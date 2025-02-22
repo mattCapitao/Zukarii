@@ -21,20 +21,31 @@ function moveMonsters() {
     });
 }
 
-function toggleRanged(event) {
-    if (!state.gameStarted) {
-        state.gameStarted = true;
-        initGame();
-        document.getElementById('info').classList.remove('hidden');
-        render();
-        return;
-    }
-    if (event.key === ' ') {
-        if (event.type === 'keydown') {
-            state.isRangedMode = true;
-        } else if (event.type === 'keyup') {
-            state.isRangedMode = false;
+function useFountain(fountain, tier) {
+    if (!fountain.used) {
+        const missingHp = state.player.maxHp - state.player.hp;
+        let healAmount;
+
+        const critChance = state.player.critChance || (state.player.agility * 0.02);
+        if (Math.random() < critChance) {
+            healAmount = missingHp;
+            const maxHpBoost = Math.round(1 + (2 * (tier / 10)));
+            state.player.maxHp += maxHpBoost;
+            state.player.hp = state.player.maxHp;
+            state.combatLog.push(`The fountain surges with power! Fully healed and Max HP increased by ${maxHpBoost} to ${state.player.maxHp}!`);
+        } else {
+            const healPercent = Math.random() * (0.5 - 0.3) + 0.3;
+            healAmount = Math.round(missingHp * healPercent);
+            state.player.hp = Math.min(state.player.hp + healAmount, state.player.maxHp);
+            state.combatLog.push(`The fountain restores ${healAmount} HP. Current HP: ${state.player.hp}/${state.player.maxHp}`);
         }
-        render();
+
+        fountain.used = true; // Still mark as used for safety
+        state.levels[tier].map[fountain.y][fountain.x] = ' '; // Remove from map
+        console.log(`Fountain at (${fountain.x}, ${fountain.y}) used and removed from tier ${tier}`);
+        if (state.combatLog.length > 5) state.combatLog.shift();
     }
 }
+
+window.moveMonsters = moveMonsters;
+window.useFountain = useFountain;

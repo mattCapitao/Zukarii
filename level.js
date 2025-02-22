@@ -99,7 +99,10 @@ function generateMonsters(tier) {
             x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
             y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
         } while (map[y][x] !== ' ' || (x === state.player.x && y === state.player.y));
-        levelMonsters.push({ x, y, hp: 15 + tier * 3, attack: 1 });
+        const minDamage = 1 + Math.floor(tier / 3);
+        const maxDamage = 3 + Math.floor(tier / 2);
+        const damage = Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
+        levelMonsters.push({ x, y, hp: 15 + tier * 3, attack: damage });
     }
     return levelMonsters;
 }

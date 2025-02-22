@@ -42,6 +42,25 @@ window.meleeCombat = function (monster) {
     if (state.combatLog.length > 5) state.combatLog.shift();
 };
 
+
+window.toggleRanged = function (event) {
+    if (!state.gameStarted) {
+        state.gameStarted = true;
+        initGame();
+        document.getElementById('info').classList.remove('hidden');
+        render();
+        return;
+    }
+    if (event.key === ' ') {
+        if (event.type === 'keydown') {
+            state.isRangedMode = true;
+        } else if (event.type === 'keyup') {
+            state.isRangedMode = false;
+        }
+        render();
+    }
+};
+
 window.rangedAttack = async function (direction) {
     let map = state.levels[state.currentLevel - 1].map;
     let dx = 0, dy = 0;
@@ -118,16 +137,4 @@ window.rangedAttack = async function (direction) {
     renderIfNeeded();
 };
 
-window.useFountain = function (fountain, tier) {
-    if (!fountain.used && state.player.hp < state.player.maxHp) {
-        let missingHp = state.player.maxHp - state.player.hp;
-        let healPercent = 0.2 + Math.random() * 0.8;
-        let healAmount = Math.round(missingHp * healPercent);
-        state.player.hp = Math.min(state.player.hp + healAmount, state.player.maxHp);
-        fountain.used = true;
-        state.combatLog.push(`Healed ${healAmount} HP at fountain`);
-        if (state.combatLog.length > 5) state.combatLog.shift();
-        let map = state.levels[tier].map;
-        map[fountain.y][fountain.x] = ' ';
-    }
-};
+
