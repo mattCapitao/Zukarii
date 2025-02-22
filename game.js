@@ -1,6 +1,6 @@
 let lastRenderTime = 0;
-const renderThrottle = 16; // ~60 FPS
-let needsRender = true; // Flag to track if render is needed
+const renderThrottle = 16;
+let needsRender = true;
 
 function handleInput(event) {
     if (!state.gameStarted) {
@@ -22,7 +22,7 @@ function handleInput(event) {
 
     if (state.isRangedMode) {
         rangedAttack(event.key);
-        return; // renderIfNeeded called in rangedAttack
+        return;
     }
 
     switch (event.key) {
@@ -39,11 +39,15 @@ function handleInput(event) {
     let fountain = state.fountains[state.currentLevel - 1].find(f => f.x === newX && f.y === newY && !f.used);
     let treasureIndex = state.treasures[state.currentLevel - 1].findIndex(t => t.x === newX && t.y === newY);
 
-    needsRender = true; // Something changed, so we’ll render
+    needsRender = true;
 
     if (monster) {
-        meleeCombat(monster);
-        checkLevelUp();
+        if (typeof meleeCombat === 'function') {
+            meleeCombat(monster);
+            checkLevelUp();
+        } else {
+            console.error("meleeCombat is not defined. Check script loading order.");
+        }
     } else if (map[newY][newX] === '>' && state.currentLevel < Number.MAX_SAFE_INTEGER) {
         state.currentLevel++;
         if (state.currentLevel > state.highestTier) {
@@ -82,9 +86,13 @@ function handleInput(event) {
             }
         }
     } else if (map[newY][newX] === 'H' && fountain) {
-        useFountain(fountain, state.currentLevel - 1);
-        state.player.x = newX;
-        state.player.y = newY;
+        if (typeof useFountain === 'function') {
+            useFountain(fountain, state.currentLevel - 1);
+            state.player.x = newX;
+            state.player.y = newY;
+        } else {
+            console.error("useFountain is not defined. Check script loading order.");
+        }
     } else if (map[newY][newX] === '$' && treasureIndex !== -1) {
         let goldGain = 10 + Math.floor(Math.random() * 41) + state.currentLevel * 10;
         state.player.gold += goldGain;
