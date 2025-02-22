@@ -1,4 +1,4 @@
-console.log("combat.js loaded"); // Debug to confirm loading
+console.log("combat.js loaded");
 
 window.meleeCombat = function (monster) {
     let baseDamage = 2 + Math.floor(Math.random() * 2);
@@ -17,8 +17,10 @@ window.meleeCombat = function (monster) {
     if (monster.hp <= 0) {
         state.combatLog.push('Monster defeated!');
         let map = state.levels[state.currentLevel - 1].map;
-        state.treasures[state.currentLevel - 1].push({ x: monster.x, y: monster.y });
+        console.log(`Melee: Dropping treasure at (${monster.x}, ${monster.y}), tier ${state.currentLevel - 1}, map tile before: ${map[monster.y][monster.x]}`);
+        state.treasures[state.currentLevel - 1].push({ x: monster.x, y: monster.y, discovered: false });
         map[monster.y][monster.x] = '$';
+        console.log(`Melee: Map tile after: ${map[monster.y][monster.x]}, treasures:`, state.treasures[state.currentLevel - 1]);
         state.player.xp += (5 + Math.floor(Math.random() * 6)) * state.currentLevel;
     } else {
         let monsterDamage = 1 + Math.floor(Math.random() * 3) + Math.floor(state.currentLevel / 2);
@@ -69,8 +71,10 @@ window.rangedAttack = async function (direction) {
             monster.hp -= playerDamage;
             if (monster.hp <= 0) {
                 state.combatLog.push('Monster defeated!');
-                state.treasures[state.currentLevel - 1].push({ x: monster.x, y: monster.y });
+                console.log(`Ranged: Dropping treasure at (${monster.x}, ${monster.y}), tier ${state.currentLevel - 1}, map tile before: ${map[monster.y][monster.x]}`);
+                state.treasures[state.currentLevel - 1].push({ x: monster.x, y: monster.y, discovered: false });
                 map[monster.y][monster.x] = '$';
+                console.log(`Ranged: Map tile after: ${map[monster.y][monster.x]}, treasures:`, state.treasures[state.currentLevel - 1]);
                 state.player.xp += (5 + Math.floor(Math.random() * 6)) * state.currentLevel;
             } else if (i === 1) {
                 let monsterDamage = 1 + Math.floor(Math.random() * 3) + Math.floor(state.currentLevel / 2);
@@ -102,4 +106,4 @@ window.useFountain = function (fountain, tier) {
         let map = state.levels[tier].map;
         map[fountain.y][fountain.x] = ' ';
     }
-};
+};S
