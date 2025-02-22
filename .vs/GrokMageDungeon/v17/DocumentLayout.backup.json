@@ -3,31 +3,40 @@
   "WorkspaceRootPath": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\titlescreen.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\combat.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:combat.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\ui.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\actions.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\game.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:game.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\combat.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\ui.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\player.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\player.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:player.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\level.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\state.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:state.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\game.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\titlescreen.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:titlescreen.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\state.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\level.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:level.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\actions.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:actions.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     }
   ],
   "DocumentGroupContainers": [
@@ -37,7 +46,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 10,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Bookmark",
@@ -49,119 +58,119 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "index.html",
-              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\index.html",
-              "RelativeDocumentMoniker": "..\\..\\..\\Desktop\\ACII Dungeon\\index.html",
-              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\index.html",
-              "RelativeToolTip": "..\\..\\..\\Desktop\\ACII Dungeon\\index.html",
-              "ViewState": "AgIAAD4AAAAAAAAAAAAAAF4AAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2025-02-22T14:01:33.606Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "state.js",
-              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\state.js",
-              "RelativeDocumentMoniker": "..\\..\\..\\Desktop\\ACII Dungeon\\state.js",
-              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\state.js",
-              "RelativeToolTip": "..\\..\\..\\Desktop\\ACII Dungeon\\state.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAfAAAAAAAAAA==",
+              "DocumentIndex": 3,
+              "Title": "ui.js",
+              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\ui.js",
+              "RelativeDocumentMoniker": "ui.js",
+              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\ui.js",
+              "RelativeToolTip": "ui.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-02-22T14:01:34.096Z",
+              "WhenOpened": "2025-02-22T15:02:55.009Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "game.js",
-              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\game.js",
-              "RelativeDocumentMoniker": "..\\..\\..\\Desktop\\ACII Dungeon\\game.js",
-              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\game.js",
-              "RelativeToolTip": "..\\..\\..\\Desktop\\ACII Dungeon\\game.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAXAAAAAAAAAA==",
+              "Title": "titlescreen.js",
+              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\titlescreen.js",
+              "RelativeDocumentMoniker": "titlescreen.js",
+              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\titlescreen.js",
+              "RelativeToolTip": "titlescreen.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-02-22T14:01:33.539Z",
+              "WhenOpened": "2025-02-22T15:02:48.768Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "level.js",
-              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\level.js",
-              "RelativeDocumentMoniker": "..\\..\\..\\Desktop\\ACII Dungeon\\level.js",
-              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\level.js",
-              "RelativeToolTip": "..\\..\\..\\Desktop\\ACII Dungeon\\level.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAASAAAAAAAAAA==",
+              "Title": "state.js",
+              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\state.js",
+              "RelativeDocumentMoniker": "state.js",
+              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\state.js",
+              "RelativeToolTip": "state.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-02-22T14:01:34.035Z",
+              "WhenOpened": "2025-02-22T15:02:47.785Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "player.js",
-              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\player.js",
-              "RelativeDocumentMoniker": "..\\..\\..\\Desktop\\ACII Dungeon\\player.js",
-              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\player.js",
-              "RelativeToolTip": "..\\..\\..\\Desktop\\ACII Dungeon\\player.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAASAAAAAAAAAA==",
+              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\player.js",
+              "RelativeDocumentMoniker": "player.js",
+              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\player.js",
+              "RelativeToolTip": "player.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-02-22T14:01:34.066Z",
+              "WhenOpened": "2025-02-22T15:02:46.661Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "combat.js",
-              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\combat.js",
-              "RelativeDocumentMoniker": "..\\..\\..\\Desktop\\ACII Dungeon\\combat.js",
-              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\combat.js",
-              "RelativeToolTip": "..\\..\\..\\Desktop\\ACII Dungeon\\combat.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGgAAAACAAAAAAAAAA==",
+              "DocumentIndex": 7,
+              "Title": "level.js",
+              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\level.js",
+              "RelativeDocumentMoniker": "level.js",
+              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\level.js",
+              "RelativeToolTip": "level.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-02-22T14:01:33.502Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "actions.js",
-              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\actions.js",
-              "RelativeDocumentMoniker": "..\\..\\..\\Desktop\\ACII Dungeon\\actions.js",
-              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\actions.js",
-              "RelativeToolTip": "..\\..\\..\\Desktop\\ACII Dungeon\\actions.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAUAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-02-22T14:01:32.405Z",
+              "WhenOpened": "2025-02-22T15:02:45.079Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "ui.js",
-              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\ui.js",
-              "RelativeDocumentMoniker": "..\\..\\..\\Desktop\\ACII Dungeon\\ui.js",
-              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\ui.js",
-              "RelativeToolTip": "..\\..\\..\\Desktop\\ACII Dungeon\\ui.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAPAAAAAAAAAA==",
+              "Title": "index.html",
+              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\index.html",
+              "RelativeDocumentMoniker": "index.html",
+              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\index.html",
+              "RelativeToolTip": "index.html",
+              "ViewState": "AgIAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-02-22T15:02:43.9Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "game.js",
+              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\game.js",
+              "RelativeDocumentMoniker": "game.js",
+              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\game.js",
+              "RelativeToolTip": "game.js",
+              "ViewState": "AgIAAGoAAAAAAAAAAAAQwIkAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-02-22T14:01:34.159Z",
+              "WhenOpened": "2025-02-22T15:02:40.894Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "titlescreen.js",
-              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\titlescreen.js",
-              "RelativeDocumentMoniker": "..\\..\\..\\Desktop\\ACII Dungeon\\titlescreen.js",
-              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Desktop\\ACII Dungeon\\titlescreen.js",
-              "RelativeToolTip": "..\\..\\..\\Desktop\\ACII Dungeon\\titlescreen.js",
+              "Title": "combat.js",
+              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\combat.js",
+              "RelativeDocumentMoniker": "combat.js",
+              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\combat.js",
+              "RelativeToolTip": "combat.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGgAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-02-22T15:02:32.308Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "actions.js",
+              "DocumentMoniker": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\actions.js",
+              "RelativeDocumentMoniker": "actions.js",
+              "ToolTip": "C:\\Users\\mattc\\OneDrive\\Documents\\GitHub\\GrokMageDungeon\\actions.js",
+              "RelativeToolTip": "actions.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-02-22T14:01:34.127Z",
+              "WhenOpened": "2025-02-22T15:02:30.103Z",
               "EditorCaption": ""
             }
           ]

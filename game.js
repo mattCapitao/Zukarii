@@ -1,5 +1,9 @@
+console.log("game.js loaded");
+
 let lastRenderTime = 0;
-const renderThrottle = 16;
+let lastInputTime = 0;
+const renderThrottle = 125; // ~8 FPS
+const inputThrottle = 100; // 100ms cooldown for input
 let needsRender = true;
 
 function handleInput(event) {
@@ -13,6 +17,9 @@ function handleInput(event) {
     }
 
     const now = Date.now();
+    if (now - lastInputTime < inputThrottle) return;
+    lastInputTime = now;
+
     if (now - lastRenderTime < renderThrottle) return;
     lastRenderTime = now;
 
@@ -42,12 +49,8 @@ function handleInput(event) {
     needsRender = true;
 
     if (monster) {
-        if (typeof meleeCombat === 'function') {
-            meleeCombat(monster);
-            checkLevelUp();
-        } else {
-            console.error("meleeCombat is not defined. Check script loading order.");
-        }
+        meleeCombat(monster);
+        checkLevelUp();
     } else if (map[newY][newX] === '>' && state.currentLevel < Number.MAX_SAFE_INTEGER) {
         state.currentLevel++;
         if (state.currentLevel > state.highestTier) {
@@ -58,18 +61,44 @@ function handleInput(event) {
         }
         addLevel(state.currentLevel - 1);
         map = state.levels[state.currentLevel - 1].map;
-    } else if (map[newY][newX] === '<') {
-        if (state.currentLevel === 1) {
-            state.combatLog.push("You exited the dungeon!");
-            document.removeEventListener('keydown', handleInput);
-            document.removeEventListener('keydown', toggleRanged);
-            document.removeEventListener('keyup', toggleRanged);
+        const upStair = state.stairsUp[state.currentLevel - 1];
+        if (upStair) {
+            state.player.x = upStair.x + 1;
+            state.player.y = upStair.y;
+            console.log(`Moved down to tier ${state.currentLevel}, placed at (${state.player.x}, ${state.player.y}) next to < at (${upStair.x}, ${upStair.y})`);
+            if (map[state.player.y][state.player.x] !== ' ') {
+                const directions = [
+                    { x: upStair.x - 1, y: upStair.y },
+                    { x: upStair.x, y: upStair.y + 1 },
+                    { x: upStair.x, y: upStair.y - 1 }
+                ];
+                for (let dir of directions) {
+                    if (map[dir.y][dir.x] === ' ') {
+                        state.player.x = dir.x;
+                        state.player.y = dir.y;
+                        console.log(`Adjusted down position to (${state.player.x}, ${state.player.y})`);
+                        break;
+                    }
+                }
+                if (map[state.player.y][state.player.x] !== ' ') {
+                    console.error(`No free space near < at (${upStair.x}, ${upStair.y}), defaulting to (1, 1)`);
+                    state.player.x = 1;
+                    state.player.y = 1;
+                }
+            }
         } else {
-            state.currentLevel--;
-            const downStair = state.stairsDown[state.currentLevel];
+            console.error(`No stairsUp defined for tier ${state.currentLevel - 1}`);
+            state.player.x = 1;
+            state.player.y = 1;
+        }
+    } else if (map[newY][newX] === '<' && state.currentLevel > 1) {
+        state.currentLevel--;
+        const downStair = state.stairsDown[state.currentLevel - 1];
+        map = state.levels[state.currentLevel - 1].map;
+        if (downStair) {
             state.player.x = downStair.x + 1;
             state.player.y = downStair.y;
-            map = state.levels[state.currentLevel - 1].map;
+            console.log(`Moved up to tier ${state.currentLevel}, placed at (${state.player.x}, ${state.player.y}) next to > at (${downStair.x}, ${downStair.y})`);
             if (map[state.player.y][state.player.x] !== ' ') {
                 const directions = [
                     { x: downStair.x - 1, y: downStair.y },
@@ -80,21 +109,33 @@ function handleInput(event) {
                     if (map[dir.y][dir.x] === ' ') {
                         state.player.x = dir.x;
                         state.player.y = dir.y;
+                        console.log(`Adjusted up position to (${state.player.x}, ${state.player.y})`);
                         break;
                     }
                 }
+                if (map[state.player.y][state.player.x] !== ' ') {
+                    console.error(`No free space near > at (${downStair.x}, ${downStair.y}), defaulting to (1, 1)`);
+                    state.player.x = 1;
+                    state.player.y = 1;
+                }
             }
-        }
-    } else if (map[newY][newX] === 'H' && fountain) {
-        if (typeof useFountain === 'function') {
-            useFountain(fountain, state.currentLevel - 1);
-            state.player.x = newX;
-            state.player.y = newY;
         } else {
-            console.error("useFountain is not defined. Check script loading order.");
+            console.error(`No stairsDown defined for tier ${state.currentLevel - 1}`);
+            state.player.x = 1;
+            state.player.y = 1;
         }
+    } else if (map[newY][newX] === '<' && state.currentLevel === 1) {
+        state.combatLog.push("You exited the dungeon!");
+        document.removeEventListener('keydown', handleInput);
+        document.removeEventListener('keydown', toggleRanged);
+        document.removeEventListener('keyup', toggleRanged);
+    } else if (map[newY][newX] === 'H' && fountain) {
+        useFountain(fountain, state.currentLevel - 1);
+        state.player.x = newX;
+        state.player.y = newY;
     } else if (map[newY][newX] === '$' && treasureIndex !== -1) {
-        let goldGain = 10 + Math.floor(Math.random() * 41) + state.currentLevel * 10;
+        const treasure = state.treasures[state.currentLevel - 1][treasureIndex];
+        const goldGain = treasure.gold || (10 + Math.floor(Math.random() * 41) + state.currentLevel * 10);
         state.player.gold += goldGain;
         state.treasures[state.currentLevel - 1].splice(treasureIndex, 1);
         map[newY][newX] = ' ';
@@ -119,6 +160,7 @@ function handleInput(event) {
 
 function renderIfNeeded() {
     if (needsRender) {
+        console.log("Rendering at", Date.now());
         render();
         needsRender = false;
     }

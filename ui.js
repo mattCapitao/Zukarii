@@ -1,3 +1,5 @@
+console.log("ui.js loaded");
+
 function render() {
     if (!state.mapDiv) state.mapDiv = document.getElementById('map');
     if (!state.statsDiv) state.statsDiv = document.getElementById('stats');
@@ -13,7 +15,6 @@ function render() {
     const tier = state.currentLevel - 1;
     let map = state.levels[tier].map;
 
-    // Only recalculate visibility if player moved or level changed
     if (state.lastPlayerX !== state.player.x || state.lastPlayerY !== state.player.y || state.needsInitialRender) {
         const prevDiscoveredCount = state.discoveredWalls[tier].size;
         state.visibleTiles[tier].clear();
@@ -44,37 +45,48 @@ function render() {
         }
     }
 
-    // Incremental DOM update: only change tiles that differ
     const tileMap = state.tileMap[tier];
     let mapDisplay = '';
     for (let y = 0; y < state.HEIGHT; y++) {
         for (let x = 0; x < state.WIDTH; x++) {
             let isInRadius = state.visibleTiles[tier].has(`${x},${y}`);
             let isDiscovered = state.discoveredWalls[tier].has(`${x},${y}`);
-            let treasure = state.treasures[tier].find(t => t.x === x && t.y === y);
             let monster = state.monsters[tier].find(m => m.x === x && m.y === y && m.hp > 0);
+            let treasure = state.treasures[tier].find(t => t.x === x && t.y === y);
             let fountain = state.fountains[tier].find(f => f.x === x && f.y === y && !f.used);
 
             let char = map[y][x];
             let className = 'undiscovered';
+
+            // Player takes highest priority
             if (x === state.player.x && y === state.player.y) {
                 char = '@';
                 className = 'discovered';
-            } else if (state.projectile && x === state.projectile.x && y === state.projectile.y) {
+            }
+            // Projectile next
+            else if (state.projectile && x === state.projectile.x && y === state.projectile.y) {
                 char = '*';
                 className = 'discovered';
-            } else if (treasure && (isInRadius || treasure.discovered)) {
+            }
+            // Monster before treasure to ensure visibility
+            else if (monster && isInRadius) {
+                char = 'M';
+                className = 'discovered';
+            }
+            // Treasure after monster
+            else if (treasure && (isInRadius || treasure.discovered)) {
                 treasure.discovered = true;
                 char = '$';
                 className = 'discovered';
-            } else if (monster && isInRadius) {
-                char = 'M';
-                className = 'discovered';
-            } else if (fountain && (isInRadius || fountain.discovered)) {
+            }
+            // Fountain
+            else if (fountain && (isInRadius || fountain.discovered)) {
                 fountain.discovered = true;
                 char = 'H';
                 className = 'discovered';
-            } else if (isDiscovered || isInRadius) {
+            }
+            // Walls and discovered tiles
+            else if (isDiscovered || isInRadius) {
                 className = 'discovered';
             }
 

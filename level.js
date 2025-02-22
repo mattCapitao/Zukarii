@@ -1,3 +1,5 @@
+console.log("level.js loaded");
+
 function generateLevel() {
     let map = [];
     for (let y = 0; y < state.HEIGHT; y++) {
@@ -16,7 +18,7 @@ function generateLevel() {
     const usableHeight = zoneHeight - buffer - 2;
     const zoneGrid = [
         { x: 1, y: 1 }, { x: zoneWidth, y: 1 }, { x: 2 * zoneWidth, y: 1 }, { x: 3 * zoneWidth, y: 1 },
-        { x: 4 * zoneWidth, y: 1 }, { x: 5 * zoneWidth, y: 1 }, { x: 1, y: zoneHeight }, 
+        { x: 4 * zoneWidth, y: 1 }, { x: 5 * zoneWidth, y: 1 }, { x: 1, y: zoneHeight },
         { x: zoneWidth, y: zoneHeight }, { x: 2 * zoneWidth, y: zoneHeight }, { x: 3 * zoneWidth, y: zoneHeight },
         { x: 4 * zoneWidth, y: zoneHeight }, { x: 5 * zoneWidth, y: zoneHeight }
     ];
@@ -129,8 +131,9 @@ function generateTreasures(tier) {
             x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
             y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
         } while (map[y][x] !== ' ');
+        const goldGain = 10 + Math.floor(Math.random() * 41) + tier * 10;
         map[y][x] = '$';
-        state.treasures[tier].push({ x, y, discovered: false });
+        state.treasures[tier].push({ x, y, gold: goldGain, discovered: false });
     }
 }
 
@@ -141,8 +144,8 @@ function addLevel(tier) {
         state.treasures[tier] = [];
         state.monsters[tier] = [];
         state.fountains[tier] = [];
-        state.stairsUp[tier] = null;
-        state.stairsDown[tier] = null;
+        state.stairsUp[tier] = null; // Stairs up to this level
+        state.stairsDown[tier] = null; // Stairs down from this level
         state.discoveredWalls[tier] = new Set();
         state.discoveredTileCount[tier] = 0;
         state.visibleTiles[tier] = new Set();
@@ -152,14 +155,14 @@ function addLevel(tier) {
         let stairUpX = firstRoom.left + 1 + Math.floor(Math.random() * (firstRoom.w - 2));
         let stairUpY = firstRoom.top + 1 + Math.floor(Math.random() * (firstRoom.h - 2));
         state.levels[tier].map[stairUpY][stairUpX] = '<';
-        state.stairsUp[tier] = { x: stairUpX, y: stairUpY };
+        state.stairsUp[tier] = { x: stairUpX, y: stairUpY }; // To this level
 
         const downRoomIndex = Math.floor(Math.random() * (newLevelData.rooms.length - 1)) + 1;
         const downRoom = newLevelData.rooms[downRoomIndex];
         let stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
         let stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
         state.levels[tier].map[stairDownY][stairDownX] = '>';
-        state.stairsDown[tier] = { x: stairDownX, y: stairDownY };
+        state.stairsDown[tier] = { x: stairDownX, y: stairDownY }; // From this level
 
         state.monsters[tier] = generateMonsters(tier);
         state.fountains[tier] = generateFountains(tier);
@@ -186,6 +189,7 @@ function addLevel(tier) {
         state.lastPlayerX = null;
         state.lastPlayerY = null;
         state.needsInitialRender = true;
+        console.log(`Tier ${tier} added: stairsUp[${tier}] at (${state.stairsUp[tier]?.x}, ${state.stairsUp[tier]?.y}), stairsDown[${tier}] at (${state.stairsDown[tier]?.x}, ${state.stairsDown[tier]?.y})`);
     }
 }
 

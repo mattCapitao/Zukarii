@@ -1,3 +1,5 @@
+console.log("state.js loaded");
+
 const state = {
     WIDTH: 120,
     HEIGHT: 50,
@@ -8,10 +10,10 @@ const state = {
     stairsUp: [],
     stairsDown: [],
     currentLevel: 1,
-    player: { 
-        x: 1, y: 1, 
-        hp: 30, maxHp: 30, 
-        gold: 0, 
+    player: {
+        x: 1, y: 1,
+        hp: 30, maxHp: 30,
+        gold: 0,
         level: 1, xp: 0, nextLevelXp: 50,
         prowess: 5 + Math.floor(Math.random() * 6),
         intellect: 5 + Math.floor(Math.random() * 6),
@@ -54,15 +56,16 @@ function initGame() {
     let stairUpX = firstRoom.left + 1 + Math.floor(Math.random() * (firstRoom.w - 2));
     let stairUpY = firstRoom.top + 1 + Math.floor(Math.random() * (firstRoom.h - 2));
     state.levels[0].map[stairUpY][stairUpX] = '<';
-    state.stairsUp[1] = { x: stairUpX, y: stairUpY };
+    state.stairsUp[1] = { x: stairUpX, y: stairUpY }; // Stairs up to tier 1 (from tier 0)
 
     const downRoomIndex = Math.floor(Math.random() * (state.levels[0].rooms.length - 1)) + 1;
     const downRoom = state.levels[0].rooms[downRoomIndex];
     let stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
     let stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
     state.levels[0].map[stairDownY][stairDownX] = '>';
-    state.stairsDown[1] = { x: stairDownX, y: stairDownY };
+    state.stairsDown[0] = { x: stairDownX, y: stairDownY }; // Stairs down from tier 0 (to tier 1)
 
+    console.log(`Tier 0 initialized: stairsUp[1] at (${stairUpX}, ${stairUpY}), stairsDown[0] at (${stairDownX}, ${stairDownY})`);
     console.log("Initializing treasures for tier 0");
     generateTreasures(0);
 
