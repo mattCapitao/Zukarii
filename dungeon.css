@@ -1,0 +1,68 @@
+﻿body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #1a1a1a;
+    font-family: monospace;
+}
+
+#game {
+    display: flex;
+    flex-direction: row;
+    background-color: #000;
+    padding: 20px;
+    border: 2px solid #0f0;
+    height: 840px;
+}
+
+#map {
+    font-size: 16px;
+    line-height: 1;
+    white-space: pre;
+    color: #0f0;
+    margin: 0;
+}
+
+#info {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    margin-left: 20px;
+    color: #0f0;
+    height: 100%;
+}
+
+    #info.hidden {
+        display: none;
+    }
+
+#stats {
+    font-size: 14px;
+    height: 40%;
+    padding: 10px;
+    border: 1px solid #0f0;
+}
+
+#log {
+    font-size: 14px;
+    height: 60%;
+    padding: 10px;
+    border: 1px solid #0f0;
+    overflow-y: auto;
+}
+
+    #log p {
+        margin: 0;
+        padding: 0;
+        line-height: 1.2;
+    }
+
+.undiscovered {
+    color: #000;
+}
+
+.discovered {
+    color: #0f0;
+}
