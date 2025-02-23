@@ -39,7 +39,7 @@ function render() {
         state.discoveredTileCount[tier] += newDiscoveredCount - prevDiscoveredCount;
         if (state.discoveredTileCount[tier] >= 1000) {
             state.player.xp += 25;
-            state.combatLog.push("Explored 1000 tiles! Gained 25 Exploration XP");
+            writeToLog("Explored 1000 tiles! Gained 25 Exploration XP");
             state.discoveredTileCount[tier] = 0;
             checkLevelUp();
         }
@@ -58,35 +58,24 @@ function render() {
             let char = map[y][x];
             let className = 'undiscovered';
 
-            // Player takes highest priority
             if (x === state.player.x && y === state.player.y) {
                 char = '@';
                 className = 'discovered';
-            }
-            // Projectile next
-            else if (state.projectile && x === state.projectile.x && y === state.projectile.y) {
+            } else if (state.projectile && x === state.projectile.x && y === state.projectile.y) {
                 char = '*';
                 className = 'discovered';
-            }
-            // Monster before treasure to ensure visibility
-            else if (monster && isInRadius) {
+            } else if (monster && isInRadius) {
                 char = 'M';
                 className = 'discovered';
-            }
-            // Treasure after monster
-            else if (treasure && (isInRadius || treasure.discovered)) {
+            } else if (treasure && (isInRadius || treasure.discovered)) {
                 treasure.discovered = true;
                 char = '$';
                 className = 'discovered';
-            }
-            // Fountain
-            else if (fountain && (isInRadius || fountain.discovered)) {
+            } else if (fountain && (isInRadius || fountain.discovered)) {
                 fountain.discovered = true;
                 char = 'H';
                 className = 'discovered';
-            }
-            // Walls and discovered tiles
-            else if (isDiscovered || isInRadius) {
+            } else if (isDiscovered || isInRadius) {
                 className = 'discovered';
             }
 
@@ -128,12 +117,12 @@ function render() {
         state.logDiv.innerHTML = `
             <div style="font-size: 16px; font-weight: bold;">Adventure Log</div>
             <hr style="border: 1px solid #0f0; margin: 5px 0;">
-            ${state.combatLog.length ? state.combatLog.slice().reverse().map(line => `<p>${line}</p>`).join('') : '<p>No combat yet.</p>'}
+            ${adventureLog.entries.length ? adventureLog.entries.map(line => `<p>${line}</p>`).join('') : '<p>Nothing to log yet.</p>'}
         `;
     }
 
     if (state.player.hp <= 0) {
-        if (state.logDiv) state.logDiv.innerHTML += '<p>You died! Game Over.</p>';
+        writeToLog('You died! Game Over.');
         document.removeEventListener('keydown', handleInput);
         document.removeEventListener('keydown', toggleRanged);
         document.removeEventListener('keyup', toggleRanged);

@@ -2,8 +2,8 @@ console.log("game.js loaded");
 
 let lastRenderTime = 0;
 let lastInputTime = 0;
-const renderThrottle = 125; // ~8 FPS
-const inputThrottle = 100; // 100ms cooldown for input
+const renderThrottle = 90;
+const inputThrottle = 100;
 let needsRender = true;
 
 function handleInput(event) {
@@ -56,7 +56,7 @@ function handleInput(event) {
         if (state.currentLevel > state.highestTier) {
             state.highestTier = state.currentLevel;
             state.player.xp += 5 * state.currentLevel;
-            state.combatLog.push(`New tier reached! +${5 * state.currentLevel} XP`);
+            writeToLog(`New tier reached! +${5 * state.currentLevel} XP`);
             checkLevelUp();
         }
         addLevel(state.currentLevel - 1);
@@ -125,7 +125,7 @@ function handleInput(event) {
             state.player.y = 1;
         }
     } else if (map[newY][newX] === '<' && state.currentLevel === 1) {
-        state.combatLog.push("You exited the dungeon!");
+        writeToLog("You exited the dungeon!");
         document.removeEventListener('keydown', handleInput);
         document.removeEventListener('keydown', toggleRanged);
         document.removeEventListener('keyup', toggleRanged);
@@ -139,12 +139,11 @@ function handleInput(event) {
         state.player.gold += goldGain;
         state.treasures[state.currentLevel - 1].splice(treasureIndex, 1);
         map[newY][newX] = ' ';
-        state.combatLog.push(`Found treasure! Gained ${goldGain} gold`);
-        if (state.combatLog.length > 5) state.combatLog.shift();
+        writeToLog(`Found treasure! Gained ${goldGain} gold`);
         state.player.x = newX;
         state.player.y = newY;
         if (state.player.gold >= 1e12) {
-            state.combatLog.push("You amassed a trillion gold! Victory!");
+            writeToLog("You amassed a trillion gold! Victory!");
             document.removeEventListener('keydown', handleInput);
             document.removeEventListener('keydown', toggleRanged);
             document.removeEventListener('keyup', toggleRanged);

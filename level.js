@@ -1,4 +1,4 @@
-console.log("level.js loaded");
+﻿console.log("level.js loaded");
 
 function generateLevel() {
     let map = [];
@@ -88,25 +88,6 @@ function generateLevel() {
     return { map, rooms };
 }
 
-function generateMonsters(tier) {
-    const map = state.levels[tier].map;
-    const rooms = state.levels[tier].rooms;
-    let levelMonsters = [];
-    for (let i = 0; i < 5; i++) {
-        const room = rooms[Math.floor(Math.random() * rooms.length)];
-        let x, y;
-        do {
-            x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
-            y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
-        } while (map[y][x] !== ' ' || (x === state.player.x && y === state.player.y));
-        const minDamage = 1 + Math.floor(tier / 3);
-        const maxDamage = 3 + Math.floor(tier / 2);
-        const damage = Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
-        levelMonsters.push({ x, y, hp: 15 + tier * 3, attack: damage });
-    }
-    return levelMonsters;
-}
-
 function generateFountains(tier) {
     const map = state.levels[tier].map;
     const rooms = state.levels[tier].rooms;
@@ -147,8 +128,8 @@ function addLevel(tier) {
         state.treasures[tier] = [];
         state.monsters[tier] = [];
         state.fountains[tier] = [];
-        state.stairsUp[tier] = null; // Stairs up to this level
-        state.stairsDown[tier] = null; // Stairs down from this level
+        state.stairsUp[tier] = null;
+        state.stairsDown[tier] = null;
         state.discoveredWalls[tier] = new Set();
         state.discoveredTileCount[tier] = 0;
         state.visibleTiles[tier] = new Set();
@@ -158,16 +139,16 @@ function addLevel(tier) {
         let stairUpX = firstRoom.left + 1 + Math.floor(Math.random() * (firstRoom.w - 2));
         let stairUpY = firstRoom.top + 1 + Math.floor(Math.random() * (firstRoom.h - 2));
         state.levels[tier].map[stairUpY][stairUpX] = '<';
-        state.stairsUp[tier] = { x: stairUpX, y: stairUpY }; // To this level
+        state.stairsUp[tier] = { x: stairUpX, y: stairUpY };
 
         const downRoomIndex = Math.floor(Math.random() * (newLevelData.rooms.length - 1)) + 1;
         const downRoom = newLevelData.rooms[downRoomIndex];
         let stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
         let stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
         state.levels[tier].map[stairDownY][stairDownX] = '>';
-        state.stairsDown[tier] = { x: stairDownX, y: stairDownY }; // From this level
+        state.stairsDown[tier] = { x: stairDownX, y: stairDownY };
 
-        state.monsters[tier] = generateMonsters(tier);
+        state.monsters[tier] = generateLevelMonsters(tier); // Updated to new function
         state.fountains[tier] = generateFountains(tier);
         console.log(`Initializing treasures for tier ${tier}`);
         generateTreasures(tier);
