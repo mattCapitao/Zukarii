@@ -1,5 +1,145 @@
 ﻿console.log("level.js loaded");
 
+const roomTypes = [
+    { type: 'SquareRoom', probability: 30, minW: 9, maxW: 13, minH: 4, maxH: 6 },
+    { type: 'VerticalRoom', probability: 15, minW: 6, maxW: 9, minH: 6, maxH: 8 },
+    { type: 'HorizontalRoom', probability: 40, minW: 12, maxW: 19, minH: 4, maxH: 6 },
+    { type: 'AlcoveSpecial', probability: 10, minW: 8, maxW: 8, minH: 4, maxH: 4 },
+    { type: 'BossChamberSpecial', probability: 5, minW: 20, maxW: 24, minH: 5, maxH: 8 }
+];
+
+// Select a room type based on probability
+function selectRoomType() {
+    const rand = Math.floor(Math.random() * 100);
+    let cumulativeProbability = 0;
+    for (const roomType of roomTypes) {
+        cumulativeProbability += roomType.probability;
+        if (rand < cumulativeProbability) {
+            return roomType;
+        }
+    }
+    return roomTypes[roomTypes.length - 1]; // Fallback
+}
+
+// Generate room dimensions
+function generateRoomDimensions(roomType) {
+    const width = Math.floor(Math.random() * (roomType.maxW - roomType.minW + 1)) + roomType.minW;
+    const height = Math.floor(Math.random() * (roomType.maxH - roomType.minH + 1)) + roomType.minH;
+    return { width, height, type: roomType.type };
+}
+
+// Constants for placement
+const BUFFER_SIZE = 1;
+const MIN_ROOM_SIZE = 4;
+
+function doesRoomOverlap(newRoom, existingRooms) {
+    const newRoomWithBuffer = {
+        x: newRoom.x - BUFFER_SIZE,
+        y: newRoom.y - BUFFER_SIZE,
+        w: newRoom.w + 2 * BUFFER_SIZE,
+        h: newRoom.h + 2 * BUFFER_SIZE
+    };
+    for (const room of existingRooms) {
+        const existingRoomWithBuffer = {
+            x: room.left - BUFFER_SIZE,
+            y: room.top - BUFFER_SIZE,
+            w: room.w + 2 * BUFFER_SIZE,
+            h: room.h + 2 * BUFFER_SIZE
+        };
+        if (
+            newRoomWithBuffer.x < existingRoomWithBuffer.x + existingRoomWithBuffer.w &&
+            newRoomWithBuffer.x + newRoomWithBuffer.w > existingRoomWithBuffer.x &&
+            newRoomWithBuffer.y < existingRoomWithBuffer.y + existingRoomWithBuffer.h &&
+            newRoomWithBuffer.y + newRoomWithBuffer.h > existingRoomWithBuffer.y
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function placeRooms(numRooms) {
+    const rooms = [];
+    let bossChamberPlaced = false;
+
+    for (let i = 0; i < numRooms; i++) {
+        let roomType = selectRoomType();
+        if (roomType.type === 'BossChamberSpecial' && bossChamberPlaced) {
+            roomType = roomTypes.find(rt => rt.type === 'AlcoveSpecial');
+        }
+        if (roomType.type === 'BossChamberSpecial') {
+            bossChamberPlaced = true;
+        }
+
+        let room = generateRoomDimensions(roomType);
+        let placed = false;
+        let attempts = 0;
+        const MAX_PLACEMENT_ATTEMPTS = 10;
+
+        while (!placed && attempts < MAX_PLACEMENT_ATTEMPTS) {
+            room.x = Math.floor(Math.random() * (state.WIDTH - room.width));
+            room.y = Math.floor(Math.random() * (state.HEIGHT - room.height));
+
+            if (!doesRoomOverlap(room, rooms)) {
+                rooms.push({
+                    left: room.x,
+                    top: room.y,
+                    w: room.width,
+                    h: room.height,
+                    x: Math.floor(room.x + room.width / 2),
+                    y: Math.floor(room.y + room.height / 2),
+                    type: room.type
+                });
+                console.log(`Room ${rooms.length} (${room.type}) placed at (${room.x}, ${room.y}) size ${room.width}x${room.height}`);
+                placed = true;
+            } else {
+                room.width = Math.max(MIN_ROOM_SIZE, room.width - 1);
+                room.height = Math.max(MIN_ROOM_SIZE, room.height - 1);
+                if (room.width <= MIN_ROOM_SIZE && room.height <= MIN_ROOM_SIZE) {
+                    break;
+                }
+            }
+            attempts++;
+        }
+    }
+    console.log(`Placed ${rooms.length} out of ${numRooms} rooms`);
+    return rooms;
+}
+
+function findNearestRoom(newRoom, existingRooms) {
+    let nearestRoom = null;
+    let minDistance = Infinity;
+    for (const room of existingRooms) {
+        const dx = newRoom.x - room.x;
+        const dy = newRoom.y - room.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < minDistance) {
+            minDistance = distance;
+            nearestRoom = room;
+        }
+    }
+    return nearestRoom;
+}
+
+function carveCorridor(startRoom, endRoom, map) {
+    const startX = startRoom.x;
+    const startY = startRoom.y;
+    const endX = endRoom.x;
+    const endY = endRoom.y;
+
+    // Horizontal then vertical (L-shaped)
+    let x = startX;
+    let y = startY;
+    while (x !== endX) {
+        map[y][x] = ' ';
+        x += Math.sign(endX - x);
+    }
+    while (y !== endY) {
+        map[y][x] = ' ';
+        y += Math.sign(endY - y);
+    }
+}
+
 function generateLevel() {
     let map = [];
     for (let y = 0; y < state.HEIGHT; y++) {
@@ -9,80 +149,24 @@ function generateLevel() {
         }
     }
 
-    const rooms = [];
-    const targetRooms = 12;
-    const zoneWidth = Math.floor(state.WIDTH / 6);
-    const zoneHeight = Math.floor(state.HEIGHT / 2);
-    const buffer = 1;
-    const usableWidth = zoneWidth - buffer - 2;
-    const usableHeight = zoneHeight - buffer - 2;
-    const zoneGrid = [
-        { x: 1, y: 1 }, { x: zoneWidth, y: 1 }, { x: 2 * zoneWidth, y: 1 }, { x: 3 * zoneWidth, y: 1 },
-        { x: 4 * zoneWidth, y: 1 }, { x: 5 * zoneWidth, y: 1 }, { x: 1, y: zoneHeight },
-        { x: zoneWidth, y: zoneHeight }, { x: 2 * zoneWidth, y: zoneHeight }, { x: 3 * zoneWidth, y: zoneHeight },
-        { x: 4 * zoneWidth, y: zoneHeight }, { x: 5 * zoneWidth, y: zoneHeight }
-    ];
+    const rooms = placeRooms(18);
 
-    for (let i = 0; i < targetRooms; i++) {
-        const zone = zoneGrid[i];
-        const w = 9 + Math.floor(Math.random() * 4);
-        const h = 9 + Math.floor(Math.random() * 4);
-        const x = zone.x + buffer + Math.floor(Math.random() * (usableWidth - w));
-        const y = zone.y + buffer + Math.floor(Math.random() * (usableHeight - h));
-
-        for (let ry = y; ry < y + h; ry++) {
-            for (let rx = x; rx < x + w; rx++) {
-                map[ry][rx] = ' ';
+    for (const room of rooms) {
+        for (let y = room.top; y < room.top + room.h; y++) {
+            for (let x = room.left; x < room.left + room.w; x++) {
+                map[y][x] = ' ';
             }
         }
-        rooms.push({ x: x + Math.floor(w / 2), y: y + Math.floor(h / 2), w, h, left: x, top: y });
-        console.log(`Room ${i + 1} placed at (${x}, ${y}) size ${w}x${h}`);
     }
 
-    console.log(`Placed ${rooms.length} out of ${targetRooms} rooms`);
-
-    for (let i = 1; i < rooms.length; i++) {
-        const r1 = rooms[i - 1];
-        const r2 = rooms[i];
-        let x1 = r1.x, y1 = r1.y;
-        let x2 = r2.x, y2 = r2.y;
-
-        while (x1 !== x2) {
-            map[y1][x1] = ' ';
-            map[y1 + 1][x1] = ' ';
-            x1 += Math.sign(x2 - x1);
+    if (rooms.length > 0) {
+        const connectedRooms = [rooms[0]];
+        for (let i = 1; i < rooms.length; i++) {
+            const newRoom = rooms[i];
+            const nearestRoom = findNearestRoom(newRoom, connectedRooms);
+            carveCorridor(newRoom, nearestRoom, map);
+            connectedRooms.push(newRoom);
         }
-        while (y1 !== y2) {
-            map[y1][x1] = ' ';
-            map[y1][x1 + 1] = ' ';
-            y1 += Math.sign(y2 - y1);
-        }
-    }
-
-    const extraCorridors = 5 + Math.floor(Math.random() * 4);
-    for (let i = 0; i < extraCorridors; i++) {
-        const r1Index = Math.floor(Math.random() * rooms.length);
-        let r2Index;
-        do {
-            r2Index = Math.floor(Math.random() * rooms.length);
-        } while (r2Index === r1Index || Math.abs(r1Index - r2Index) === 1);
-
-        const r1 = rooms[r1Index];
-        const r2 = rooms[r2Index];
-        let x1 = r1.x, y1 = r1.y;
-        let x2 = r2.x, y2 = r2.y;
-
-        while (x1 !== x2) {
-            map[y1][x1] = ' ';
-            map[y1 + 1][x1] = ' ';
-            x1 += Math.sign(x2 - x1);
-        }
-        while (y1 !== y2) {
-            map[y1][x1] = ' ';
-            map[y1][x1 + 1] = ' ';
-            y1 += Math.sign(y2 - y1);
-        }
-        console.log(`Added extra corridor from room ${r1Index + 1} to ${r2Index + 1}`);
     }
 
     return { map, rooms };
@@ -148,7 +232,7 @@ function addLevel(tier) {
         state.levels[tier].map[stairDownY][stairDownX] = '>';
         state.stairsDown[tier] = { x: stairDownX, y: stairDownY };
 
-        state.monsters[tier] = generateLevelMonsters(tier); // Updated to new function
+        state.monsters[tier] = generateLevelMonsters(tier);
         state.fountains[tier] = generateFountains(tier);
         console.log(`Initializing treasures for tier ${tier}`);
         generateTreasures(tier);

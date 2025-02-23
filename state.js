@@ -7,8 +7,8 @@ const state = {
     statsDiv: null,
     logDiv: null,
     levels: [],
-    stairsUp: [],
-    stairsDown: [],
+    stairsUp: {},
+    stairsDown: {},
     currentLevel: 1,
     player: {
         x: 1, y: 1,
@@ -19,19 +19,19 @@ const state = {
         intellect: 5 + Math.floor(Math.random() * 6),
         agility: 5 + Math.floor(Math.random() * 6)
     },
-    treasures: [],
-    monsters: [],
-    fountains: [],
+    treasures: {},
+    monsters: {},
+    fountains: {},
     combatLog: [],
     isRangedMode: false,
     projectile: null,
     highestTier: 1,
     gameStarted: false,
     discoveryRadius: 8,
-    discoveredWalls: [],
-    discoveredTileCount: [],
-    visibleTiles: [],
-    tileMap: [],
+    discoveredWalls: {},
+    discoveredTileCount: {},
+    visibleTiles: {},
+    tileMap: {},
     lastPlayerX: null,
     lastPlayerY: null,
     lastProjectileX: null,
@@ -40,13 +40,12 @@ const state = {
 };
 
 function initGame() {
-    state.treasures = [];
-    state.stairsUp = [];
-    state.stairsDown = [];
-    state.levels = [generateLevel()];
     state.treasures[0] = [];
-    state.monsters = [generateLevelMonsters(0)]; // Updated to new function
-    state.fountains = [generateFountains(0)];
+    state.stairsUp = { 1: null };
+    state.stairsDown = { 0: null };
+    state.levels[0] = generateLevel();
+    state.monsters[0] = generateLevelMonsters(0);
+    state.fountains[0] = generateFountains(0);
     state.discoveredWalls[0] = new Set();
     state.discoveredTileCount[0] = 0;
     state.visibleTiles[0] = new Set();
