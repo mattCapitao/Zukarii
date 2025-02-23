@@ -14,10 +14,13 @@ function moveMonsters() {
         let newX = monster.x + (dx !== 0 ? Math.sign(dx) : 0);
         let newY = monster.y + (dy !== 0 ? Math.sign(dy) : 0);
 
-        if (map[newY][newX] !== '#' && !(newX === state.player.x && newY === state.player.y)) {
-            monster.x = newX;
-            monster.y = newY;
+        // Treat stairs ('<' and '>') like walls, in addition to '#' and player position
+        if (map[newY][newX] === '#' || map[newY][newX] === '<' || map[newY][newX] === '>' || (newX === state.player.x && newY === state.player.y)) {
+            return; // Monster can't move to this tile
         }
+
+        monster.x = newX;
+        monster.y = newY;
     });
 }
 
