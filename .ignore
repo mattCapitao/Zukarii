@@ -1,1 +1,5 @@
-ignore
+# Ignore Visual Studio folder
+.vs/
+
+# Ignore the /ignore directory
+/ignore/
