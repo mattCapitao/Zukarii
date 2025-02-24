@@ -36,7 +36,8 @@ const state = {
     lastPlayerY: null,
     lastProjectileX: null,
     lastProjectileY: null,
-    needsInitialRender: false
+    needsInitialRender: false,
+    MIN_STAIR_DISTANCE: 60 // Moved here, set to your current tweak
 };
 
 function initGame() {
@@ -51,16 +52,31 @@ function initGame() {
     state.visibleTiles[0] = new Set();
     state.tileMap[0] = buildTileMap(0);
 
-    const firstRoom = state.levels[0].rooms[0];
-    let stairUpX = firstRoom.left + 1 + Math.floor(Math.random() * (firstRoom.w - 2));
-    let stairUpY = firstRoom.top + 1 + Math.floor(Math.random() * (firstRoom.h - 2));
+    // Pick upstairs room, excluding AlcoveSpecial and BossChamberSpecial
+    const upRooms = state.levels[0].rooms.filter(r => r.type !== 'AlcoveSpecial' && r.type !== 'BossChamberSpecial');
+    const upRoomIndex = Math.floor(Math.random() * upRooms.length);
+    const upRoom = upRooms[upRoomIndex];
+    let stairUpX = upRoom.left + 1 + Math.floor(Math.random() * (upRoom.w - 2));
+    let stairUpY = upRoom.top + 1 + Math.floor(Math.random() * (upRoom.h - 2));
     state.levels[0].map[stairUpY][stairUpX] = '<';
     state.stairsUp[1] = { x: stairUpX, y: stairUpY };
 
-    const downRoomIndex = Math.floor(Math.random() * (state.levels[0].rooms.length - 1)) + 1;
-    const downRoom = state.levels[0].rooms[downRoomIndex];
-    let stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
-    let stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
+    // Pick downstairs room, aiming for max distance
+    let downRoom, stairDownX, stairDownY;
+    const downOptions = state.levels[0].rooms.map(room => {
+        const centerX = room.left + Math.floor(room.w / 2);
+        const centerY = room.top + Math.floor(room.h / 2);
+        const dx = stairUpX - centerX;
+        const dy = stairUpY - centerY;
+        return { room, distance: Math.sqrt(dx * dx + dy * dy) };
+    }).sort((a, b) => b.distance - a.distance);
+
+    const farRooms = downOptions.filter(opt => opt.distance >= state.MIN_STAIR_DISTANCE);
+    downRoom = farRooms.find(opt => opt.room.type === 'BossChamberSpecial')?.room ||
+        farRooms.find(opt => opt.room.type === 'AlcoveSpecial')?.room ||
+        farRooms[0]?.room || downOptions[0].room;
+    stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
+    stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
     state.levels[0].map[stairDownY][stairDownX] = '>';
     state.stairsDown[0] = { x: stairDownX, y: stairDownY };
 
