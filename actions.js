@@ -1,28 +1,4 @@
-function moveMonsters() {
-    const tier = state.currentLevel - 1;
-    console.log(`Moving monsters on tier ${state.currentLevel}, monsters:`, state.monsters[tier]);
-    if (!state.monsters[tier] || !Array.isArray(state.monsters[tier])) {
-        console.log(`No monsters defined for tier ${state.currentLevel}`);
-        return;
-    }
-    let map = state.levels[tier].map;
-    state.monsters[tier].forEach(monster => {
-        if (monster.hp <= 0) return;
 
-        let dx = state.player.x - monster.x;
-        let dy = state.player.y - monster.y;
-        let newX = monster.x + (dx !== 0 ? Math.sign(dx) : 0);
-        let newY = monster.y + (dy !== 0 ? Math.sign(dy) : 0);
-
-        // Treat stairs ('<' and '>') like walls, in addition to '#' and player position
-        if (map[newY][newX] === '#' || map[newY][newX] === '<' || map[newY][newX] === '>' || (newX === state.player.x && newY === state.player.y)) {
-            return; // Monster can't move to this tile
-        }
-
-        monster.x = newX;
-        monster.y = newY;
-    });
-}
 
 function useFountain(fountain, tier) {
     if (!fountain.used) {
@@ -49,5 +25,5 @@ function useFountain(fountain, tier) {
     }
 }
 
-window.moveMonsters = moveMonsters;
+
 window.useFountain = useFountain;

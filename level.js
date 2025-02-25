@@ -410,6 +410,7 @@ function addLevel(tier) {
         state.stairsDown[tier] = { x: stairDownX, y: stairDownY };
 
         state.monsters[tier] = generateLevelMonsters(tier);
+        console.log(`Tier Monsters: ${state.monsters[tier]}`);
         state.fountains[tier] = generateFountains(tier);
         console.log(`Initializing treasures for tier ${tier}`);
         generateTreasures(tier);

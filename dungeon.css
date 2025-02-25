@@ -61,8 +61,25 @@
 
 .undiscovered {
     color: #000;
+    background-color: #000;
+    position: relative; /* Ensure stacking context */
+    z-index: 0; /* Below player */
 }
 
 .discovered {
     color: #0f0;
+    background-color: #080808;
+    position: relative; /* Ensure stacking context */
+    z-index: 0; /* Below player */
+}
+
+.player {
+    height: 1em;
+    width: 1em;
+    background-color: #080808;
+    border-radius: 50%;
+    box-shadow: 0 0 4em 1.5em #edbc4325;
+    position: relative; /* Establish stacking context */
+    z-index: 1; /* Lift above other spans */
+  
 }

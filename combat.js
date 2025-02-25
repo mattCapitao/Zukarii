@@ -4,22 +4,23 @@ window.meleeCombat = function (monster) {
     let baseDamage = 2 + Math.floor(Math.random() * 2);
     let playerDamage = Math.round(baseDamage * (state.player.prowess * 0.3));
 
-    let combatLogMsg = `You dealt ${playerDamage} damage to Monster `;
+    let combatLogMsg = `You dealt ${playerDamage} damage to ${monster.name} `;
 
     const critChance = state.player.agility / 2;
     if (Math.random() * 100 < critChance) {
         const critMultiplier = 1.5 + Math.random() * 1.5;
         playerDamage = Math.round(playerDamage * critMultiplier);
         //writeToLog(`Critical hit! Dealt ${playerDamage} damage to Monster (${monster.hp - playerDamage}/${monster.maxHp})`);
-        combatLogMsg = `Critical hit! Dealt ${playerDamage} damage to Monster `;
+        combatLogMsg = `Critical hit! Dealt ${playerDamage} damage to ${monster.name} `;
     }
 
     monster.hp -= playerDamage;
 
     if (monster.hp <= 0) {
         monster.hp = 0;
+        monster.isAgro = false;
         writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-        writeToLog('Monster defeated!');
+        writeToLog(`${monster.name} defeated!`);
         let map = state.levels[state.currentLevel - 1].map;
         let tierTreasures = state.treasures[state.currentLevel - 1];
         console.log(`Melee: Checking treasure at (${monster.x}, ${monster.y}), tier ${state.currentLevel - 1}, map tile before: ${map[monster.y][monster.x]}`);
@@ -40,11 +41,16 @@ window.meleeCombat = function (monster) {
         state.player.xp += (5 + Math.floor(Math.random() * 6)) * state.currentLevel;
     } else {
         writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-        let monsterDamage = 1 + Math.floor(Math.random() * 3) + Math.floor(state.currentLevel / 2);
+
+        //let monsterDamage = 1 + Math.floor(Math.random() * 3) + Math.floor(state.currentLevel / 2);
+
+        let monsterDamage = window.calculateMonsterAttackDamage(monster, state.currentLevel);
         state.player.hp -= monsterDamage;
-        writeToLog(`Monster dealt ${monsterDamage} damage to You`);
+        writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
     }
 };
+
+
 
 window.toggleRanged = function (event) {
     if (!state.gameStarted) {
@@ -93,22 +99,22 @@ window.rangedAttack = async function (direction) {
             let baseDamage = 2 + Math.floor(Math.random() * 2);
             let playerDamage = Math.round(baseDamage * (state.player.intellect * 0.3));
 
-            let combatLogMsg = `You dealt ${playerDamage} damage to Monster `;
+            let combatLogMsg = `You dealt ${playerDamage} damage to ${monster.name} `;
 
             const critChance = state.player.agility / 2;
             if (Math.random() * 100 < critChance) {
                 const critMultiplier = 1.5 + Math.random() * 1.5;
                 playerDamage = Math.round(playerDamage * critMultiplier);
-                //writeToLog(`Critical hit! Dealt ${playerDamage} damage to Monster (${monster.hp - playerDamage}/${monster.maxHp})`);
-                combatLogMsg = `Critical hit! Dealt ${playerDamage} damage to Monster `;
+                combatLogMsg = `Critical hit! Dealt ${playerDamage} damage to ${monster.name} `;
             }
 
             monster.hp -= playerDamage;
 
             if (monster.hp <= 0) {
                 monster.hp = 0;
+                monster.isAgro = false;
                 writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-                writeToLog('Monster defeated!');
+                writeToLog(`${monster.name} defeated!`);
                 let tierTreasures = state.treasures[state.currentLevel - 1];
                 console.log(`Ranged: Checking treasure at (${monster.x}, ${monster.y}), tier ${state.currentLevel - 1}, map tile before: ${map[monster.y][monster.x]}`);
 
@@ -128,9 +134,10 @@ window.rangedAttack = async function (direction) {
                 state.player.xp += (5 + Math.floor(Math.random() * 6)) * state.currentLevel;
             } else if (i === 1) {
                 writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-                let monsterDamage = 1 + Math.floor(Math.random() * 3) + Math.floor(state.currentLevel / 2);
+                //let monsterDamage = 1 + Math.floor(Math.random() * 3) + Math.floor(state.currentLevel / 2);
+                let monsterDamage = calculateMonsterAttackDamage(monster, state.currentLevel)
                 state.player.hp -= monsterDamage;
-                writeToLog(`Monster dealt ${monsterDamage} damage to You`);
+                writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
             } else {
                 writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
             }

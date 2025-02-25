@@ -27,8 +27,9 @@ const state = {
     projectile: null,
     highestTier: 1,
     gameStarted: false,
-    discoveryRadius: 8,
+    discoveryRadius: 5,
     discoveredWalls: {},
+    discoveredFloors: {},
     discoveredTileCount: {},
     visibleTiles: {},
     tileMap: {},
@@ -45,9 +46,13 @@ function initGame() {
     state.stairsUp = { 1: null };
     state.stairsDown = { 0: null };
     state.levels[0] = generateLevel();
-    state.monsters[0] = generateLevelMonsters(0);
+    const GeneratedMonsters = generateLevelMonsters(0);
+    state.monsters[0] = GeneratedMonsters;
+    console.log(`Tier Monsters: ${GeneratedMonsters}`);
+    console.log(`Tier Monsters: ${state.monsters[0]}`);
     state.fountains[0] = generateFountains(0);
     state.discoveredWalls[0] = new Set();
+    state.discoveredFloors[0] = new Set();
     state.discoveredTileCount[0] = 0;
     state.visibleTiles[0] = new Set();
     state.tileMap[0] = buildTileMap(0);

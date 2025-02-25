@@ -19,10 +19,10 @@ function render() {
         const prevDiscoveredCount = state.discoveredWalls[tier].size;
         state.visibleTiles[tier].clear();
 
-        const minX = Math.max(0, state.player.x - 8);
-        const maxX = Math.min(state.WIDTH - 1, state.player.x + 8);
-        const minY = Math.max(0, state.player.y - 8);
-        const maxY = Math.min(state.HEIGHT - 1, state.player.y + 8);
+        const minX = Math.max(0, state.player.x - state.discoveryRadius);
+        const maxX = Math.min(state.WIDTH - 1, state.player.x + state.discoveryRadius);
+        const minY = Math.max(0, state.player.y - state.discoveryRadius);
+        const maxY = Math.min(state.HEIGHT - 1, state.player.y + state.discoveryRadius);
 
         for (let y = minY; y <= maxY; y++) {
             for (let x = minX; x <= maxX; x++) {
@@ -30,6 +30,10 @@ function render() {
                 let isInRadius = distance <= state.discoveryRadius;
                 if (isInRadius && (map[y][x] === '#' || map[y][x] === '<' || map[y][x] === '>')) {
                     state.discoveredWalls[tier].add(`${x},${y}`);
+                }
+                if (isInRadius && (map[y][x] === ' ')) {
+                   state.discoveredFloors[tier] = state.discoveredFloors[tier] || new Set();
+                   state.discoveredFloors[tier].add(`${x},${y}`);
                 }
                 if (isInRadius) state.visibleTiles[tier].add(`${x},${y}`);
             }
@@ -51,6 +55,7 @@ function render() {
         for (let x = 0; x < state.WIDTH; x++) {
             let isInRadius = state.visibleTiles[tier].has(`${x},${y}`);
             let isDiscovered = state.discoveredWalls[tier].has(`${x},${y}`);
+            let isFloor = state.discoveredFloors[tier].has(`${x},${y}`);
             let monster = state.monsters[tier].find(m => m.x === x && m.y === y && m.hp > 0);
             let treasure = state.treasures[tier].find(t => t.x === x && t.y === y);
             let fountain = state.fountains[tier].find(f => f.x === x && f.y === y && !f.used);
@@ -64,7 +69,7 @@ function render() {
             } else if (state.projectile && x === state.projectile.x && y === state.projectile.y) {
                 char = '*';
                 className = 'discovered';
-            } else if (monster && isInRadius) {
+            } else if (monster && (isInRadius || monster.isAgro)) {
                 char = 'M';
                 className = 'discovered';
             } else if (treasure && (isInRadius || treasure.discovered)) {
@@ -77,9 +82,17 @@ function render() {
                 className = 'discovered';
             } else if (isDiscovered || isInRadius) {
                 className = 'discovered';
+            } else if (map[y][x] === ' ' && isFloor) {
+                className = 'discovered';
             }
+            
+            if (char == '@') {
+                className = `player`;
+            } 
 
             const current = tileMap[y][x];
+
+
             if (current.char !== char || current.class !== className) {
                 mapDisplay += `<span class="${className}">${char}</span>`;
                 tileMap[y][x] = { char, class: className };

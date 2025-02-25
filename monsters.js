@@ -1,36 +1,252 @@
 ﻿console.log("monsters.js loaded");
 
+const monsterTemplates = [
+    {
+        x: 0,
+        y: 0,
+        name: "Skeleton",
+        baseHp: 15,
+        maxHp: 15,
+        hp: 15,
+        minBaseDamage: 1,
+        maxBaseDamage: 3,
+        isAgro: false,
+    },
+    {
+        x: 0,
+        y: 0,
+        name: "Goblin",
+        baseHp: 15,
+        maxHp: 15,
+        hp: 15,
+        minBaseDamage: 2,
+        maxBaseDamage: 3,
+        isAgro: false,
+    },
+    {
+        x: 0,
+        y: 0,
+        name: "Orc",
+        baseHp: 15,
+        maxHp: 15,
+        hp: 15,
+        minBaseDamage: 2,
+        maxBaseDamage: 4,
+        isAgro: false,
+    }
+];
+
+
+function calculateMonsterAttackDamage(enemy, tier) {
+    const tierDamageMultiplier = 0.1;
+    const baseDamage = Math.floor(Math.random() * (enemy.maxBaseDamage - enemy.minBaseDamage + 1)) + enemy.minBaseDamage;
+    const damage = Math.round(baseDamage * (1 + tier * tierDamageMultiplier));
+    console.log(`Monster attack damage: ${damage} (base: ${baseDamage}, min: ${enemy.minBaseDamage}, max: ${enemy.maxBaseDamage})`);
+    return damage;
+}
+
 // Generates a single monster instance with tier-scaled stats
 function generateMonster(tier, map, rooms, playerX, playerY) {
+
+    let newMonster = { ...monsterTemplates[Math.floor(Math.random() * monsterTemplates.length)] };
     const room = rooms[Math.floor(Math.random() * rooms.length)];
-    let x, y;
+
     do {
-        x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
-        y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
-    } while (map[y][x] !== ' ' || (x === playerX && y === playerY));
-    const minDamage = 1 + Math.floor(tier / 3);
-    const maxDamage = 3 + Math.floor(tier / 2);
-    const damage = Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
-    const totalHp = 15 + tier * 3;
-    return { x, y, hp: totalHp, maxHp: totalHp, attack: damage };
+        newMonster.x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
+        newMonster.y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
+    } while (map[newMonster.y][newMonster.x] !== ' ' || (newMonster.x === playerX && newMonster.y === playerY));
+
+    const newMonsterTierHpSmoothing = 1 + Math.floor(Math.random() * 5);
+    const calculatedMaxMonsterHp = newMonster.baseHp + newMonsterTierHpSmoothing * Math.sqrt(tier + 1);
+    newMonster.maxHp = Math.round(calculatedMaxMonsterHp);
+    newMonster.hp = newMonster.maxHp;
+    newMonster.minBaseDamage += Math.floor(tier / 3);
+    newMonster.maxBaseDamage += Math.floor(tier / 2);
+
+    return newMonster;
 }
+
+
 
 // Generates monsters for a level, with configurable density
 function generateLevelMonsters(tier) {
     const map = state.levels[tier].map;
     const rooms = state.levels[tier].rooms;
-    const baseMonsterCount = 7; // Increased from 5 to 7 for higher density
-    const densityFactor = 1 + tier * 0.1; // 10% more monsters per tier
-    const monsterCount = Math.floor(baseMonsterCount * densityFactor); // Scales with tier
+    const baseMonsterCount = 7;
+    const densityFactor = 1 + tier * 0.1;
+    const monsterCount = Math.floor(baseMonsterCount * densityFactor);
     let levelMonsters = [];
 
-    // Clearer density implementation: base count + tier-scaled increase
     console.log(`Generating ${monsterCount} monsters for tier ${tier} (base: ${baseMonsterCount}, density factor: ${densityFactor.toFixed(2)})`);
 
     for (let i = 0; i < monsterCount; i++) {
-        levelMonsters.push(generateMonster(tier, map, rooms, state.player.x, state.player.y));
+        const monsterToPush = generateMonster(tier, map, rooms, state.player.x, state.player.y);
+        console.log(`Monster to push:`, monsterToPush);
+        levelMonsters.push(monsterToPush);
     }
     return levelMonsters;
 }
 
+function moveMonsters() {
+    const tier = state.currentLevel - 1;
+    console.log(`Moving monsters on tier ${state.currentLevel}, monsters:`, state.monsters[tier]);
+    if (!state.monsters[tier] || !Array.isArray(state.monsters[tier])) {
+        console.log(`No monsters defined for tier ${state.currentLevel}`);
+        return;
+    }
+    let map = state.levels[tier].map;
+    const monsters = state.monsters[tier];
+
+    const AGGRO_RANGE = 10;
+
+    monsters.forEach(monster => {
+        console.log(`Monster: `, monster);
+        if (monster.hp <= 0) return;
+
+        const dx = state.player.x - monster.x;
+        const dy = state.player.y - monster.y;
+        const distanceToPlayer = Math.sqrt(dx * dx + dy * dy);
+
+        if (distanceToPlayer <= AGGRO_RANGE) {
+            monster.isAgro = true;
+            // Chase player
+            let directions = [
+                { x: Math.sign(dx), y: Math.sign(dy) },
+                { x: Math.sign(dx), y: 0 },
+                { x: 0, y: Math.sign(dy) }
+            ];
+
+            for (let dir of directions) {
+                let newX = monster.x + dir.x;
+                let newY = monster.y + dir.y;
+
+                const isOccupiedByMonster = monsters.some(otherMonster =>
+                    otherMonster !== monster &&
+                    otherMonster.hp > 0 &&
+                    otherMonster.x === newX &&
+                    otherMonster.y === newY
+                );
+
+                if (map[newY][newX] === '#' ||
+                    map[newY][newX] === '<' ||
+                    map[newY][newX] === '>' ||
+                    (newX === state.player.x && newY === state.player.y) ||
+                    isOccupiedByMonster) {
+                    continue;
+                }
+
+                monster.x = newX;
+                monster.y = newY;
+                break;
+            }
+        } else {
+            monster.isAgro = false;
+            // Random wandering when out of range
+            let wanderDirections = [
+                { x: 1, y: 0 }, { x: -1, y: 0 }, // Left, right
+                { x: 0, y: 1 }, { x: 0, y: -1 }  // Up, down
+            ];
+            const dir = wanderDirections[Math.floor(Math.random() * wanderDirections.length)];
+            let newX = monster.x + dir.x;
+            let newY = monster.y + dir.y;
+
+            const isOccupiedByMonster = monsters.some(otherMonster =>
+                otherMonster !== monster &&
+                otherMonster.hp > 0 &&
+                otherMonster.x === newX &&
+                otherMonster.y === newY
+            );
+
+            if (map[newY][newX] !== '#' &&
+                map[newY][newX] !== '<' &&
+                map[newY][newX] !== '>' &&
+                !(newX === state.player.x && newY === state.player.y) &&
+                !isOccupiedByMonster) {
+                monster.x = newX;
+                monster.y = newY;
+            }
+        }
+    });
+}
+
+/*
+function moveMonsters() {
+    const tier = state.currentLevel - 1;
+    console.log(`Moving monsters on tier ${state.currentLevel}, monsters:`, state.monsters[tier]);
+    if (!state.monsters[tier] || !Array.isArray(state.monsters[tier])) {
+        console.log(`No monsters defined for tier ${state.currentLevel}`);
+        return;
+    }
+    let map = state.levels[tier].map;
+    const monsters = state.monsters[tier];
+
+    monsters.forEach(monster => {
+        console.log(`Monster: `, monster);
+        if (monster.hp <= 0) return;
+
+        let dx = state.player.x - monster.x;
+        let dy = state.player.y - monster.y;
+        let directions = [
+            { x: Math.sign(dx), y: Math.sign(dy) }, // Primary direction
+            { x: Math.sign(dx), y: 0 },             // Horizontal only
+            { x: 0, y: Math.sign(dy) }              // Vertical only
+        ];
+
+        for (let dir of directions) {
+            let newX = monster.x + dir.x;
+            let newY = monster.y + dir.y;
+
+            const isOccupiedByMonster = monsters.some(otherMonster =>
+                otherMonster !== monster &&
+                otherMonster.hp > 0 &&
+                otherMonster.x === newX &&
+                otherMonster.y === newY
+            );
+
+            if (map[newY][newX] === '#' ||
+                map[newY][newX] === '<' ||
+                map[newY][newX] === '>' ||
+                (newX === state.player.x && newY === state.player.y) ||
+                isOccupiedByMonster) {
+                continue; // Try next direction
+            }
+
+            monster.x = newX;
+            monster.y = newY;
+            break; // Move successful, exit loop
+        }
+    });
+}
+
+
+function moveMonsters() {
+    const tier = state.currentLevel - 1;
+    console.log(`Moving monsters on tier ${state.currentLevel}, monsters:`, state.monsters[tier]);
+    if (!state.monsters[tier] || !Array.isArray(state.monsters[tier])) {
+        console.log(`No monsters defined for tier ${state.currentLevel}`);
+        return;
+    }
+    let map = state.levels[tier].map;
+    state.monsters[tier].forEach(monster => {
+        console.log(`Monster: `, monster);
+        if (monster.hp <= 0) return;
+
+        let dx = state.player.x - monster.x;
+        let dy = state.player.y - monster.y;
+        let newX = monster.x + (dx !== 0 ? Math.sign(dx) : 0);
+        let newY = monster.y + (dy !== 0 ? Math.sign(dy) : 0);
+
+        // Treat stairs ('<' and '>') like walls, in addition to '#' and player position
+        if (map[newY][newX] === '#' || map[newY][newX] === '<' || map[newY][newX] === '>' || (newX === state.player.x && newY === state.player.y)) {
+            return; // Monster can't move to this tile
+        }
+
+        monster.x = newX;
+        monster.y = newY;
+    });
+}
+*/
+
+window.calculateMonsterAttackDamage = calculateMonsterAttackDamage;
+window.moveMonsters = moveMonsters;
 window.generateLevelMonsters = generateLevelMonsters;
