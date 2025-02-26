@@ -1,4 +1,4 @@
-
+console.log("actions.js loaded");
 
 function useFountain(fountain, tier) {
     if (!fountain.used) {
@@ -25,5 +25,36 @@ function useFountain(fountain, tier) {
     }
 }
 
+function lightTorch() {
+    let message = '';
 
+    if (state.player.torches > 0) {
+        state.player.torches--;
+        state.player.torchLit = true;
+        state.torchExpires = 1000;
+        state.discoveryRadius = 4;
+        message = 'The darkness is at bay... for now!';
+
+        if (state.player.torches < 1) {
+            message = 'You light your last torch!';
+        }   
+    } else {
+        message = 'You have no torches left.';
+    }
+    writeToLog(message);
+
+    render();
+
+}
+
+function torchExpired(){
+    state.player.torchLit = false;
+    state.torchExpires = 0;
+    state.discoveryRadius = state.discoveryRadiusDefault;
+    writeToLog('The torch has burned out!');
+    render();
+}
+
+window.lightTorch = lightTorch;
+window.torchExpired = torchExpired;
 window.useFountain = useFountain;

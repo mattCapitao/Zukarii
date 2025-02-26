@@ -1,4 +1,4 @@
-const titleScreen = `
+const titleScreen = `<center><pre>
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣤⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣶⠟⠛⠉⠉⠉⠛⠻⢿⣶⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⣍⠻⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -25,21 +25,27 @@ const titleScreen = `
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠁⠀⠻⣿⣦⣾⠀⠀⠀⠀⠀⣶⣤⡟⠟⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⢻⣧⡀⠀⠀⣼⡿⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢷⣦⡾⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-<div><center>
-<h2>Grok Mage Dungeon</h2>
-
+</pre><div>
+<h1>Grok Mage Dungeon</h1>
+<table><tr>
+<th>INSTRUCTIONS</th>
+<th>MAP KEY</th>
+</tr><tr>
+<td>
+Arrow keys: Move / Mele Attack 
+Hold Space + Arrows: Ranged attack (*)
 <b>Collect One Trillion Gold to WIN!</b>
-	
-<b><i>Instructions:</i></b>
-<div style="text-align:left;margin-left:20%;">
-- Arrow keys: Move / Mele Attack 
-- Hold Space + Arrows: Ranged attack (*)
-- >: Go down tiers (infinite)
-- <: Go up tiers, (from tier 1 exit and fail)
-- $: Collect gold 
-- H: Heal Fountain
-- M: Monster
-</div>
-<b><i>Press any key to start...</i></b>
+</td><td>
+𓀠: The Battle Mage - (You)
+$: Treasure (aka Da Lootz!)
+a-z, A-Z: Monster (Kill or Be Killed)
+≅: Magic Fountain (Heal, Boost, ???)
+#: Wall (You Can't Go Here)
+⇓: Stairs Down ∞ (Infinite)
+⇑: Stairs Up (Tier 1 Exit Game)
+</td>
+</tr></table>
+<b><i>Press F11 to start in FULL SCREEN Mode<br/>
+Or any key to start in standard browser mode</i></b>
 </center></div>
 `;

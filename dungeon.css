@@ -1,4 +1,6 @@
-﻿body {
+﻿/* dungeon.css */
+
+body {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,78 +10,225 @@
     font-family: monospace;
 }
 
+table {
+    border-spacing: 10px;
+    border-collapse: separate;
+    font-size: 18px;
+}
+
+th {
+    text-align: center;
+    font-weight: bold;
+    font-size: larger;
+}
+
+td {
+    text-align: left;
+    vertical-align: top;
+    padding-left: 50px;
+    line-height: 1.25;
+}
+
+span {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    line-height: 16px;
+    vertical-align: top;
+}
+
+
 #game {
     display: flex;
     flex-direction: row;
     background-color: #000;
-    padding: 20px;
+    padding: 0 20px 0 20px;
     border: 2px solid #0f0;
-    height: 840px;
-}
-
-#map {
-    font-size: 16px;
-    line-height: 1;
-    white-space: pre;
-    color: #0f0;
+    height: 860px;
     margin: 0;
 }
 
-#info {
-    display: flex;
-    flex-direction: column;
-    width: 300px;
-    margin-left: 20px;
+#map {
+    
+    font-size: 16px;
+    line-height: 16px;
+    white-space: pre;
     color: #0f0;
-    height: 100%;
+    padding 20px 0 20px 0;
+    margin: 0;
+    width: 1100px; /* Example: 40 columns * 16px */
+    height: 860px; /* Fits within #game’s 1000px minus padding/border */
+    overflow: auto; /* Enable scrolling */
+    box-sizing: border-box; /* Include padding/border in size */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    position: relative;
 }
 
-    #info.hidden {
-        display: none;
-    }
+#map::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and newer Edge */
+}
+
+#info {
+    padding: 0 ;
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    margin: 20px 0 20px 20px;
+    color: #0f0;
+    height: 820px;
+    font-family: monospace;
+}
+
+#info.hidden {
+    display: none;
+}
 
 #stats {
-    font-size: 14px;
+    font-size: 16px;
     height: 40%;
     padding: 10px;
     border: 1px solid #0f0;
 }
 
 #log {
-    font-size: 14px;
+    font-size: 16px;
     height: 60%;
-    padding: 10px;
+    padding: 0;
     border: 1px solid #0f0;
-    overflow-y: auto;
+    overflow-y: hidden;
 }
 
-    #log p {
-        margin: 0;
-        padding: 0;
-        line-height: 1.2;
-    }
+#log p {
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+#log > p:first-of-type {
+    font-weight: bold;
+}
+
+
 
 .undiscovered {
     color: #000;
     background-color: #000;
-    position: relative; /* Ensure stacking context */
-    z-index: 0; /* Below player */
 }
 
 .discovered {
     color: #0f0;
-    background-color: #080808;
-    position: relative; /* Ensure stacking context */
-    z-index: 0; /* Below player */
+    background-color: #0B0C0B;
 }
 
 .player {
-    height: 1em;
-    width: 1em;
-    background-color: #080808;
-    border-radius: 50%;
-    box-shadow: 0 0 4em 1.5em #edbc4325;
-    position: relative; /* Establish stacking context */
-    z-index: 1; /* Lift above other spans */
-  
+    overflow: visible;
+    transform: scale(1.2);
+    transform-origin: center;
+    z-index: 3; /* Lift above other spans */
+}
+
+    .player.torch {
+        background-color: #8b6a4b50;
+        border-radius: 50%;
+        box-shadow: 0 0 4em 2em #8b6a4b74;
+    }
+
+    .player.lamp {
+        background-color: #efe8ac50;
+        border-radius: 50%;
+        box-shadow: 0 0 5em 2.5em #efe8ac92;
+    }
+
+/*//////////////////////////////// START MONSTERS ||||||||||||||||||||||||||||||||||*/
+
+span.discovered.monster {
+    color: #0f0; /* Green, matching your map style */
+    font-family: monospace; /* Ensure consistent rendering */
+    /*overflow: visible;
+    transform: scale(1.1);
+    transform-origin: center;*/
+    z-index: 2; /* Lift above other spans */
+}
+
+.skeleton {}/* Skeleton */
+.goblin {}/* Goblin */
+.orc {}/* Orc */
+
+/* Future expansions (placeholders) */
+span.discovered.monster.elite { /* Uppercase for elites */
+    text-transform: uppercase;
+}
+
+span.discovered.monster.boss { /* Bold red uppercase for bosses */
+    text-transform: uppercase;
+    font-weight: bold;
+    color: red;
+}
+
+/* Monster Affix styling */
+span.discovered.monster.fast:after {
+    content: '*';
+    color: #0f0;
+    font-size: 0.8em;
+}
+
+span.discovered.monster.armored:after {
+    content: '+';
+    color: #0f0;
+    font-size: 0.8em;
+}
+/*//////////////////////////////// END MONSTERS ||||||||||||||||||||||||||||||||||*/
+
+#game-over {
+    position: absolute;
+    
+    font-size:18px;
+    z-index: 10;
+    text-align: center;
+    
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#game-over h1{
+    font-size: 48px;
+}
+
+#game-over.death {
+    color: red;
+    background: rgba(0, 0, 0, 0.7);
+    animation: fadeIn 0.5s ease-in;
+}
+
+#game-over.victory {
+    color: #0f0;
+    background: rgba(0, 0, 0, 0.5);
+    text-shadow: 0 0 10px #0f0;
+    animation: victoryPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes victoryPulse {
+    0% {transform: scale(1); opacity: 1;}
+    50% {transform: scale(1.1); opacity: 0.9;}
+    100% {transform: scale(1); opacity: 1;}
+}
+
+#restart-button {
+    background: #0f0;
+    color: #000;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: monospace;
+}
+
+#restart-button:hover {
+    background: #00ff00;
 }

@@ -1,56 +1,71 @@
 console.log("combat.js loaded");
 
-window.meleeCombat = function (monster) {
-    let baseDamage = 2 + Math.floor(Math.random() * 2);
-    let playerDamage = Math.round(baseDamage * (state.player.prowess * 0.3));
-
-    let combatLogMsg = `You dealt ${playerDamage} damage to ${monster.name} `;
+function calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage) {
+    let baseDamage = Math.floor(Math.random() * (maxBaseDamage - minBaseDamage + 1)) + minBaseDamage;
+    let playerDamage = Math.round(baseDamage * (baseStat * 0.3));
+    let isCrit = false;
 
     const critChance = state.player.agility / 2;
     if (Math.random() * 100 < critChance) {
         const critMultiplier = 1.5 + Math.random() * 1.5;
         playerDamage = Math.round(playerDamage * critMultiplier);
-        //writeToLog(`Critical hit! Dealt ${playerDamage} damage to Monster (${monster.hp - playerDamage}/${monster.maxHp})`);
-        combatLogMsg = `Critical hit! Dealt ${playerDamage} damage to ${monster.name} `;
+        isCrit = true;
     }
 
-    monster.hp -= playerDamage;
+    return { damage: playerDamage, isCrit };
+}
+
+function handleMonsterDeath(monster, tier, combatLogMsg) {
+    monster.hp = 0;
+    monster.isAgro = false;
+    writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
+    writeToLog(`${monster.name} defeated!`);
+    dropTreasure(monster, tier);
+    monsterKillXP = (5 + Math.floor(Math.random() * 6)) * state.currentLevel;
+    awardXp(monsterKillXP);
+}
+
+function handleMonsterRetaliation(monster, tier) {
+    let monsterDamage = calculateMonsterAttackDamage(monster, state.currentLevel);
+    const defense = state.player.inventory.equipped.armor?.defense || 0;
+    monsterDamage = Math.max(1, monsterDamage - defense);
+    state.player.hp -= monsterDamage;
+    writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
+    if (state.player.hp <= 0) {
+        playerDied(monster.name);
+        return true; 
+    }
+    return false; 
+}
+
+window.meleeCombat = function (monster) {
+    let minBaseDamage, maxBaseDamage;
+    const mainWeapon = state.player.inventory.equipped.mainhand;
+    const offWeapon = state.player.inventory.equipped.offhand;
+
+    if (mainWeapon?.attackType === "melee") {
+        minBaseDamage = mainWeapon.baseDamageMin;
+        maxBaseDamage = mainWeapon.baseDamageMax;
+    } else if (offWeapon?.attackType === "melee") {
+        minBaseDamage = offWeapon.baseDamageMin;
+        maxBaseDamage = offWeapon.baseDamageMax;
+    } else {
+        minBaseDamage = 1; // Fists
+        maxBaseDamage = 1;
+    }
+
+    const { damage, isCrit } = calculatePlayerDamage(state.player.prowess, minBaseDamage, maxBaseDamage);
+    let combatLogMsg = isCrit ? `Critical hit! Dealt ${damage} damage to ${monster.name} ` : `You dealt ${damage} damage to ${monster.name} `;
+
+    monster.hp -= damage;
 
     if (monster.hp <= 0) {
-        monster.hp = 0;
-        monster.isAgro = false;
-        writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-        writeToLog(`${monster.name} defeated!`);
-        let map = state.levels[state.currentLevel - 1].map;
-        let tierTreasures = state.treasures[state.currentLevel - 1];
-        console.log(`Melee: Checking treasure at (${monster.x}, ${monster.y}), tier ${state.currentLevel - 1}, map tile before: ${map[monster.y][monster.x]}`);
-
-        const existingTreasure = tierTreasures.find(t => t.x === monster.x && t.y === monster.y);
-        const goldGain = 10 + Math.floor(Math.random() * 41) + state.currentLevel * 10;
-
-        if (existingTreasure) {
-            existingTreasure.gold = (existingTreasure.gold || 10) + goldGain;
-            console.log(`Melee: Updated treasure at (${monster.x}, ${monster.y}) to ${existingTreasure.gold} gold`);
-        } else {
-            console.log(`Melee: Dropping new treasure at (${monster.x}, ${monster.y}) with ${goldGain} gold`);
-            tierTreasures.push({ x: monster.x, y: monster.y, gold: goldGain, discovered: false });
-            map[monster.y][monster.x] = '$';
-        }
-
-        console.log(`Melee: Map tile after: ${map[monster.y][monster.x]}, treasures:`, tierTreasures);
-        state.player.xp += (5 + Math.floor(Math.random() * 6)) * state.currentLevel;
+        handleMonsterDeath(monster, state.currentLevel - 1, combatLogMsg);
     } else {
         writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-
-        //let monsterDamage = 1 + Math.floor(Math.random() * 3) + Math.floor(state.currentLevel / 2);
-
-        let monsterDamage = window.calculateMonsterAttackDamage(monster, state.currentLevel);
-        state.player.hp -= monsterDamage;
-        writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
+        handleMonsterRetaliation(monster, state.currentLevel);
     }
 };
-
-
 
 window.toggleRanged = function (event) {
     if (!state.gameStarted) {
@@ -62,7 +77,13 @@ window.toggleRanged = function (event) {
     }
     if (event.key === ' ') {
         if (event.type === 'keydown') {
-            state.isRangedMode = true;
+            const offWeapon = state.player.inventory.equipped.offhand;
+            const mainWeapon = state.player.inventory.equipped.mainhand;
+            if (offWeapon?.attackType === "ranged" || mainWeapon?.attackType === "ranged") {
+                state.isRangedMode = true;
+            } else {
+                writeToLog("You need a ranged weapon equipped to use ranged mode!");
+            }
         } else if (event.type === 'keyup') {
             state.isRangedMode = false;
         }
@@ -81,6 +102,21 @@ window.rangedAttack = async function (direction) {
         default: return;
     }
 
+    let minBaseDamage, maxBaseDamage;
+    const offWeapon = state.player.inventory.equipped.offhand;
+    const mainWeapon = state.player.inventory.equipped.mainhand;
+
+    if (offWeapon?.attackType === "ranged") {
+        minBaseDamage = offWeapon.baseDamageMin;
+        maxBaseDamage = offWeapon.baseDamageMax;
+    } else if (mainWeapon?.attackType === "ranged") {
+        minBaseDamage = mainWeapon.baseDamageMin;
+        maxBaseDamage = mainWeapon.baseDamageMax;
+    } else {
+        writeToLog("No ranged weapon equipped!");
+        return; // Shouldn’t hit this due to toggleRanged check, but safety net
+    }
+
     for (let i = 1; i <= 7; i++) {
         let tx = state.player.x + dx * i;
         let ty = state.player.y + dy * i;
@@ -96,48 +132,18 @@ window.rangedAttack = async function (direction) {
 
         let monster = state.monsters[state.currentLevel - 1].find(m => m.x === tx && m.y === ty && m.hp > 0);
         if (monster) {
-            let baseDamage = 2 + Math.floor(Math.random() * 2);
-            let playerDamage = Math.round(baseDamage * (state.player.intellect * 0.3));
+            const { damage, isCrit } = calculatePlayerDamage(state.player.intellect, minBaseDamage, maxBaseDamage);
+            let combatLogMsg = isCrit ? `Critical hit! Dealt ${damage} damage to ${monster.name} ` : `You dealt ${damage} damage to ${monster.name} `;
 
-            let combatLogMsg = `You dealt ${playerDamage} damage to ${monster.name} `;
-
-            const critChance = state.player.agility / 2;
-            if (Math.random() * 100 < critChance) {
-                const critMultiplier = 1.5 + Math.random() * 1.5;
-                playerDamage = Math.round(playerDamage * critMultiplier);
-                combatLogMsg = `Critical hit! Dealt ${playerDamage} damage to ${monster.name} `;
-            }
-
-            monster.hp -= playerDamage;
+            monster.hp -= damage;
 
             if (monster.hp <= 0) {
-                monster.hp = 0;
-                monster.isAgro = false;
-                writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-                writeToLog(`${monster.name} defeated!`);
-                let tierTreasures = state.treasures[state.currentLevel - 1];
-                console.log(`Ranged: Checking treasure at (${monster.x}, ${monster.y}), tier ${state.currentLevel - 1}, map tile before: ${map[monster.y][monster.x]}`);
-
-                const existingTreasure = tierTreasures.find(t => t.x === monster.x && t.y === monster.y);
-                const goldGain = 10 + Math.floor(Math.random() * 41) + state.currentLevel * 10;
-
-                if (existingTreasure) {
-                    existingTreasure.gold = (existingTreasure.gold || 10) + goldGain;
-                    console.log(`Ranged: Updated treasure at (${monster.x}, ${monster.y}) to ${existingTreasure.gold} gold`);
-                } else {
-                    console.log(`Ranged: Dropping new treasure at (${monster.x}, ${monster.y}) with ${goldGain} gold`);
-                    tierTreasures.push({ x: monster.x, y: monster.y, gold: goldGain, discovered: false });
-                    map[monster.y][monster.x] = '$';
-                }
-
-                console.log(`Ranged: Map tile after: ${map[monster.y][monster.x]}, treasures:`, tierTreasures);
-                state.player.xp += (5 + Math.floor(Math.random() * 6)) * state.currentLevel;
+                handleMonsterDeath(monster, state.currentLevel - 1, combatLogMsg);
             } else if (i === 1) {
                 writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-                //let monsterDamage = 1 + Math.floor(Math.random() * 3) + Math.floor(state.currentLevel / 2);
-                let monsterDamage = calculateMonsterAttackDamage(monster, state.currentLevel)
-                state.player.hp -= monsterDamage;
-                writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
+                if (!handleMonsterRetaliation(monster, state.currentLevel)) {
+                    // Continue if player still alive
+                }
             } else {
                 writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
             }
@@ -148,7 +154,6 @@ window.rangedAttack = async function (direction) {
         }
     }
     state.projectile = null;
-    moveMonsters();
     needsRender = true;
-    renderIfNeeded();
-};
+    endTurn();
+}; 

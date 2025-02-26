@@ -345,7 +345,7 @@ function generateFountains(tier) {
             x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
             y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
         } while (map[y][x] !== ' ');
-        map[y][x] = 'H';
+        map[y][x] = '≅';
         levelFountains.push({ x, y, used: false, discovered: false });
     }
     return levelFountains;
@@ -387,7 +387,7 @@ function addLevel(tier) {
         const upRoom = upRooms[upRoomIndex];
         let stairUpX = upRoom.left + 1 + Math.floor(Math.random() * (upRoom.w - 2));
         let stairUpY = upRoom.top + 1 + Math.floor(Math.random() * (upRoom.h - 2));
-        state.levels[tier].map[stairUpY][stairUpX] = '<';
+        state.levels[tier].map[stairUpY][stairUpX] = '⇑';
         state.stairsUp[tier] = { x: stairUpX, y: stairUpY };
 
         // Pick downstairs room, aiming for max distance
@@ -406,7 +406,7 @@ function addLevel(tier) {
             farRooms[0]?.room || downOptions[0].room;
         stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
         stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
-        state.levels[tier].map[stairDownY][stairDownX] = '>';
+        state.levels[tier].map[stairDownY][stairDownX] = '⇓';
         state.stairsDown[tier] = { x: stairDownX, y: stairDownY };
 
         state.monsters[tier] = generateLevelMonsters(tier);

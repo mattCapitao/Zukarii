@@ -1,9 +1,9 @@
-console.log("game.js loaded");
+﻿console.log("game.js loaded");
 
 let lastRenderTime = 0;
 let lastInputTime = 0;
-const renderThrottle = 90;
-const inputThrottle = 100;
+const renderThrottle = 70;
+const inputThrottle = 70;
 let needsRender = true;
 
 function handleInput(event) {
@@ -27,6 +27,11 @@ function handleInput(event) {
     let newX = state.player.x;
     let newY = state.player.y;
 
+    if (event.key === ' ') {
+        toggleRanged(event); 
+        return;
+    }
+
     if (state.isRangedMode) {
         rangedAttack(event.key);
         return;
@@ -37,10 +42,19 @@ function handleInput(event) {
         case 'ArrowDown': newY++; break;
         case 'ArrowLeft': newX--; break;
         case 'ArrowRight': newX++; break;
+        case 't': // Add 't' (lowercase) for torch
+        case 'T': // Add 'T' (uppercase) for torch (optional, for consistency)
+            window.lightTorch();
+            needsRender = true;
+            endTurn();
+            return; // Exit after lighting torch, no movement
         default: return;
     }
 
-    if (map[newY][newX] === '#') return;
+    if (map[newY][newX] === '#') {
+        endTurn();
+        return;
+    }
 
     let monster = state.monsters[state.currentLevel - 1].find(m => m.x === newX && m.y === newY && m.hp > 0);
     let fountain = state.fountains[state.currentLevel - 1].find(f => f.x === newX && f.y === newY && !f.used);
@@ -51,13 +65,13 @@ function handleInput(event) {
     if (monster) {
         meleeCombat(monster);
         checkLevelUp();
-    } else if (map[newY][newX] === '>' && state.currentLevel < Number.MAX_SAFE_INTEGER) {
+    } else if (map[newY][newX] === '⇓' && state.currentLevel < Number.MAX_SAFE_INTEGER) {
         state.currentLevel++;
         if (state.currentLevel > state.highestTier) {
             state.highestTier = state.currentLevel;
-            state.player.xp += 5 * state.currentLevel;
-            writeToLog(`New tier reached! +${5 * state.currentLevel} XP`);
-            checkLevelUp();
+            const newTierXP = 5 * state.currentLevel;
+            writeToLog(`You Reached Tier ${ state.currentLevel}`);
+            awardXp(newTierXP);
         }
         addLevel(state.currentLevel - 1);
         map = state.levels[state.currentLevel - 1].map;
@@ -91,7 +105,7 @@ function handleInput(event) {
             state.player.x = 1;
             state.player.y = 1;
         }
-    } else if (map[newY][newX] === '<' && state.currentLevel > 1) {
+    } else if (map[newY][newX] === '⇑' && state.currentLevel > 1) {
         state.currentLevel--;
         const downStair = state.stairsDown[state.currentLevel - 1];
         map = state.levels[state.currentLevel - 1].map;
@@ -124,12 +138,11 @@ function handleInput(event) {
             state.player.x = 1;
             state.player.y = 1;
         }
-    } else if (map[newY][newX] === '<' && state.currentLevel === 1) {
-        writeToLog("You exited the dungeon!");
-        document.removeEventListener('keydown', handleInput);
-        document.removeEventListener('keydown', toggleRanged);
-        document.removeEventListener('keyup', toggleRanged);
-    } else if (map[newY][newX] === 'H' && fountain) {
+    } else if (map[newY][newX] === '⇑' && state.currentLevel === 1) {
+
+        playerExit();
+
+    } else if (map[newY][newX] === '≅' && fountain) {
         useFountain(fountain, state.currentLevel - 1);
         state.player.x = newX;
         state.player.y = newY;
@@ -137,13 +150,33 @@ function handleInput(event) {
         const treasure = state.treasures[state.currentLevel - 1][treasureIndex];
         const goldGain = treasure.gold || (10 + Math.floor(Math.random() * 41) + state.currentLevel * 10);
         state.player.gold += goldGain;
+        let pickupMessage = `Found treasure! Gained ${goldGain} gold`;
+
+        if (treasure.torches) {
+            state.player.torches += treasure.torches;
+            state.player.torchDropFail = 0;
+            pickupMessage += ` and ${treasure.torches} torch${treasure.torches > 1 ? 'es' : ''}`;
+        }
+        if (treasure.items && treasure.items.length) {
+            treasure.items.forEach(item => {
+                // Check for duplicates in inventory
+                if (!state.player.inventory.items.some(i => JSON.stringify(i) === JSON.stringify(item))) {
+                    state.player.inventory.items.push({ ...item });
+                    pickupMessage += ` and picked up ${item.name}`;
+                } else {
+                    console.log(`Duplicate ${item.name} ignored in pickup`);
+                }
+            });
+        }
+
         state.treasures[state.currentLevel - 1].splice(treasureIndex, 1);
         map[newY][newX] = ' ';
-        writeToLog(`Found treasure! Gained ${goldGain} gold`);
+        writeToLog(pickupMessage);
         state.player.x = newX;
         state.player.y = newY;
         if (state.player.gold >= 1e12) {
             writeToLog("You amassed a trillion gold! Victory!");
+            state.isVictory = true;
             document.removeEventListener('keydown', handleInput);
             document.removeEventListener('keydown', toggleRanged);
             document.removeEventListener('keyup', toggleRanged);
@@ -153,8 +186,24 @@ function handleInput(event) {
         state.player.y = newY;
     }
 
+    if (state.player.x === newX && state.player.y === newY) {
+        updateMapScroll();
+    }
+
+    endTurn();
+}
+
+function endTurn(){
+    if (state.torchExpires > 0) {
+        state.torchExpires--;
+        console.log(`Torch expires in ${state.torchExpires} turns`);
+        if (state.torchExpires < 1) {
+            torchExpired();
+        }
+    }
     moveMonsters();
     renderIfNeeded();
+
 }
 
 function renderIfNeeded() {
@@ -177,3 +226,4 @@ function init() {
 }
 
 window.addEventListener('DOMContentLoaded', init);
+window.endTurn = endTurn;

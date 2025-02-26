@@ -1,3 +1,12 @@
+console.log("player.js loaded");
+
+
+function awardXp(amount) {
+    state.player.xp += amount;
+    writeToLog(`Gained ${amount} XP (${state.player.xp}/${state.player.nextLevelXp})`);
+    checkLevelUp(); // Always check for level-up after XP award
+}
+
 function checkLevelUp() {
     while (state.player.xp >= state.player.nextLevelXp) {
         state.player.level++;
@@ -17,3 +26,40 @@ function checkLevelUp() {
         writeToLog(`Level up! Now level ${state.player.level}, Max HP increased by ${hpIncrease} to ${state.player.maxHp}`);
     }
 }
+
+function death(source) {
+    state.player.hp = 0;
+    state.player.dead = true;
+    writeToLog('You died! Game Over.');
+    needsRender = true;
+    renderIfNeeded();
+    document.removeEventListener('keydown', handleInput);
+    document.removeEventListener('keydown', toggleRanged);
+    document.removeEventListener('keyup', toggleRanged);
+    console.log("Player has died - Game over!");
+
+    gameOver('You have been killed by a ' + source + '!');
+
+
+    return;
+}
+
+function exit() {
+    writeToLog("You exited the dungeon! Game Over.");
+    needsRender = true;
+    renderIfNeeded();
+    document.removeEventListener('keydown', handleInput);
+    document.removeEventListener('keydown', toggleRanged);
+    document.removeEventListener('keyup', toggleRanged);
+    console.log("Player has Left the building - Game over!");
+
+    gameOver('You exited the dungeon! Too much adventure to handle eh?');
+
+    
+
+    return;
+}
+
+window.playerExit = exit;
+window.playerDied = death;
+window.awardXp = awardXp;
