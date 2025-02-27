@@ -1,4 +1,8 @@
-const titleScreen = `<center><pre>
+const titleScreen = `
+<h1>Grok Mage Dungeon</h1>
+<pre>
+
+
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣤⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣶⠟⠛⠉⠉⠉⠛⠻⢿⣶⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⣍⠻⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -25,27 +29,36 @@ const titleScreen = `<center><pre>
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠁⠀⠻⣿⣦⣾⠀⠀⠀⠀⠀⣶⣤⡟⠟⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⢻⣧⡀⠀⠀⣼⡿⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢷⣦⡾⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-</pre><div>
-<h1>Grok Mage Dungeon</h1>
-<table><tr>
-<th>INSTRUCTIONS</th>
-<th>MAP KEY</th>
-</tr><tr>
-<td>
-Arrow keys: Move / Mele Attack 
-Hold Space + Arrows: Ranged attack (*)
-<b>Collect One Trillion Gold to WIN!</b>
-</td><td>
-𓀠: The Battle Mage - (You)
-$: Treasure (aka Da Lootz!)
-a-z, A-Z: Monster (Kill or Be Killed)
-≅: Magic Fountain (Heal, Boost, ???)
-#: Wall (You Can't Go Here)
-⇓: Stairs Down ∞ (Infinite)
-⇑: Stairs Up (Tier 1 Exit Game)
-</td>
-</tr></table>
-<b><i>Press F11 to start in FULL SCREEN Mode<br/>
-Or any key to start in standard browser mode</i></b>
-</center></div>
+
+
+</pre>
+ <h4>Collect One Trillion Gold to WIN!</h4>
+   <br />
+<table>
+    <tr>
+        <th>INSTRUCTIONS</th>
+        <th>MAP KEY</th>
+    </tr>
+    <tr>
+        <td>
+            <ul>
+                <li>Arrow keys: Move / Mele Attack 
+                </li><li>Hold Space: -> Arrows: Ranged attack (*)
+                </li><li>T key: Light Torch
+                </li><li>F11 to start Gam in Full Screen
+                </li><li>Any Key to start in standard browser mode</li>
+            </ul>
+        </td>
+        <td>
+            <ul>
+               <li> 𓀠: The Battle Mage - (You)
+               </li><li> $: Treasure (aka Da Lootz!)
+               </li><li>a-z, A-Z: Monster (Kill or Be Killed)
+               </li><li>≅: Magic Fountain (Heal, Boost, ???)
+               </li><li>#: Wall (You Can't Go Here)
+               </li><li> ⇓: Stairs Down ∞ (Infinite)
+               </li><li>⇑: Stairs Up (Tier 1 Exit Game)</li>
+        </td>
+    </tr>
+</table>
 `;

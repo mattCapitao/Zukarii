@@ -1,0 +1,346 @@
+@-ms-viewport {
+  width: device-width;
+}
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section, main, summary {
+  display: block;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+html {
+  /* 1 */
+  box-sizing: border-box;
+  /* 2 */
+  touch-action: manipulation;
+  /* 3 */
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  /* 4 */
+  -ms-overflow-style: scrollbar;
+  /* 5 */
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body {
+  line-height: 1;
+}
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video, main {
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote::before, blockquote::after, q::before, q::after {
+  content: "";
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+hr {
+  /* 1 */
+  box-sizing: content-box;
+  height: 0;
+  /* 2 */
+  overflow: visible;
+}
+
+pre, code, kbd, samp {
+  /* 1 */
+  font-family: monospace, monospace;
+}
+
+pre {
+  /* 2 */
+  overflow: auto;
+  /* 3 */
+  -ms-overflow-style: scrollbar;
+}
+
+a {
+  /* 1 */
+  background-color: transparent;
+  /* 2 */
+  -webkit-text-decoration-skip: objects;
+}
+
+abbr[title] {
+  /* 1 */
+  border-bottom: none;
+  /* 2 */
+  text-decoration: underline;
+  text-decoration: underline dotted;
+}
+
+b, strong {
+  font-weight: bolder;
+}
+
+small {
+  font-size: 80%;
+}
+
+sub, sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+img {
+  border-style: none;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+button {
+  border-radius: 0;
+}
+
+input, button, select, optgroup, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button, [type=reset], [type=submit], html [type=button] {
+  -webkit-appearance: button;
+}
+
+input[type=date], input[type=time], input[type=datetime-local], input[type=month] {
+  -webkit-appearance: listbox;
+}
+
+fieldset {
+  min-width: 0;
+}
+
+[tabindex="-1"]:focus {
+  outline: 0 !important;
+}
+
+button, input {
+  overflow: visible;
+}
+
+button, select {
+  text-transform: none;
+}
+
+button::-moz-focus-inner, [type=button]::-moz-focus-inner, [type=reset]::-moz-focus-inner, [type=submit]::-moz-focus-inner {
+  border-style: none;
+  padding: 0;
+}
+
+legend {
+  /* 1 */
+  max-width: 100%;
+  white-space: normal;
+  /* 2 */
+  color: inherit;
+  /* 3 */
+  display: block;
+}
+
+progress {
+  vertical-align: baseline;
+}
+
+textarea {
+  overflow: auto;
+}
+
+[type=checkbox], [type=radio] {
+  /* 1 */
+  box-sizing: border-box;
+  /* 2 */
+  padding: 0;
+}
+
+[type=number]::-webkit-inner-spin-button, [type=number]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+[type=search] {
+  /* 1 */
+  -webkit-appearance: textfield;
+  /* 2 */
+  outline-offset: -2px;
+}
+
+[type=search]::-webkit-search-cancel-button, [type=search]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+::-webkit-file-upload-button {
+  /* 1 */
+  -webkit-appearance: button;
+  /* 2 */
+  font: inherit;
+}
+
+template {
+  display: none;
+}
+
+[hidden] {
+  display: none;
+}
+
+button:focus {
+  outline: 1px dotted;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
+button:-moz-focusring, [type=button]:-moz-focusring, [type=reset]:-moz-focusring, [type=submit]:-moz-focusring {
+  outline: 1px dotted ButtonText;
+}
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video, main {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+input, button, select, optgroup, textarea {
+  margin: 0;
+}
+
+body {
+  width: 100vw;
+  min-height: 100vh;
+  overflow: visible;
+  scroll-behavior: auto;
+}
+
+textarea {
+  resize: vertical;
+}
+
+br {
+  display: block;
+  content: "";
+  border-bottom: 0px solid transparent;
+}
+
+h1 {
+  font-size: 2.78rem;
+}
+
+h2 {
+  font-size: 2.454rem;
+}
+
+h3 {
+  font-size: 2.128rem;
+}
+
+h4 {
+  font-size: 1.802rem;
+}
+
+h5 {
+  font-size: 1.476rem;
+}
+
+h6 {
+  font-size: 1.15rem;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+:root {
+  --css-baseline-scrollbar-background: lightgray;
+  --css-baseline-scrollbar-foreground: dimgray;
+}
+
+* {
+  scrollbar-color: var(--css-baseline-scrollbar-foreground) var(--css-baseline-scrollbar-background);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--css-baseline-scrollbar-background);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--css-baseline-scrollbar-foreground);
+  border: 2px solid var(--css-baseline-scrollbar-background);
+  border-radius: 20px;
+}
+
+textarea, input {
+  border: 1px lightgray solid;
+  padding: 2px;
+  outline: none;
+}
+textarea:focus, input:focus {
+  outline: none;
+}
+textarea:disabled, input:disabled {
+  color: gray;
+  background-color: lightgray;
+}
+
+*:invalid {
+  border-bottom: red solid 2px;
+  padding-bottom: 1px;
+  color: gray;
+}
+
+button, input[type=button], input[type=submit], input[type=reset] {
+  height: auto;
+  border: 1pt solid #bebebe;
+  background: white;
+  color: black;
+  padding: 0.3rem 0.6rem;
+  box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2196078431);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-out;
+  outline: none;
+}
+button:hover, input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover {
+  background: lightgray;
+}
+button:active, input[type=button]:active, input[type=submit]:active, input[type=reset]:active {
+  box-shadow: 0px 0px 0px -1px rgba(0, 0, 0, 0.2196078431);
+  background: initial;
+}
+button:focus, input[type=button]:focus, input[type=submit]:focus, input[type=reset]:focus {
+  outline: none;
+  box-shadow: 0px 0px 0px 2px #a7ccf9;
+}
+button:disabled, input[type=button]:disabled, input[type=submit]:disabled, input[type=reset]:disabled {
+  color: gray;
+}
+
+/*# sourceMappingURL=4.css.map */

@@ -146,6 +146,7 @@ function handleInput(event) {
         useFountain(fountain, state.currentLevel - 1);
         state.player.x = newX;
         state.player.y = newY;
+
     } else if (map[newY][newX] === '$' && treasureIndex !== -1) {
         const treasure = state.treasures[state.currentLevel - 1][treasureIndex];
         const goldGain = treasure.gold || (10 + Math.floor(Math.random() * 41) + state.currentLevel * 10);
@@ -159,12 +160,11 @@ function handleInput(event) {
         }
         if (treasure.items && treasure.items.length) {
             treasure.items.forEach(item => {
-                // Check for duplicates in inventory
                 if (!state.player.inventory.items.some(i => JSON.stringify(i) === JSON.stringify(item))) {
                     state.player.inventory.items.push({ ...item });
                     pickupMessage += ` and picked up ${item.name}`;
                 } else {
-                    console.log(`Duplicate ${item.name} ignored in pickup`);
+                    console.log(`Duplicate ${item.name} ignored in pickup with ID ${item.uniqueId}`);
                 }
             });
         }

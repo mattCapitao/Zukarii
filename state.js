@@ -1,5 +1,10 @@
 ﻿console.log("state.js loaded");
 
+
+function generateUniqueId() {
+    return Date.now().toString() + Math.random().toString(36).substring(2, 8);
+}
+
 const state = {
     WIDTH: 100,
     HEIGHT: 60,
@@ -36,7 +41,10 @@ const state = {
                     baseDamageMin: 1,
                     baseDamageMax: 3,
                     itemTier: "junk",
-                    description: "A rusty dagger, barely sharp."
+                    description: "A rusty dagger, barely sharp.",
+                    uniqueId: generateUniqueId(),
+                    icon: "dagger.svg",
+
                 },
                 offhand: {
                     name: "Crooked Wand",
@@ -47,6 +55,8 @@ const state = {
                     baseDamageMax: 4,
                     itemTier: "junk",
                     description: "A crooked wand, hope it shoots straighter than it looks.",
+                    uniqueId: generateUniqueId(),
+                    icon: "crooked-wand.svg",
             },
                 armor: {
                     name: "Ragged Robes",
@@ -55,11 +65,31 @@ const state = {
                     slot: "armor",
                     defense: 1,
                     itemTier: "junk",
-                    description: "Musty old ragged robes. Will this actually protect you from anything?"
+                    description: "Musty old ragged robes. Will this actually protect you from anything?",
+                    uniqueId: generateUniqueId(),
+                    icon: "robe.svg",
                 },
-                amulet: {name: "None"},
-                rightring: { name: "None" },
-                leftring: { name: "None" },
+                amulet: {
+                    name: "None",
+                    type: "amulet",
+                    slot: "amulet",
+                    uniqueId: generateUniqueId(),
+                    icon: "no-amulet.svg",
+                },
+                rightring: {
+                    name: "None",
+                    type: "ring",
+                    slot: "rightring",
+                    uniqueId: generateUniqueId(), 
+                    icon: "no-right-ring.svg",
+                },
+                leftring: {
+                    name: "None",
+                    type: "ring",
+                    slot: "leftring",
+                    uniqueId: generateUniqueId(),
+                    icon: "no-left-ring.svg",
+                }
             },
             items: [
                 {
@@ -71,6 +101,8 @@ const state = {
                     baseDamageMax: 15,
                     itemTier: "relic",
                     description: "You know it’s gonna be a Griff’s Annihilator, and those are super rare!",
+                    uniqueId: generateUniqueId(),
+                    icon: "golden-khepresh.svg",
                 },
             ],
         },
@@ -177,3 +209,6 @@ function initGame() {
     state.needsInitialRender = true;
 
 }
+
+
+window.generateUniqueId = generateUniqueId;

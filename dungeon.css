@@ -1,19 +1,30 @@
 ﻿/* dungeon.css */
 
+
+/*////////////////////////////////////////////////////  CUSTOM BASELINE - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
 body {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    width: 100vw;
     margin: 0;
-    background-color: #1a1a1a;
-    font-family: monospace;
+    padding: 0;
+    background-color: #000;
+    font-size:16px;
+   
+}
+div {
+    margin: 0;
+    padding: 0;
+    border: none;
+
 }
 
 table {
     border-spacing: 10px;
     border-collapse: separate;
-    font-size: 18px;
 }
 
 th {
@@ -29,36 +40,152 @@ td {
     line-height: 1.25;
 }
 
-span {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    text-align: center;
-    line-height: 16px;
-    vertical-align: top;
-}
+/*////////////////////////////////////////////////////  CUSTOM BASELINE - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+/*////////////////////////////////////////////////////  GENERAL UI - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #game {
     display: flex;
     flex-direction: row;
     background-color: #000;
-    padding: 0 20px 0 20px;
-    border: 2px solid #0f0;
-    height: 860px;
+    border: 1px solid #0f0;
+    padding: 0;
     margin: 0;
+    width: 98.5vw;
+    height: 98.5vh;
 }
 
+#game-over {
+    position: absolute;
+    font-size: 18px;
+    z-index: 10;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+    #game-over h1 {
+        font-size: 48px;
+    }
+
+    #game-over.death {
+        color: red;
+        background: rgba(0, 0, 0, 0.7);
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    #game-over.victory {
+        color: #0f0;
+        background: rgba(0, 0, 0, 0.5);
+        text-shadow: 0 0 10px #0f0;
+        animation: victoryPulse 1.5s infinite ease-in-out;
+    }
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes victoryPulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+#restart-button {
+    background: #0f0;
+    color: #000;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: Roboto, Verdana;
+}
+
+    #restart-button:hover {
+        background: #00ff00;
+    }
+
+#stats-overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 5px;
+    color: #0f0;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-around;
+    z-index: 500; /* Above map but below tooltips */
+}
+
+#stats-overlay div div {
+    transition: width 0.3s; /* Smooth bar animations */
+}
+
+
+/*////////////////////////////////////////////////////  GENERAL UI - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+/*////////////////////////////////////////////////////   SPLASH DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+#splash {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+    color: #0f0;
+    padding: 0;
+    margin:0;
+    font-family:  Roboto, Verdana;
+    z-index: 1000;
+    width:100%;
+    position: absolute;
+}
+
+#splash pre {
+    font-family: "courier new", courier, monospace;
+    font-size: .75em;
+}
+
+#splash h1 {font-size: 3em;}
+#splash h2 {font-size: 1.5em;}
+#splash table tr th {font-size: 1.0em;}
+#splash table tr td ul li {font-size: .75em;}
+
+/*////////////////////////////////////////////////////   SPLASH DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+/*////////////////////////////////////////////////////   MAP DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
 #map {
-    
+    font-family: monospace;
     font-size: 16px;
     line-height: 16px;
     white-space: pre;
     color: #0f0;
-    padding 20px 0 20px 0;
+    border: 1px solid #0f0;
+    padding: 0;
     margin: 0;
-    width: 1100px; /* Example: 40 columns * 16px */
-    height: 860px; /* Fits within #game’s 1000px minus padding/border */
+    width: 1340px; /* 1120 70 columns * 16px */
+    height: 940px; /* 960 70 columns * 16px  */
     overflow: auto; /* Enable scrolling */
     box-sizing: border-box; /* Include padding/border in size */
     -ms-overflow-style: none; /* IE and Edge */
@@ -70,46 +197,14 @@ span {
     display: none; /* Chrome, Safari, and newer Edge */
 }
 
-#info {
-    padding: 0 ;
-    display: flex;
-    flex-direction: column;
-    width: 400px;
-    margin: 20px 0 20px 20px;
-    color: #0f0;
-    height: 820px;
-    font-family: monospace;
+#map span {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    line-height: 16px;
+    vertical-align: top;
 }
-
-#info.hidden {
-    display: none;
-}
-
-#stats {
-    font-size: 16px;
-    height: 40%;
-    padding: 10px;
-    border: 1px solid #0f0;
-}
-
-#log {
-    font-size: 16px;
-    height: 60%;
-    padding: 0;
-    border: 1px solid #0f0;
-    overflow-y: hidden;
-}
-
-#log p {
-    margin: 0;
-    padding: 0;
-    line-height: 1.2;
-}
-#log > p:first-of-type {
-    font-weight: bold;
-}
-
-
 
 .undiscovered {
     color: #000;
@@ -120,6 +215,117 @@ span {
     color: #0f0;
     background-color: #0B0C0B;
 }
+
+/*////////////////////////////////////////////////////   MAP DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+/*////////////////////////////////////////////////////   INFO DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+#info {
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    width: 340px;
+    margin: 0;
+    padding: 0;
+    color: #0f0;
+    height: 100%;
+    font-family: Roboto, Verdana;
+}
+
+#info.hidden {display: none;}
+
+#info #equipped-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+}
+
+#info p.inventory-slot,
+#info p.equip-slot {
+    margin:10px 0 0 0;
+    padding: 0;
+    text-align: center;
+}
+
+
+#info p.inventory-slot img.item,
+#info p.equip-slot img.item {
+    width: 64px;
+    height: 64px;
+    border: 1px solid #0f0;
+    padding:0;
+    margin:0;
+}
+
+#info button {
+    background: #000;
+    color: #0f0;
+}
+
+#info button:hover {
+    background: #0f0;
+    color: #000;
+}
+
+#player-name {
+    text-align: center;
+    font-size: 24px;
+}
+
+#info div.col-50-wrapper {
+    display: flex;
+    justify-content: space-between;
+}
+
+#info col-50 {
+    width: 50%;
+}
+
+#stats {
+    margin:0;
+    padding: 10px;
+}
+
+#log {
+    height: 100%;
+    padding: 5px;
+    margin: 0;
+    overflow-y: hidden;
+}
+
+#tab-menu {
+    display: flex;
+    justify-content: space-around;
+}
+
+#tab-menu button {
+    flex: 1;
+    width:30%;
+    cursor: pointer;
+}
+
+#log p {
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+
+#item-tooltip {
+    position: absolute;
+    background: #000;
+    border: 1px solid #0f0;
+    padding: 5px;
+    font-size: 14px;
+    color: #0f0;
+    z-index: 1000;
+    max-width: 200px;
+    white-space: pre-wrap;
+}
+
+/*////////////////////////////////////////////////////   INFO DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+/*////////////////////////////////////////////////////  PLAYER - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 .player {
     overflow: visible;
@@ -139,6 +345,10 @@ span {
         border-radius: 50%;
         box-shadow: 0 0 5em 2.5em #efe8ac92;
     }
+
+
+/*////////////////////////////////////////////////////  PLAYER - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
 
 /*//////////////////////////////// START MONSTERS ||||||||||||||||||||||||||||||||||*/
 
@@ -180,55 +390,3 @@ span.discovered.monster.armored:after {
 }
 /*//////////////////////////////// END MONSTERS ||||||||||||||||||||||||||||||||||*/
 
-#game-over {
-    position: absolute;
-    
-    font-size:18px;
-    z-index: 10;
-    text-align: center;
-    
-    padding: 20px;
-    border-radius: 10px;
-}
-
-#game-over h1{
-    font-size: 48px;
-}
-
-#game-over.death {
-    color: red;
-    background: rgba(0, 0, 0, 0.7);
-    animation: fadeIn 0.5s ease-in;
-}
-
-#game-over.victory {
-    color: #0f0;
-    background: rgba(0, 0, 0, 0.5);
-    text-shadow: 0 0 10px #0f0;
-    animation: victoryPulse 1.5s infinite ease-in-out;
-}
-
-@keyframes fadeIn {
-    from {opacity: 0;}
-    to {opacity: 1;}
-}
-
-@keyframes victoryPulse {
-    0% {transform: scale(1); opacity: 1;}
-    50% {transform: scale(1.1); opacity: 0.9;}
-    100% {transform: scale(1); opacity: 1;}
-}
-
-#restart-button {
-    background: #0f0;
-    color: #000;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: monospace;
-}
-
-#restart-button:hover {
-    background: #00ff00;
-}

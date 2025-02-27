@@ -13,6 +13,8 @@ const uniqueItems = [
         baseDamageMax: 15,
         itemTier: "relic",
         description: "You know it's gonna be a Griff's Annihilator, and those are super rare!",
+        uniqueId: null,
+        icon: "golden-kheepresh.svg",
     },
     {
         name: "Rusty Dagger",
@@ -23,6 +25,8 @@ const uniqueItems = [
         baseDamageMax: 3,
         itemTier: "junk",
         description: "A rusty dagger, barely sharp.",
+        uniqueId: null,
+        icon: "dagger.svg",
     },
     {
         name: "Bronze Dagger",
@@ -33,6 +37,8 @@ const uniqueItems = [
         baseDamageMax: 3,
         itemTier: "common",
         description: "The blade is sharp but the metal is soft.",
+        uniqueId: null,
+        icon: "dagger.svg",
     },
     {
         name: "Crooked Wand",
@@ -43,6 +49,8 @@ const uniqueItems = [
         baseDamageMax: 3,
         itemTier: "junk",
         description: "A crooked wand, hope it shoots straighter than it looks.",
+        uniqueId: null,
+        icon: "crooked-wand.svg",
     },
     {
         name: "Willow Wand",
@@ -53,6 +61,8 @@ const uniqueItems = [
         baseDamageMax: 4,
         itemTier: "junk",
         description: "You don't sense any innate power here, but it should do the trick.",
+        uniqueId: null,
+        icon: "willow-wand.svg",
     },
 
     {
@@ -63,6 +73,8 @@ const uniqueItems = [
         defense: 1,
         itemTier: "junk",
         description: "Musty old ragged robes. Will this actually protect you from anything?",
+        uniqueId: null,
+        icon: "robe.svg",
     },
     {
         name: "Apprentice Robes",
@@ -72,8 +84,11 @@ const uniqueItems = [
         defense: 2,
         itemTier: "common",
         description: "Plain and ordinary, but there are no holes and the fabric is heavy",
+        uniqueId: null,
+        icon: "robe.svg",
     },
 ];
+
 
 function dropTreasure(monster, tier) {
     const map = state.levels[tier].map;
@@ -98,11 +113,11 @@ function dropTreasure(monster, tier) {
         torchChance = 0.05;
     }
 
-    const itemChance = 0.10;
+    const itemChance = 0.90;
     let droppedItems = [];
     let torchDropped = Math.random() < torchChance;
     if (Math.random() < itemChance) {
-        droppedItems.push({ ...uniqueItems[Math.floor(Math.random() * uniqueItems.length)] }); // No quantity
+        droppedItems.push({ ...uniqueItems[Math.floor(Math.random() * uniqueItems.length)], uniqueId: generateUniqueId() }); // Use new UUID
     }
 
     const existingTreasure = tierTreasures.find(t => t.x === monster.x && t.y === monster.y);
@@ -117,10 +132,9 @@ function dropTreasure(monster, tier) {
         }
         droppedItems.forEach(droppedItem => {
             existingTreasure.items = existingTreasure.items || [];
-            // Check for duplicate items (same name, type, tier, etc.)
             if (!existingTreasure.items.some(i => JSON.stringify(i) === JSON.stringify(droppedItem))) {
                 existingTreasure.items.push(droppedItem);
-                console.log(`Added ${droppedItem.name} to treasure at (${monster.x}, ${monster.y})`);
+                console.log(`Added ${droppedItem.name} to treasure at (${monster.x}, ${monster.y}) with ID ${droppedItem.uniqueId}`);
             } else {
                 console.log(`Duplicate ${droppedItem.name} ignored at (${monster.x}, ${monster.y})`);
             }
@@ -134,10 +148,9 @@ function dropTreasure(monster, tier) {
         }
         droppedItems.forEach(droppedItem => {
             newTreasure.items = newTreasure.items || [];
-            // Check for duplicate items
             if (!newTreasure.items.some(i => JSON.stringify(i) === JSON.stringify(droppedItem))) {
                 newTreasure.items.push(droppedItem);
-                console.log(`Dropping new treasure with ${droppedItem.name} at (${monster.x}, ${monster.y})`);
+                console.log(`Dropping new treasure with ${droppedItem.name} at (${monster.x}, ${monster.y}) with ID ${droppedItem.uniqueId}`);
             } else {
                 console.log(`Duplicate ${droppedItem.name} ignored at (${monster.x}, ${monster.y})`);
             }

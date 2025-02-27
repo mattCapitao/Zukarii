@@ -43,8 +43,6 @@ function lightTorch() {
     }
     writeToLog(message);
 
-    render();
-
 }
 
 function torchExpired(){
