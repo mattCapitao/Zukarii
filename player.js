@@ -1,10 +1,18 @@
 console.log("player.js loaded");
 
+function addStartingItems() {
+    state.player.inventory.equipped = emptyEquipSlots;
+    const startItems = [window.uniqueItems[0], window.junkItems[0], window.junkItems[1]];
+    for (let item of startItems) {
+        item.uniqueId = window.generateUniqueId(),
+            state.player.inventory.items.push({ ...item });
+    }
+}
 
 function awardXp(amount) {
     state.player.xp += amount;
     writeToLog(`Gained ${amount} XP (${state.player.xp}/${state.player.nextLevelXp})`);
-    checkLevelUp(); // Always check for level-up after XP award
+    checkLevelUp();
 }
 
 function checkLevelUp() {
@@ -31,35 +39,27 @@ function death(source) {
     state.player.hp = 0;
     state.player.dead = true;
     writeToLog('You died! Game Over.');
-    needsRender = true;
-    renderIfNeeded();
     document.removeEventListener('keydown', handleInput);
     document.removeEventListener('keydown', toggleRanged);
     document.removeEventListener('keyup', toggleRanged);
     console.log("Player has died - Game over!");
-
-    gameOver('You have been killed by a ' + source + '!');
-
-
-    return;
+    state.gameOver = true; // Set flag
+    window.gameOver('You have been killed by a ' + source + '!');
 }
 
 function exit() {
     writeToLog("You exited the dungeon! Game Over.");
-    needsRender = true;
-    renderIfNeeded();
     document.removeEventListener('keydown', handleInput);
     document.removeEventListener('keydown', toggleRanged);
     document.removeEventListener('keyup', toggleRanged);
     console.log("Player has Left the building - Game over!");
-
-    gameOver('You exited the dungeon! Too much adventure to handle eh?');
-
-    
-
-    return;
+    state.gameOver = true; // Set flag
+    window.gameOver('You exited the dungeon! Too much adventure to handle eh?');
+    //window.needsRender = true;
+    //renderIfNeeded();
 }
 
+window.addStartingItems = addStartingItems;
 window.playerExit = exit;
 window.playerDied = death;
 window.awardXp = awardXp;

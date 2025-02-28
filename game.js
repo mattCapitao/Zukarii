@@ -4,15 +4,21 @@ let lastRenderTime = 0;
 let lastInputTime = 0;
 const renderThrottle = 70;
 const inputThrottle = 70;
-let needsRender = true;
 
 function handleInput(event) {
     if (!state.gameStarted) {
+        console.log("Starting game...");
         state.gameStarted = true;
         initGame();
         document.getElementById('info').classList.remove('hidden');
-        needsRender = true;
+        window.needsRender = true;
+        console.log("needsRender set to true for init (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
         renderIfNeeded();
+        return;
+    }
+
+    if (state.gameOver) {
+        console.log("Game over, input ignored");
         return;
     }
 
@@ -23,32 +29,57 @@ function handleInput(event) {
     if (now - lastRenderTime < renderThrottle) return;
     lastRenderTime = now;
 
-    let map = state.levels[state.currentLevel - 1].map;
+    let map = state.levels[state.tier].map;
     let newX = state.player.x;
     let newY = state.player.y;
 
     if (event.key === ' ') {
-        toggleRanged(event); 
+        toggleRanged(event);
         return;
     }
 
     if (state.isRangedMode) {
-        rangedAttack(event.key);
-        return;
+        // Map WASD to ranged attacks when in ranged mode
+        switch (event.key.toLowerCase()) {
+            case 'w': window.rangedAttack('ArrowUp'); break;
+            case 's': window.rangedAttack('ArrowDown'); break;
+            case 'a': window.rangedAttack('ArrowLeft'); break;
+            case 'd': window.rangedAttack('ArrowRight'); break;
+            default: return;
+        }
+        return; // Prevent further processing since we handled the ranged attack
     }
 
     switch (event.key) {
-        case 'ArrowUp': newY--; break;
-        case 'ArrowDown': newY++; break;
-        case 'ArrowLeft': newX--; break;
-        case 'ArrowRight': newX++; break;
-        case 't': // Add 't' (lowercase) for torch
-        case 'T': // Add 'T' (uppercase) for torch (optional, for consistency)
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+            newY--;
+            break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+            newY++;
+            break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+            newX--;
+            break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+            newX++;
+            break;
+        case 't':
+        case 'T':
             window.lightTorch();
-            needsRender = true;
+            window.needsRender = true;
+            console.log("needsRender set to true for torch (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
             endTurn();
-            return; // Exit after lighting torch, no movement
-        default: return;
+            return;
+        default:
+            return;
     }
 
     if (map[newY][newX] === '#') {
@@ -56,30 +87,31 @@ function handleInput(event) {
         return;
     }
 
-    let monster = state.monsters[state.currentLevel - 1].find(m => m.x === newX && m.y === newY && m.hp > 0);
-    let fountain = state.fountains[state.currentLevel - 1].find(f => f.x === newX && f.y === newY && !f.used);
-    let treasureIndex = state.treasures[state.currentLevel - 1].findIndex(t => t.x === newX && t.y === newY);
+    let monster = state.monsters[state.tier].find(m => m.x === newX && m.y === newY && m.hp > 0);
+    let fountain = state.fountains[state.tier].find(f => f.x === newX && f.y === newY && !f.used);
+    let treasureIndex = state.treasures[state.tier].findIndex(t => t.x === newX && t.y === newY);
 
-    needsRender = true;
+    window.needsRender = true;
+    console.log("needsRender set to true for action at", newX, newY, "(window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
 
     if (monster) {
         meleeCombat(monster);
         checkLevelUp();
-    } else if (map[newY][newX] === '⇓' && state.currentLevel < Number.MAX_SAFE_INTEGER) {
-        state.currentLevel++;
-        if (state.currentLevel > state.highestTier) {
-            state.highestTier = state.currentLevel;
-            const newTierXP = 5 * state.currentLevel;
-            writeToLog(`You Reached Tier ${ state.currentLevel}`);
+    } else if (map[newY][newX] === '⇓' && state.tier < Number.MAX_SAFE_INTEGER) {
+        state.tier++;
+        if (state.tier > state.highestTier) {
+            state.highestTier = state.tier;
+            const newTierXP = 5 * state.tier;
+            writeToLog(`You Reached Tier ${state.tier}`);
             awardXp(newTierXP);
         }
-        addLevel(state.currentLevel - 1);
-        map = state.levels[state.currentLevel - 1].map;
-        const upStair = state.stairsUp[state.currentLevel - 1];
+        addLevel(state.tier);
+        map = state.levels[state.tier].map;
+        const upStair = state.stairsUp[state.tier];
         if (upStair) {
             state.player.x = upStair.x + 1;
             state.player.y = upStair.y;
-            console.log(`Moved down to tier ${state.currentLevel}, placed at (${state.player.x}, ${state.player.y}) next to < at (${upStair.x}, ${upStair.y})`);
+            console.log(`Moved down to tier ${state.tier}, placed at (${state.player.x}, ${state.player.y}) next to < at (${upStair.x}, ${upStair.y})`);
             if (map[state.player.y][state.player.x] !== ' ') {
                 const directions = [
                     { x: upStair.x - 1, y: upStair.y },
@@ -101,55 +133,54 @@ function handleInput(event) {
                 }
             }
         } else {
-            console.error(`No stairsUp defined for tier ${state.currentLevel - 1}`);
+            console.error(`No stairsUp defined for tier ${state.tier}`);
             state.player.x = 1;
             state.player.y = 1;
         }
-    } else if (map[newY][newX] === '⇑' && state.currentLevel > 1) {
-        state.currentLevel--;
-        const downStair = state.stairsDown[state.currentLevel - 1];
-        map = state.levels[state.currentLevel - 1].map;
-        if (downStair) {
-            state.player.x = downStair.x + 1;
-            state.player.y = downStair.y;
-            console.log(`Moved up to tier ${state.currentLevel}, placed at (${state.player.x}, ${state.player.y}) next to > at (${downStair.x}, ${downStair.y})`);
-            if (map[state.player.y][state.player.x] !== ' ') {
-                const directions = [
-                    { x: downStair.x - 1, y: downStair.y },
-                    { x: downStair.x, y: downStair.y + 1 },
-                    { x: downStair.x, y: downStair.y - 1 }
-                ];
-                for (let dir of directions) {
-                    if (map[dir.y][dir.x] === ' ') {
-                        state.player.x = dir.x;
-                        state.player.y = dir.y;
-                        console.log(`Adjusted up position to (${state.player.x}, ${state.player.y})`);
-                        break;
+    } else if (map[newY][newX] === '⇑' && state.tier > 0) {
+        state.tier--;
+        if (state.tier === 0) {
+            window.playerExit();
+        } else {
+            const downStair = state.stairsDown[state.tier];
+            map = state.levels[state.tier].map;
+            if (downStair) {
+                state.player.x = downStair.x + 1;
+                state.player.y = downStair.y;
+                console.log(`Moved up to tier ${state.tier}, placed at (${state.player.x}, ${state.player.y}) next to > at (${downStair.x}, ${downStair.y})`);
+                if (map[state.player.y][state.player.x] !== ' ') {
+                    const directions = [
+                        { x: downStair.x - 1, y: downStair.y },
+                        { x: downStair.x, y: downStair.y + 1 },
+                        { x: downStair.x, y: downStair.y - 1 }
+                    ];
+                    for (let dir of directions) {
+                        if (map[dir.y][dir.x] === ' ') {
+                            state.player.x = dir.x;
+                            state.player.y = dir.y;
+                            console.log(`Adjusted up position to (${state.player.x}, ${state.player.y})`);
+                            break;
+                        }
+                    }
+                    if (map[state.player.y][state.player.x] !== ' ') {
+                        console.error(`No free space near > at (${downStair.x}, ${downStair.y}), defaulting to (1, 1)`);
+                        state.player.x = 1;
+                        state.player.y = 1;
                     }
                 }
-                if (map[state.player.y][state.player.x] !== ' ') {
-                    console.error(`No free space near > at (${downStair.x}, ${downStair.y}), defaulting to (1, 1)`);
-                    state.player.x = 1;
-                    state.player.y = 1;
-                }
+            } else {
+                console.error(`No stairsDown defined for tier ${state.tier}`);
+                state.player.x = 1;
+                state.player.y = 1;
             }
-        } else {
-            console.error(`No stairsDown defined for tier ${state.currentLevel - 1}`);
-            state.player.x = 1;
-            state.player.y = 1;
         }
-    } else if (map[newY][newX] === '⇑' && state.currentLevel === 1) {
-
-        playerExit();
-
     } else if (map[newY][newX] === '≅' && fountain) {
-        useFountain(fountain, state.currentLevel - 1);
+        useFountain(fountain, state.tier);
         state.player.x = newX;
         state.player.y = newY;
-
     } else if (map[newY][newX] === '$' && treasureIndex !== -1) {
-        const treasure = state.treasures[state.currentLevel - 1][treasureIndex];
-        const goldGain = treasure.gold || (10 + Math.floor(Math.random() * 41) + state.currentLevel * 10);
+        const treasure = state.treasures[state.tier][treasureIndex];
+        const goldGain = treasure.gold || (10 + Math.floor(Math.random() * 41) + state.tier * 10);
         state.player.gold += goldGain;
         let pickupMessage = `Found treasure! Gained ${goldGain} gold`;
 
@@ -169,7 +200,7 @@ function handleInput(event) {
             });
         }
 
-        state.treasures[state.currentLevel - 1].splice(treasureIndex, 1);
+        state.treasures[state.tier].splice(treasureIndex, 1);
         map[newY][newX] = ' ';
         writeToLog(pickupMessage);
         state.player.x = newX;
@@ -193,7 +224,11 @@ function handleInput(event) {
     endTurn();
 }
 
-function endTurn(){
+function endTurn() {
+    if (state.gameOver) {
+        console.log("endTurn skipped due to gameOver");
+        return;
+    }
     if (state.torchExpires > 0) {
         state.torchExpires--;
         console.log(`Torch expires in ${state.torchExpires} turns`);
@@ -203,14 +238,21 @@ function endTurn(){
     }
     moveMonsters();
     renderIfNeeded();
-
 }
 
 function renderIfNeeded() {
-    if (needsRender) {
-        console.log("Rendering at", Date.now());
-        render();
-        needsRender = false;
+    if (state.gameOver) {
+        console.log("renderIfNeeded skipped due to gameOver");
+        return;
+    }
+    console.log("Checking renderIfNeeded, needsRender:", window.needsRender, "typeof:", typeof window.needsRender);
+    if (window.needsRender === true) { // Explicit boolean check
+        console.log("Rendering at", Date.now(), "with needsRender:", window.needsRender, "typeof:", typeof window.needsRender);
+        window.render();
+        window.needsRender = false;
+        console.log("needsRender set to false after render (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
+    } else {
+        console.log("renderIfNeeded called but needsRender is", window.needsRender, "typeof:", typeof window.needsRender);
     }
 }
 
@@ -218,7 +260,8 @@ function init() {
     state.mapDiv = document.getElementById('map');
     state.statsDiv = document.getElementById('stats');
     state.logDiv = document.getElementById('log');
-    needsRender = true;
+    window.needsRender = true;
+    console.log("needsRender set to true for init (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
     renderIfNeeded();
     document.addEventListener('keydown', handleInput);
     document.addEventListener('keydown', toggleRanged);

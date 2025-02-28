@@ -21,21 +21,21 @@ function handleMonsterDeath(monster, tier, combatLogMsg) {
     writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
     writeToLog(`${monster.name} defeated!`);
     dropTreasure(monster, tier);
-    monsterKillXP = (5 + Math.floor(Math.random() * 6)) * state.currentLevel;
+    monsterKillXP = (5 + Math.floor(Math.random() * 6)) * state.tier;
     awardXp(monsterKillXP);
 }
 
 function handleMonsterRetaliation(monster, tier) {
-    let monsterDamage = calculateMonsterAttackDamage(monster, state.currentLevel);
+    let monsterDamage = calculateMonsterAttackDamage(monster, state.tier);
     const defense = state.player.inventory.equipped.armor?.defense || 0;
     monsterDamage = Math.max(1, monsterDamage - defense);
     state.player.hp -= monsterDamage;
     writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
     if (state.player.hp <= 0) {
         playerDied(monster.name);
-        return true; 
+        return true;
     }
-    return false; 
+    return false;
 }
 
 window.meleeCombat = function (monster) {
@@ -60,10 +60,10 @@ window.meleeCombat = function (monster) {
     monster.hp -= damage;
 
     if (monster.hp <= 0) {
-        handleMonsterDeath(monster, state.currentLevel - 1, combatLogMsg);
+        handleMonsterDeath(monster, state.tier, combatLogMsg);
     } else {
         writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-        handleMonsterRetaliation(monster, state.currentLevel);
+        handleMonsterRetaliation(monster, state.tier);
     }
 };
 
@@ -87,12 +87,16 @@ window.toggleRanged = function (event) {
         } else if (event.type === 'keyup') {
             state.isRangedMode = false;
         }
-        render();
+        // Only trigger render if state.isRangedMode changed and no projectile is active
+        if (!state.projectile) {
+            window.needsRender = true; // Use window.needsRender to match global scope
+            renderIfNeeded();
+        }
     }
 };
 
 window.rangedAttack = async function (direction) {
-    let map = state.levels[state.currentLevel - 1].map;
+    let map = state.levels[state.tier].map;
     let dx = 0, dy = 0;
     switch (direction) {
         case 'ArrowUp': dy = -1; break;
@@ -126,11 +130,11 @@ window.rangedAttack = async function (direction) {
         }
 
         state.projectile = { x: tx, y: ty };
-        needsRender = true;
+        window.needsRender = true; // Use window.needsRender to match global scope
         renderIfNeeded();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 50));
 
-        let monster = state.monsters[state.currentLevel - 1].find(m => m.x === tx && m.y === ty && m.hp > 0);
+        let monster = state.monsters[state.tier].find(m => m.x === tx && m.y === ty && m.hp > 0);
         if (monster) {
             const { damage, isCrit } = calculatePlayerDamage(state.player.intellect, minBaseDamage, maxBaseDamage);
             let combatLogMsg = isCrit ? `Critical hit! Dealt ${damage} damage to ${monster.name} ` : `You dealt ${damage} damage to ${monster.name} `;
@@ -138,22 +142,22 @@ window.rangedAttack = async function (direction) {
             monster.hp -= damage;
 
             if (monster.hp <= 0) {
-                handleMonsterDeath(monster, state.currentLevel - 1, combatLogMsg);
+                handleMonsterDeath(monster, state.tier, combatLogMsg);
             } else if (i === 1) {
                 writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-                if (!handleMonsterRetaliation(monster, state.currentLevel)) {
+                if (!handleMonsterRetaliation(monster, state.tier)) {
                     // Continue if player still alive
                 }
             } else {
                 writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
             }
             state.projectile = null;
-            needsRender = true;
+            window.needsRender = true; // Use window.needsRender to match global scope
             renderIfNeeded();
             break;
         }
     }
     state.projectile = null;
-    needsRender = true;
+    window.needsRender = true; // Use window.needsRender to match global scope
     endTurn();
-}; 
+};

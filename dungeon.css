@@ -12,14 +12,13 @@ body {
     margin: 0;
     padding: 0;
     background-color: #000;
-    font-size:16px;
-   
+    font-size: 16px;
 }
+
 div {
     margin: 0;
     padding: 0;
     border: none;
-
 }
 
 table {
@@ -137,9 +136,9 @@ td {
     z-index: 500; /* Above map but below tooltips */
 }
 
-#stats-overlay div div {
-    transition: width 0.3s; /* Smooth bar animations */
-}
+    #stats-overlay div div {
+        transition: width 0.3s; /* Smooth bar animations */
+    }
 
 
 /*////////////////////////////////////////////////////  GENERAL UI - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
@@ -154,22 +153,33 @@ td {
     background-color: #000;
     color: #0f0;
     padding: 0;
-    margin:0;
-    font-family:  Roboto, Verdana;
+    margin: 0;
+    font-family: Roboto, Verdana;
     z-index: 1000;
-    width:100%;
+    width: 100%;
     position: absolute;
 }
 
-#splash pre {
-    font-family: "courier new", courier, monospace;
-    font-size: .75em;
-}
+    #splash pre {
+        font-family: "courier new", courier, monospace;
+        font-size: .75em;
+    }
 
-#splash h1 {font-size: 3em;}
-#splash h2 {font-size: 1.5em;}
-#splash table tr th {font-size: 1.0em;}
-#splash table tr td ul li {font-size: .75em;}
+    #splash h1 {
+        font-size: 3em;
+    }
+
+    #splash h2 {
+        font-size: 1.5em;
+    }
+
+    #splash table tr th {
+        font-size: 1.0em;
+    }
+
+    #splash table tr td ul li {
+        font-size: .75em;
+    }
 
 /*////////////////////////////////////////////////////   SPLASH DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
@@ -193,18 +203,18 @@ td {
     position: relative;
 }
 
-#map::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, and newer Edge */
-}
+    #map::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, and newer Edge */
+    }
 
-#map span {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    text-align: center;
-    line-height: 16px;
-    vertical-align: top;
-}
+    #map span {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        text-align: center;
+        line-height: 16px;
+        vertical-align: top;
+    }
 
 .undiscovered {
     color: #000;
@@ -231,41 +241,43 @@ td {
     font-family: Roboto, Verdana;
 }
 
-#info.hidden {display: none;}
+    #info.hidden {
+        display: none;
+    }
 
-#info #equipped-items {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 10px;
-}
+    #info #equipped-items {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px;
+    }
 
-#info p.inventory-slot,
-#info p.equip-slot {
-    margin:10px 0 0 0;
-    padding: 0;
-    text-align: center;
-}
+    #info p.inventory-slot,
+    #info p.equip-slot {
+        margin: 10px 0 0 0;
+        padding: 0;
+        text-align: center;
+    }
 
 
-#info p.inventory-slot img.item,
-#info p.equip-slot img.item {
-    width: 64px;
-    height: 64px;
-    border: 1px solid #0f0;
-    padding:0;
-    margin:0;
-}
+        #info p.inventory-slot img.item,
+        #info p.equip-slot img.item {
+            width: 64px;
+            height: 64px;
+            border: 1px solid #0f0;
+            padding: 0;
+            margin: 0;
+        }
 
-#info button {
-    background: #000;
-    color: #0f0;
-}
+    #info button {
+        background: #000;
+        color: #0f0;
+    }
 
-#info button:hover {
-    background: #0f0;
-    color: #000;
-}
+        #info button:hover {
+            background: #0f0;
+            color: #000;
+        }
 
 #player-name {
     text-align: center;
@@ -282,7 +294,7 @@ td {
 }
 
 #stats {
-    margin:0;
+    margin: 0;
     padding: 10px;
 }
 
@@ -298,11 +310,11 @@ td {
     justify-content: space-around;
 }
 
-#tab-menu button {
-    flex: 1;
-    width:30%;
-    cursor: pointer;
-}
+    #tab-menu button {
+        flex: 1;
+        width: 30%;
+        cursor: pointer;
+    }
 
 #log p {
     margin: 0;
@@ -361,9 +373,15 @@ span.discovered.monster {
     z-index: 2; /* Lift above other spans */
 }
 
-.skeleton {}/* Skeleton */
-.goblin {}/* Goblin */
-.orc {}/* Orc */
+.skeleton {
+}
+/* Skeleton */
+.goblin {
+}
+/* Goblin */
+.orc {
+}
+/* Orc */
 
 /* Future expansions (placeholders) */
 span.discovered.monster.elite { /* Uppercase for elites */

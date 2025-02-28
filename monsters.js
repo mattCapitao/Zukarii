@@ -128,10 +128,10 @@ function moveMonsters() {
 
     if (state.player.dead) return;
 
-    const tier = state.currentLevel - 1;
-    console.log(`Moving monsters on tier ${state.currentLevel}, monsters:`, state.monsters[tier]);
+    const tier = state.tier;
+    console.log(`Moving monsters on tier ${state.tier}, monsters:`, state.monsters[tier]);
     if (!state.monsters[tier] || !Array.isArray(state.monsters[tier])) {
-        console.log(`No monsters defined for tier ${state.currentLevel}`);
+        console.log(`No monsters defined for tier ${state.tier}`);
         return;
     }
     let map = state.levels[tier].map;
@@ -219,7 +219,7 @@ function dropLoot(monster) {
             type: 'gold',
             amount: Math.floor(Math.random() * 10) + 1
         };
-        state.loot[state.currentLevel - 1].push(loot);
+        state.loot[state.tier - 1].push(loot);
         console.log(`Dropped loot:`, loot);
     }
 */

@@ -441,10 +441,12 @@ function addLevel(tier) {
 
 function buildTileMap(tier) {
     let map = state.levels[tier].map;
+    const height = map.length; // Use actual map height
+    const width = map[0].length; // Use actual map width
     let tileMap = [];
-    for (let y = 0; y < state.HEIGHT; y++) {
+    for (let y = 0; y < height; y++) {
         tileMap[y] = [];
-        for (let x = 0; x < state.WIDTH; x++) {
+        for (let x = 0; x < width; x++) {
             tileMap[y][x] = { char: map[y][x], class: 'undiscovered' };
         }
     }
