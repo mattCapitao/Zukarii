@@ -80,6 +80,12 @@ const state = {
     stairsUp: {},
     stairsDown: {},
     tier: 1, // Start at tier 1, the first dungeon level
+    ui: { // Namespace for UI state
+        overlayOpen: false, // Tracks if #tabs overlay is visible
+        activeTab: 'log',   // Current active tab, defaults to log
+        logEntries: [],     // Cache for log messages, newest first
+        maxLogEntries: 20   // Max log entries to display
+    },
     player: {
         x: 1, y: 1,
         name: "Leith42",
@@ -130,7 +136,6 @@ const state = {
     needsInitialRender: false,
     MIN_STAIR_DISTANCE: 60,
     isVictory: false,
-    currentTab: 'log',
 };
 
 // Hardcoded 10x10 surface level (tier 0) with stairs down only

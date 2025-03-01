@@ -1,6 +1,5 @@
 ﻿/* dungeon.css */
 
-
 /*////////////////////////////////////////////////////  CUSTOM BASELINE - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 body {
@@ -12,7 +11,8 @@ body {
     margin: 0;
     padding: 0;
     background-color: #000;
-    font-size: 16px;
+    font-size: 1rem; /* ~16px base, flexible */
+    overflow: hidden; /* Prevent scrollbars */
 }
 
 div {
@@ -22,20 +22,20 @@ div {
 }
 
 table {
-    border-spacing: 10px;
+    border-spacing: 0.625rem; /* ~10px */
     border-collapse: separate;
 }
 
 th {
     text-align: center;
     font-weight: bold;
-    font-size: larger;
+    font-size: 1.25rem; /* ~20px */
 }
 
 td {
     text-align: left;
     vertical-align: top;
-    padding-left: 50px;
+    padding-left: 3.125rem; /* ~50px */
     line-height: 1.25;
 }
 
@@ -47,24 +47,75 @@ td {
     display: flex;
     flex-direction: row;
     background-color: #000;
-    border: 1px solid #0f0;
+    border: 0.0625rem solid #0f0; /* ~1px */
     padding: 0;
     margin: 0;
-    width: 98.5vw;
-    height: 98.5vh;
+    width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
+    height: calc(100vh - 0.125rem); /* Account for border (1px each side) */
 }
+
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    pointer-events: none; /* Non-clickable, children can override */
+    z-index: 100; /* Above game but below splash */
+    overflow: hidden; /* Prevent child overflow */
+}
+
+#tabs {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60vw;
+    height: 60vh;
+    background: rgba(20, 30, 20, 0.7);
+    border: 0.0625rem solid #060; /* ~1px */
+    color: #0f0;
+    display: none; /* Hidden by default */
+    font-family: Roboto, Verdana;
+    font-size: 0.875rem; /* ~14px */
+    padding: 1rem; /* ~16px */
+    pointer-events: auto; /* Clickable children */
+    z-index: 2000; /* Increased to appear above #splash */
+}
+
+    #tabs.hidden {
+        display: none;
+    }
+
+#close-tabs {
+    position: absolute;
+    top: 0.5rem; /* ~8px */
+    right: 0.5rem; /* ~8px */
+    background: #000;
+    color: #0f0;
+    border: 0.0625rem solid #0f0; /* ~1px */
+    padding: 0.3125rem 0.625rem; /* ~5px 10px */
+    cursor: pointer;
+    font-size: 1rem; /* ~16px */
+}
+
+    #close-tabs:hover {
+        background: #0f0;
+        color: #000;
+    }
 
 #game-over {
     position: absolute;
-    font-size: 18px;
+    font-size: 1.125rem; /* ~18px */
     z-index: 10;
     text-align: center;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 1.25rem; /* ~20px */
+    border-radius: 0.625rem; /* ~10px */
 }
 
     #game-over h1 {
-        font-size: 48px;
+        font-size: 3rem; /* ~48px */
     }
 
     #game-over.death {
@@ -76,7 +127,7 @@ td {
     #game-over.victory {
         color: #0f0;
         background: rgba(0, 0, 0, 0.5);
-        text-shadow: 0 0 10px #0f0;
+        text-shadow: 0 0 0.625rem #0f0; /* ~10px */
         animation: victoryPulse 1.5s infinite ease-in-out;
     }
 
@@ -110,9 +161,9 @@ td {
 #restart-button {
     background: #0f0;
     color: #000;
-    padding: 10px 20px;
+    padding: 0.625rem 1.25rem; /* ~10px 20px */
     border: none;
-    border-radius: 5px;
+    border-radius: 0.3125rem; /* ~5px */
     cursor: pointer;
     font-family: Roboto, Verdana;
 }
@@ -123,14 +174,14 @@ td {
 
 #stats-overlay {
     position: absolute;
-    bottom: 10px;
+    bottom: 0.625rem; /* ~10px */
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
     background: rgba(0, 0, 0, 0.7);
-    padding: 5px;
+    padding: 0.3125rem; /* ~5px */
     color: #0f0;
-    font-size: 14px;
+    font-size: 0.875rem; /* ~14px */
     display: flex;
     justify-content: space-around;
     z-index: 500; /* Above map but below tooltips */
@@ -139,7 +190,6 @@ td {
     #stats-overlay div div {
         transition: width 0.3s; /* Smooth bar animations */
     }
-
 
 /*////////////////////////////////////////////////////  GENERAL UI - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
@@ -162,23 +212,23 @@ td {
 
     #splash pre {
         font-family: "courier new", courier, monospace;
-        font-size: .75em;
+        font-size: 0.75rem; /* ~12px */
     }
 
     #splash h1 {
-        font-size: 3em;
+        font-size: 3rem; /* ~48px */
     }
 
     #splash h2 {
-        font-size: 1.5em;
+        font-size: 1.5rem; /* ~24px */
     }
 
     #splash table tr th {
-        font-size: 1.0em;
+        font-size: 1rem; /* ~16px */
     }
 
     #splash table tr td ul li {
-        font-size: .75em;
+        font-size: 0.75rem; /* ~12px */
     }
 
 /*////////////////////////////////////////////////////   SPLASH DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
@@ -187,32 +237,32 @@ td {
 
 #map {
     font-family: monospace;
-    font-size: 16px;
-    line-height: 16px;
+    font-size: 1rem; /* ~16px */
+    line-height: 1rem; /* ~16px */
     white-space: pre;
     color: #0f0;
-    border: 1px solid #0f0;
+    border: 0.0625rem solid #0f0; /* ~1px */
     padding: 0;
     margin: 0;
-    width: 1340px; /* 1120 70 columns * 16px */
-    height: 940px; /* 960 70 columns * 16px  */
-    overflow: auto; /* Enable scrolling */
-    box-sizing: border-box; /* Include padding/border in size */
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    width: calc(100vw - 0.25rem); /* Account for game and map borders */
+    height: calc(100vh - 0.25rem); /* Account for game and map borders */
+    overflow: auto;
+    box-sizing: border-box;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
     position: relative;
 }
 
     #map::-webkit-scrollbar {
-        display: none; /* Chrome, Safari, and newer Edge */
+        display: none;
     }
 
     #map span {
         display: inline-block;
-        width: 16px;
-        height: 16px;
+        width: 1rem; /* ~16px */
+        height: 1rem; /* ~16px */
         text-align: center;
-        line-height: 16px;
+        line-height: 1rem; /* ~16px */
         vertical-align: top;
     }
 
@@ -228,79 +278,63 @@ td {
 
 /*////////////////////////////////////////////////////   MAP DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-/*////////////////////////////////////////////////////   INFO DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-#info {
-    font-size: 14px;
+/*////////////////////////////////////////////////////   TABS DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+#tabs #equipped-items {
     display: flex;
-    flex-direction: column;
-    width: 340px;
-    margin: 0;
-    padding: 0;
-    color: #0f0;
-    height: 100%;
-    font-family: Roboto, Verdana;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.625rem; /* ~10px */
 }
 
-    #info.hidden {
-        display: none;
-    }
+#tabs p.inventory-slot,
+#tabs p.equip-slot {
+    margin: 0.625rem 0 0 0; /* ~10px */
+    padding: 0;
+    text-align: center;
+}
 
-    #info #equipped-items {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        padding: 10px;
-    }
-
-    #info p.inventory-slot,
-    #info p.equip-slot {
-        margin: 10px 0 0 0;
+    #tabs p.inventory-slot img.item,
+    #tabs p.equip-slot img.item {
+        width: 4rem; /* ~64px */
+        height: 4rem; /* ~64px */
+        border: 0.0625rem solid #0f0; /* ~1px */
         padding: 0;
-        text-align: center;
+        margin: 0;
     }
 
+#tabs button {
+    background: #000;
+    color: #0f0;
+}
 
-        #info p.inventory-slot img.item,
-        #info p.equip-slot img.item {
-            width: 64px;
-            height: 64px;
-            border: 1px solid #0f0;
-            padding: 0;
-            margin: 0;
-        }
-
-    #info button {
-        background: #000;
-        color: #0f0;
+    #tabs button:hover {
+        background: #0f0;
+        color: #000;
     }
-
-        #info button:hover {
-            background: #0f0;
-            color: #000;
-        }
 
 #player-name {
     text-align: center;
-    font-size: 24px;
+    font-size: 1.5rem; /* ~24px */
 }
 
-#info div.col-50-wrapper {
+#tabs div.col-50-wrapper {
     display: flex;
     justify-content: space-between;
 }
 
-#info col-50 {
+#tabs col-50 {
     width: 50%;
 }
 
 #stats {
     margin: 0;
-    padding: 10px;
+    padding: 0.625rem; /* ~10px */
 }
 
 #log {
     height: 100%;
-    padding: 5px;
+    padding: 0.3125rem; /* ~5px */
     margin: 0;
     overflow-y: hidden;
 }
@@ -325,19 +359,18 @@ td {
 #item-tooltip {
     position: absolute;
     background: #000;
-    border: 1px solid #0f0;
-    padding: 5px;
-    font-size: 14px;
+    border: 0.0625rem solid #0f0; /* ~1px */
+    padding: 0.3125rem; /* ~5px */
+    font-size: 0.875rem; /* ~14px */
     color: #0f0;
     z-index: 1000;
-    max-width: 200px;
+    max-width: 12.5rem; /* ~200px */
     white-space: pre-wrap;
 }
 
-/*////////////////////////////////////////////////////   INFO DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+/*////////////////////////////////////////////////////   TABS DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-
-/*////////////////////////////////////////////////////  PLAYER - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+/*////////////////////////////////////////////////////  PLAYER - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 .player {
     overflow: visible;
@@ -358,18 +391,13 @@ td {
         box-shadow: 0 0 5em 2.5em #efe8ac92;
     }
 
-
 /*////////////////////////////////////////////////////  PLAYER - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
 
 /*//////////////////////////////// START MONSTERS ||||||||||||||||||||||||||||||||||*/
 
 span.discovered.monster {
     color: #0f0; /* Green, matching your map style */
     font-family: monospace; /* Ensure consistent rendering */
-    /*overflow: visible;
-    transform: scale(1.1);
-    transform-origin: center;*/
     z-index: 2; /* Lift above other spans */
 }
 
@@ -407,4 +435,3 @@ span.discovered.monster.armored:after {
     font-size: 0.8em;
 }
 /*//////////////////////////////// END MONSTERS ||||||||||||||||||||||||||||||||||*/
-

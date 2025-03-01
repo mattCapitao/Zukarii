@@ -10,7 +10,6 @@ function handleInput(event) {
         console.log("Starting game...");
         state.gameStarted = true;
         initGame();
-        document.getElementById('info').classList.remove('hidden');
         window.needsRender = true;
         console.log("needsRender set to true for init (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
         renderIfNeeded();
@@ -32,6 +31,67 @@ function handleInput(event) {
     let map = state.levels[state.tier].map;
     let newX = state.player.x;
     let newY = state.player.y;
+
+    // Overlay toggle logic
+    const tabsDiv = document.getElementById('tabs');
+    switch (event.key.toLowerCase()) {
+        case 'i':
+            if (!state.ui.overlayOpen) {
+                state.ui.overlayOpen = true;
+                state.ui.activeTab = 'inventory';
+                tabsDiv.classList.remove('hidden');
+                window.ui.renderOverlay();
+                window.ui.updateInventory(); // Ensure immediate inventory update
+            } else if (state.ui.activeTab.toLowerCase() === 'inventory') {
+                state.ui.overlayOpen = false;
+                tabsDiv.classList.add('hidden');
+                window.ui.renderOverlay();
+            } else {
+                state.ui.activeTab = 'inventory';
+                window.ui.renderOverlay();
+                window.ui.updateInventory(); // Ensure immediate inventory update
+            }
+            return;
+        case 'c':
+            if (!state.ui.overlayOpen) {
+                state.ui.overlayOpen = true;
+                state.ui.activeTab = 'character';
+                tabsDiv.classList.remove('hidden');
+                window.ui.renderOverlay();
+                window.ui.updateInventory(true); // Ensure immediate equipped items update
+            } else if (state.ui.activeTab.toLowerCase() === 'character') {
+                state.ui.overlayOpen = false;
+                tabsDiv.classList.add('hidden');
+                window.ui.renderOverlay();
+            } else {
+                state.ui.activeTab = 'character';
+                window.ui.renderOverlay();
+                window.ui.updateInventory(true); // Ensure immediate equipped items update
+            }
+            return;
+        case 'l':
+            if (!state.ui.overlayOpen) {
+                state.ui.overlayOpen = true;
+                state.ui.activeTab = 'log';
+                tabsDiv.classList.remove('hidden');
+                window.ui.renderOverlay();
+            } else if (state.ui.activeTab.toLowerCase() === 'log') {
+                state.ui.overlayOpen = false;
+                tabsDiv.classList.add('hidden');
+                window.ui.renderOverlay();
+            } else {
+                state.ui.activeTab = 'log';
+                window.ui.renderOverlay();
+            }
+            return;
+        case 'escape':
+            if (state.ui.overlayOpen) {
+                state.ui.overlayOpen = false;
+                tabsDiv.classList.add('hidden');
+                window.ui.renderOverlay();
+            }
+            return;
+    }
 
     if (event.key === ' ') {
         toggleRanged(event);
@@ -212,6 +272,10 @@ function handleInput(event) {
             document.removeEventListener('keydown', toggleRanged);
             document.removeEventListener('keyup', toggleRanged);
         }
+        if (state.ui.overlayOpen) {
+            window.ui.updateStats();
+            window.ui.updateInventory();
+        }
     } else {
         state.player.x = newX;
         state.player.y = newY;
@@ -266,6 +330,17 @@ function init() {
     document.addEventListener('keydown', handleInput);
     document.addEventListener('keydown', toggleRanged);
     document.addEventListener('keyup', toggleRanged);
+
+    // Add click handler for #close-tabs
+    const closeTabsButton = document.getElementById('close-tabs');
+    if (closeTabsButton) {
+        closeTabsButton.addEventListener('click', () => {
+            state.ui.overlayOpen = false;
+            document.getElementById('tabs').classList.add('hidden');
+            window.ui.renderOverlay();
+            console.log("Overlay closed via close button");
+        });
+    }
 }
 
 window.addEventListener('DOMContentLoaded', init);

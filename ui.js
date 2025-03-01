@@ -114,8 +114,11 @@ function unequipItem(item, event) {
         icon: `no-${item.equippedSlot}.svg`,
     };
 
-    window.needsRender = true;
-    window.render();
+    if (state.ui.overlayOpen) {
+        updateStats();
+        updateLog();
+        updateInventory();
+    }
 }
 
 function equipItem(item) {
@@ -126,7 +129,7 @@ function equipItem(item) {
         return;
     }
 
-    const currentTab = state.currentTab;
+    const currentTab = state.ui.activeTab;
     console.log("Equipping item:", item, "Current equipped state:", JSON.stringify(state.player.inventory.equipped));
 
     const indexToRemove = state.player.inventory.items.findIndex(i => i.uniqueId === item.uniqueId);
@@ -216,18 +219,24 @@ function equipItem(item) {
             return;
     }
 
-    state.currentTab = currentTab;
-    window.needsRender = true;
-    window.render();
+    state.ui.activeTab = currentTab;
+    if (state.ui.overlayOpen) {
+        updateStats();
+        updateLog();
+        updateInventory();
+    }
 }
 
-window.dropItem = function (index) {
+function dropItem(index) {
     const item = state.player.inventory.items[index];
     writeToLog(`Dropped ${item.name}`);
     state.player.inventory.items.splice(index, 1);
-    window.needsRender = true;
-    window.render();
-};
+    if (state.ui.overlayOpen) {
+        updateStats();
+        updateLog();
+        updateInventory();
+    }
+}
 
 function addItemListeners() {
     console.log("Adding tooltip listeners...");
@@ -290,4 +299,231 @@ function addItemListeners() {
     });
 }
 
-window.equipItem = equipItem;
+function updateStats() {
+    if (!state.ui.overlayOpen) return;
+
+    const statsDiv = document.getElementById('stats');
+    if (statsDiv) {
+        statsDiv.innerHTML = `
+            <div id="player-name">Player: ${state.player.name}</div>
+            <div class="col-50-wrapper">
+                <div class="col-50">Player Level: ${state.player.level}</div>
+                <div class="col-50">Dungeon Tier: ${state.tier}</div>
+            </div>`;
+    }
+}
+
+function updateLog() {
+    if (!state.ui.overlayOpen) return;
+
+    const logContent = document.getElementById('log-content');
+    if (logContent) {
+        const entries = state.ui.logEntries.slice(0, state.ui.maxLogEntries);
+        logContent.innerHTML = `
+            <div>Adventure Log</div>
+            ${entries.length ? entries.map(line => `<p>${line}</p>`).join('') : '<p>Nothing to log yet.</p>'}`;
+    }
+}
+
+function updateInventory(equippedOnly = false) {
+    if (!state.ui.overlayOpen) return '';
+
+    const inventoryContent = document.getElementById('inventory-content');
+    const equippedItems = document.getElementById('equipped-items');
+    const equip = state.player.inventory.equipped || {}; // Safety for undefined
+
+    if (equippedOnly) {
+        if (equippedItems) {
+            equippedItems.innerHTML = `
+                <div style="width: 30%;">
+                    <p class="equip-slot mainhand">
+                        Mainhand:
+                        <img src="img/icons/items/${equip.mainhand?.icon || 'no-mainhand.svg'}" alt="${equip.mainhand?.name || 'Mainhand'}" 
+                             class="item item-icon ${equip.mainhand?.itemTier || 'Empty'} ${equip.mainhand?.type || 'weapon'}" 
+                             data-item='${JSON.stringify(equip.mainhand || { name: "Mainhand", itemTier: "Empty", type: "weapon", slots: ["mainhand"], baseDamageMin: 1, baseDamageMax: 1, uniqueId: generateUniqueId(), icon: "no-mainhand.svg" })}'>
+                    </p>
+                    <p class="equip-slot rightring">
+                        Right Ring:
+                        <img src="img/icons/items/${equip.rightring?.icon || 'no-rightring.svg'}" alt="${equip.rightring?.name || 'Right Ring'}" 
+                             class="item item-icon ${equip.rightring?.itemTier || 'Empty'} ${equip.rightring?.type || 'ring'}" 
+                             data-item='${JSON.stringify(equip.rightring || { name: "Right Ring", itemTier: "Empty", type: "ring", slot: "rightring", uniqueId: generateUniqueId(), icon: "no-rightring.svg" })}'>
+                    </p>
+                </div>
+                <div style="width: 30%;">
+                    <p class="equip-slot amulet">
+                        Amulet:
+                        <img src="img/icons/items/${equip.amulet?.icon || 'no-amulet.svg'}" alt="${equip.amulet?.name || 'Amulet'}" 
+                             class="item item-icon ${equip.amulet?.itemTier || 'Empty'} ${equip.amulet?.type || 'amulet'}" 
+                             data-item='${JSON.stringify(equip.amulet || { name: "Amulet", itemTier: "Empty", type: "amulet", slot: "amulet", uniqueId: generateUniqueId(), icon: "no-amulet.svg" })}'>
+                    </p>
+                    <p class="equip-slot armor">
+                        Armor:
+                        <img src="img/icons/items/${equip.armor?.icon || 'no-armor.svg'}" alt="${equip.armor?.name || 'Armor'}" 
+                             class="item item-icon ${equip.armor?.itemTier || 'Empty'} ${equip.armor?.type || 'armor'}" 
+                             data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: generateUniqueId(), defense: 0, icon: "no-armor.svg" })}'>
+                    </p>
+                </div>
+                <div style="width: 30%;">
+                    <p class="equip-slot offhand">
+                        Offhand:
+                        <img src="img/icons/items/${equip.offhand?.icon || 'no-offhand.svg'}" alt="${equip.offhand?.name || 'Offhand'}" 
+                             class="item item-icon ${equip.offhand?.itemTier || 'Empty'} ${equip.offhand?.type || 'weapon'}" 
+                             data-item='${JSON.stringify(equip.offhand || { name: "Offhand", itemTier: "Empty", type: "weapon", slots: ["offhand"], baseDamageMin: 0, baseDamageMax: 0, uniqueId: generateUniqueId(), icon: "no-offhand.svg" })}'>
+                    </p>
+                    <p class="equip-slot leftring">
+                        Left Ring:
+                        <img src="img/icons/items/${equip.leftring?.icon || 'no-leftring.svg'}" alt="${equip.leftring?.name || 'Left Ring'}" 
+                             class="item item-icon ${equip.leftring?.itemTier || 'Empty'} ${equip.leftring?.type || 'ring'}" 
+                             data-item='${JSON.stringify(equip.leftring || { name: "Left Ring", itemTier: "Empty", type: "ring", slot: "leftring", uniqueId: generateUniqueId(), icon: "no-leftring.svg" })}'>
+                    </p>
+                </div>`;
+            addItemListeners(); // Re-add listeners after updating equipped items
+            return '';
+        }
+        return '';
+    }
+
+    if (inventoryContent) {
+        inventoryContent.innerHTML = `
+            <div style="font-size: 18px; font-weight: bold;">Inventory</div>
+            <hr style="border: 1px solid #0f0; margin: 0;">
+            ${state.player.inventory.items?.length ? state.player.inventory.items.map((item, index) => `
+                <div class="inventory-item" style="display: flex; justify-content: space-between; border-bottom:1px dashed #090;">
+                    <div style="width: 50%;">
+                        <p class="inventory-slot ${item.itemTier} ${item.type}">
+                            <img src="img/icons/items/${item.icon}" alt="${item.name}" 
+                                 class="item item-icon ${item.itemTier} ${item.type}" 
+                                 data-item='${JSON.stringify(item)}' data-index='${index}'>
+                        </p>
+                    </div>
+                    <div style="width: 50%;">
+                        <p class="item-name">${item.name}<br />(${item.itemTier} ${item.type})</p>
+                        <p><button onclick="window.ui.dropItem(${index})">Drop</button></p>
+                    </div>
+                </div>`).join('') : '<p>Inventory empty.</p>'}`;
+        addItemListeners(); // Re-add listeners after updating inventory
+        return '';
+    }
+
+    return '';
+}
+
+function renderOverlay() {
+    const tabsDiv = document.getElementById('tabs');
+    if (!state.ui.overlayOpen) {
+        if (tabsDiv) {
+            tabsDiv.style.display = 'none';
+            tabsDiv.classList.add('hidden');
+        }
+        return;
+    }
+
+    if (tabsDiv) {
+        tabsDiv.style.display = 'block';
+        tabsDiv.classList.remove('hidden');
+    }
+
+    const statsDiv = document.getElementById('stats');
+    const logDiv = document.getElementById('log');
+    const equip = state.player.inventory.equipped;
+
+    if (statsDiv) {
+        updateStats();
+    }
+
+    if (logDiv) {
+        logDiv.innerHTML = `
+            <div id="tab-menu">
+                <button id="log-tab" style="flex: 1; background: ${state.ui.activeTab === 'log' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'log' ? '#000' : '#0f0'};">Log</button>
+                <button id="character-tab" style="flex: 1; background: ${state.ui.activeTab === 'character' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'character' ? '#000' : '#0f0'};">Character</button>
+                <button id="inventory-tab" style="flex: 1; background: ${state.ui.activeTab === 'inventory' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'inventory' ? '#000' : '#0f0'};">Inventory</button>
+            </div>
+
+            <div id="log-content" class="ui-tab" style="display: ${state.ui.activeTab === 'log' ? 'block' : 'none'}; overflow-y: auto;">
+                ${state.ui.logEntries.length ? state.ui.logEntries.slice(0, state.ui.maxLogEntries).map(line => `<p>${line}</p>`).join('') : '<p>Nothing to log yet.</p>'}
+            </div>
+
+            <div id="inventory-content" class="ui-tab" style="display: ${state.ui.activeTab === 'inventory' ? 'block' : 'none'}; overflow-y: auto;">
+                ${updateInventory()}
+            </div>
+
+            <div id="character-content" class="ui-tab" style="display: ${state.ui.activeTab === 'character' ? 'block' : 'none'}; overflow-y: auto;">
+                <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Vital Stats</div>
+                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                    <div style="width: 50%;">
+                        <div>Prowess: ${state.player.prowess}</div>
+                        <div>Intellect: ${state.player.intellect}</div>
+                        <div>Agility: ${state.player.agility}</div>
+                        <div>Armor: ${state.player.armor}</div>
+                        <div>Defense: ${state.player.defense}</div>
+                    </div>
+                    <div style="width: 50%;">
+                        <div>HP: ${state.player.hp}/${state.player.maxHp}</div>
+                        <div>Mana: ${state.player.mana}/${state.player.maxMana}</div>
+                        <div>XP: ${state.player.xp}/${state.player.nextLevelXp}</div>
+                        <div>Gold: ${state.player.gold}</div>
+                        <div>Torches: ${state.player.torches}</div>
+                    </div>
+                </div>
+
+                <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Equipped Items</div>
+                <div id="equipped-items">
+                    ${updateInventory(true)} <!-- Pass true for equipped items -->
+                </div>
+            </div>
+        `;
+
+        // Ensure inventory and equipped items are updated for all tabs on open
+        updateInventory(state.ui.activeTab === 'character');
+
+        const logTab = document.getElementById('log-tab');
+        const inventoryTab = document.getElementById('inventory-tab');
+        const characterTab = document.getElementById('character-tab');
+        if (logTab && inventoryTab && characterTab) {
+            logTab.addEventListener('click', () => {
+                console.log("Switching to Log tab");
+                state.ui.activeTab = 'log';
+                renderOverlay();
+            });
+            inventoryTab.addEventListener('click', () => {
+                console.log("Switching to Inventory tab");
+                state.ui.activeTab = 'inventory';
+                updateInventory();
+                renderOverlay();
+            });
+            characterTab.addEventListener('click', () => {
+                console.log("Switching to Character tab");
+                state.ui.activeTab = 'character';
+                updateInventory(true); // Update equipped items only
+                renderOverlay();
+            });
+        }
+
+        // Add item listeners only if not already added
+        addItemListeners();
+    }
+}
+
+function writeToLog(message) {
+    state.ui.logEntries.unshift(message);
+    if (state.ui.logEntries.length > state.ui.maxLogEntries) {
+        state.ui.logEntries.pop();
+    }
+    if (state.ui.overlayOpen) {
+        updateLog();
+    }
+}
+
+// Namespace exports
+window.ui = {
+    dropItem,
+    equipItem,
+    renderOverlay,
+    showItemTooltip,
+    hideItemTooltip,
+    addItemListeners,
+    updateStats,
+    updateLog,
+    updateInventory,
+    writeToLog
+};

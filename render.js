@@ -1,26 +1,19 @@
 ﻿console.log("render.js loaded");
 
-// Removed: let needsRender = true; (we’ll use window.needsRender globally)
-
-const adventureLog = {
-    entries: [],
-    maxEntries: 20
-};
-
 function writeToLog(message) {
-    adventureLog.entries.unshift(message);
-    if (adventureLog.entries.length > adventureLog.maxEntries) {
-        adventureLog.entries.pop();
-    }
+    window.ui.writeToLog(message);
 }
 
 function clearLog() {
-    adventureLog.entries = [];
+    state.ui.logEntries = [];
+    if (state.ui.overlayOpen) {
+        window.ui.updateLog();
+    }
 }
 
 function render() {
     console.log("Rendering...", window.needsRender, "typeof:", typeof window.needsRender);
-    if (!window.needsRender) return; // Use window.needsRender
+    if (!window.needsRender) return;
 
     const titleScreenContainer = document.getElementById('splash');
 
@@ -32,8 +25,6 @@ function render() {
         document.getElementById('splash').style.display = 'flex';
         titleScreenContainer.innerHTML = titleScreen;
         state.mapDiv.style.border = 'none';
-        if (state.statsDiv) state.statsDiv.textContent = '';
-        if (state.logDiv) state.logDiv.innerHTML = '';
         return;
     }
 
@@ -140,179 +131,17 @@ function render() {
 
     state.mapDiv.innerHTML = mapDisplay;
     state.mapDiv.style.borderRight = '1px solid #0f0';
-    const equip = state.player.inventory.equipped;
 
-    if (state.statsDiv) {
-        state.statsDiv.innerHTML = `
-            <div id="player-name">Player: ${state.player.name}</div>
-            <div class="col-50-wrapper">
-                <div class="col-50">Player Level: ${state.player.level}</div>
-                <div class="col-50">Dungeon Tier: ${state.tier}</div>
-            </div>`;
-    }
-
-    if (state.logDiv) {
-        state.logDiv.innerHTML = `
-            <div id="tab-menu">
-                <button id="log-tab" style="flex: 1; background: ${state.currentTab === 'log' ? '#0f0' : '#000'}; color: ${state.currentTab === 'log' ? '#000' : '#0f0'}; ">Log</button>
-                <button id="character-tab" style="flex: 1; background: ${state.currentTab === 'character' ? '#0f0' : '#000'}; color: ${state.currentTab === 'character' ? '#000' : '#0f0'}; ">Character</button>
-                <button id="inventory-tab" style="flex: 1; background: ${state.currentTab === 'inventory' ? '#0f0' : '#000'}; color: ${state.currentTab === 'inventory' ? '#000' : '#0f0'}; ">Inventory</button>
-            </div>
-
-            <div id="log-content" class="ui-tab" style="display: ${state.currentTab === 'log' ? 'block' : 'none'}; overflow-y: auto;">
-                <div>Adventure Log</div>
-                ${adventureLog.entries.length ? adventureLog.entries.map(line => `<p>${line}</p>`).join('') : '<p>Nothing to log yet.</p>'}
-            </div>
-
-            <div id="inventory-content" class="ui-tab" style="display: ${state.currentTab === 'inventory' ? 'block' : 'none'}; overflow-y: auto;">
-                <div style="font-size: 18px; font-weight: bold;">Inventory</div>
-                <hr style="border: 1px solid #0f0; margin: 0;">
-                ${state.player.inventory.items.length ? state.player.inventory.items.map((item, index) => `
-                    <div class="inventory-item" style="display: flex; justify-content: space-between; border-bottom:1px dashed #090;">
-                        <div style="width: 50%;">
-                            <p class="inventory-slot ${item.itemTier} ${item.type}">
-                                <img src="img/icons/items/${item.icon}" alt="${item.name}" 
-                                     class="item item-icon ${item.itemTier} ${item.type}" 
-                                     data-item='${JSON.stringify(item)}' data-index='${index}'>
-                            </p>
-                        </div>
-                        <div style="width: 50%;">
-                            <p class="item-name">${item.name}<br />(${item.itemTier} ${item.type})</p>
-                            <p><button onclick="dropItem(${index})">Drop</button></p>
-                        </div>
-                    </div>`).join('') : '<p>Inventory empty.</p>'}
-            </div>
-
-            <div id="character-content" class="ui-tab" style="display: ${state.currentTab === 'character' ? 'block' : 'none'}; overflow-y: auto;">
-                <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Vital Stats</div>
-                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-                    <div style="width: 50%;">
-                        <div>Prowess: ${state.player.prowess}</div>
-                        <div>Intellect: ${state.player.intellect}</div>
-                        <div>Agility: ${state.player.agility}</div>
-                        <div>Armor: ${state.player.armor}</div>
-                        <div>Defense: ${state.player.defense}</div>
-                    </div>
-                    <div style="width: 50%;">
-                        <div>HP: ${state.player.hp}/${state.player.maxHp}</div>
-                        <div>Mana: ${state.player.mana}/${state.player.maxMana}</div>
-                        <div>XP: ${state.player.xp}/${state.player.nextLevelXp}</div>
-                        <div>Gold: ${state.player.gold}</div>
-                        <div>Torches: ${state.player.torches}</div>
-                    </div>
-                </div>
-
-                <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Equipped Items</div>
-                <div id="equipped-items">
-                    <div style="width: 30%;">
-                        <p class="equip-slot mainhand">
-                            Mainhand:
-                            <img src="img/icons/items/${equip.mainhand.icon}" alt="${equip.mainhand.name}" 
-                                 class="item item-icon ${equip.mainhand.itemTier} ${equip.mainhand.type}" 
-                                 data-item='${JSON.stringify(equip.mainhand)}'>
-                        </p>
-                        <p class="equip-slot rightring">
-                            Right Ring:
-                            <img src="img/icons/items/${equip.rightring.icon}" alt="${equip.rightring.name}" 
-                                 class="item item-icon ${equip.rightring.itemTier} ${equip.rightring.type}" 
-                                 data-item='${JSON.stringify(equip.rightring)}'>
-                        </p>
-                    </div>
-                    <div style="width: 30%;">
-                        <p class="equip-slot amulet">
-                            Amulet:
-                            <img src="img/icons/items/${equip.amulet.icon}" alt="${equip.amulet.name}" 
-                                 class="item item-icon ${equip.amulet.itemTier} ${equip.amulet.type}" 
-                                 data-item='${JSON.stringify(equip.amulet)}'>
-                        </p>
-                        <p class="equip-slot armor">
-                            Armor:
-                            <img src="img/icons/items/${equip.armor.icon}" alt="${equip.armor.name}" 
-                                 class="item item-icon ${equip.armor.itemTier} ${equip.armor.type}" 
-                                 data-item='${JSON.stringify(equip.armor)}'>
-                        </p>
-                    </div>
-                    <div style="width: 30%;">
-                        <p class="equip-slot offhand">
-                            Offhand:
-                            <img src="img/icons/items/${equip.offhand.icon}" alt="${equip.offhand.name}" 
-                                 class="item item-icon ${equip.offhand.itemTier} ${equip.offhand.type}" 
-                                 data-item='${JSON.stringify(equip.offhand)}'>
-                        </p>
-                        <p class="equip-slot leftring">
-                            Left Ring:
-                            <img src="img/icons/items/${equip.leftring.icon}" alt="${equip.leftring.name}" 
-                                 class="item item-icon ${equip.leftring.itemTier} ${equip.leftring.type}" 
-                                 data-item='${JSON.stringify(equip.leftring)}'>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        if (state.currentTab === 'inventory') {
-            const inventoryContent = document.getElementById('inventory-content');
-            if (inventoryContent) inventoryContent.innerHTML = `
-                <div style="font-size: 18px; font-weight: bold;">Inventory</div>
-                <hr style="border: 1px solid #0f0; margin: 0;">
-                ${state.player.inventory.items.length ? state.player.inventory.items.map((item, index) => `
-                    <div class="inventory-item" style="display: flex; justify-content: space-between; border-bottom:1px dashed #090;">
-                        <div style="width: 50%;">
-                            <p class="inventory-slot ${item.itemTier} ${item.type}">
-                                <img src="img/icons/items/${item.icon}" alt="${item.name}" 
-                                     class="item item-icon ${item.itemTier} ${item.type}" 
-                                     data-item='${JSON.stringify(item)}' data-index='${index}'>
-                            </p>
-                        </div>
-                        <div style="width: 50%;">
-                            <p class="item-name">${item.name}<br />(${item.itemTier} ${item.type})</p>
-                            <p><button onclick="dropItem(${index})">Drop</button></p>
-                        </div>
-                    </div>`).join('') : '<p>Inventory empty.</p>'}
-            `;
-        }
-
-        const logTab = document.getElementById('log-tab');
-        const inventoryTab = document.getElementById('inventory-tab');
-        const characterTab = document.getElementById('character-tab');
-        if (logTab && inventoryTab && characterTab) {
-            logTab.addEventListener('click', () => {
-                console.log("Switching to Log tab");
-                state.currentTab = 'log';
-                window.needsRender = true; // Use window.needsRender
-                render();
-            });
-            inventoryTab.addEventListener('click', () => {
-                console.log("Switching to Inventory tab");
-                state.currentTab = 'inventory';
-                window.needsRender = true; // Use window.needsRender
-                render();
-            });
-            characterTab.addEventListener('click', () => {
-                console.log("Switching to Character tab");
-                state.currentTab = 'character';
-                window.needsRender = true; // Use window.needsRender
-                render();
-            });
-        }
-    }
-
-    if (!document.querySelector('.item[data-listener-added]')) {
-        addItemListeners();
-        document.querySelectorAll('.item').forEach(item => item.setAttribute('data-listener-added', 'true'));
+    if (state.needsInitialRender) {
+        setInitialScroll();
     }
 
     state.lastPlayerX = state.player.x;
     state.lastPlayerY = state.player.y;
     state.lastProjectileX = state.projectile ? state.projectile.x : null;
     state.lastProjectileY = state.projectile ? state.projectile.y : null;
-
-    if (state.needsInitialRender) {
-        setInitialScroll();
-    }
-
     state.needsInitialRender = false;
-    window.needsRender = false; // Use window.needsRender
+    window.needsRender = false;
     console.log("needsRender after render:", window.needsRender, "typeof:", typeof window.needsRender);
 }
 
