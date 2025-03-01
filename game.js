@@ -41,6 +41,7 @@ function handleInput(event) {
                 state.ui.activeTab = 'inventory';
                 tabsDiv.classList.remove('hidden');
                 window.ui.renderOverlay();
+                window.ui.updateInventory(); // Ensure immediate inventory update
             } else if (state.ui.activeTab.toLowerCase() === 'inventory') {
                 state.ui.overlayOpen = false;
                 tabsDiv.classList.add('hidden');
@@ -48,6 +49,7 @@ function handleInput(event) {
             } else {
                 state.ui.activeTab = 'inventory';
                 window.ui.renderOverlay();
+                window.ui.updateInventory(); // Ensure immediate inventory update
             }
             return;
         case 'c':
@@ -56,6 +58,7 @@ function handleInput(event) {
                 state.ui.activeTab = 'character';
                 tabsDiv.classList.remove('hidden');
                 window.ui.renderOverlay();
+                window.ui.updateInventory(true); // Ensure immediate equipped items update
             } else if (state.ui.activeTab.toLowerCase() === 'character') {
                 state.ui.overlayOpen = false;
                 tabsDiv.classList.add('hidden');
@@ -63,6 +66,7 @@ function handleInput(event) {
             } else {
                 state.ui.activeTab = 'character';
                 window.ui.renderOverlay();
+                window.ui.updateInventory(true); // Ensure immediate equipped items update
             }
             return;
         case 'l':
@@ -267,6 +271,10 @@ function handleInput(event) {
             document.removeEventListener('keydown', handleInput);
             document.removeEventListener('keydown', toggleRanged);
             document.removeEventListener('keyup', toggleRanged);
+        }
+        if (state.ui.overlayOpen) {
+            window.ui.updateStats();
+            window.ui.updateInventory();
         }
     } else {
         state.player.x = newX;

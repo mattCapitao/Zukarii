@@ -1,19 +1,13 @@
 ﻿console.log("render.js loaded");
 
 function writeToLog(message) {
-    state.ui.logEntries.unshift(message);
-    if (state.ui.logEntries.length > state.ui.maxLogEntries) {
-        state.ui.logEntries.pop();
-    }
-    if (state.ui.overlayOpen) {
-        window.ui.renderOverlay();
-    }
+    window.ui.writeToLog(message);
 }
 
 function clearLog() {
     state.ui.logEntries = [];
     if (state.ui.overlayOpen) {
-        window.ui.renderOverlay();
+        window.ui.updateLog();
     }
 }
 
