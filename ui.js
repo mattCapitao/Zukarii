@@ -114,8 +114,9 @@ function unequipItem(item, event) {
         icon: `no-${item.equippedSlot}.svg`,
     };
 
-    window.needsRender = true;
-    window.render();
+    if (state.ui.overlayOpen) {
+        renderOverlay();
+    }
 }
 
 function equipItem(item) {
@@ -126,7 +127,7 @@ function equipItem(item) {
         return;
     }
 
-    const currentTab = state.currentTab;
+    const currentTab = state.ui.activeTab;
     console.log("Equipping item:", item, "Current equipped state:", JSON.stringify(state.player.inventory.equipped));
 
     const indexToRemove = state.player.inventory.items.findIndex(i => i.uniqueId === item.uniqueId);
@@ -216,18 +217,20 @@ function equipItem(item) {
             return;
     }
 
-    state.currentTab = currentTab;
-    window.needsRender = true;
-    window.render();
+    state.ui.activeTab = currentTab;
+    if (state.ui.overlayOpen) {
+        renderOverlay();
+    }
 }
 
-window.dropItem = function (index) {
+function dropItem(index) {
     const item = state.player.inventory.items[index];
     writeToLog(`Dropped ${item.name}`);
     state.player.inventory.items.splice(index, 1);
-    window.needsRender = true;
-    window.render();
-};
+    if (state.ui.overlayOpen) {
+        renderOverlay();
+    }
+}
 
 function addItemListeners() {
     console.log("Adding tooltip listeners...");
@@ -290,4 +293,167 @@ function addItemListeners() {
     });
 }
 
-window.equipItem = equipItem;
+function renderOverlay() {
+    const tabsDiv = document.getElementById('tabs');
+    if (!state.ui.overlayOpen) {
+        if (tabsDiv) {
+            tabsDiv.style.display = 'none';
+            tabsDiv.classList.add('hidden');
+        }
+        return;
+    }
+
+    if (tabsDiv) {
+        tabsDiv.style.display = 'block';
+        tabsDiv.classList.remove('hidden');
+    }
+
+    const statsDiv = document.getElementById('stats');
+    const logDiv = document.getElementById('log');
+    const equip = state.player.inventory.equipped;
+
+    if (statsDiv) {
+        statsDiv.innerHTML = `
+            <div id="player-name">Player: ${state.player.name}</div>
+            <div class="col-50-wrapper">
+                <div class="col-50">Player Level: ${state.player.level}</div>
+                <div class="col-50">Dungeon Tier: ${state.tier}</div>
+            </div>`;
+    }
+
+    if (logDiv) {
+        logDiv.innerHTML = `
+            <div id="tab-menu">
+                <button id="log-tab" style="flex: 1; background: ${state.ui.activeTab === 'log' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'log' ? '#000' : '#0f0'};">Log</button>
+                <button id="character-tab" style="flex: 1; background: ${state.ui.activeTab === 'character' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'character' ? '#000' : '#0f0'};">Character</button>
+                <button id="inventory-tab" style="flex: 1; background: ${state.ui.activeTab === 'inventory' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'inventory' ? '#000' : '#0f0'};">Inventory</button>
+            </div>
+
+            <div id="log-content" class="ui-tab" style="display: ${state.ui.activeTab === 'log' ? 'block' : 'none'}; overflow-y: auto;">
+                <div>Adventure Log</div>
+                ${state.ui.logEntries.length ? state.ui.logEntries.slice(0, state.ui.maxLogEntries).map(line => `<p>${line}</p>`).join('') : '<p>Nothing to log yet.</p>'}
+            </div>
+
+            <div id="inventory-content" class="ui-tab" style="display: ${state.ui.activeTab === 'inventory' ? 'block' : 'none'}; overflow-y: auto;">
+                <div style="font-size: 18px; font-weight: bold;">Inventory</div>
+                <hr style="border: 1px solid #0f0; margin: 0;">
+                ${state.player.inventory.items.length ? state.player.inventory.items.map((item, index) => `
+                    <div class="inventory-item" style="display: flex; justify-content: space-between; border-bottom:1px dashed #090;">
+                        <div style="width: 50%;">
+                            <p class="inventory-slot ${item.itemTier} ${item.type}">
+                                <img src="img/icons/items/${item.icon}" alt="${item.name}" 
+                                     class="item item-icon ${item.itemTier} ${item.type}" 
+                                     data-item='${JSON.stringify(item)}' data-index='${index}'>
+                            </p>
+                        </div>
+                        <div style="width: 50%;">
+                            <p class="item-name">${item.name}<br />(${item.itemTier} ${item.type})</p>
+                            <p><button onclick="window.ui.dropItem(${index})">Drop</button></p>
+                        </div>
+                    </div>`).join('') : '<p>Inventory empty.</p>'}
+            </div>
+
+            <div id="character-content" class="ui-tab" style="display: ${state.ui.activeTab === 'character' ? 'block' : 'none'}; overflow-y: auto;">
+                <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Vital Stats</div>
+                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                    <div style="width: 50%;">
+                        <div>Prowess: ${state.player.prowess}</div>
+                        <div>Intellect: ${state.player.intellect}</div>
+                        <div>Agility: ${state.player.agility}</div>
+                        <div>Armor: ${state.player.armor}</div>
+                        <div>Defense: ${state.player.defense}</div>
+                    </div>
+                    <div style="width: 50%;">
+                        <div>HP: ${state.player.hp}/${state.player.maxHp}</div>
+                        <div>Mana: ${state.player.mana}/${state.player.maxMana}</div>
+                        <div>XP: ${state.player.xp}/${state.player.nextLevelXp}</div>
+                        <div>Gold: ${state.player.gold}</div>
+                        <div>Torches: ${state.player.torches}</div>
+                    </div>
+                </div>
+
+                <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Equipped Items</div>
+                <div id="equipped-items">
+                    <div style="width: 30%;">
+                        <p class="equip-slot mainhand">
+                            Mainhand:
+                            <img src="img/icons/items/${equip.mainhand.icon}" alt="${equip.mainhand.name}" 
+                                 class="item item-icon ${equip.mainhand.itemTier} ${equip.mainhand.type}" 
+                                 data-item='${JSON.stringify(equip.mainhand)}'>
+                        </p>
+                        <p class="equip-slot rightring">
+                            Right Ring:
+                            <img src="img/icons/items/${equip.rightring.icon}" alt="${equip.rightring.name}" 
+                                 class="item item-icon ${equip.rightring.itemTier} ${equip.rightring.type}" 
+                                 data-item='${JSON.stringify(equip.rightring)}'>
+                        </p>
+                    </div>
+                    <div style="width: 30%;">
+                        <p class="equip-slot amulet">
+                            Amulet:
+                            <img src="img/icons/items/${equip.amulet.icon}" alt="${equip.amulet.name}" 
+                                 class="item item-icon ${equip.amulet.itemTier} ${equip.amulet.type}" 
+                                 data-item='${JSON.stringify(equip.amulet)}'>
+                        </p>
+                        <p class="equip-slot armor">
+                            Armor:
+                            <img src="img/icons/items/${equip.armor.icon}" alt="${equip.armor.name}" 
+                                 class="item item-icon ${equip.armor.itemTier} ${equip.armor.type}" 
+                                 data-item='${JSON.stringify(equip.armor)}'>
+                        </p>
+                    </div>
+                    <div style="width: 30%;">
+                        <p class="equip-slot offhand">
+                            Offhand:
+                            <img src="img/icons/items/${equip.offhand.icon}" alt="${equip.offhand.name}" 
+                                 class="item item-icon ${equip.offhand.itemTier} ${equip.offhand.type}" 
+                                 data-item='${JSON.stringify(equip.offhand)}'>
+                        </p>
+                        <p class="equip-slot leftring">
+                            Left Ring:
+                            <img src="img/icons/items/${equip.leftring.icon}" alt="${equip.leftring.name}" 
+                                 class="item item-icon ${equip.leftring.itemTier} ${equip.leftring.type}" 
+                                 data-item='${JSON.stringify(equip.leftring)}'>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const logTab = document.getElementById('log-tab');
+        const inventoryTab = document.getElementById('inventory-tab');
+        const characterTab = document.getElementById('character-tab');
+        if (logTab && inventoryTab && characterTab) {
+            logTab.addEventListener('click', () => {
+                console.log("Switching to Log tab");
+                state.ui.activeTab = 'log';
+                renderOverlay();
+            });
+            inventoryTab.addEventListener('click', () => {
+                console.log("Switching to Inventory tab");
+                state.ui.activeTab = 'inventory';
+                renderOverlay();
+            });
+            characterTab.addEventListener('click', () => {
+                console.log("Switching to Character tab");
+                state.ui.activeTab = 'character';
+                renderOverlay();
+            });
+        }
+
+        // Add item listeners only if not already added
+        if (!document.querySelector('#tabs [data-listener-added]')) {
+            addItemListeners();
+        }
+    }
+}
+
+// Namespace exports
+window.ui = {
+    dropItem,
+    equipItem,
+    renderOverlay,
+    showItemTooltip,
+    hideItemTooltip,
+    addItemListeners
+};

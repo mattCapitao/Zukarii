@@ -1,7 +1,7 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- index.html -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grok Mage Dungeon</title>
@@ -10,10 +10,12 @@
 </head>
 <body>
     <div id="game">
-
         <pre id="map"></pre>
         <div id="splash"></div>
-        <div id="info" class="hidden">
+    </div>
+    <div id="ui-layer">
+        <div id="tabs" class="hidden">
+            <button id="close-tabs">X</button>
             <div id="stats"></div>
             <div id="log"></div>
         </div>
@@ -29,5 +31,6 @@
     <script src="player.js"></script>
     <script src="monsters.js"></script>
     <script src="game.js"></script>
+    <!-- Cloudflare script unchanged -->
 </body>
-    </html>
+</html>
