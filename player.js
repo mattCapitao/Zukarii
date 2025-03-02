@@ -2,12 +2,12 @@ console.log("player.js loaded");
 
 function addStartingItems() {
     state.player.inventory.equipped = emptyEquipSlots;
-    const startItems = [window.uniqueItems[0], window.junkItems[0], window.junkItems[1]];
+    const startItems = [window.uniqueItems[0], window.startItems[0], window.startItems[1], window.startItems[2]];
     for (let item of startItems) {
         item.uniqueId = window.generateUniqueId(),
             state.player.inventory.items.push({ ...item });
     }
-    if (state.ui.overlayOpen) {
+    if (state.ui.overlayOpen) {i
         window.ui.updateStats();
     }
 }
@@ -44,6 +44,8 @@ function checkLevelUp() {
         if (state.ui.overlayOpen) {
             window.ui.updateStats();
         }
+        window.ui.updatePlayerInfo();
+        window.ui.updatePlayerStatus();
     }
 }
 

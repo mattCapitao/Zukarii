@@ -98,7 +98,11 @@ const state = {
         agility: 5 + Math.floor(Math.random() * 6),
         armor: 0,
         defense: 0,
+        block: 0,
         luck: 0,
+        damageBonus: 0,
+        meleeDamageBonus: 0,
+        rangedDamageBonus: 0,
         maxLuck: 0,
         mana: 10,
         maxMana: 10,
@@ -171,6 +175,9 @@ function generateSurfaceLevel() {
 }
 
 function initGame() {
+    const splash = document.getElementById('splash');
+    splash.remove();
+
     // Initialize tier 0 (surface/exit) as a fallback
     state.levels[0] = generateSurfaceLevel();
     state.treasures[0] = [];
@@ -254,6 +261,8 @@ function initGame() {
     state.lastPlayerX = null;
     state.lastPlayerY = null;
     state.needsInitialRender = true;
+    window.needsRender = true;
+    
 }
 
 window.generateUniqueId = generateUniqueId;

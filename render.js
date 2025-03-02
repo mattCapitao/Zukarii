@@ -34,8 +34,6 @@ function render() {
     const width = map[0].length;
 
     if (state.lastPlayerX !== state.player.x || state.lastPlayerY !== state.player.y || state.needsInitialRender) {
-        document.getElementById('splash').style.display = 'none';
-        titleScreenContainer.innerHTML = '';
         const prevDiscoveredCount = state.discoveredWalls[tier].size;
         state.visibleTiles[tier].clear();
 
@@ -130,10 +128,11 @@ function render() {
     }
 
     state.mapDiv.innerHTML = mapDisplay;
-    state.mapDiv.style.borderRight = '1px solid #0f0';
+    state.mapDiv.style.border = 'none';
 
     if (state.needsInitialRender) {
         setInitialScroll();
+
     }
 
     state.lastPlayerX = state.player.x;

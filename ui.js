@@ -203,7 +203,7 @@ function equipItem(item) {
             break;
 
         case "ring":
-            item.equippedSlot = (state.player.inventory.equipped.leftring.name === "None" ? "leftring" : "rightring");
+            item.equippedSlot = (state.player.inventory.equipped.leftring.itemTier === "Empty" ? "leftring" : "rightring");
             const oldRing = state.player.inventory.equipped[item.equippedSlot];
             if (oldRing && oldRing.itemTier !== "Empty") {
                 state.player.inventory.items.push({ ...oldRing });
@@ -249,7 +249,7 @@ function addItemListeners() {
                 const decodedItemDataStr = decodeURIComponent(itemDataStr);
                 console.log("Decoded JSON string:", decodedItemDataStr);
                 const itemData = JSON.parse(decodedItemDataStr);
-                console.log(`Parsed item data for ${itemData.name} with ID ${itemData.uniqueId}`);
+                console.log(`Parsed item data for ${itemData.tier} ${itemData.type} ${itemData.name} with ID ${itemData.uniqueId}`);
                 if (itemData && itemData.uniqueId) {
                     p.addEventListener('mouseover', (event) => showItemTooltip(itemData, event));
                     p.addEventListener('mouseout', () => hideItemTooltip(itemData));
@@ -299,7 +299,32 @@ function addItemListeners() {
     });
 }
 
+function updatePlayerInfo() {
+
+    const playerInfo = document.getElementById('player-info');
+
+    playerInfo.innerHTML = `
+    <div class="player-info-child">Player: ${state.player.name}</div>
+    <div class="player-info-child">Level: ${state.player.level}</div>
+    <div class="player-info-child">Dungeon Tier: ${state.tier}</div>`;
+
+}
+
+function updatePlayerStatus() {
+
+    const playerStatus = document.getElementById('player-status');
+
+    playerStatus.innerHTML = `
+    <div class="player-status-child">HP: ${state.player.hp}/${state.player.maxHp}</div>
+     <div class="player-status-child">Mana: ${state.player.mana}/${state.player.maxMana}</div>
+    <div class="player-status-child">XP: ${state.player.xp}/${state.player.nextLevelXp}</div>
+     <div class="player-status-child">Gold: ${state.player.gold}</div>
+     <div class="player-status-child">Torches: ${state.player.torches}</div>`; 
+}
+
 function updateStats() {
+    updatePlayerInfo();
+    updatePlayerStatus();
     if (!state.ui.overlayOpen) return;
 
     const statsDiv = document.getElementById('stats');
@@ -385,22 +410,18 @@ function updateInventory(equippedOnly = false) {
 
     if (inventoryContent) {
         inventoryContent.innerHTML = `
-            <div style="font-size: 18px; font-weight: bold;">Inventory</div>
-            <hr style="border: 1px solid #0f0; margin: 0;">
+
+            <div class="inventory-item-wrapper">
             ${state.player.inventory.items?.length ? state.player.inventory.items.map((item, index) => `
-                <div class="inventory-item" style="display: flex; justify-content: space-between; border-bottom:1px dashed #090;">
-                    <div style="width: 50%;">
-                        <p class="inventory-slot ${item.itemTier} ${item.type}">
-                            <img src="img/icons/items/${item.icon}" alt="${item.name}" 
-                                 class="item item-icon ${item.itemTier} ${item.type}" 
-                                 data-item='${JSON.stringify(item)}' data-index='${index}'>
-                        </p>
-                    </div>
-                    <div style="width: 50%;">
-                        <p class="item-name">${item.name}<br />(${item.itemTier} ${item.type})</p>
-                        <p><button onclick="window.ui.dropItem(${index})">Drop</button></p>
-                    </div>
-                </div>`).join('') : '<p>Inventory empty.</p>'}`;
+                
+                <div class="inventory-item">
+                    <p class="inventory-slot ${item.itemTier} ${item.type}">
+                        <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' data-index='${index}'>
+                        <br /><span class="item-label ${item.itemTier}">(${item.itemTier} ${item.type})</span><br /><button onclick="window.ui.dropItem(${index})">X</button>
+                    </p>
+                </div>
+
+                `).join('') + `</div>`: '<p>Inventory empty.</p>'}`;
         addItemListeners(); // Re-add listeners after updating inventory
         return '';
     }
@@ -408,7 +429,10 @@ function updateInventory(equippedOnly = false) {
     return '';
 }
 
+
+
 function renderOverlay() {
+
     const tabsDiv = document.getElementById('tabs');
     if (!state.ui.overlayOpen) {
         if (tabsDiv) {
@@ -443,7 +467,7 @@ function renderOverlay() {
                 ${state.ui.logEntries.length ? state.ui.logEntries.slice(0, state.ui.maxLogEntries).map(line => `<p>${line}</p>`).join('') : '<p>Nothing to log yet.</p>'}
             </div>
 
-            <div id="inventory-content" class="ui-tab" style="display: ${state.ui.activeTab === 'inventory' ? 'block' : 'none'}; overflow-y: auto;">
+            <div id="inventory-content" class="ui-tab" style="display: ${state.ui.activeTab === 'inventory' ? 'block' : 'none'};">
                 ${updateInventory()}
             </div>
 
@@ -456,6 +480,7 @@ function renderOverlay() {
                         <div>Agility: ${state.player.agility}</div>
                         <div>Armor: ${state.player.armor}</div>
                         <div>Defense: ${state.player.defense}</div>
+                        <div>Block: ${state.player.block}</div>
                     </div>
                     <div style="width: 50%;">
                         <div>HP: ${state.player.hp}/${state.player.maxHp}</div>
@@ -525,5 +550,7 @@ window.ui = {
     updateStats,
     updateLog,
     updateInventory,
-    writeToLog
+    writeToLog,
+    updatePlayerInfo,
+    updatePlayerStatus
 };

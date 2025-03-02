@@ -10,7 +10,7 @@ body {
     width: 100vw;
     margin: 0;
     padding: 0;
-    background-color: #000;
+    background-color: #0f0;
     font-size: 1rem; /* ~16px base, flexible */
     overflow: hidden; /* Prevent scrollbars */
 }
@@ -47,8 +47,6 @@ td {
     display: flex;
     flex-direction: row;
     background-color: #000;
-    border: 0.0625rem solid #0f0; /* ~1px */
-    padding: 0;
     margin: 0;
     width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
     height: calc(100vh - 0.125rem); /* Account for border (1px each side) */
@@ -58,13 +56,63 @@ td {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
+    height: calc(100vh - 0.125rem); /* Account for border (1px each side) */
     background: transparent;
     pointer-events: none; /* Non-clickable, children can override */
     z-index: 100; /* Above game but below splash */
     overflow: hidden; /* Prevent child overflow */
 }
+
+#player-info {
+    position: absolute;
+    display: flex;
+    justify-content: space-evenly;
+    top: 0;
+    left: 0;
+    width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
+    margin: 0.0625rem;
+    
+
+    height: 3rem; /* ~48px */
+    background-color: #000;
+    pointer-events: none; /* Non-clickable, children can override */
+    z-index: 500; /* Above game but below splash */
+    overflow: hidden; /* Prevent child overflow */
+}
+
+    #player-info > * {
+        font-weight: bold;
+        text-align: center;
+        color: #0f0;
+        z-index: 1000;
+        padding: 0.625rem; /* ~10px */
+    }
+
+
+#player-status {
+    position: absolute;
+    display: flex;
+    justify-content: space-evenly;
+    bottom: 0;
+    left: 0;
+    width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
+    margin: 0.0625rem;
+    height: 3rem; /* ~48px */
+    background-color: #000;
+    pointer-events: none; /* Non-clickable, children can override */
+    z-index: 500; /* Above game but below splash */
+    overflow: hidden; /* Prevent child overflow */
+}
+
+#player-status > * {
+    font-weight: bold;
+    text-align: center;
+    color: #0f0;
+    z-index: 1000;
+    padding: 0.625rem; /* ~10px */
+}
+
 
 #tabs {
     position: absolute;
@@ -206,7 +254,8 @@ td {
     margin: 0;
     font-family: Roboto, Verdana;
     z-index: 1000;
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
     position: absolute;
 }
 
@@ -241,9 +290,9 @@ td {
     line-height: 1rem; /* ~16px */
     white-space: pre;
     color: #0f0;
-    border: 0.0625rem solid #0f0; /* ~1px */
-    padding: 0;
-    margin: 0;
+    border: 0;
+    padding:0;
+    margin: 3rem;
     width: calc(100vw - 0.25rem); /* Account for game and map borders */
     height: calc(100vh - 0.25rem); /* Account for game and map borders */
     overflow: auto;
@@ -281,17 +330,40 @@ td {
 /*////////////////////////////////////////////////////   TABS DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #tabs #equipped-items {
+    width: 100%;
     display: flex;
     justify-content: space-around;
-    align-items: center;
+    flex-wrap:wrap;
     padding: 0.625rem; /* ~10px */
+}
+
+inventory-content {
+    height: 25rem; /* ~400px */
+    width: 100%;
+    overflow-y: auto;
+}
+
+#tabs div.inventory-item-wrapper {
+    display: flex;
+    height: 21.5rem; /* ~344px */
+    margin-top: 0.625rem; /* ~10px */
+    padding: 0.625rem; /* ~10px */
+    border: 0.0625rem solid #0f0; /* ~1px */
+}
+
+#tabs div.inventory-item {
+    padding: .3125rem; /* ~5px */
+    margin: 0;
 }
 
 #tabs p.inventory-slot,
 #tabs p.equip-slot {
-    margin: 0.625rem 0 0 0; /* ~10px */
+    margin: 0.125rem 0 0 0; /* ~2px */
     padding: 0;
+    margin 0;
     text-align: center;
+    width: 4.25rem; /* ~68px */
+    height: 4.25rem; /* ~68px */
 }
 
     #tabs p.inventory-slot img.item,
@@ -303,14 +375,15 @@ td {
         margin: 0;
     }
 
-#tabs button {
-    background: #000;
-    color: #0f0;
-}
-
-    #tabs button:hover {
-        background: #0f0;
-        color: #000;
+    #tabs p.inventory-slot span.item-label {
+        background: #000;
+        color: #0f0;
+        font-size: 0.6rem; /* ~10px */
+        width: 4rem; /* ~64px */
+        text-align: center;
+    }
+    #tabs p.inventory-slot span.item-label.relic{
+        color: gold;
     }
 
 #player-name {

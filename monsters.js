@@ -58,9 +58,28 @@ const uniqueMonsters = [
     {
         x: 0,
         y: 0,
-        name: "Pinklefart",
-        classes: "demon",
+        name: "Plinklefart",
+        classes: "Demon",
         avatar: "P",
+        baseHp: 14,
+        maxHp: 14,
+        hp: 14,
+        minBaseDamage: 2,
+        maxBaseDamage: 3,
+        isAgro: false,
+        isElite: true,
+        isBoss: true,
+        affixes: ['poisonGas'],
+        gold: 100,
+        uniqueItemsDropped: ['Golden Khepresh'],
+    },
+
+    {
+        x: 0,
+        y: 0,
+        name: "T`Kore-Tickrob",
+        classes: "demon",
+        avatar: "K",
         baseHp: 12,
         maxHp: 12,
         hp: 12,
@@ -69,10 +88,45 @@ const uniqueMonsters = [
         isAgro: false,
         isElite: true,
         isBoss: true,
-        affixes: [],
+        affixes: ['goldTheft'],
+        gold: 100,
+        uniqueItemsDropped: ['Stolen Honor'],
 
-        },
-    ]
+    },
+
+]
+
+
+const monsterAffixes = {
+    goldTheft: {
+        name: "Gold Theft",
+        description: "Steals gold on hit",
+        onHit: function (monster, player) {
+            const goldStolen = Math.floor(player.gold * 0.1);
+            player.gold -= goldStolen;
+            writeToLog(`${monster.name} has stolen ${goldStolen} gold from you!`);
+            if (player.gold < 0) {
+                player.gold = 0;
+                writeToLog(`ALL YOUR GOLD ARE BELONG TO ${monster.name} `);
+            }
+        }
+    },
+    poisonGas: {
+        name: "Poison Gas",
+        description: "Releases a cloud of poison gas.",
+        onDeath: function (monster, tier) {
+            const gasCloud = {
+                x: monster.x,
+                y: monster.y,
+                tier: tier,
+                duration: 3,
+                damage: 2
+            };
+            state.gasClouds.push(gasCloud);
+            console.log(`Poison gas cloud released at (${monster.x}, ${monster.y})`);
+        }
+    }
+}
 
 function calculateMonsterAttackDamage(enemy, tier) {
     const tierDamageMultiplier = 0.1;

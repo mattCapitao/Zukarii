@@ -31,6 +31,7 @@ function handleInput(event) {
     let map = state.levels[state.tier].map;
     let newX = state.player.x;
     let newY = state.player.y;
+    let spacePressed = false;
 
     // Overlay toggle logic
     const tabsDiv = document.getElementById('tabs');
@@ -91,55 +92,80 @@ function handleInput(event) {
                 window.ui.renderOverlay();
             }
             return;
-    }
-
-    if (event.key === ' ') {
-        toggleRanged(event);
-        return;
-    }
-
-    if (state.isRangedMode) {
-        // Map WASD to ranged attacks when in ranged mode
-        switch (event.key.toLowerCase()) {
-            case 'w': window.rangedAttack('ArrowUp'); break;
-            case 's': window.rangedAttack('ArrowDown'); break;
-            case 'a': window.rangedAttack('ArrowLeft'); break;
-            case 'd': window.rangedAttack('ArrowRight'); break;
-            default: return;
-        }
-        return; // Prevent further processing since we handled the ranged attack
-    }
-
-    switch (event.key) {
-        case 'ArrowUp':
-        case 'w':
-        case 'W':
-            newY--;
-            break;
-        case 'ArrowDown':
-        case 's':
-        case 'S':
-            newY++;
-            break;
-        case 'ArrowLeft':
-        case 'a':
-        case 'A':
-            newX--;
-            break;
-        case 'ArrowRight':
-        case 'd':
-        case 'D':
-            newX++;
-            break;
         case 't':
-        case 'T':
             window.lightTorch();
             window.needsRender = true;
             console.log("needsRender set to true for torch (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
             endTurn();
             return;
-        default:
+    }
+    /*
+    if (event.key === ' ') {
+
+        if ((event.type === 'keydown' && !state.isRangedMode) || (event.type === 'keyup' && state.isRangedMode)) {
+            console.log(`Spacebar ${event.type} detected state.isRangedMode = ${state.isRangedMode} : toggling ranged mode. Event:` , event);
+            toggleRanged(event);
             return;
+        }
+    }
+    */
+
+    if (event.key === ' ') {
+        if (event.type === 'keydown' && !spacePressed && !state.isRangedMode) {
+            spacePressed = true;
+            console.log(`Spacebar pressed detected state.isRangedMode = ${state.isRangedMode} : toggling ranged mode`);
+            toggleRanged(event);
+            return;
+        } else if (event.type === 'keyup' && spacePressed && state.isRangedMode) {
+            spacePressed = false;
+            console.log(`Spacebar released detected state.isRangedMode = ${state.isRangedMode} : toggling ranged mode`);
+            toggleRanged(event);
+            return;
+        }
+    }
+
+
+    const directionalKeys = new Set(['w', 'W', 'a', 'A', 's', 'S', 'd', 'D', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight']);
+
+    const keyMap = {
+        'w': 'ArrowUp',
+        'W': 'ArrowUp', 
+        'a': 'ArrowLeft',
+        'A': 'ArrowLeft', 
+        's': 'ArrowDown',
+        'S': 'ArrowDown', 
+        'd': 'ArrowRight',
+        'D': 'ArrowRight',
+        'ArrowUp': 'ArrowUp',
+        'ArrowLeft': 'ArrowLeft',
+        'ArrowDown': 'ArrowDown',
+        'ArrowRight': 'ArrowRight',
+    };
+
+    if (state.isRangedMode && directionalKeys.has(event.key)) {
+
+        const rangedEventKey = keyMap[event.key];
+        console.log(`Directional key pressed: ${event.key} - rangedKey: ${rangedEventKey} state.isRangedMode = ${state.isRangedMode}`);
+        window.rangedAttack(rangedEventKey);
+        console.log(`directional key pressed: ${event.key} state.isRanged = ${state.isRangedMode} : Ranged attack triggered for` , rangedEventKey);
+
+        return;
+
+    } 
+
+    switch (keyMap[event.key]) {
+        case 'ArrowUp':
+            newY--;
+            break;
+        case 'ArrowDown':
+            newY++;
+            break;
+        case 'ArrowLeft':
+            newX--;
+            break;
+        case 'ArrowRight':
+            newX++;
+            break;
     }
 
     if (map[newY][newX] === '#') {
@@ -328,7 +354,7 @@ function init() {
     console.log("needsRender set to true for init (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
     renderIfNeeded();
     document.addEventListener('keydown', handleInput);
-    document.addEventListener('keydown', toggleRanged);
+
     document.addEventListener('keyup', toggleRanged);
 
     // Add click handler for #close-tabs

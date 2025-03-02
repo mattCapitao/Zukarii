@@ -1,8 +1,8 @@
 console.log("combat.js loaded");
 
-function calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage) {
+function calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus) {
     let baseDamage = Math.floor(Math.random() * (maxBaseDamage - minBaseDamage + 1)) + minBaseDamage;
-    let playerDamage = Math.round(baseDamage * (baseStat * 0.3));
+    let playerDamage = Math.round(baseDamage * (baseStat * 0.3)) + damageBonus;
     let isCrit = false;
 
     const critChance = state.player.agility / 2;
@@ -31,6 +31,7 @@ function handleMonsterRetaliation(monster, tier) {
     monsterDamage = Math.max(1, monsterDamage - defense);
     state.player.hp -= monsterDamage;
     writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
+    window.ui.updatePlayerStatus();
     if (state.ui.overlayOpen) {
         window.ui.updateStats();
     }
@@ -56,8 +57,8 @@ window.meleeCombat = function (monster) {
         minBaseDamage = 1; // Fists
         maxBaseDamage = 1;
     }
-
-    const { damage, isCrit } = calculatePlayerDamage(state.player.prowess, minBaseDamage, maxBaseDamage);
+    const damageBonus = state.player.damageBonus + state.player.meleeDamageBonus;
+    const { damage, isCrit } = calculatePlayerDamage(state.player.prowess, minBaseDamage, maxBaseDamage, damageBonus);
     let combatLogMsg = isCrit ? `Critical hit! Dealt ${damage} damage to ${monster.name} ` : `You dealt ${damage} damage to ${monster.name} `;
 
     monster.hp -= damage;
@@ -82,7 +83,7 @@ window.toggleRanged = function (event) {
     if (!state.gameStarted) {
         state.gameStarted = true;
         initGame();
-        document.getElementById('info').classList.remove('hidden');
+        //document.getElementById('info').classList.remove('hidden');
         render();
         return;
     }
@@ -147,7 +148,8 @@ window.rangedAttack = async function (direction) {
 
         let monster = state.monsters[state.tier].find(m => m.x === tx && m.y === ty && m.hp > 0);
         if (monster) {
-            const { damage, isCrit } = calculatePlayerDamage(state.player.intellect, minBaseDamage, maxBaseDamage);
+            const damageBonus = state.player.damageBonus + state.player.rangedDamageBonus;
+            const { damage, isCrit } = calculatePlayerDamage(state.player.intellect, minBaseDamage, maxBaseDamage, damageBonus);
             let combatLogMsg = isCrit ? `Critical hit! Dealt ${damage} damage to ${monster.name} ` : `You dealt ${damage} damage to ${monster.name} `;
 
             monster.hp -= damage;
