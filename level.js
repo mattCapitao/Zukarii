@@ -32,7 +32,7 @@ function generateRoomDimensions(roomType) {
 const BUFFER_SIZE = 1;
 const SPECIAL_BUFFER_SIZE = 2;
 const MIN_ROOM_SIZE = 4;
-const EDGE_BUFFER = 1;
+const EDGE_BUFFER = 2;
 const MAX_OVERLAP_PERCENT = 0.10;
 const INITIAL_MIN_DISTANCE = 10;
 const MIN_DISTANCE_FLOOR = 3;

@@ -539,7 +539,43 @@ function writeToLog(message) {
     }
 }
 
-// Namespace exports
+
+function gameOver(message) {
+    console.log("gameOver called with message:", message);
+    const existingGameOver = document.getElementById('game-over');
+    if (existingGameOver) existingGameOver.remove();
+
+    const gameOver = document.createElement('div');
+    gameOver.id = 'game-over';
+    const headline = state.isVictory ? '<h1>VICTORY!</h1>' : '<h1>GAME OVER</h1>';
+    gameOver.innerHTML = headline + '<p>' + message + '</p>';
+    document.getElementById('map').appendChild(gameOver);
+
+    const mapElement = document.getElementById('map');
+    const mapWidth = mapElement.clientWidth;
+    const mapHeight = mapElement.clientHeight;
+    const scrollLeft = mapElement.scrollLeft;
+    const scrollTop = mapElement.scrollTop;
+    const centerX = scrollLeft + (mapWidth / 2);
+    const centerY = scrollTop + (mapHeight / 2);
+
+    gameOver.style.left = `${centerX - (gameOver.offsetWidth / 2)}px`;
+    gameOver.style.top = `${centerY - (gameOver.offsetHeight / 2)}px`;
+
+    gameOver.classList.add(state.isVictory ? 'victory' : 'death');
+
+    const restartButton = document.createElement('button');
+    restartButton.id = 'restart-button';
+    restartButton.textContent = 'Play Again?';
+    restartButton.onclick = () => {
+        console.log('Restart Clicked');
+        location.reload(true);
+    };
+    gameOver.appendChild(restartButton);
+}
+
+
+
 window.ui = {
     dropItem,
     equipItem,
@@ -552,5 +588,6 @@ window.ui = {
     updateInventory,
     writeToLog,
     updatePlayerInfo,
-    updatePlayerStatus
+    updatePlayerStatus,
+    gameOver
 };

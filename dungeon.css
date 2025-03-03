@@ -48,8 +48,9 @@ td {
     flex-direction: row;
     background-color: #000;
     margin: 0;
+    padding:0;
     width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
-    height: calc(100vh - 0.125rem); /* Account for border (1px each side) */
+    height: calc(100vh - 3.125rem); /* Account for border (1px each side) */
 }
 
 #ui-layer {
@@ -291,10 +292,20 @@ td {
     white-space: pre;
     color: #0f0;
     border: 0;
-    padding:0;
-    margin: 3rem;
-    width: calc(100vw - 0.25rem); /* Account for game and map borders */
-    height: calc(100vh - 0.25rem); /* Account for game and map borders */
+    padding: 0;
+    margin: 0;
+
+    /*////////////////////////////////////////////// BEGIN WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+    /* DO NOT SET HEIGHT, WIDTH, OR MARGIN HERE - THESE CREATE DEAD ZONES IN MAP SCROLLING BY LIMITING SCROLLABLE AREA 
+       OR OFFSETTING #MAP POSITION. 
+       USE OVERFLOW: AUTO AND RELY ON RENDER.JS FOR DYNAMIC SCROLLING. */
+    /* margin: 3rem;*/
+    /*width: calc(100vw - 0.25rem);  Account for game and map borders */
+    /* height: calc(100vh - 0.25rem); /* Account for game and map borders */
+
+    /*////////////////////////////////////////////////END WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/ 
+        
     overflow: auto;
     box-sizing: border-box;
     -ms-overflow-style: none;

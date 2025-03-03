@@ -1,16 +1,4 @@
 ﻿console.log("render.js loaded");
-
-function writeToLog(message) {
-    window.ui.writeToLog(message);
-}
-
-function clearLog() {
-    state.ui.logEntries = [];
-    if (state.ui.overlayOpen) {
-        window.ui.updateLog();
-    }
-}
-
 function render() {
     console.log("Rendering...", window.needsRender, "typeof:", typeof window.needsRender);
     if (!window.needsRender) return;
@@ -20,6 +8,11 @@ function render() {
     if (!state.mapDiv) state.mapDiv = document.getElementById('map');
     if (!state.statsDiv) state.statsDiv = document.getElementById('stats');
     if (!state.logDiv) state.logDiv = document.getElementById('log');
+
+    // Add one-time check for unexpected CSS properties on #map here
+    if (state.mapDiv.style.height || state.mapDiv.style.width || state.mapDiv.style.margin) {
+        console.warn("Unexpected CSS properties on #map (height, width, or margin) may break scrolling. Ensure only overflow: auto is used.");
+    }
 
     if (!state.gameStarted || !state.levels[state.tier]) {
         document.getElementById('splash').style.display = 'flex';
@@ -62,7 +55,7 @@ function render() {
         if (state.discoveredTileCount[tier] >= 1000) {
             state.discoveredTileCount[tier] = 0;
             const exploreXP = 25;
-            writeToLog("Explored 1000 tiles!");
+            window.ui.writeToLog("Explored 1000 tiles!");
             awardXp(exploreXP);
         }
     }
@@ -154,6 +147,9 @@ function updateMapScroll() {
         return;
     }
 
+    console.log(`Map dimensions: scrollWidth=${map.scrollWidth}, scrollHeight=${map.scrollHeight}, clientWidth=${map.clientWidth}, clientHeight=${map.clientHeight}`);
+    console.log(`Player position: offsetLeft=${player.offsetLeft}, offsetTop=${player.offsetTop}`);
+
     if (animationFrame) {
         cancelAnimationFrame(animationFrame);
     }
@@ -167,8 +163,8 @@ function updateMapScroll() {
     const currentScrollX = map.scrollLeft;
     const currentScrollY = map.scrollTop;
 
-    const paddingX = viewportWidth * 0.15;
-    const paddingY = viewportHeight * 0.15;
+    const paddingX = viewportWidth * 0.25;
+    const paddingY = viewportHeight * 0.25;
 
     const playerViewportX = playerX - currentScrollX;
     const playerViewportY = playerY - currentScrollY;
@@ -185,7 +181,7 @@ function updateMapScroll() {
     if (playerViewportY < paddingY) {
         targetScrollY = playerY - paddingY;
     } else if (playerViewportY + spanHeight > viewportHeight - paddingY) {
-        targetScrollY = playerY + spanHeight - (viewportHeight - paddingY);
+        targetScrollY = playerY + spanHeight - (viewportHeight - (paddingY) );
     }
 
     targetScrollX = Math.max(0, Math.min(targetScrollX, map.scrollWidth - viewportWidth));
@@ -196,7 +192,7 @@ function updateMapScroll() {
         return;
     }
 
-    const duration = 200;
+    const duration = 300;
     let startTime = null;
     const easeInOutQuad = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
@@ -231,6 +227,9 @@ function setInitialScroll() {
         return;
     }
 
+    console.log(`Map dimensions: scrollWidth=${map.scrollWidth}, scrollHeight=${map.scrollHeight}, clientWidth=${map.clientWidth}, clientHeight=${map.clientHeight}`);
+    console.log(`Player position: offsetLeft=${player.offsetLeft}, offsetTop=${player.offsetTop}`);
+
     const spanWidth = 16;
     const spanHeight = 16;
     const playerX = player.offsetLeft;
@@ -247,43 +246,8 @@ function setInitialScroll() {
     console.log(`Initial scroll set to (${map.scrollLeft}, ${map.scrollTop}) for player at (${playerX}, ${playerY})`);
 }
 
-function gameOver(message) {
-    console.log("gameOver called with message:", message);
-    const existingGameOver = document.getElementById('game-over');
-    if (existingGameOver) existingGameOver.remove();
-
-    const gameOver = document.createElement('div');
-    gameOver.id = 'game-over';
-    const headline = state.isVictory ? '<h1>VICTORY!</h1>' : '<h1>GAME OVER</h1>';
-    gameOver.innerHTML = headline + '<p>' + message + '</p>';
-    document.getElementById('map').appendChild(gameOver);
-
-    const mapElement = document.getElementById('map');
-    const mapWidth = mapElement.clientWidth;
-    const mapHeight = mapElement.clientHeight;
-    const scrollLeft = mapElement.scrollLeft;
-    const scrollTop = mapElement.scrollTop;
-    const centerX = scrollLeft + (mapWidth / 2);
-    const centerY = scrollTop + (mapHeight / 2);
-
-    gameOver.style.left = `${centerX - (gameOver.offsetWidth / 2)}px`;
-    gameOver.style.top = `${centerY - (gameOver.offsetHeight / 2)}px`;
-
-    gameOver.classList.add(state.isVictory ? 'victory' : 'death');
-
-    const restartButton = document.createElement('button');
-    restartButton.id = 'restart-button';
-    restartButton.textContent = 'Play Again?';
-    restartButton.onclick = () => {
-        console.log('Restart Clicked');
-        location.reload(true);
-    };
-    gameOver.appendChild(restartButton);
-}
 
 window.render = render;
 window.setInitialScroll = setInitialScroll;
 window.updateMapScroll = updateMapScroll;
-window.gameOver = gameOver;
-window.writeToLog = writeToLog;
-window.clearLog = clearLog;
+

@@ -80,13 +80,7 @@ window.meleeCombat = function (monster) {
 };
 
 window.toggleRanged = function (event) {
-    if (!state.gameStarted) {
-        state.gameStarted = true;
-        initGame();
-        //document.getElementById('info').classList.remove('hidden');
-        render();
-        return;
-    }
+
     if (event.key === ' ') {
         if (event.type === 'keydown') {
             const offWeapon = state.player.inventory.equipped.offhand;

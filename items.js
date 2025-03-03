@@ -200,6 +200,7 @@ function itemDropRoll() {
             itemTier= itemTiers[6]; // 'relic'
     }
 
+
     // Optional: for testing
     //console.log(`Random: ${randomValue.toFixed(2)}, Tier: ${itemTierDropped}`);
     console.log(`itemDropRoll() returning: { roll: ,${itemDropData.roll} itemTier: ${itemDropData.itemTier}}`);

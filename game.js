@@ -6,6 +6,9 @@ const renderThrottle = 70;
 const inputThrottle = 70;
 
 function handleInput(event) {
+
+    //////////////////////////////// BEGIN INPUT VALIDATION
+
     if (!state.gameStarted) {
         console.log("Starting game...");
         state.gameStarted = true;
@@ -16,10 +19,7 @@ function handleInput(event) {
         return;
     }
 
-    if (state.gameOver) {
-        console.log("Game over, input ignored");
-        return;
-    }
+    if (state.gameOver) {console.log("Game over, input ignored");return;}
 
     const now = Date.now();
     if (now - lastInputTime < inputThrottle) return;
@@ -31,142 +31,127 @@ function handleInput(event) {
     let map = state.levels[state.tier].map;
     let newX = state.player.x;
     let newY = state.player.y;
-    let spacePressed = false;
 
-    // Overlay toggle logic
     const tabsDiv = document.getElementById('tabs');
-    switch (event.key.toLowerCase()) {
-        case 'i':
-            if (!state.ui.overlayOpen) {
-                state.ui.overlayOpen = true;
-                state.ui.activeTab = 'inventory';
-                tabsDiv.classList.remove('hidden');
-                window.ui.renderOverlay();
-                window.ui.updateInventory(); // Ensure immediate inventory update
-            } else if (state.ui.activeTab.toLowerCase() === 'inventory') {
-                state.ui.overlayOpen = false;
-                tabsDiv.classList.add('hidden');
-                window.ui.renderOverlay();
-            } else {
-                state.ui.activeTab = 'inventory';
-                window.ui.renderOverlay();
-                window.ui.updateInventory(); // Ensure immediate inventory update
-            }
-            return;
-        case 'c':
-            if (!state.ui.overlayOpen) {
-                state.ui.overlayOpen = true;
-                state.ui.activeTab = 'character';
-                tabsDiv.classList.remove('hidden');
-                window.ui.renderOverlay();
-                window.ui.updateInventory(true); // Ensure immediate equipped items update
-            } else if (state.ui.activeTab.toLowerCase() === 'character') {
-                state.ui.overlayOpen = false;
-                tabsDiv.classList.add('hidden');
-                window.ui.renderOverlay();
-            } else {
-                state.ui.activeTab = 'character';
-                window.ui.renderOverlay();
-                window.ui.updateInventory(true); // Ensure immediate equipped items update
-            }
-            return;
-        case 'l':
-            if (!state.ui.overlayOpen) {
-                state.ui.overlayOpen = true;
-                state.ui.activeTab = 'log';
-                tabsDiv.classList.remove('hidden');
-                window.ui.renderOverlay();
-            } else if (state.ui.activeTab.toLowerCase() === 'log') {
-                state.ui.overlayOpen = false;
-                tabsDiv.classList.add('hidden');
-                window.ui.renderOverlay();
-            } else {
-                state.ui.activeTab = 'log';
-                window.ui.renderOverlay();
-            }
-            return;
-        case 'escape':
-            if (state.ui.overlayOpen) {
-                state.ui.overlayOpen = false;
-                tabsDiv.classList.add('hidden');
-                window.ui.renderOverlay();
-            }
-            return;
-        case 't':
-            window.lightTorch();
-            window.needsRender = true;
-            console.log("needsRender set to true for torch (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
-            endTurn();
-            return;
-    }
-    /*
-    if (event.key === ' ') {
-
-        if ((event.type === 'keydown' && !state.isRangedMode) || (event.type === 'keyup' && state.isRangedMode)) {
-            console.log(`Spacebar ${event.type} detected state.isRangedMode = ${state.isRangedMode} : toggling ranged mode. Event:` , event);
-            toggleRanged(event);
-            return;
-        }
-    }
-    */
-
-    if (event.key === ' ') {
-        if (event.type === 'keydown' && !spacePressed && !state.isRangedMode) {
-            spacePressed = true;
-            console.log(`Spacebar pressed detected state.isRangedMode = ${state.isRangedMode} : toggling ranged mode`);
-            toggleRanged(event);
-            return;
-        } else if (event.type === 'keyup' && spacePressed && state.isRangedMode) {
-            spacePressed = false;
-            console.log(`Spacebar released detected state.isRangedMode = ${state.isRangedMode} : toggling ranged mode`);
-            toggleRanged(event);
-            return;
-        }
-    }
-
-
-    const directionalKeys = new Set(['w', 'W', 'a', 'A', 's', 'S', 'd', 'D', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight']);
-
     const keyMap = {
-        'w': 'ArrowUp',
-        'W': 'ArrowUp', 
-        'a': 'ArrowLeft',
-        'A': 'ArrowLeft', 
-        's': 'ArrowDown',
-        'S': 'ArrowDown', 
-        'd': 'ArrowRight',
-        'D': 'ArrowRight',
-        'ArrowUp': 'ArrowUp',
-        'ArrowLeft': 'ArrowLeft',
-        'ArrowDown': 'ArrowDown',
-        'ArrowRight': 'ArrowRight',
+        'w': 'ArrowUp', 'W': 'ArrowUp', 'ArrowUp': 'ArrowUp',
+        'a': 'ArrowLeft', 'A': 'ArrowLeft', 'ArrowLeft': 'ArrowLeft',
+        's': 'ArrowDown', 'S': 'ArrowDown', 'ArrowDown': 'ArrowDown',
+        'd': 'ArrowRight', 'D': 'ArrowRight', 'ArrowRight': 'ArrowRight',
+        'i': 'i', 'I': 'i', 'c': 'c', 'C': 'c', 'l': 'l', 'L': 'l',
+        'escape': 'escape', 'Escape': 'escape', 't': 't', 'T': 't',
+        ' ': ' ', 'Space': ' '
     };
 
-    if (state.isRangedMode && directionalKeys.has(event.key)) {
+    const mappedKeys = new Set(Object.keys(keyMap));
+    if (mappedKeys.has(event.key) !== true) { console.log(`unmapped/unmanaged key press event ${event} exiting handleInput()`); return; }
 
-        const rangedEventKey = keyMap[event.key];
-        console.log(`Directional key pressed: ${event.key} - rangedKey: ${rangedEventKey} state.isRangedMode = ${state.isRangedMode}`);
-        window.rangedAttack(rangedEventKey);
-        console.log(`directional key pressed: ${event.key} state.isRanged = ${state.isRangedMode} : Ranged attack triggered for` , rangedEventKey);
+    ///// END INPUT VALIDATION
 
-        return;
+    ///// START KEY UP
 
-    } 
+    if (event.type === 'keyup') {
 
-    switch (keyMap[event.key]) {
-        case 'ArrowUp':
-            newY--;
-            break;
-        case 'ArrowDown':
-            newY++;
-            break;
-        case 'ArrowLeft':
-            newX--;
-            break;
-        case 'ArrowRight':
-            newX++;
-            break;
+       if(event.key === ' ' && state.isRangedMode) {
+            console.log(`Spacebar released detected state.isRangedMode = ${state.isRangedMode} : toggling ranged mode`);
+            toggleRanged(event); return;
+        }
     }
+
+    ///// END KEY UP
+
+    ///// START KEY DOWN
+
+    if (event.type === 'keydown') {
+
+        const directionalKeys = new Set(['w', 'W', 'a', 'A', 's', 'S', 'd', 'D', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight']);
+
+        if (state.isRangedMode && directionalKeys.has(event.key)) {
+
+            const rangedEventKey = keyMap[event.key];
+            console.log(`Directional key pressed: ${event.key} - rangedKey: ${rangedEventKey} state.isRangedMode = ${state.isRangedMode}`);
+            window.rangedAttack(rangedEventKey);
+            console.log(`directional key pressed: ${event.key} state.isRanged = ${state.isRangedMode} : Ranged attack triggered for`, rangedEventKey);
+
+            return;
+        }
+
+        switch (keyMap[event.key]) {
+            case 'ArrowUp':newY--; break;
+            case 'ArrowDown':newY++; break;
+            case 'ArrowLeft':newX--; break;
+            case 'ArrowRight': newX++;break;
+        }
+
+        switch (event.key.toLowerCase()) {
+            case 'i':
+                if (!state.ui.overlayOpen) {
+                    state.ui.overlayOpen = true;
+                    state.ui.activeTab = 'inventory';
+                    tabsDiv.classList.remove('hidden');
+                    window.ui.renderOverlay();
+                    window.ui.updateInventory(); // Ensure immediate inventory update
+                } else if (state.ui.activeTab.toLowerCase() === 'inventory') {
+                    state.ui.overlayOpen = false;
+                    tabsDiv.classList.add('hidden');
+                    window.ui.renderOverlay();
+                } else {
+                    state.ui.activeTab = 'inventory';
+                    window.ui.renderOverlay();
+                    window.ui.updateInventory(); // Ensure immediate inventory update
+                }
+                return;
+            case 'c':
+                if (!state.ui.overlayOpen) {
+                    state.ui.overlayOpen = true;
+                    state.ui.activeTab = 'character';
+                    tabsDiv.classList.remove('hidden');
+                    window.ui.renderOverlay();
+                    window.ui.updateInventory(true); // Ensure immediate equipped items update
+                } else if (state.ui.activeTab.toLowerCase() === 'character') {
+                    state.ui.overlayOpen = false;
+                    tabsDiv.classList.add('hidden');
+                    window.ui.renderOverlay();
+                } else {
+                    state.ui.activeTab = 'character';
+                    window.ui.renderOverlay();
+                    window.ui.updateInventory(true); // Ensure immediate equipped items update
+                }
+                return;
+            case 'l':
+                if (!state.ui.overlayOpen) {
+                    state.ui.overlayOpen = true;
+                    state.ui.activeTab = 'log';
+                    tabsDiv.classList.remove('hidden');
+                    window.ui.renderOverlay();
+                } else if (state.ui.activeTab.toLowerCase() === 'log') {
+                    state.ui.overlayOpen = false;
+                    tabsDiv.classList.add('hidden');
+                    window.ui.renderOverlay();
+                } else {
+                    state.ui.activeTab = 'log';
+                    window.ui.renderOverlay();
+                }
+                return;
+            case 'escape':
+                if (state.ui.overlayOpen) {
+                    state.ui.overlayOpen = false;
+                    tabsDiv.classList.add('hidden');
+                    window.ui.renderOverlay();
+                }
+                return;
+            case 't':
+                window.lightTorch();
+                window.needsRender = true;
+                console.log("needsRender set to true for torch (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
+                endTurn();
+                return;
+            case ' ':
+               if(!state.isRangedMode) toggleRanged(event);
+                return;
+        }
+
+    } // END keydown
 
     if (map[newY][newX] === '#') {
         endTurn();
@@ -295,7 +280,6 @@ function handleInput(event) {
             writeToLog("You amassed a trillion gold! Victory!");
             state.isVictory = true;
             document.removeEventListener('keydown', handleInput);
-            document.removeEventListener('keydown', toggleRanged);
             document.removeEventListener('keyup', toggleRanged);
         }
         if (state.ui.overlayOpen) {

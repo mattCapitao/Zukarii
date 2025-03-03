@@ -58,7 +58,9 @@ function death(source) {
     document.removeEventListener('keyup', toggleRanged);
     console.log("Player has died - Game over!");
     state.gameOver = true; // Set flag
-    window.gameOver('You have been killed by a ' + source + '!');
+    window.ui.updatePlayerInfo();
+    window.ui.updatePlayerStatus();
+    window.ui.gameOver('You have been killed by a ' + source + '!');
     if (state.ui.overlayOpen) {
         window.ui.updateStats();
     }
@@ -71,9 +73,12 @@ function exit() {
     document.removeEventListener('keyup', toggleRanged);
     console.log("Player has Left the building - Game over!");
     state.gameOver = true; // Set flag
-    window.gameOver('You exited the dungeon! Too much adventure to handle eh?');
+    window.ui.gameOver('You exited the dungeon! Too much adventure to handle eh?');
+    window.ui.updatePlayerInfo();
+    window.ui.updatePlayerStatus();
     if (state.ui.overlayOpen) {
         window.ui.updateStats();
+        
     }
 }
 
