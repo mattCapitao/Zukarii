@@ -2,7 +2,25 @@ console.log("player.js loaded");
 
 function addStartingItems() {
     state.player.inventory.equipped = emptyEquipSlots;
-    const startItems = [window.uniqueItems[0], window.startItems[0], window.startItems[1], window.startItems[2]];
+    const startItems = [
+        window.uniqueItems[0],
+        window.startItems[0], window.startItems[1], window.startItems[2],
+        window.startItems[3], window.startItems[4], window.startItems[5], 
+        window.startItems[0], window.startItems[1], window.startItems[2],
+        window.startItems[3], window.startItems[4], window.startItems[5], 
+        window.startItems[0], window.startItems[1], window.startItems[2],
+        window.startItems[3], window.startItems[4], window.startItems[5], 
+        window.startItems[0], window.startItems[1], window.startItems[2],
+        window.startItems[3], window.startItems[4], window.startItems[5], 
+        window.startItems[0], window.startItems[1], window.startItems[2],
+        window.startItems[3], window.startItems[4], window.startItems[5], 
+        window.startItems[0], window.startItems[1], window.startItems[2],
+        window.startItems[3], window.startItems[4], window.startItems[5], 
+        window.startItems[0], window.startItems[1], window.startItems[2],
+        window.startItems[3], window.startItems[4], window.startItems[5], 
+        window.startItems[0], window.startItems[1], window.startItems[2],
+        window.startItems[3], window.startItems[4], window.startItems[5], 
+    ];
     for (let item of startItems) {
         item.uniqueId = window.generateUniqueId(),
             state.player.inventory.items.push({ ...item });

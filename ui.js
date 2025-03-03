@@ -458,9 +458,10 @@ function renderOverlay() {
     if (logDiv) {
         logDiv.innerHTML = `
             <div id="tab-menu">
-                <button id="log-tab" style="flex: 1; background: ${state.ui.activeTab === 'log' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'log' ? '#000' : '#0f0'};">Log</button>
-                <button id="character-tab" style="flex: 1; background: ${state.ui.activeTab === 'character' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'character' ? '#000' : '#0f0'};">Character</button>
-                <button id="inventory-tab" style="flex: 1; background: ${state.ui.activeTab === 'inventory' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'inventory' ? '#000' : '#0f0'};">Inventory</button>
+                <button id="log-tab" class="tabs-button" style="background: ${state.ui.activeTab === 'log' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'log' ? '#000' : '#0f0'};">Log</button>
+                <button id="character-tab" class="tabs-button" style="background: ${state.ui.activeTab === 'character' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'character' ? '#000' : '#0f0'};">Character</button>
+                <button id="inventory-tab" class="tabs-button" style="background: ${state.ui.activeTab === 'inventory' ? '#0f0' : '#000'}; color: ${state.ui.activeTab === 'inventory' ? '#000' : '#0f0'};">Inventory</button>
+                <button id="close-tabs" >X</button>
             </div>
 
             <div id="log-content" class="ui-tab" style="display: ${state.ui.activeTab === 'log' ? 'block' : 'none'}; overflow-y: auto;">

@@ -137,16 +137,21 @@ td {
         display: none;
     }
 
+
+.tabs-button {
+    flex: 0 0 auto;
+}
+
+
 #close-tabs {
-    position: absolute;
-    top: 0.5rem; /* ~8px */
-    right: 0.5rem; /* ~8px */
     background: #000;
     color: #0f0;
     border: 0.0625rem solid #0f0; /* ~1px */
     padding: 0.3125rem 0.625rem; /* ~5px 10px */
     cursor: pointer;
     font-size: 1rem; /* ~16px */
+    width:1rem;
+
 }
 
     #close-tabs:hover {
@@ -348,30 +353,34 @@ td {
     padding: 0.625rem; /* ~10px */
 }
 
-inventory-content {
+#inventory-content {
     height: 25rem; /* ~400px */
     width: 100%;
-    overflow-y: auto;
 }
 
 #tabs div.inventory-item-wrapper {
     display: flex;
-    height: 21.5rem; /* ~344px */
+    flex-wrap: wrap;
+    width: 100%;
+    height:100%;
     margin-top: 0.625rem; /* ~10px */
     padding: 0.625rem; /* ~10px */
     border: 0.0625rem solid #0f0; /* ~1px */
+    overflow-y: auto;
 }
 
 #tabs div.inventory-item {
+    display: flex;
+
     padding: .3125rem; /* ~5px */
-    margin: 0;
+    height: 8rem;  
 }
 
 #tabs p.inventory-slot,
 #tabs p.equip-slot {
     margin: 0.125rem 0 0 0; /* ~2px */
     padding: 0;
-    margin 0;
+    margin: 0;
     text-align: center;
     width: 4.25rem; /* ~68px */
     height: 4.25rem; /* ~68px */
@@ -389,7 +398,7 @@ inventory-content {
     #tabs p.inventory-slot span.item-label {
         background: #000;
         color: #0f0;
-        font-size: 0.6rem; /* ~10px */
+        font-size: 0.5rem; 
         width: 4rem; /* ~64px */
         text-align: center;
     }
