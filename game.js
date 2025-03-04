@@ -251,6 +251,12 @@ function handleInput(event) {
                 state.player.x = 1;
                 state.player.y = 1;
             }
+
+            // Trigger a full render for the new tier
+            state.needsInitialRender = true;
+            window.needsRender = true;
+            console.log("Triggered initial render for tier", state.tier);
+
         }
     } else if (map[newY][newX] === '≅' && fountain) {
         useFountain(fountain, state.tier);
@@ -314,6 +320,7 @@ function endTurn() {
             torchExpired();
         }
     }
+    window.calculateStats();
     window.ui.updateStats();
     moveMonsters();
     renderIfNeeded();

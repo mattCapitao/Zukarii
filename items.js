@@ -10,7 +10,7 @@ const uniqueItems = [
         baseDamageMin: 10,
         baseDamageMax: 15,
         itemTier: "relic",
-        stats: {intellect: 10, mana: 10, agility: 10, luck: 10, hp: 15}, 
+        stats: {intellect: 10, mana: 10, agility: 10, maxLuck: 10, hp: 15}, 
         description: "The Golden Khepresh has got nothing on this babby! ",
         uniqueId: null,
         icon: "mbphu-staff.svg",
@@ -37,12 +37,12 @@ const itemStatOptions = {
     },
     armor: {
         base: ['armor'],
-        bonus: ['hp', 'prowess', 'agility', 'block', 'defense'],
+        bonus: ['maxHp', 'prowess', 'agility', 'block', 'defense'],
     },
     amulet: {
-        base: ['luck'],
+        base: ['maxLuck'],
         bonus: [
-            'hp', 'mana', 'luck',
+            'maxHp', 'maxMana', 'maxLuck',
             'intellect', 'prowess', 'agility',
             'range', 'block', 'defense',
             'rangedDamageBonus', 'damageBonus'],
@@ -50,7 +50,7 @@ const itemStatOptions = {
     ring: {
         base: ['luck'],
         bonus: [
-            'hp', 'mana', 'luck',
+            'maxHp', 'maxMana', 'maxLuck',
             'intellect', 'prowess', 'agility',
             'range', 'block', 'defense',
             'rangedDamageBonus', 'damageBonus'],

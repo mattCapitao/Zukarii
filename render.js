@@ -9,7 +9,6 @@ function render() {
     if (!state.statsDiv) state.statsDiv = document.getElementById('stats');
     if (!state.logDiv) state.logDiv = document.getElementById('log');
 
-    // Add one-time check for unexpected CSS properties on #map here
     if (state.mapDiv.style.height || state.mapDiv.style.width || state.mapDiv.style.margin) {
         console.warn("Unexpected CSS properties on #map (height, width, or margin) may break scrolling. Ensure only overflow: auto is used.");
     }
@@ -17,8 +16,6 @@ function render() {
     if (!state.gameStarted || !state.levels[state.tier]) {
         document.getElementById('splash').style.display = 'flex';
         titleScreenContainer.innerHTML = titleScreen;
-        userNamePropmpt(500);
-        //state.mapDiv.style.border = 'none';
         return;
     }
 
@@ -63,71 +60,124 @@ function render() {
     }
 
     const tileMap = state.tileMap[tier];
-    let mapDisplay = '';
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            let isInRadius = state.visibleTiles[tier].has(`${x},${y}`);
-            let isDiscovered = state.discoveredWalls[tier].has(`${x},${y}`);
-            let isFloor = state.discoveredFloors[tier].has(`${x},${y}`);
-            let monster = state.monsters[tier].find(m => m.x === x && m.y === y && m.hp > 0);
-            let treasure = state.treasures[tier].find(t => t.x === x && t.y === y);
-            let fountain = state.fountains[tier].find(f => f.x === x && f.y === y && !f.used);
+    const updateRadius = Math.min(state.AGGRO_RANGE + 2, 15)
+    const minUpdateX = state.needsInitialRender ? 0 : Math.max(0, state.player.x - updateRadius);
+    const maxUpdateX = state.needsInitialRender ? width - 1 : Math.min(width - 1, state.player.x + updateRadius);
+    const minUpdateY = state.needsInitialRender ? 0 : Math.max(0, state.player.y - updateRadius);
+    const maxUpdateY = state.needsInitialRender ? height - 1 : Math.min(height - 1, state.player.y + updateRadius);
 
-            let char = map[y][x];
-            let className = 'undiscovered';
+    if (state.needsInitialRender) {
+        let mapDisplay = '';
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                let char = map[y][x];
+                let className = 'undiscovered';
+                let isDiscovered = state.discoveredWalls[tier].has(`${x},${y}`);
+                let isFloor = state.discoveredFloors[tier] && state.discoveredFloors[tier].has(`${x},${y}`);
+                let isInRadius = state.visibleTiles[tier].has(`${x},${y}`);
+                let monster = state.monsters[tier].find(m => m.x === x && m.y === y && m.hp > 0);
+                let treasure = state.treasures[tier].find(t => t.x === x && t.y === y);
+                let fountain = state.fountains[tier].find(f => f.x === x && f.y === y && !f.used);
 
-            if (x === state.player.x && y === state.player.y) {
-                char = '𓀠';
-                className = 'player';
-                if (state.player.torchLit) {
-                    className += ' torch';
+                if (x === state.player.x && y === state.player.y) {
+                    char = '𓀠';
+                    className = 'player';
+                    if (state.player.torchLit) className += ' torch';
+                    if (state.player.lampLit) {
+                        className += ' lamp';
+                        state.discoveryRadius = 6;
+                    }
+                } else if (state.projectile && x === state.projectile.x && y === state.projectile.y) {
+                    char = '*';
+                    className = 'discovered';
+                } else if (monster && (isInRadius || monster.isAgro)) {
+                    char = monster.avatar;
+                    className = 'discovered monster ' + monster.classes;
+                    if (monster.isElite) className += ' elite';
+                    if (monster.isBoss) className += ' boss';
+                    monster.affixes.forEach(affix => className += ` ${affix}`);
+                } else if (treasure && (isInRadius || treasure.discovered)) {
+                    treasure.discovered = true;
+                    char = '$';
+                    className = 'discovered treasure';
+                } else if (fountain && (isInRadius || fountain.discovered)) {
+                    fountain.discovered = true;
+                    char = '≅';
+                    className = 'discovered fountain';
+                } else if (isDiscovered || isInRadius) {
+                    className = 'discovered';
+                } else if (map[y][x] === ' ' && isFloor) {
+                    className = 'discovered floor';
                 }
-                if (state.player.lampLit) {
-                    className += ' lamp';
-                    state.discoveryRadius = 6;
-                }
-            } else if (state.projectile && x === state.projectile.x && y === state.projectile.y) {
-                char = '*';
-                className = 'discovered';
-            } else if (monster && (isInRadius || monster.isAgro)) {
-                char = monster.avatar;
-                className = 'discovered monster ' + monster.classes;
-                if (monster.isElite) className += ' elite';
-                if (monster.isBoss) className += ' boss';
-                monster.affixes.forEach(affix => className += ` ${affix}`);
-            } else if (treasure && (isInRadius || treasure.discovered)) {
-                treasure.discovered = true;
-                char = '$';
-                className = 'discovered treasure';
-            } else if (fountain && (isInRadius || fountain.discovered)) {
-                fountain.discovered = true;
-                char = '≅';
-                className = 'discovered fountain';
-            } else if (isDiscovered || isInRadius) {
-                className = 'discovered';
-            } else if (map[y][x] === ' ' && isFloor) {
-                className = 'discovered floor';
-            }
 
-            const current = tileMap[y][x];
-
-            if (current.char !== char || current.class !== className) {
-                mapDisplay += `<span class="${className}">${char}</span>`;
+                mapDisplay += `<span class="${className}" data-x="${x}" data-y="${y}">${char}</span>`;
                 tileMap[y][x] = { char, class: className };
-            } else {
-                mapDisplay += current.spanHTML || `<span class="${className}">${char}</span>`;
             }
-            tileMap[y][x].spanHTML = `<span class="${className}">${char}</span>`;
+            mapDisplay += '\n';
         }
-        mapDisplay += '\n';
+        state.mapDiv.innerHTML = mapDisplay;
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                tileMap[y][x].element = state.mapDiv.querySelector(`span[data-x="${x}"][data-y="${y}"]`);
+            }
+        }
+    } else {
+        for (let y = minUpdateY; y <= maxUpdateY; y++) {
+            for (let x = minUpdateX; x <= maxUpdateX; x++) {
+                let char = map[y][x];
+                let className = 'undiscovered';
+                let isDiscovered = state.discoveredWalls[tier].has(`${x},${y}`);
+                let isFloor = state.discoveredFloors[tier] && state.discoveredFloors[tier].has(`${x},${y}`);
+                let isInRadius = state.visibleTiles[tier].has(`${x},${y}`);
+                let monster = state.monsters[tier].find(m => m.x === x && m.y === y && m.hp > 0);
+                let treasure = state.treasures[tier].find(t => t.x === x && t.y === y);
+                let fountain = state.fountains[tier].find(f => f.x === x && f.y === y && !f.used);
+
+                if (x === state.player.x && y === state.player.y) {
+                    char = '𓀠';
+                    className = 'player';
+                    if (state.player.torchLit) className += ' torch';
+                    if (state.player.lampLit) {
+                        className += ' lamp';
+                        state.discoveryRadius = 6;
+                    }
+                } else if (state.projectile && x === state.projectile.x && y === state.projectile.y) {
+                    char = '*';
+                    className = 'discovered';
+                } else if (monster && (isInRadius || monster.isAgro)) {
+                    char = monster.avatar;
+                    className = 'discovered monster ' + monster.classes;
+                    if (monster.isElite) className += ' elite';
+                    if (monster.isBoss) className += ' boss';
+                    monster.affixes.forEach(affix => className += ` ${affix}`);
+                } else if (treasure && (isInRadius || treasure.discovered)) {
+                    treasure.discovered = true;
+                    char = '$';
+                    className = 'discovered treasure';
+                } else if (fountain && (isInRadius || fountain.discovered)) {
+                    fountain.discovered = true;
+                    char = '≅';
+                    className = 'discovered fountain';
+                } else if (isDiscovered || isInRadius) {
+                    className = 'discovered';
+                } else if (map[y][x] === ' ' && isFloor) {
+                    className = 'discovered floor';
+                }
+
+                const current = tileMap[y][x];
+                if (current.char !== char || current.class !== className) {
+                    current.element.textContent = char;
+                    current.element.className = className;
+                    tileMap[y][x] = { char, class: className, element: current.element };
+                }
+            }
+        }
     }
 
-    state.mapDiv.innerHTML = mapDisplay;
     state.mapDiv.style.border = 'none';
 
     if (state.needsInitialRender) {
         setInitialScroll();
-
     }
 
     state.lastPlayerX = state.player.x;
@@ -183,7 +233,7 @@ function updateMapScroll() {
     if (playerViewportY < paddingY) {
         targetScrollY = playerY - paddingY;
     } else if (playerViewportY + spanHeight > viewportHeight - paddingY) {
-        targetScrollY = playerY + spanHeight - (viewportHeight - (paddingY) );
+        targetScrollY = playerY + spanHeight - (viewportHeight - (paddingY));
     }
 
     targetScrollX = Math.max(0, Math.min(targetScrollX, map.scrollWidth - viewportWidth));
@@ -248,8 +298,6 @@ function setInitialScroll() {
     console.log(`Initial scroll set to (${map.scrollLeft}, ${map.scrollTop}) for player at (${playerX}, ${playerY})`);
 }
 
-
-
 const mageNames = [
     "Elarion",
     "Sylvara",
@@ -282,6 +330,7 @@ const mageNames = [
     "Valthira",
     "Nythera"
 ];
+
 function getRandomName(names) {
     if (!Array.isArray(names) || names.length === 0) {
         return undefined;
@@ -289,15 +338,16 @@ function getRandomName(names) {
     const randomIndex = Math.floor(Math.random() * names.length);
     return names[randomIndex];
 }
+
 function encodeHTMLEntities(text) {
     return text.replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+        .replace(/'/g, '&apos;');
 }
-function userNamePropmpt(delay) {
 
+function userNamePropmpt(delay) {
     setTimeout(() => {
         let userCharacterName = prompt("Please name your character to begin:");
         if (userCharacterName !== null) {
@@ -312,8 +362,6 @@ function userNamePropmpt(delay) {
     }, delay);
 }
 
-
 window.render = render;
 window.setInitialScroll = setInitialScroll;
 window.updateMapScroll = updateMapScroll;
-

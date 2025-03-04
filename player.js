@@ -5,13 +5,7 @@ function addStartingItems() {
     const startItems = [
         window.uniqueItems[0],
         window.startItems[0], window.startItems[1], window.startItems[2], 
-        window.startItems[3], window.startItems[4], window.startItems[5],
-        window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5],
-        window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5],
-        window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5],
+    
     ];
     for (let item of startItems) {
         item.uniqueId = window.generateUniqueId(),
@@ -39,7 +33,8 @@ function checkLevelUp() {
         }
 
         const hpIncrease = Math.round(3 + state.player.level * state.player.prowess * 0.5);
-        state.player.maxHp += hpIncrease;
+        state.player.stats.base.maxHp += hpIncrease;
+        state.player.maxHp = state.player.stats.base.maxHp;
         state.player.hp = state.player.maxHp;
         state.player.xp = 0;
         state.player.nextLevelXp = Math.round(state.player.nextLevelXp * 1.5);
@@ -80,6 +75,13 @@ function exit() {
 
 }
 
+function calculateStats() {
+        state.possibleItemStats.forEach(stat => {
+        state.player[stat] = (state.player.stats.base[stat] || 0) + (state.player.stats.gear[stat] || 0);
+    });
+}
+
+window.calculateStats = calculateStats;
 window.addStartingItems = addStartingItems;
 window.playerExit = exit;
 window.playerDied = death;

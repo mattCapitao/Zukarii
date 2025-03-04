@@ -436,6 +436,11 @@ function addLevel(tier) {
         state.lastPlayerY = null;
         state.needsInitialRender = true;
         console.log(`Tier ${tier} added: stairsUp[${tier}] at (${state.stairsUp[tier]?.x}, ${state.stairsUp[tier]?.y}), stairsDown[${tier}] at (${state.stairsDown[tier]?.x}, ${state.stairsDown[tier]?.y})`);
+    } else {
+        // Trigger a full render for the new tier
+        state.needsInitialRender = true;
+        window.needsRender = true;
+        console.log("Triggered initial render for tier", state.tier);
     }
 }
 

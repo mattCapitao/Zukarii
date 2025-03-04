@@ -89,23 +89,21 @@ const state = {
     player: {
         x: 1, y: 1,
         name: "Leith42",
-        hp: 30, maxHp: 30,
-        gold: 0,
         level: 1, xp: 0, nextLevelXp: 50,
         dead: false,
+        gold: 0,
+        hp: 30, maxHp: 30,
+        mana: 10, maxMana: 10,
+        luck: 0, maxLuck: 0,
         prowess: 5 + Math.floor(Math.random() * 6),
         intellect: 5 + Math.floor(Math.random() * 6),
         agility: 5 + Math.floor(Math.random() * 6),
         armor: 0,
         defense: 0,
         block: 0,
-        luck: 0,
         damageBonus: 0,
         meleeDamageBonus: 0,
         rangedDamageBonus: 0,
-        maxLuck: 0,
-        mana: 10,
-        maxMana: 10,
         inventory: {
             equipped: emptyEquipSlots,
             items: [],
@@ -115,8 +113,46 @@ const state = {
         torchDropFail: 0,
         torchLit: false,
         lampLit: false,
+        stats: {
+            base: {
+                maxHp: 30,
+                maxMana: 10,
+                maxLuck: 0,
+                prowess: 5 + Math.floor(Math.random() * 6),
+                intellect: 5 + Math.floor(Math.random() * 6),
+                agility: 5 + Math.floor(Math.random() * 6),
+                armor: 0,
+                defense: 0,
+                block: 0,
+                damageBonus: 0,
+                meleeDamageBonus: 0,
+                rangedDamageBonus: 0,
+                
+                
+            },
+            gear: {
+                maxHp: 0,
+                maxMana: 0,
+                maxLuck: 0,
+                prowess: 0,
+                intellect: 0,
+                agility: 0,
+                armor: 0,
+                defense: 0,
+                block: 0,
+                damageBonus: 0,
+                meleeDamageBonus: 0,
+                rangedDamageBonus: 0,
+            },
+        }
     },
     items: [],
+    possibleItemStats: [
+        'maxHp', 'maxMana', 'maxLuck',
+        'intellect', 'prowess', 'agility',
+        'range', 'block', 'armor', 'defense',
+        'rangedDamageBonus', 'meleeDamageBonus', 'damageBonus'
+    ],
     treasures: {},
     monsters: {},
     fountains: {},
@@ -141,6 +177,7 @@ const state = {
     MIN_STAIR_DISTANCE: 60,
     isVictory: false,
     torchLitOnTurn: false,
+    AGGRO_RANGE:4,
 };
 
 // Hardcoded 10x10 surface level (tier 0) with stairs down only

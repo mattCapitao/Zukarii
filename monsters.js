@@ -191,8 +191,8 @@ function moveMonsters() {
     let map = state.levels[tier].map;
     const monsters = state.monsters[tier];
 
-    const AGGRO_RANGE = 10;
-
+    const AGGRO_RANGE = (state.discoveryRadius || 2)  + 2;
+    state.AGGRO_RANGE= AGGRO_RANGE;
     monsters.forEach(monster => {
         console.log(`Monster: `, monster);
         if (monster.hp <= 0) return;
@@ -279,6 +279,7 @@ function dropLoot(monster) {
 */
     return;
 }
+
 
 window.dropLoot = dropLoot;
 window.calculateMonsterAttackDamage = calculateMonsterAttackDamage;
