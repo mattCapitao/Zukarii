@@ -151,8 +151,6 @@ function handleInput(event) {
                 return;
             case 't':
                 window.lightTorch();
-                window.needsRender = true;
-                console.log("needsRender set to true for torch (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
                 endTurn();
                 return;
             case ' ':
@@ -311,6 +309,7 @@ function endTurn() {
     if (state.torchExpires > 0) {
         state.torchExpires--;
         console.log(`Torch expires in ${state.torchExpires} turns`);
+
         if (state.torchExpires < 1) {
             torchExpired();
         }
@@ -318,6 +317,7 @@ function endTurn() {
     window.ui.updateStats();
     moveMonsters();
     renderIfNeeded();
+
 }
 
 function renderIfNeeded() {

@@ -37,11 +37,14 @@ function lightTorch() {
 
         if (state.player.torches < 1) {
             message = 'You light your last torch!';
+            state.torchLitOnTurn = true
+            window.needsRender = true;
         }   
     } else {
         message = 'You have no torches left.';
     }
-    writeToLog(message);
+    window.ui.writeToLog(message);
+    
 
 }
 
@@ -50,7 +53,7 @@ function torchExpired(){
     state.torchExpires = 0;
     state.discoveryRadius = state.discoveryRadiusDefault;
     writeToLog('The torch has burned out!');
-    render();
+    window.render();
 }
 
 window.lightTorch = lightTorch;

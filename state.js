@@ -140,6 +140,7 @@ const state = {
     needsInitialRender: false,
     MIN_STAIR_DISTANCE: 60,
     isVictory: false,
+    torchLitOnTurn: false,
 };
 
 // Hardcoded 10x10 surface level (tier 0) with stairs down only

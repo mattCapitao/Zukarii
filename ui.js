@@ -145,20 +145,22 @@ function equipItem(item) {
     switch (item.type) {
         case "weapon":
             const slots = ["mainhand", "offhand"];
-            let equippedSlot = null;
+            let equippedSlot = item.equippedSlot; // Use provided slot if available
 
-            if (item.attackType === "melee") {
-                equippedSlot = slots.find(slot => state.player.inventory.equipped[slot]?.attackType === "melee") || "mainhand";
-                console.log(`Melee weapon, selected slot: ${equippedSlot}`);
-            } else if (item.attackType === "ranged") {
-                equippedSlot = slots.find(slot => state.player.inventory.equipped[slot]?.attackType === "ranged") || "offhand";
-                console.log(`Ranged weapon, selected slot: ${equippedSlot}`);
-            } else {
-                equippedSlot = "mainhand";
-                console.log(`Unknown attack type, defaulting to mainhand`);
+            if (!equippedSlot) {
+                if (item.attackType === "melee") {
+                    equippedSlot = slots.find(slot => state.player.inventory.equipped[slot]?.attackType === "melee") || "mainhand";
+                    console.log(`Melee weapon, selected slot: ${equippedSlot}`);
+                } else if (item.attackType === "ranged") {
+                    equippedSlot = slots.find(slot => state.player.inventory.equipped[slot]?.attackType === "ranged") || "offhand";
+                    console.log(`Ranged weapon, selected slot: ${equippedSlot}`);
+                } else {
+                    equippedSlot = "mainhand";
+                    console.log(`Unknown attack type, defaulting to mainhand`);
+                }
             }
 
-            if (!equippedSlot || !state.player.inventory.equipped.hasOwnProperty(equippedSlot)) {
+            if (!slots.includes(equippedSlot)) {
                 console.error(`Invalid slot ${equippedSlot} for ${item.name}`);
                 writeToLog(`Error: Invalid slot for ${item.name}!`);
                 return;
@@ -169,7 +171,7 @@ function equipItem(item) {
             const oldWeapon = state.player.inventory.equipped[equippedSlot];
             console.log(`Old item in ${equippedSlot}:`, oldWeapon);
             if (oldWeapon && oldWeapon.itemTier !== "Empty") {
-                state.player.inventory.items.push({ ...oldWeapon });
+                state.player.inventory.items.push({ ...oldWeapon, equippedSlot: undefined });
                 writeToLog(`Unequipped ${oldWeapon.name} to inventory`);
             } else {
                 console.log(`No old item in ${equippedSlot}, skipping push`);
@@ -183,7 +185,7 @@ function equipItem(item) {
         case "armor":
             const oldArmor = state.player.inventory.equipped.armor;
             if (oldArmor && oldArmor.itemTier !== "Empty") {
-                state.player.inventory.items.push({ ...oldArmor });
+                state.player.inventory.items.push({ ...oldArmor, equippedSlot: undefined });
                 writeToLog(`Unequipped ${oldArmor.name} to inventory`);
             }
             state.player.inventory.equipped.armor = { ...item };
@@ -195,7 +197,7 @@ function equipItem(item) {
             item.equippedSlot = "amulet";
             const oldAmulet = state.player.inventory.equipped.amulet;
             if (oldAmulet && oldAmulet.itemTier !== "Empty") {
-                state.player.inventory.items.push({ ...oldAmulet });
+                state.player.inventory.items.push({ ...oldAmulet, equippedSlot: undefined });
                 writeToLog(`Unequipped ${oldAmulet.name} to inventory`);
             }
             state.player.inventory.equipped.amulet = { ...item };
@@ -206,7 +208,7 @@ function equipItem(item) {
             item.equippedSlot = (state.player.inventory.equipped.leftring.itemTier === "Empty" ? "leftring" : "rightring");
             const oldRing = state.player.inventory.equipped[item.equippedSlot];
             if (oldRing && oldRing.itemTier !== "Empty") {
-                state.player.inventory.items.push({ ...oldRing });
+                state.player.inventory.items.push({ ...oldRing, equippedSlot: undefined });
                 writeToLog(`Unequipped ${oldRing.name} to inventory`);
             }
             state.player.inventory.equipped[item.equippedSlot] = { ...item };
@@ -240,8 +242,170 @@ function dropItem(index) {
 }
 
 
+function handleDragStart(event, itemData) {
+    console.log(`Dragging started for ${itemData.name} (ID: ${itemData.uniqueId})`);
+    event.dataTransfer.setData('text/plain', JSON.stringify(itemData));
+    event.target.style.opacity = '0.5'; // Visual feedback
+}
+
+function handleDragOver(event) {
+    event.preventDefault(); // Allow drop
+    event.dataTransfer.dropEffect = 'move';
+}
 
 
+function handleDrop(event, targetItemData, isTargetEquipped) {
+    event.preventDefault();
+    const draggedItemDataStr = event.dataTransfer.getData('text/plain');
+    if (!draggedItemDataStr) {
+        console.error("No dragged item data found in dataTransfer");
+        return;
+    }
+
+    let draggedItemData;
+    try {
+        draggedItemData = JSON.parse(draggedItemDataStr);
+        if (!draggedItemData || !draggedItemData.uniqueId) {
+            throw new Error("Invalid dragged item data");
+        }
+        console.log(`Dropped ${draggedItemData.name} onto ${targetItemData.name}`);
+    } catch (e) {
+        console.error("Error parsing dragged item data:", e);
+        return;
+    }
+
+    // Case 1: Dragging from inventory to equipped
+    if (!draggedItemData.equippedSlot && isTargetEquipped) {
+        if (draggedItemData.type === targetItemData.type ||
+            (draggedItemData.type === 'weapon' && (targetItemData.equippedSlot === 'mainhand' || targetItemData.equippedSlot === 'offhand')) ||
+            (draggedItemData.type === 'ring' && (targetItemData.equippedSlot === 'leftring' || targetItemData.equippedSlot === 'rightring'))) {
+            const targetSlot = targetItemData.equippedSlot;
+            const currentEquipped = state.player.inventory.equipped[targetSlot];
+            if (currentEquipped && currentEquipped.itemTier !== "Empty") {
+                unequipItem(currentEquipped, event);
+            }
+            const draggedCopy = { ...draggedItemData, equippedSlot: targetSlot };
+            equipItem(draggedCopy);
+        } else {
+            writeToLog(`Cannot equip ${draggedItemData.name} to ${targetItemData.equippedSlot}!`);
+        }
+    }
+    // Case 2: Dragging from equipped to inventory
+    else if (draggedItemData.equippedSlot && !isTargetEquipped) {
+        unequipItem(draggedItemData, event);
+    }
+    // Case 3: Dragging equipped to equipped (swap)
+    else if (draggedItemData.equippedSlot && isTargetEquipped) {
+        if (draggedItemData.type === targetItemData.type ||
+            (draggedItemData.type === 'weapon' && (targetItemData.equippedSlot === 'mainhand' || targetItemData.equippedSlot === 'offhand')) ||
+            (draggedItemData.type === 'ring' && (targetItemData.equippedSlot === 'leftring' || targetItemData.equippedSlot === 'rightring'))) {
+            const draggedSlot = draggedItemData.equippedSlot;
+            const targetSlot = targetItemData.equippedSlot;
+
+            const draggedCopy = { ...draggedItemData, equippedSlot: targetSlot };
+            const targetCopy = { ...targetItemData, equippedSlot: draggedSlot };
+
+            // Unequip both if not empty
+            if (draggedItemData.itemTier !== "Empty") {
+                unequipItem(draggedItemData, event);
+            }
+            if (targetItemData.itemTier !== "Empty") {
+                unequipItem(targetItemData, event);
+            }
+
+            // Equip to swapped slots
+            if (draggedItemData.itemTier !== "Empty") {
+                equipItem(draggedCopy);
+            }
+            if (targetItemData.itemTier !== "Empty") {
+                equipItem(targetCopy);
+            }
+
+            writeToLog(`Swapped ${draggedItemData.name} with ${targetItemData.name}`);
+        } else {
+            writeToLog(`Cannot swap ${draggedItemData.name} with ${targetItemData.name}!`);
+        }
+    }
+    // Case 4: Inventory to inventory (no action)
+    else {
+        console.log("Inventory-to-inventory drag, no action taken");
+    }
+
+    updateInventory();
+}
+
+
+function handleDragEnd(event) {
+    event.target.style.opacity = '1'; // Reset visual feedback
+}
+
+function addItemListeners() {
+    console.log("Adding item listeners...");
+
+    // Equipped items
+    const equipItems = document.querySelectorAll('#equipped-items .item:not([data-listener-added])');
+    console.log(`Found ${equipItems.length} new equipped items`);
+    equipItems.forEach(p => {
+        const itemDataStr = p.dataset.item;
+        if (itemDataStr) {
+            try {
+                const decodedItemDataStr = decodeURIComponent(itemDataStr);
+                const itemData = JSON.parse(decodedItemDataStr);
+                console.log(`Parsed item data for ${itemData.tier} ${itemData.type} ${itemData.name} with ID ${itemData.uniqueId}`);
+                if (itemData && itemData.uniqueId) {
+                    p.draggable = true; // Make item draggable
+                    p.addEventListener('dragstart', (event) => handleDragStart(event, itemData));
+                    p.addEventListener('dragover', handleDragOver);
+                    p.addEventListener('drop', (event) => handleDrop(event, itemData, true));
+                    p.addEventListener('dragend', handleDragEnd);
+                    p.addEventListener('mouseover', (event) => showItemTooltip(itemData, event));
+                    p.addEventListener('mouseout', () => hideItemTooltip(itemData));
+                    p.addEventListener('click', (event) => unequipItem(itemData, event));
+                    p.setAttribute('data-listener-added', 'true');
+                } else {
+                    console.warn("Missing uniqueId in equipped item", itemData);
+                }
+            } catch (e) {
+                console.error("Failed to parse item data:", e, itemDataStr);
+            }
+        } else {
+            console.warn("No data-item attribute on equipped item", p);
+        }
+    });
+
+    // Inventory items
+    const inventoryItems = document.querySelectorAll('.inventory-item-wrapper .item:not([data-listener-added])');
+    console.log(`Found ${inventoryItems.length} new inventory items`);
+    inventoryItems.forEach(p => {
+        const itemDataStr = p.dataset.item;
+        if (itemDataStr) {
+            try {
+                const decodedItemDataStr = decodeURIComponent(itemDataStr);
+                const itemData = JSON.parse(decodedItemDataStr);
+                console.log(`Parsed item data for ${itemData.name} with ID ${itemData.uniqueId}`);
+                if (itemData && itemData.uniqueId) {
+                    p.draggable = true; // Make item draggable
+                    p.addEventListener('dragstart', (event) => handleDragStart(event, itemData));
+                    p.addEventListener('dragover', handleDragOver);
+                    p.addEventListener('drop', (event) => handleDrop(event, itemData, false));
+                    p.addEventListener('dragend', handleDragEnd);
+                    p.addEventListener('mouseover', (event) => showItemTooltip(itemData, event));
+                    p.addEventListener('mouseout', () => hideItemTooltip(itemData));
+                    p.addEventListener('click', (event) => handleInventoryItemClick(itemData, event));
+                    p.setAttribute('data-listener-added', 'true');
+                } else {
+                    console.warn("Missing uniqueId in inventory item", itemData);
+                }
+            } catch (e) {
+                console.error("Failed to parse item data:", e, itemDataStr);
+            }
+        } else {
+            console.warn("No data-item attribute on inventory item", p);
+        }
+    });
+}
+
+/*
 function addItemListeners() {
     console.log("Adding item listeners...");
     const equipItems = document.querySelectorAll('#equipped-items .item:not([data-listener-added])');
@@ -298,6 +462,8 @@ function addItemListeners() {
         }
     });
 }
+
+*/
 function handleInventoryItemClick(item, event) {
     console.log("Handling item click", item, event);
     if (item.itemTier === "Empty") {
@@ -368,7 +534,7 @@ function updateLog() {
     }
 }
 
-function updateInventory(equippedOnly = false) {
+function updateInventory() {
     if (!state.ui.overlayOpen) { return ''; }
 
     const inventory = document.getElementById('inventory');

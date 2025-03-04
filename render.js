@@ -26,7 +26,8 @@ function render() {
     const height = map.length;
     const width = map[0].length;
 
-    if (state.lastPlayerX !== state.player.x || state.lastPlayerY !== state.player.y || state.needsInitialRender) {
+    if (state.lastPlayerX !== state.player.x || state.lastPlayerY !== state.player.y || state.needsInitialRender || state.torchLitOnTurn) {
+        if (state.torchLitOnTurn) { state.torchLitOnTurn = false }
         const prevDiscoveredCount = state.discoveredWalls[tier].size;
         state.visibleTiles[tier].clear();
 
