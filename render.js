@@ -17,7 +17,8 @@ function render() {
     if (!state.gameStarted || !state.levels[state.tier]) {
         document.getElementById('splash').style.display = 'flex';
         titleScreenContainer.innerHTML = titleScreen;
-        state.mapDiv.style.border = 'none';
+        userNamePropmpt(500);
+        //state.mapDiv.style.border = 'none';
         return;
     }
 
@@ -245,6 +246,70 @@ function setInitialScroll() {
     map.scrollTop = Math.max(0, Math.min(scrollY, map.scrollHeight - mapHeight));
 
     console.log(`Initial scroll set to (${map.scrollLeft}, ${map.scrollTop}) for player at (${playerX}, ${playerY})`);
+}
+
+
+
+const mageNames = [
+    "Elarion",
+    "Sylvara",
+    "Tharion",
+    "Lysandra",
+    "Zephyrion",
+    "Morwenna",
+    "Aethric",
+    "Vionelle",
+    "Dravenor",
+    "Celestine",
+    "Kaelith",
+    "Seraphine",
+    "Tormund",
+    "Elowen",
+    "Zarathis",
+    "Lunara",
+    "Veyron",
+    "Ashka",
+    "Rivenna",
+    "Solthar",
+    "Ysmera",
+    "Drenvar",
+    "Thalindra",
+    "Orythia",
+    "Xandrel",
+    "Miravelle",
+    "Korathis",
+    "Eryndor",
+    "Valthira",
+    "Nythera"
+];
+function getRandomName(names) {
+    if (!Array.isArray(names) || names.length === 0) {
+        return undefined;
+    }
+    const randomIndex = Math.floor(Math.random() * names.length);
+    return names[randomIndex];
+}
+function encodeHTMLEntities(text) {
+    return text.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+function userNamePropmpt(delay) {
+
+    setTimeout(() => {
+        let userCharacterName = prompt("Please name your character to begin:");
+        if (userCharacterName !== null) {
+            console.log("Hello, " + userCharacterName + "!");
+            const sanitizedInput = encodeHTMLEntities(userCharacterName);
+            state.player.name = sanitizedInput;
+        } else {
+            console.log("User cancelled the prompt.");
+            state.player.name = getRandomName(mageNames);
+            window.ui.writeToLog(`You didnt enter a name, so a random one has been given to you, ${state.player.name} `);
+        }
+    }, delay);
 }
 
 
