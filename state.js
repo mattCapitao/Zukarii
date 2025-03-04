@@ -262,7 +262,6 @@ function initGame() {
     state.lastPlayerY = null;
     state.needsInitialRender = true;
     window.needsRender = true;
-    
 }
 
 window.generateUniqueId = generateUniqueId;

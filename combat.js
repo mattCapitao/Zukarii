@@ -31,10 +31,8 @@ function handleMonsterRetaliation(monster, tier) {
     monsterDamage = Math.max(1, monsterDamage - defense);
     state.player.hp -= monsterDamage;
     writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
-    window.ui.updatePlayerStatus();
-    if (state.ui.overlayOpen) {
-        window.ui.updateStats();
-    }
+    window.ui.updateStats();
+
     if (state.player.hp <= 0) {
         playerDied(monster.name);
         return true;
@@ -153,10 +151,7 @@ window.rangedAttack = async function (direction) {
             } else if (i === 1) {
                 writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
                 if (!handleMonsterRetaliation(monster, state.tier)) {
-                    // Continue if player still alive
-                    if (state.ui.overlayOpen) {
-                        window.ui.updateStats();
-                    }
+                    window.ui.updateStats();
                 }
             } else {
                 writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
@@ -164,16 +159,11 @@ window.rangedAttack = async function (direction) {
             state.projectile = null;
             window.needsRender = true; // Use window.needsRender to match global scope
             renderIfNeeded();
-            if (state.ui.overlayOpen) {
-                window.ui.updateStats();
-            }
+            window.ui.updateStats();
             break;
         }
     }
     state.projectile = null;
     window.needsRender = true; // Use window.needsRender to match global scope
     endTurn();
-    if (state.ui.overlayOpen) {
-        window.ui.updateStats();
-    }
 };

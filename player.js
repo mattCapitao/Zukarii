@@ -4,38 +4,26 @@ function addStartingItems() {
     state.player.inventory.equipped = emptyEquipSlots;
     const startItems = [
         window.uniqueItems[0],
+        window.startItems[0], window.startItems[1], window.startItems[2], 
+        window.startItems[3], window.startItems[4], window.startItems[5],
         window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5], 
+        window.startItems[3], window.startItems[4], window.startItems[5],
         window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5], 
+        window.startItems[3], window.startItems[4], window.startItems[5],
         window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5], 
-        window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5], 
-        window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5], 
-        window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5], 
-        window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5], 
-        window.startItems[0], window.startItems[1], window.startItems[2],
-        window.startItems[3], window.startItems[4], window.startItems[5], 
+        window.startItems[3], window.startItems[4], window.startItems[5],
     ];
     for (let item of startItems) {
         item.uniqueId = window.generateUniqueId(),
-            state.player.inventory.items.push({ ...item });
+        state.player.inventory.items.push({ ...item });
     }
-    if (state.ui.overlayOpen) {i
-        window.ui.updateStats();
-    }
+    window.ui.updateStats();
 }
 
 function awardXp(amount) {
     state.player.xp += amount;
     writeToLog(`Gained ${amount} XP (${state.player.xp}/${state.player.nextLevelXp})`);
-    if (state.ui.overlayOpen) {
-        window.ui.updateStats();
-    }
+        
     checkLevelUp();
 }
 
@@ -48,9 +36,6 @@ function checkLevelUp() {
             const statToBoost = stats[Math.floor(Math.random() * 3)];
             state.player[statToBoost]++;
             writeToLog(`Your ${statToBoost} increased to ${state.player[statToBoost]}!`);
-            if (state.ui.overlayOpen) {
-                window.ui.updateStats();
-            }
         }
 
         const hpIncrease = Math.round(3 + state.player.level * state.player.prowess * 0.5);
@@ -59,11 +44,8 @@ function checkLevelUp() {
         state.player.xp = 0;
         state.player.nextLevelXp = Math.round(state.player.nextLevelXp * 1.5);
         writeToLog(`Level up! Now level ${state.player.level}, Max HP increased by ${hpIncrease} to ${state.player.maxHp}`);
-        if (state.ui.overlayOpen) {
-            window.ui.updateStats();
-        }
-        window.ui.updatePlayerInfo();
-        window.ui.updatePlayerStatus();
+
+        window.ui.updateStats();
     }
 }
 
@@ -79,9 +61,8 @@ function death(source) {
     window.ui.updatePlayerInfo();
     window.ui.updatePlayerStatus();
     window.ui.gameOver('You have been killed by a ' + source + '!');
-    if (state.ui.overlayOpen) {
-        window.ui.updateStats();
-    }
+    window.ui.updateStats();
+
 }
 
 function exit() {
@@ -94,10 +75,9 @@ function exit() {
     window.ui.gameOver('You exited the dungeon! Too much adventure to handle eh?');
     window.ui.updatePlayerInfo();
     window.ui.updatePlayerStatus();
-    if (state.ui.overlayOpen) {
-        window.ui.updateStats();
+    window.ui.updateStats();
         
-    }
+
 }
 
 window.addStartingItems = addStartingItems;

@@ -38,15 +38,24 @@ function handleInput(event) {
         'a': 'ArrowLeft', 'A': 'ArrowLeft', 'ArrowLeft': 'ArrowLeft',
         's': 'ArrowDown', 'S': 'ArrowDown', 'ArrowDown': 'ArrowDown',
         'd': 'ArrowRight', 'D': 'ArrowRight', 'ArrowRight': 'ArrowRight',
-        'i': 'i', 'I': 'i', 'c': 'c', 'C': 'c', 'l': 'l', 'L': 'l',
+        'i': 'c', 'I': 'c', 'c': 'c', 'C': 'c', 'l': 'l', 'L': 'l',
         'escape': 'escape', 'Escape': 'escape', 't': 't', 'T': 't',
         ' ': ' ', 'Space': ' '
     };
 
+   
+
     const mappedKeys = new Set(Object.keys(keyMap));
-    if (mappedKeys.has(event.key) !== true) { console.log(`unmapped/unmanaged key press event ${event} exiting handleInput()`); return; }
+
+    if (mappedKeys.has(event.key) !== true) {
+        //console.log(`unmapped/unmanaged key press event ${event} exiting handleInput()`);
+        return;
+    }
 
     ///// END INPUT VALIDATION
+
+    event.key = keyMap[event.key] || event.key; //reassign pressed event key to mapped value
+    console.log(`Mapped key: ${event.key}`);
 
     ///// START KEY UP
 
@@ -85,7 +94,7 @@ function handleInput(event) {
 
         switch (event.key.toLowerCase()) {
             case 'i':
-                if (!state.ui.overlayOpen) {
+              /*  if (!state.ui.overlayOpen) {
                     state.ui.overlayOpen = true;
                     state.ui.activeTab = 'inventory';
                     tabsDiv.classList.remove('hidden');
@@ -100,7 +109,7 @@ function handleInput(event) {
                     window.ui.renderOverlay();
                     window.ui.updateInventory(); // Ensure immediate inventory update
                 }
-                return;
+                return;*/
             case 'c':
                 if (!state.ui.overlayOpen) {
                     state.ui.overlayOpen = true;
@@ -282,10 +291,6 @@ function handleInput(event) {
             document.removeEventListener('keydown', handleInput);
             document.removeEventListener('keyup', toggleRanged);
         }
-        if (state.ui.overlayOpen) {
-            window.ui.updateStats();
-            window.ui.updateInventory();
-        }
     } else {
         state.player.x = newX;
         state.player.y = newY;
@@ -310,6 +315,7 @@ function endTurn() {
             torchExpired();
         }
     }
+    window.ui.updateStats();
     moveMonsters();
     renderIfNeeded();
 }
@@ -340,17 +346,8 @@ function init() {
     document.addEventListener('keydown', handleInput);
 
     document.addEventListener('keyup', toggleRanged);
-
-    // Add click handler for #close-tabs
-    const closeTabsButton = document.getElementById('close-tabs');
-    if (closeTabsButton) {
-        closeTabsButton.addEventListener('click', () => {
-            state.ui.overlayOpen = false;
-            document.getElementById('tabs').classList.add('hidden');
-            window.ui.renderOverlay();
-            console.log("Overlay closed via close button");
-        });
-    }
+    updateStats();
+    
 }
 
 window.addEventListener('DOMContentLoaded', init);

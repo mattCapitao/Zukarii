@@ -120,10 +120,11 @@ td {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 60vw;
-    height: 60vh;
+    width: 72vw;
+    height: 72vh;
     background: rgba(20, 30, 20, 0.7);
     border: 0.0625rem solid #060; /* ~1px */
+    border-radius: .625rem;
     color: #0f0;
     display: none; /* Hidden by default */
     font-family: Roboto, Verdana;
@@ -345,71 +346,8 @@ td {
 
 /*////////////////////////////////////////////////////   TABS DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#tabs #equipped-items {
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    flex-wrap:wrap;
-    padding: 0.625rem; /* ~10px */
-}
 
-#inventory-content {
-    height: 25rem; /* ~400px */
-    width: 100%;
-}
 
-#tabs div.inventory-item-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-    height:100%;
-    margin-top: 0.625rem; /* ~10px */
-    padding: 0.625rem; /* ~10px */
-    border: 0.0625rem solid #0f0; /* ~1px */
-    overflow-y: auto;
-}
-
-#tabs div.inventory-item {
-    display: flex;
-
-    padding: .3125rem; /* ~5px */
-    height: 8rem;  
-}
-
-#tabs p.inventory-slot,
-#tabs p.equip-slot {
-    margin: 0.125rem 0 0 0; /* ~2px */
-    padding: 0;
-    margin: 0;
-    text-align: center;
-    width: 4.25rem; /* ~68px */
-    height: 4.25rem; /* ~68px */
-}
-
-    #tabs p.inventory-slot img.item,
-    #tabs p.equip-slot img.item {
-        width: 4rem; /* ~64px */
-        height: 4rem; /* ~64px */
-        border: 0.0625rem solid #0f0; /* ~1px */
-        padding: 0;
-        margin: 0;
-    }
-
-    #tabs p.inventory-slot span.item-label {
-        background: #000;
-        color: #0f0;
-        font-size: 0.5rem; 
-        width: 4rem; /* ~64px */
-        text-align: center;
-    }
-    #tabs p.inventory-slot span.item-label.relic{
-        color: gold;
-    }
-
-#player-name {
-    text-align: center;
-    font-size: 1.5rem; /* ~24px */
-}
 
 #tabs div.col-50-wrapper {
     display: flex;
@@ -420,10 +358,17 @@ td {
     width: 50%;
 }
 
-#stats {
-    margin: 0;
-    padding: 0.625rem; /* ~10px */
+#tab-menu {
+display: flex;
+justify-content: space-around;
 }
+
+#tab-menu button {
+    flex: 1;
+    width: 30%;
+    cursor: pointer;
+}
+
 
 #log {
     height: 100%;
@@ -432,22 +377,120 @@ td {
     overflow-y: hidden;
 }
 
-#tab-menu {
-    display: flex;
-    justify-content: space-around;
+#log-content {
+    height: 30rem; /* ~400px */
+    width: 100%;
 }
 
-    #tab-menu button {
-        flex: 1;
-        width: 30%;
-        cursor: pointer;
+#character-content {
+    height: 30rem; /* ~400px */
+    width: 100%;
+    display: flex; /* overwritten in line with none when hide is triggered*/
+    justify-content: space-between;
+    
+}
+    #character {
+        display: flex;
+        flex-direction: column;
+        height: 30rem; /* ~400px */
+        width: 32%;
+        margin-top: 0.625rem; /* ~10px */
     }
 
-#log p {
+        #equipped-items {
+            width: 100%;
+            display: flex;
+            justify-content:center;
+            flex-wrap: wrap;
+            padding: 0.625rem; /* ~10px */
+        }
+#tabs p.equip-slot {
+    margin: 1.625rem;  
+    padding: 0.325rem 0 0.325rem 0;
+    text-align: center;
+    width: 4.25rem; /* ~68px */
+    height: 4.25rem; /* ~68px */
+}
+#tabs #equipped-items figcaption {
+    margin: 0;
+    text-align: center;
+    font-size: 0.75rem; /* ~12px */
+    width: 4.25rem; /* ~68px */
+}
+    #inventory {
+        display: flex;
+        width: 65%;
+        margin-top: 0.625rem; /* ~10px */
+    }
+
+#tabs div.inventory-item-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 30rem;
+    padding: 0.625rem; /* ~10px */
+    border: 0.0625rem solid #0f0; /* ~1px */
+    border-radius: .625rem;
+    overflow-y: auto;
+    scrollbar-color: #0f0 #111;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+    gap: 0.3125rem;
+}
+
+        #tabs div.inventory-item {
+            display: flex;
+            padding: 0;
+            height: 4.25rem;  
+        }
+#tabs div.equipped-item {
+    display: flex;
+    padding: .3125rem; /* ~5px */
+    height: 6rem;
+}
+
+        #tabs p.inventory-slot,
+        #tabs p.equip-slot {
+            margin: 0.125rem 0 0 0; /* ~2px */
+            padding: 0;
+            margin: 0;
+            text-align: center;
+            width: 4.25rem; /* ~68px */
+            height: 4.25rem; /* ~68px */
+        }
+
+
+        #tabs p.inventory-slot img.item,
+        #tabs p.equip-slot img.item {
+            width: 4rem; /* ~64px */
+            height: 4rem; /* ~64px */
+            border: 0.0625rem solid #0f0; /* ~1px */
+            padding: 0;
+            margin: 0;
+            border-radius: .3125rem; /* ~5px */
+        }
+        /* GROK*/
+#tabs p.inventory-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin: 0;
     padding: 0;
-    line-height: 1.2;
+    width: 4.25rem;
+    min-height: 4.25rem;
+    height: auto;
 }
+        /*Grok*/
+
+        #tabs p.inventory-slot span.item-label {
+            color: #0f0;
+            font-size: 0.5rem; 
+            width: 4rem; /* ~64px */
+            text-align: center;
+        }
+        #tabs p.inventory-slot span.item-label.relic{
+            color: gold;
+        }
 
 #item-tooltip {
     position: absolute;
@@ -457,9 +500,27 @@ td {
     font-size: 0.875rem; /* ~14px */
     color: #0f0;
     z-index: 1000;
-    max-width: 12.5rem; /* ~200px */
+    max-width: 15rem; /* ~200px */
     white-space: pre-wrap;
 }
+
+#player-name {
+    text-align: center;
+    font-size: 1.5rem; /* ~24px */
+}
+
+#stats {
+    margin: 0;
+    padding: 0.625rem; /* ~10px */
+}
+
+#log p {
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+
+
 
 /*////////////////////////////////////////////////////   TABS DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
