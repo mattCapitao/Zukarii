@@ -2,6 +2,8 @@
 
 const tooltipCache = new Map();
 
+
+
 function showItemTooltip(itemData, event) {
     if (!itemData || !itemData.uniqueId) {
         console.log("No item data or uniqueId for tooltip", itemData);
@@ -10,38 +12,87 @@ function showItemTooltip(itemData, event) {
 
     let tooltip = tooltipCache.get(itemData.uniqueId);
     if (!tooltip) {
+        // Create tooltip container
         tooltip = document.createElement('div');
         tooltip.id = `item-tooltip-${itemData.uniqueId}`;
+        tooltip.className = `item-tooltip-class ${itemData.itemTier}`;
         tooltip.style.position = 'absolute';
-        tooltip.style.background = '#000';
-        tooltip.style.border = '1px solid #0f0';
-        tooltip.style.padding = '5px';
-        tooltip.style.fontSize = '14px';
-        tooltip.style.color = '#0f0';
-        tooltip.style.zIndex = '1000';
-        tooltip.style.maxWidth = '200px';
         tooltip.style.whiteSpace = 'pre-wrap';
 
-        let content = `Name: ${itemData.name}\n`;
-        content += `Tier: ${itemData.itemTier}\n`;
-        content += `Description: ${itemData.description}\n`;
+        // Build HTML content
+        const content = document.createElement('div');
 
+        // Item Name
+        const name = document.createElement('div');
+        name.className = 'item-tooltip-name';
+        name.textContent = itemData.name;
+        content.appendChild(name);
+
+        // Item Type and Tier
+        const typeTier = document.createElement('div');
+        typeTier.className = 'item-tooltip-type-tier';
+        typeTier.textContent = `${itemData.itemTier} ${itemData.type}`;
+        content.appendChild(typeTier);
+
+        // Specific Stats (Weapon or Armor)
         if (itemData.type === "weapon") {
-            content += `Damage: ${itemData.baseDamageMin}–${itemData.baseDamageMax}\n`;
+            const damage = document.createElement('div');
+            damage.className = 'item-tooltip-damage';
+            damage.textContent = `Damage: ${itemData.baseDamageMin}–${itemData.baseDamageMax}`;
+            content.appendChild(damage);
         } else if (itemData.type === "armor") {
-            content += `Defense: ${itemData.defense}\n`;
+            const defense = document.createElement('div');
+            defense.className = 'item-tooltip-defense';
+            defense.textContent = `Defense: ${itemData.defense}`;
+            content.appendChild(defense);
         }
 
-        tooltip.textContent = content;
+        // Stats Section
+        if ('stats' in itemData && itemData.stats) {
+            const divider = document.createElement('hr');
+            divider.className = 'tooltip-divider';
+            content.appendChild(divider);
+
+            const propCount = Object.keys(itemData.stats).length;
+            if (propCount > 0) {
+                const statsContainer = document.createElement('div');
+                statsContainer.className = 'tooltip-stats';
+                Object.entries(itemData.stats).forEach(([stat, value]) => {
+
+                    if (stat !== 'luck' && stat !== 'maxLuck') {
+                        const statLine = document.createElement('div');
+                        statLine.className = 'tooltip-stat';
+
+                        statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${window.util.camelToTitleCase(stat)}`;
+                        statsContainer.appendChild(statLine);
+                    }
+                });
+                content.appendChild(statsContainer);
+            }
+        }
+
+        // Description
+        const descriptionDivider = document.createElement('hr');
+        descriptionDivider.className = 'tooltip-divider';
+        content.appendChild(descriptionDivider);
+
+        const description = document.createElement('div');
+        description.className = 'tooltip-description';
+        description.textContent = `${itemData.description}`;
+        content.appendChild(description);
+
+        // Append content to tooltip
+        tooltip.appendChild(content);
         document.body.appendChild(tooltip);
         tooltipCache.set(itemData.uniqueId, tooltip);
         console.log(`Created tooltip for ${itemData.name} with ID ${itemData.uniqueId}`);
     }
 
+    // Position the tooltip
     tooltip.style.display = 'block';
     setTimeout(() => {
         const x = event.pageX - tooltip.offsetWidth - 15;
-        const y = event.pageY - tooltip.offsetHeight - 15;
+        const y = event.pageY - tooltip.offsetHeight + (tooltip.offsetHeight/2);
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
         const tooltipWidth = tooltip.offsetWidth;
@@ -113,6 +164,8 @@ function unequipItem(item, event) {
         uniqueId: generateUniqueId(),
         icon: `no-${item.equippedSlot}.svg`,
     };
+
+    window.updateGearStats();
 
     if (state.ui.overlayOpen) {
         updateStats();
@@ -220,6 +273,8 @@ function equipItem(item) {
             writeToLog(`Error: Unknown item type ${item.type}!`);
             return;
     }
+
+    window.updateGearStats();
 
     state.ui.activeTab = currentTab;
     if (state.ui.overlayOpen) {
@@ -404,66 +459,6 @@ function addItemListeners() {
         }
     });
 }
-
-/*
-function addItemListeners() {
-    console.log("Adding item listeners...");
-    const equipItems = document.querySelectorAll('#equipped-items .item:not([data-listener-added])');
-    console.log(`Found ${equipItems.length} new equipped items`);
-    equipItems.forEach(p => {
-        const itemDataStr = p.dataset.item;
-        if (itemDataStr) {
-            try {
-                const decodedItemDataStr = decodeURIComponent(itemDataStr);
-                console.log("Decoded JSON string:", decodedItemDataStr);
-                const itemData = JSON.parse(decodedItemDataStr);
-                console.log(`Parsed item data for ${itemData.tier} ${itemData.type} ${itemData.name} with ID ${itemData.uniqueId}`);
-                if (itemData && itemData.uniqueId) {
-                    p.addEventListener('mouseover', (event) => showItemTooltip(itemData, event));
-                    p.addEventListener('mouseout', () => hideItemTooltip(itemData));
-                    p.addEventListener('click', (event) => unequipItem(itemData, event));
-                    p.setAttribute('data-listener-added', 'true');
-                } else {
-                    console.warn("Missing uniqueId in equipped item", itemData);
-                }
-            } catch (e) {
-                console.error("Failed to parse item data:", e, itemDataStr);
-                console.log("Problematic JSON string:", itemDataStr);
-            }
-        } else {
-            console.warn("No data-item attribute on equipped item", p);
-        }
-    });
-
-    const inventoryItems = document.querySelectorAll('.inventory-item-wrapper .item:not([data-listener-added])');
-    console.log(`Found ${inventoryItems.length} new inventory items`);
-    inventoryItems.forEach(p => {
-        const itemDataStr = p.dataset.item;
-        if (itemDataStr) {
-            try {
-                const decodedItemDataStr = decodeURIComponent(itemDataStr);
-                console.log("Decoded JSON string:", decodedItemDataStr);
-                const itemData = JSON.parse(decodedItemDataStr);
-                console.log(`Parsed item data for ${itemData.name} with ID ${itemData.uniqueId}`);
-                if (itemData && itemData.uniqueId) {
-                    p.addEventListener('mouseover', (event) => showItemTooltip(itemData, event));
-                    p.addEventListener('mouseout', () => hideItemTooltip(itemData));
-                    p.addEventListener('click', (event) => handleInventoryItemClick(itemData, event));
-                    p.setAttribute('data-listener-added', 'true');
-                } else {
-                    console.warn("Missing uniqueId in inventory item", itemData);
-                }
-            } catch (e) {
-                console.error("Failed to parse item data:", e, itemDataStr);
-                console.log("Problematic JSON string:", itemDataStr);
-            }
-        } else {
-            console.warn("No data-item attribute on inventory item", p);
-        }
-    });
-}
-
-*/
 function handleInventoryItemClick(item, event) {
     console.log("Handling item click", item, event);
     if (item.itemTier === "Empty") {
@@ -659,34 +654,33 @@ function renderOverlay() {
             </div>
 
             <div id="character-content" class="ui-tab" style="display: ${state.ui.activeTab === 'character' ? 'flex' : 'none'} ;">
-                
                 <div id="character">
-                    <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Vital Stats</div>
-                    <div id="character-stat-wrapper" style="display: flex; justify-content: space-between; margin-top: 5px;">
-                        <div style="width: 50%;">
-                            <div>Prowess: ${state.player.prowess}</div>
-                            <div>Intellect: ${state.player.intellect}</div>
-                            <div>Agility: ${state.player.agility}</div>
-                            <div>Armor: ${state.player.armor}</div>
-                            <div>Defense: ${state.player.defense}</div>
-                            <div>Block: ${state.player.block}</div>
-                        </div>
-                        <div style="width: 50%;">
-                            <div>HP: ${state.player.hp}/${state.player.maxHp}</div>
-                            <div>Mana: ${state.player.mana}/${state.player.maxMana}</div>
-                            <div>XP: ${state.player.xp}/${state.player.nextLevelXp}</div>
-                            <div>Gold: ${state.player.gold}</div>
-                            <div>Torches: ${state.player.torches}</div>
-                        </div>
-                    </div>
                     <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Equipped Items</div>
                     <div id="equipped-items">${updateInventory(true)}</div>
+                    <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Effective Stats</div>
+                    <div id="character-stat-wrapper">
+                       
+                        <div>Level: ${state.player.level}</div>
+                        <div>XP: ${state.player.xp}/${state.player.nextLevelXp}</div>
+                        <div>HP: ${state.player.hp}/${state.player.maxHp}</div>
+                        <div>Mana: ${state.player.mana}/${state.player.maxMana}</div>
+                        <div>Gold: ${state.player.gold}</div>
+                        <div>Torches: ${state.player.torches}</div>
+                        <div>${state.player.intellect} : Intellect</div>
+                        <div>${state.player.prowess} : Prowess</div>
+                        <div>${state.player.agility} : Agility</div>
+                        <div>${state.player.defense} : Defense </div>
+                        <div>${state.player.damageBonus} : Damage Bonus</div>
+                        <div> ${state.player.armor} : Armor</div>  
+                        <div>${state.player.meleeDamageBonus} : Melee Dmg</div>
+                        <div> ${state.player.block} : Block</div>
+                        <div>${state.player.rangedDamageBonus} : Ranged Dmg</div>
+                        <div>${state.player.dodge} : Dodge</div>
+                    </div> 
                 </div>
-
                 <div id="inventory">
                     ${updateInventory()}
                 </div>
-
             </div>
         `;
 

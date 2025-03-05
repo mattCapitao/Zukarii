@@ -75,12 +75,43 @@ function exit() {
 
 }
 
-function calculateStats() {
-        state.possibleItemStats.forEach(stat => {
-        state.player[stat] = (state.player.stats.base[stat] || 0) + (state.player.stats.gear[stat] || 0);
+
+function updateGearStats() {
+    console.log("Before Updating gear stats", state.player.stats.gear);
+
+    state.possibleItemStats.forEach(stat => {
+        state.player.stats.gear[stat] = 0;
     });
+
+    // Update gear stats from equipped items
+    Object.values(state.player.inventory.equipped).forEach(item => {
+        if ('stats' in item && item.stats) {  // Check if stats exists and is truthy
+            const propCount = Object.keys(item.stats).length;
+            if (propCount > 0) {  // Ensure stats object has properties
+                Object.entries(item.stats).forEach(([stat, value]) => {
+                    state.player.stats.gear[stat] = (state.player.stats.gear[stat] || 0) + (value || 0);
+                });
+            }
+        }
+    });
+
+    console.log("After Updating gear stats", state.player.stats.gear);
+    calculateStats();
 }
 
+
+
+function calculateStats() {
+    state.possibleItemStats.forEach(stat => {
+            state.player[stat] = (state.player.stats.base[stat] || 0) + (state.player.stats.gear[stat] || 0);
+        console.log(`${stat} = ${(state.player.stats.base[stat] || 0)} + ${(state.player.stats.gear[stat] || 0)}`)
+        console.log(state.player);
+    });
+    window.ui.renderOverlay();
+}
+
+
+window.updateGearStats = updateGearStats;
 window.calculateStats = calculateStats;
 window.addStartingItems = addStartingItems;
 window.playerExit = exit;

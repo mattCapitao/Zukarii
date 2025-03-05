@@ -13,6 +13,7 @@ body {
     background-color: #0f0;
     font-size: 1rem; /* ~16px base, flexible */
     overflow: hidden; /* Prevent scrollbars */
+    font-family: 'Verdana', Roboto, sans-serif;   
 }
 
 div {
@@ -127,7 +128,7 @@ td {
     border-radius: .625rem;
     color: #0f0;
     display: none; /* Hidden by default */
-    font-family: Roboto, Verdana;
+    font-family: 'Verdana', Roboto, sans-serif;
     font-size: 0.875rem; /* ~14px */
     padding: 1rem; /* ~16px */
     pointer-events: auto; /* Clickable children */
@@ -220,7 +221,7 @@ td {
     border: none;
     border-radius: 0.3125rem; /* ~5px */
     cursor: pointer;
-    font-family: Roboto, Verdana;
+    font-family: 'Verdana', Roboto, sans-serif;
 }
 
     #restart-button:hover {
@@ -259,7 +260,7 @@ td {
     color: #0f0;
     padding: 0;
     margin: 0;
-    font-family: Roboto, Verdana;
+    font-family: 'Verdana', Roboto, sans-serif;
     z-index: 1000;
     width: 100vw;
     height: 100vh;
@@ -396,14 +397,27 @@ justify-content: space-around;
         width: 32%;
         margin-top: 0.625rem; /* ~10px */
     }
+#character-stat-wrapper {
+    display: flex;
+    flex-wrap: wrap; /* Allows items to wrap into multiple columns */
+    width: 100%;
+    gap: 0; /* Optional: controls spacing between items */
+}
 
-        #equipped-items {
-            width: 100%;
-            display: flex;
-            justify-content:center;
-            flex-wrap: wrap;
-            padding: 0.625rem; /* ~10px */
-        }
+    #character-stat-wrapper > div {
+        padding: .175rem; 
+        width: 50%; /* 50% width minus border width (3px * 2) */
+        box-sizing: border-box; /* Ensures padding/border don't increase width */
+    }
+
+
+#equipped-items {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0.625rem; /* ~10px */
+}
 #tabs p.equip-slot {
     margin: 1.625rem;  
     padding: 0.325rem 0 0.325rem 0;
@@ -492,17 +506,47 @@ justify-content: space-around;
             color: gold;
         }
 
-#item-tooltip {
-    position: absolute;
-    background: #000;
-    border: 0.0625rem solid #0f0; /* ~1px */
-    padding: 0.3125rem; /* ~5px */
+.item-tooltip-class {
+    padding: 0.625rem; /* ~5px */
     font-size: 0.875rem; /* ~14px */
     color: #0f0;
     z-index: 1000;
     max-width: 15rem; /* ~200px */
-    white-space: pre-wrap;
+    background: rgba(20, 30, 20, 1);
+    border: 0.0625rem solid #060; /* ~1px */
+    border-radius: .625rem;
 }
+
+.item-tooltip-class.relic {
+    color: gold;
+    border: 0.0625rem solid gold; /* ~1px */
+}
+
+
+.item-tooltip-name {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.125rem; /* ~18px */
+    margin-bottom: 0.125rem; /* ~2px */
+}
+
+.item-tooltip-type-tier {
+    width: 100%;
+    text-align: center;
+    font-size: 1rem; /* ~16px */
+    font-weight: bold;
+    margin-bottom: 0.125rem; /* ~2px */
+}
+
+
+tooltip-description {
+    width: 100%;
+    text-align: left;
+    font-size: 0.75rem; /* ~12px */
+    font-style: italic;
+}
+
 
 #player-name {
     text-align: center;

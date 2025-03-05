@@ -2,7 +2,7 @@ console.log("items.js loaded");
 
 const uniqueItems = [
     {
-        name: "Mbphu Staff of iLvl Annihilation",
+        name: "Mbphu Staff ",
         type: "weapon",
         attackType: "ranged",
         range: 10,
@@ -10,7 +10,7 @@ const uniqueItems = [
         baseDamageMin: 10,
         baseDamageMax: 15,
         itemTier: "relic",
-        stats: {intellect: 10, mana: 10, agility: 10, maxLuck: 10, hp: 15}, 
+        stats: {intellect: 10, maxMana: 10, agility: 10, maxLuck: 10, maxHp: 15, damageBonus: 5}, 
         description: "The Golden Khepresh has got nothing on this babby! ",
         uniqueId: null,
         icon: "mbphu-staff.svg",

@@ -101,6 +101,7 @@ const state = {
         armor: 0,
         defense: 0,
         block: 0,
+        dodge: 0,
         damageBonus: 0,
         meleeDamageBonus: 0,
         rangedDamageBonus: 0,
@@ -124,11 +125,10 @@ const state = {
                 armor: 0,
                 defense: 0,
                 block: 0,
+                dodge: 0,
                 damageBonus: 0,
                 meleeDamageBonus: 0,
-                rangedDamageBonus: 0,
-                
-                
+                rangedDamageBonus: 0, 
             },
             gear: {
                 maxHp: 0,
@@ -140,6 +140,7 @@ const state = {
                 armor: 0,
                 defense: 0,
                 block: 0,
+                dodge: 0,
                 damageBonus: 0,
                 meleeDamageBonus: 0,
                 rangedDamageBonus: 0,
