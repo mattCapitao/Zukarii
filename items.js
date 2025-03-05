@@ -1,12 +1,14 @@
 console.log("items.js loaded");
 
 class Items {
-    constructor(state, data) {
+    constructor(state, data, ui) {
         this.state = state;
         this.data = data;
-       
+        this.ui = ui;
+
         this.relicItems = this.data.getUniqueItems();
         this.artifactItems = this.data.getUniqueItems();
+
         this.itemTiers = ['junk', 'common', 'rare', 'mastercraft', 'magic', 'artifact', 'relic'];
         this.itemTypes = ['weapon', 'armor', 'amulet', 'ring'];
         this.weaponAttackTypes = ['melee', 'ranged'];
@@ -44,16 +46,13 @@ class Items {
                 ],
             },
         };
-        
-
-
     }
 
     logDroppedItems(monster, goldGain, torchDropped, droppedItems) {
         let logMessage = `${monster.name} dropped ${goldGain} gold`;
         if (torchDropped) logMessage += ' and a torch';
         if (droppedItems.length) logMessage += ` and ${droppedItems.map(i => i.name).join(', ')}`;
-        window.ui.writeToLog(logMessage + '!');
+        this.ui.writeToLog(logMessage + '!');
     }
 
     getBonusStats(statArray, itemTier) {
@@ -196,7 +195,7 @@ class Items {
                 this.state.player.torches = 1;
                 this.state.player.torchDropFail = 0;
                 console.log(`Player found a torch after 3 failed attempts`);
-                window.ui.writeToLog('You found a discarded torch lying on the ground!');
+                this.ui.writeToLog('You found a discarded torch lying on the ground!');
             }
         } else if (this.state.player.torches < 2) {
             torchChance = 0.15;
@@ -232,7 +231,7 @@ class Items {
 
             const escapedItem = this.escapeItemProperties(randomItem);
 
-            droppedItems.push({ ...escapedItem, uniqueId: window.generateUniqueId() });
+            droppedItems.push({ ...escapedItem, uniqueId: this.ui.utilities.generateUniqueId() });
         }
 
         const existingTreasure = tierTreasures.find(t => t.x === monster.x && t.y === monster.y);
@@ -278,37 +277,12 @@ class Items {
         this.logDroppedItems(monster, goldGain, torchDropped, droppedItems);
     }
 
-    escapeJsonString(str) {
-        return str.replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"')
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r')
-            .replace(/\t/g, '\\t');
-    }
-
     escapeItemProperties(item) {
         console.log("Escaping item properties for item", item);
         return {
             ...item,
-            name: this.escapeJsonString(item.name),
-            description: this.escapeJsonString(item.description),
+            name: this.ui.utilities.escapeJsonString(item.name),
+            description: this.ui.utilities.escapeJsonString(item.description),
         };
     }
 }
-
-// Expose properties and methods on window as per original
-
-window.dropTreasure = function (monster, tier) {
-    window.itemsInstance.dropTreasure(monster, tier);
-};
-window.rogItem = function (rollTotal) {
-    return window.itemsInstance.rogItem(rollTotal);
-};
-window.escapeJsonString = function (str) {
-    return window.itemsInstance.escapeJsonString(str);
-};
-window.escapeItemProperties = function (item) {
-    return window.itemsInstance.escapeItemProperties(item);
-};
-
-// Note: Items instance will be created in game.js as window.itemsInstance

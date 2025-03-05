@@ -6,34 +6,21 @@ class Game {
         this.state = new State(this.data);
         this.utilities = new Utilities();
         this.level = new Level(this.state, this);
-        this.combat = new Combat(this.state, this);
-        this.actions = new Actions(this.state);
-        this.player = new Player(this.state);
-        this.ui = new UI(this.state, this.player, this.utilities);
-        this.render = new Render(this.state);
-        this.items = new Items(this.state, this.data);
-       
-        this.monsters = new Monsters(this.state, this.data);
+        this.ui = new UI(this.state, this, this.utilities);
+        this.render = new Render(this.state, this.ui, this);
+        this.items = new Items(this.state, this.data, this.ui);
+        this.player = new Player(this.state, this.ui, this);
+        this.monsters = new Monsters(this.state, this.data, this.ui, this.items);
+        this.actions = new Actions(this.state, this, this.ui, this.render);
+        this.combat = new Combat(this.state, this, this.ui, this.player, this.monsters, this.items);
 
         this.combat.toggleRanged = this.combat.toggleRanged.bind(this.combat);
-
-        // Assign instances to window for global access
-        window.util = this.utilities;
-        window.generateUniqueId = State.generateUniqueId;
-        window.combat = this.combat;
-        window.actions = this.actions;
-        window.uiInstance = this.ui;
-        window.renderInstance = this.render;
-        window.itemsInstance = this.items;
-        window.playerInstance = this.player;
-        window.monstersInstance = this.monsters;
 
         this.lastRenderTime = 0;
         this.lastInputTime = 0;
         this.renderThrottle = 70;
         this.inputThrottle = 70;
 
-        // Bind handleInput to maintain `this` context for event listeners
         this.handleInput = this.handleInput.bind(this);
     }
 
@@ -44,7 +31,7 @@ class Game {
             this.initGame();
             window.needsRender = true;
             console.log("needsRender set to true for init (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
-            this.renderIfNeeded();
+            this.render.renderIfNeeded();
             return;
         }
 
@@ -80,7 +67,7 @@ class Game {
             return;
         }
 
-        const mappedKey = keyMap[event.key] || event.key; // Use a variable instead
+        const mappedKey = keyMap[event.key] || event.key;
         console.log(`Mapped key: ${mappedKey}`);
 
         if (event.type === 'keyup') {
@@ -102,7 +89,7 @@ class Game {
                 return;
             }
 
-            switch (mappedKey) { // Use mappedKey here
+            switch (mappedKey) {
                 case 'ArrowUp': newY--; break;
                 case 'ArrowDown': newY++; break;
                 case 'ArrowLeft': newX--; break;
@@ -320,23 +307,7 @@ class Game {
         this.player.calculateStats();
         this.ui.updateStats();
         this.monsters.moveMonsters();
-        this.renderIfNeeded();
-    }
-
-    renderIfNeeded() {
-        if (this.state.gameOver) {
-            console.log("renderIfNeeded skipped due to gameOver");
-            return;
-        }
-        console.log("Checking renderIfNeeded, needsRender:", window.needsRender, "typeof:", typeof window.needsRender);
-        if (window.needsRender === true) {
-            console.log("Rendering at", Date.now(), "with needsRender:", window.needsRender, "typeof:", typeof window.needsRender);
-            this.render.render();
-            window.needsRender = false;
-            console.log("needsRender set to false after render (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
-        } else {
-            console.log("renderIfNeeded called but needsRender is", window.needsRender, "typeof:", typeof window.needsRender);
-        }
+        this.render.renderIfNeeded();
     }
 
     init() {
@@ -345,7 +316,7 @@ class Game {
         this.state.logDiv = document.getElementById('log');
         window.needsRender = true;
         console.log("needsRender set to true for init (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
-        this.renderIfNeeded();
+        this.render.renderIfNeeded();
         document.addEventListener('keydown', this.handleInput);
         document.addEventListener('keyup', this.combat.toggleRanged);
         this.ui.updateStats();
@@ -353,16 +324,13 @@ class Game {
 
     initGame() {
         this.state.initGame(this.level, this.monsters, this.items, this.player);
+
+        //////////////////////INACTIVE DO NOT UNCOMMENT OR DELETE
+        //this.player.promptForName(0); // Moved from Render
     }
 }
 
-// Expose endTurn on window as per original
-window.endTurn = function () {
-    window.gameInstance.endTurn();
-};
-
-// Initialize game on DOMContentLoaded
 window.addEventListener('DOMContentLoaded', () => {
-    window.gameInstance = new Game();
-    window.gameInstance.init();
+    const gameInstance = new Game();
+    gameInstance.init();
 });

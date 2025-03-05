@@ -1,9 +1,13 @@
 console.log("combat.js loaded");
 
 class Combat {
-    constructor(state, game) {
+    constructor(state, game, ui, player, monsters, items) {
         this.state = state;
         this.game = game;
+        this.ui = ui;
+        this.player = player;
+        this.monsters = monsters;
+        this.items = items;
     }
 
     calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus) {
@@ -24,23 +28,23 @@ class Combat {
     handleMonsterDeath(monster, tier, combatLogMsg) {
         monster.hp = 0;
         monster.isAgro = false;
-        window.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-        window.ui.writeToLog(`${monster.name} defeated!`);
-        window.dropTreasure(monster, tier);
+        this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
+        this.ui.writeToLog(`${monster.name} defeated!`);
+        this.items.dropTreasure(monster, tier); // Replace window.dropTreasure
         const monsterKillXP = (5 + Math.floor(Math.random() * 6)) * this.state.tier;
-        window.awardXp(monsterKillXP);
+        this.player.awardXp(monsterKillXP); // Replace window.awardXp
     }
 
     handleMonsterRetaliation(monster, tier) {
-        let monsterDamage = window.calculateMonsterAttackDamage(monster, this.state.tier);
+        let monsterDamage = this.monsters.calculateMonsterAttackDamage(monster, this.state.tier); // Replace window.calculateMonsterAttackDamage
         const defense = this.state.player.inventory.equipped.armor?.defense || 0;
         monsterDamage = Math.max(1, monsterDamage - defense);
         this.state.player.hp -= monsterDamage;
-        window.ui.writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
-        window.ui.updateStats();
+        this.ui.writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
+        this.ui.updateStats();
 
         if (this.state.player.hp <= 0) {
-            window.playerDied(monster.name);
+            this.player.death(monster.name); // Replace window.playerDied
             return true;
         }
         return false;
@@ -70,14 +74,14 @@ class Combat {
         if (monster.hp <= 0) {
             this.handleMonsterDeath(monster, this.state.tier, combatLogMsg);
         } else {
-            window.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
+            this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
             if (this.handleMonsterRetaliation(monster, this.state.tier)) {
                 if (this.state.ui.overlayOpen) {
-                    window.ui.updateStats();
+                    this.ui.updateStats();
                 }
             } else {
                 if (this.state.ui.overlayOpen) {
-                    window.ui.updateStats();
+                    this.ui.updateStats();
                 }
             }
         }
@@ -91,17 +95,16 @@ class Combat {
                 if (offWeapon?.attackType === "ranged" || mainWeapon?.attackType === "ranged") {
                     this.state.isRangedMode = true;
                 } else {
-                    window.ui.writeToLog("You need a ranged weapon equipped to use ranged mode!");
+                    this.ui.writeToLog("You need a ranged weapon equipped to use ranged mode!");
                 }
             } else if (event.type === 'keyup') {
                 this.state.isRangedMode = false;
             }
-            
+
             if (!this.state.projectile) {
                 window.needsRender = true;
-                this.game.renderIfNeeded();
+                this.game.render.renderIfNeeded();
             }
-            
         }
     }
 
@@ -127,7 +130,7 @@ class Combat {
             minBaseDamage = mainWeapon.baseDamageMin;
             maxBaseDamage = mainWeapon.baseDamageMax;
         } else {
-            window.ui.writeToLog("No ranged weapon equipped!");
+            this.ui.writeToLog("No ranged weapon equipped!");
             return;
         }
 
@@ -135,13 +138,13 @@ class Combat {
             let tx = this.state.player.x + dx * i;
             let ty = this.state.player.y + dy * i;
             if (tx < 0 || tx >= this.state.WIDTH || ty < 0 || ty >= this.state.HEIGHT || map[ty][tx] === '#') {
-                window.ui.writeToLog(`Ranged shot hit a wall at (${tx}, ${ty})`);
+                this.ui.writeToLog(`Ranged shot hit a wall at (${tx}, ${ty})`);
                 break;
             }
 
             this.state.projectile = { x: tx, y: ty };
             window.needsRender = true;
-            this.game.renderIfNeeded();
+            this.game.render.renderIfNeeded();
             await new Promise(resolve => setTimeout(resolve, 50));
 
             let monster = this.state.monsters[this.state.tier].find(m => m.x === tx && m.y === ty && m.hp > 0);
@@ -155,35 +158,22 @@ class Combat {
                 if (monster.hp <= 0) {
                     this.handleMonsterDeath(monster, this.state.tier, combatLogMsg);
                 } else if (i === 1) {
-                    window.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
+                    this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
                     if (!this.handleMonsterRetaliation(monster, this.state.tier)) {
-                        window.ui.updateStats();
+                        this.ui.updateStats();
                     }
                 } else {
-                    window.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
+                    this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
                 }
                 this.state.projectile = null;
                 window.needsRender = true;
-                this.game.renderIfNeeded();
-                window.ui.updateStats();
+                this.game.render.renderIfNeeded();
+                this.ui.updateStats();
                 break;
             }
         }
         this.state.projectile = null;
         window.needsRender = true;
-       this.game.endTurn();
+        this.game.endTurn();
     }
 }
-
-// Expose methods on window as per original
-window.meleeCombat = function (monster) {
-    window.combat.meleeCombat(monster);
-};
-window.toggleRanged = function (event) {
-    window.combat.toggleRanged(event);
-};
-window.rangedAttack = async function (direction) {
-    await window.combat.rangedAttack(direction);
-};
-
-// Note: Combat instance will be created in game.js

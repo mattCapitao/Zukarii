@@ -457,5 +457,3 @@ class Level {
         return tileMap;
     }
 }
-
-// Note: Level instance will be created in game.js or state.js where needed

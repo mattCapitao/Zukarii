@@ -1,0 +1,62 @@
+{
+  "mainhand": {
+    "name": "Mainhand",
+    "type": "weapon",
+    "attackType": "melee",
+    "slots": [ "mainhand" ],
+    "baseDamageMin": 1,
+    "baseDamageMax": 1,
+    "uniqueId": null,
+    "itemTier": "Empty",
+    "description": "Not equipped.",
+    "icon": "no-mainhand.svg"
+  },
+  "offhand": {
+    "name": "Offhand",
+    "type": "weapon",
+    "slots": [ "offhand" ],
+    "baseDamageMin": 0,
+    "baseDamageMax": 0,
+    "uniqueId": null,
+    "itemTier": "Empty",
+    "description": "Not equipped.",
+    "icon": "no-offhand.svg"
+  },
+  "armor": {
+    "name": "Armor",
+    "type": "armor",
+    "slot": "armor",
+    "uniqueId": null,
+    "itemTier": "Empty",
+    "defense": 0,
+    "description": "Not equipped.",
+    "icon": "no-armor.svg"
+  },
+  "amulet": {
+    "name": "Amulet",
+    "type": "amulet",
+    "slot": "amulet",
+    "uniqueId": null,
+    "itemTier": "Empty",
+    "description": "Not equipped.",
+    "icon": "no-amulet.svg"
+  },
+  "rightring": {
+    "name": "Right Ring",
+    "type": "ring",
+    "slot": "rightring",
+    "uniqueId": null,
+    "itemTier": "Empty",
+    "description": "Not equipped.",
+    "icon": "no-rightring.svg"
+  },
+  "leftring": {
+    "name": "Left Ring",
+    "type": "ring",
+    "slot": "leftring",
+    "uniqueId": null,
+    "itemTier": "Empty",
+    "description": "Not equipped.",
+    "icon": "no-leftring.svg"
+  }
+}

@@ -1,18 +1,12 @@
 ﻿console.log("ui.js loaded");
 
+
 class UI {
-    constructor(state, player, utilities) {
+    constructor(state, game, utilities) {
         this.state = state;
-        this.player = player;
+        this.game = game; // Use game instead of player for broader access
         this.utilities = utilities;
         this.tooltipCache = new Map();
-    }
-
-    camelToTitleCase(str) {
-        return str
-            .replace(/([A-Z])/g, ' $1') // Add space before each uppercase letter
-            .replace(/^./, str => str.toUpperCase()) // Capitalize the first letter
-            .trim(); // Remove any leading/trailing spaces
     }
 
     showItemTooltip(itemData, event) {
@@ -66,7 +60,7 @@ class UI {
                         if (stat !== 'luck' && stat !== 'maxLuck') {
                             const statLine = document.createElement('div');
                             statLine.className = 'tooltip-stat';
-                            statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.camelToTitleCase(stat)}`;
+                            statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.utilities.camelToTitleCase(stat)}`;
                             statsContainer.appendChild(statLine);
                         }
                     });
@@ -161,11 +155,11 @@ class UI {
             itemTier: "Empty",
             type: item.equippedSlot,
             slot: item.equippedSlot,
-            uniqueId: window.generateUniqueId(),
+            uniqueId: State.generateUniqueId(), // Replace window.generateUniqueId
             icon: `no-${item.equippedSlot}.svg`,
         };
 
-        this.player.updateGearStats();
+        this.game.player.updateGearStats();
 
         if (this.state.ui.overlayOpen) {
             this.updateStats();
@@ -274,7 +268,7 @@ class UI {
                 return;
         }
 
-        this.player.updateGearStats();
+        this.game.player.updateGearStats();
 
         this.state.ui.activeTab = currentTab;
         if (this.state.ui.overlayOpen) {
@@ -524,14 +518,14 @@ class UI {
                         <p class="equip-slot mainhand">
                             <img src="img/icons/items/${equip.mainhand?.icon || 'no-mainhand.svg'}" alt="${equip.mainhand?.name || 'Mainhand'}" 
                                  class="item item-icon ${equip.mainhand?.itemTier || 'Empty'} ${equip.mainhand?.type || 'weapon'}" 
-                                 data-item='${JSON.stringify(equip.mainhand || { name: "Mainhand", itemTier: "Empty", type: "weapon", slots: ["mainhand"], baseDamageMin: 1, baseDamageMax: 1, uniqueId: window.generateUniqueId(), icon: "no-mainhand.svg" })}'>
+                                 data-item='${JSON.stringify(equip.mainhand || { name: "Mainhand", itemTier: "Empty", type: "weapon", slots: ["mainhand"], baseDamageMin: 1, baseDamageMax: 1, uniqueId: State.generateUniqueId(), icon: "no-mainhand.svg" })}'>
                             <br><span class="item-label">Mainhand</span></p>
                     </div>
                     <div class="equipped-item">
                         <p class="equip-slot rightring">
                             <img src="img/icons/items/${equip.rightring?.icon || 'no-rightring.svg'}" alt="${equip.rightring?.name || 'Right Ring'}" 
                                  class="item item-icon ${equip.rightring?.itemTier || 'Empty'} ${equip.rightring?.type || 'ring'}" 
-                                 data-item='${JSON.stringify(equip.rightring || { name: "Right Ring", itemTier: "Empty", type: "ring", slot: "rightring", uniqueId: window.generateUniqueId(), icon: "no-rightring.svg" })}'>
+                                 data-item='${JSON.stringify(equip.rightring || { name: "Right Ring", itemTier: "Empty", type: "ring", slot: "rightring", uniqueId: State.generateUniqueId(), icon: "no-rightring.svg" })}'>
                             <br><span class="item-label">Right Ring </span></p>
                     </div>
                 </div>
@@ -540,14 +534,14 @@ class UI {
                         <p class="equip-slot amulet"> 
                             <img src="img/icons/items/${equip.amulet?.icon || 'no-amulet.svg'}" alt="${equip.amulet?.name || 'Amulet'}" 
                                  class="item item-icon ${equip.amulet?.itemTier || 'Empty'} ${equip.amulet?.type || 'amulet'}" 
-                                 data-item='${JSON.stringify(equip.amulet || { name: "Amulet", itemTier: "Empty", type: "amulet", slot: "amulet", uniqueId: window.generateUniqueId(), icon: "no-amulet.svg" })}'>
+                                 data-item='${JSON.stringify(equip.amulet || { name: "Amulet", itemTier: "Empty", type: "amulet", slot: "amulet", uniqueId: State.generateUniqueId(), icon: "no-amulet.svg" })}'>
                             <br><span class="item-label">Amulet</span></p>
                     </div>
                     <div class="equipped-item">
                         <p class="equip-slot armor">
                             <img src="img/icons/items/${equip.armor?.icon || 'no-armor.svg'}" alt="${equip.armor?.name || 'Armor'}" 
                                  class="item item-icon ${equip.armor?.itemTier || 'Empty'} ${equip.armor?.type || 'armor'}" 
-                                 data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: window.generateUniqueId(), defense: 0, icon: "no-armor.svg" })}'>
+                                 data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: State.generateUniqueId(), defense: 0, icon: "no-armor.svg" })}'>
                             <br><span class="item-label">Armor</span> </p>
                     </div>
                 </div>
@@ -556,14 +550,14 @@ class UI {
                         <p class="equip-slot offhand">
                             <img src="img/icons/items/${equip.offhand?.icon || 'no-offhand.svg'}" alt="${equip.offhand?.name || 'Offhand'}" 
                                  class="item item-icon ${equip.offhand?.itemTier || 'Empty'} ${equip.offhand?.type || 'weapon'}" 
-                                 data-item='${JSON.stringify(equip.offhand || { name: "Offhand", itemTier: "Empty", type: "weapon", slots: ["offhand"], baseDamageMin: 0, baseDamageMax: 0, uniqueId: window.generateUniqueId(), icon: "no-offhand.svg" })}'>
+                                 data-item='${JSON.stringify(equip.offhand || { name: "Offhand", itemTier: "Empty", type: "weapon", slots: ["offhand"], baseDamageMin: 0, baseDamageMax: 0, uniqueId: State.generateUniqueId(), icon: "no-offhand.svg" })}'>
                             <br><span class="item-label">Offhand</span></p>
                     </div>
                     <div class="equipped-item">
                         <p class="equip-slot leftring">
                             <img src="img/icons/items/${equip.leftring?.icon || 'no-leftring.svg'}" alt="${equip.leftring?.name || 'Left Ring'}" 
                                  class="item item-icon ${equip.leftring?.itemTier || 'Empty'} ${equip.leftring?.type || 'ring'}" 
-                                 data-item='${JSON.stringify(equip.leftring || { name: "Left Ring", itemTier: "Empty", type: "ring", slot: "leftring", uniqueId: window.generateUniqueId(), icon: "no-leftring.svg" })}'>
+                                 data-item='${JSON.stringify(equip.leftring || { name: "Left Ring", itemTier: "Empty", type: "ring", slot: "leftring", uniqueId: State.generateUniqueId(), icon: "no-leftring.svg" })}'>
                             <br><span class="item-label">Left Ring</span> </p>
                     </div>
                 </div>`;
@@ -731,22 +725,3 @@ class UI {
         gameOver.appendChild(restartButton);
     }
 }
-
-// Expose UI methods on window.ui as per original
-window.ui = {
-    dropItem: function (index) { window.uiInstance.dropItem(index); },
-    equipItem: function (item) { window.uiInstance.equipItem(item); },
-    renderOverlay: function () { window.uiInstance.renderOverlay(); },
-    showItemTooltip: function (itemData, event) { window.uiInstance.showItemTooltip(itemData, event); },
-    hideItemTooltip: function (itemData) { window.uiInstance.hideItemTooltip(itemData); },
-    addItemListeners: function () { window.uiInstance.addItemListeners(); },
-    updateStats: function () { window.uiInstance.updateStats(); },
-    updateLog: function () { window.uiInstance.updateLog(); },
-    updateInventory: function () { window.uiInstance.updateInventory(); },
-    writeToLog: function (message) { window.uiInstance.writeToLog(message); },
-    updatePlayerInfo: function () { window.uiInstance.updatePlayerInfo(); },
-    updatePlayerStatus: function () { window.uiInstance.updatePlayerStatus(); },
-    gameOver: function (message) { window.uiInstance.gameOver(message); }
-};
-
-// Note: UI instance will be created in game.js as window.uiInstance

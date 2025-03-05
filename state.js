@@ -1,6 +1,5 @@
 ﻿console.log("state.js loaded");
 
-
 class State {
     constructor(data) {
         this.data = data;
@@ -40,7 +39,7 @@ class State {
             meleeDamageBonus: 0,
             rangedDamageBonus: 0,
             inventory: {
-                equipped: {},
+                equipped: {}, // Initialized in Player now
                 items: [],
             },
             torches: 1,
@@ -114,25 +113,6 @@ class State {
         this.AGGRO_RANGE = 4;
     }
 
-    static generateUniqueId() {
-        const time = Date.now().toString(36);
-        const rand1 = Math.random().toString(36).substring(2, 8);
-        const rand2 = Math.random().toString(36).substring(2, 8);
-        return `${time}-${rand1}-${rand2}`;
-    }
-
-    initializeEquippedSlots() {
-        const emptyEquipSlots = this.data.getEmptyEquipSlots(); // Use Data instance
-        const slotsWithIds = {};
-        Object.entries(emptyEquipSlots).forEach(([slot, data]) => {
-            slotsWithIds[slot] = {
-                ...data,
-                uniqueId: State.generateUniqueId(),
-            };
-        });
-        return slotsWithIds;
-    }
-
     generateSurfaceLevel() {
         let map = [];
         for (let y = 0; y < 10; y++) {
@@ -159,7 +139,7 @@ class State {
         return { map, rooms };
     }
 
-    initGame(level, monsters, items, player) { // Add all needed instances
+    initGame(level, monsters, items, player) {
         const splash = document.getElementById('splash');
         splash.remove();
 
@@ -245,8 +225,3 @@ class State {
         window.needsRender = true;
     }
 }
-
-// Expose generateUniqueId globally as per original
-window.generateUniqueId = State.generateUniqueId;
-
-// Note: State instance will be created in game.js to maintain initialization order

@@ -1,13 +1,45 @@
 console.log("utilities.js loaded");
 
 class Utilities {
-    static camelToTitleCase(str) {
+    constructor() {
+        // No properties needed for now, but constructor is here for instance creation
+    }
+
+    camelToTitleCase(str) {
         return str
-            .replace(/([A-Z])/g, ' $1') // Add space before each uppercase letter
-            .replace(/^./, str => str.toUpperCase()) // Capitalize the first letter
-            .trim(); // Remove any leading/trailing spaces
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase())
+            .trim();
+    }
+
+    generateUniqueId() {
+        const time = Date.now().toString(36);
+        const rand1 = Math.random().toString(36).substring(2, 8);
+        const rand2 = Math.random().toString(36).substring(2, 8);
+        return `${time}-${rand1}-${rand2}`;
+    }
+
+    encodeHTMLEntities(text) {
+        return text.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    getRandomName(names) {
+        if (!Array.isArray(names) || names.length === 0) {
+            return undefined;
+        }
+        const randomIndex = Math.floor(Math.random() * names.length);
+        return names[randomIndex];
+    }
+
+    escapeJsonString(str) {
+        return str.replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r')
+            .replace(/\t/g, '\\t');
     }
 }
-
-// Expose instance on window.util as per original
-window.util = new Utilities();

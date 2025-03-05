@@ -1,8 +1,10 @@
 ﻿console.log("render.js loaded");
 
 class Render {
-    constructor(state) {
+    constructor(state, ui, game) {
         this.state = state;
+        this.ui = ui;
+        this.game = game; // Added for renderIfNeeded dependencies
         this.animationFrame = null;
         this.mageNames = [
             "Elarion", "Sylvara", "Tharion", "Lysandra", "Zephyrion", "Morwenna", "Aethric",
@@ -68,8 +70,8 @@ class Render {
             if (this.state.discoveredTileCount[tier] >= 1000) {
                 this.state.discoveredTileCount[tier] = 0;
                 const exploreXP = 25;
-                window.ui.writeToLog("Explored 1000 tiles!");
-                window.awardXp(exploreXP);
+                this.ui.writeToLog("Explored 1000 tiles!");
+                this.game.player.awardXp(exploreXP);
             }
         }
 
@@ -310,50 +312,19 @@ class Render {
         console.log(`Initial scroll set to (${map.scrollLeft}, ${map.scrollTop}) for player at (${playerX}, ${playerY})`);
     }
 
-    getRandomName(names) {
-        if (!Array.isArray(names) || names.length === 0) {
-            return undefined;
+    renderIfNeeded() {
+        if (this.state.gameOver) {
+            console.log("renderIfNeeded skipped due to gameOver");
+            return;
         }
-        const randomIndex = Math.floor(Math.random() * names.length);
-        return names[randomIndex];
-    }
-
-    encodeHTMLEntities(text) {
-        return text.replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
-    }
-
-    userNamePrompt(delay) {
-        setTimeout(() => {
-            let userCharacterName = prompt("Please name your character to begin:");
-            if (userCharacterName !== null) {
-                console.log("Hello, " + userCharacterName + "!");
-                const sanitizedInput = this.encodeHTMLEntities(userCharacterName);
-                this.state.player.name = sanitizedInput;
-            } else {
-                console.log("User cancelled the prompt.");
-                this.state.player.name = this.getRandomName(this.mageNames);
-                window.ui.writeToLog(`You didnt enter a name, so a random one has been given to you, ${this.state.player.name} `);
-            }
-        }, delay);
+        console.log("Checking renderIfNeeded, needsRender:", window.needsRender, "typeof:", typeof window.needsRender);
+        if (window.needsRender === true) {
+            console.log("Rendering at", Date.now(), "with needsRender:", window.needsRender, "typeof:", typeof window.needsRender);
+            this.render();
+            window.needsRender = false;
+            console.log("needsRender set to false after render (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
+        } else {
+            console.log("renderIfNeeded called but needsRender is", window.needsRender, "typeof:", typeof window.needsRender);
+        }
     }
 }
-
-// Expose methods on window as per original
-window.render = function () {
-    window.renderInstance.render();
-};
-window.render = function () {
-    window.renderInstance.render();
-};
-window.setInitialScroll = function () {
-    window.renderInstance.setInitialScroll();
-};
-window.updateMapScroll = function () {
-    window.renderInstance.updateMapScroll();
-};
-
-// Note: Render instance will be created in game.js as window.renderInstance

@@ -1,9 +1,11 @@
 ﻿console.log("monsters.js loaded");
 
 class Monsters {
-    constructor(state, data) {
+    constructor(state, data, ui, items) {
         this.state = state;
         this.data = data;
+        this.ui = ui;
+        this.items = items;
         this.monsterAffixes = {
             goldTheft: {
                 name: "Gold Theft",
@@ -11,12 +13,12 @@ class Monsters {
                 onHit: function (monster, player) {
                     const goldStolen = Math.floor(player.gold * 0.1);
                     player.gold -= goldStolen;
-                    window.ui.writeToLog(`${monster.name} has stolen ${goldStolen} gold from you!`);
+                    this.ui.writeToLog(`${monster.name} has stolen ${goldStolen} gold from you!`);
                     if (player.gold < 0) {
                         player.gold = 0;
-                        window.ui.writeToLog(`ALL YOUR GOLD ARE BELONG TO ${monster.name} `);
+                        this.ui.writeToLog(`ALL YOUR GOLD ARE BELONG TO ${monster.name} `);
                     }
-                }
+                }.bind(this)
             },
             poisonGas: {
                 name: "Poison Gas",
@@ -31,7 +33,7 @@ class Monsters {
                     };
                     this.state.gasClouds.push(gasCloud);
                     console.log(`Poison gas cloud released at (${monster.x}, ${monster.y})`);
-                }.bind(this) // Bind to keep `this.state` context
+                }.bind(this)
             }
         };
     }
@@ -45,9 +47,8 @@ class Monsters {
     }
 
     generateMonster(tier, map, rooms, playerX, playerY, unique = false) {
-
         const monsterTemplates = unique ? this.data.getUniqueMonsters() : this.data.getMonsterTemplates();
-        
+
         let newMonster = { ...monsterTemplates[Math.floor(Math.random() * monsterTemplates.length)] };
         const room = rooms[Math.floor(Math.random() * rooms.length)];
 
@@ -166,16 +167,3 @@ class Monsters {
         });
     }
 }
-
-
-window.calculateMonsterAttackDamage = function (enemy, tier) {
-    return window.monstersInstance.calculateMonsterAttackDamage(enemy, tier);
-};
-window.moveMonsters = function () {
-    window.monstersInstance.moveMonsters();
-};
-window.generateLevelMonsters = function (tier) {
-    return window.monstersInstance.generateLevelMonsters(tier);
-};
-
-// Note: Monsters instance will be created in game.js as window.monstersInstance

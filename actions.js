@@ -1,8 +1,11 @@
 console.log("actions.js loaded");
 
 class Actions {
-    constructor(state) {
+    constructor(state, game, ui, render) {
         this.state = state;
+        this.game = game;
+        this.ui = ui;
+        this.render = render;
     }
 
     useFountain(fountain, tier) {
@@ -17,13 +20,13 @@ class Actions {
                 this.state.player.maxHp = this.state.player.stats.base.maxHp;
                 healAmount = this.state.player.maxHp - this.state.player.hp;
                 this.state.player.hp = this.state.player.maxHp;
-                window.ui.writeToLog(`The fountain surges with power! Fully healed and Max HP increased by ${maxHpBoost} to ${this.state.player.maxHp}!`);
+                this.ui.writeToLog(`The fountain surges with power! Fully healed and Max HP increased by ${maxHpBoost} to ${this.state.player.maxHp}!`);
             } else {
                 const missingHp = this.state.player.maxHp - this.state.player.hp;
                 const healPercent = Math.random() * (0.5 - 0.3) + 0.3;
                 healAmount = Math.round(missingHp * healPercent);
                 this.state.player.hp = Math.min(this.state.player.hp + healAmount, this.state.player.maxHp);
-                window.ui.writeToLog(`The fountain restores ${healAmount} HP. Current HP: ${this.state.player.hp}/${this.state.player.maxHp}`);
+                this.ui.writeToLog(`The fountain restores ${healAmount} HP. Current HP: ${this.state.player.hp}/${this.state.player.maxHp}`);
             }
 
             fountain.used = true;
@@ -50,27 +53,14 @@ class Actions {
         } else {
             message = 'You have no torches left.';
         }
-        window.ui.writeToLog(message);
+        this.ui.writeToLog(message);
     }
 
     torchExpired() {
         this.state.player.torchLit = false;
         this.state.torchExpires = 0;
         this.state.discoveryRadius = this.state.discoveryRadiusDefault;
-        window.ui.writeToLog('The torch has burned out!');
-        window.render();
+        this.ui.writeToLog('The torch has burned out!');
+        this.render.render();
     }
 }
-
-// Expose methods on window as per original
-window.lightTorch = function () {
-    window.actions.lightTorch();
-};
-window.torchExpired = function () {
-    window.actions.torchExpired();
-};
-window.useFountain = function (fountain, tier) {
-    window.actions.useFountain(fountain, tier);
-};
-
-// Note: Actions instance will be created in game.js
