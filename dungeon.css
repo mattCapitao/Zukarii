@@ -40,6 +40,13 @@ td {
     line-height: 1.25;
 }
 
+hr {
+    border: 0;
+    border-top: .0625rem solid #0f0; /* ~1px */
+    height: 0.0625rem; /* ~1px */
+    margin: 0.625rem 0; /* ~10px */
+}
+
 /*////////////////////////////////////////////////////  CUSTOM BASELINE - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 /*////////////////////////////////////////////////////  GENERAL UI - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
@@ -397,27 +404,59 @@ justify-content: space-around;
         width: 32%;
         margin-top: 0.625rem; /* ~10px */
     }
+
+#tabs h2 {
+    font-size: 1.125rem; /* ~18px */
+    font-weight: bold;
+    text-align: center;
+    margin: 0 0 0.625rem 0; /* ~5px */
+}
+
 #character-stat-wrapper {
     display: flex;
     flex-wrap: wrap; /* Allows items to wrap into multiple columns */
     width: 100%;
     gap: 0; /* Optional: controls spacing between items */
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 0.75rem; /* ~12px */
+    padding: 0.625rem; /* ~10px */
+    background: rgba(20, 30, 20, 0.7);
+    border: 0.0625rem solid #0f0; /* ~1px */
+    border-radius: .625rem;
 }
 
     #character-stat-wrapper > div {
-        padding: .175rem; 
+        padding: .125rem 0 .125rem 0; /* ~2px */
         width: 50%; /* 50% width minus border width (3px * 2) */
         box-sizing: border-box; /* Ensures padding/border don't increase width */
+        margin: 0;
+        justify-content: center;
+        align-content: center;
     }
-
 
 #equipped-items {
     width: 100%;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
+    font-size: 0.75rem; /* ~12px */
     padding: 0.625rem; /* ~10px */
+    background: rgba(20, 30, 20, 0.7);
+    border: 0.0625rem solid #0f0; /* ~1px */
+    border-radius: .625rem;
+    margin-bottom: 0.625rem; /* ~10px */
 }
+
+    #equipped-items div.col {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 33% !important;
+    }
+
 #tabs p.equip-slot {
     margin: 1.625rem;  
     padding: 0.325rem 0 0.325rem 0;
@@ -431,11 +470,14 @@ justify-content: space-around;
     font-size: 0.75rem; /* ~12px */
     width: 4.25rem; /* ~68px */
 }
-    #inventory {
-        display: flex;
-        width: 65%;
-        margin-top: 0.625rem; /* ~10px */
-    }
+
+#inventory {
+    display: flex;
+    flex-direction: column;
+    height: 30rem; /* ~400px */
+    width: 65%;
+    margin-top: 0.625rem; /* ~10px */
+}
 
 #tabs div.inventory-item-wrapper {
     display: flex;
@@ -449,6 +491,7 @@ justify-content: space-around;
     scrollbar-color: #0f0 #111;
     scrollbar-width: thin;
     scrollbar-gutter: stable;
+    background: rgba(20, 30, 20, 0.7);
     gap: 0.3125rem;
 }
 
@@ -502,9 +545,7 @@ justify-content: space-around;
             width: 4rem; /* ~64px */
             text-align: center;
         }
-        #tabs p.inventory-slot span.item-label.relic{
-            color: gold;
-        }
+       
 
 .item-tooltip-class {
     padding: 0.625rem; /* ~5px */
@@ -517,11 +558,94 @@ justify-content: space-around;
     border-radius: .625rem;
 }
 
-.item-tooltip-class.relic {
-    color: gold;
-    border: 0.0625rem solid gold; /* ~1px */
+.relic,
+.relic hr,
+.item-tooltip-class.relic,
+#tabs p.equip-slot.relic img.item,
+#tabs p.inventory-slot.relic img.item,
+#tabs p.inventory-slot span.item-label.relic {
+color: gold !important;
+       
+border-color: gold !important;
 }
 
+.relic hr,
+#tabs p.equip-slot.relic img.item,
+#tabs p.inventory-slot.relic img.item, {
+background-color: gold !important;
+}
+    
+
+.magic,
+.magic hr,
+.item-tooltip-class.magic,
+#tabs p.equip-slot.magic img.item,
+#tabs p.inventory-slot.magic img.item,
+#tabs p.inventory-slot span.item-label.magic {
+color: blueviolet !important;
+border-color: blueviolet !important;
+}
+.magic hr,
+#tabs p.equip-slot.magic img.item,
+#tabs p.inventory-slot.magic img.item, {
+background-color: blueviolet !important;
+}
+
+    .rare,
+    .rare hr,
+    .item-tooltip-class.rare,
+    #tabs p.equip-slot.rare img.item,
+    #tabs p.inventory-slot.rare img.item,
+    #tabs p.inventory-slot span.item-label.rare {
+        color: blue !important;
+        border-color: blue !important;
+    }
+
+        .rare hr,
+        #tabs p.equip-slot.rare img.item,
+        #tabs p.inventory-slot.rare img.item, {
+            background-color: blueviolet !important;
+        }
+
+    .junk,
+    .junk hr,
+    .item-tooltip-class.junk,
+    #tabs p.equip-slot.junk img.item,
+    #tabs p.inventory-slot.junk img.item,
+    #tabs p.inventory-slot span.item-label.junk {
+        color: whitesmoke !important;
+        border-color: whitesmoke !important;
+    }
+
+        .junk hr,
+        #tabs p.equip-slot.junk img.item,
+        #tabs p.inventory-slot.junk img.item, {
+            background-color: whitesmoke !important;
+        }
+
+/*
+     #tabs p.inventory-slot span.item-label.relic{
+            color: gold;
+        }
+
+.item-tooltip-class.relic {
+    color: gold;
+    border: 0.0625rem solid gold; 
+}
+
+    .item-tooltip-class.relic hr {
+        border: 0;
+        border-top: .0625rem solid gold; 
+        height: 0.0625rem; 
+        background: gold;
+        margin: 0.625rem 0; 
+    }
+
+#tabs p.inventory-slot.relic img.item,
+#tabs p.equip-slot.relic img.item {
+    border: 0.0625rem solid #0f0; 
+}
+*/
 
 .item-tooltip-name {
     width: 100%;

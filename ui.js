@@ -539,7 +539,7 @@ function updateInventory() {
     if (equippedItems) {
 
         equippedItems.innerHTML = `
-            <div style="width: 30%;">
+            <div class="col">
             <div class="equipped-item">
                 <p class="equip-slot mainhand">
                     <img src="img/icons/items/${equip.mainhand?.icon || 'no-mainhand.svg'}" alt="${equip.mainhand?.name || 'Mainhand'}" 
@@ -555,7 +555,7 @@ function updateInventory() {
                 <br><span class="item-label">Right Ring </span></p>
                 </div>
             </div>
-            <div style="width: 30%;">
+            <div class="col">
                 <div class="equipped-item">
                 <p class="equip-slot amulet"> 
                     <img src="img/icons/items/${equip.amulet?.icon || 'no-amulet.svg'}" alt="${equip.amulet?.name || 'Amulet'}" 
@@ -571,7 +571,7 @@ function updateInventory() {
                <br><span class="item-label">Armor</span> </p>
                </div>
             </div>
-            <div style="width: 30%;">
+            <div class="col">
 
                 <div class="equipped-item">
                 <p class="equip-slot offhand">
@@ -595,7 +595,7 @@ function updateInventory() {
 
     if (inventory) {
         inventory.innerHTML = `
-
+            <h2>Inventory Items</h2>
             <div class="inventory-item-wrapper">
             ${state.player.inventory.items?.length ? state.player.inventory.items.map((item, index) => `
                 
@@ -655,9 +655,9 @@ function renderOverlay() {
 
             <div id="character-content" class="ui-tab" style="display: ${state.ui.activeTab === 'character' ? 'flex' : 'none'} ;">
                 <div id="character">
-                    <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Equipped Items</div>
+                    <h2>Equipped Items</h2>
                     <div id="equipped-items">${updateInventory(true)}</div>
-                    <div style="font-size: 18px; font-weight: bold; text-align: center; margin-top: 10px; border-bottom: 1px dashed #090;">Effective Stats</div>
+                    <h2>Effective Stats</h2>
                     <div id="character-stat-wrapper">
                        
                         <div>Level: ${state.player.level}</div>
@@ -666,6 +666,7 @@ function renderOverlay() {
                         <div>Mana: ${state.player.mana}/${state.player.maxMana}</div>
                         <div>Gold: ${state.player.gold}</div>
                         <div>Torches: ${state.player.torches}</div>
+                        <div><hr></div><div><hr></div>
                         <div>${state.player.intellect} : Intellect</div>
                         <div>${state.player.prowess} : Prowess</div>
                         <div>${state.player.agility} : Agility</div>
@@ -679,11 +680,12 @@ function renderOverlay() {
                     </div> 
                 </div>
                 <div id="inventory">
+                    
                     ${updateInventory()}
                 </div>
             </div>
         `;
-
+        
         // Ensure inventory and equipped items are updated for all tabs on open
         updateInventory(state.ui.activeTab === 'character');
 
