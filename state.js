@@ -28,7 +28,7 @@ class State {
             gold: 0,
             hp: 30, maxHp: 30,
             mana: 10, maxMana: 10,
-            luck: 0, maxLuck: 0,
+            luck: 0, maxLuck: 0, luckTempMod:0,
             prowess: 5 + Math.floor(Math.random() * 6),
             intellect: 5 + Math.floor(Math.random() * 6),
             agility: 5 + Math.floor(Math.random() * 6),
@@ -220,9 +220,11 @@ class State {
                 }
             }
         }
+        
         this.lastPlayerX = null;
         this.lastPlayerY = null;
         this.needsInitialRender = true;
         this.needsRender = true;
+        level.generateTreasures(1);
     }
 }

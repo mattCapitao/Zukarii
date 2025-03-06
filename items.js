@@ -1,17 +1,21 @@
 console.log("items.js loaded");
 
 class Items {
-    constructor(state, data, ui) {
+    constructor(state, data, ui, game) {
         this.state = state;
         this.data = data;
         this.ui = ui;
+        this.game = game;
 
         this.relicItems = this.data.getUniqueItems();
         this.artifactItems = this.data.getUniqueItems();
 
         this.itemTiers = ['junk', 'common', 'rare', 'mastercraft', 'magic', 'artifact', 'relic'];
+
         this.itemTypes = ['weapon', 'armor', 'amulet', 'ring'];
+
         this.weaponAttackTypes = ['melee', 'ranged'];
+
         this.itemStatOptions = {
             weapon: {
                 ranged: {
@@ -33,22 +37,66 @@ class Items {
                     'maxHp', 'maxMana', 'maxLuck',
                     'intellect', 'prowess', 'agility',
                     'range', 'block', 'defense',
-                    'rangedDamageBonus', 'damageBonus'
+                    'meleeDamageBonus', 'rangedDamageBonus', 'damageBonus'
                 ],
             },
             ring: {
-                base: ['luck'],
+                base: ['maxLuck'],
                 bonus: [
                     'maxHp', 'maxMana', 'maxLuck',
                     'intellect', 'prowess', 'agility',
                     'range', 'block', 'defense',
-                    'rangedDamageBonus', 'damageBonus'
+                    'meleeDamageBonus', 'rangedDamageBonus', 'damageBonus'
                 ],
             },
         };
+
+
     }
 
-    getBonusStats(statArray, itemTier) {
+    statRoll(stat, item) {
+
+        switch (stat) { 
+            case 'baseDamageMin':
+                 return Math.floor(item.tierIndex * 1.5);
+            case 'baseDamageMax':
+                return Math.floor(Math.random() * item.tierIndex) + 1;
+            case 'range':
+                return Math.floor(Math.random() * 2) + 1;
+            case 'block':
+                return Math.floor(Math.random() * 2) + 1;
+            case 'armor':
+                return Math.floor(item.tierIndex) + 1;
+            case 'maxLuck':
+                return Math.min(Math.floor(Math.random() * 5) + Math.floor(Math.random() * 5) - 4, item.tierIndex * 2 + 1) + Math.floor(Math.random() * 2);
+            case 'maxHp':
+                return item.tierIndex * 2;
+            case 'maxMana':
+                return Math.floor(item.tierIndex / 2);
+            case 'prowess':
+                return Math.floor(item.tierIndex / 2);
+            case 'agility':
+                return Math.floor(item.tierIndex / 2);
+            case 'intellect':
+                return Math.floor(item.tierIndex / 2);
+            case 'defense':
+                return Math.floor(item.tierIndex) + 1;
+            case 'damageBonus':
+                return Math.floor(item.tierIndex) + 1;
+            case 'meleeDamageBonus':
+                return Math.floor(item.tierIndex) + 1;
+            case 'rangedDamageBonus':
+                return Math.floor(item.tierIndex) + 1;
+            default:
+                console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
+                return 0;
+        }
+        
+    };
+
+    getBonusStats(statArray, item) {
+        console.log(`getBonusStats() called with statArray:`, statArray, `for item: `, item);
+        const itemTier = item.tierIndex;
         let availableStats = [...statArray];
         let selectedStats = {};
 
@@ -57,19 +105,53 @@ class Items {
         for (let i = 0; i < count && availableStats.length > 0; i++) {
             const index = Math.floor(Math.random() * availableStats.length);
             const stat = availableStats.splice(index, 1)[0];
-            selectedStats[stat] = Math.floor(Math.random() * 10) + 1;
+            const statValue = this.statRoll(stat, item);
+
+            if (selectedStats.hasOwnProperty(stat)) {
+                selectedStats[stat] += statValue;
+            } else {
+                selectedStats[stat] = statValue;
+            }
         }
+        console.log(`Returning selected stats:`, selectedStats);
         return selectedStats;
+    }
+
+    itemDropRoll() {
+        let randomValue = Math.random() * 1;
+        console.log(`itemDropRoll() randomValue: ${randomValue}`);
+        let dungeonTierBonus = this.state.tier * 0.01;
+        let playerLuckBonus = this.state.player.luck * 0.01;
+
+        let rollTotal = randomValue + dungeonTierBonus + playerLuckBonus;
+
+        console.log(`itemDropRoll() : dungeonTierBonus = ${dungeonTierBonus} : playerLuckBonus = ${dungeonTierBonus} : rollTotal: ${rollTotal}`);
+
+        let itemDropData = { roll: rollTotal, itemTier: '' };
+
+        switch (true) {
+            case randomValue < 0.99:
+                itemDropData.itemTier = 'rog';
+                break;
+            case randomValue < 0.999:
+                itemDropData.itemTier = 'artifact';
+                break;
+            default:
+                itemDropData.itemTier = 'relic';
+        }
+
+        console.log(`itemDropRoll() returning: { roll: ,${itemDropData.roll} itemTier: ${itemDropData.itemTier}}`);
+        return itemDropData;
     }
 
     rogItem(rollTotal) {
         let item = {};
         switch (true) {
-            case rollTotal < 0.30: item.tier = this.itemTiers[0]; item.tierIndex = 0; break; // 'junk'
-            case rollTotal < 0.55: item.tier = this.itemTiers[1]; item.tierIndex = 1; break; // 'common'
-            case rollTotal < 0.75: item.tier = this.itemTiers[2]; item.tierIndex = 2; break; // 'rare'
-            case rollTotal < 0.88: item.tier = this.itemTiers[3]; item.tierIndex = 3; break; // 'mastercraft'
-            case rollTotal < 0.95: item.tier = this.itemTiers[4]; item.tierIndex = 4; break; // 'magic'
+            case rollTotal < 0.15: item.tier = this.itemTiers[0]; item.tierIndex = 0; break; // 'junk'
+            case rollTotal < 0.78: item.tier = this.itemTiers[1]; item.tierIndex = 1; break; // 'common'
+            case rollTotal < 0.93: item.tier = this.itemTiers[2]; item.tierIndex = 2; break; // 'rare'
+            case rollTotal < 0.98: item.tier = this.itemTiers[3]; item.tierIndex = 3; break; // 'mastercraft'
+            case rollTotal < 0.99: item.tier = this.itemTiers[4]; item.tierIndex = 4; break; // 'magic'
         }
 
         let randomType = this.itemTypes[Math.floor(Math.random() * this.itemTypes.length)];
@@ -87,29 +169,19 @@ class Items {
             }
         }
         const type = randomType;
+        console.log(`Generating item of type ${type} with tier ${item.tier}`);
         let statOptions = this.itemStatOptions[type];
-
+        console.log(`Stat options for item:`, statOptions);
         item.type = type;
 
-        const tierStatMods = {
-            hp: item.tierIndex * 2,
-            mana: Math.floor(item.tierIndex / 2),
-            luck: Math.min(Math.floor(Math.random() * 5) + Math.floor(Math.random() * 5) - 4, item.tierIndex * 2 + 1) + Math.floor(Math.random() * 2),
-            prowess: Math.floor(item.tierIndex / 2),
-            agility: Math.floor(item.tierIndex / 2),
-            intellect: Math.floor(item.tierIndex / 2),
-            defense: Math.floor(item.tierIndex) + 1,
-            baseDamageMin: Math.floor(item.tierIndex * 1.5),
-            baseDamageMax: Math.floor(Math.random() * item.tierIndex) + 1,
-        };
 
         switch (type) {
             case 'weapon':
                 item.attackType = this.weaponAttackTypes[Math.floor(Math.random() * this.weaponAttackTypes.length)];
-                item.baseDamageMin = Math.floor(Math.random() * 2) + tierStatMods.baseDamageMin;
-                item.baseDamageMax = item.baseDamageMin + Math.floor(Math.random() * 5) + tierStatMods.baseDamageMax;
+                item.baseDamageMin = Math.floor(Math.random() * 2) + this.statRoll("baseDamageMin", item);
+                item.baseDamageMax = item.baseDamageMin + Math.floor(Math.random() * 5) + this.statRoll("baseDamageMax",item);
                 statOptions = statOptions[item.attackType];
-                if (item.tierIndex > 1) { item.stats = this.getBonusStats(statOptions.bonus, item.tierIndex); }
+                if (item.tierIndex > 1) { item.stats = this.getBonusStats(statOptions.bonus, item); }
                 switch (item.attackType) {
                     case 'melee':
                         item.icon = 'dagger.svg';
@@ -120,18 +192,29 @@ class Items {
                 }
                 break;
             case 'armor':
-                item.defense = Math.floor(Math.random() * 2) + tierStatMods.defense;
-                if (item.tierIndex > 1) { item.stats = this.getBonusStats(statOptions.bonus, item.tierIndex); }
+                item.armor = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
+                if (item.tierIndex > 1) {
+
+                    console.log(`requsting bonus stats for item:`, item);
+                    item.stats = this.getBonusStats(statOptions.bonus, item);
+                }
                 item.icon = 'armor.svg';
                 break;
             case 'amulet':
-                item.luck = Math.floor(Math.random() * 2) + tierStatMods.luck;
-                if (item.tierIndex > 1) { item.stats = this.getBonusStats(statOptions.bonus, item.tierIndex); }
+                item.maxLuck = Math.floor(Math.random() * 2) + this.statRoll("maxLuck", item);
+                if (item.tierIndex > 1) {
+                    console.log(`requsting bonus stats for item:`, item);
+                    item.stats = this.getBonusStats(statOptions.bonus, item);
+                }
                 item.icon = 'amulet.svg';
                 break;
             case 'ring':
-                item.luck = Math.floor(Math.random() * 2) + tierStatMods.luck;
-                if (item.tierIndex > 1) { item.stats = this.getBonusStats(statOptions.bonus, item.tierIndex); }
+                item.maxLuck = Math.floor(Math.random() * 2) + this.statRoll("maxLuck", item);
+               
+                if (item.tierIndex > 1) {
+                    console.log(`requsting bonus stats for item:`, item);
+                    item.stats = this.getBonusStats(statOptions.bonus, item);
+                }
                 item.icon = 'ring.svg';
                 break;
         }
@@ -147,37 +230,9 @@ class Items {
         return item;
     }
 
-    itemDropRoll() {
-        let randomValue = Math.random() * 1;
-        console.log(`itemDropRoll() randomValue: ${randomValue}`);
-        let dungeonTierBonus = this.state.tier * 0.01;
-        let playerLevelBonus = this.state.player.level * 0.01;
-        let playerLuckBonus = this.state.player.luck * 0.01;
 
-        let rollTotal = randomValue + dungeonTierBonus + playerLevelBonus + playerLuckBonus;
-
-        console.log(`itemDropRoll() rollTotal: ${rollTotal}`);
-
-        let itemDropData = { roll: rollTotal, itemTier: '' };
-
-        switch (true) {
-            case randomValue < 0.95:
-                itemDropData.itemTier = 'rog';
-                break;
-            case randomValue < 0.99:
-                itemDropData.itemTier = 'artifact';
-                break;
-            default:
-                itemDropData.itemTier = 'relic';
-        }
-
-        console.log(`itemDropRoll() returning: { roll: ,${itemDropData.roll} itemTier: ${itemDropData.itemTier}}`);
-        return itemDropData;
-    }
 
     dropTreasure(monster, tier) {
-        const map = this.state.levels[tier].map;
-        const tierTreasures = this.state.treasures[tier];
         const goldGain = 10 + Math.floor(Math.random() * 41) + (tier + 1) * 10;
 
         let torchChance;
@@ -216,56 +271,29 @@ class Items {
                     randomItem = this.relicItems[Math.floor(Math.random() * this.relicItems.length)];
                     break;
                 default:
-                    randomItem = this.rogItem(50); // set to a common rog item as a fallback
+                    randomItem = this.rogItem(50); // Set to a common rog item as a fallback
                     break;
             }
             console.log(`Dropping Random item:`, randomItem);
             const escapedItem = this.escapeItemProperties(randomItem);
             droppedItems.push({ ...escapedItem });
-            this.state.player.inventory.addItem({ ...escapedItem }); // Add to inventory directly
         }
 
-        const existingTreasure = tierTreasures.find(t => t.x === monster.x && t.y === monster.y);
+        const treasure = {
+            x: monster.x,
+            y: monster.y,
+            name: monster.name || "Treasure Chest", // Use monster.name for monsters, "Treasure Chest" for level treasures
+            gold: goldGain,
+            torches: torchDropped ? 1 : 0,
+            items: droppedItems,
+            suppressRender: monster.suppressRender,
+        };
 
-        if (existingTreasure) {
-            existingTreasure.gold = (existingTreasure.gold || 0) + goldGain;
-            console.log(`Treasure updated at (${monster.x}, ${monster.y}) to ${existingTreasure.gold} gold`);
-            if (torchDropped) {
-                this.state.player.torchDropFail = 0;
-                existingTreasure.torches = (existingTreasure.torches || 0) + 1;
-                console.log(`Added a torch to treasure at (${monster.x}, ${monster.y}), now ${existingTreasure.torches} torches`);
-            }
-            droppedItems.forEach(droppedItem => {
-                existingTreasure.items = existingTreasure.items || [];
-                if (!existingTreasure.items.some(i => JSON.stringify(i) === JSON.stringify(droppedItem))) {
-                    existingTreasure.items.push(droppedItem);
-                    console.log(`Added ${droppedItem.name} to treasure at (${monster.x}, ${monster.y})`);
-                } else {
-                    console.log(`Duplicate ${droppedItem.name} ignored at (${monster.x}, ${monster.y})`);
-                }
-            });
-        } else {
-            const newTreasure = { x: monster.x, y: monster.y, gold: goldGain, discovered: false };
-            if (torchDropped) {
-                this.state.player.torchDropFail = 0;
-                newTreasure.torches = 1;
-                console.log(`Dropping new treasure with a torch at (${monster.x}, ${monster.y})`);
-            }
-            droppedItems.forEach(droppedItem => {
-                newTreasure.items = newTreasure.items || [];
-                if (!newTreasure.items.some(i => JSON.stringify(i) === JSON.stringify(droppedItem))) {
-                    newTreasure.items.push(droppedItem);
-                    console.log(`Dropping new treasure with ${droppedItem.name} at (${monster.x}, ${monster.y})`);
-                } else {
-                    console.log(`Duplicate ${droppedItem.name} ignored at (${monster.x}, ${monster.y})`);
-                }
-            });
-            tierTreasures.push(newTreasure);
-            map[monster.y][monster.x] = '$';
-            console.log(`Dropping new treasure at (${monster.x}, ${monster.y}) with ${goldGain} gold`);
+        this.game.actions.placeTreasure(treasure);
+
+        if (monster.name && monster.name !== "Treasure Chest") {
+            this.ui.logDroppedItems(monster, goldGain, torchDropped, droppedItems);
         }
-
-        this.ui.logDroppedItems(monster, goldGain, torchDropped, droppedItems);
     }
 
     escapeItemProperties(item) {

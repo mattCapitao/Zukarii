@@ -37,8 +37,8 @@ class Combat {
 
     handleMonsterRetaliation(monster, tier) {
         let monsterDamage = this.monsters.calculateMonsterAttackDamage(monster, this.state.tier);
-        const defense = this.player.inventory.getEquipped("armor")?.defense || 0;
-        monsterDamage = Math.max(1, monsterDamage - defense);
+        const armor = this.player.playerInventory.getEquipped("armor")?.armor || 0;
+        monsterDamage = Math.max(1, monsterDamage - armor);
         this.state.player.hp -= monsterDamage;
         this.ui.writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
         this.ui.updateStats();
@@ -52,8 +52,8 @@ class Combat {
 
     meleeCombat(monster) {
         let minBaseDamage, maxBaseDamage;
-        const mainWeapon = this.player.inventory.getEquipped("mainhand");
-        const offWeapon = this.player.inventory.getEquipped("offhand");
+        const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
+        const offWeapon = this.player.playerInventory.getEquipped("offhand");
 
         if (mainWeapon?.attackType === "melee") {
             minBaseDamage = mainWeapon.baseDamageMin;
@@ -90,8 +90,8 @@ class Combat {
     toggleRanged(event) {
         if (event.key === ' ') {
             if (event.type === 'keydown') {
-                const offWeapon = this.player.inventory.getEquipped("offhand");
-                const mainWeapon = this.player.inventory.getEquipped("mainhand");
+                const offWeapon = this.player.playerInventory.getEquipped("offhand");
+                const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
                 if (offWeapon?.attackType === "ranged" || mainWeapon?.attackType === "ranged") {
                     this.state.isRangedMode = true;
                 } else {
@@ -100,17 +100,13 @@ class Combat {
             } else if (event.type === 'keyup') {
                 this.state.isRangedMode = false;
             }
-
-            if (!this.state.projectile) {
-                this.state.needsRender = true;
-                this.game.render.renderIfNeeded();
-            }
         }
     }
 
     async rangedAttack(direction) {
         let map = this.state.levels[this.state.tier].map;
         let dx = 0, dy = 0;
+        const defaultRange = 7;
         switch (direction) {
             case 'ArrowUp': dy = -1; break;
             case 'ArrowDown': dy = 1; break;
@@ -118,10 +114,10 @@ class Combat {
             case 'ArrowRight': dx = 1; break;
             default: return;
         }
-
+        console.log(`Ranged attack in direction ${direction}`);
         let minBaseDamage, maxBaseDamage;
-        const offWeapon = this.player.inventory.getEquipped("offhand");
-        const mainWeapon = this.player.inventory.getEquipped("mainhand");
+        const offWeapon = this.player.playerInventory.getEquipped("offhand");
+        const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
 
         if (offWeapon?.attackType === "ranged") {
             minBaseDamage = offWeapon.baseDamageMin;
@@ -134,7 +130,7 @@ class Combat {
             return;
         }
 
-        for (let i = 1; i <= 7; i++) {
+        for (let i = 1; i <= defaultRange; i++) {
             let tx = this.state.player.x + dx * i;
             let ty = this.state.player.y + dy * i;
             if (tx < 0 || tx >= this.state.WIDTH || ty < 0 || ty >= this.state.HEIGHT || map[ty][tx] === '#') {
@@ -143,6 +139,7 @@ class Combat {
             }
 
             this.state.projectile = { x: tx, y: ty };
+            console.log(`Projectile tick ${i} at (${tx}, ${ty})`);
             this.state.needsRender = true;
             this.game.render.renderIfNeeded();
             await new Promise(resolve => setTimeout(resolve, 50));

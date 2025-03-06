@@ -8,10 +8,10 @@ class Game {
         this.level = new Level(this.state, this);
         this.ui = new UI(this.state, this, this.utilities);
         this.render = new Render(this.state, this.ui, this);
-        this.items = new Items(this.state, this.data, this.ui);
+        this.items = new Items(this.state, this.data, this.ui, this);
         this.player = new Player(this.state, this.ui, this, this.utilities); // Added this.utilities
         this.monsters = new Monsters(this.state, this.data, this.ui, this.items);
-        this.actions = new Actions(this.state, this, this.ui, this.render);
+        this.actions = new Actions(this.state, this, this.ui, this.render, this.player.playerInventory); // Pass PlayerInventory to Actions
         this.combat = new Combat(this.state, this, this.ui, this.player, this.monsters, this.items);
 
         this.combat.toggleRanged = this.combat.toggleRanged.bind(this.combat);
@@ -29,8 +29,8 @@ class Game {
             console.log("Starting game...");
             this.state.gameStarted = true;
             this.initGame();
-            State.needsRender = true;
-            console.log("needsRender set to true for init (State.needsRender:", State.needsRender, "typeof:", typeof State.needsRender, ")");
+            this.state.needsRender = true;
+            console.log("needsRender set to true for init (this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
             this.render.renderIfNeeded();
             return;
         }
@@ -40,12 +40,19 @@ class Game {
             return;
         }
 
+
+
         const now = Date.now();
         if (now - this.lastInputTime < this.inputThrottle) return;
         this.lastInputTime = now;
 
         if (now - this.lastRenderTime < this.renderThrottle) return;
         this.lastRenderTime = now;
+
+        if (event.type === 'keydown' && this.state.isRangedMode && event.key === ' ') {
+            console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : skipping input`);
+            return;
+        }
 
         let map = this.state.levels[this.state.tier].map;
         let newX = this.state.player.x;
@@ -142,6 +149,7 @@ class Game {
                     return;
                 case ' ':
                     if (!this.state.isRangedMode) this.combat.toggleRanged(event);
+                    console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : toggling ranged mode`);
                     return;
             }
         }
@@ -155,9 +163,9 @@ class Game {
         let fountain = this.state.fountains[this.state.tier].find(f => f.x === newX && f.y === newY && !f.used);
         let treasureIndex = this.state.treasures[this.state.tier].findIndex(t => t.x === newX && t.y === newY);
 
-        State.needsRender = true;
-        console.log("needsRender set to true for action at", newX, newY, "(State.needsRender:", State.needsRender, "typeof:", typeof State.needsRender, ")");
-
+        this.state.needsRender = true;
+        console.log("needsRender set to true for action at", newX, newY, "(this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
+        console.log(`Checking for treasure at (${newX}, ${newY}): map tile = '${map[newY][newX]}', treasureIndex = ${treasureIndex}`);
         if (monster) {
             this.combat.meleeCombat(monster);
             this.player.checkLevelUp();
@@ -239,7 +247,7 @@ class Game {
                 }
 
                 this.state.needsInitialRender = true;
-                State.needsRender = true;
+                this.state.needsRender = true;
                 console.log("Triggered initial render for tier", this.state.tier);
             }
         } else if (map[newY][newX] === '≅' && fountain) {
@@ -247,30 +255,8 @@ class Game {
             this.state.player.x = newX;
             this.state.player.y = newY;
         } else if (map[newY][newX] === '$' && treasureIndex !== -1) {
-            const treasure = this.state.treasures[this.state.tier][treasureIndex];
-            const goldGain = treasure.gold || (10 + Math.floor(Math.random() * 41) + this.state.tier * 10);
-            this.state.player.gold += goldGain;
-            let pickupMessage = `Found treasure! Gained ${goldGain} gold`;
-
-            if (treasure.torches) {
-                this.state.player.torches += treasure.torches;
-                this.state.player.torchDropFail = 0;
-                pickupMessage += ` and ${treasure.torches} torch${treasure.torches > 1 ? 'es' : ''}`;
-            }
-            if (treasure.items && treasure.items.length) {
-                treasure.items.forEach(item => {
-                    if (!this.state.player.inventory.items.some(i => JSON.stringify(i) === JSON.stringify(item))) {
-                        this.state.player.inventory.items.push({ ...item });
-                        pickupMessage += ` and picked up ${item.name}`;
-                    } else {
-                        console.log(`Duplicate ${item.name} ignored in pickup with ID ${item.uniqueId}`);
-                    }
-                });
-            }
-
-            this.state.treasures[this.state.tier].splice(treasureIndex, 1);
-            map[newY][newX] = ' ';
-            this.ui.writeToLog(pickupMessage);
+            console.log(`Treasure found at (${newX}, ${newY})! Picking up...`);
+            this.actions.pickupTreasure(newX, newY);
             this.state.player.x = newX;
             this.state.player.y = newY;
             if (this.state.player.gold >= 1e12) {
@@ -314,8 +300,8 @@ class Game {
         this.state.mapDiv = document.getElementById('map');
         this.state.statsDiv = document.getElementById('stats');
         this.state.logDiv = document.getElementById('log');
-        State.needsRender = true;
-        console.log("needsRender set to true for init (State.needsRender:", State.needsRender, "typeof:", typeof State.needsRender, ")");
+        this.state.needsRender = true;
+        console.log("needsRender set to true for init (this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
         this.render.renderIfNeeded();
         document.addEventListener('keydown', this.handleInput);
         document.addEventListener('keyup', this.combat.toggleRanged);
@@ -323,7 +309,9 @@ class Game {
     }
 
     initGame() {
-        this.state.initGame(this.level, this.monsters, this.items, this.player);
+        this.state.initGame(this.level, this.monsters, this.items, this.player); 
+
+        console.log("Treasures after initGame:", this.state.treasures[this.state.tier]);
 
         //////////////////////INACTIVE DO NOT UNCOMMENT OR DELETE
         //this.player.promptForName(0); // Moved from Render

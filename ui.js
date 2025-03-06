@@ -40,10 +40,10 @@ class UI {
                 damage.textContent = `Damage: ${itemData.baseDamageMin}–${itemData.baseDamageMax}`;
                 content.appendChild(damage);
             } else if (itemData.type === "armor") {
-                const defense = document.createElement('div');
-                defense.className = 'item-tooltip-defense';
-                defense.textContent = `Defense: ${itemData.defense}`;
-                content.appendChild(defense);
+                const armor = document.createElement('div');
+                armor.className = 'item-tooltip-armor';
+                armor.textContent = `Armor: ${itemData.armor}`;
+                content.appendChild(armor);
             }
 
             if ('stats' in itemData && itemData.stats) {
@@ -56,7 +56,8 @@ class UI {
                     const statsContainer = document.createElement('div');
                     statsContainer.className = 'tooltip-stats';
                     Object.entries(itemData.stats).forEach(([stat, value]) => {
-                        if (stat !== 'luck' && stat !== 'maxLuck') {
+                        // if (stat !== 'luck' && stat !== 'maxLuck') {
+                        if (true) { // Temporarily show luck stats for testing
                             const statLine = document.createElement('div');
                             statLine.className = 'tooltip-stat';
                             statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.utilities.camelToTitleCase(stat)}`;
@@ -140,7 +141,7 @@ class UI {
             return;
         }
 
-        this.game.player.inventory.handleDrop(draggedItemData, targetItemData, isTargetEquipped);
+        this.game.player.playerInventory.handleDrop(draggedItemData, targetItemData, isTargetEquipped);
         if (this.state.ui.overlayOpen) {
             this.updateStats();
             this.updateLog();
@@ -156,14 +157,14 @@ class UI {
         console.log("Adding item listeners...");
 
         const equipItems = document.querySelectorAll('#equipped-items .item:not([data-listener-added])');
-        console.log(`Found ${equipItems.length} new equipped items`);
+        console.log(`Found ${equipItems.length} new equipped items`, equipItems);
         equipItems.forEach(p => {
             const itemDataStr = p.dataset.item;
             if (itemDataStr) {
                 try {
                     const decodedItemDataStr = decodeURIComponent(itemDataStr);
                     const itemData = JSON.parse(decodedItemDataStr);
-                    console.log(`Parsed item data for ${itemData.tier} ${itemData.type} ${itemData.name} with ID ${itemData.uniqueId}`);
+                    //console.log(`Parsed item data for ${itemData.itemTier} ${itemData.name} : ID ${itemData.uniqueId} : `/*, itemData */);
                     if (itemData && itemData.uniqueId) {
                         p.draggable = true;
                         p.addEventListener('dragstart', (event) => this.handleDragStart(event, itemData));
@@ -172,7 +173,7 @@ class UI {
                         p.addEventListener('dragend', (event) => this.handleDragEnd(event));
                         p.addEventListener('mouseover', (event) => this.showItemTooltip(itemData, event));
                         p.addEventListener('mouseout', () => this.hideItemTooltip(itemData));
-                        p.addEventListener('click', () => this.game.player.inventory.unequipItem(itemData));
+                        p.addEventListener('click', () => this.game.player.playerInventory.unequipItem(itemData));
                         p.setAttribute('data-listener-added', 'true');
                     } else {
                         console.warn("Missing uniqueId in equipped item", itemData);
@@ -193,7 +194,7 @@ class UI {
                 try {
                     const decodedItemDataStr = decodeURIComponent(itemDataStr);
                     const itemData = JSON.parse(decodedItemDataStr);
-                    console.log(`Parsed item data for ${itemData.name} with ID ${itemData.uniqueId}`);
+                    console.log(`Parsed item data for ${itemData.itemTier} ${itemData.name} : ID ${itemData.uniqueId} : `, itemData );
                     if (itemData && itemData.uniqueId) {
                         p.draggable = true;
                         p.addEventListener('dragstart', (event) => this.handleDragStart(event, itemData));
@@ -224,13 +225,13 @@ class UI {
         }
         if (event.ctrlKey) {
             console.log("Ctrl key pressed, dropping item", item, "Event:", event);
-            this.game.player.inventory.dropItem(event.target.dataset.index);
+            this.game.player.playerInventory.dropItem(event.target.dataset.index);
         } else if (event.shiftKey) {
             console.log("Shift key pressed, no action taken");
             return;
         } else {
             console.log("equipping item", item);
-            this.game.player.inventory.equipItem(item);
+            this.game.player.playerInventory.equipItem(item);
         }
         if (this.state.ui.overlayOpen) {
             this.updateStats();
@@ -322,7 +323,7 @@ class UI {
                         <p class="equip-slot armor">
                             <img src="img/icons/items/${equip.armor?.icon || 'no-armor.svg'}" alt="${equip.armor?.name || 'Armor'}" 
                                  class="item item-icon ${equip.armor?.itemTier || 'Empty'} ${equip.armor?.type || 'armor'}" 
-                                 data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: this.utilities.generateUniqueId(), defense: 0, icon: "no-armor.svg" })}'>
+                                 data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: this.utilities.generateUniqueId(), armor: 0, icon: "no-armor.svg" })}'>
                             <br><span class="item-label">Armor</span> </p>
                     </div>
                 </div>

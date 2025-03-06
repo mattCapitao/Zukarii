@@ -6,7 +6,7 @@ class Player {
         this.ui = ui;
         this.game = game;
         this.utilities = utilities; // Store utilities
-        this.inventory = new Inventory(state, ui, this, utilities); // Pass utilities to Inventory
+        this.playerInventory = new PlayerInventory(state, ui, this, utilities); // Pass utilities to Inventory
     }
 
     initializeEquippedSlots() {
@@ -26,12 +26,12 @@ class Player {
         const startItems = this.state.data.getStartItems();
         const uniqueItems = this.state.data.getUniqueItems();
         const itemsToAdd = [
-            uniqueItems[0],
+            //uniqueItems[0],
             startItems[0], startItems[1], startItems[2],
         ];
 
         for (let item of itemsToAdd) {
-            this.inventory.addItem(item);
+            this.playerInventory.addItem(item);
         }
         this.ui.updateStats();
     }
@@ -70,7 +70,6 @@ class Player {
         this.state.player.dead = true;
         this.ui.writeToLog('You died! Game Over.');
         document.removeEventListener('keydown', this.game.handleInput);
-        document.removeEventListener('keydown', this.game.combat.toggleRanged);
         document.removeEventListener('keyup', this.game.combat.toggleRanged);
         console.log("Player has died - Game over!");
         this.state.gameOver = true;
@@ -83,7 +82,6 @@ class Player {
     exit() {
         this.ui.writeToLog("You exited the dungeon! Game Over.");
         document.removeEventListener('keydown', this.game.handleInput);
-        document.removeEventListener('keydown', this.game.combat.toggleRanged);
         document.removeEventListener('keyup', this.game.combat.toggleRanged);
         console.log("Player has Left the building - Game over!");
         this.state.gameOver = true;
@@ -94,7 +92,7 @@ class Player {
     }
 
     updateGearStats() {
-        console.log("Before Updating gear stats", this.state.player.stats.gear);
+        console.log("Before Updating gear stats", this.state.player);
 
         this.state.possibleItemStats.forEach(stat => {
             this.state.player.stats.gear[stat] = 0;
@@ -108,19 +106,41 @@ class Player {
                         this.state.player.stats.gear[stat] = (this.state.player.stats.gear[stat] || 0) + (value || 0);
                     });
                 }
+                
+            }
+
+            if (item.type === 'armor') {
+                // We set the player armor gear stat directly to the base armor value of the equipped item as it is not tracked in item.stats[]
+                console.log("Armor change detected", item.armor);
+                this.state.player.stats.gear.armor = (this.state.player.stats.armor || 0) + (item.armor || 0);
             }
         });
 
-        console.log("After Updating gear stats", this.state.player.stats.gear);
+        console.log("After Updating gear stats", this.state.player);
         this.calculateStats();
     }
 
     calculateStats() {
         this.state.possibleItemStats.forEach(stat => {
-            this.state.player[stat] = (this.state.player.stats.base[stat] || 0) + (this.state.player.stats.gear[stat] || 0);
-            console.log(`${stat} = ${(this.state.player.stats.base[stat] || 0)} + ${(this.state.player.stats.gear[stat] || 0)}`);
-            console.log(this.state.player);
+
+            switch(stat){
+                case 'maxLuck':
+                    this.state.player[stat] = this.state.player.stats.base[stat] + this.state.player.stats.gear[stat];
+                    this.state.player.luck = this.state.player[stat] + this.state.player.luckTempMod;
+                    console.log(`Luck = base:${this.state.player.stats.base[stat]} + gear:${this.state.player.stats.gear[stat]} + temp:${this.state.player.luckTempMod}`);
+                break;
+
+                case 'maxHp':// placholder for potential temp stat modifiers
+                case 'maxMana':// placholder for potential temp stat modifiers
+                default:
+                    this.state.player[stat] = (this.state.player.stats.base[stat] || 0) + (this.state.player.stats.gear[stat] || 0);
+                    console.log(`${stat} = ${ (this.state.player.stats.base[stat] || 0) } + ${ (this.state.player.stats.gear[stat] || 0) }`);
+                    console.log(this.state.player);
+                break;
+            }
         });
+
+
         this.ui.renderOverlay();
     }
 

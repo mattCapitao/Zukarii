@@ -148,6 +148,8 @@ class Level {
         return rooms;
     }
 
+
+
     findNearestRoom(newRoom, existingRooms, excludeRooms = []) {
         let nearestRoom = null;
         let minDistance = Infinity;
@@ -363,9 +365,16 @@ class Level {
                 x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
                 y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
             } while (map[y][x] !== ' ');
-            const goldGain = 10 + Math.floor(Math.random() * 41) + tier * 10;
-            map[y][x] = '$';
-            this.state.treasures[tier].push({ x, y, gold: goldGain, discovered: false });
+            const treasure = {
+                x: x,
+                y: y,
+                name: "Treasure Chest",
+                hp: 0,
+                maxHp: 0,
+                isAgro: false,
+                suppressRender: true,
+            };
+            this.game.items.dropTreasure(treasure, tier);
         }
     }
 
@@ -438,7 +447,7 @@ class Level {
             console.log(`Tier ${tier} added: stairsUp[${tier}] at (${this.state.stairsUp[tier]?.x}, ${this.state.stairsUp[tier]?.y}), stairsDown[${tier}] at (${this.state.stairsDown[tier]?.x}, ${this.state.stairsDown[tier]?.y})`);
         } else {
             this.state.needsInitialRender = true;
-            State.needsRender = true;
+            this.state.needsRender = true;
             console.log("Triggered initial render for tier", this.state.tier);
         }
     }
