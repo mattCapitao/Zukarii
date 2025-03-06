@@ -48,7 +48,7 @@ class Actions {
             if (this.state.player.torches < 1) {
                 message = 'You light your last torch!';
                 this.state.torchLitOnTurn = true;
-                window.needsRender = true;
+                State.needsRender = true;
             }
         } else {
             message = 'You have no torches left.';

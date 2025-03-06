@@ -48,13 +48,6 @@ class Items {
         };
     }
 
-    logDroppedItems(monster, goldGain, torchDropped, droppedItems) {
-        let logMessage = `${monster.name} dropped ${goldGain} gold`;
-        if (torchDropped) logMessage += ' and a torch';
-        if (droppedItems.length) logMessage += ` and ${droppedItems.map(i => i.name).join(', ')}`;
-        this.ui.writeToLog(logMessage + '!');
-    }
-
     getBonusStats(statArray, itemTier) {
         let availableStats = [...statArray];
         let selectedStats = {};
@@ -211,9 +204,7 @@ class Items {
 
         if (Math.random() < itemChance) {
             let randomItem = {};
-
             const dropRoll = this.itemDropRoll();
-
             switch (dropRoll.itemTier) {
                 case 'rog':
                     randomItem = this.rogItem(dropRoll.roll);
@@ -225,13 +216,13 @@ class Items {
                     randomItem = this.relicItems[Math.floor(Math.random() * this.relicItems.length)];
                     break;
                 default:
-                    randomItem = this.startItems[Math.floor(Math.random() * this.startItems.length)];
+                    randomItem = this.rogItem(50); // set to a common rog item as a fallback
+                    break;
             }
             console.log(`Dropping Random item:`, randomItem);
-
             const escapedItem = this.escapeItemProperties(randomItem);
-
-            droppedItems.push({ ...escapedItem, uniqueId: this.ui.utilities.generateUniqueId() });
+            droppedItems.push({ ...escapedItem });
+            this.state.player.inventory.addItem({ ...escapedItem }); // Add to inventory directly
         }
 
         const existingTreasure = tierTreasures.find(t => t.x === monster.x && t.y === monster.y);
@@ -248,7 +239,7 @@ class Items {
                 existingTreasure.items = existingTreasure.items || [];
                 if (!existingTreasure.items.some(i => JSON.stringify(i) === JSON.stringify(droppedItem))) {
                     existingTreasure.items.push(droppedItem);
-                    console.log(`Added ${droppedItem.name} to treasure at (${monster.x}, ${monster.y}) with ID ${droppedItem.uniqueId}`);
+                    console.log(`Added ${droppedItem.name} to treasure at (${monster.x}, ${monster.y})`);
                 } else {
                     console.log(`Duplicate ${droppedItem.name} ignored at (${monster.x}, ${monster.y})`);
                 }
@@ -264,7 +255,7 @@ class Items {
                 newTreasure.items = newTreasure.items || [];
                 if (!newTreasure.items.some(i => JSON.stringify(i) === JSON.stringify(droppedItem))) {
                     newTreasure.items.push(droppedItem);
-                    console.log(`Dropping new treasure with ${droppedItem.name} at (${monster.x}, ${monster.y}) with ID ${droppedItem.uniqueId}`);
+                    console.log(`Dropping new treasure with ${droppedItem.name} at (${monster.x}, ${monster.y})`);
                 } else {
                     console.log(`Duplicate ${droppedItem.name} ignored at (${monster.x}, ${monster.y})`);
                 }
@@ -274,7 +265,7 @@ class Items {
             console.log(`Dropping new treasure at (${monster.x}, ${monster.y}) with ${goldGain} gold`);
         }
 
-        this.logDroppedItems(monster, goldGain, torchDropped, droppedItems);
+        this.ui.logDroppedItems(monster, goldGain, torchDropped, droppedItems);
     }
 
     escapeItemProperties(item) {

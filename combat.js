@@ -30,21 +30,21 @@ class Combat {
         monster.isAgro = false;
         this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
         this.ui.writeToLog(`${monster.name} defeated!`);
-        this.items.dropTreasure(monster, tier); // Replace window.dropTreasure
+        this.items.dropTreasure(monster, tier);
         const monsterKillXP = (5 + Math.floor(Math.random() * 6)) * this.state.tier;
-        this.player.awardXp(monsterKillXP); // Replace window.awardXp
+        this.player.awardXp(monsterKillXP);
     }
 
     handleMonsterRetaliation(monster, tier) {
-        let monsterDamage = this.monsters.calculateMonsterAttackDamage(monster, this.state.tier); // Replace window.calculateMonsterAttackDamage
-        const defense = this.state.player.inventory.equipped.armor?.defense || 0;
+        let monsterDamage = this.monsters.calculateMonsterAttackDamage(monster, this.state.tier);
+        const defense = this.player.inventory.getEquipped("armor")?.defense || 0;
         monsterDamage = Math.max(1, monsterDamage - defense);
         this.state.player.hp -= monsterDamage;
         this.ui.writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
         this.ui.updateStats();
 
         if (this.state.player.hp <= 0) {
-            this.player.death(monster.name); // Replace window.playerDied
+            this.player.death(monster.name);
             return true;
         }
         return false;
@@ -52,8 +52,8 @@ class Combat {
 
     meleeCombat(monster) {
         let minBaseDamage, maxBaseDamage;
-        const mainWeapon = this.state.player.inventory.equipped.mainhand;
-        const offWeapon = this.state.player.inventory.equipped.offhand;
+        const mainWeapon = this.player.inventory.getEquipped("mainhand");
+        const offWeapon = this.player.inventory.getEquipped("offhand");
 
         if (mainWeapon?.attackType === "melee") {
             minBaseDamage = mainWeapon.baseDamageMin;
@@ -90,8 +90,8 @@ class Combat {
     toggleRanged(event) {
         if (event.key === ' ') {
             if (event.type === 'keydown') {
-                const offWeapon = this.state.player.inventory.equipped.offhand;
-                const mainWeapon = this.state.player.inventory.equipped.mainhand;
+                const offWeapon = this.player.inventory.getEquipped("offhand");
+                const mainWeapon = this.player.inventory.getEquipped("mainhand");
                 if (offWeapon?.attackType === "ranged" || mainWeapon?.attackType === "ranged") {
                     this.state.isRangedMode = true;
                 } else {
@@ -102,7 +102,7 @@ class Combat {
             }
 
             if (!this.state.projectile) {
-                window.needsRender = true;
+                this.state.needsRender = true;
                 this.game.render.renderIfNeeded();
             }
         }
@@ -120,8 +120,8 @@ class Combat {
         }
 
         let minBaseDamage, maxBaseDamage;
-        const offWeapon = this.state.player.inventory.equipped.offhand;
-        const mainWeapon = this.state.player.inventory.equipped.mainhand;
+        const offWeapon = this.player.inventory.getEquipped("offhand");
+        const mainWeapon = this.player.inventory.getEquipped("mainhand");
 
         if (offWeapon?.attackType === "ranged") {
             minBaseDamage = offWeapon.baseDamageMin;
@@ -143,7 +143,7 @@ class Combat {
             }
 
             this.state.projectile = { x: tx, y: ty };
-            window.needsRender = true;
+            this.state.needsRender = true;
             this.game.render.renderIfNeeded();
             await new Promise(resolve => setTimeout(resolve, 50));
 
@@ -166,14 +166,14 @@ class Combat {
                     this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
                 }
                 this.state.projectile = null;
-                window.needsRender = true;
+                this.state.needsRender = true;
                 this.game.render.renderIfNeeded();
                 this.ui.updateStats();
                 break;
             }
         }
         this.state.projectile = null;
-        window.needsRender = true;
+        this.state.needsRender = true;
         this.game.endTurn();
     }
 }

@@ -3,6 +3,7 @@
 class State {
     constructor(data) {
         this.data = data;
+        this.needsRender=false
         this.WIDTH = 100;
         this.HEIGHT = 60;
         this.MIN_STAIR_DISTANCE = 60;
@@ -222,6 +223,6 @@ class State {
         this.lastPlayerX = null;
         this.lastPlayerY = null;
         this.needsInitialRender = true;
-        window.needsRender = true;
+        this.needsRender = true;
     }
 }

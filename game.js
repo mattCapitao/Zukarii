@@ -9,7 +9,7 @@ class Game {
         this.ui = new UI(this.state, this, this.utilities);
         this.render = new Render(this.state, this.ui, this);
         this.items = new Items(this.state, this.data, this.ui);
-        this.player = new Player(this.state, this.ui, this);
+        this.player = new Player(this.state, this.ui, this, this.utilities); // Added this.utilities
         this.monsters = new Monsters(this.state, this.data, this.ui, this.items);
         this.actions = new Actions(this.state, this, this.ui, this.render);
         this.combat = new Combat(this.state, this, this.ui, this.player, this.monsters, this.items);
@@ -29,8 +29,8 @@ class Game {
             console.log("Starting game...");
             this.state.gameStarted = true;
             this.initGame();
-            window.needsRender = true;
-            console.log("needsRender set to true for init (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
+            State.needsRender = true;
+            console.log("needsRender set to true for init (State.needsRender:", State.needsRender, "typeof:", typeof State.needsRender, ")");
             this.render.renderIfNeeded();
             return;
         }
@@ -155,8 +155,8 @@ class Game {
         let fountain = this.state.fountains[this.state.tier].find(f => f.x === newX && f.y === newY && !f.used);
         let treasureIndex = this.state.treasures[this.state.tier].findIndex(t => t.x === newX && t.y === newY);
 
-        window.needsRender = true;
-        console.log("needsRender set to true for action at", newX, newY, "(window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
+        State.needsRender = true;
+        console.log("needsRender set to true for action at", newX, newY, "(State.needsRender:", State.needsRender, "typeof:", typeof State.needsRender, ")");
 
         if (monster) {
             this.combat.meleeCombat(monster);
@@ -239,7 +239,7 @@ class Game {
                 }
 
                 this.state.needsInitialRender = true;
-                window.needsRender = true;
+                State.needsRender = true;
                 console.log("Triggered initial render for tier", this.state.tier);
             }
         } else if (map[newY][newX] === '≅' && fountain) {
@@ -314,8 +314,8 @@ class Game {
         this.state.mapDiv = document.getElementById('map');
         this.state.statsDiv = document.getElementById('stats');
         this.state.logDiv = document.getElementById('log');
-        window.needsRender = true;
-        console.log("needsRender set to true for init (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
+        State.needsRender = true;
+        console.log("needsRender set to true for init (State.needsRender:", State.needsRender, "typeof:", typeof State.needsRender, ")");
         this.render.renderIfNeeded();
         document.addEventListener('keydown', this.handleInput);
         document.addEventListener('keyup', this.combat.toggleRanged);

@@ -16,8 +16,8 @@ class Render {
     }
 
     render() {
-        console.log("Rendering...", window.needsRender, "typeof:", typeof window.needsRender);
-        if (!window.needsRender) return;
+        console.log("Rendering...", State.needsRender, "typeof:", typeof State.needsRender);
+        if (!State.needsRender) return;
 
         const titleScreenContainer = document.getElementById('splash');
 
@@ -201,8 +201,8 @@ class Render {
         this.state.lastProjectileX = this.state.projectile ? this.state.projectile.x : null;
         this.state.lastProjectileY = this.state.projectile ? this.state.projectile.y : null;
         this.state.needsInitialRender = false;
-        window.needsRender = false;
-        console.log("needsRender after render:", window.needsRender, "typeof:", typeof window.needsRender);
+        State.needsRender = false;
+        console.log("needsRender after render:", State.needsRender, "typeof:", typeof State.needsRender);
     }
 
     updateMapScroll() {
@@ -317,14 +317,14 @@ class Render {
             console.log("renderIfNeeded skipped due to gameOver");
             return;
         }
-        console.log("Checking renderIfNeeded, needsRender:", window.needsRender, "typeof:", typeof window.needsRender);
-        if (window.needsRender === true) {
-            console.log("Rendering at", Date.now(), "with needsRender:", window.needsRender, "typeof:", typeof window.needsRender);
+        console.log("Checking renderIfNeeded, needsRender:", State.needsRender, "typeof:", typeof State.needsRender);
+        if (State.needsRender === true) {
+            console.log("Rendering at", Date.now(), "with needsRender:", State.needsRender, "typeof:", typeof State.needsRender);
             this.render();
-            window.needsRender = false;
-            console.log("needsRender set to false after render (window.needsRender:", window.needsRender, "typeof:", typeof window.needsRender, ")");
+            State.needsRender = false;
+            console.log("needsRender set to false after render (State.needsRender:", State.needsRender, "typeof:", typeof State.needsRender, ")");
         } else {
-            console.log("renderIfNeeded called but needsRender is", window.needsRender, "typeof:", typeof window.needsRender);
+            console.log("renderIfNeeded called but needsRender is", State.needsRender, "typeof:", typeof State.needsRender);
         }
     }
 }

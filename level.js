@@ -438,7 +438,7 @@ class Level {
             console.log(`Tier ${tier} added: stairsUp[${tier}] at (${this.state.stairsUp[tier]?.x}, ${this.state.stairsUp[tier]?.y}), stairsDown[${tier}] at (${this.state.stairsDown[tier]?.x}, ${this.state.stairsDown[tier]?.y})`);
         } else {
             this.state.needsInitialRender = true;
-            window.needsRender = true;
+            State.needsRender = true;
             console.log("Triggered initial render for tier", this.state.tier);
         }
     }

@@ -1,10 +1,12 @@
 console.log("player.js loaded");
 
 class Player {
-    constructor(state, ui, game) {
+    constructor(state, ui, game, utilities) { // Added utilities parameter
         this.state = state;
         this.ui = ui;
         this.game = game;
+        this.utilities = utilities; // Store utilities
+        this.inventory = new Inventory(state, ui, this, utilities); // Pass utilities to Inventory
     }
 
     initializeEquippedSlots() {
@@ -13,7 +15,7 @@ class Player {
         Object.entries(emptyEquipSlots).forEach(([slot, data]) => {
             slotsWithIds[slot] = {
                 ...data,
-                uniqueId: this.ui.utilities.generateUniqueId(),
+                uniqueId: this.utilities.generateUniqueId(), // Use this.utilities
             };
         });
         return slotsWithIds;
@@ -29,8 +31,7 @@ class Player {
         ];
 
         for (let item of itemsToAdd) {
-            item.uniqueId = this.ui.utilities.generateUniqueId();
-            this.state.player.inventory.items.push({ ...item });
+            this.inventory.addItem(item);
         }
         this.ui.updateStats();
     }
@@ -125,15 +126,24 @@ class Player {
 
     promptForName(delay) {
         setTimeout(() => {
-            let userCharacterName = prompt("Please name your character to begin:");
-            if (userCharacterName !== null) {
-                console.log("Hello, " + userCharacterName + "!");
-                const sanitizedInput = this.ui.utilities.encodeHTMLEntities(userCharacterName);
-                this.state.player.name = sanitizedInput;
-            } else {
-                console.log("User cancelled the prompt.");
-                this.state.player.name = this.ui.utilities.getRandomName(this.game.render.mageNames);
-                this.ui.writeToLog(`You didnt enter a name, so a random one has been given to you, ${this.state.player.name} `);
+            try {
+                let userCharacterName = prompt("Please name your character to begin:");
+                if (userCharacterName !== null) {
+                    console.log("Hello, " + userCharacterName + "!");
+                    const sanitizedInput = this.utilities.encodeHTMLEntities(userCharacterName);
+                    this.state.player.name = sanitizedInput;
+                    this.ui.updatePlayerInfo();
+                } else {
+                    console.log("User cancelled the prompt.");
+                    this.state.player.name = this.utilities.getRandomName(this.game.render.mageNames);
+                    this.ui.writeToLog(`You didnt enter a name, so a random one has been given to you, ${this.state.player.name} `);
+                    this.ui.updatePlayerInfo();
+                }
+            } catch (error) {
+                console.error("Error in promptForName:", error);
+                this.state.player.name = this.utilities.getRandomName(this.game.render.mageNames);
+                this.ui.writeToLog(`Failed to get name due to an error, assigned: ${this.state.player.name}`);
+                this.ui.updatePlayerInfo();
             }
         }, delay);
     }

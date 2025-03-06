@@ -1,10 +1,9 @@
 ﻿console.log("ui.js loaded");
 
-
 class UI {
     constructor(state, game, utilities) {
         this.state = state;
-        this.game = game; // Use game instead of player for broader access
+        this.game = game;
         this.utilities = utilities;
         this.tooltipCache = new Map();
     }
@@ -110,186 +109,6 @@ class UI {
         }
     }
 
-    unequipItem(item, event) {
-        this.hideItemTooltip(item);
-
-        console.log("Unequipping item ", item, " Event Data ", event, "Current state:", JSON.stringify(this.state.player.inventory));
-        if (!item || item.itemTier === "Empty") return;
-
-        if (!item.equippedSlot) {
-            const slotMap = {
-                amulet: "amulet",
-                armor: "armor",
-                ring: ["leftring", "rightring"],
-                weapon: ["mainhand", "offhand"]
-            };
-            for (let [slotType, slotName] of Object.entries(slotMap)) {
-                if (item.type === slotType) {
-                    if (Array.isArray(slotName)) {
-                        item.equippedSlot = slotName.find(s => this.state.player.inventory.equipped[s].name === item.name) || slotName[0];
-                    } else {
-                        item.equippedSlot = slotName;
-                    }
-                    break;
-                }
-            }
-            if (!item.equippedSlot) {
-                console.error("Could not determine equippedSlot for", item);
-                this.writeToLog(`Error: Could not unequip ${item.name}—slot not found!`);
-                return;
-            }
-        }
-
-        const isDuplicate = this.state.player.inventory.items.some(i => i.uniqueId === item.uniqueId);
-        if (!isDuplicate) {
-            const indexAdded = this.state.player.inventory.items.push({ ...item }) - 1;
-            console.log(`Added ${item.name} to inventory at index ${indexAdded}, New state:`, JSON.stringify(this.state.player.inventory));
-        } else {
-            console.log(`Duplicate ${item.name} (ID: ${item.uniqueId}) prevented from adding to inventory`);
-        }
-
-        this.writeToLog(`Unequipped ${item.name} to inventory`);
-        let emptyItemName = item.equippedSlot === "mainhand" ? "Main Hand" : item.equippedSlot === "offhand" ? "Off Hand" : item.equippedSlot.charAt(0).toUpperCase() + item.equippedSlot.slice(1);
-        this.state.player.inventory.equipped[item.equippedSlot] = {
-            name: emptyItemName,
-            itemTier: "Empty",
-            type: item.equippedSlot,
-            slot: item.equippedSlot,
-            uniqueId: State.generateUniqueId(), // Replace window.generateUniqueId
-            icon: `no-${item.equippedSlot}.svg`,
-        };
-
-        this.game.player.updateGearStats();
-
-        if (this.state.ui.overlayOpen) {
-            this.updateStats();
-            this.updateLog();
-            this.updateInventory();
-        }
-    }
-
-    equipItem(item) {
-        this.hideItemTooltip(item);
-
-        if (item.levelRequirement && this.state.player.level < item.levelRequirement) {
-            this.writeToLog(`You need to be level ${item.levelRequirement} to equip ${item.name}!`);
-            return;
-        }
-
-        const currentTab = this.state.ui.activeTab;
-        console.log("Equipping item:", item, "Current equipped state:", JSON.stringify(this.state.player.inventory.equipped));
-
-        const indexToRemove = this.state.player.inventory.items.findIndex(i => i.uniqueId === item.uniqueId);
-        console.log("Index to remove:", indexToRemove, "Items:", this.state.player.inventory.items);
-        if (indexToRemove === -1) {
-            console.error(`Item ${item.name} (ID: ${item.uniqueId}) not found in inventory—cannot equip!`);
-            this.writeToLog(`Error: Couldn't equip ${item.name}—not in inventory!`);
-            return;
-        }
-        this.state.player.inventory.items.splice(indexToRemove, 1);
-        console.log("After splice, items:", this.state.player.inventory.items);
-
-        switch (item.type) {
-            case "weapon":
-                const slots = ["mainhand", "offhand"];
-                let equippedSlot = item.equippedSlot;
-
-                if (!equippedSlot) {
-                    if (item.attackType === "melee") {
-                        equippedSlot = slots.find(slot => this.state.player.inventory.equipped[slot]?.attackType === "melee") || "mainhand";
-                        console.log(`Melee weapon, selected slot: ${equippedSlot}`);
-                    } else if (item.attackType === "ranged") {
-                        equippedSlot = slots.find(slot => this.state.player.inventory.equipped[slot]?.attackType === "ranged") || "offhand";
-                        console.log(`Ranged weapon, selected slot: ${equippedSlot}`);
-                    } else {
-                        equippedSlot = "mainhand";
-                        console.log(`Unknown attack type, defaulting to mainhand`);
-                    }
-                }
-
-                if (!slots.includes(equippedSlot)) {
-                    console.error(`Invalid slot ${equippedSlot} for ${item.name}`);
-                    this.writeToLog(`Error: Invalid slot for ${item.name}!`);
-                    return;
-                }
-
-                item.equippedSlot = equippedSlot;
-
-                const oldWeapon = this.state.player.inventory.equipped[equippedSlot];
-                console.log(`Old item in ${equippedSlot}:`, oldWeapon);
-                if (oldWeapon && oldWeapon.itemTier !== "Empty") {
-                    this.state.player.inventory.items.push({ ...oldWeapon, equippedSlot: undefined });
-                    this.writeToLog(`Unequipped ${oldWeapon.name} to inventory`);
-                } else {
-                    console.log(`No old item in ${equippedSlot}, skipping push`);
-                }
-
-                this.state.player.inventory.equipped[equippedSlot] = { ...item };
-                console.log("After equip, equipped state:", JSON.stringify(this.state.player.inventory.equipped));
-                this.writeToLog(`Equipped ${item.name} to ${equippedSlot}`);
-                break;
-
-            case "armor":
-                const oldArmor = this.state.player.inventory.equipped.armor;
-                if (oldArmor && oldArmor.itemTier !== "Empty") {
-                    this.state.player.inventory.items.push({ ...oldArmor, equippedSlot: undefined });
-                    this.writeToLog(`Unequipped ${oldArmor.name} to inventory`);
-                }
-                this.state.player.inventory.equipped.armor = { ...item };
-                item.equippedSlot = "armor";
-                this.writeToLog(`Equipped ${item.name}`);
-                break;
-
-            case "amulet":
-                item.equippedSlot = "amulet";
-                const oldAmulet = this.state.player.inventory.equipped.amulet;
-                if (oldAmulet && oldAmulet.itemTier !== "Empty") {
-                    this.state.player.inventory.items.push({ ...oldAmulet, equippedSlot: undefined });
-                    this.writeToLog(`Unequipped ${oldAmulet.name} to inventory`);
-                }
-                this.state.player.inventory.equipped.amulet = { ...item };
-                this.writeToLog(`Equipped ${item.name}`);
-                break;
-
-            case "ring":
-                item.equippedSlot = (this.state.player.inventory.equipped.leftring.itemTier === "Empty" ? "leftring" : "rightring");
-                const oldRing = this.state.player.inventory.equipped[item.equippedSlot];
-                if (oldRing && oldRing.itemTier !== "Empty") {
-                    this.state.player.inventory.items.push({ ...oldRing, equippedSlot: undefined });
-                    this.writeToLog(`Unequipped ${oldRing.name} to inventory`);
-                }
-                this.state.player.inventory.equipped[item.equippedSlot] = { ...item };
-                this.writeToLog(`Equipped ${item.name}`);
-                break;
-
-            default:
-                console.error(`Unknown item type: ${item.type}`);
-                this.writeToLog(`Error: Unknown item type ${item.type}!`);
-                return;
-        }
-
-        this.game.player.updateGearStats();
-
-        this.state.ui.activeTab = currentTab;
-        if (this.state.ui.overlayOpen) {
-            this.updateStats();
-            this.updateLog();
-            this.updateInventory();
-        }
-    }
-
-    dropItem(index) {
-        const item = this.state.player.inventory.items[index];
-        this.hideItemTooltip(item);
-        this.writeToLog(`Dropped ${item.name}`);
-        this.state.player.inventory.items.splice(index, 1);
-        if (this.state.ui.overlayOpen) {
-            this.updateStats();
-            this.updateLog();
-            this.updateInventory();
-        }
-    }
-
     handleDragStart(event, itemData) {
         console.log(`Dragging started for ${itemData.name} (ID: ${itemData.uniqueId})`);
         event.dataTransfer.setData('text/plain', JSON.stringify(itemData));
@@ -321,55 +140,12 @@ class UI {
             return;
         }
 
-        if (!draggedItemData.equippedSlot && isTargetEquipped) {
-            if (draggedItemData.type === targetItemData.type ||
-                (draggedItemData.type === 'weapon' && (targetItemData.equippedSlot === 'mainhand' || targetItemData.equippedSlot === 'offhand')) ||
-                (draggedItemData.type === 'ring' && (targetItemData.equippedSlot === 'leftring' || targetItemData.equippedSlot === 'rightring'))) {
-                const targetSlot = targetItemData.equippedSlot;
-                const currentEquipped = this.state.player.inventory.equipped[targetSlot];
-                if (currentEquipped && currentEquipped.itemTier !== "Empty") {
-                    this.unequipItem(currentEquipped, event);
-                }
-                const draggedCopy = { ...draggedItemData, equippedSlot: targetSlot };
-                this.equipItem(draggedCopy);
-            } else {
-                this.writeToLog(`Cannot equip ${draggedItemData.name} to ${targetItemData.equippedSlot}!`);
-            }
-        } else if (draggedItemData.equippedSlot && !isTargetEquipped) {
-            this.unequipItem(draggedItemData, event);
-        } else if (draggedItemData.equippedSlot && isTargetEquipped) {
-            if (draggedItemData.type === targetItemData.type ||
-                (draggedItemData.type === 'weapon' && (targetItemData.equippedSlot === 'mainhand' || targetItemData.equippedSlot === 'offhand')) ||
-                (draggedItemData.type === 'ring' && (targetItemData.equippedSlot === 'leftring' || targetItemData.equippedSlot === 'rightring'))) {
-                const draggedSlot = draggedItemData.equippedSlot;
-                const targetSlot = targetItemData.equippedSlot;
-
-                const draggedCopy = { ...draggedItemData, equippedSlot: targetSlot };
-                const targetCopy = { ...targetItemData, equippedSlot: draggedSlot };
-
-                if (draggedItemData.itemTier !== "Empty") {
-                    this.unequipItem(draggedItemData, event);
-                }
-                if (targetItemData.itemTier !== "Empty") {
-                    this.unequipItem(targetItemData, event);
-                }
-
-                if (draggedItemData.itemTier !== "Empty") {
-                    this.equipItem(draggedCopy);
-                }
-                if (targetItemData.itemTier !== "Empty") {
-                    this.equipItem(targetCopy);
-                }
-
-                this.writeToLog(`Swapped ${draggedItemData.name} with ${targetItemData.name}`);
-            } else {
-                this.writeToLog(`Cannot swap ${draggedItemData.name} with ${targetItemData.name}!`);
-            }
-        } else {
-            console.log("Inventory-to-inventory drag, no action taken");
+        this.game.player.inventory.handleDrop(draggedItemData, targetItemData, isTargetEquipped);
+        if (this.state.ui.overlayOpen) {
+            this.updateStats();
+            this.updateLog();
+            this.updateInventory();
         }
-
-        this.updateInventory();
     }
 
     handleDragEnd(event) {
@@ -396,7 +172,7 @@ class UI {
                         p.addEventListener('dragend', (event) => this.handleDragEnd(event));
                         p.addEventListener('mouseover', (event) => this.showItemTooltip(itemData, event));
                         p.addEventListener('mouseout', () => this.hideItemTooltip(itemData));
-                        p.addEventListener('click', (event) => this.unequipItem(itemData, event));
+                        p.addEventListener('click', () => this.game.player.inventory.unequipItem(itemData));
                         p.setAttribute('data-listener-added', 'true');
                     } else {
                         console.warn("Missing uniqueId in equipped item", itemData);
@@ -448,13 +224,18 @@ class UI {
         }
         if (event.ctrlKey) {
             console.log("Ctrl key pressed, dropping item", item, "Event:", event);
-            this.dropItem(event.target.dataset.index);
+            this.game.player.inventory.dropItem(event.target.dataset.index);
         } else if (event.shiftKey) {
             console.log("Shift key pressed, no action taken");
             return;
         } else {
             console.log("equipping item", item);
-            this.equipItem(item);
+            this.game.player.inventory.equipItem(item);
+        }
+        if (this.state.ui.overlayOpen) {
+            this.updateStats();
+            this.updateLog();
+            this.updateInventory();
         }
     }
 
@@ -509,7 +290,7 @@ class UI {
 
         const inventory = document.getElementById('inventory');
         const equippedItems = document.getElementById('equipped-items');
-        const equip = this.state.player.inventory.equipped || {};
+        const equip = this.state.player.inventory.equipped;
 
         if (equippedItems) {
             equippedItems.innerHTML = `
@@ -518,14 +299,14 @@ class UI {
                         <p class="equip-slot mainhand">
                             <img src="img/icons/items/${equip.mainhand?.icon || 'no-mainhand.svg'}" alt="${equip.mainhand?.name || 'Mainhand'}" 
                                  class="item item-icon ${equip.mainhand?.itemTier || 'Empty'} ${equip.mainhand?.type || 'weapon'}" 
-                                 data-item='${JSON.stringify(equip.mainhand || { name: "Mainhand", itemTier: "Empty", type: "weapon", slots: ["mainhand"], baseDamageMin: 1, baseDamageMax: 1, uniqueId: State.generateUniqueId(), icon: "no-mainhand.svg" })}'>
+                                 data-item='${JSON.stringify(equip.mainhand || { name: "Mainhand", itemTier: "Empty", type: "weapon", slots: ["mainhand"], baseDamageMin: 1, baseDamageMax: 1, uniqueId: this.utilities.generateUniqueId(), icon: "no-mainhand.svg" })}'>
                             <br><span class="item-label">Mainhand</span></p>
                     </div>
                     <div class="equipped-item">
                         <p class="equip-slot rightring">
                             <img src="img/icons/items/${equip.rightring?.icon || 'no-rightring.svg'}" alt="${equip.rightring?.name || 'Right Ring'}" 
                                  class="item item-icon ${equip.rightring?.itemTier || 'Empty'} ${equip.rightring?.type || 'ring'}" 
-                                 data-item='${JSON.stringify(equip.rightring || { name: "Right Ring", itemTier: "Empty", type: "ring", slot: "rightring", uniqueId: State.generateUniqueId(), icon: "no-rightring.svg" })}'>
+                                 data-item='${JSON.stringify(equip.rightring || { name: "Right Ring", itemTier: "Empty", type: "ring", slot: "rightring", uniqueId: this.utilities.generateUniqueId(), icon: "no-rightring.svg" })}'>
                             <br><span class="item-label">Right Ring </span></p>
                     </div>
                 </div>
@@ -534,14 +315,14 @@ class UI {
                         <p class="equip-slot amulet"> 
                             <img src="img/icons/items/${equip.amulet?.icon || 'no-amulet.svg'}" alt="${equip.amulet?.name || 'Amulet'}" 
                                  class="item item-icon ${equip.amulet?.itemTier || 'Empty'} ${equip.amulet?.type || 'amulet'}" 
-                                 data-item='${JSON.stringify(equip.amulet || { name: "Amulet", itemTier: "Empty", type: "amulet", slot: "amulet", uniqueId: State.generateUniqueId(), icon: "no-amulet.svg" })}'>
+                                 data-item='${JSON.stringify(equip.amulet || { name: "Amulet", itemTier: "Empty", type: "amulet", slot: "amulet", uniqueId: this.utilities.generateUniqueId(), icon: "no-amulet.svg" })}'>
                             <br><span class="item-label">Amulet</span></p>
                     </div>
                     <div class="equipped-item">
                         <p class="equip-slot armor">
                             <img src="img/icons/items/${equip.armor?.icon || 'no-armor.svg'}" alt="${equip.armor?.name || 'Armor'}" 
                                  class="item item-icon ${equip.armor?.itemTier || 'Empty'} ${equip.armor?.type || 'armor'}" 
-                                 data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: State.generateUniqueId(), defense: 0, icon: "no-armor.svg" })}'>
+                                 data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: this.utilities.generateUniqueId(), defense: 0, icon: "no-armor.svg" })}'>
                             <br><span class="item-label">Armor</span> </p>
                     </div>
                 </div>
@@ -550,14 +331,14 @@ class UI {
                         <p class="equip-slot offhand">
                             <img src="img/icons/items/${equip.offhand?.icon || 'no-offhand.svg'}" alt="${equip.offhand?.name || 'Offhand'}" 
                                  class="item item-icon ${equip.offhand?.itemTier || 'Empty'} ${equip.offhand?.type || 'weapon'}" 
-                                 data-item='${JSON.stringify(equip.offhand || { name: "Offhand", itemTier: "Empty", type: "weapon", slots: ["offhand"], baseDamageMin: 0, baseDamageMax: 0, uniqueId: State.generateUniqueId(), icon: "no-offhand.svg" })}'>
+                                 data-item='${JSON.stringify(equip.offhand || { name: "Offhand", itemTier: "Empty", type: "weapon", slots: ["offhand"], baseDamageMin: 0, baseDamageMax: 0, uniqueId: this.utilities.generateUniqueId(), icon: "no-offhand.svg" })}'>
                             <br><span class="item-label">Offhand</span></p>
                     </div>
                     <div class="equipped-item">
                         <p class="equip-slot leftring">
                             <img src="img/icons/items/${equip.leftring?.icon || 'no-leftring.svg'}" alt="${equip.leftring?.name || 'Left Ring'}" 
                                  class="item item-icon ${equip.leftring?.itemTier || 'Empty'} ${equip.leftring?.type || 'ring'}" 
-                                 data-item='${JSON.stringify(equip.leftring || { name: "Left Ring", itemTier: "Empty", type: "ring", slot: "leftring", uniqueId: State.generateUniqueId(), icon: "no-leftring.svg" })}'>
+                                 data-item='${JSON.stringify(equip.leftring || { name: "Left Ring", itemTier: "Empty", type: "ring", slot: "leftring", uniqueId: this.utilities.generateUniqueId(), icon: "no-leftring.svg" })}'>
                             <br><span class="item-label">Left Ring</span> </p>
                     </div>
                 </div>`;
@@ -689,6 +470,13 @@ class UI {
         if (this.state.ui.overlayOpen) {
             this.updateLog();
         }
+    }
+
+    logDroppedItems(monster, goldGain, torchDropped, droppedItems) {
+        let logMessage = `${monster.name} dropped ${goldGain} gold`;
+        if (torchDropped) logMessage += ' and a torch';
+        if (droppedItems.length) logMessage += ` and ${droppedItems.map(i => i.name).join(', ')}`;
+        this.writeToLog(logMessage + '!');
     }
 
     gameOver(message) {
