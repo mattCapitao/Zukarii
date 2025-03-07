@@ -253,9 +253,12 @@ class Items {
             torchChance = 0.05;
         }
 
+        let potionChance = 0.10;
+
         const itemChance = 1.0;
         let droppedItems = [];
         let torchDropped = Math.random() < torchChance;
+        let potionDropped = Math.random() < potionChance;
 
         if (Math.random() < itemChance) {
             let randomItem = {};
@@ -285,6 +288,7 @@ class Items {
             name: monster.name || "Treasure Chest", // Use monster.name for monsters, "Treasure Chest" for level treasures
             gold: goldGain,
             torches: torchDropped ? 1 : 0,
+            healPotions: potionDropped ? 1 : 0,
             items: droppedItems,
             suppressRender: monster.suppressRender,
         };

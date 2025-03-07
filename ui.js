@@ -245,17 +245,33 @@ class UI {
         playerInfo.innerHTML = `
             <div class="player-info-child">Player: ${this.state.player.name}</div>
             <div class="player-info-child">Level: ${this.state.player.level}</div>
-            <div class="player-info-child">Dungeon Tier: ${this.state.tier}</div>`;
+            <div class="player-info-child">Dungeon Tier: ${this.state.tier}</div>
+            <div class="player-info-child">Gold: ${this.state.player.gold}</div>`;
     }
 
     updatePlayerStatus() {
         const playerStatus = document.getElementById('player-status');
-        playerStatus.innerHTML = `
-            <div class="player-status-child">HP: ${this.state.player.hp}/${this.state.player.maxHp}</div>
-            <div class="player-status-child">Mana: ${this.state.player.mana}/${this.state.player.maxMana}</div>
-            <div class="player-status-child">XP: ${this.state.player.xp}/${this.state.player.nextLevelXp}</div>
-            <div class="player-status-child">Gold: ${this.state.player.gold}</div>
-            <div class="player-status-child">Torches: ${this.state.player.torches}</div>`;
+        playerStatus.innerHTML =`
+        <div class="player-status-child">Heal Potions: ${this.state.player.healPotions}</div>
+        <div class="player-status-child bar">
+            <div class="progress-bar">
+                <div class="progress-fill hp-fill" style="width: ${(this.state.player.hp / this.state.player.maxHp) * 100}%"></div>
+            </div>
+             HP: ${this.state.player.hp}/${this.state.player.maxHp}
+        </div>
+        <div class="player-status-child bar">
+            <div class="progress-bar">
+                <div class="progress-fill mana-fill" style="width: ${(this.state.player.mana / this.state.player.maxMana) * 100}%"></div>
+            </div>
+            Mana: ${this.state.player.mana}/${this.state.player.maxMana}
+        </div>
+        <div class="player-status-child bar">
+            <div class="progress-bar">
+                <div class="progress-fill xp-fill" style="width: ${(this.state.player.xp / this.state.player.nextLevelXp) * 100}%"></div>
+            </div>
+             XP: ${this.state.player.xp}/${this.state.player.nextLevelXp}
+        </div>
+        <div class="player-status-child">Torches: ${this.state.player.torches}</div>`;
     }
 
     updateStats() {

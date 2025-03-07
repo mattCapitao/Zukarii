@@ -1,12 +1,13 @@
 ﻿console.log("state.js loaded");
 
 class State {
-    constructor(data) {
+    constructor(data, utilities) {
         this.data = data;
+        this.utilities = utilities;
         this.needsRender=false
-        this.WIDTH = 100;
-        this.HEIGHT = 60;
-        this.MIN_STAIR_DISTANCE = 60;
+        this.WIDTH = 122;
+        this.HEIGHT = 67;
+        this.MIN_STAIR_DISTANCE = Math.floor(Math.random()*21) + 40;
         this.mapDiv = null;
         this.statsDiv = null;
         this.logDiv = null;
@@ -29,9 +30,9 @@ class State {
             hp: 30, maxHp: 30,
             mana: 10, maxMana: 10,
             luck: 0, maxLuck: 0, luckTempMod:0,
-            prowess: 5 + Math.floor(Math.random() * 6),
-            intellect: 5 + Math.floor(Math.random() * 6),
-            agility: 5 + Math.floor(Math.random() * 6),
+            prowess: this.utilities.d6(3),
+            intellect: this.utilities.d6(3),
+            agility: this.utilities.d6(3), 
             armor: 0,
             defense: 0,
             block: 0,
@@ -43,6 +44,7 @@ class State {
                 equipped: {}, // Initialized in Player now
                 items: [],
             },
+            healPotions: 1,
             torches: 1,
             torchExpires: 0,
             torchDropFail: 0,

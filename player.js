@@ -44,6 +44,8 @@ class Player {
 
     checkLevelUp() {
         while (this.state.player.xp >= this.state.player.nextLevelXp) {
+
+            const newXp = this.state.player.xp - this.state.player.nextLevelXp;
             this.state.player.level++;
 
             if (this.state.player.level % 3 === 0) {
@@ -57,7 +59,7 @@ class Player {
             this.state.player.stats.base.maxHp += hpIncrease;
             this.state.player.maxHp = this.state.player.stats.base.maxHp;
             this.state.player.hp = this.state.player.maxHp;
-            this.state.player.xp = 0;
+            this.state.player.xp = newXp;
             this.state.player.nextLevelXp = Math.round(this.state.player.nextLevelXp * 1.5);
             this.ui.writeToLog(`Level up! Now level ${this.state.player.level}, Max HP increased by ${hpIncrease} to ${this.state.player.maxHp}`);
 

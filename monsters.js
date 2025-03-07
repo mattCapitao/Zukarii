@@ -70,7 +70,7 @@ class Monsters {
     generateLevelMonsters(tier) {
         const map = this.state.levels[tier].map;
         const rooms = this.state.levels[tier].rooms;
-        const baseMonsterCount = 9;
+        const baseMonsterCount = 12;
         const densityFactor = 1 + tier * 0.1;
         const monsterCount = Math.floor(baseMonsterCount * densityFactor);
         let levelMonsters = [];

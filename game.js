@@ -3,8 +3,9 @@
 class Game {
     constructor() {
         this.data = new Data();
-        this.state = new State(this.data);
         this.utilities = new Utilities();
+        this.state = new State(this.data, this.utilities);
+        
         this.level = new Level(this.state, this);
         this.ui = new UI(this.state, this, this.utilities);
         this.render = new Render(this.state, this.ui, this);
@@ -25,6 +26,8 @@ class Game {
     }
 
     handleInput(event) {
+       
+
         if (!this.state.gameStarted) {
             console.log("Starting game...");
             this.state.gameStarted = true;
@@ -40,7 +43,11 @@ class Game {
             return;
         }
 
-
+        if (event.type === 'keydown' && this.state.isRangedMode && event.key === ' ') {
+            event.preventDefault();
+            console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : skipping input`);
+            return false;
+        }
 
         const now = Date.now();
         if (now - this.lastInputTime < this.inputThrottle) return;
@@ -49,10 +56,7 @@ class Game {
         if (now - this.lastRenderTime < this.renderThrottle) return;
         this.lastRenderTime = now;
 
-        if (event.type === 'keydown' && this.state.isRangedMode && event.key === ' ') {
-            console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : skipping input`);
-            return;
-        }
+        
 
         let map = this.state.levels[this.state.tier].map;
         let newX = this.state.player.x;
@@ -66,7 +70,7 @@ class Game {
             'd': 'ArrowRight', 'D': 'ArrowRight', 'ArrowRight': 'ArrowRight',
             'i': 'c', 'I': 'c', 'c': 'c', 'C': 'c', 'l': 'l', 'L': 'l',
             'escape': 'escape', 'Escape': 'escape', 't': 't', 'T': 't',
-            ' ': ' ', 'Space': ' '
+            'h': 'h', 'H': 'h', ' ': ' ', 'Space': ' '
         };
 
         const mappedKeys = new Set(Object.keys(keyMap));
@@ -103,7 +107,7 @@ class Game {
                 case 'ArrowRight': newX++; break;
             }
 
-            switch (event.key.toLowerCase()) {
+            switch (mappedKey) {
                 case 'c':
                     if (!this.state.ui.overlayOpen) {
                         this.state.ui.overlayOpen = true;
@@ -145,6 +149,10 @@ class Game {
                     return;
                 case 't':
                     this.actions.lightTorch();
+                    this.endTurn();
+                    return;
+                case 'h':
+                    this.actions.drinkHealPotion();
                     this.endTurn();
                     return;
                 case ' ':
@@ -256,9 +264,10 @@ class Game {
             this.state.player.y = newY;
         } else if (map[newY][newX] === '$' && treasureIndex !== -1) {
             console.log(`Treasure found at (${newX}, ${newY})! Picking up...`);
-            this.actions.pickupTreasure(newX, newY);
+            
             this.state.player.x = newX;
             this.state.player.y = newY;
+            this.actions.pickupTreasure(newX, newY);
             if (this.state.player.gold >= 1e12) {
                 this.ui.writeToLog("You amassed a trillion gold! Victory!");
                 this.state.isVictory = true;

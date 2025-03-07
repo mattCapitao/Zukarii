@@ -17,7 +17,7 @@ class Level {
         this.MIN_ROOM_SIZE = 4;
         this.EDGE_BUFFER = 2;
         this.MAX_OVERLAP_PERCENT = 0.10;
-        this.INITIAL_MIN_DISTANCE = 10;
+        this.INITIAL_MIN_DISTANCE = 12;
         this.MIN_DISTANCE_FLOOR = 3;
     }
 
@@ -322,8 +322,8 @@ class Level {
                 map[y][x] = '#';
             }
         }
-
-        const rooms = this.placeRooms(22);
+        const roomsPerLevel = Math.floor(Math.random() * 8) + 28;
+        const rooms = this.placeRooms(33);
 
         for (const room of rooms) {
             for (let y = room.top; y < room.top + room.h; y++) {
@@ -339,10 +339,11 @@ class Level {
     }
 
     generateFountains(tier) {
+        const fountainsPerLevel = Math.floor(Math.random() * 3) +1;
         const map = this.state.levels[tier].map;
         const rooms = this.state.levels[tier].rooms;
         let levelFountains = [];
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < fountainsPerLevel; i++) {
             const room = rooms[Math.floor(Math.random() * rooms.length)];
             let x, y;
             do {
@@ -356,9 +357,10 @@ class Level {
     }
 
     generateTreasures(tier) {
+        const treasuresPerLevel = Math.floor(Math.random() * 5) +3;
         const map = this.state.levels[tier].map;
         const rooms = this.state.levels[tier].rooms;
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < treasuresPerLevel; i++) {
             const room = rooms[Math.floor(Math.random() * rooms.length)];
             let x, y;
             do {

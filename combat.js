@@ -11,8 +11,8 @@ class Combat {
     }
 
     calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus) {
-        let baseDamage = Math.floor(Math.random() * (maxBaseDamage - minBaseDamage + 1)) + minBaseDamage;
-        let playerDamage = Math.round(baseDamage * (baseStat * 0.3)) + damageBonus;
+        let baseDamage = Math.floor(Math.random() * (maxBaseDamage - minBaseDamage + 1)) + minBaseDamage + this.state.player.level;
+        let playerDamage = Math.round(baseDamage * (baseStat * 0.20)) + damageBonus;
         let isCrit = false;
 
         const critChance = this.state.player.agility / 2;
@@ -36,11 +36,36 @@ class Combat {
     }
 
     handleMonsterRetaliation(monster, tier) {
+
+
+        if (this.state.player.block > 0 || this.state.player.dodge > 0) {
+
+            if (Math.random() * 100 < this.state.player.block) {
+                this.ui.writeToLog(`You blocked the ${monster.name}'s attack!`);
+                return false;
+            }
+            if (Math.random() * 100 < this.state.player.dodge) {
+                this.ui.writeToLog(`You dodged the ${monster.name}'s attack!`);
+                return false;
+            }
+        }
+
         let monsterDamage = this.monsters.calculateMonsterAttackDamage(monster, this.state.tier);
+
         const armor = this.player.playerInventory.getEquipped("armor")?.armor || 0;
-        monsterDamage = Math.max(1, monsterDamage - armor);
-        this.state.player.hp -= monsterDamage;
-        this.ui.writeToLog(`${monster.name} dealt ${monsterDamage} damage to You`);
+        let armorDmgReduction = 0;
+
+        if (armor > 0) {
+            armorDmgReduction = Math.max(1,Math.floor(monsterDamage * (.01 * armor * 2)));
+        } 
+        let damageDealt = monsterDamage - armorDmgReduction;
+
+        const defenseDmgReduction = Math.round(monsterDamage * (.01 * this.state.player.defense));
+        console.log(`Monster attack (${monsterDamage}) : Defense (${this.state.player.defense})`, this.player);
+        damageDealt -= defenseDmgReduction;
+
+        this.state.player.hp -= damageDealt;
+        this.ui.writeToLog(`${monster.name} dealt ${damageDealt} damage to You. Attack(${monsterDamage}) - Armor(${armorDmgReduction}) - Defense(${defenseDmgReduction}) `);
         this.ui.updateStats();
 
         if (this.state.player.hp <= 0) {
@@ -89,6 +114,7 @@ class Combat {
 
     toggleRanged(event) {
         if (event.key === ' ') {
+            event.preventDefault();
             if (event.type === 'keydown') {
                 const offWeapon = this.player.playerInventory.getEquipped("offhand");
                 const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
@@ -101,6 +127,7 @@ class Combat {
                 this.state.isRangedMode = false;
             }
         }
+        return false;
     }
 
     async rangedAttack(direction) {

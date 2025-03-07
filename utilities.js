@@ -42,4 +42,12 @@ class Utilities {
             .replace(/\r/g, '\\r')
             .replace(/\t/g, '\\t');
     }
+
+    d6(rollCount = 1) {
+        let total = 0;
+        for (let i = 0; i < rollCount; i++) {
+            total += Math.floor(Math.random() * 6) + 1;
+        }
+        return total;
+    }
 }

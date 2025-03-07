@@ -1,11 +1,8 @@
 console.log("titlescreen.js loaded");
 
-const titleScreen = `
-<h1>Grok Mage Dungeon</h1>
+const titleScreen = `<h1>Grok Mage Dungeon</h1>
+ <h5>Collect One Trillion Gold to WIN!</h5>
 <pre style="font-size:.225rem;">
-
-
-
 
 
 
@@ -113,12 +110,8 @@ const titleScreen = `
 
 
 
-
-
-
-
 </pre>
- <h4>Collect One Trillion Gold to WIN!</h4>
+
    <br />
 <table>
     <tr>
@@ -132,9 +125,8 @@ const titleScreen = `
                 <li>wasd: Move / Mele Attack
                 </li><li>Hold Space: -> Arrows: Ranged attack (*)
                 </li><li>T key: Light Torch
-                </li><li>T key: Inventory
-                </li><li>T key: Character
-                </li><li>T key: Adventure Log
+                </li><li>C key: Character
+                </li><li>L key: Adventure Log
                 </li><li>F11 to start Gam in Full Screen
                 </li><li>Any Key to start in standard browser mode</li>
             </ul>
