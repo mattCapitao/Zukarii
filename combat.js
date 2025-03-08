@@ -91,6 +91,11 @@ class Combat {
             return;
         }
 
+        const projectileDiscoveryRadius = 1; // Discover 1 tile around the path
+        const maxDiscoveredTiles = Math.min(5, this.state.player.range); // Cap at 5 tiles or range, whichever is less
+        let discoveredTiles = new Set();
+        let newlyDiscoveredCount = 0; // Track newly discovered tiles for this attack
+
         for (let i = 1; i <= (this.state.player.range); i++) {
             let tx = this.state.player.x + dx * i;
             let ty = this.state.player.y + dy * i;
@@ -100,10 +105,51 @@ class Combat {
             }
 
             this.state.projectile = { x: tx, y: ty };
-            console.log(`Projectile tick ${i} at (${tx}, ${ty})`);
             this.state.needsRender = true;
             this.game.render.renderIfNeeded();
             await new Promise(resolve => setTimeout(resolve, 50));
+
+            // Discover tiles only if beyond discoveryRadius
+            if (i > this.state.discoveryRadius) { // Changed from >= to >
+                for (let dyOffset = -projectileDiscoveryRadius; dyOffset <= projectileDiscoveryRadius; dyOffset++) {
+                    for (let dxOffset = -projectileDiscoveryRadius; dxOffset <= projectileDiscoveryRadius; dxOffset++) {
+                        let discX = tx + dxOffset;
+                        let discY = ty + dyOffset;
+                        if (discX >= 0 && discX < this.state.WIDTH && discY >= 0 && discY < this.state.HEIGHT) {
+                            const tileKey = `${discX},${discY}`;
+                            const alreadyDiscoveredWall = this.state.discoveredWalls[this.state.tier].has(tileKey);
+                            const alreadyDiscoveredFloor = this.state.discoveredFloors[this.state.tier] && this.state.discoveredFloors[this.state.tier].has(tileKey);
+                            if (!discoveredTiles.has(tileKey) && !alreadyDiscoveredWall && !alreadyDiscoveredFloor && discoveredTiles.size < maxDiscoveredTiles) {
+                                if (map[discY][discX] === '#') {
+                                    this.state.discoveredWalls[this.state.tier].add(tileKey);
+                                    newlyDiscoveredCount++;
+                                } else if (map[discY][discX] === ' ') {
+                                    this.state.discoveredFloors[this.state.tier] = this.state.discoveredFloors[this.state.tier] || new Set();
+                                    this.state.discoveredFloors[this.state.tier].add(tileKey);
+                                    newlyDiscoveredCount++;
+                                }
+                                discoveredTiles.add(tileKey);
+                                this.state.needsRender = true;
+                                console.log(`Discovered tile at (${discX}, ${discY})`);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Check for monsters within AGGRO_RANGE and set aggro and detection
+            this.state.monsters[this.state.tier].forEach(monster => {
+                if (monster.hp > 0) {
+                    const distX = monster.x - tx;
+                    const distY = monster.y - ty;
+                    const distance = Math.sqrt(distX * distX + distY * distY);
+                    if (distance <= this.state.AGGRO_RANGE) {
+                        monster.isAggro = true;
+                        monster.isDetected = true; // Set detection flag for visibility
+                        console.log(`Monster at (${monster.x}, ${monster.y}) aggroed and detected by projectile`);
+                    }
+                }
+            });
 
             let monster = this.state.monsters[this.state.tier].find(m => m.x === tx && m.y === ty && m.hp > 0);
             if (monster) {
@@ -112,7 +158,7 @@ class Combat {
                 let combatLogMsg = isCrit ? `Critical hit! Dealt ${damage} damage to ${monster.name} ` : `You dealt ${damage} damage to ${monster.name} `;
 
                 monster.hp -= damage;
-               
+                monster.isDetected = true; // Ensure the hit monster is visible
 
                 if (monster.hp <= 0) {
                     this.monsters.handleMonsterDeath(monster, this.player, this.state.tier, combatLogMsg);
@@ -132,8 +178,23 @@ class Combat {
                 break;
             }
         }
+
+        // Update the discovered tile count for exploration XP
+        if (newlyDiscoveredCount > 0) {
+            this.state.discoveredTileCount[this.state.tier] += newlyDiscoveredCount;
+            console.log(`Ranged attack discovered ${newlyDiscoveredCount} new tiles, total for tier ${this.state.tier}: ${this.state.discoveredTileCount[this.state.tier]}`);
+            if (this.state.discoveredTileCount[this.state.tier] >= 1000) {
+                this.state.discoveredTileCount[this.state.tier] = 0;
+                const exploreXP = 25;
+                this.ui.writeToLog("Explored 1000 tiles!");
+                this.game.player.awardXp(exploreXP);
+            }
+        }
+
         this.state.projectile = null;
         this.state.needsRender = true;
         this.game.endTurn();
     }
+
+
 }
