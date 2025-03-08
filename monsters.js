@@ -38,13 +38,7 @@ class Monsters {
         };
     }
 
-    calculateMonsterAttackDamage(enemy, tier) {
-        const tierDamageMultiplier = 0.1;
-        const baseDamage = Math.floor(Math.random() * (enemy.maxBaseDamage - enemy.minBaseDamage + 1)) + enemy.minBaseDamage;
-        const damage = Math.round(baseDamage * (1 + tier * tierDamageMultiplier));
-        console.log(`Monster attack damage: ${damage} (base: ${baseDamage}, min: ${enemy.minBaseDamage}, max: ${enemy.maxBaseDamage})`);
-        return damage;
-    }
+
 
     generateMonster(tier, map, rooms, playerX, playerY, unique = false) {
         const monsterTemplates = unique ? this.data.getUniqueMonsters() : this.data.getMonsterTemplates();
@@ -107,8 +101,13 @@ class Monsters {
             const dy = this.state.player.y - monster.y;
             const distanceToPlayer = Math.sqrt(dx * dx + dy * dy);
 
+            if (distanceToPlayer <= AGGRO_RANGE + 2) {
+                //placeholder for monster detection set default to aggro + 2
+                monster.isDetected = true;
+            }
+
             if (distanceToPlayer <= AGGRO_RANGE) {
-                monster.isAgro = true;
+                monster.isAggro = true;
                 let directions = [
                     { x: Math.sign(dx), y: Math.sign(dy) },
                     { x: Math.sign(dx), y: 0 },
@@ -139,7 +138,7 @@ class Monsters {
                     break;
                 }
             } else {
-                monster.isAgro = false;
+                monster.isAggro = false;
                 let wanderDirections = [
                     { x: 1, y: 0 }, { x: -1, y: 0 },
                     { x: 0, y: 1 }, { x: 0, y: -1 }
@@ -166,4 +165,73 @@ class Monsters {
             }
         });
     }
+
+
+    handleMonsterDeath(monster, player, tier, combatLogMsg) {
+        monster.hp = 0;
+        monster.isAggro = false;
+        this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
+        this.ui.writeToLog(`${monster.name} defeated!`);
+        this.items.dropTreasure(monster, tier);
+        const monsterKillXP = (5 + Math.floor(Math.random() * 6)) * this.state.tier;
+        player.awardXp(monsterKillXP);
+    }
+
+    calculateMonsterAttackDamage(enemy, tier) {
+        tier = this.state.tier;
+        const tierDamageMultiplier = 0.05;
+        const baseDamage = Math.floor(Math.random() * (enemy.maxBaseDamage - enemy.minBaseDamage) + 1) + enemy.minBaseDamage;
+        const damage = Math.round(baseDamage * (tier * (1 + tierDamageMultiplier)));
+        console.log(`Monster attack damage: ${damage} (base: ${baseDamage}, min: ${enemy.minBaseDamage}, max: ${enemy.maxBaseDamage})`);
+        return damage;
+    }
+
+    handleMonsterAttack(monster, player) {
+
+        //currently this method is only called if the monster survives the player's attack and is not dead and is in mele range
+        //if the monster is not aggro, it will become aggro and attack the player - For future development, this could be expanded to include other situations
+        //Like a player using stealth reaching melee range of a monster that is not aggro, or player attacking a monster that has a ranged attack.
+        if (!monster.isAggro) {
+            monster.isAgro = true;
+            return false;
+        }
+
+
+        if (this.state.player.block > 0 || this.state.player.dodge > 0) {
+
+            if (Math.random() * 100 < this.state.player.block) {
+                this.ui.writeToLog(`You blocked the ${monster.name}'s attack!`);
+                return false;
+            }
+            if (Math.random() * 100 < this.state.player.dodge) {
+                this.ui.writeToLog(`You dodged the ${monster.name}'s attack!`);
+                return false;
+            }
+        }
+
+        let monsterDamage = this.calculateMonsterAttackDamage(monster);
+
+        const armor = player.playerInventory.getEquipped("armor")?.armor || 0;
+        let armorDmgReduction = 0;
+
+        if (armor > 0) {
+            armorDmgReduction = Math.max(1, Math.floor(monsterDamage * (.01 * armor * 2)));
+        }
+        let damageDealt = monsterDamage - armorDmgReduction;
+
+        const defenseDmgReduction = Math.round(monsterDamage * (.01 * this.state.player.defense));
+        console.log(`Monster attack (${monsterDamage}) : Defense (${this.state.player.defense})`, this.player);
+        damageDealt -= defenseDmgReduction;
+
+        this.state.player.hp -= damageDealt;
+        this.ui.writeToLog(`${monster.name} dealt ${damageDealt} damage to You. Attack(${monsterDamage}) - Armor(${armorDmgReduction}) - Defense(${defenseDmgReduction}) `);
+        this.ui.updateStats();
+
+        if (this.state.player.hp <= 0) {
+            this.player.death(monster.name);
+            return true;
+        }
+        return false;
+    }
+
 }

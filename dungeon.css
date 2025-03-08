@@ -604,7 +604,7 @@ border-color: gold !important;
 
 .relic hr,
 #tabs p.equip-slot.relic img.item,
-#tabs p.inventory-slot.relic img.item, {
+#tabs p.inventory-slot.relic img.item {
 background-color: gold !important;
 }
     
@@ -620,7 +620,7 @@ border-color: blueviolet !important;
 }
 .mastercraft hr,
 #tabs p.equip-slot.magic img.item,
-#tabs p.inventory-slot.magic img.item, {
+#tabs p.inventory-slot.magic img.item {
 background-color: darkorchid !important;
 }
 
@@ -636,7 +636,7 @@ background-color: darkorchid !important;
 
         .magic hr,
         #tabs p.equip-slot.magic img.item,
-        #tabs p.inventory-slot.magic img.item, {
+        #tabs p.inventory-slot.magic img.item {
             background-color: blueviolet !important;
         }
 
@@ -652,7 +652,7 @@ background-color: darkorchid !important;
 
         .rare hr,
         #tabs p.equip-slot.rare img.item,
-        #tabs p.inventory-slot.rare img.item, {
+        #tabs p.inventory-slot.rare img.item {
             background-color: blue !important;
         }
 
@@ -668,7 +668,7 @@ background-color: darkorchid !important;
 
         .junk hr,
         #tabs p.equip-slot.junk img.item,
-        #tabs p.inventory-slot.junk img.item, {
+        #tabs p.inventory-slot.junk img.item {
             background-color: whitesmoke !important;
         }
 
@@ -757,7 +757,7 @@ tooltip-description {
         
     }
 
-player.torch.flicker {
+.player.torch.flicker {
     animation: torchFlicker 0.5s infinite, torchShadow 0.5s infinite;
 }
 

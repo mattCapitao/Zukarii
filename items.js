@@ -19,11 +19,11 @@ class Items {
         this.itemStatOptions = {
             weapon: {
                 ranged: {
-                    base: ['baseDamageMin', 'baseDamageMax', 'attackType', 'range'],
+                    base: ['baseDamageMin', 'baseDamageMax', 'attackType', 'baseRange'],
                     bonus: ['intellect', 'agility', 'range', 'rangedDamageBonus', 'damageBonus'],
                 },
                 melee: {
-                    base: ['baseDamageMin', 'baseDamageMax', 'attackType', 'block'],
+                    base: ['baseDamageMin', 'baseDamageMax', 'attackType', 'baseBlock'],
                     bonus: ['prowess', 'agility', 'block', 'meleeDamageBonus', 'damageBonus'],
                 },
             },
@@ -87,6 +87,10 @@ class Items {
                 return Math.floor(item.tierIndex) + 1;
             case 'rangedDamageBonus':
                 return Math.floor(item.tierIndex) + 1;
+            case 'baseBlock':
+                return Math.floor(item.tierIndex) + 1;
+            case 'baseRange':
+                return Math.floor(item.tierIndex) + 4;
             default:
                 console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
                 return 0;
@@ -144,8 +148,8 @@ class Items {
         return itemDropData;
     }
 
-    rogItem(rollTotal) {
-        let item = {};
+    rogItem(rollTotal, item = {}) {
+
         switch (true) {
             case rollTotal < 0.15: item.tier = this.itemTiers[0]; item.tierIndex = 0; break; // 'junk'
             case rollTotal < 0.78: item.tier = this.itemTiers[1]; item.tierIndex = 1; break; // 'common'
@@ -154,30 +158,36 @@ class Items {
             case rollTotal < 0.99: item.tier = this.itemTiers[4]; item.tierIndex = 4; break; // 'magic'
         }
 
-        let randomType = this.itemTypes[Math.floor(Math.random() * this.itemTypes.length)];
+        if (!item.type || item.type === '') {
+           
+       
+            let randomType = this.itemTypes[Math.floor(Math.random() * this.itemTypes.length)];
 
-        if (item.tierIndex < 2) {
-            switch (randomType) {
-                case 'ring':
-                    randomType = 'weapon';
-                    break;
-                case 'amulet':
-                    randomType = 'armor';
-                    break;
-                default:
-                    break;
+            if (item.tierIndex < 2) {
+                switch (randomType) {
+                    case 'ring':
+                        randomType = 'weapon';
+                        break;
+                    case 'amulet':
+                        randomType = 'armor';
+                        break;
+                    default:
+                        break;
+                }
             }
+            item.type = randomType;
         }
-        const type = randomType;
-        console.log(`Generating item of type ${type} with tier ${item.tier}`);
-        let statOptions = this.itemStatOptions[type];
+
+        console.log(`Generating item of type ${item.type} with tier ${item.tier}`);
+        let statOptions = this.itemStatOptions[item.type];
         console.log(`Stat options for item:`, statOptions);
-        item.type = type;
 
 
-        switch (type) {
+        switch (item.type) {
             case 'weapon':
-                item.attackType = this.weaponAttackTypes[Math.floor(Math.random() * this.weaponAttackTypes.length)];
+                if (!item.attackType || item.attackType === '') {
+                    item.attackType = this.weaponAttackTypes[Math.floor(Math.random() * this.weaponAttackTypes.length)];
+                }
                 item.baseDamageMin = Math.floor(Math.random() * 2) + this.statRoll("baseDamageMin", item);
                 item.baseDamageMax = item.baseDamageMin + Math.floor(Math.random() * 5) + this.statRoll("baseDamageMax",item);
                 statOptions = statOptions[item.attackType];
@@ -185,9 +195,11 @@ class Items {
                 switch (item.attackType) {
                     case 'melee':
                         item.icon = 'dagger.svg';
+                        item.baseBlock = Math.floor(Math.random() * 2) + this.statRoll("baseBlock", item);
                         break;
                     case 'ranged':
                         item.icon = 'orb-wand.svg';
+                        item.baseRange = Math.floor(Math.random() * 2) + this.statRoll("baseRange", item);
                         break;
                 }
                 break;
@@ -230,11 +242,7 @@ class Items {
         return item;
     }
 
-
-
-    dropTreasure(monster, tier) {
-        const goldGain = 10 + Math.floor(Math.random() * 41) + (tier + 1) * 10;
-
+    calculateTorchChance() {
         let torchChance;
         if (this.state.player.torches === 0 && !this.state.player.torchLit) {
             torchChance = 0.20;
@@ -252,13 +260,51 @@ class Items {
         } else {
             torchChance = 0.05;
         }
+        return torchChance;
+    }
 
-        let potionChance = 0.10;
+    calculatePotionChance() {
+        let potionChance;
+        if (this.state.player.potions === 0) {
+            potionChance = 0.20;
+            this.state.player.potionDropFail++;
+            if (this.state.player.potionDropFail === 3) {
+                this.state.player.potionDropFail = 0;
+                return 1.0;
 
-        const itemChance = 1.0;
+            }
+        } else if (this.state.player.potions < 2) {
+            potionChance = 0.15;
+        } else if (this.state.player.potions <= 5) {
+            potionChance = 0.10;
+        } else {
+            potionChance = 0.05;
+        }
+        return potionChance;
+    }
+
+    calculateItemChance() {
+        let itemChance;
+        // need to think on scaling, luck mods etc
+        itemChance = 1.0; 
+
+        return itemChance
+    }
+
+
+    dropTreasure(monster, tier) {
+        const goldGain = 10 + Math.floor(Math.random() * 41) + (tier + 1) * 10;
+        const torchChance = this.calculateTorchChance();
+        const potionChance = this.calculatePotionChance();
+        const itemChance = this.calculateItemChance();
+
         let droppedItems = [];
         let torchDropped = Math.random() < torchChance;
+        if (torchDropped) { this.state.player.potionDropFail = 0;  }
         let potionDropped = Math.random() < potionChance;
+        if (potionDropped) { this.state.player.torchDropFail = 0; }
+
+
 
         if (Math.random() < itemChance) {
             let randomItem = {};

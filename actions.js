@@ -1,7 +1,7 @@
 console.log("actions.js loaded");
 
 class Actions {
-    constructor(state, game, ui, render, playerInventory) {
+    constructor(state, game, ui, render, playerInventory,) {
         this.state = state;
         this.game = game;
         this.ui = ui;
@@ -45,7 +45,7 @@ class Actions {
             const critChance = this.state.player.critChance || (this.state.player.agility * 0.02);
             let ctitHealText = '';
 
-            let healAmount = Math.round(this.state.player.maxHp * .2); 
+            let healAmount = Math.round(this.state.player.maxHp * .3); 
            
             if (Math.random() < critChance) {  
                 healAmount = this.state.player.maxHp - this.state.player.hp;
@@ -74,7 +74,7 @@ class Actions {
             this.state.player.torches--;
             this.state.player.torchLit = true;
             this.state.torchExpires = 1000;
-            this.state.discoveryRadius = 4;
+            this.state.discoveryRadius = this.state.discoveryRadiusDefault + 2;
             message = 'The darkness is at bay... for now!';
 
             if (this.state.player.torches < 1) {
@@ -82,6 +82,8 @@ class Actions {
                 this.state.torchLitOnTurn = true;
                 this.state.needsRender = true;
             }
+
+            this.game.audioManager.playTorch();
         } else {
             message = 'You have no torches left.';
         }
@@ -89,6 +91,7 @@ class Actions {
     }
 
     torchExpired() {
+        this.game.audioManager.playTorch(false);
         this.state.player.torchLit = false;
         this.state.torchExpires = 0;
         this.state.discoveryRadius = this.state.discoveryRadiusDefault;

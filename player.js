@@ -21,19 +21,57 @@ class Player {
         return slotsWithIds;
     }
 
+    getInitialItems(startItems, uniqueItems) {
+        return [
+            // Add specific start items and unique items if needed
+            // startItems[0], startItems[1], startItems[2],
+            // uniqueItems[0],
+        ];
+    }
+
+    getRandomStartItems() {
+        return [ 
+            { type: 'weapon', attackType: 'ranged' },
+            { type: 'weapon', attackType: 'melee' },
+            { type: 'armor' },
+        ];
+    }
+
     addStartingItems() {
         this.state.player.inventory.equipped = this.initializeEquippedSlots();
         const startItems = this.state.data.getStartItems();
         const uniqueItems = this.state.data.getUniqueItems();
-        const itemsToAdd = [
-            //uniqueItems[0],
-            startItems[0], startItems[1], startItems[2],
-        ];
 
-        for (let item of itemsToAdd) {
+        const itemsToAdd = this.getInitialItems(startItems, uniqueItems);
+        const randomStartItems = this.getRandomStartItems();
+
+        randomStartItems.forEach(item => {
+            const maxRogTierRoll = 25; // used in rogItem() 25 gives a 15:10 split for junk:common
+            const rogTierRoll = (Math.floor(Math.random() * maxRogTierRoll) + 1) * .01; // 0.01 - 0.25
+            const rogItem = this.game.items.rogItem(rogTierRoll, item);
+            itemsToAdd.push(rogItem);
+        });
+        
+        itemsToAdd.forEach(item => {
             this.playerInventory.addItem(item);
-        }
+        });
+
         this.ui.updateStats();
+    }
+
+    calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus) {
+        let baseDamage = Math.floor(Math.random() * (maxBaseDamage - minBaseDamage + 1)) + minBaseDamage + this.state.player.level;
+        let playerDamage = Math.round(baseDamage * (baseStat * 0.20)) + damageBonus;
+        let isCrit = false;
+
+        const critChance = this.state.player.agility / 2;
+        if (Math.random() * 100 < critChance) {
+            const critMultiplier = 1.5 + Math.random() * 1.5;
+            playerDamage = Math.round(playerDamage * critMultiplier);
+            isCrit = true;
+        }
+
+        return { damage: playerDamage, isCrit };
     }
 
     awardXp(amount) {
@@ -111,10 +149,31 @@ class Player {
                 
             }
 
+            // We set the player Base gear stats for Armor, Block and Range directly, as they are not tracked in item.stats[]
+
             if (item.type === 'armor') {
-                // We set the player armor gear stat directly to the base armor value of the equipped item as it is not tracked in item.stats[]
+                
+                // we allow cumulative stacking of baseArmor bonuses for future support of multiple armor slots (helmet, chest, legs, etc))
                 console.log("Armor change detected", item.armor);
-                this.state.player.stats.gear.armor = (this.state.player.stats.armor || 0) + (item.armor || 0);
+                this.state.player.stats.gear.armor = (this.state.player.stats.gear.armor || 0) + (item.armor || 0);
+            }
+
+            if (item.type === 'weapon') {
+                switch (item.attackType) {
+                    case 'melee':
+                        // we allow cumulative stacking of baseBlock with other weapon baseBlock and block bonuses for future support of dual wield melee weapons
+                        this.state.player.stats.gear.block = (this.state.player.stats.gear.block || 0) + (item.baseBlock || 0);
+                        break;
+                    case 'ranged':
+                        // Take only the highest baseRange value from all equipped ranged weapons
+                        this.state.player.stats.gear.Baserange = Math.max(this.state.player.stats.gear.baseRange, item.baseRange, 0);
+                        // allow cumulative stacking of baseRange and range bonuses 
+                        this.state.player.stats.gear.range = (this.state.player.stats.gear.range || 0) + (this.state.player.stats.gear.Baserange || 0)
+                        break;
+                    default:
+                        console.log("Unknown weapon type");
+                        break;
+                }
             }
         });
 

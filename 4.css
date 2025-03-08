@@ -1,3 +1,8 @@
+
+/* Define custom property for IntelliSense */
+/* @property -webkit-text-decoration-skip */
+
+
 @-ms-viewport {
   width: device-width;
 }
@@ -72,10 +77,11 @@ pre {
 }
 
 a {
-  /* 1 */
-  background-color: transparent;
-  /* 2 */
-  -webkit-text-decoration-skip: objects;
+    /* 1 */
+    background-color: transparent;
+    /* 2 */
+    /* @property -webkit-text-decoration-skip */
+    -webkit-text-decoration-skip: objects; /* @ts-ignore */
 }
 
 abbr[title] {
@@ -344,3 +350,4 @@ button:disabled, input[type=button]:disabled, input[type=submit]:disabled, input
 }
 
 /*# sourceMappingURL=4.css.map */
+

@@ -373,7 +373,7 @@ class Level {
                 name: "Treasure Chest",
                 hp: 0,
                 maxHp: 0,
-                isAgro: false,
+                isAggro: false,
                 suppressRender: true,
             };
             this.game.items.dropTreasure(treasure, tier);

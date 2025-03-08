@@ -37,6 +37,7 @@ class State {
             defense: 0,
             block: 0,
             dodge: 0,
+            range: 0,
             damageBonus: 0,
             meleeDamageBonus: 0,
             rangedDamageBonus: 0,
@@ -45,6 +46,7 @@ class State {
                 items: [],
             },
             healPotions: 1,
+            potionDropFail: 0,
             torches: 1,
             torchExpires: 0,
             torchDropFail: 0,
@@ -62,6 +64,7 @@ class State {
                     defense: 0,
                     block: 0,
                     dodge: 0,
+                    range: 0,
                     damageBonus: 0,
                     meleeDamageBonus: 0,
                     rangedDamageBonus: 0,
@@ -77,6 +80,8 @@ class State {
                     defense: 0,
                     block: 0,
                     dodge: 0,
+                    range: 0,
+                    baseRange: 0,
                     damageBonus: 0,
                     meleeDamageBonus: 0,
                     rangedDamageBonus: 0,
@@ -88,6 +93,7 @@ class State {
             'maxHp', 'maxMana', 'maxLuck',
             'intellect', 'prowess', 'agility',
             'range', 'block', 'armor', 'defense',
+            'baseBlock', 'baseRange', 
             'rangedDamageBonus', 'meleeDamageBonus', 'damageBonus'
         ];
         this.treasures = {};

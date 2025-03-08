@@ -98,15 +98,18 @@ class Render {
                     if (x === this.state.player.x && y === this.state.player.y) {
                         char = '𓀠';
                         className = 'player';
-                        if (this.state.player.torchLit) className += ' torch';
+                        if (this.state.player.torchLit) {
+                            className += ' torch flicker';
+                            this.state.discoveryRadius = this.state.discoveryRadiusDefault + 2;
+                        }
                         if (this.state.player.lampLit) {
-                            className += ' lamp';
-                            this.state.discoveryRadius = 6;
+                            className += ' lamp flicker';
+                            this.state.discoveryRadius = this.state.discoveryRadiusDefault + 4;
                         }
                     } else if (this.state.projectile && x === this.state.projectile.x && y === this.state.projectile.y) {
                         char = '*';
                         className = 'discovered';
-                    } else if (monster && (isInRadius || monster.isAgro)) {
+                    } else if (monster && (isInRadius || monster.isAggro || monster.isDetected)) {
                         char = monster.avatar;
                         className = 'discovered monster ' + monster.classes;
                         if (monster.isElite) className += ' elite';
@@ -152,15 +155,18 @@ class Render {
                     if (x === this.state.player.x && y === this.state.player.y) {
                         char = '𓀠';
                         className = 'player';
-                        if (this.state.player.torchLit) className += ' torch';
+                        if (this.state.player.torchLit) {
+                            className += ' torch flicker';
+                            this.state.discoveryRadius = this.state.discoveryRadiusDefault + 2;
+                        }
                         if (this.state.player.lampLit) {
-                            className += ' lamp';
-                            this.state.discoveryRadius = 6;
+                            className += ' lamp flicker';
+                            this.state.discoveryRadius = this.state.discoveryRadiusDefault + 4;
                         }
                     } else if (this.state.projectile && x === this.state.projectile.x && y === this.state.projectile.y) {
                         char = '*';
                         className = 'discovered';
-                    } else if (monster && (isInRadius || monster.isAgro)) {
+                    } else if (monster && (isInRadius || monster.isAggro || monster.isDetected)) {
                         char = monster.avatar;
                         className = 'discovered monster ' + monster.classes;
                         if (monster.isElite) className += ' elite';

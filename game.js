@@ -4,8 +4,8 @@ class Game {
     constructor() {
         this.data = new Data();
         this.utilities = new Utilities();
+        this.audioManager = new AudioManager();
         this.state = new State(this.data, this.utilities);
-        
         this.level = new Level(this.state, this);
         this.ui = new UI(this.state, this, this.utilities);
         this.render = new Render(this.state, this.ui, this);
@@ -23,7 +23,10 @@ class Game {
         this.inputThrottle = 70;
 
         this.handleInput = this.handleInput.bind(this);
+        
     }
+
+
 
     handleInput(event) {
        
@@ -35,7 +38,9 @@ class Game {
             this.state.needsRender = true;
             console.log("needsRender set to true for init (this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
             this.render.renderIfNeeded();
+            this.audioManager.playBackgroundMusic();
             return;
+            
         }
 
         if (this.state.gameOver) {
@@ -56,6 +61,7 @@ class Game {
         if (now - this.lastRenderTime < this.renderThrottle) return;
         this.lastRenderTime = now;
 
+        
         
 
         let map = this.state.levels[this.state.tier].map;
@@ -315,6 +321,7 @@ class Game {
         document.addEventListener('keydown', this.handleInput);
         document.addEventListener('keyup', this.combat.toggleRanged);
         this.ui.updateStats();
+       
     }
 
     initGame() {
@@ -328,6 +335,7 @@ class Game {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded fired');
     const gameInstance = new Game();
     gameInstance.init();
 });

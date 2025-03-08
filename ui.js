@@ -39,6 +39,20 @@ class UI {
                 damage.className = 'item-tooltip-damage';
                 damage.textContent = `Damage: ${itemData.baseDamageMin}–${itemData.baseDamageMax}`;
                 content.appendChild(damage);
+                switch (itemData.attackType) {
+                    case "melee":
+                        const baseBlock = document.createElement('div');
+                        baseBlock.className = 'item-tooltip-base-block';
+                        baseBlock.textContent = `Block: ${itemData.baseBlock}`;
+                        content.appendChild(baseBlock);
+                        break;
+                    case "ranged":  
+                        const baseRange = document.createElement('div');
+                        baseRange.className = 'item-tooltip-base-range';
+                        baseRange.textContent = `Range: ${itemData.baseRange}`;
+                        content.appendChild(baseRange);
+                        break;
+                }
             } else if (itemData.type === "armor") {
                 const armor = document.createElement('div');
                 armor.className = 'item-tooltip-armor';
@@ -436,7 +450,7 @@ class UI {
                             <div>${this.state.player.meleeDamageBonus} : Melee Dmg</div>
                             <div> ${this.state.player.block} : Block</div>
                             <div>${this.state.player.rangedDamageBonus} : Ranged Dmg</div>
-                            <div>${this.state.player.dodge} : Dodge</div>
+                            <div>${this.state.player.range} : Range</div>
                         </div> 
                     </div>
                     <div id="inventory">

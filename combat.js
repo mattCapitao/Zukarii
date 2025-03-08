@@ -10,71 +10,6 @@ class Combat {
         this.items = items;
     }
 
-    calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus) {
-        let baseDamage = Math.floor(Math.random() * (maxBaseDamage - minBaseDamage + 1)) + minBaseDamage + this.state.player.level;
-        let playerDamage = Math.round(baseDamage * (baseStat * 0.20)) + damageBonus;
-        let isCrit = false;
-
-        const critChance = this.state.player.agility / 2;
-        if (Math.random() * 100 < critChance) {
-            const critMultiplier = 1.5 + Math.random() * 1.5;
-            playerDamage = Math.round(playerDamage * critMultiplier);
-            isCrit = true;
-        }
-
-        return { damage: playerDamage, isCrit };
-    }
-
-    handleMonsterDeath(monster, tier, combatLogMsg) {
-        monster.hp = 0;
-        monster.isAgro = false;
-        this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-        this.ui.writeToLog(`${monster.name} defeated!`);
-        this.items.dropTreasure(monster, tier);
-        const monsterKillXP = (5 + Math.floor(Math.random() * 6)) * this.state.tier;
-        this.player.awardXp(monsterKillXP);
-    }
-
-    handleMonsterRetaliation(monster, tier) {
-
-
-        if (this.state.player.block > 0 || this.state.player.dodge > 0) {
-
-            if (Math.random() * 100 < this.state.player.block) {
-                this.ui.writeToLog(`You blocked the ${monster.name}'s attack!`);
-                return false;
-            }
-            if (Math.random() * 100 < this.state.player.dodge) {
-                this.ui.writeToLog(`You dodged the ${monster.name}'s attack!`);
-                return false;
-            }
-        }
-
-        let monsterDamage = this.monsters.calculateMonsterAttackDamage(monster, this.state.tier);
-
-        const armor = this.player.playerInventory.getEquipped("armor")?.armor || 0;
-        let armorDmgReduction = 0;
-
-        if (armor > 0) {
-            armorDmgReduction = Math.max(1,Math.floor(monsterDamage * (.01 * armor * 2)));
-        } 
-        let damageDealt = monsterDamage - armorDmgReduction;
-
-        const defenseDmgReduction = Math.round(monsterDamage * (.01 * this.state.player.defense));
-        console.log(`Monster attack (${monsterDamage}) : Defense (${this.state.player.defense})`, this.player);
-        damageDealt -= defenseDmgReduction;
-
-        this.state.player.hp -= damageDealt;
-        this.ui.writeToLog(`${monster.name} dealt ${damageDealt} damage to You. Attack(${monsterDamage}) - Armor(${armorDmgReduction}) - Defense(${defenseDmgReduction}) `);
-        this.ui.updateStats();
-
-        if (this.state.player.hp <= 0) {
-            this.player.death(monster.name);
-            return true;
-        }
-        return false;
-    }
-
     meleeCombat(monster) {
         let minBaseDamage, maxBaseDamage;
         const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
@@ -91,16 +26,16 @@ class Combat {
             maxBaseDamage = 1;
         }
         const damageBonus = this.state.player.damageBonus + this.state.player.meleeDamageBonus;
-        const { damage, isCrit } = this.calculatePlayerDamage(this.state.player.prowess, minBaseDamage, maxBaseDamage, damageBonus);
+        const { damage, isCrit } = this.player.calculatePlayerDamage(this.state.player.prowess, minBaseDamage, maxBaseDamage, damageBonus);
         let combatLogMsg = isCrit ? `Critical hit! Dealt ${damage} damage to ${monster.name} ` : `You dealt ${damage} damage to ${monster.name} `;
 
         monster.hp -= damage;
 
         if (monster.hp <= 0) {
-            this.handleMonsterDeath(monster, this.state.tier, combatLogMsg);
+            this.monsters.handleMonsterDeath(monster, this.player, this.state.tier, combatLogMsg);
         } else {
             this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-            if (this.handleMonsterRetaliation(monster, this.state.tier)) {
+            if (this.monsters.handleMonsterAttack(monster, this.player)) {
                 if (this.state.ui.overlayOpen) {
                     this.ui.updateStats();
                 }
@@ -133,7 +68,6 @@ class Combat {
     async rangedAttack(direction) {
         let map = this.state.levels[this.state.tier].map;
         let dx = 0, dy = 0;
-        const defaultRange = 7;
         switch (direction) {
             case 'ArrowUp': dy = -1; break;
             case 'ArrowDown': dy = 1; break;
@@ -146,10 +80,10 @@ class Combat {
         const offWeapon = this.player.playerInventory.getEquipped("offhand");
         const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
 
-        if (offWeapon?.attackType === "ranged") {
+        if (offWeapon?.attackType === "ranged" && offWeapon?.baseRange > 0) {
             minBaseDamage = offWeapon.baseDamageMin;
             maxBaseDamage = offWeapon.baseDamageMax;
-        } else if (mainWeapon?.attackType === "ranged") {
+        } else if (mainWeapon?.attackType === "ranged" && mainWeapon?.baseRange > 0) {
             minBaseDamage = mainWeapon.baseDamageMin;
             maxBaseDamage = mainWeapon.baseDamageMax;
         } else {
@@ -157,7 +91,7 @@ class Combat {
             return;
         }
 
-        for (let i = 1; i <= defaultRange; i++) {
+        for (let i = 1; i <= (this.state.player.range); i++) {
             let tx = this.state.player.x + dx * i;
             let ty = this.state.player.y + dy * i;
             if (tx < 0 || tx >= this.state.WIDTH || ty < 0 || ty >= this.state.HEIGHT || map[ty][tx] === '#') {
@@ -174,19 +108,21 @@ class Combat {
             let monster = this.state.monsters[this.state.tier].find(m => m.x === tx && m.y === ty && m.hp > 0);
             if (monster) {
                 const damageBonus = this.state.player.damageBonus + this.state.player.rangedDamageBonus;
-                const { damage, isCrit } = this.calculatePlayerDamage(this.state.player.intellect, minBaseDamage, maxBaseDamage, damageBonus);
+                const { damage, isCrit } = this.player.calculatePlayerDamage(this.state.player.intellect, minBaseDamage, maxBaseDamage, damageBonus);
                 let combatLogMsg = isCrit ? `Critical hit! Dealt ${damage} damage to ${monster.name} ` : `You dealt ${damage} damage to ${monster.name} `;
 
                 monster.hp -= damage;
+               
 
                 if (monster.hp <= 0) {
-                    this.handleMonsterDeath(monster, this.state.tier, combatLogMsg);
+                    this.monsters.handleMonsterDeath(monster, this.player, this.state.tier, combatLogMsg);
                 } else if (i === 1) {
                     this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-                    if (!this.handleMonsterRetaliation(monster, this.state.tier)) {
+                    if (!this.monsters.handleMonsterAttack(monster, this.player)) {
                         this.ui.updateStats();
                     }
                 } else {
+                    monster.isAggro = true;
                     this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
                 }
                 this.state.projectile = null;
