@@ -19,9 +19,9 @@ class Player {
 
 
     statInit() {
-        this.state.player.stats.base.intellect = this.utilities.d6(3);
-        this.state.player.stats.base.prowess = this.utilities.d6(3);
-        this.state.player.stats.base.agility = this.utilities.d6(3);
+        this.state.player.stats.base.intellect = this.utilities.dRoll(6,2,3);
+        this.state.player.stats.base.prowess = this.utilities.dRoll(6,2,3);
+        this.state.player.stats.base.agility = this.utilities.dRoll(6,2,3);
         this.state.player.stats.base.maxHp = 30;
         this.state.player.stats.base.maxMana = 10;
 
