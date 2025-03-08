@@ -7,6 +7,28 @@ class Player {
         this.game = game;
         this.utilities = utilities; // Store utilities
         this.playerInventory = new PlayerInventory(state, ui, this, utilities); // Pass utilities to Inventory
+        this.initializePlayer();
+    }
+
+    initializePlayer() {
+        this.statInit();
+        this.addStartingItems();
+        this.calculateStats()
+    }
+
+
+
+    statInit() {
+        this.state.player.stats.base.intellect = this.utilities.d6(3);
+        this.state.player.stats.base.prowess = this.utilities.d6(3);
+        this.state.player.stats.base.agility = this.utilities.d6(3);
+        this.state.player.stats.base.maxHp = 30;
+        this.state.player.stats.base.maxMana = 10;
+
+        // Manually init current stat vaslues that are not updated by calculateStats()
+        this.state.player.hp = this.state.player.stats.base.maxHp;
+        this.state.player.mana = this.state.player.stats.base.maxMana;
+        this.state.player.nextLevelXp = 75;
     }
 
     initializeEquippedSlots() {
@@ -19,22 +41,6 @@ class Player {
             };
         });
         return slotsWithIds;
-    }
-
-    getInitialItems(startItems, uniqueItems) {
-        return [
-            // Add specific start items and unique items if needed
-            // startItems[0], startItems[1], startItems[2],
-            // uniqueItems[0],
-        ];
-    }
-
-    getRandomStartItems() {
-        return [ 
-            { type: 'weapon', attackType: 'ranged' },
-            { type: 'weapon', attackType: 'melee' },
-            { type: 'armor' },
-        ];
     }
 
     addStartingItems() {
@@ -51,12 +57,28 @@ class Player {
             const rogItem = this.game.items.rogItem(rogTierRoll, item);
             itemsToAdd.push(rogItem);
         });
-        
+
         itemsToAdd.forEach(item => {
             this.playerInventory.addItem(item);
         });
 
         this.ui.updateStats();
+    }
+
+    getInitialItems(startItems, uniqueItems) {
+        return [
+            // Add specific start items and unique items if needed
+            // startItems[0], startItems[1], startItems[2],
+            // uniqueItems[0],
+        ];
+    }
+
+    getRandomStartItems() {
+        return [ 
+            { type: 'weapon', attackType: 'ranged' },
+            { type: 'weapon', attackType: 'melee' },
+            { type: 'armor' },
+        ];
     }
 
     calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus) {

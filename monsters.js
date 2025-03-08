@@ -106,7 +106,7 @@ class Monsters {
                 monster.isDetected = true;
             }
 
-            if (distanceToPlayer <= AGGRO_RANGE) {
+            if (distanceToPlayer <= AGGRO_RANGE || monster.isAggro) {
                 monster.isAggro = true;
                 let directions = [
                     { x: Math.sign(dx), y: Math.sign(dy) },

@@ -24,15 +24,15 @@ class State {
         this.player = {
             x: 1, y: 1,
             name: "Leith42",
-            level: 1, xp: 0, nextLevelXp: 50,
+            level: 1, xp: 0, nextLevelXp: 0,
             dead: false,
             gold: 0,
-            hp: 30, maxHp: 30,
-            mana: 10, maxMana: 10,
+            hp: 0, maxHp: 0,
+            mana: 0, maxMana: 0,
             luck: 0, maxLuck: 0, luckTempMod:0,
-            prowess: this.utilities.d6(3),
-            intellect: this.utilities.d6(3),
-            agility: this.utilities.d6(3), 
+            prowess: 0,
+            intellect:0,
+            agility: 0, 
             armor: 0,
             defense: 0,
             block: 0,
@@ -54,12 +54,12 @@ class State {
             lampLit: false,
             stats: {
                 base: {
-                    maxHp: 30,
-                    maxMana: 10,
+                    maxHp: 0,
+                    maxMana: 0,
                     maxLuck: 0,
-                    prowess: 5 + Math.floor(Math.random() * 6),
-                    intellect: 5 + Math.floor(Math.random() * 6),
-                    agility: 5 + Math.floor(Math.random() * 6),
+                    prowess: 0,
+                    intellect: 0,
+                    agility: 0,
                     armor: 0,
                     defense: 0,
                     block: 0,
@@ -212,7 +212,6 @@ class State {
 
         this.player.x = stairUpX + 1;
         this.player.y = stairUpY;
-        player.addStartingItems();
         const map = this.levels[1].map;
         if (map[this.player.y][this.player.x] !== ' ') {
             const directions = [

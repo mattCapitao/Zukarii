@@ -181,7 +181,7 @@ class Game {
         console.log("needsRender set to true for action at", newX, newY, "(this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
         console.log(`Checking for treasure at (${newX}, ${newY}): map tile = '${map[newY][newX]}', treasureIndex = ${treasureIndex}`);
         if (monster) {
-            this.combat.meleeCombat(monster);
+            this.combat.meleeAttack(monster);
             this.player.checkLevelUp();
         } else if (map[newY][newX] === '⇓' && this.state.tier < Number.MAX_SAFE_INTEGER) {
             this.state.tier++;

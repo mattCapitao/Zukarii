@@ -1,5 +1,4 @@
 console.log("combat.js loaded");
-
 class Combat {
     constructor(state, game, ui, player, monsters, items) {
         this.state = state;
@@ -9,41 +8,54 @@ class Combat {
         this.monsters = monsters;
         this.items = items;
     }
-
-    meleeCombat(monster) {
-        let minBaseDamage, maxBaseDamage;
+    
+    getWeaponDamageRange(attackType) {// Extracted method: Get damage range for a given attack type
         const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
         const offWeapon = this.player.playerInventory.getEquipped("offhand");
+        let returnData = null;
 
-        if (mainWeapon?.attackType === "melee") {
-            minBaseDamage = mainWeapon.baseDamageMin;
-            maxBaseDamage = mainWeapon.baseDamageMax;
-        } else if (offWeapon?.attackType === "melee") {
-            minBaseDamage = offWeapon.baseDamageMin;
-            maxBaseDamage = offWeapon.baseDamageMax;
-        } else {
-            minBaseDamage = 1; // Fists
-            maxBaseDamage = 1;
-        }
-        const damageBonus = this.state.player.damageBonus + this.state.player.meleeDamageBonus;
-        const { damage, isCrit } = this.player.calculatePlayerDamage(this.state.player.prowess, minBaseDamage, maxBaseDamage, damageBonus);
-        let combatLogMsg = isCrit ? `Critical hit! Dealt ${damage} damage to ${monster.name} ` : `You dealt ${damage} damage to ${monster.name} `;
+        if (mainWeapon?.attackType === attackType) {
+            returnData = { minBaseDamage: mainWeapon.baseDamageMin, maxBaseDamage: mainWeapon.baseDamageMax };
+        } else if (offWeapon?.attackType === attackType) {
+            returnData = { minBaseDamage: offWeapon.baseDamageMin, maxBaseDamage: offWeapon.baseDamageMax };
+        } else if (attackType === 'melee') {
+            returnData = { minBaseDamage: 1, maxBaseDamage: 1 }; // Fists
+        } return returnData;
+    }
 
+    calculateAndLogDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus, monster) {// Extracted method: Calculate damage and generate log message
+        const { damage, isCrit } = this.player.calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus);
+        const combatLogMsg = `${isCrit ? 'CRITICAL HIT! : ' : ''}You dealt ${damage} damage to ${monster.name} `;
+        return { damage, combatLogMsg };
+    }
+
+    applyDamageToMonster(monster, damage, combatLogMsg) { // Extracted method: Apply damage to monster and handle death
         monster.hp -= damage;
-
         if (monster.hp <= 0) {
             this.monsters.handleMonsterDeath(monster, this.player, this.state.tier, combatLogMsg);
-        } else {
-            this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-            if (this.monsters.handleMonsterAttack(monster, this.player)) {
-                if (this.state.ui.overlayOpen) {
-                    this.ui.updateStats();
-                }
-            } else {
-                if (this.state.ui.overlayOpen) {
-                    this.ui.updateStats();
-                }
+            return true; // Monster died
+        }
+        return false; // Monster survived
+    }
+
+    handleMonsterResponse(monster, combatLogMsg, canRetaliate) {// Extracted method: Handle monster response after being attacked
+        this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
+        if (canRetaliate) {
+            if (!this.monsters.handleMonsterAttack(monster, this.player)) {
+                this.ui.updateStats();
             }
+        } else {monster.isAggro = true;}
+    }
+
+    meleeAttack(monster) {
+        const { minBaseDamage, maxBaseDamage } = this.getWeaponDamageRange("melee");
+
+        const damageBonus = this.state.player.damageBonus + this.state.player.meleeDamageBonus;
+        const { damage, combatLogMsg } = this.calculateAndLogDamage(this.state.player.prowess, minBaseDamage, maxBaseDamage, damageBonus, monster);
+
+        const monsterDied = this.applyDamageToMonster(monster, damage, combatLogMsg);
+        if (!monsterDied) {
+            this.handleMonsterResponse(monster, combatLogMsg, true); // Melee always allows retaliation
         }
     }
 
@@ -53,10 +65,14 @@ class Combat {
             if (event.type === 'keydown') {
                 const offWeapon = this.player.playerInventory.getEquipped("offhand");
                 const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
-                if (offWeapon?.attackType === "ranged" || mainWeapon?.attackType === "ranged") {
+                if ((offWeapon?.attackType === "ranged" && offWeapon?.baseRange > 0 ||
+                    mainWeapon?.attackType === "ranged" && mainWeapon?.baseRange > 0) 
+                    && this.state.player.range > 0)
+                {
                     this.state.isRangedMode = true;
                 } else {
-                    this.ui.writeToLog("You need a ranged weapon equipped to use ranged mode!");
+                    this.state.isRangedMode = false;
+                    this.ui.writeToLog("You need a valid ranged weapon equipped to use ranged mode!");
                 }
             } else if (event.type === 'keyup') {
                 this.state.isRangedMode = false;
@@ -76,25 +92,18 @@ class Combat {
             default: return;
         }
         console.log(`Ranged attack in direction ${direction}`);
-        let minBaseDamage, maxBaseDamage;
-        const offWeapon = this.player.playerInventory.getEquipped("offhand");
-        const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
 
-        if (offWeapon?.attackType === "ranged" && offWeapon?.baseRange > 0) {
-            minBaseDamage = offWeapon.baseDamageMin;
-            maxBaseDamage = offWeapon.baseDamageMax;
-        } else if (mainWeapon?.attackType === "ranged" && mainWeapon?.baseRange > 0) {
-            minBaseDamage = mainWeapon.baseDamageMin;
-            maxBaseDamage = mainWeapon.baseDamageMax;
-        } else {
+        const damageRange = this.getWeaponDamageRange("ranged");
+        if (!damageRange) {
             this.ui.writeToLog("No ranged weapon equipped!");
             return;
         }
+        const { minBaseDamage, maxBaseDamage } = damageRange;
 
-        const projectileDiscoveryRadius = 1; // Discover 1 tile around the path
-        const maxDiscoveredTiles = Math.min(5, this.state.player.range); // Cap at 5 tiles or range, whichever is less
+        const projectileDiscoveryRadius = 1;
+        const maxDiscoveredTiles = Math.min(5, this.state.player.range);
         let discoveredTiles = new Set();
-        let newlyDiscoveredCount = 0; // Track newly discovered tiles for this attack
+        let newlyDiscoveredCount = 0;
 
         for (let i = 1; i <= (this.state.player.range); i++) {
             let tx = this.state.player.x + dx * i;
@@ -109,8 +118,7 @@ class Combat {
             this.game.render.renderIfNeeded();
             await new Promise(resolve => setTimeout(resolve, 50));
 
-            // Discover tiles only if beyond discoveryRadius
-            if (i > this.state.discoveryRadius) { // Changed from >= to >
+            if (i > this.state.discoveryRadius) {
                 for (let dyOffset = -projectileDiscoveryRadius; dyOffset <= projectileDiscoveryRadius; dyOffset++) {
                     for (let dxOffset = -projectileDiscoveryRadius; dxOffset <= projectileDiscoveryRadius; dxOffset++) {
                         let discX = tx + dxOffset;
@@ -137,7 +145,6 @@ class Combat {
                 }
             }
 
-            // Check for monsters within AGGRO_RANGE and set aggro and detection
             this.state.monsters[this.state.tier].forEach(monster => {
                 if (monster.hp > 0) {
                     const distX = monster.x - tx;
@@ -145,7 +152,7 @@ class Combat {
                     const distance = Math.sqrt(distX * distX + distY * distY);
                     if (distance <= this.state.AGGRO_RANGE) {
                         monster.isAggro = true;
-                        monster.isDetected = true; // Set detection flag for visibility
+                        monster.isDetected = true;
                         console.log(`Monster at (${monster.x}, ${monster.y}) aggroed and detected by projectile`);
                     }
                 }
@@ -154,23 +161,14 @@ class Combat {
             let monster = this.state.monsters[this.state.tier].find(m => m.x === tx && m.y === ty && m.hp > 0);
             if (monster) {
                 const damageBonus = this.state.player.damageBonus + this.state.player.rangedDamageBonus;
-                const { damage, isCrit } = this.player.calculatePlayerDamage(this.state.player.intellect, minBaseDamage, maxBaseDamage, damageBonus);
-                let combatLogMsg = isCrit ? `Critical hit! Dealt ${damage} damage to ${monster.name} ` : `You dealt ${damage} damage to ${monster.name} `;
+                const { damage, combatLogMsg } = this.calculateAndLogDamage(this.state.player.intellect, minBaseDamage, maxBaseDamage, damageBonus, monster);
 
-                monster.hp -= damage;
-                monster.isDetected = true; // Ensure the hit monster is visible
-
-                if (monster.hp <= 0) {
-                    this.monsters.handleMonsterDeath(monster, this.player, this.state.tier, combatLogMsg);
-                } else if (i === 1) {
-                    this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-                    if (!this.monsters.handleMonsterAttack(monster, this.player)) {
-                        this.ui.updateStats();
-                    }
-                } else {
-                    monster.isAggro = true;
-                    this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
+                monster.isDetected = true;
+                const monsterDied = this.applyDamageToMonster(monster, damage, combatLogMsg);
+                if (!monsterDied) {
+                    this.handleMonsterResponse(monster, combatLogMsg, i === 1); // Retaliate only if at range 1
                 }
+
                 this.state.projectile = null;
                 this.state.needsRender = true;
                 this.game.render.renderIfNeeded();
@@ -179,7 +177,6 @@ class Combat {
             }
         }
 
-        // Update the discovered tile count for exploration XP
         if (newlyDiscoveredCount > 0) {
             this.state.discoveredTileCount[this.state.tier] += newlyDiscoveredCount;
             console.log(`Ranged attack discovered ${newlyDiscoveredCount} new tiles, total for tier ${this.state.tier}: ${this.state.discoveredTileCount[this.state.tier]}`);
@@ -195,6 +192,4 @@ class Combat {
         this.state.needsRender = true;
         this.game.endTurn();
     }
-
-
 }
