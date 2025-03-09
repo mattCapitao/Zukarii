@@ -45,8 +45,9 @@ export class Utilities {
 
     dRoll(dieSize, rollCount = 1, plus=0) {
 
-        let total = plus;let roll = 0;
+        let total = plus; let roll = 0;
         let rollText = `Rolling ${rollCount} D${dieSize} + ${plus} : `;
+
         for (let i = 0; i < rollCount; i++) {
             roll= Math.floor(Math.random() * dieSize) + 1;
             total += roll;

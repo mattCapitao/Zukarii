@@ -81,11 +81,11 @@ export class Game {
 
 
     if (event.key === ' ') {
-        console.log(`Spacebar detected eventData: `,event );
+        //console.log(`Spacebar detected eventData: `,event );
 
         if (event.type === 'keydown' && this.state.isRangedMode) {
                 event.preventDefault();
-                console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : skipping input`);
+               //w w console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : skipping input`);
                 return false;
         }
 

@@ -11,7 +11,7 @@ export class State {
         this.needsRender=false
         this.WIDTH = 122;
         this.HEIGHT = 67;
-        this.MIN_STAIR_DISTANCE = Math.floor(Math.random()*21) + 40;
+        this.MIN_STAIR_DISTANCE = Math.floor(Math.random()*41) + 20;
         this.mapDiv = null;
         this.statsDiv = null;
         this.logDiv = null;
@@ -49,7 +49,7 @@ export class State {
                 equipped: {}, // Initialized in Player now
                 items: [],
             },
-            healPotions: 1,
+            healPotions: 5,
             potionDropFail: 0,
             torches: 1,
             torchExpires: 0,
@@ -238,6 +238,5 @@ export class State {
     this.lastPlayerY = null;
     this.needsInitialRender = true;
     this.needsRender = true;
-    levelService.generateTreasures(1); // Keep this duplicate call since it’s in your original
 }
 }
