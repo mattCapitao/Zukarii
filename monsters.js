@@ -202,8 +202,9 @@ export class Monsters {
         //currently this method is only called if the monster survives the player's attack and is not dead and is in mele range
         //if the monster is not aggro, it will become aggro and attack the player - For future development, this could be expanded to include other situations
         //Like a player using stealth reaching melee range of a monster that is not aggro, or player attacking a monster that has a ranged attack.
+        
         if (!monster.isAggro) {
-            monster.isAgro = true;
+            monster.isAggro = true;
             return false;
         }
 
@@ -239,7 +240,7 @@ export class Monsters {
         this.ui.updateStats();
 
         if (this.state.player.hp <= 0) {
-            this.player.death(monster.name);
+            player.death(monster.name);
             return true;
         }
         return false;

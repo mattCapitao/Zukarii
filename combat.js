@@ -51,8 +51,10 @@ export class Combat {
     handleMonsterResponse(monster, combatLogMsg, canRetaliate) {// Extracted method: Handle monster response after being attacked
         this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
         if (canRetaliate) {
-            if (!this.monsters.handleMonsterAttack(monster, this.player)) {
-                this.ui.updateStats();
+            const playerKilled = this.monsters.handleMonsterAttack(monster, this.player);
+            this.ui.updateStats();
+            if (playerKilled) {
+                
             }
         } else {monster.isAggro = true;}
     }
