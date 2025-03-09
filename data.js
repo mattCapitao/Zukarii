@@ -1,4 +1,4 @@
-console.log("data.js loaded");
+console.log("Data.js loaded");
 
 export class Data {
     constructor() {

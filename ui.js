@@ -1,6 +1,6 @@
-﻿console.log("ui.js loaded");
+﻿console.log("UI.js loaded");
 
-import { State } from './state.js';
+import { State } from './State.js';
 
 export class UI {
     constructor(state) {

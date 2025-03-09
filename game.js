@@ -1,18 +1,18 @@
 ﻿console.log("game.js loaded");
 
-import { Data } from './data.js';
-import { Utilities } from './utilities.js';
-import { AudioManager } from './audioManager.js';
-import { State } from './state.js';
-import { Level } from './level.js';
-import { UI } from './ui.js';
-import { Render } from './render.js';
-import { Items } from './items.js';
-import { Player } from './player.js';
-import { Monsters } from './monsters.js';
+import { Data } from './Data.js';
+import { Utilities } from './Utilities.js';
+import { AudioManager } from './AudioManager.js';
+import { State } from './State.js';
+import { Level } from './Level.js';
+import { UI } from './UI.js';
+import { Render } from './Render.js';
+import { Items } from './Items.js';
+import { Player } from './Player.js';
+import { Monsters } from './Monsters.js';
 import { Combat } from './Combat.js';
-import { Actions } from './actions.js';
-import { PlayerInventory } from './playerInventory.js';
+import { Actions } from './Actions.js';
+import { PlayerInventory } from './PlayerInventory.js';
 
 export class Game {
     constructor() {

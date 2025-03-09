@@ -1,6 +1,6 @@
-console.log("actions.js loaded");
+console.log("Actions.js loaded");
 
-import { State } from './state.js';
+import { State } from './State.js';
 
 export class Actions {
     constructor(state) {

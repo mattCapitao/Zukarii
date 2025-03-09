@@ -1,6 +1,6 @@
-console.log("items.js loaded");
+console.log("Items.js loaded");
 
-import { State } from './state.js';
+import { State } from './State.js';
 
 export class Items {
     constructor(state) {

@@ -1,4 +1,4 @@
-console.log("audioManager.js loaded");
+console.log("AudioManager.js loaded");
 
 export class AudioManager {
     constructor() {

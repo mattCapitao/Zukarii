@@ -1,6 +1,6 @@
-console.log("playerInventory.js loaded");
+console.log("PlayerInventory.js loaded");
 
-import { State } from './state.js';
+import { State } from './State.js';
 
 export class PlayerInventory {
     constructor(state) {

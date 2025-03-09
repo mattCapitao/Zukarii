@@ -1,6 +1,6 @@
-﻿console.log("level.js loaded");
+﻿console.log("Level.js loaded");
 
-import { State } from './state.js';
+import { State } from './State.js';
 
 const roomTypes = [
     { type: 'SquareRoom', probability: 30, minW: 11, maxW: 15, minH: 6, maxH: 8 },

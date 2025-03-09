@@ -1,6 +1,6 @@
 console.log("player.js loaded");
 
-import { State } from './state.js';
+import { State } from './State.js';
 
 export class Player {
     constructor(state) {

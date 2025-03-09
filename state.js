@@ -1,7 +1,7 @@
-﻿console.log("state.js loaded");
+﻿console.log("State.js loaded");
 
-import { Data } from './data.js';
-import { Utilities } from './utilities.js';
+import { Data } from './Data.js';
+import { Utilities } from './Utilities.js';
 
 export class State {
     constructor(data, utilities) {

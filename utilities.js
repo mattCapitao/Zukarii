@@ -1,4 +1,4 @@
-console.log("utilities.js loaded");
+console.log("Utilities.js loaded");
 
 export class Utilities {
     constructor() {

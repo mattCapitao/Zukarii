@@ -1,6 +1,6 @@
-﻿console.log("render.js loaded");
+﻿console.log("Render.js loaded");
 
-import { State } from './state.js';
+import { State } from './State.js';
 import { titleScreen } from './titlescreen.js';
 
 export class Render {

@@ -1,6 +1,6 @@
-﻿console.log("monsters.js loaded");
+﻿console.log("Monsters.js loaded");
 
-import { State } from './state.js';
+import { State } from './State.js';
 
 export class Monsters {
     constructor(state) {
