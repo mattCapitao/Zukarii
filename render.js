@@ -1,10 +1,15 @@
 ﻿console.log("render.js loaded");
 
-class Render {
+import { State } from './state.js';
+import { UI } from './ui.js';
+import { Game } from './game.js';
+import { titleScreen } from './titlescreen.js';
+
+export class Render {
     constructor(state, ui, game) {
         this.state = state;
         this.ui = ui;
-        this.game = game; // Added for renderIfNeeded dependencies
+        this.game = game;
         this.animationFrame = null;
         this.mageNames = [
             "Elarion", "Sylvara", "Tharion", "Lysandra", "Zephyrion", "Morwenna", "Aethric",
@@ -29,9 +34,9 @@ class Render {
             console.warn("Unexpected CSS properties on #map (height, width, or margin) may break scrolling. Ensure only overflow: auto is used.");
         }
 
-        if (!this.state.gameStarted || !this.state.levels[this.state.tier]) {
+       if (!this.state.gameStarted || !this.state.levels[this.state.tier]) {
             document.getElementById('splash').style.display = 'flex';
-            titleScreenContainer.innerHTML = window.titleScreen || '<pre>DUNGEON CRAWL\n\nPress any key to start</pre>';
+            titleScreenContainer.innerHTML = titleScreen || '<pre>DUNGEON CRAWL\n\nPress any key to start</pre>';
             return;
         }
 

@@ -1,7 +1,12 @@
 console.log("actions.js loaded");
 
-class Actions {
-    constructor(state, game, ui, render, playerInventory,) {
+import { State } from './state.js'; // If State is used directly
+import { UI } from './ui.js';
+import { Render } from './render.js';
+import { PlayerInventory } from './playerInventory.js';
+
+export class Actions {
+    constructor(state, game, ui, render, playerInventory) {
         this.state = state;
         this.game = game;
         this.ui = ui;

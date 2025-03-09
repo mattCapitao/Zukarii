@@ -1,5 +1,13 @@
 console.log("combat.js loaded");
-class Combat {
+
+import { State } from './state.js';
+import { Game } from './game.js';
+import { UI } from './ui.js';
+import { Player } from './player.js';
+import { Monsters } from './monsters.js';
+import { Items } from './items.js';
+
+export class Combat {
     constructor(state, game, ui, player, monsters, items) {
         this.state = state;
         this.game = game;
@@ -7,7 +15,9 @@ class Combat {
         this.player = player;
         this.monsters = monsters;
         this.items = items;
-    }
+
+        this.isRangedModeEnabled = false;
+    }ww
     
     getWeaponDamageRange(attackType) {// Extracted method: Get damage range for a given attack type
         const mainWeapon = this.player.playerInventory.getEquipped("mainhand");

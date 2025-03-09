@@ -1,6 +1,11 @@
 console.log("items.js loaded");
 
-class Items {
+import { State } from './state.js';
+import { Data } from './data.js';
+import { UI } from './ui.js';
+import { Game } from './game.js';
+
+export class Items {
     constructor(state, data, ui, game) {
         this.state = state;
         this.data = data;

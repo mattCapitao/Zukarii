@@ -1,5 +1,6 @@
 ﻿console.log("level.js loaded");
 
+
 const roomTypes = [
     { type: 'SquareRoom', probability: 30, minW: 11, maxW: 15, minH: 6, maxH: 8 },
     { type: 'VerticalRoom', probability: 15, minW: 8, maxW: 11, minH: 8, maxH: 10 },
@@ -8,18 +9,22 @@ const roomTypes = [
     { type: 'BossChamberSpecial', probability: 5, minW: 20, maxW: 24, minH: 5, maxH: 8 }
 ];
 
-class Level {
+import { State } from './state.js';
+import { Game } from './game.js';
+
+export class Level {
     constructor(state, game) {
         this.state = state;
         this.game = game;
-        this.BUFFER_SIZE = 1;
+         this.BUFFER_SIZE = 1;
         this.SPECIAL_BUFFER_SIZE = 2;
         this.MIN_ROOM_SIZE = 4;
         this.EDGE_BUFFER = 2;
         this.MAX_OVERLAP_PERCENT = 0.10;
         this.INITIAL_MIN_DISTANCE = 12;
         this.MIN_DISTANCE_FLOOR = 3;
-    }
+}
+
 
     selectRoomType() {
         const rand = Math.floor(Math.random() * 100);

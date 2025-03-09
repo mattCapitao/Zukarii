@@ -1,6 +1,6 @@
 console.log("titlescreen.js loaded");
 
-const titleScreen = `<h1>Grok Mage Dungeon</h1>
+export const titleScreen = `<h1>Grok Mage Dungeon</h1>
  <h5>Collect One Trillion Gold to WIN!</h5>
 <pre style="font-size:.225rem;">
 
@@ -144,5 +144,3 @@ const titleScreen = `<h1>Grok Mage Dungeon</h1>
     </tr>
 </table>
 `;
-
-window.titleScreen = titleScreen;

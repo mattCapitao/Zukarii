@@ -1,4 +1,4 @@
-class AudioManager {
+export class AudioManager {
     constructor() {
         this.sounds = {};
         this.preloadSounds();
@@ -8,8 +8,8 @@ class AudioManager {
 
     preloadSounds() {
         const soundFiles = {
-           torchBurning: 'audio/torch-burning.mp3',
-            backgroundMusic: 'audio/haunted.wav',
+           torchBurning: '/audio/torch-burning.mp3',
+            backgroundMusic: '/audio/haunted.wav',
  
         };
 

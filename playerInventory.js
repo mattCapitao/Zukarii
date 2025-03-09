@@ -1,6 +1,11 @@
 console.log("playerInventory.js loaded");
 
-class PlayerInventory {
+import { State } from './state.js';
+import { UI } from './ui.js';
+import { Player } from './player.js';
+import { Utilities } from './utilities.js';
+
+export class PlayerInventory {
     constructor(state, ui, player, utilities) {
         this.state = state;
         this.ui = ui;

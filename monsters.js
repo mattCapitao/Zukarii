@@ -1,6 +1,11 @@
 ﻿console.log("monsters.js loaded");
 
-class Monsters {
+import { State } from './state.js';
+import { Data } from './data.js';
+import { UI } from './ui.js';
+import { Items } from './items.js';
+
+export class Monsters {
     constructor(state, data, ui, items) {
         this.state = state;
         this.data = data;
@@ -167,13 +172,19 @@ class Monsters {
     }
 
 
+    monsterXpCalc(monster, tier) {
+        let baseXp = (monster.maxHp / 3) + (monster.minBaseDamage + (monster.maxBaseDamage * 1.5));
+        let xpMultiplier = 1 + (tier * 0.05);
+        return Math.round(baseXp * xpMultiplier);
+    }
+
     handleMonsterDeath(monster, player, tier, combatLogMsg) {
         monster.hp = 0;
         monster.isAggro = false;
         this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
         this.ui.writeToLog(`${monster.name} defeated!`);
         this.items.dropTreasure(monster, tier);
-        const monsterKillXP = (5 + Math.floor(Math.random() * 6)) * this.state.tier;
+        const monsterKillXP = this.monsterXpCalc( monster, this.state.tier);
         player.awardXp(monsterKillXP);
     }
 

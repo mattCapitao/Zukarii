@@ -1,6 +1,6 @@
 console.log("utilities.js loaded");
 
-class Utilities {
+export class Utilities {
     constructor() {
         // No properties needed for now, but constructor is here for instance creation
     }

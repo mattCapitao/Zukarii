@@ -1,6 +1,6 @@
 console.log("data.js loaded");
 
-class Data {
+export class Data {
     constructor() {
         // Static JSON objects defined here
         this._emptyEquipSlots = {
@@ -329,13 +329,6 @@ class Data {
         return JSON.parse(JSON.stringify(this._uniqueItems));
     }
 
-
-    // Placeholder for future fetch implementation
-    // async getEmptyEquipSlots() {
-    //     const response = await fetch('data/emptyEquipSlots.json');
-    //     const data = await response.json();
-    //     return data;
-    // }
 }
 
-window.Data = Data; // Expose globally for now, to match current structure
+

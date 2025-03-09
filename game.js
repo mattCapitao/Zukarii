@@ -1,6 +1,19 @@
 ﻿console.log("game.js loaded");
+import { Data } from './data.js';
+import { Utilities } from './utilities.js';
+import { AudioManager } from './audioManager.js';
+import { State } from './state.js';
+import { Level } from './level.js';
+import { UI } from './ui.js';
+import { Render } from './render.js';
+import { Items } from './items.js';
+import { Player } from './player.js';
+import { Monsters } from './monsters.js';
+import { Combat } from './combat.js';
+import { Actions } from './actions.js';
+import { PlayerInventory } from './playerInventory.js';
 
-class Game {
+export class Game {
     constructor() {
         this.data = new Data();
         this.utilities = new Utilities();
@@ -10,20 +23,18 @@ class Game {
         this.ui = new UI(this.state, this, this.utilities);
         this.render = new Render(this.state, this.ui, this);
         this.items = new Items(this.state, this.data, this.ui, this);
-        this.player = new Player(this.state, this.ui, this, this.utilities); // Added this.utilities
+        this.player = new Player(this.state, this.ui, this, this.utilities);
         this.monsters = new Monsters(this.state, this.data, this.ui, this.items);
-        this.actions = new Actions(this.state, this, this.ui, this.render, this.player.playerInventory); // Pass PlayerInventory to Actions
+        this.actions = new Actions(this.state, this, this.ui, this.render, this.player.playerInventory);
         this.combat = new Combat(this.state, this, this.ui, this.player, this.monsters, this.items);
 
         this.combat.toggleRanged = this.combat.toggleRanged.bind(this.combat);
+        this.handleInput = this.handleInput.bind(this);
 
         this.lastRenderTime = 0;
         this.lastInputTime = 0;
         this.renderThrottle = 70;
         this.inputThrottle = 70;
-
-        this.handleInput = this.handleInput.bind(this);
-        
     }
 
 
@@ -333,9 +344,3 @@ class Game {
         //this.player.promptForName(0); // Moved from Render
     }
 }
-
-window.addEventListener('DOMContentLoaded', () => {
-    console.log('DOMContentLoaded fired');
-    const gameInstance = new Game();
-    gameInstance.init();
-});

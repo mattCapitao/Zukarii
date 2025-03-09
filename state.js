@@ -1,6 +1,9 @@
 ﻿console.log("state.js loaded");
 
-class State {
+import { Data } from './data.js';
+import { Utilities } from './utilities.js';
+
+export class State {
     constructor(data, utilities) {
         this.data = data;
         this.utilities = utilities;
@@ -150,7 +153,7 @@ class State {
 
     initGame(level, monsters, items, player) {
         const splash = document.getElementById('splash');
-        splash.remove();
+        if (splash) splash.remove();
 
         this.levels[0] = this.generateSurfaceLevel();
         this.treasures[0] = [];

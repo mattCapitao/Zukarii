@@ -1,6 +1,10 @@
 ﻿console.log("ui.js loaded");
 
-class UI {
+import { State } from './state.js';
+import { Game } from './game.js';
+import { Utilities } from './utilities.js';
+
+export class UI {
     constructor(state, game, utilities) {
         this.state = state;
         this.game = game;

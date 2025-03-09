@@ -1,34 +1,41 @@
 console.log("player.js loaded");
 
-class Player {
-    constructor(state, ui, game, utilities) { // Added utilities parameter
+import { State } from './state.js';
+import { UI } from './ui.js';
+import { Game } from './game.js';
+import { Utilities } from './utilities.js';
+import { PlayerInventory } from './playerInventory.js';
+
+export class Player {
+    constructor(state, ui, game, utilities) {
         this.state = state;
         this.ui = ui;
         this.game = game;
-        this.utilities = utilities; // Store utilities
-        this.playerInventory = new PlayerInventory(state, ui, this, utilities); // Pass utilities to Inventory
+        this.utilities = utilities;
+        this.playerInventory = new PlayerInventory(state, ui, this, utilities);
         this.initializePlayer();
     }
 
     initializePlayer() {
         this.statInit();
         this.addStartingItems();
-        this.calculateStats()
+        
     }
 
-
-
     statInit() {
-        this.state.player.stats.base.intellect = this.utilities.dRoll(6,2,3);
-        this.state.player.stats.base.prowess = this.utilities.dRoll(6,2,3);
-        this.state.player.stats.base.agility = this.utilities.dRoll(6,2,3);
-        this.state.player.stats.base.maxHp = 30;
-        this.state.player.stats.base.maxMana = 10;
+        this.state.player.stats.base.intellect = this.utilities.dRoll(4,3,3);
+        this.state.player.stats.base.prowess = this.utilities.dRoll(4,3,3);
+        this.state.player.stats.base.agility = this.utilities.dRoll(4,3,3);
+        this.state.player.stats.base.maxHp = Math.round(30 * this.state.player.stats.base.prowess * .1);
+        this.state.player.stats.base.maxMana = Math.round(10 * this.state.player.stats.base.intellect * .05);
+        console.log("Player base stats initialized", this.state.player.stats.base);
+
 
         // Manually init current stat vaslues that are not updated by calculateStats()
         this.state.player.hp = this.state.player.stats.base.maxHp;
         this.state.player.mana = this.state.player.stats.base.maxMana;
-        this.state.player.nextLevelXp = 75;
+        console.log("Player stats initialized", this.state.player);
+        this.state.player.nextLevelXp = 100;
     }
 
     initializeEquippedSlots() {
@@ -86,9 +93,9 @@ class Player {
         let playerDamage = Math.round(baseDamage * (baseStat * 0.20)) + damageBonus;
         let isCrit = false;
 
-        const critChance = this.state.player.agility / 2;
+        const critChance = (this.state.player.agility / 10) + 1;
         if (Math.random() * 100 < critChance) {
-            const critMultiplier = 1.5 + Math.random() * 1.5;
+            const critMultiplier = 1.5 
             playerDamage = Math.round(playerDamage * critMultiplier);
             isCrit = true;
         }
@@ -115,10 +122,14 @@ class Player {
                 this.ui.writeToLog(`Your ${statToBoost} increased to ${this.state.player[statToBoost]}!`);
             }
 
-            const hpIncrease = Math.round(3 + this.state.player.level * this.state.player.prowess * 0.5);
+            const hpIncrease = Math.round(6 + this.state.player.level * this.state.player.prowess * 0.1);
+            const mpIncrease = Math.round(2 + this.state.player.level * this.state.player.intellect * 0.05);
             this.state.player.stats.base.maxHp += hpIncrease;
+            this.state.player.stats.base.maxMana += mpIncrease;
             this.state.player.maxHp = this.state.player.stats.base.maxHp;
+            this.state.player.maxMana = this.state.player.stats.base.maxMana;
             this.state.player.hp = this.state.player.maxHp;
+            this.state.player.mana = this.state.player.maxMana;
             this.state.player.xp = newXp;
             this.state.player.nextLevelXp = Math.round(this.state.player.nextLevelXp * 1.5);
             this.ui.writeToLog(`Level up! Now level ${this.state.player.level}, Max HP increased by ${hpIncrease} to ${this.state.player.maxHp}`);
