@@ -1,5 +1,6 @@
 ﻿console.log("level.js loaded");
 
+import { State } from './state.js';
 
 const roomTypes = [
     { type: 'SquareRoom', probability: 30, minW: 11, maxW: 15, minH: 6, maxH: 8 },
@@ -9,22 +10,17 @@ const roomTypes = [
     { type: 'BossChamberSpecial', probability: 5, minW: 20, maxW: 24, minH: 5, maxH: 8 }
 ];
 
-import { State } from './state.js';
-import { Game } from './game.js';
-
 export class Level {
-    constructor(state, game) {
+    constructor(state) {
         this.state = state;
-        this.game = game;
-         this.BUFFER_SIZE = 1;
+        this.BUFFER_SIZE = 1;
         this.SPECIAL_BUFFER_SIZE = 2;
         this.MIN_ROOM_SIZE = 4;
         this.EDGE_BUFFER = 2;
         this.MAX_OVERLAP_PERCENT = 0.10;
         this.INITIAL_MIN_DISTANCE = 12;
         this.MIN_DISTANCE_FLOOR = 3;
-}
-
+    }
 
     selectRoomType() {
         const rand = Math.floor(Math.random() * 100);
@@ -152,8 +148,6 @@ export class Level {
         console.log(`Placed ${rooms.length} out of ${numRooms} rooms`);
         return rooms;
     }
-
-
 
     findNearestRoom(newRoom, existingRooms, excludeRooms = []) {
         let nearestRoom = null;
@@ -344,7 +338,7 @@ export class Level {
     }
 
     generateFountains(tier) {
-        const fountainsPerLevel = Math.floor(Math.random() * 3) +1;
+        const fountainsPerLevel = Math.floor(Math.random() * 3) + 1;
         const map = this.state.levels[tier].map;
         const rooms = this.state.levels[tier].rooms;
         let levelFountains = [];
@@ -362,7 +356,8 @@ export class Level {
     }
 
     generateTreasures(tier) {
-        const treasuresPerLevel = Math.floor(Math.random() * 5) +3;
+        const itemsService = this.state.game.getService('items');
+        const treasuresPerLevel = Math.floor(Math.random() * 5) + 3;
         const map = this.state.levels[tier].map;
         const rooms = this.state.levels[tier].rooms;
         for (let i = 0; i < treasuresPerLevel; i++) {
@@ -381,11 +376,12 @@ export class Level {
                 isAggro: false,
                 suppressRender: true,
             };
-            this.game.items.dropTreasure(treasure, tier);
+            itemsService.dropTreasure(treasure, tier);
         }
     }
 
     addLevel(tier) {
+        const monstersService = this.state.game.getService('monsters');
         if (!this.state.levels[tier]) {
             const newLevelData = this.generateLevel();
             this.state.levels[tier] = newLevelData;
@@ -425,7 +421,7 @@ export class Level {
             this.state.levels[tier].map[stairDownY][stairDownX] = '⇓';
             this.state.stairsDown[tier] = { x: stairDownX, y: stairDownY };
 
-            this.state.monsters[tier] = this.game.monsters.generateLevelMonsters(tier);
+            this.state.monsters[tier] = monstersService.generateLevelMonsters(tier);
             console.log(`Tier Monsters: ${this.state.monsters[tier]}`);
             this.state.fountains[tier] = this.generateFountains(tier);
             console.log(`Initializing treasures for tier ${tier}`);

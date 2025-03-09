@@ -1,15 +1,11 @@
 ﻿console.log("render.js loaded");
 
 import { State } from './state.js';
-import { UI } from './ui.js';
-import { Game } from './game.js';
 import { titleScreen } from './titlescreen.js';
 
 export class Render {
-    constructor(state, ui, game) {
+    constructor(state) {
         this.state = state;
-        this.ui = ui;
-        this.game = game;
         this.animationFrame = null;
         this.mageNames = [
             "Elarion", "Sylvara", "Tharion", "Lysandra", "Zephyrion", "Morwenna", "Aethric",
@@ -21,6 +17,8 @@ export class Render {
     }
 
     render() {
+        const uiService = this.state.game.getService('ui');
+        const playerService = this.state.game.getService('player');
         console.log("Rendering...", this.state.needsRender, "typeof:", typeof this.state.needsRender);
         if (!this.state.needsRender) return;
 
@@ -34,7 +32,7 @@ export class Render {
             console.warn("Unexpected CSS properties on #map (height, width, or margin) may break scrolling. Ensure only overflow: auto is used.");
         }
 
-       if (!this.state.gameStarted || !this.state.levels[this.state.tier]) {
+        if (!this.state.gameStarted || !this.state.levels[this.state.tier]) {
             document.getElementById('splash').style.display = 'flex';
             titleScreenContainer.innerHTML = titleScreen || '<pre>DUNGEON CRAWL\n\nPress any key to start</pre>';
             return;
@@ -75,8 +73,8 @@ export class Render {
             if (this.state.discoveredTileCount[tier] >= 1000) {
                 this.state.discoveredTileCount[tier] = 0;
                 const exploreXP = 25;
-                this.ui.writeToLog("Explored 1000 tiles!");
-                this.game.player.awardXp(exploreXP);
+                uiService.writeToLog("Explored 1000 tiles!");
+                playerService.awardXp(exploreXP);
             }
         }
 

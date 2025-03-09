@@ -1,16 +1,10 @@
 ﻿console.log("monsters.js loaded");
 
 import { State } from './state.js';
-import { Data } from './data.js';
-import { UI } from './ui.js';
-import { Items } from './items.js';
 
 export class Monsters {
-    constructor(state, data, ui, items) {
+    constructor(state) {
         this.state = state;
-        this.data = data;
-        this.ui = ui;
-        this.items = items;
         this.monsterAffixes = {
             goldTheft: {
                 name: "Gold Theft",
@@ -18,10 +12,10 @@ export class Monsters {
                 onHit: function (monster, player) {
                     const goldStolen = Math.floor(player.gold * 0.1);
                     player.gold -= goldStolen;
-                    this.ui.writeToLog(`${monster.name} has stolen ${goldStolen} gold from you!`);
+                    this.state.game.getService('ui').writeToLog(`${monster.name} has stolen ${goldStolen} gold from you!`);
                     if (player.gold < 0) {
                         player.gold = 0;
-                        this.ui.writeToLog(`ALL YOUR GOLD ARE BELONG TO ${monster.name} `);
+                        this.state.game.getService('ui').writeToLog(`ALL YOUR GOLD ARE BELONG TO ${monster.name} `);
                     }
                 }.bind(this)
             },
@@ -43,10 +37,9 @@ export class Monsters {
         };
     }
 
-
-
     generateMonster(tier, map, rooms, playerX, playerY, unique = false) {
-        const monsterTemplates = unique ? this.data.getUniqueMonsters() : this.data.getMonsterTemplates();
+        const data = this.state.data;
+        const monsterTemplates = unique ? data.getUniqueMonsters() : data.getMonsterTemplates();
 
         let newMonster = { ...monsterTemplates[Math.floor(Math.random() * monsterTemplates.length)] };
         const room = rooms[Math.floor(Math.random() * rooms.length)];
@@ -107,7 +100,6 @@ export class Monsters {
             const distanceToPlayer = Math.sqrt(dx * dx + dy * dy);
 
             if (distanceToPlayer <= AGGRO_RANGE + 2) {
-                //placeholder for monster detection set default to aggro + 2
                 monster.isDetected = true;
             }
 
@@ -171,7 +163,6 @@ export class Monsters {
         });
     }
 
-
     monsterXpCalc(monster, tier) {
         let baseXp = (monster.maxHp / 3) + (monster.minBaseDamage + (monster.maxBaseDamage * 1.5));
         let xpMultiplier = 1 + (tier * 0.05);
@@ -181,15 +172,17 @@ export class Monsters {
     handleMonsterDeath(monster, player, tier, combatLogMsg) {
         monster.hp = 0;
         monster.isAggro = false;
-        this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
-        this.ui.writeToLog(`${monster.name} defeated!`);
-        this.items.dropTreasure(monster, tier);
-        const monsterKillXP = this.monsterXpCalc( monster, this.state.tier);
+        const uiService = this.state.game.getService('ui');
+        const itemsService = this.state.game.getService('items');
+        uiService.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
+        uiService.writeToLog(`${monster.name} defeated!`);
+        itemsService.dropTreasure(monster, tier);
+        const monsterKillXP = this.monsterXpCalc(monster, this.state.tier);
         player.awardXp(monsterKillXP);
     }
 
-    calculateMonsterAttackDamage(enemy, tier) {
-        tier = this.state.tier;
+    calculateMonsterAttackDamage(enemy) {
+        const tier = this.state.tier;
         const tierDamageMultiplier = 0.05;
         const baseDamage = Math.floor(Math.random() * (enemy.maxBaseDamage - enemy.minBaseDamage) + 1) + enemy.minBaseDamage;
         const damage = Math.round(baseDamage * (tier * (1 + tierDamageMultiplier)));
@@ -198,46 +191,39 @@ export class Monsters {
     }
 
     handleMonsterAttack(monster, player) {
-
-        //currently this method is only called if the monster survives the player's attack and is not dead and is in mele range
-        //if the monster is not aggro, it will become aggro and attack the player - For future development, this could be expanded to include other situations
-        //Like a player using stealth reaching melee range of a monster that is not aggro, or player attacking a monster that has a ranged attack.
-        
+        const uiService = this.state.game.getService('ui');
         if (!monster.isAggro) {
             monster.isAggro = true;
             return false;
         }
 
-
         if (this.state.player.block > 0 || this.state.player.dodge > 0) {
-
             if (Math.random() * 100 < this.state.player.block) {
-                this.ui.writeToLog(`You blocked the ${monster.name}'s attack!`);
+                uiService.writeToLog(`You blocked the ${monster.name}'s attack!`);
                 return false;
             }
             if (Math.random() * 100 < this.state.player.dodge) {
-                this.ui.writeToLog(`You dodged the ${monster.name}'s attack!`);
+                uiService.writeToLog(`You dodged the ${monster.name}'s attack!`);
                 return false;
             }
         }
 
         let monsterDamage = this.calculateMonsterAttackDamage(monster);
-
         const armor = player.playerInventory.getEquipped("armor")?.armor || 0;
         let armorDmgReduction = 0;
 
         if (armor > 0) {
-            armorDmgReduction = Math.max(1, Math.floor(monsterDamage * (.01 * armor * 2)));
+            armorDmgReduction = Math.max(1, Math.floor(monsterDamage * (0.01 * armor * 2)));
         }
         let damageDealt = monsterDamage - armorDmgReduction;
 
-        const defenseDmgReduction = Math.round(monsterDamage * (.01 * this.state.player.defense));
-        console.log(`Monster attack (${monsterDamage}) : Defense (${this.state.player.defense})`, this.player);
+        const defenseDmgReduction = Math.round(monsterDamage * (0.01 * this.state.player.defense));
+        console.log(`Monster attack (${monsterDamage}) : Defense (${this.state.player.defense})`, this.state.player);
         damageDealt -= defenseDmgReduction;
 
         this.state.player.hp -= damageDealt;
-        this.ui.writeToLog(`${monster.name} dealt ${damageDealt} damage to You. Attack(${monsterDamage}) - Armor(${armorDmgReduction}) - Defense(${defenseDmgReduction}) `);
-        this.ui.updateStats();
+        uiService.writeToLog(`${monster.name} dealt ${damageDealt} damage to You. Attack(${monsterDamage}) - Armor(${armorDmgReduction}) - Defense(${defenseDmgReduction}) `);
+        uiService.updateStats();
 
         if (this.state.player.hp <= 0) {
             player.death(monster.name);
@@ -245,5 +231,4 @@ export class Monsters {
         }
         return false;
     }
-
 }

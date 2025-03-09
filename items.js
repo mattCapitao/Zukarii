@@ -1,24 +1,16 @@
 console.log("items.js loaded");
 
 import { State } from './state.js';
-import { Data } from './data.js';
-import { UI } from './ui.js';
-import { Game } from './game.js';
 
 export class Items {
-    constructor(state, data, ui, game) {
+    constructor(state) {
         this.state = state;
-        this.data = data;
-        this.ui = ui;
-        this.game = game;
-
+        this.data = this.state.data; // Access Data via State
         this.relicItems = this.data.getUniqueItems();
         this.artifactItems = this.data.getUniqueItems();
 
         this.itemTiers = ['junk', 'common', 'rare', 'mastercraft', 'magic', 'artifact', 'relic'];
-
         this.itemTypes = ['weapon', 'armor', 'amulet', 'ring'];
-
         this.weaponAttackTypes = ['melee', 'ranged'];
 
         this.itemStatOptions = {
@@ -55,15 +47,12 @@ export class Items {
                 ],
             },
         };
-
-
     }
 
     statRoll(stat, item) {
-
         switch (stat) { 
             case 'baseDamageMin':
-                 return Math.floor(item.tierIndex * 1.5);
+                return Math.floor(item.tierIndex * 1.5);
             case 'baseDamageMax':
                 return Math.floor(Math.random() * item.tierIndex) + 1;
             case 'range':
@@ -100,8 +89,7 @@ export class Items {
                 console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
                 return 0;
         }
-        
-    };
+    }
 
     getBonusStats(statArray, item) {
         console.log(`getBonusStats() called with statArray:`, statArray, `for item: `, item);
@@ -134,7 +122,7 @@ export class Items {
 
         let rollTotal = randomValue + dungeonTierBonus + playerLuckBonus;
 
-        console.log(`itemDropRoll() : dungeonTierBonus = ${dungeonTierBonus} : playerLuckBonus = ${dungeonTierBonus} : rollTotal: ${rollTotal}`);
+        console.log(`itemDropRoll() : dungeonTierBonus = ${dungeonTierBonus} : playerLuckBonus = ${playerLuckBonus} : rollTotal: ${rollTotal}`);
 
         let itemDropData = { roll: rollTotal, itemTier: '' };
 
@@ -154,7 +142,6 @@ export class Items {
     }
 
     rogItem(rollTotal, item = {}) {
-
         switch (true) {
             case rollTotal < 0.15: item.tier = this.itemTiers[0]; item.tierIndex = 0; break; // 'junk'
             case rollTotal < 0.78: item.tier = this.itemTiers[1]; item.tierIndex = 1; break; // 'common'
@@ -164,8 +151,6 @@ export class Items {
         }
 
         if (!item.type || item.type === '') {
-           
-       
             let randomType = this.itemTypes[Math.floor(Math.random() * this.itemTypes.length)];
 
             if (item.tierIndex < 2) {
@@ -187,14 +172,13 @@ export class Items {
         let statOptions = this.itemStatOptions[item.type];
         console.log(`Stat options for item:`, statOptions);
 
-
         switch (item.type) {
             case 'weapon':
                 if (!item.attackType || item.attackType === '') {
                     item.attackType = this.weaponAttackTypes[Math.floor(Math.random() * this.weaponAttackTypes.length)];
                 }
                 item.baseDamageMin = Math.floor(Math.random() * 2) + this.statRoll("baseDamageMin", item);
-                item.baseDamageMax = item.baseDamageMin + Math.floor(Math.random() * 5) + this.statRoll("baseDamageMax",item);
+                item.baseDamageMax = item.baseDamageMin + Math.floor(Math.random() * 5) + this.statRoll("baseDamageMax", item);
                 statOptions = statOptions[item.attackType];
                 if (item.tierIndex > 1) { item.stats = this.getBonusStats(statOptions.bonus, item); }
                 switch (item.attackType) {
@@ -211,8 +195,7 @@ export class Items {
             case 'armor':
                 item.armor = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
                 if (item.tierIndex > 1) {
-
-                    console.log(`requsting bonus stats for item:`, item);
+                    console.log(`requesting bonus stats for item:`, item);
                     item.stats = this.getBonusStats(statOptions.bonus, item);
                 }
                 item.icon = 'armor.svg';
@@ -220,16 +203,15 @@ export class Items {
             case 'amulet':
                 item.maxLuck = Math.floor(Math.random() * 2) + this.statRoll("maxLuck", item);
                 if (item.tierIndex > 1) {
-                    console.log(`requsting bonus stats for item:`, item);
+                    console.log(`requesting bonus stats for item:`, item);
                     item.stats = this.getBonusStats(statOptions.bonus, item);
                 }
                 item.icon = 'amulet.svg';
                 break;
             case 'ring':
                 item.maxLuck = Math.floor(Math.random() * 2) + this.statRoll("maxLuck", item);
-               
                 if (item.tierIndex > 1) {
-                    console.log(`requsting bonus stats for item:`, item);
+                    console.log(`requesting bonus stats for item:`, item);
                     item.stats = this.getBonusStats(statOptions.bonus, item);
                 }
                 item.icon = 'ring.svg';
@@ -256,7 +238,7 @@ export class Items {
                 this.state.player.torches = 1;
                 this.state.player.torchDropFail = 0;
                 console.log(`Player found a torch after 3 failed attempts`);
-                this.ui.writeToLog('You found a discarded torch lying on the ground!');
+                this.state.game.getService('ui').writeToLog('You found a discarded torch lying on the ground!');
             }
         } else if (this.state.player.torches < 2) {
             torchChance = 0.15;
@@ -270,17 +252,16 @@ export class Items {
 
     calculatePotionChance() {
         let potionChance;
-        if (this.state.player.potions === 0) {
+        if (this.state.player.healPotions === 0) { // Changed from .potions to .healPotions to match usage
             potionChance = 0.20;
             this.state.player.potionDropFail++;
             if (this.state.player.potionDropFail === 3) {
                 this.state.player.potionDropFail = 0;
                 return 1.0;
-
             }
-        } else if (this.state.player.potions < 2) {
+        } else if (this.state.player.healPotions < 2) {
             potionChance = 0.15;
-        } else if (this.state.player.potions <= 5) {
+        } else if (this.state.player.healPotions <= 5) {
             potionChance = 0.10;
         } else {
             potionChance = 0.05;
@@ -289,15 +270,13 @@ export class Items {
     }
 
     calculateItemChance() {
-        let itemChance;
-        // need to think on scaling, luck mods etc
-        itemChance = 1.0; 
-
-        return itemChance
+        let itemChance = 1.0; // Placeholder as per original
+        return itemChance;
     }
 
-
     dropTreasure(monster, tier) {
+        const uiService = this.state.game.getService('ui');
+        const actionsService = this.state.game.getService('actions');
         const goldGain = 10 + Math.floor(Math.random() * 41) + (tier + 1) * 10;
         const torchChance = this.calculateTorchChance();
         const potionChance = this.calculatePotionChance();
@@ -305,11 +284,9 @@ export class Items {
 
         let droppedItems = [];
         let torchDropped = Math.random() < torchChance;
-        if (torchDropped) { this.state.player.potionDropFail = 0;  }
+        if (torchDropped) { this.state.player.potionDropFail = 0; } // Should this be torchDropFail?
         let potionDropped = Math.random() < potionChance;
-        if (potionDropped) { this.state.player.torchDropFail = 0; }
-
-
+        if (potionDropped) { this.state.player.torchDropFail = 0; } // Should this be potionDropFail?
 
         if (Math.random() < itemChance) {
             let randomItem = {};
@@ -325,7 +302,7 @@ export class Items {
                     randomItem = this.relicItems[Math.floor(Math.random() * this.relicItems.length)];
                     break;
                 default:
-                    randomItem = this.rogItem(50); // Set to a common rog item as a fallback
+                    randomItem = this.rogItem(50);
                     break;
             }
             console.log(`Dropping Random item:`, randomItem);
@@ -336,7 +313,7 @@ export class Items {
         const treasure = {
             x: monster.x,
             y: monster.y,
-            name: monster.name || "Treasure Chest", // Use monster.name for monsters, "Treasure Chest" for level treasures
+            name: monster.name || "Treasure Chest",
             gold: goldGain,
             torches: torchDropped ? 1 : 0,
             healPotions: potionDropped ? 1 : 0,
@@ -344,19 +321,25 @@ export class Items {
             suppressRender: monster.suppressRender,
         };
 
-        this.game.actions.placeTreasure(treasure);
+        actionsService.placeTreasure(treasure);
 
         if (monster.name && monster.name !== "Treasure Chest") {
-            this.ui.logDroppedItems(monster, goldGain, torchDropped, droppedItems);
+            uiService.logDroppedItems(monster, goldGain, torchDropped, droppedItems);
         }
     }
 
-    escapeItemProperties(item) {
+        escapeItemProperties(item) {
+        const uiService = this.state.game.getService('ui');
+        console.log("Fetching uiService in escapeItemProperties:", uiService);
+        if (!uiService || !uiService.utilities) {
+            console.error("uiService or uiService.utilities is undefined! Using fallback for item:", item);
+            return { ...item };
+        }
         console.log("Escaping item properties for item", item);
         return {
             ...item,
-            name: this.ui.utilities.escapeJsonString(item.name),
-            description: this.ui.utilities.escapeJsonString(item.description),
+            name: uiService.utilities.escapeJsonString(item.name),
+            description: uiService.utilities.escapeJsonString(item.description),
         };
     }
 }

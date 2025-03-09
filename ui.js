@@ -1,14 +1,11 @@
 ﻿console.log("ui.js loaded");
 
 import { State } from './state.js';
-import { Game } from './game.js';
-import { Utilities } from './utilities.js';
 
 export class UI {
-    constructor(state, game, utilities) {
+    constructor(state) {
         this.state = state;
-        this.game = game;
-        this.utilities = utilities;
+        this.utilities = this.state.utilities; // Ensure this line exists
         this.tooltipCache = new Map();
     }
 
@@ -74,11 +71,10 @@ export class UI {
                     const statsContainer = document.createElement('div');
                     statsContainer.className = 'tooltip-stats';
                     Object.entries(itemData.stats).forEach(([stat, value]) => {
-                        // if (stat !== 'luck' && stat !== 'maxLuck') {
                         if (true) { // Temporarily show luck stats for testing
                             const statLine = document.createElement('div');
                             statLine.className = 'tooltip-stat';
-                            statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.utilities.camelToTitleCase(stat)}`;
+                            statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.state.utilities.camelToTitleCase(stat)}`;
                             statsContainer.appendChild(statLine);
                         }
                     });
@@ -140,6 +136,7 @@ export class UI {
     }
 
     handleDrop(event, targetItemData, isTargetEquipped) {
+        const playerService = this.state.game.getService('player');
         event.preventDefault();
         const draggedItemDataStr = event.dataTransfer.getData('text/plain');
         if (!draggedItemDataStr) {
@@ -159,7 +156,7 @@ export class UI {
             return;
         }
 
-        this.game.player.playerInventory.handleDrop(draggedItemData, targetItemData, isTargetEquipped);
+        playerService.playerInventory.handleDrop(draggedItemData, targetItemData, isTargetEquipped);
         if (this.state.ui.overlayOpen) {
             this.updateStats();
             this.updateLog();
@@ -172,6 +169,7 @@ export class UI {
     }
 
     addItemListeners() {
+        const playerService = this.state.game.getService('player');
         console.log("Adding item listeners...");
 
         const equipItems = document.querySelectorAll('#equipped-items .item:not([data-listener-added])');
@@ -182,7 +180,6 @@ export class UI {
                 try {
                     const decodedItemDataStr = decodeURIComponent(itemDataStr);
                     const itemData = JSON.parse(decodedItemDataStr);
-                    //console.log(`Parsed item data for ${itemData.itemTier} ${itemData.name} : ID ${itemData.uniqueId} : `/*, itemData */);
                     if (itemData && itemData.uniqueId) {
                         p.draggable = true;
                         p.addEventListener('dragstart', (event) => this.handleDragStart(event, itemData));
@@ -191,7 +188,7 @@ export class UI {
                         p.addEventListener('dragend', (event) => this.handleDragEnd(event));
                         p.addEventListener('mouseover', (event) => this.showItemTooltip(itemData, event));
                         p.addEventListener('mouseout', () => this.hideItemTooltip(itemData));
-                        p.addEventListener('click', () => this.game.player.playerInventory.unequipItem(itemData));
+                        p.addEventListener('click', () => playerService.playerInventory.unequipItem(itemData));
                         p.setAttribute('data-listener-added', 'true');
                     } else {
                         console.warn("Missing uniqueId in equipped item", itemData);
@@ -212,7 +209,7 @@ export class UI {
                 try {
                     const decodedItemDataStr = decodeURIComponent(itemDataStr);
                     const itemData = JSON.parse(decodedItemDataStr);
-                    console.log(`Parsed item data for ${itemData.itemTier} ${itemData.name} : ID ${itemData.uniqueId} : `, itemData );
+                    console.log(`Parsed item data for ${itemData.itemTier} ${itemData.name} : ID ${itemData.uniqueId} : `, itemData);
                     if (itemData && itemData.uniqueId) {
                         p.draggable = true;
                         p.addEventListener('dragstart', (event) => this.handleDragStart(event, itemData));
@@ -236,6 +233,7 @@ export class UI {
     }
 
     handleInventoryItemClick(item, event) {
+        const playerService = this.state.game.getService('player');
         console.log("Handling item click", item, event);
         if (item.itemTier === "Empty") {
             console.log("Empty item, skipping");
@@ -243,13 +241,13 @@ export class UI {
         }
         if (event.ctrlKey) {
             console.log("Ctrl key pressed, dropping item", item, "Event:", event);
-            this.game.player.playerInventory.dropItem(event.target.dataset.index);
+            playerService.playerInventory.dropItem(event.target.dataset.index);
         } else if (event.shiftKey) {
             console.log("Shift key pressed, no action taken");
             return;
         } else {
             console.log("equipping item", item);
-            this.game.player.playerInventory.equipItem(item);
+            playerService.playerInventory.equipItem(item);
         }
         if (this.state.ui.overlayOpen) {
             this.updateStats();
@@ -273,13 +271,13 @@ export class UI {
         <div class="player-status-child">Heal Potions: ${this.state.player.healPotions}</div>
         <div class="player-status-child bar">
             <div class="progress-bar">
-                <div class="progress-fill hp-fill" style="width: ${(this.state.player.hp / this.state.player.maxHp) * 100}%"></div>
+                <div class="progress-fill hp-fill" style="width: ${(this.state.player.hp / this.state.player.stats.base.maxHp) * 100}%"></div>
             </div>
              HP: ${this.state.player.hp}/${this.state.player.maxHp}
         </div>
         <div class="player-status-child bar">
             <div class="progress-bar">
-                <div class="progress-fill mana-fill" style="width: ${(this.state.player.mana / this.state.player.maxMana) * 100}%"></div>
+                <div class="progress-fill mana-fill" style="width: ${(this.state.player.mana / this.state.player.stats.base.maxMana) * 100}%"></div>
             </div>
             Mana: ${this.state.player.mana}/${this.state.player.maxMana}
         </div>
@@ -291,22 +289,34 @@ export class UI {
         </div>
         <div class="player-status-child">Torches: ${this.state.player.torches}</div>`;
     }
+updateStats() {
+    this.updatePlayerInfo();
+    this.updatePlayerStatus();
+    if (!this.state.ui.overlayOpen) return;
 
-    updateStats() {
-        this.updatePlayerInfo();
-        this.updatePlayerStatus();
-        if (!this.state.ui.overlayOpen) return;
-
-        const statsDiv = document.getElementById('stats');
-        if (statsDiv) {
-            statsDiv.innerHTML = `
-                <div id="player-name">Player: ${this.state.player.name}</div>
-                <div class="col-50-wrapper">
-                    <div class="col-50">Player Level: ${this.state.player.level}</div>
-                    <div class="col-50">Dungeon Tier: ${this.state.tier}</div>
-                </div>`;
-        }
+    const statsDiv = document.getElementById('stats');
+    console.log("updateStats - statsDiv:", statsDiv, "player:", {
+        level: this.state.player.level,
+        xp: this.state.player.xp,
+        nextLevelXp: this.state.player.nextLevelXp,
+        hp: this.state.player.hp,
+        maxHp: this.state.player.maxHp,
+        mana: this.state.player.mana,
+        maxMana: this.state.player.maxMana,
+        gold: this.state.player.gold,
+        torches: this.state.player.torches
+    });
+    if (statsDiv) {
+        statsDiv.innerHTML = `
+            <div id="player-name">Player: ${this.state.player.name}</div>
+            <div class="col-50-wrapper">
+                <div class="col-50">Player Level: ${this.state.player.level}</div>
+                <div class="col-50">Dungeon Tier: ${this.state.tier}</div>
+            </div>`;
+    } else {
+        console.warn("statsDiv not found in overlay!");
     }
+}
 
     updateLog() {
         if (!this.state.ui.overlayOpen) return;
@@ -320,8 +330,88 @@ export class UI {
         }
     }
 
-    updateInventory() {
-        if (!this.state.ui.overlayOpen) return '';
+updateInventory(equipped = false) {
+    if (!this.state.ui.overlayOpen && !equipped) return ''; // Only update equipped items if overlay is closed
+
+    const inventory = document.getElementById('inventory');
+    const equippedItems = document.getElementById('equipped-items');
+    const equip = this.state.player.inventory.equipped;
+    console.log(`updateInventory - equipped: ${equipped}, equippedItems:`, equippedItems, "inventory:", inventory, "items:", this.state.player.inventory.items);
+
+    if (equipped && equippedItems) {
+        equippedItems.innerHTML = `
+            <div class="col">
+                <div class="equipped-item">
+                    <p class="equip-slot mainhand">
+                        <img src="img/icons/items/${equip.mainhand?.icon || 'no-mainhand.svg'}" alt="${equip.mainhand?.name || 'Mainhand'}" 
+                             class="item item-icon ${equip.mainhand?.itemTier || 'Empty'} ${equip.mainhand?.type || 'weapon'}" 
+                             data-item='${JSON.stringify(equip.mainhand || { name: "Mainhand", itemTier: "Empty", type: "weapon", slots: ["mainhand"], baseDamageMin: 1, baseDamageMax: 1, uniqueId: this.state.utilities.generateUniqueId(), icon: "no-mainhand.svg" })}'>
+                        <br><span class="item-label">Mainhand</span></p>
+                </div>
+                <div class="equipped-item">
+                    <p class="equip-slot rightring">
+                        <img src="img/icons/items/${equip.rightring?.icon || 'no-rightring.svg'}" alt="${equip.rightring?.name || 'Right Ring'}" 
+                             class="item item-icon ${equip.rightring?.itemTier || 'Empty'} ${equip.rightring?.type || 'ring'}" 
+                             data-item='${JSON.stringify(equip.rightring || { name: "Right Ring", itemTier: "Empty", type: "ring", slot: "rightring", uniqueId: this.state.utilities.generateUniqueId(), icon: "no-rightring.svg" })}'>
+                        <br><span class="item-label">Right Ring </span></p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="equipped-item">
+                    <p class="equip-slot amulet"> 
+                        <img src="img/icons/items/${equip.amulet?.icon || 'no-amulet.svg'}" alt="${equip.amulet?.name || 'Amulet'}" 
+                             class="item item-icon ${equip.amulet?.itemTier || 'Empty'} ${equip.amulet?.type || 'amulet'}" 
+                             data-item='${JSON.stringify(equip.amulet || { name: "Amulet", itemTier: "Empty", type: "amulet", slot: "amulet", uniqueId: this.state.utilities.generateUniqueId(), icon: "no-amulet.svg" })}'>
+                        <br><span class="item-label">Amulet</span></p>
+                </div>
+                <div class="equipped-item">
+                    <p class="equip-slot armor">
+                        <img src="img/icons/items/${equip.armor?.icon || 'no-armor.svg'}" alt="${equip.armor?.name || 'Armor'}" 
+                             class="item item-icon ${equip.armor?.itemTier || 'Empty'} ${equip.armor?.type || 'armor'}" 
+                             data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: this.state.utilities.generateUniqueId(), armor: 0, icon: "no-armor.svg" })}'>
+                        <br><span class="item-label">Armor</span> </p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="equipped-item">
+                    <p class="equip-slot offhand">
+                        <img src="img/icons/items/${equip.offhand?.icon || 'no-offhand.svg'}" alt="${equip.offhand?.name || 'Offhand'}" 
+                             class="item item-icon ${equip.offhand?.itemTier || 'Empty'} ${equip.offhand?.type || 'weapon'}" 
+                             data-item='${JSON.stringify(equip.offhand || { name: "Offhand", itemTier: "Empty", type: "weapon", slots: ["offhand"], baseDamageMin: 0, baseDamageMax: 0, uniqueId: this.state.utilities.generateUniqueId(), icon: "no-offhand.svg" })}'>
+                        <br><span class="item-label">Offhand</span></p>
+                </div>
+                <div class="equipped-item">
+                    <p class="equip-slot leftring">
+                        <img src="img/icons/items/${equip.leftring?.icon || 'no-leftring.svg'}" alt="${equip.leftring?.name || 'Left Ring'}" 
+                             class="item item-icon ${equip.leftring?.itemTier || 'Empty'} ${equip.leftring?.type || 'ring'}" 
+                             data-item='${JSON.stringify(equip.leftring || { name: "Left Ring", itemTier: "Empty", type: "ring", slot: "leftring", uniqueId: this.state.utilities.generateUniqueId(), icon: "no-leftring.svg" })}'>
+                        <br><span class="item-label">Left Ring</span> </p>
+                </div>
+            </div>`;
+
+        this.addItemListeners();
+    }
+
+    if (inventory) {
+        inventory.innerHTML = `
+            <h2>Inventory Items</h2>
+            <div class="inventory-item-wrapper">
+            ${this.state.player.inventory.items?.length ? this.state.player.inventory.items.map((item, index) => `
+                <div class="inventory-item">
+                    <p class="inventory-slot ${item.itemTier} ${item.type}">
+                        <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' data-index='${index}'>
+                        <span class="item-label ${item.itemTier}">(${item.itemTier} ${item.type})</span>
+                    </p>
+                </div>
+            `).join('') + `</div>` : '<p>Inventory empty.</p>'}`;
+        this.addItemListeners();
+    }
+
+    return '';
+}
+    /*
+    updateInventory(force = false) {
+        if (!this.state.ui.overlayOpen && !force) return '';
 
         const inventory = document.getElementById('inventory');
         const equippedItems = document.getElementById('equipped-items');
@@ -334,14 +424,14 @@ export class UI {
                         <p class="equip-slot mainhand">
                             <img src="img/icons/items/${equip.mainhand?.icon || 'no-mainhand.svg'}" alt="${equip.mainhand?.name || 'Mainhand'}" 
                                  class="item item-icon ${equip.mainhand?.itemTier || 'Empty'} ${equip.mainhand?.type || 'weapon'}" 
-                                 data-item='${JSON.stringify(equip.mainhand || { name: "Mainhand", itemTier: "Empty", type: "weapon", slots: ["mainhand"], baseDamageMin: 1, baseDamageMax: 1, uniqueId: this.utilities.generateUniqueId(), icon: "no-mainhand.svg" })}'>
+                                 data-item='${JSON.stringify(equip.mainhand || { name: "Mainhand", itemTier: "Empty", type: "weapon", slots: ["mainhand"], baseDamageMin: 1, baseDamageMax: 1, uniqueId: this.state.utilities.generateUniqueId(), icon: "no-mainhand.svg" })}'>
                             <br><span class="item-label">Mainhand</span></p>
                     </div>
                     <div class="equipped-item">
                         <p class="equip-slot rightring">
                             <img src="img/icons/items/${equip.rightring?.icon || 'no-rightring.svg'}" alt="${equip.rightring?.name || 'Right Ring'}" 
                                  class="item item-icon ${equip.rightring?.itemTier || 'Empty'} ${equip.rightring?.type || 'ring'}" 
-                                 data-item='${JSON.stringify(equip.rightring || { name: "Right Ring", itemTier: "Empty", type: "ring", slot: "rightring", uniqueId: this.utilities.generateUniqueId(), icon: "no-rightring.svg" })}'>
+                                 data-item='${JSON.stringify(equip.rightring || { name: "Right Ring", itemTier: "Empty", type: "ring", slot: "rightring", uniqueId: this.state.utilities.generateUniqueId(), icon: "no-rightring.svg" })}'>
                             <br><span class="item-label">Right Ring </span></p>
                     </div>
                 </div>
@@ -350,14 +440,14 @@ export class UI {
                         <p class="equip-slot amulet"> 
                             <img src="img/icons/items/${equip.amulet?.icon || 'no-amulet.svg'}" alt="${equip.amulet?.name || 'Amulet'}" 
                                  class="item item-icon ${equip.amulet?.itemTier || 'Empty'} ${equip.amulet?.type || 'amulet'}" 
-                                 data-item='${JSON.stringify(equip.amulet || { name: "Amulet", itemTier: "Empty", type: "amulet", slot: "amulet", uniqueId: this.utilities.generateUniqueId(), icon: "no-amulet.svg" })}'>
+                                 data-item='${JSON.stringify(equip.amulet || { name: "Amulet", itemTier: "Empty", type: "amulet", slot: "amulet", uniqueId: this.state.utilities.generateUniqueId(), icon: "no-amulet.svg" })}'>
                             <br><span class="item-label">Amulet</span></p>
                     </div>
                     <div class="equipped-item">
                         <p class="equip-slot armor">
                             <img src="img/icons/items/${equip.armor?.icon || 'no-armor.svg'}" alt="${equip.armor?.name || 'Armor'}" 
                                  class="item item-icon ${equip.armor?.itemTier || 'Empty'} ${equip.armor?.type || 'armor'}" 
-                                 data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: this.utilities.generateUniqueId(), armor: 0, icon: "no-armor.svg" })}'>
+                                 data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: this.state.utilities.generateUniqueId(), armor: 0, icon: "no-armor.svg" })}'>
                             <br><span class="item-label">Armor</span> </p>
                     </div>
                 </div>
@@ -366,14 +456,14 @@ export class UI {
                         <p class="equip-slot offhand">
                             <img src="img/icons/items/${equip.offhand?.icon || 'no-offhand.svg'}" alt="${equip.offhand?.name || 'Offhand'}" 
                                  class="item item-icon ${equip.offhand?.itemTier || 'Empty'} ${equip.offhand?.type || 'weapon'}" 
-                                 data-item='${JSON.stringify(equip.offhand || { name: "Offhand", itemTier: "Empty", type: "weapon", slots: ["offhand"], baseDamageMin: 0, baseDamageMax: 0, uniqueId: this.utilities.generateUniqueId(), icon: "no-offhand.svg" })}'>
+                                 data-item='${JSON.stringify(equip.offhand || { name: "Offhand", itemTier: "Empty", type: "weapon", slots: ["offhand"], baseDamageMin: 0, baseDamageMax: 0, uniqueId: this.state.utilities.generateUniqueId(), icon: "no-offhand.svg" })}'>
                             <br><span class="item-label">Offhand</span></p>
                     </div>
                     <div class="equipped-item">
                         <p class="equip-slot leftring">
                             <img src="img/icons/items/${equip.leftring?.icon || 'no-leftring.svg'}" alt="${equip.leftring?.name || 'Left Ring'}" 
                                  class="item item-icon ${equip.leftring?.itemTier || 'Empty'} ${equip.leftring?.type || 'ring'}" 
-                                 data-item='${JSON.stringify(equip.leftring || { name: "Left Ring", itemTier: "Empty", type: "ring", slot: "leftring", uniqueId: this.utilities.generateUniqueId(), icon: "no-leftring.svg" })}'>
+                                 data-item='${JSON.stringify(equip.leftring || { name: "Left Ring", itemTier: "Empty", type: "ring", slot: "leftring", uniqueId: this.state.utilities.generateUniqueId(), icon: "no-leftring.svg" })}'>
                             <br><span class="item-label">Left Ring</span> </p>
                     </div>
                 </div>`;
@@ -398,6 +488,7 @@ export class UI {
 
         return '';
     }
+    */
 
     renderOverlay() {
         const tabsDiv = document.getElementById('tabs');

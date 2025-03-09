@@ -1,27 +1,18 @@
-console.log("combat.js loaded");
+console.log("Combat.js loaded");
 
 import { State } from './state.js';
-import { Game } from './game.js';
-import { UI } from './ui.js';
-import { Player } from './player.js';
-import { Monsters } from './monsters.js';
-import { Items } from './items.js';
 
 export class Combat {
-    constructor(state, game, ui, player, monsters, items) {
+    constructor(state, game) {
         this.state = state;
-        this.game = game;
-        this.ui = ui;
-        this.player = player;
-        this.monsters = monsters;
-        this.items = items;
-
-        this.isRangedModeEnabled = false;
-    }ww
+        this.game = game; // Inject game to access services
+        this.playerInventory = this.game.getService('playerInventory'); // Get playerInventory service
+        console.log("Combat initialized with playerInventory:", this.playerInventory);
+    }
     
-    getWeaponDamageRange(attackType) {// Extracted method: Get damage range for a given attack type
-        const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
-        const offWeapon = this.player.playerInventory.getEquipped("offhand");
+    getWeaponDamageRange(attackType) {
+        const mainWeapon = this.playerInventory.getEquipped("mainhand");
+        const offWeapon = this.playerInventory.getEquipped("offhand");
         let returnData = null;
 
         if (mainWeapon?.attackType === attackType) {
@@ -30,70 +21,88 @@ export class Combat {
             returnData = { minBaseDamage: offWeapon.baseDamageMin, maxBaseDamage: offWeapon.baseDamageMax };
         } else if (attackType === 'melee') {
             returnData = { minBaseDamage: 1, maxBaseDamage: 1 }; // Fists
-        } return returnData;
+        }
+        return returnData;
     }
 
-    calculateAndLogDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus, monster) {// Extracted method: Calculate damage and generate log message
-        const { damage, isCrit } = this.player.calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus);
+    calculateAndLogDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus, monster) {
+        const playerService = this.state.game.getService('player');
+        const uiService = this.state.game.getService('ui');
+        const { damage, isCrit } = playerService.calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus);
         const combatLogMsg = `${isCrit ? 'CRITICAL HIT! : ' : ''}You dealt ${damage} damage to ${monster.name} `;
         return { damage, combatLogMsg };
     }
 
-    applyDamageToMonster(monster, damage, combatLogMsg) { // Extracted method: Apply damage to monster and handle death
+    applyDamageToMonster(monster, damage, combatLogMsg) {
+        const monstersService = this.state.game.getService('monsters');
+        const playerService = this.state.game.getService('player');
         monster.hp -= damage;
         if (monster.hp <= 0) {
-            this.monsters.handleMonsterDeath(monster, this.player, this.state.tier, combatLogMsg);
-            return true; // Monster died
+            monstersService.handleMonsterDeath(monster, playerService, this.state.tier, combatLogMsg);
+            return true;
         }
-        return false; // Monster survived
+        return false;
     }
 
-    handleMonsterResponse(monster, combatLogMsg, canRetaliate) {// Extracted method: Handle monster response after being attacked
-        this.ui.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
+    handleMonsterResponse(monster, combatLogMsg, canRetaliate) {
+        const uiService = this.state.game.getService('ui');
+        const monstersService = this.state.game.getService('monsters');
+        uiService.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
         if (canRetaliate) {
-            const playerKilled = this.monsters.handleMonsterAttack(monster, this.player);
-            this.ui.updateStats();
+            const playerService = this.state.game.getService('player');
+            const playerKilled = monstersService.handleMonsterAttack(monster, playerService);
+            uiService.updateStats();
             if (playerKilled) {
-                
+                // No additional action needed here; death is handled in Monsters
             }
-        } else {monster.isAggro = true;}
+        } else {
+            monster.isAggro = true;
+        }
     }
 
     meleeAttack(monster) {
         const { minBaseDamage, maxBaseDamage } = this.getWeaponDamageRange("melee");
-
         const damageBonus = this.state.player.damageBonus + this.state.player.meleeDamageBonus;
         const { damage, combatLogMsg } = this.calculateAndLogDamage(this.state.player.prowess, minBaseDamage, maxBaseDamage, damageBonus, monster);
 
         const monsterDied = this.applyDamageToMonster(monster, damage, combatLogMsg);
         if (!monsterDied) {
-            this.handleMonsterResponse(monster, combatLogMsg, true); // Melee always allows retaliation
+            this.handleMonsterResponse(monster, combatLogMsg, true);
         }
     }
 
-    toggleRanged(event) {
-        if (event.key === ' ') {
-            event.preventDefault();
-            if (event.type === 'keydown') {
-                const offWeapon = this.player.playerInventory.getEquipped("offhand");
-                const mainWeapon = this.player.playerInventory.getEquipped("mainhand");
-                if ((offWeapon?.attackType === "ranged" && offWeapon?.baseRange > 0 ||
-                    mainWeapon?.attackType === "ranged" && mainWeapon?.baseRange > 0) 
-                    && this.state.player.range > 0)
-                {
-                    this.state.isRangedMode = true;
-                } else {
-                    this.state.isRangedMode = false;
-                    this.ui.writeToLog("You need a valid ranged weapon equipped to use ranged mode!");
-                }
-            } else if (event.type === 'keyup') {
-                this.state.isRangedMode = false;
-            }
+toggleRanged(event) {
+    const uiService = this.state.game.getService('ui');
+    if (event.key === ' ') {
+        event.preventDefault();
+
+        if (event.type === 'keyup') {
+            this.state.isRangedMode = false;
+            console.log("Ranged mode disabled on keyup");
+            return;
         }
-        return false;
+
+        if (event.type === 'keydown') {
+            const offWeapon = this.playerInventory.getEquipped("offhand");
+            const mainWeapon = this.playerInventory.getEquipped("mainhand");
+            if ((offWeapon?.attackType === "ranged" && offWeapon?.baseRange > 0 ||
+                mainWeapon?.attackType === "ranged" && mainWeapon?.baseRange > 0) 
+                && this.state.player.range > 0) {
+                this.state.isRangedMode = true;
+                console.log("Ranged mode enabled");
+                 console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : after toggleRanged`);
+            } else {
+                this.state.isRangedMode = false;
+                uiService.writeToLog("You need a valid ranged weapon equipped to use ranged mode!");
+            }
+        } 
     }
+    return false;
+}
 
     async rangedAttack(direction) {
+        const uiService = this.state.game.getService('ui');
+        const renderService = this.state.game.getService('render');
         let map = this.state.levels[this.state.tier].map;
         let dx = 0, dy = 0;
         switch (direction) {
@@ -107,7 +116,7 @@ export class Combat {
 
         const damageRange = this.getWeaponDamageRange("ranged");
         if (!damageRange) {
-            this.ui.writeToLog("No ranged weapon equipped!");
+            uiService.writeToLog("No ranged weapon equipped!");
             return;
         }
         const { minBaseDamage, maxBaseDamage } = damageRange;
@@ -117,17 +126,17 @@ export class Combat {
         let discoveredTiles = new Set();
         let newlyDiscoveredCount = 0;
 
-        for (let i = 1; i <= (this.state.player.range); i++) {
+        for (let i = 1; i <= this.state.player.range; i++) {
             let tx = this.state.player.x + dx * i;
             let ty = this.state.player.y + dy * i;
             if (tx < 0 || tx >= this.state.WIDTH || ty < 0 || ty >= this.state.HEIGHT || map[ty][tx] === '#') {
-                this.ui.writeToLog(`Ranged shot hit a wall at (${tx}, ${ty})`);
+                uiService.writeToLog(`Ranged shot hit a wall at (${tx}, ${ty})`);
                 break;
             }
 
             this.state.projectile = { x: tx, y: ty };
             this.state.needsRender = true;
-            this.game.render.renderIfNeeded();
+            renderService.renderIfNeeded();
             await new Promise(resolve => setTimeout(resolve, 50));
 
             if (i > this.state.discoveryRadius) {
@@ -138,7 +147,7 @@ export class Combat {
                         if (discX >= 0 && discX < this.state.WIDTH && discY >= 0 && discY < this.state.HEIGHT) {
                             const tileKey = `${discX},${discY}`;
                             const alreadyDiscoveredWall = this.state.discoveredWalls[this.state.tier].has(tileKey);
-                            const alreadyDiscoveredFloor = this.state.discoveredFloors[this.state.tier] && this.state.discoveredFloors[this.state.tier].has(tileKey);
+                            const alreadyDiscoveredFloor = this.state.discoveredFloors[this.state.tier]?.has(tileKey);
                             if (!discoveredTiles.has(tileKey) && !alreadyDiscoveredWall && !alreadyDiscoveredFloor && discoveredTiles.size < maxDiscoveredTiles) {
                                 if (map[discY][discX] === '#') {
                                     this.state.discoveredWalls[this.state.tier].add(tileKey);
@@ -178,13 +187,13 @@ export class Combat {
                 monster.isDetected = true;
                 const monsterDied = this.applyDamageToMonster(monster, damage, combatLogMsg);
                 if (!monsterDied) {
-                    this.handleMonsterResponse(monster, combatLogMsg, i === 1); // Retaliate only if at range 1
+                    this.handleMonsterResponse(monster, combatLogMsg, i === 1);
                 }
 
                 this.state.projectile = null;
                 this.state.needsRender = true;
-                this.game.render.renderIfNeeded();
-                this.ui.updateStats();
+                renderService.renderIfNeeded();
+                uiService.updateStats();
                 break;
             }
         }
@@ -195,13 +204,13 @@ export class Combat {
             if (this.state.discoveredTileCount[this.state.tier] >= 1000) {
                 this.state.discoveredTileCount[this.state.tier] = 0;
                 const exploreXP = 25;
-                this.ui.writeToLog("Explored 1000 tiles!");
-                this.game.player.awardXp(exploreXP);
+                uiService.writeToLog("Explored 1000 tiles!");
+                this.state.game.getService('player').awardXp(exploreXP);
             }
         }
 
         this.state.projectile = null;
         this.state.needsRender = true;
-        this.game.endTurn();
+        this.state.game.endTurn();
     }
 }

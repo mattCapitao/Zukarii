@@ -1,20 +1,14 @@
 console.log("actions.js loaded");
 
-import { State } from './state.js'; // If State is used directly
-import { UI } from './ui.js';
-import { Render } from './render.js';
-import { PlayerInventory } from './playerInventory.js';
+import { State } from './state.js';
 
 export class Actions {
-    constructor(state, game, ui, render, playerInventory) {
+    constructor(state) {
         this.state = state;
-        this.game = game;
-        this.ui = ui;
-        this.render = render;
-        this.playerInventory = playerInventory;
     }
 
     useFountain(fountain, tier) {
+        const uiService = this.state.game.getService('ui');
         if (!fountain.used) {
             let healAmount;
 
@@ -26,13 +20,13 @@ export class Actions {
                 this.state.player.maxHp = this.state.player.stats.base.maxHp;
                 healAmount = this.state.player.maxHp - this.state.player.hp;
                 this.state.player.hp = this.state.player.maxHp;
-                this.ui.writeToLog(`The fountain surges with power! Fully healed and Max HP increased by ${maxHpBoost} to ${this.state.player.maxHp}!`);
+                uiService.writeToLog(`The fountain surges with power! Fully healed and Max HP increased by ${maxHpBoost} to ${this.state.player.maxHp}!`);
             } else {
                 const missingHp = this.state.player.maxHp - this.state.player.hp;
                 const healPercent = Math.random() * (0.5 - 0.3) + 0.3;
                 healAmount = Math.round(missingHp * healPercent);
                 this.state.player.hp = Math.min(this.state.player.hp + healAmount, this.state.player.maxHp);
-                this.ui.writeToLog(`The fountain restores ${healAmount} HP. Current HP: ${this.state.player.hp}/${this.state.player.maxHp}`);
+                uiService.writeToLog(`The fountain restores ${healAmount} HP. Current HP: ${this.state.player.hp}/${this.state.player.maxHp}`);
             }
 
             fountain.used = true;
@@ -41,20 +35,17 @@ export class Actions {
         }
     }
 
-
-
-
     drinkHealPotion() {
+        const uiService = this.state.game.getService('ui');
         if (this.state.player.healPotions) {
-
             const critChance = this.state.player.critChance || (this.state.player.agility * 0.02);
-            let ctitHealText = '';
+            let critHealText = '';
 
-            let healAmount = Math.round(this.state.player.maxHp * .3); 
+            let healAmount = Math.round(this.state.player.maxHp * .3);
            
             if (Math.random() < critChance) {  
                 healAmount = this.state.player.maxHp - this.state.player.hp;
-                ctitHealText = 'is of exceptional quailty and '; 
+                critHealText = 'is of exceptional quality and '; 
             }
 
             let healMessage = `The Heal Potion restores ${healAmount} HP. Current HP: ${this.state.player.hp}/${this.state.player.maxHp}`;
@@ -62,17 +53,17 @@ export class Actions {
 
             if (this.state.player.hp >= this.state.player.maxHp) {
                 this.state.player.hp = this.state.player.maxHp;
-                healMessage = `The Heal Potion ${ctitHealText} fully heals you!`;
+                healMessage = `The Heal Potion ${critHealText} fully heals you!`;
             } 
-            this.ui.writeToLog(healMessage);
+            uiService.writeToLog(healMessage);
             this.state.player.healPotions--;
         }
     }
 
-
-
-
     lightTorch() {
+        const uiService = this.state.game.getService('ui');
+        const audioService = this.state.game.getService('audio');
+        const renderService = this.state.game.getService('render');
         let message = '';
 
         if (this.state.player.torches > 0) {
@@ -88,23 +79,28 @@ export class Actions {
                 this.state.needsRender = true;
             }
 
-            this.game.audioManager.playTorch();
+            audioService.playTorch();
         } else {
             message = 'You have no torches left.';
         }
-        this.ui.writeToLog(message);
+        uiService.writeToLog(message);
+        if (this.state.needsRender) renderService.renderIfNeeded();
     }
 
     torchExpired() {
-        this.game.audioManager.playTorch(false);
+        const uiService = this.state.game.getService('ui');
+        const audioService = this.state.game.getService('audio');
+        const renderService = this.state.game.getService('render');
+        audioService.playTorch(false);
         this.state.player.torchLit = false;
         this.state.torchExpires = 0;
         this.state.discoveryRadius = this.state.discoveryRadiusDefault;
-        this.ui.writeToLog('The torch has burned out!');
-        this.render.render();
+        uiService.writeToLog('The torch has burned out!');
+        renderService.renderIfNeeded();
     }
 
     placeTreasure(treasure) {
+        const renderService = this.state.game.getService('render');
         const tier = this.state.tier;
         const map = this.state.levels[tier].map;
         const tierTreasures = this.state.treasures[tier];
@@ -142,10 +138,14 @@ export class Actions {
 
         this.state.needsRender = true;
         if (!treasure.suppressRender) {
-            this.render.renderIfNeeded();
+            renderService.renderIfNeeded();
         }
     }
+
     pickupTreasure(x, y) {
+        const uiService = this.state.game.getService('ui');
+        const renderService = this.state.game.getService('render');
+        const playerInventoryService = this.state.game.getService('player').playerInventory;
         const tier = this.state.tier;
         const tierTreasures = this.state.treasures[tier];
         const treasureIndex = tierTreasures.findIndex(t => t.x === x && t.y === y);
@@ -168,29 +168,25 @@ export class Actions {
             }
             if (treasure.items && treasure.items.length) {
                 treasure.items.forEach(item => {
-                    this.playerInventory.addItem(item);
+                    playerInventoryService.addItem(item);
                     pickupMessage.push(item.name);
                 });
             }
 
             if (pickupMessage.length) {
                 const message = `Found ${pickupMessage.join(', ')} from ${treasure.name || 'a treasure'}!`;
-                this.ui.writeToLog(message);
+                uiService.writeToLog(message);
             }
 
-            // Remove the treasure
             tierTreasures.splice(treasureIndex, 1);
 
-            // Update the map unconditionally since the treasure is gone
             const map = this.state.levels[tier].map;
             console.log(`Before clearing tile at (${x}, ${y}): '${map[y][x]}'`);
             map[y][x] = ' ';
             console.log(`After clearing tile at (${x}, ${y}): '${map[y][x]}'`);
 
             this.state.needsRender = true;
-           
-                this.render.renderIfNeeded();
-            
+            renderService.renderIfNeeded();
         } else {
             console.log(`No treasure found at (${x}, ${y})`);
         }

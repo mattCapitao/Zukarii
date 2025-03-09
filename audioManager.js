@@ -1,3 +1,5 @@
+console.log("audioManager.js loaded");
+
 export class AudioManager {
     constructor() {
         this.sounds = {};
@@ -8,9 +10,8 @@ export class AudioManager {
 
     preloadSounds() {
         const soundFiles = {
-           torchBurning: '/audio/torch-burning.mp3',
+            torchBurning: '/audio/torch-burning.mp3',
             backgroundMusic: '/audio/haunted.wav',
- 
         };
 
         for (const [key, path] of Object.entries(soundFiles)) {
