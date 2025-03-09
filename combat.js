@@ -1,6 +1,8 @@
 console.log("Combat.js loaded");
 
-import { State } from './state.js';
+
+
+import { State } from './State.js';
 
 export class Combat {
     constructor(state, game) {
@@ -70,6 +72,7 @@ export class Combat {
             this.handleMonsterResponse(monster, combatLogMsg, true);
         }
     }
+
 
 toggleRanged(event) {
     const uiService = this.state.game.getService('ui');
