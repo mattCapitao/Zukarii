@@ -53,7 +53,7 @@ export class Combat {
         if (canRetaliate) {
             const playerService = this.state.game.getService('player');
             const playerKilled = monstersService.handleMonsterAttack(monster, playerService);
-            uiService.updateStats();
+            uiService.statRefreshUI();
             if (playerKilled) {
                 // No additional action needed here; death is handled in Monsters
             }
@@ -196,7 +196,7 @@ toggleRanged(event) {
                 this.state.projectile = null;
                 this.state.needsRender = true;
                 renderService.renderIfNeeded();
-                uiService.updateStats();
+                uiService.statRefreshUI();
                 break;
             }
         }
@@ -214,6 +214,6 @@ toggleRanged(event) {
 
         this.state.projectile = null;
         this.state.needsRender = true;
-        this.state.game.endTurn();
+        renderService.renderIfNeeded();
     }
 }

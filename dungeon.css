@@ -509,6 +509,8 @@ align-content:flex-start;
     margin-bottom: 0.625rem; /* ~10px */
 }
 
+
+
     #equipped-items div.col {
         display: flex;
         flex-direction: column;
@@ -517,19 +519,75 @@ align-content:flex-start;
         width: 33% !important;
     }
 
+#tabs div.equipped-item {
+    display: flex;
+    flex-direction: column;
+    padding: .3125rem; /* ~5px */
+    height: 6rem;
+    
+}
+
 #tabs p.equip-slot {
-    margin: 1.625rem;  
-    padding: 0.325rem 0 0.325rem 0;
+    margin: 0.125rem 0 0 0; /* ~2px */
+    padding: 0;
+    margin: 0;
     text-align: center;
     width: 4.25rem; /* ~68px */
     height: 4.25rem; /* ~68px */
+    
+   
 }
-#tabs #equipped-items figcaption {
+#tabs p.empty {
+    width: 4rem;
+    height: 4rem;
+    background-size: 4rem;
+    border-radius: .3125rem; /* ~5px */
+    box-shadow: inset 0 0 20px #000;
+    border: 0.0625rem solid #ccc; /* ~1px */
+}
+    #tabs #equipped-items span {
     margin: 0;
     text-align: center;
     font-size: 0.75rem; /* ~12px */
-    width: 4.25rem; /* ~68px */
+    width: 4rem; /* ~68px */
 }
+
+#tabs p.mainhand {background-image: url("/img/icons/item_slots/mainhand.svg");}
+#tabs p.offhand {background-image: url("img/icons/item_slots/offhand.svg");}
+#tabs p.amulet {background-image: url("img/icons/item_slots/amulet.svg");}
+#tabs p.leftring {background-image: url("img/icons/item_slots/leftring.svg");}
+#tabs p.rightring {background-image: url("img/icons/item_slots/rightring.svg");}
+#tabs p.armor {background-image: url("img/icons/item_slots/armor.svg");}
+
+/* Add more armor later !!!!!
+            #tabs p.equip-slot.head {
+                background-image: url('img/icons/item-slots/head.svg');
+            }
+            #tabs p.equip-slot.gloves {
+                background-image: url('img/icons/item-slots/gloves.svg');
+            }
+            #tabs p.equip-slot.belt {
+                background-image: url('img/icons/item-slots/belt.svg');
+            }
+            #tabs p.equip-slot.legs {
+                background-image: url('img/icons/item-slots/legs.svg');
+            }
+            #tabs p.equip-slot.boots {
+                background-image: url('img/icons/item-slots/boots.svg');
+            }
+            */
+
+#tabs p.equip-slot img.item {
+    width: 4rem; /* ~64px */
+    height: 4rem; /* ~64px */
+    border: 0.0625rem solid #ccc; /* ~1px */
+    padding: 0;
+    margin: 0;
+    border-radius: .3125rem; /* ~5px */
+}
+
+
+
 
 #inventory {
     display: flex;
@@ -568,10 +626,7 @@ align-content:flex-start;
     margin: 0; /* Remove any default margins */
     box-sizing: border-box; /* Include padding/border in height */
 }
-#tabs div.inventory-item {
 
-
-}
     #tabs p.inventory-slot {
     display:block;
     align-items: center;
@@ -593,26 +648,8 @@ align-content:flex-start;
 
 
 
-        #tabs p.equip-slot {
-            margin: 0.125rem 0 0 0; /* ~2px */
-            padding: 0;
-            margin: 0;
-            text-align: center;
-            width: 4.25rem; /* ~68px */
-            height: 4.25rem; /* ~68px */
-        }
-
-        #tabs p.equip-slot img.item {
-            width: 4rem; /* ~64px */
-            height: 4rem; /* ~64px */
-            border: 0.0625rem solid #0f0; /* ~1px */
-            padding: 0;
-            margin: 0;
-            border-radius: .3125rem; /* ~5px */
-        }
 
 
-        /*Grok*/
 
 #tabs p.inventory-slot span.item-label {
     display: block;
@@ -621,11 +658,7 @@ align-content:flex-start;
     width: 4rem; /* ~64px */
     text-align: center;
 }
-#tabs div.equipped-item {
-    display: flex;
-    padding: .3125rem; /* ~5px */
-    height: 6rem;
-}
+
     
 
 .item-tooltip-class {

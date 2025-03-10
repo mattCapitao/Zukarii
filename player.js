@@ -80,7 +80,7 @@ export class Player {
         return [
             { type: 'weapon', attackType: 'ranged' },{ type: 'weapon', attackType: 'melee' },{ type: 'armor' },
 
-            {  }, 
+            { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, 
 
             
 

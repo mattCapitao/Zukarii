@@ -115,24 +115,42 @@ export class UI {
 
         console.log(`updateInventory - equipped: ${equipped}, equippedItems:`, equippedItems, "inventory:", inventory, "items:", this.state.player.inventory.items);
 
-        if (equipped && equippedItems) {
-            equippedItems.innerHTML = `
-            <div class="col">
-                <div class="equipped-item">
-                    <p class="equip-slot mainhand">
+
+        /*
+ <div class="equipped-item">
+                    <p class="equip-slot mainhand" data-equip_slot="{slotId:0, slot: "mainhand" }">
                         <img src="img/icons/items/${equip.mainhand?.icon || 'no-mainhand.svg'}" alt="${equip.mainhand?.name || 'Mainhand'}" 
                              class="item item-icon ${equip.mainhand?.itemTier || 'Empty'} ${equip.mainhand?.type || 'weapon'}" 
-                             data-item='${JSON.stringify(equip.mainhand || { name: "Mainhand", itemTier: "Empty", type: "weapon", slots: ["mainhand"], baseDamageMin: 1, baseDamageMax: 1, uniqueId: this.state.utilities.generateUniqueId(), icon: "no-mainhand.svg" })}'>
+                             data-item='${JSON.stringify(equip.mainhand || { name: "Mainhand", itemTier: "Empty", type: "weapon", slots: ["mainhand"], baseDamageMin: 1, baseDamageMax: 3, uniqueId: this.state.utilities.generateUniqueId(), icon: "no-mainhand.svg" })}'>
                         <br><span class="item-label">Mainhand</span></p>
                 </div>
-                <div class="equipped-item">
-                    <p class="equip-slot rightring">
+                <div class="equipped-item rightring">
+                    <p class="equip-slot rightring empty" data-equip_slot='{"slotId": 1, "slot": "rightring" }'>
                         <img src="img/icons/items/${equip.rightring?.icon || 'no-rightring.svg'}" alt="${equip.rightring?.name || 'Right Ring'}" 
                              class="item item-icon ${equip.rightring?.itemTier || 'Empty'} ${equip.rightring?.type || 'ring'}" 
                              data-item='${JSON.stringify(equip.rightring || { name: "Right Ring", itemTier: "Empty", type: "ring", slot: "rightring", uniqueId: this.state.utilities.generateUniqueId(), icon: "no-rightring.svg" })}'>
-                        <br><span class="item-label">Right Ring </span></p>
+                      </p> <span class="item-label">Right Ring </span>
+                </div>
+
+
+        */
+
+
+
+        if (equipped && equippedItems) {
+            equippedItems.innerHTML = `
+            <div class="col">
+                <div class="equipped-item mainhand">
+                    <p class="equip-slot mainhand empty" data-equip_slot='{"slotId":0, "slot": "mainhand" }'> </p>
+                    <span class="item-label">Mainhand</span>
+                </div>
+               
+                <div class="equipped-item rightring">
+                    <p class="equip-slot rightring empty" data-equip_slot='{"slotId": 1, "slot": "rightring" }'></p>
+                    <span class="item-label">Right Ring</span>
                 </div>
             </div>
+
             <div class="col">
                 <div class="equipped-item">
                     <p class="equip-slot amulet"> 

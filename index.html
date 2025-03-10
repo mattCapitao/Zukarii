@@ -30,7 +30,58 @@
             <div id="character-content" class="ui-tab">
                 <div id="character">
                     <h2>Equipped Items</h2>
-                    <div id="equipped-items"></div>
+                    <div id="equipped-items">
+                        <div class="col">
+                            <div class="equipped-item">
+                                <p class="equip-slot mainhand empty" data-equip_slot='{"slotId":0, "slot": "mainhand" }'></p>
+                                <span class="item-label">Mainhand</span>
+                            </div>
+                            <div class="equipped-item">
+                                <p class="equip-slot rightring">
+                                    <img src="img/icons/items/${equip.rightring?.icon || 'no-rightring.svg'}" alt="${equip.rightring?.name || 'Right Ring'}"
+                                         class="item item-icon ${equip.rightring?.itemTier || 'Empty'} ${equip.rightring?.type || 'ring'}"
+                                         data-item='${JSON.stringify(equip.rightring || { name: "Right Ring", itemTier: "Empty", type: "ring", slot: "rightring", uniqueId: this.state.utilities.generateUniqueId(), icon: "no-rightring.svg" })}'>
+                                    <br><span class="item-label">Right Ring </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="equipped-item">
+                                <p class="equip-slot amulet">
+                                    <img src="img/icons/items/${equip.amulet?.icon || 'no-amulet.svg'}" alt="${equip.amulet?.name || 'Amulet'}"
+                                         class="item item-icon ${equip.amulet?.itemTier || 'Empty'} ${equip.amulet?.type || 'amulet'}"
+                                         data-item='${JSON.stringify(equip.amulet || { name: "Amulet", itemTier: "Empty", type: "amulet", slot: "amulet", uniqueId: this.state.utilities.generateUniqueId(), icon: "no-amulet.svg" })}'>
+                                    <br><span class="item-label">Amulet</span>
+                                </p>
+                            </div>
+                            <div class="equipped-item">
+                                <p class="equip-slot armor">
+                                    <img src="img/icons/items/${equip.armor?.icon || 'no-armor.svg'}" alt="${equip.armor?.name || 'Armor'}"
+                                         class="item item-icon ${equip.armor?.itemTier || 'Empty'} ${equip.armor?.type || 'armor'}"
+                                         data-item='${JSON.stringify(equip.armor || { name: "Armor", itemTier: "Empty", type: "armor", slot: "armor", uniqueId: this.state.utilities.generateUniqueId(), armor: 0, icon: "no-armor.svg" })}'>
+                                    <br><span class="item-label">Armor</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="equipped-item">
+                                <p class="equip-slot offhand">
+                                    <img src="img/icons/items/${equip.offhand?.icon || 'no-offhand.svg'}" alt="${equip.offhand?.name || 'Offhand'}"
+                                         class="item item-icon ${equip.offhand?.itemTier || 'Empty'} ${equip.offhand?.type || 'weapon'}"
+                                         data-item='${JSON.stringify(equip.offhand || { name: "Offhand", itemTier: "Empty", type: "weapon", slots: ["offhand"], baseDamageMin: 0, baseDamageMax: 0, uniqueId: this.state.utilities.generateUniqueId(), icon: "no-offhand.svg" })}'>
+                                    <br><span class="item-label">Offhand</span>
+                                </p>
+                            </div>
+                            <div class="equipped-item">
+                                <p class="equip-slot leftring">
+                                    <img src="img/icons/items/${equip.leftring?.icon || 'no-leftring.svg'}" alt="${equip.leftring?.name || 'Left Ring'}"
+                                         class="item item-icon ${equip.leftring?.itemTier || 'Empty'} ${equip.leftring?.type || 'ring'}"
+                                         data-item='${JSON.stringify(equip.leftring || { name: "Left Ring", itemTier: "Empty", type: "ring", slot: "leftring", uniqueId: this.state.utilities.generateUniqueId(), icon: "no-leftring.svg" })}'>
+                                    <br><span class="item-label">Left Ring</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                     <h2>Character Stats</h2>
                     <div id="character-stat-wrapper"></div>
                 </div>

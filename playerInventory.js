@@ -73,7 +73,7 @@ export class PlayerInventory {
                 const oldWeapon = this.state.player.inventory.equipped[equippedSlot];
                 if (oldWeapon && oldWeapon.itemTier !== "Empty") {
                     this.state.player.inventory.items.push({ ...oldWeapon, equippedSlot: undefined });
-                    uiService.writeToLog(`Unequipped ${oldWeapon.name} to inventory`);
+                    uiService.writeToLog(`Unequipped ${oldWeapon.name} ${oldWeapon.uniqueId}to inventory`);
                     uiService.hideItemTooltip(oldWeapon);
                 }
                 this.state.player.inventory.equipped[equippedSlot] = { ...item };
@@ -197,10 +197,11 @@ export class PlayerInventory {
         }
     }
 
+/*
     handleDrop(draggedItemData, targetItemData, isTargetEquipped) {
         const uiService = this.state.game.getService('ui');
         uiService.writeToLog(`player.handleDrop( ${draggedItemData.name} to ${targetItemData.equippedSlot}!`);
-        
+
         if (!draggedItemData || !draggedItemData.uniqueId || !targetItemData || !targetItemData.uniqueId) {
             console.error("Invalid drag-drop data:", draggedItemData, targetItemData);
             return;
@@ -211,7 +212,6 @@ export class PlayerInventory {
 
         if (!draggedItemData.equippedSlot && isTargetEquipped) {
             if (this.isSlotCompatible(draggedItemData, targetItemData.equippedSlot)) {
-
                 const targetSlot = targetItemData.equippedSlot;
                 const currentEquipped = this.getEquipped(targetSlot);
                 if (currentEquipped && currentEquipped.itemTier !== "Empty") {
@@ -247,4 +247,59 @@ export class PlayerInventory {
         }
         uiService.statRefreshUI();
     }
+*/
+
+
+
+    handleDrop(draggedItemData, targetItemData, isTargetEquipped) {
+        const uiService = this.state.game.getService('ui');
+        uiService.writeToLog(`player.handleDrop( ${draggedItemData.name} to ${targetItemData.equippedSlot}!`);
+        
+        if (!draggedItemData || !draggedItemData.uniqueId || !targetItemData || !targetItemData.uniqueId) {
+            console.error("Invalid drag-drop data:", draggedItemData, targetItemData);
+            return;
+        }
+        uiService.hideItemTooltip(draggedItemData);
+        uiService.hideItemTooltip(targetItemData);
+
+        if (!draggedItemData.equippedSlot && isTargetEquipped) {
+            if (this.isSlotCompatible(draggedItemData, targetItemData.equippedSlot)) {
+
+                const targetSlot = targetItemData.equippedSlot;
+                const currentEquipped = this.getEquipped(targetSlot);
+                if (currentEquipped && currentEquipped.itemTier !== "Empty") {
+                    this.unequipItem(currentEquipped);
+                }
+                const draggedCopy = { ...draggedItemData, equippedSlot: targetSlot };
+                this.equipItem(draggedCopy);
+            } else {
+                uiService.writeToLog(`Cannot equip ${draggedItemData.name} to ${targetItemData.equippedSlot}!`);
+            }
+        } else if (draggedItemData.equippedSlot && !isTargetEquipped) {
+            this.unequipItem(draggedItemData);
+        } else if (draggedItemData.equippedSlot && isTargetEquipped) {
+
+            if (this.isSlotCompatible(draggedItemData, targetItemData.equippedSlot) && this.isSlotCompatible(targetItemData, draggedItemData.equippedSlot)) {
+                const draggedSlot = draggedItemData.equippedSlot;
+                const targetSlot = targetItemData.equippedSlot;
+
+                const draggedCopy = { ...draggedItemData, equippedSlot: targetSlot };
+                const targetCopy = { ...targetItemData, equippedSlot: draggedSlot };
+
+                if (draggedItemData.itemTier !== "Empty") this.unequipItem(draggedItemData);
+                if (targetItemData.itemTier !== "Empty") this.unequipItem(targetItemData);
+
+                if (draggedItemData.itemTier !== "Empty") this.equipItem(draggedCopy);
+                if (targetItemData.itemTier !== "Empty") this.equipItem(targetCopy);
+
+                uiService.writeToLog(`Swapped ${draggedItemData.name} with ${targetItemData.name}`);
+            } else {
+                uiService.writeToLog(`Cannot swap ${draggedItemData.name} with ${targetItemData.name}!`);
+            }
+        } else {
+            console.log("Inventory-to-inventory drag, no action taken");
+        }
+        uiService.statRefreshUI();
+    }
+
 }
