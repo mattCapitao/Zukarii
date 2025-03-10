@@ -15,6 +15,7 @@ export class Data {
                 uniqueId: null, // Will be set by generateUniqueId in constructor
                 itemTier: "Empty",
                 description: "Not equipped.",
+                equippedSlot: "mainhand",
                 icon: "no-mainhand.svg",
             },
             offhand: {
@@ -27,6 +28,7 @@ export class Data {
                 uniqueId: null,
                 itemTier: "Empty",
                 description: "Not equipped.",
+                equippedSlot: "offhand",
                 icon: "no-offhand.svg",
             },
             armor: {
@@ -37,6 +39,7 @@ export class Data {
                 itemTier: "Empty",
                 armor: 0,
                 description: "Not equipped.",
+                equippedSlot: "armor",
                 icon: "no-armor.svg",
             },
             amulet: {
@@ -46,6 +49,7 @@ export class Data {
                 uniqueId: null,
                 itemTier: "Empty",
                 description: "Not equipped.",
+                equippedSlot: "amulet",
                 icon: "no-amulet.svg",
             },
             rightring: {
@@ -55,6 +59,7 @@ export class Data {
                 uniqueId: null,
                 itemTier: "Empty",
                 description: "Not equipped.",
+                equippedSlot: "rightring",
                 icon: "no-rightring.svg",
             },
             leftring: {
@@ -64,6 +69,7 @@ export class Data {
                 uniqueId: null,
                 itemTier: "Empty",
                 description: "Not equipped.",
+                equippedSlot: "leftring",
                 icon: "no-leftring.svg",
             },
         };

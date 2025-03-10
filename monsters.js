@@ -223,7 +223,7 @@ export class Monsters {
 
         this.state.player.hp -= damageDealt;
         uiService.writeToLog(`${monster.name} dealt ${damageDealt} damage to You. Attack(${monsterDamage}) - Armor(${armorDmgReduction}) - Defense(${defenseDmgReduction}) `);
-        uiService.updateStats();
+        uiService.statRefreshUI();
 
         if (this.state.player.hp <= 0) {
             player.death(monster.name);

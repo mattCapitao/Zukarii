@@ -1,4 +1,4 @@
-console.log("PlayerInventory.js loaded");
+ï»¿console.log("PlayerInventory.js loaded");
 
 import { State } from './State.js';
 
@@ -24,6 +24,9 @@ export class PlayerInventory {
     }
 
     isSlotCompatible(item, slot) {
+
+        const uiService = this.state.game.getService('ui');
+        uiService.writeToLog(`player.isSlotCompatible( ${item.name}, ${slot} )`); 
         const slotMap = {
             amulet: "amulet",
             armor: "armor",
@@ -46,8 +49,8 @@ export class PlayerInventory {
 
         const indexToRemove = this.state.player.inventory.items.findIndex(i => i.uniqueId === item.uniqueId);
         if (indexToRemove === -1) {
-            console.error(`Item ${item.name} (ID: ${item.uniqueId}) not found in inventory—cannot equip!`);
-            uiService.writeToLog(`Error: Couldn't equip ${item.name}—not in inventory!`);
+            console.error(`Item ${item.name} (ID: ${item.uniqueId}) not found in inventoryï¿½cannot equip!`);
+            uiService.writeToLog(`Error: Couldn't equip ${item.name}ï¿½not in inventory!`);
             uiService.hideItemTooltip(item);
             return;
         }
@@ -151,7 +154,7 @@ export class PlayerInventory {
             }
             if (!item.equippedSlot) {
                 console.error("Could not determine equippedSlot for", item);
-                uiService.writeToLog(`Error: Could not unequip ${item.name}—slot not found!`);
+                uiService.writeToLog(`Error: Could not unequip ${item.name}ï¿½slot not found!`);
                 uiService.hideItemTooltip(item);
                 return;
             }
@@ -173,13 +176,14 @@ export class PlayerInventory {
             itemTier: "Empty",
             type: item.equippedSlot,
             slot: item.equippedSlot,
+            equippedSlot: item.equippedSlot,
             uniqueId: this.state.utilities.generateUniqueId(),
             icon: `no-${item.equippedSlot}.svg`,
         };
         uiService.hideItemTooltip(this.state.player.inventory.equipped[item.equippedSlot]);
 
         playerService.updateGearStats();
-        uiService.updateStats();
+        uiService.statRefreshUI();
     }
 
     dropItem(index) {
@@ -189,12 +193,14 @@ export class PlayerInventory {
             uiService.hideItemTooltip(item);
             this.state.player.inventory.items.splice(index, 1);
             uiService.writeToLog(`Dropped ${item.name}`);
-            uiService.updateStats();
+            uiService.statRefreshUI();
         }
     }
 
     handleDrop(draggedItemData, targetItemData, isTargetEquipped) {
         const uiService = this.state.game.getService('ui');
+        uiService.writeToLog(`player.handleDrop( ${draggedItemData.name} to ${targetItemData.equippedSlot}!`);
+        
         if (!draggedItemData || !draggedItemData.uniqueId || !targetItemData || !targetItemData.uniqueId) {
             console.error("Invalid drag-drop data:", draggedItemData, targetItemData);
             return;
@@ -205,6 +211,7 @@ export class PlayerInventory {
 
         if (!draggedItemData.equippedSlot && isTargetEquipped) {
             if (this.isSlotCompatible(draggedItemData, targetItemData.equippedSlot)) {
+
                 const targetSlot = targetItemData.equippedSlot;
                 const currentEquipped = this.getEquipped(targetSlot);
                 if (currentEquipped && currentEquipped.itemTier !== "Empty") {
@@ -238,7 +245,6 @@ export class PlayerInventory {
         } else {
             console.log("Inventory-to-inventory drag, no action taken");
         }
-        uiService.updateStats();
+        uiService.statRefreshUI();
     }
 }
-

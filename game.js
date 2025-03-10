@@ -91,9 +91,6 @@ export class Game {
 
     }
 
-    
-
-   
 
     const now = Date.now();
     if (now - this.lastInputTime < this.inputThrottle) return;
@@ -135,11 +132,13 @@ export class Game {
 
     if (event.type === 'keydown') {
         const directionalKeys = new Set(['w', 'W', 'a', 'A', 's', 'S', 'd', 'D', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight']);
+
         if (this.state.isRangedMode && directionalKeys.has(event.key)) {
             const rangedEventKey = keyMap[event.key];
             console.log(`Directional key pressed: ${event.key} - rangedKey: ${rangedEventKey} state.isRangedMode = ${this.state.isRangedMode}`);
             this.getService('combat').rangedAttack(rangedEventKey);
             console.log(`directional key pressed: ${event.key} state.isRanged = ${this.state.isRangedMode} : Ranged attack triggered for`, rangedEventKey);
+            this.#endTurn();
             return;
         }
 
@@ -148,6 +147,9 @@ export class Game {
             case 'ArrowDown': newY++; break;
             case 'ArrowLeft': newX--; break;
             case 'ArrowRight': newX++; break;
+                
+                this.#endTurn();
+                
         }
 
         switch (mappedKey) {
@@ -157,7 +159,6 @@ export class Game {
                     this.state.ui.activeTab = 'character';
                     tabsDiv.classList.remove('hidden');
                     this.getService('ui').renderOverlay();
-                    this.getService('ui').updateInventory(true);
                 } else if (this.state.ui.activeTab.toLowerCase() === 'character') {
                     this.state.ui.overlayOpen = false;
                     tabsDiv.classList.add('hidden');
@@ -165,7 +166,6 @@ export class Game {
                 } else {
                     this.state.ui.activeTab = 'character';
                     this.getService('ui').renderOverlay();
-                    this.getService('ui').updateInventory(true);
                 }
                 return;
             case 'l':
@@ -192,11 +192,11 @@ export class Game {
                 return;
             case 't':
                 this.getService('actions').lightTorch();
-                this.endTurn();
+                this.#endTurn();
                 return;
             case 'h':
                 this.getService('actions').drinkHealPotion();
-                this.endTurn();
+                this.#endTurn();
                 return;
             case ' ':
                 this.getService('combat').toggleRanged(event);
@@ -206,7 +206,6 @@ export class Game {
     }
 
     if (map[newY][newX] === '#') {
-        this.endTurn();
         return;
     }
 
@@ -318,16 +317,16 @@ export class Game {
     } else {
         this.state.player.x = newX;
         this.state.player.y = newY;
+        this.#endTurn();
     }
 
     if (this.state.player.x === newX && this.state.player.y === newY) {
         this.getService('render').updateMapScroll();
     }
 
-    this.endTurn();
 }
 
-    endTurn() {
+    #endTurn() {
         if (this.state.gameOver) {
             console.log("endTurn skipped due to gameOver");
             return;
@@ -340,8 +339,9 @@ export class Game {
             }
         }
         this.getService('player').calculateStats();
-        this.getService('ui').updateStats();
+        this.getService('ui').statRefreshUI()
         this.getService('monsters').moveMonsters();
+        this.state.needsRender = true;
         this.getService('render').renderIfNeeded();
     }
 
@@ -359,9 +359,7 @@ export class Game {
         this.getService('render').renderIfNeeded();
         document.addEventListener('keydown', this.handleInput);
         document.addEventListener('keyup', this.handleInput);
-        this.getService('ui').updatePlayerInfo(); // Ensure top bar updates
-        this.getService('ui').updatePlayerStatus(); // Ensure bottom bar updates
-        this.getService('ui').updateStats(); // Ensure overlay stats update if open
+        this.getService('ui').statRefreshUI() // Refresh all UI Elements with state data on init - overlay only called if open
     }
 
     initGame() {

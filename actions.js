@@ -20,12 +20,14 @@ export class Actions {
                 this.state.player.maxHp = this.state.player.stats.base.maxHp;
                 healAmount = this.state.player.maxHp - this.state.player.hp;
                 this.state.player.hp = this.state.player.maxHp;
+                uiService.statRefreshUI();
                 uiService.writeToLog(`The fountain surges with power! Fully healed and Max HP increased by ${maxHpBoost} to ${this.state.player.maxHp}!`);
             } else {
                 const missingHp = this.state.player.maxHp - this.state.player.hp;
                 const healPercent = Math.random() * (0.5 - 0.3) + 0.3;
                 healAmount = Math.round(missingHp * healPercent);
                 this.state.player.hp = Math.min(this.state.player.hp + healAmount, this.state.player.maxHp);
+                uiService.statRefreshUI();
                 uiService.writeToLog(`The fountain restores ${healAmount} HP. Current HP: ${this.state.player.hp}/${this.state.player.maxHp}`);
             }
 
@@ -57,6 +59,7 @@ export class Actions {
             } 
             uiService.writeToLog(healMessage);
             this.state.player.healPotions--;
+            uiService.statRefreshUI();
         }
     }
 
@@ -85,6 +88,7 @@ export class Actions {
         }
         uiService.writeToLog(message);
         if (this.state.needsRender) renderService.renderIfNeeded();
+
     }
 
     torchExpired() {

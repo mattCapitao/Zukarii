@@ -23,7 +23,7 @@ export class State {
             overlayOpen: false,
             activeTab: 'log',
             logEntries: [],
-            maxLogEntries: 20
+            maxLogEntries: 60
         };
         this.player = {
             x: 1, y: 1,

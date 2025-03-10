@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grok Mage Dungeon</title>
-   <link rel="stylesheet" href="/4.css">
+    <link rel="stylesheet" href="/4.css">
     <link rel="stylesheet" href="/dungeon.css">
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -13,17 +13,37 @@
     <link rel="manifest" href="/site.webmanifest" />
 </head>
 <body>
-    <div id="splash"></div>
-    <div id="game">
-        <pre id="map"></pre>
-    </div>
-    <div id="ui-layer">
-        <div id="player-info"></div>
-        <div id="tabs" class="hidden">
-            <div id="log"></div>
+<div id="splash"></div>
+<div id="game">
+    <pre id="map"></pre>
+</div>
+<div id="ui-layer">
+    <div id="player-info"></div>
+    
+    <div id="tabs" class="hidden">
+        <div id="tab-wrapper">
+            <div id="tab-menu"></div>
+            <div id="log-content" class="ui-tab">
+                <h2>Adventure Log</h2>
+                <div id="log"></div>
+            </div>
+            <div id="character-content" class="ui-tab">
+                <div id="character">
+                    <h2>Equipped Items</h2>
+                    <div id="equipped-items"></div>
+                    <h2>Character Stats</h2>
+                    <div id="character-stat-wrapper"></div>
+                </div>
+                <div id="inventory">
+
+                </div>
+            </div>
         </div>
-        <div id="player-status"></div>
     </div>
+
+    <div id="player-status"></div>
+</div>
+     
     <script type="module" src="/main.js"></script>
 </body>
 </html>

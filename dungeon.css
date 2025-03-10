@@ -401,19 +401,22 @@ hr {
 
 #tab-menu {
 display: flex;
-justify-content: space-around;
+align-content:flex-start;
 }
 
-#tab-menu button {
+.tabs-button {
+    flex: 15;
+    cursor: pointer;
+}
+#close-tabs {
     flex: 1;
-    width: 30%;
     cursor: pointer;
 }
 
 
-#log {
+#tab-wrapper {
     height: 100%;
-    padding: 0.3125rem; /* ~5px */
+    padding: 0.3125rem; 
     margin: 0;
     overflow-y: hidden;
 }
@@ -421,7 +424,31 @@ justify-content: space-around;
 #log-content {
     height: 30rem; /* ~400px */
     width: 100%;
+    overflow-y: hidden;
 }
+
+#log {
+    display: flex;
+    flex-direction:column;
+    width: 100%;
+    height: 28rem; /* Keep max height but let content dictate rows */
+    padding: 0.625rem; /* Outer padding */
+    border: 0.0625rem solid #0f0;
+    border-radius: .625rem;
+    overflow-y: auto;
+    scrollbar-color: #0f0 #111;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+    background: rgba(20, 30, 20, 0.9);
+}
+
+    #log p {
+        display: flex;
+        margin-bottom: 0.3125rem; /* ~5px */
+        line-height: 1.2;
+    }
+
+
 
 #character-content {
     height: 30rem; /* ~400px */
@@ -434,7 +461,7 @@ justify-content: space-around;
         display: flex;
         flex-direction: column;
         height: 30rem; /* ~400px */
-        width: 32%;
+        width: 29%;
         margin-top: 0.625rem; /* ~10px */
     }
 
@@ -508,38 +535,64 @@ justify-content: space-around;
     display: flex;
     flex-direction: column;
     height: 30rem; /* ~400px */
-    width: 65%;
+    width: 68%;
     margin-top: 0.625rem; /* ~10px */
 }
 
 #tabs div.inventory-item-wrapper {
     display: flex;
     flex-wrap: wrap;
+    flex-direction: row;
+    -ms-align-content: flex-start;
+    -webkit-align-content: flex-start;
+    align-content: flex-start;
+    gap: 0.625rem; /* ~5px */
     width: 100%;
-    height: 30rem;
-    padding: 0.625rem; /* ~10px */
-    border: 0.0625rem solid #0f0; /* ~1px */
+    height: 30rem; /* Keep max height but let content dictate rows */
+    padding: 0.625rem; /* Outer padding */
+    border: 0.0625rem solid #0f0;
     border-radius: .625rem;
     overflow-y: auto;
     scrollbar-color: #0f0 #111;
     scrollbar-width: thin;
     scrollbar-gutter: stable;
     background: rgba(20, 30, 20, 0.7);
-    gap: 0.3125rem;
 }
 
-        #tabs div.inventory-item {
-            display: flex;
-            padding: 0;
-            height: 4.25rem;  
-        }
-#tabs div.equipped-item {
+#tabs div.inventory-item {
+    padding: 0;
     display: flex;
-    padding: .3125rem; /* ~5px */
-    height: 6rem;
+    flex-direction: column;
+    min-height: 4.25rem; /* ~68px */
+    width: 4.25rem; /* ~68px */
+    margin: 0; /* Remove any default margins */
+    box-sizing: border-box; /* Include padding/border in height */
+}
+#tabs div.inventory-item {
+
+
+}
+    #tabs p.inventory-slot {
+    display:block;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+ 
+
+
 }
 
-        #tabs p.inventory-slot,
+    #tabs p.inventory-slot img.item {
+        width: 4rem; /* Match the 64px design */
+        height: 4rem; /* Match the 64px design */
+        border: 0.0625rem solid #0f0;
+        padding: 0;
+        margin: 0;
+        border-radius: .3125rem;
+    }
+
+
+
         #tabs p.equip-slot {
             margin: 0.125rem 0 0 0; /* ~2px */
             padding: 0;
@@ -549,8 +602,6 @@ justify-content: space-around;
             height: 4.25rem; /* ~68px */
         }
 
-
-        #tabs p.inventory-slot img.item,
         #tabs p.equip-slot img.item {
             width: 4rem; /* ~64px */
             height: 4rem; /* ~64px */
@@ -559,26 +610,23 @@ justify-content: space-around;
             margin: 0;
             border-radius: .3125rem; /* ~5px */
         }
-        /* GROK*/
-#tabs p.inventory-slot {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-    width: 4.25rem;
-    min-height: 4.25rem;
-    height: auto;
-}
+
+
         /*Grok*/
 
-        #tabs p.inventory-slot span.item-label {
-            color: #0f0;
-            font-size: 0.5rem; 
-            width: 4rem; /* ~64px */
-            text-align: center;
-        }
-       
+#tabs p.inventory-slot span.item-label {
+    display: block;
+    color: #0f0;
+    font-size: .75rem;
+    width: 4rem; /* ~64px */
+    text-align: center;
+}
+#tabs div.equipped-item {
+    display: flex;
+    padding: .3125rem; /* ~5px */
+    height: 6rem;
+}
+    
 
 .item-tooltip-class {
     padding: 0.625rem; /* ~5px */
@@ -672,29 +720,6 @@ background-color: darkorchid !important;
             background-color: whitesmoke !important;
         }
 
-/*
-     #tabs p.inventory-slot span.item-label.relic{
-            color: gold;
-        }
-
-.item-tooltip-class.relic {
-    color: gold;
-    border: 0.0625rem solid gold; 
-}
-
-    .item-tooltip-class.relic hr {
-        border: 0;
-        border-top: .0625rem solid gold; 
-        height: 0.0625rem; 
-        background: gold;
-        margin: 0.625rem 0; 
-    }
-
-#tabs p.inventory-slot.relic img.item,
-#tabs p.equip-slot.relic img.item {
-    border: 0.0625rem solid #0f0; 
-}
-*/
 
 .item-tooltip-name {
     width: 100%;
@@ -731,11 +756,7 @@ tooltip-description {
     padding: 0.625rem; /* ~10px */
 }
 
-#log p {
-    margin: 0;
-    padding: 0;
-    line-height: 1.2;
-}
+
 
 
 
