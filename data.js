@@ -2,77 +2,7 @@
 
 export class Data {
     constructor() {
-        // Static JSON objects defined here
-        this._emptyEquipSlots = {
-            mainhand: {
-                name: "Mainhand",
-                type: "weapon",
-                attackType: "melee",
-                slots: ["mainhand"],
-                baseBlock: 0,
-                baseDamageMin: 1,
-                baseDamageMax: 1,
-                uniqueId: null, // Will be set by generateUniqueId in constructor
-                itemTier: "Empty",
-                description: "Not equipped.",
-                equippedSlot: "mainhand",
-                icon: "no-mainhand.svg",
-            },
-            offhand: {
-                name: "Offhand",
-                type: "weapon",
-                slots: ["offhand"],
-                baseRange: 0,
-                baseDamageMin: 0,
-                baseDamageMax: 0,
-                uniqueId: null,
-                itemTier: "Empty",
-                description: "Not equipped.",
-                equippedSlot: "offhand",
-                icon: "no-offhand.svg",
-            },
-            armor: {
-                name: "Armor",
-                type: "armor",
-                slot: "armor",
-                uniqueId: null,
-                itemTier: "Empty",
-                armor: 0,
-                description: "Not equipped.",
-                equippedSlot: "armor",
-                icon: "no-armor.svg",
-            },
-            amulet: {
-                name: "Amulet",
-                type: "amulet",
-                slot: "amulet",
-                uniqueId: null,
-                itemTier: "Empty",
-                description: "Not equipped.",
-                equippedSlot: "amulet",
-                icon: "no-amulet.svg",
-            },
-            rightring: {
-                name: "Right Ring",
-                type: "ring",
-                slot: "rightring",
-                uniqueId: null,
-                itemTier: "Empty",
-                description: "Not equipped.",
-                equippedSlot: "rightring",
-                icon: "no-rightring.svg",
-            },
-            leftring: {
-                name: "Left Ring",
-                type: "ring",
-                slot: "leftring",
-                uniqueId: null,
-                itemTier: "Empty",
-                description: "Not equipped.",
-                equippedSlot: "leftring",
-                icon: "no-leftring.svg",
-            },
-        };
+        // Static JSON objects defined her
 
         this._monsterTemplates = [
             {
@@ -193,6 +123,7 @@ export class Data {
                 name: "Crooked Wand",
                 type: "weapon",
                 attackType: "ranged",
+                baseRange: 4,
                 slots: ["mainhand", "offhand"],
                 baseDamageMin: 2,
                 baseDamageMax: 3,
@@ -200,41 +131,6 @@ export class Data {
                 description: "A crooked wand, hope it shoots straighter than it looks.",
                 uniqueId: null,
                 icon: "crooked-wand.svg",
-            },
-            {
-                name: "Bronze Dagger",
-                type: "weapon",
-                attackType: "melee",
-                slots: ["mainhand", "offhand"],
-                baseDamageMin: 2,
-                baseDamageMax: 3,
-                itemTier: "common",
-                description: "The blade is sharp but the metal is soft.",
-                uniqueId: null,
-                icon: "dagger.svg",
-            },
-            {
-                name: "Willow Wand",
-                type: "weapon",
-                attackType: "ranged",
-                slots: ["mainhand", "offhand"],
-                baseDamageMin: 2,
-                baseDamageMax: 4,
-                itemTier: "common",
-                description: `No sense any innate power here, but it should do the trick.`,
-                uniqueId: null,
-                icon: "willow-wand.svg",
-            },
-            {
-                name: "Apprentice Robes",
-                type: "armor",
-                attackType: null,
-                slot: "armor",
-                armor: 2,
-                itemTier: "common",
-                description: "Plain and ordinary, but there are no holes and the fabric is heavy",
-                uniqueId: null,
-                icon: "robe.svg",
             },
         ];
 
@@ -311,12 +207,6 @@ export class Data {
             },
         ];
 
-    }
-
-    // Getter for emptyEquipSlots
-    getEmptyEquipSlots() {
-        // Return a deep copy to prevent external modification
-        return JSON.parse(JSON.stringify(this._emptyEquipSlots));
     }
 
     getMonsterTemplates() {

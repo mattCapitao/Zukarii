@@ -28,37 +28,21 @@ export class Player {
         this.state.player.nextLevelXp = 100;
         this.updateGearStats()
     }
-    /*
-    initializeEquippedSlots() {
-        const emptyEquipSlots = this.state.data.getEmptyEquipSlots();
-        const slotsWithIds = {};
-        Object.entries(emptyEquipSlots).forEach(([slot, data]) => {
-            slotsWithIds[slot] = {
-                ...data,
-                uniqueId: this.state.utilities.generateUniqueId(),
 
-            };
-        });
-        return slotsWithIds;
-    }
-*/
     addStartingItems() {
         const itemsService = this.state.game.getService('items');
         const playerInventory = this.state.game.getService('playerInventory');
-        /*
-        this.state.player.inventory.equipped = this.initializeEquippedSlots();
-        //console.log("Equipped slots initialized", this.state.player.inventory.equipped);
-        */
+
         const startItems = this.state.data.getStartItems();
         const uniqueItems = this.state.data.getUniqueItems();
 
-        const itemsToAdd = this.getInitialItems(startItems, uniqueItems);
-        const randomStartItems = this.getRandomStartItems();
+        const itemsToAdd = this.getInitialItems(startItems, uniqueItems); //create array of specific start/unique items
+
+        const randomStartItems = this.getRandomStartItems(); //create array of start items with some params to send to ROG
 
         randomStartItems.forEach(item => {
-            const maxRogTierRoll = 20; //  15:5 junk:common split
-            const rogTierRoll = (Math.floor(Math.random() * maxRogTierRoll) + 1) * 0.01; // 0.01 - 0.25
-            const rogItem = itemsService.rogItem(rogTierRoll, item);
+            item.tierIndex = Math.round(Math.random() - .2) || 0; 
+            const rogItem = itemsService.getItem(item);
             itemsToAdd.push(rogItem);
         });
 
@@ -72,23 +56,15 @@ export class Player {
     getInitialItems(startItems, uniqueItems) {
         return [
             // Add specific start items and unique items if needed
-            // startItems[0], startItems[1], startItems[2],
+            startItems[0], startItems[1], startItems[2],
            //uniqueItems[0],
         ];
     }
 
     getRandomStartItems() {
         return [
-            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, { type: 'armor' },
-
-
-            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
-            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
-            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
-            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
-            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
-            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
-            { type: 'ring', }, { type: 'ring', }, {type: 'amulet'},
+            //{ type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
+            //{ type: 'ring', }, { type: 'ring', }, {type: 'amulet'},
 
             
 

@@ -7,6 +7,7 @@ import { State } from './State.js';
 import { Level } from './Level.js';
 import { UI } from './UI.js';
 import { Render } from './Render.js';
+import { LootTables } from './LootTables.js';
 import { Items } from './Items.js';
 import { Player } from './Player.js';
 import { Monsters } from './Monsters.js';
@@ -22,6 +23,7 @@ export class Game {
         this.level = new Level(this.state);
         this.ui = new UI(this.state);
         this.render = new Render(this.state);
+        this.lootTables = new LootTables(this.state);
         this.items = new Items(this.state);
         this.playerInventory = new PlayerInventory(this.state); // Initialize before Player
         this.player = new Player(this.state);
@@ -49,6 +51,7 @@ export class Game {
             'level': this.level,
             'ui': this.ui,
             'render': this.render,
+            'lootTables': this.lootTables,
             'items': this.items,
             'player': this.player,
             'playerInventory': this.playerInventory,
@@ -147,7 +150,7 @@ export class Game {
             case 'ArrowLeft': newX--; break;
             case 'ArrowRight': newX++; break;
                 
-                this.#endTurn();
+               
                 
         }
 
@@ -216,7 +219,10 @@ export class Game {
     //console.log("needsRender set to true for action at", newX, newY, "(this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
     //console.log(`Checking for treasure at (${newX}, ${newY}): map tile = '${map[newY][newX]}', treasureIndex = ${treasureIndex}`);
     if (monster) {
-        this.getService('combat').meleeAttack(monster);
+        if (this.getService('combat').meleeAttack(monster)) {
+            this.#endTurn();
+        }
+        
         this.getService('player').checkLevelUp();
     } else if (map[newY][newX] === '⇓' && this.state.tier < Number.MAX_SAFE_INTEGER) {
         this.state.tier++;

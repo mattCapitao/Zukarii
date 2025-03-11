@@ -43,13 +43,13 @@ export class PlayerInventory {
         if (index === -1) {
             console.error(`Item ${item.name} (ID: ${item.uniqueId}) not found in inventory`);
             uiService.writeToLog(`Error: ${item.name} not in inventory`);
-            //console.log("Current inventory:", this.state.player.inventory.items);
+            console.log("Current inventory:", this.state.player.inventory.items);
             return false;
         }
 
         const currentItem = this.getEquipped(slot);
         if (currentItem) {
-            this.unequipItem(slot, false); // Move to inventory without UI update yet
+            this.unequipItem(slot, true); // Move to inventory without UI update yet
         }
 
         this.state.player.inventory.items.splice(index, 1);
@@ -76,12 +76,12 @@ export class PlayerInventory {
     }
 
     dropItem(index, item) {
-        //console.error("Dropping item:", item, "inventoryIndex: ", index);
+        console.error("Dropping item:", item, "inventoryIndex: ", index);
         const uiService = this.state.game.getService('ui');
         const actionsService = this.state.game.getService('actions');
         //const item = this.state.player.inventory.items[index];
         if (!item) {
-            console.log
+            console.log("Invalid item to drop:", item);
             return;
         }
         this.state.player.inventory.items.splice(index, 1);
@@ -106,7 +106,7 @@ export class PlayerInventory {
             return;
         }
 
-        //console.log("Handling drop:", draggedItem, "to", targetSlotData, "isTargetEquipped:", isTargetEquipped);
+        console.log("Handling drop:", draggedItem, "to", targetSlotData, "isTargetEquipped:", isTargetEquipped);
 
         if (isTargetEquipped) {
             const slot = targetSlotData.slot;
@@ -122,10 +122,10 @@ export class PlayerInventory {
             this.equipItem(draggedItem, slot);
         } else if (draggedItem.equippedSlot) {
             // Equipped to inventory
-            this.unequipItem(draggedItem.equippedSlot);
+            this.unequipItem(draggedItem.equippedSlot, true);
             uiService.writeToLog(`Unequipped ${draggedItem.name} to inventory`);
         } else {
-            //console.log("Inventory-to-inventory drag, no action");
+            console.log("Inventory-to-inventory drag, no action");
         }
     }
 }
