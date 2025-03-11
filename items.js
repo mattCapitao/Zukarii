@@ -33,7 +33,7 @@ export class Items {
             amulet: {
                 base: ['maxLuck'],
                 bonus: [
-                    'maxHp', 'maxMana', 'maxLuck',
+                    'maxHp', 'maxMana', 
                     'intellect', 'prowess', 'agility',
                     'range', 'block', 'defense',
                     'meleeDamageBonus', 'rangedDamageBonus', 'damageBonus'
@@ -42,7 +42,7 @@ export class Items {
             ring: {
                 base: ['maxLuck'],
                 bonus: [
-                    'maxHp', 'maxMana', 'maxLuck',
+                    'maxHp', 'maxMana', 
                     'intellect', 'prowess', 'agility',
                     'range', 'block', 'defense',
                     'meleeDamageBonus', 'rangedDamageBonus', 'damageBonus'
@@ -54,6 +54,8 @@ export class Items {
 
     getItem(tierIndex, item = {}) {
         console.log(`getItem(${tierIndex}) called with item:`, item);
+
+        console.log('this is Items:', this instanceof Items); // Debug context
 
         const maxRogTier = 4;
 
@@ -69,8 +71,12 @@ export class Items {
             item.tierIndex = tierIndex;
             item.itemTier = this.itemTiers[tierIndex];
             console.log(`getItem(${tierIndex}) calling this.#rogItem(${item})`, item);
-
-            return this.#rogItem(item);
+            try {
+                return this.#rogItem(item);
+            } catch (err) {
+                console.error(`Error in getItem(${tierIndex}) calling this.#rogItem(${item}):`, err);
+                return null;
+            }
 
         } else if (!item) {
             error.log('getItem() called with insufficient data to generate an item: ', item);
@@ -84,15 +90,17 @@ export class Items {
 
         switch (item.itemTier || item.tierIndex) {
 
-            case 'legndary': case 5: randomItem = this.legendaryItmes[Math.floor(Math.random() * this.legendaryItems.length)]; break;
+            case 'legendary': case 5: newItem = this.legendaryItmes[Math.floor(Math.random() * this.legendaryItems.length)]; break;
 
-            case 'relic': case 6: randomItem = this.relicItems[Math.floor(Math.random() * this.relicItems.length)]; break;
+            case 'relic': case 6: newItem = this.relicItems[Math.floor(Math.random() * this.relicItems.length)]; break;
 
-            case 'artifact': case 7 : randomItem = this.artifactItems[Math.floor(Math.random() * this.artifactItems.length)]; break;
+            case 'artifact': case 7 : newItem = this.artifactItems[Math.floor(Math.random() * this.artifactItems.length)]; break;
 
             default:
                 error.log('No Unique Item table could be fond for Item: ', item);
+                return null;
         }
+        return newItem;
     }
 
 
@@ -166,7 +174,10 @@ export class Items {
                 item.icon = 'armor.svg';
                 break;
             case 'amulet':
-                item.maxLuck = Math.floor(Math.random() * 2) + this.statRoll("maxLuck", item);
+
+                const luckRollAmulet = this.rollMaxLuck(item);
+                if (luckRollAmulet !== 0) item.maxLuck = luckRollAmulet;
+
                 if (item.tierIndex > 1) {
                     //console.log(`requesting bonus stats for item:`, item);
                     item.stats = this.getBonusStats(statOptions.bonus, item);
@@ -174,7 +185,10 @@ export class Items {
                 item.icon = 'amulet.svg';
                 break;
             case 'ring':
-                item.maxLuck = Math.floor(Math.random() * 2) + this.statRoll("maxLuck", item);
+
+                const luckRollRing = this.rollMaxLuck(item);
+                if (luckRollRing !== 0) item.maxLuck = luckRollRing;
+
                 if (item.tierIndex > 1) {
                     //console.log(`requesting bonus stats for item:`, item);
                     item.stats = this.getBonusStats(statOptions.bonus, item);
@@ -182,8 +196,6 @@ export class Items {
                 item.icon = 'ring.svg';
                 break;
         }
-
-    
 
 
         item.name = `${item.itemTier} ${item.type}`;
@@ -195,6 +207,29 @@ export class Items {
         item.description = `A ${item.itemTier} ${item.type} ${statsText}`;
         return item;
     }
+
+
+    rollMaxLuck(item) {
+        const dungeonTier = this.state.tier || 1;
+        const baseRoll = Math.floor(Math.random() * 12) - 4; // -4 to 7
+        const tierFactor = item.tierIndex + Math.floor(dungeonTier / 5);
+        const positiveCap = tierFactor * 2 + 1;
+        const negativeCap = -Math.floor(tierFactor * 2 / 3);
+        let scaledRoll = baseRoll < 0 ? baseRoll : baseRoll + 1; // -4 to -1, 1 to 8
+        scaledRoll = Math.max(Math.min(scaledRoll, positiveCap), negativeCap);
+        const finalRoll = scaledRoll + Math.floor(Math.random() * 2);
+
+        const rangeWidth = positiveCap - negativeCap + 1;
+        const gapSize = Math.floor(rangeWidth * 0.5);
+        const centerThresholdLow = Math.floor((negativeCap + positiveCap) / 2 - gapSize / 2);
+        const centerThresholdHigh = centerThresholdLow + gapSize - 1;
+
+        if (finalRoll >= centerThresholdLow && finalRoll <= centerThresholdHigh) {
+            return 0; // 50% no luck
+        }
+        return finalRoll; // 50% luck
+    }
+
 
     statRoll(stat, item) {
         switch (stat) {
@@ -208,8 +243,6 @@ export class Items {
                 return Math.floor(Math.random() * 2) + 1;
             case 'armor':
                 return Math.floor(item.tierIndex) + 1;
-            case 'maxLuck':
-                return Math.min(Math.floor(Math.random() * 5) + Math.floor(Math.random() * 5) - 4, item.tierIndex * 2 + 1) + Math.floor(Math.random() * 2);
             case 'maxHp':
                 return item.tierIndex * 2;
             case 'maxMana':
@@ -260,7 +293,6 @@ export class Items {
         //console.log(`Returning selected stats:`, selectedStats);
         return selectedStats;
     }
-
 
     calculateTorchChance() {
         let torchChance;
@@ -351,7 +383,7 @@ export class Items {
         }
     }
 
-        escapeItemProperties(item) {
+    escapeItemProperties(item) {
         const uiService = this.state.game.getService('ui');
         //console.log("Fetching uiService in escapeItemProperties:", uiService);
         if (!uiService || !uiService.utilities) {
@@ -366,70 +398,8 @@ export class Items {
         };
     }
 
-    statRoll(stat, item) {
-        switch (stat) { 
-            case 'baseDamageMin':
-                return Math.floor(item.tierIndex * 1.5);
-            case 'baseDamageMax':
-                return Math.floor(Math.random() * item.tierIndex) + 1;
-            case 'range':
-                return Math.floor(Math.random() * 2) + 1;
-            case 'block':
-                return Math.floor(Math.random() * 2) + 1;
-            case 'armor':
-                return Math.floor(item.tierIndex) + 1;
-            case 'maxLuck':
-                return Math.min(Math.floor(Math.random() * 5) + Math.floor(Math.random() * 5) - 4, item.tierIndex * 2 + 1) + Math.floor(Math.random() * 2);
-            case 'maxHp':
-                return item.tierIndex * 2;
-            case 'maxMana':
-                return Math.floor(item.tierIndex / 2);
-            case 'prowess':
-                return Math.floor(item.tierIndex / 2);
-            case 'agility':
-                return Math.floor(item.tierIndex / 2);
-            case 'intellect':
-                return Math.floor(item.tierIndex / 2);
-            case 'defense':
-                return Math.floor(item.tierIndex) + 1;
-            case 'damageBonus':
-                return Math.floor(item.tierIndex) + 1;
-            case 'meleeDamageBonus':
-                return Math.floor(item.tierIndex) + 1;
-            case 'rangedDamageBonus':
-                return Math.floor(item.tierIndex) + 1;
-            case 'baseBlock':
-                return Math.floor(item.tierIndex) + 1;
-            case 'baseRange':
-                return Math.floor(item.tierIndex) + 4;
-            default:
-                //console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
-                return 0;
-        }
-    }
+    
 
-    getBonusStats(statArray, item) {
-        //console.log(`getBonusStats() called with statArray:`, statArray, `for item: `, item);
-        const itemTier = item.tierIndex;
-        let availableStats = [...statArray];
-        let selectedStats = {};
-
-        const count = itemTier;
-
-        for (let i = 0; i < count && availableStats.length > 0; i++) {
-            const index = Math.floor(Math.random() * availableStats.length);
-            const stat = availableStats.splice(index, 1)[0];
-            const statValue = this.statRoll(stat, item);
-
-            if (selectedStats.hasOwnProperty(stat)) {
-                selectedStats[stat] += statValue;
-            } else {
-                selectedStats[stat] = statValue;
-            }
-        }
-        //console.log(`Returning selected stats:`, selectedStats);
-        return selectedStats;
-    }
 
 
     // Deprecated code for reference

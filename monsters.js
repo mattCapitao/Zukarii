@@ -10,9 +10,9 @@ export class Monsters {
                 name: "Gold Theft",
                 description: "Steals gold on hit",
                 onHit: function (monster, player) {
-                    const goldStolen = Math.floor(player.gold * 0.1);
+                    const goldStolen = Math.floor(player.gold * 0.1) +1 ;
                     player.gold -= goldStolen;
-                    this.state.game.getService('ui').writeToLog(`${monster.name} has stolen ${goldStolen} gold from you!`);
+                    this.state.game.getService('ui').writeToLog(`${monster.name}'s' Greedy Claw attack has stolen ${goldStolen} gold from you!`);
                     if (player.gold < 0) {
                         player.gold = 0;
                         this.state.game.getService('ui').writeToLog(`ALL YOUR GOLD ARE BELONG TO ${monster.name} `);

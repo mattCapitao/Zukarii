@@ -103,10 +103,12 @@ export class Combat {
 
     // Melee attack with dual wield support
     meleeAttack(monster) {
+        /* // commented out for now since a melee attack against a monster is currently only triggered when the player attempts to move into the monster's tile.
         if (!this.isInMeleeRange(monster)) {
             this.game.getService('ui').writeToLog(`The ${monster.name} is too far for a melee attack!`);
-            return;
+            return false;
         }
+        */
 
         const meleeWeapons = this.getMeleeWeapons();
         const isDualWield = meleeWeapons.length === 2;
@@ -116,13 +118,15 @@ export class Combat {
         let monsterAlive = monster.hp > 0;
         let combatLogMsg = '';
 
-        meleeWeapons.forEach(({ slot, weapon }, index) => {
-            if (!monsterAlive) return; // Stop if monster dies
+        for (const [index, { slot, weapon }] of meleeWeapons.entries()) {
+            if (!monsterAlive) break; // Stop if monster dies
+
             // Miss chance: 20% for mainhand, 30% for offhand in dual wield
             const missChance = isDualWield ? (index === 0 ? 20 : 30) : 0;
+
             if (Math.random() * 100 < missChance) {
                 this.game.getService('ui').writeToLog(`Your ${slot} attack missed the ${monster.name}!`);
-                return;
+                continue;
             }
             //console.log('ERROR: Weapon sent to dmg calc:', weapon);
             const { damage, combatLogMsg } = this.calculateAndLogDamage(
@@ -136,13 +140,15 @@ export class Combat {
             if (monsterDied) {
                 monsterAlive = false;
             }
-        });
+        }
 
         if (monsterAlive) {
             this.handleMonsterResponse(monster, combatLogMsg, true);
         }
 
         this.state.needsRender = true;
+
+        return true;
     }
 
     toggleRanged(event) {
