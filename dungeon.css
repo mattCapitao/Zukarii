@@ -542,7 +542,7 @@ align-content:flex-start;
     height: 4rem;
     background-size: 4rem;
     border-radius: .3125rem; /* ~5px */
-    box-shadow: inset 0 0 20px #000;
+    box-shadow: inset 0 0 10px #000;
     border: 0.0625rem solid #ccc; /* ~1px */
 }
     #tabs #equipped-items span {
@@ -552,12 +552,12 @@ align-content:flex-start;
     width: 4rem; /* ~68px */
 }
 
-#tabs p.mainhand {background-image: url("/img/icons/item_slots/mainhand.svg");}
-#tabs p.offhand {background-image: url("img/icons/item_slots/offhand.svg");}
-#tabs p.amulet {background-image: url("img/icons/item_slots/amulet.svg");}
-#tabs p.leftring {background-image: url("img/icons/item_slots/leftring.svg");}
-#tabs p.rightring {background-image: url("img/icons/item_slots/rightring.svg");}
-#tabs p.armor {background-image: url("img/icons/item_slots/armor.svg");}
+#tabs p.mainhand.empty {background-image: url("/img/icons/item_slots/mainhand.svg");}
+#tabs p.offhand.empty {background-image: url("img/icons/item_slots/offhand.svg");}
+#tabs p.amulet.empty {background-image: url("img/icons/item_slots/amulet.svg");}
+#tabs p.leftring.empty {background-image: url("img/icons/item_slots/leftring.svg");}
+#tabs p.rightring.empty {background-image: url("img/icons/item_slots/rightring.svg");}
+#tabs p.armor.empty {background-image: url("img/icons/item_slots/armor.svg");}
 
 /* Add more armor later !!!!!
             #tabs p.equip-slot.head {

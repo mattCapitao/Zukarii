@@ -1,4 +1,4 @@
-﻿console.log("Render.js loaded");
+﻿//console.log("Render.js loaded");
 
 import { State } from './State.js';
 import { titleScreen } from './titlescreen.js';
@@ -19,7 +19,7 @@ export class Render {
     render() {
         const uiService = this.state.game.getService('ui');
         const playerService = this.state.game.getService('player');
-        console.log("Rendering...", this.state.needsRender, "typeof:", typeof this.state.needsRender);
+        //console.log("Rendering...", this.state.needsRender, "typeof:", typeof this.state.needsRender);
         if (!this.state.needsRender) return;
 
         const titleScreenContainer = document.getElementById('splash');
@@ -211,19 +211,19 @@ export class Render {
         this.state.lastProjectileY = this.state.projectile ? this.state.projectile.y : null;
         this.state.needsInitialRender = false;
         this.state.needsRender = false;
-        console.log("needsRender after render:", this.state.needsRender, "typeof:", typeof this.state.needsRender);
+        //console.log("needsRender after render:", this.state.needsRender, "typeof:", typeof this.state.needsRender);
     }
 
     updateMapScroll() {
         const map = document.getElementById('map');
         const player = document.querySelector('.player');
         if (!player || !map) {
-            console.log("Scroll update failed: Player or map not found");
+            //console.log("Scroll update failed: Player or map not found");
             return;
         }
 
-        console.log(`Map dimensions: scrollWidth=${map.scrollWidth}, scrollHeight=${map.scrollHeight}, clientWidth=${map.clientWidth}, clientHeight=${map.clientHeight}`);
-        console.log(`Player position: offsetLeft=${player.offsetLeft}, offsetTop=${player.offsetTop}`);
+        //console.log(`Map dimensions: scrollWidth=${map.scrollWidth}, scrollHeight=${map.scrollHeight}, clientWidth=${map.clientWidth}, clientHeight=${map.clientHeight}`);
+        //console.log(`Player position: offsetLeft=${player.offsetLeft}, offsetTop=${player.offsetTop}`);
 
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
@@ -287,7 +287,7 @@ export class Render {
                 this.animationFrame = requestAnimationFrame(animateScroll);
             } else {
                 this.animationFrame = null;
-                console.log(`Scroll adjusted to (${map.scrollLeft}, ${map.scrollTop}) for player at (${playerX}, ${playerY})`);
+                //console.log(`Scroll adjusted to (${map.scrollLeft}, ${map.scrollTop}) for player at (${playerX}, ${playerY})`);
             }
         };
 
@@ -298,12 +298,12 @@ export class Render {
         const map = document.getElementById('map');
         const player = document.querySelector('.player');
         if (!player || !map) {
-            console.log("Initial scroll failed: Player or map not found");
+            //console.log("Initial scroll failed: Player or map not found");
             return;
         }
 
-        console.log(`Map dimensions: scrollWidth=${map.scrollWidth}, scrollHeight=${map.scrollHeight}, clientWidth=${map.clientWidth}, clientHeight=${map.clientHeight}`);
-        console.log(`Player position: offsetLeft=${player.offsetLeft}, offsetTop=${player.offsetTop}`);
+        //console.log(`Map dimensions: scrollWidth=${map.scrollWidth}, scrollHeight=${map.scrollHeight}, clientWidth=${map.clientWidth}, clientHeight=${map.clientHeight}`);
+        //console.log(`Player position: offsetLeft=${player.offsetLeft}, offsetTop=${player.offsetTop}`);
 
         const spanWidth = 16;
         const spanHeight = 16;
@@ -318,22 +318,22 @@ export class Render {
         map.scrollLeft = Math.max(0, Math.min(scrollX, map.scrollWidth - mapWidth));
         map.scrollTop = Math.max(0, Math.min(scrollY, map.scrollHeight - mapHeight));
 
-        console.log(`Initial scroll set to (${map.scrollLeft}, ${map.scrollTop}) for player at (${playerX}, ${playerY})`);
+        //console.log(`Initial scroll set to (${map.scrollLeft}, ${map.scrollTop}) for player at (${playerX}, ${playerY})`);
     }
 
     renderIfNeeded() {
         if (this.state.gameOver) {
-            console.log("renderIfNeeded skipped due to gameOver");
+            //console.log("renderIfNeeded skipped due to gameOver");
             return;
         }
-        console.log("Checking renderIfNeeded, needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender);
+        //console.log("Checking renderIfNeeded, needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender);
         if (this.state.needsRender === true) {
-            console.log("Rendering at", Date.now(), "with needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender);
+            //console.log("Rendering at", Date.now(), "with needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender);
             this.render();
             this.state.needsRender = false;
-            console.log("needsRender set to false after render (this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
+            //console.log("needsRender set to false after render (this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
         } else {
-            console.log("renderIfNeeded called but needsRender is", this.state.needsRender, "typeof:", typeof this.state.needsRender);
+            //console.log("renderIfNeeded called but needsRender is", this.state.needsRender, "typeof:", typeof this.state.needsRender);
         }
     }
 }

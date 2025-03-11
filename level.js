@@ -1,4 +1,4 @@
-﻿console.log("Level.js loaded");
+﻿//console.log("Level.js loaded");
 
 import { State } from './State.js';
 
@@ -133,7 +133,7 @@ export class Level {
                         type: room.type,
                         connections: []
                     });
-                    console.log(`Room ${rooms.length} (${room.type}) placed at (${room.x}, ${room.y}) size ${room.width}x${room.height}, minDistance: ${minDistance.toFixed(2)}`);
+                    //console.log(`Room ${rooms.length} (${room.type}) placed at (${room.x}, ${room.y}) size ${room.width}x${room.height}, minDistance: ${minDistance.toFixed(2)}`);
                     placed = true;
                 } else {
                     room.width = Math.max(this.MIN_ROOM_SIZE, room.width - 1);
@@ -145,7 +145,7 @@ export class Level {
                 attempts++;
             }
         }
-        console.log(`Placed ${rooms.length} out of ${numRooms} rooms`);
+        //console.log(`Placed ${rooms.length} out of ${numRooms} rooms`);
         return rooms;
     }
 
@@ -422,9 +422,9 @@ export class Level {
             this.state.stairsDown[tier] = { x: stairDownX, y: stairDownY };
 
             this.state.monsters[tier] = monstersService.generateLevelMonsters(tier);
-            console.log(`Tier Monsters: ${this.state.monsters[tier]}`);
+            //console.log(`Tier Monsters: ${this.state.monsters[tier]}`);
             this.state.fountains[tier] = this.generateFountains(tier);
-            console.log(`Initializing treasures for tier ${tier}`);
+            //console.log(`Initializing treasures for tier ${tier}`);
             this.generateTreasures(tier);
 
             this.state.player.x = stairUpX + 1;
@@ -447,11 +447,11 @@ export class Level {
             this.state.lastPlayerX = null;
             this.state.lastPlayerY = null;
             this.state.needsInitialRender = true;
-            console.log(`Tier ${tier} added: stairsUp[${tier}] at (${this.state.stairsUp[tier]?.x}, ${this.state.stairsUp[tier]?.y}), stairsDown[${tier}] at (${this.state.stairsDown[tier]?.x}, ${this.state.stairsDown[tier]?.y})`);
+            //console.log(`Tier ${tier} added: stairsUp[${tier}] at (${this.state.stairsUp[tier]?.x}, ${this.state.stairsUp[tier]?.y}), stairsDown[${tier}] at (${this.state.stairsDown[tier]?.x}, ${this.state.stairsDown[tier]?.y})`);
         } else {
             this.state.needsInitialRender = true;
             this.state.needsRender = true;
-            console.log("Triggered initial render for tier", this.state.tier);
+            //console.log("Triggered initial render for tier", this.state.tier);
         }
     }
 

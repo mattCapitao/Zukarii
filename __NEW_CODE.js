@@ -1,4 +1,4 @@
-﻿//console.log("PlayerInventory.js loaded");
+//console.log("PlayerInventory.js loaded");
 
 import { State } from './State.js';
 
@@ -41,9 +41,7 @@ export class PlayerInventory {
 
         const index = this.state.player.inventory.items.findIndex(i => i.uniqueId === item.uniqueId);
         if (index === -1) {
-            console.error(`Item ${item.name} (ID: ${item.uniqueId}) not found in inventory`);
-            uiService.writeToLog(`Error: ${item.name} not in inventory`);
-            //console.log("Current inventory:", this.state.player.inventory.items);
+            console.error(`Item ${item.name} not found in inventory`);
             return false;
         }
 
@@ -75,19 +73,16 @@ export class PlayerInventory {
         if (toInventory) uiService.statRefreshUI();
     }
 
-    dropItem(index, item) {
-        //console.error("Dropping item:", item, "inventoryIndex: ", index);
+    dropItem(index) {
         const uiService = this.state.game.getService('ui');
         const actionsService = this.state.game.getService('actions');
-        //const item = this.state.player.inventory.items[index];
-        if (!item) {
-            console.log
-            return;
-        }
+        const item = this.state.player.inventory.items[index];
+        if (!item) return;
+
         this.state.player.inventory.items.splice(index, 1);
         const treasure = {
             x: this.state.player.x,
-            y: this.state.player.y, 
+            y: this.state.player.y,
             name: `${item.name} Treasure`,
             gold: 0,
             torches: 0,
@@ -101,31 +96,26 @@ export class PlayerInventory {
 
     handleDrop(draggedItem, targetSlotData, isTargetEquipped) {
         const uiService = this.state.game.getService('ui');
-        if (!draggedItem || !draggedItem.uniqueId) {
-            console.error("Invalid drop data:", draggedItem, targetSlotData);
+        if (!draggedItem || !targetSlotData) return;
+
+        if (!isTargetEquipped) {
+            // Inventory-to-inventory drag, no action
             return;
         }
 
-        //console.log("Handling drop:", draggedItem, "to", targetSlotData, "isTargetEquipped:", isTargetEquipped);
-
-        if (isTargetEquipped) {
-            const slot = targetSlotData.slot;
-            if (!this.isSlotCompatible(draggedItem, slot)) {
-                uiService.writeToLog(`Cannot equip ${draggedItem.name} to ${slot}!`);
-                return;
-            }
-            if (draggedItem.equippedSlot) {
-                uiService.writeToLog(`Slot-to-slot dragging not supported yet`);
-                return;
-            }
-            // Inventory to equip slot
-            this.equipItem(draggedItem, slot);
-        } else if (draggedItem.equippedSlot) {
-            // Equipped to inventory
-            this.unequipItem(draggedItem.equippedSlot);
-            uiService.writeToLog(`Unequipped ${draggedItem.name} to inventory`);
-        } else {
-            //console.log("Inventory-to-inventory drag, no action");
+        const slot = targetSlotData.slot;
+        if (!this.isSlotCompatible(draggedItem, slot)) {
+            uiService.writeToLog(`Cannot equip ${draggedItem.name} to ${slot}!`);
+            return;
         }
+
+        if (draggedItem.equippedSlot) {
+            // Slot-to-slot drag (not implemented yet)
+            uiService.writeToLog(`Slot-to-slot dragging not supported yet`);
+            return;
+        }
+
+        // Inventory to equip slot
+        this.equipItem(draggedItem, slot);
     }
 }

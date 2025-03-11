@@ -1,4 +1,4 @@
-﻿console.log("Monsters.js loaded");
+﻿//console.log("Monsters.js loaded");
 
 import { State } from './State.js';
 
@@ -31,7 +31,7 @@ export class Monsters {
                         damage: 2
                     };
                     this.state.gasClouds.push(gasCloud);
-                    console.log(`Poison gas cloud released at (${monster.x}, ${monster.y})`);
+                    //console.log(`Poison gas cloud released at (${monster.x}, ${monster.y})`);
                 }.bind(this)
             }
         };
@@ -67,11 +67,11 @@ export class Monsters {
         const monsterCount = Math.floor(baseMonsterCount * densityFactor);
         let levelMonsters = [];
 
-        console.log(`Generating ${monsterCount} monsters for tier ${tier} (base: ${baseMonsterCount}, density factor: ${densityFactor.toFixed(2)})`);
+        //console.log(`Generating ${monsterCount} monsters for tier ${tier} (base: ${baseMonsterCount}, density factor: ${densityFactor.toFixed(2)})`);
 
         for (let i = 0; i < monsterCount; i++) {
             const monsterToPush = this.generateMonster(tier, map, rooms, this.state.player.x, this.state.player.y);
-            console.log(`Monster to push:`, monsterToPush);
+            //console.log(`Monster to push:`, monsterToPush);
             levelMonsters.push(monsterToPush);
         }
         return levelMonsters;
@@ -81,9 +81,9 @@ export class Monsters {
         if (this.state.player.dead) return;
 
         const tier = this.state.tier;
-        console.log(`Moving monsters on tier ${this.state.tier}, monsters:`, this.state.monsters[tier]);
+        //console.log(`Moving monsters on tier ${this.state.tier}, monsters:`, this.state.monsters[tier]);
         if (!this.state.monsters[tier] || !Array.isArray(this.state.monsters[tier])) {
-            console.log(`No monsters defined for tier ${this.state.tier}`);
+            //console.log(`No monsters defined for tier ${this.state.tier}`);
             return;
         }
         let map = this.state.levels[tier].map;
@@ -92,7 +92,7 @@ export class Monsters {
         const AGGRO_RANGE = (this.state.discoveryRadius || 2) + 2;
         this.state.AGGRO_RANGE = AGGRO_RANGE;
         monsters.forEach(monster => {
-            console.log(`Monster: `, monster);
+            //console.log(`Monster: `, monster);
             if (monster.hp <= 0) return;
 
             const dx = this.state.player.x - monster.x;
@@ -105,11 +105,15 @@ export class Monsters {
 
             if (distanceToPlayer <= AGGRO_RANGE || monster.isAggro) {
                 monster.isAggro = true;
+ // Diagonals are disabled for now - consider a check for a monster Affix that enables them when we add affixes
+// { x: Math.sign(dx), y: Math.sign(dy) },
+
                 let directions = [
-                    { x: Math.sign(dx), y: Math.sign(dy) },
-                    { x: Math.sign(dx), y: 0 },
-                    { x: 0, y: Math.sign(dy) }
+                    { x: Math.sign(dx), y: 0, dist: Math.abs(dx) },
+                    { x: 0, y: Math.sign(dy), dist: Math.abs(dy) }
                 ];
+                directions.sort((a, b) => b.dist - a.dist); // Sort by distance, descending
+
 
                 for (let dir of directions) {
                     let newX = monster.x + dir.x;
@@ -186,7 +190,7 @@ export class Monsters {
         const tierDamageMultiplier = 0.05;
         const baseDamage = Math.floor(Math.random() * (enemy.maxBaseDamage - enemy.minBaseDamage) + 1) + enemy.minBaseDamage;
         const damage = Math.round(baseDamage * (tier * (1 + tierDamageMultiplier)));
-        console.log(`Monster attack damage: ${damage} (base: ${baseDamage}, min: ${enemy.minBaseDamage}, max: ${enemy.maxBaseDamage})`);
+        //console.log(`Monster attack damage: ${damage} (base: ${baseDamage}, min: ${enemy.minBaseDamage}, max: ${enemy.maxBaseDamage})`);
         return damage;
     }
 
@@ -218,7 +222,7 @@ export class Monsters {
         let damageDealt = monsterDamage - armorDmgReduction;
 
         const defenseDmgReduction = Math.round(monsterDamage * (0.01 * this.state.player.defense));
-        console.log(`Monster attack (${monsterDamage}) : Defense (${this.state.player.defense})`, this.state.player);
+        //console.log(`Monster attack (${monsterDamage}) : Defense (${this.state.player.defense})`, this.state.player);
         damageDealt -= defenseDmgReduction;
 
         this.state.player.hp -= damageDealt;

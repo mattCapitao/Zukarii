@@ -1,4 +1,4 @@
-﻿console.log("State.js loaded");
+﻿//console.log("State.js loaded");
 
 import { Data } from './Data.js';
 import { Utilities } from './Utilities.js';
@@ -169,7 +169,7 @@ export class State {
     this.discoveredTileCount[0] = 0;
     this.visibleTiles[0] = new Set();
     this.tileMap[0] = levelService.buildTileMap(0);
-    console.log(`Tier 0 initialized: stairsDown[0] at (5, 5)`);
+    //console.log(`Tier 0 initialized: stairsDown[0] at (5, 5)`);
 
     this.treasures[1] = [];
     this.stairsUp = { 1: null, ...this.stairsUp };
@@ -177,8 +177,8 @@ export class State {
     this.levels[1] = levelService.generateLevel();
     const GeneratedMonsters = monstersService.generateLevelMonsters(1);
     this.monsters[1] = GeneratedMonsters;
-    console.log(`Tier Monsters: ${GeneratedMonsters}`);
-    console.log(`Tier Monsters: ${this.monsters[1]}`);
+    //console.log(`Tier Monsters: ${GeneratedMonsters}`);
+    //console.log(`Tier Monsters: ${this.monsters[1]}`);
     this.fountains[1] = levelService.generateFountains(1);
     this.discoveredWalls[1] = new Set();
     this.discoveredFloors[1] = new Set();
@@ -212,8 +212,8 @@ export class State {
     this.levels[1].map[stairDownY][stairDownX] = '⇓';
     this.stairsDown[1] = { x: stairDownX, y: stairDownY };
 
-    console.log(`Tier 1 initialized: stairsUp[1] at (${stairUpX}, ${stairUpY}), stairsDown[1] at (${stairDownX}, ${stairDownY})`);
-    console.log("Initializing treasures for tier 1");
+    //console.log(`Tier 1 initialized: stairsUp[1] at (${stairUpX}, ${stairUpY}), stairsDown[1] at (${stairDownX}, ${stairDownY})`);
+    //console.log("Initializing treasures for tier 1");
     levelService.generateTreasures(1);
 
     this.player.x = stairUpX + 1;

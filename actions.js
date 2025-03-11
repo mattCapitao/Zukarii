@@ -1,4 +1,4 @@
-console.log("Actions.js loaded");
+//console.log("Actions.js loaded");
 
 import { State } from './State.js';
 
@@ -33,7 +33,7 @@ export class Actions {
 
             fountain.used = true;
             this.state.levels[tier].map[fountain.y][fountain.x] = ' ';
-            console.log(`Fountain at (${fountain.x}, ${fountain.y}) used and removed from tier ${tier}`);
+            //console.log(`Fountain at (${fountain.x}, ${fountain.y}) used and removed from tier ${tier}`);
         }
     }
 
@@ -109,7 +109,7 @@ export class Actions {
         const map = this.state.levels[tier].map;
         const tierTreasures = this.state.treasures[tier];
 
-        console.log(`Placing treasure at (${treasure.x}, ${treasure.y}):`, treasure);
+        //console.log(`Placing treasure at (${treasure.x}, ${treasure.y}):`, treasure);
         map[treasure.y][treasure.x] = '$';
 
         const existingTreasureIndex = tierTreasures.findIndex(t => t.x === treasure.x && t.y === treasure.y);
@@ -124,7 +124,7 @@ export class Actions {
                         existingTreasure.items = existingTreasure.items || [];
                         existingTreasure.items.push(newItem);
                     } else {
-                        console.log(`Duplicate item ${newItem.name} (ID: ${newItem.uniqueId}) ignored at (${treasure.x}, ${treasure.y})`);
+                        //console.log(`Duplicate item ${newItem.name} (ID: ${newItem.uniqueId}) ignored at (${treasure.x}, ${treasure.y})`);
                     }
                 });
             }
@@ -185,14 +185,14 @@ export class Actions {
             tierTreasures.splice(treasureIndex, 1);
 
             const map = this.state.levels[tier].map;
-            console.log(`Before clearing tile at (${x}, ${y}): '${map[y][x]}'`);
+            //console.log(`Before clearing tile at (${x}, ${y}): '${map[y][x]}'`);
             map[y][x] = ' ';
-            console.log(`After clearing tile at (${x}, ${y}): '${map[y][x]}'`);
+            //console.log(`After clearing tile at (${x}, ${y}): '${map[y][x]}'`);
 
             this.state.needsRender = true;
             renderService.renderIfNeeded();
         } else {
-            console.log(`No treasure found at (${x}, ${y})`);
+            //console.log(`No treasure found at (${x}, ${y})`);
         }
     }
 }

@@ -1,4 +1,4 @@
-console.log("AudioManager.js loaded");
+//console.log("AudioManager.js loaded");
 
 export class AudioManager {
     constructor() {
@@ -19,7 +19,7 @@ export class AudioManager {
             this.sounds[key].preload = 'auto';
 
             const preloadHandler = () => {
-                console.log(`${key} preloaded!`);
+                //console.log(`${key} preloaded!`);
                 this.sounds[key].removeEventListener('canplaythrough', preloadHandler);
             };
             this.sounds[key].addEventListener('canplaythrough', preloadHandler);

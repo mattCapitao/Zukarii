@@ -1,4 +1,4 @@
-console.log("Player.js loaded");
+//console.log("Player.js loaded");
 
 import { State } from './State.js';
 
@@ -19,16 +19,16 @@ export class Player {
         this.state.player.stats.base.agility = this.state.utilities.dRoll(4, 3, 3);
         this.state.player.stats.base.maxHp = Math.round(30 * this.state.player.stats.base.prowess * 0.1);
         this.state.player.stats.base.maxMana = Math.round(10 * this.state.player.stats.base.intellect * 0.05);
-        console.log("Player base stats initialized", this.state.player.stats.base);
+        //console.log("Player base stats initialized", this.state.player.stats.base);
 
         // Manually init current stat values that are not updated by calculateStats()
         this.state.player.hp = this.state.player.stats.base.maxHp;
         this.state.player.mana = this.state.player.stats.base.maxMana;
-        console.log("Player stats initialized", this.state.player);
+        //console.log("Player stats initialized", this.state.player);
         this.state.player.nextLevelXp = 100;
         this.updateGearStats()
     }
-
+    /*
     initializeEquippedSlots() {
         const emptyEquipSlots = this.state.data.getEmptyEquipSlots();
         const slotsWithIds = {};
@@ -41,13 +41,14 @@ export class Player {
         });
         return slotsWithIds;
     }
-
+*/
     addStartingItems() {
         const itemsService = this.state.game.getService('items');
         const playerInventory = this.state.game.getService('playerInventory');
-
+        /*
         this.state.player.inventory.equipped = this.initializeEquippedSlots();
-        console.log("Equipped slots initialized", this.state.player.inventory.equipped);
+        //console.log("Equipped slots initialized", this.state.player.inventory.equipped);
+        */
         const startItems = this.state.data.getStartItems();
         const uniqueItems = this.state.data.getUniqueItems();
 
@@ -65,7 +66,7 @@ export class Player {
             playerInventory.addItem(item);
         });
 
-        console.log("Starting rog items added:", this.state.player.inventory.items);
+        //console.log("Starting rog items added:", this.state.player.inventory.items);
     }
 
     getInitialItems(startItems, uniqueItems) {
@@ -78,9 +79,16 @@ export class Player {
 
     getRandomStartItems() {
         return [
-            { type: 'weapon', attackType: 'ranged' },{ type: 'weapon', attackType: 'melee' },{ type: 'armor' },
+            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, { type: 'armor' },
 
-            { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, { type: 'ring', }, 
+
+            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
+            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
+            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
+            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
+            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
+            { type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
+            { type: 'ring', }, { type: 'ring', }, {type: 'amulet'},
 
             
 
@@ -142,7 +150,7 @@ export class Player {
         this.state.game.getService('ui').writeToLog('You died! Game Over.');
         document.removeEventListener('keydown', this.state.game.handleInput);
         document.removeEventListener('keyup', this.state.game.handleInput);
-        console.log("Player has died - Game over!");
+        //console.log("Player has died - Game over!");
         this.state.gameOver = true;
         this.state.game.getService('ui').gameOver('You have been killed by a ' + source + '!');
         this.state.game.getService('ui').statRefreshUI();
@@ -152,22 +160,23 @@ export class Player {
         this.state.game.getService('ui').writeToLog("You exited the dungeon! Game Over.");
         document.removeEventListener('keydown', this.state.game.handleInput);
         document.removeEventListener('keyup', this.state.game.handleInput);
-        console.log("Player has Left the building - Game over!");
+        //console.log("Player has Left the building - Game over!");
         this.state.gameOver = true;
         this.state.game.getService('ui').gameOver('You exited the dungeon! Too much adventure to handle eh?');
         this.state.game.getService('ui').statRefreshUI();
     }
 
     updateGearStats() {
-        console.log("Before Updating gear stats", this.state.player);
+        //console.log("Before Updating gear stats", this.state.player);
 
-        const startGearProwess = this.state.player.stats.gear.prowess;
+        const startGearProwess = this.state.player.stats.gear.prowess || 0;
 
         this.state.possibleItemStats.forEach(stat => {
             this.state.player.stats.gear[stat] = 0;
         });
 
         Object.values(this.state.player.inventory.equipped).forEach(item => {
+            if (!item) return; // Skip empty slots
             if ('stats' in item && item.stats) {
                 const propCount = Object.keys(item.stats).length;
                 if (propCount > 0) {
@@ -178,7 +187,7 @@ export class Player {
             }
 
             if (item.type === 'armor') {
-                console.log("Armor change detected", item.armor);
+                //console.log("Armor change detected", item.armor);
                 this.state.player.stats.gear.armor = (this.state.player.stats.gear.armor || 0) + (item.armor || 0);
             }
 
@@ -192,7 +201,7 @@ export class Player {
                         this.state.player.stats.gear.range = (this.state.player.stats.gear.range || 0) + (this.state.player.stats.gear.Baserange || 0);
                         break;
                     default:
-                        console.log("Unknown weapon type");
+                        //console.log("Unknown weapon type");
                         break;
                 }
             }
@@ -204,7 +213,7 @@ export class Player {
 
         this.state.player.stats.gear.maxHp += newHp;
 
-        console.log("After Updating gear stats", this.state.player);
+        //console.log("After Updating gear stats", this.state.player);
         this.calculateStats();
     }
 
@@ -214,11 +223,11 @@ export class Player {
                 case 'maxLuck':
                     this.state.player[stat] = this.state.player.stats.base[stat] + this.state.player.stats.gear[stat];
                     this.state.player.luck = this.state.player[stat] + this.state.player.luckTempMod;
-                    console.log(`Luck = base:${this.state.player.stats.base[stat]} + gear:${this.state.player.stats.gear[stat]} + temp:${this.state.player.luckTempMod}`);
+                    //console.log(`Luck = base:${this.state.player.stats.base[stat]} + gear:${this.state.player.stats.gear[stat]} + temp:${this.state.player.luckTempMod}`);
                     break;
                 default:
                     this.state.player[stat] = (this.state.player.stats.base[stat] || 0) + (this.state.player.stats.gear[stat] || 0);
-                    console.log(`${stat} = base:${this.state.player.stats.base[stat] || 0} + gear:${this.state.player.stats.gear[stat] || 0}`);
+                    //console.log(`${stat} = base:${this.state.player.stats.base[stat] || 0} + gear:${this.state.player.stats.gear[stat] || 0}`);
                     break;
             }
         });
@@ -228,12 +237,12 @@ export class Player {
         this.state.player.maxMana = this.state.player.stats.base.maxMana + (this.state.player.stats.gear.maxMana || 0);
         this.state.player.hp = Math.min(this.state.player.hp, this.state.player.maxHp);
         this.state.player.mana = Math.min(this.state.player.mana, this.state.player.maxMana);
-        console.log("After calculateStats:", {
+        /*console.log("After calculateStats:", {
             maxHp: this.state.player.maxHp,
             hp: this.state.player.hp,
             maxMana: this.state.player.maxMana,
             mana: this.state.player.mana
-        });
+        });*/
         this.state.game.getService('ui').statRefreshUI();
     }
 
@@ -242,12 +251,12 @@ export class Player {
             try {
                 let userCharacterName = prompt("Please name your character to begin:");
                 if (userCharacterName !== null) {
-                    console.log("Hello, " + userCharacterName + "!");
+                    //console.log("Hello, " + userCharacterName + "!");
                     const sanitizedInput = this.state.utilities.encodeHTMLEntities(userCharacterName);
                     this.state.player.name = sanitizedInput;
                     this.state.game.getService('ui').updatePlayerInfo();
                 } else {
-                    console.log("User cancelled the prompt.");
+                    //console.log("User cancelled the prompt.");
                     this.state.player.name = this.state.utilities.getRandomName(this.state.game.getService('render').mageNames);
                     this.state.game.getService('ui').writeToLog(`You didnt enter a name, so a random one has been given to you, ${this.state.player.name} `);
                     this.state.game.getService('ui').updatePlayerInfo();

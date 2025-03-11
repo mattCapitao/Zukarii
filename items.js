@@ -1,4 +1,4 @@
-console.log("Items.js loaded");
+//console.log("Items.js loaded");
 
 import { State } from './State.js';
 
@@ -86,13 +86,13 @@ export class Items {
             case 'baseRange':
                 return Math.floor(item.tierIndex) + 4;
             default:
-                console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
+                //console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
                 return 0;
         }
     }
 
     getBonusStats(statArray, item) {
-        console.log(`getBonusStats() called with statArray:`, statArray, `for item: `, item);
+        //console.log(`getBonusStats() called with statArray:`, statArray, `for item: `, item);
         const itemTier = item.tierIndex;
         let availableStats = [...statArray];
         let selectedStats = {};
@@ -110,19 +110,19 @@ export class Items {
                 selectedStats[stat] = statValue;
             }
         }
-        console.log(`Returning selected stats:`, selectedStats);
+        //console.log(`Returning selected stats:`, selectedStats);
         return selectedStats;
     }
 
     itemDropRoll() {
         let randomValue = Math.random() * 1;
-        console.log(`itemDropRoll() randomValue: ${randomValue}`);
+        //console.log(`itemDropRoll() randomValue: ${randomValue}`);
         let dungeonTierBonus = this.state.tier * 0.01;
         let playerLuckBonus = this.state.player.luck * 0.01;
 
         let rollTotal = randomValue + dungeonTierBonus + playerLuckBonus;
 
-        console.log(`itemDropRoll() : dungeonTierBonus = ${dungeonTierBonus} : playerLuckBonus = ${playerLuckBonus} : rollTotal: ${rollTotal}`);
+        //console.log(`itemDropRoll() : dungeonTierBonus = ${dungeonTierBonus} : playerLuckBonus = ${playerLuckBonus} : rollTotal: ${rollTotal}`);
 
         let itemDropData = { roll: rollTotal, itemTier: '' };
 
@@ -137,7 +137,7 @@ export class Items {
                 itemDropData.itemTier = 'relic';
         }
 
-        console.log(`itemDropRoll() returning: { roll: ,${itemDropData.roll} itemTier: ${itemDropData.itemTier}}`);
+        //console.log(`itemDropRoll() returning: { roll: ,${itemDropData.roll} itemTier: ${itemDropData.itemTier}}`);
         return itemDropData;
     }
 
@@ -168,16 +168,16 @@ export class Items {
             item.type = randomType;
         }
 
-        console.log(`Generating item of type ${item.type} with tier ${item.tier}`);
+        //console.log(`Generating item of type ${item.type} with tier ${item.tier}`);
         let statOptions = this.itemStatOptions[item.type];
-        console.log(`Stat options for item:`, statOptions);
+        //console.log(`Stat options for item:`, statOptions);
 
         switch (item.type) {
             case 'weapon':
                 if (!item.attackType || item.attackType === '') {
                     item.attackType = this.weaponAttackTypes[Math.floor(Math.random() * this.weaponAttackTypes.length)];
                 }
-                item.baseDamageMin = Math.floor(Math.random() * 2) + this.statRoll("baseDamageMin", item);
+                item.baseDamageMin = Math.floor(Math.random() * 2) + this.statRoll("baseDamageMin", item) || 1;
                 item.baseDamageMax = item.baseDamageMin + Math.floor(Math.random() * 5) + this.statRoll("baseDamageMax", item);
                 statOptions = statOptions[item.attackType];
                 if (item.tierIndex > 1) { item.stats = this.getBonusStats(statOptions.bonus, item); }
@@ -195,7 +195,7 @@ export class Items {
             case 'armor':
                 item.armor = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
                 if (item.tierIndex > 1) {
-                    console.log(`requesting bonus stats for item:`, item);
+                    //console.log(`requesting bonus stats for item:`, item);
                     item.stats = this.getBonusStats(statOptions.bonus, item);
                 }
                 item.icon = 'armor.svg';
@@ -203,7 +203,7 @@ export class Items {
             case 'amulet':
                 item.maxLuck = Math.floor(Math.random() * 2) + this.statRoll("maxLuck", item);
                 if (item.tierIndex > 1) {
-                    console.log(`requesting bonus stats for item:`, item);
+                    //console.log(`requesting bonus stats for item:`, item);
                     item.stats = this.getBonusStats(statOptions.bonus, item);
                 }
                 item.icon = 'amulet.svg';
@@ -211,7 +211,7 @@ export class Items {
             case 'ring':
                 item.maxLuck = Math.floor(Math.random() * 2) + this.statRoll("maxLuck", item);
                 if (item.tierIndex > 1) {
-                    console.log(`requesting bonus stats for item:`, item);
+                    //console.log(`requesting bonus stats for item:`, item);
                     item.stats = this.getBonusStats(statOptions.bonus, item);
                 }
                 item.icon = 'ring.svg';
@@ -220,7 +220,7 @@ export class Items {
 
         item.itemTier = item.tier;
         item.name = `${item.tier} ${item.type}`;
-        console.log(`Generated item:`, item);
+        //console.log(`Generated item:`, item);
         let statsText = '';
         if (typeof item.stats === 'object' && item.stats !== null) {
             statsText = `with ${Object.keys(item.stats).map(stat => `${stat}: ${item.stats[stat]}`).join(', ')}`;
@@ -237,7 +237,7 @@ export class Items {
             if (this.state.player.torchDropFail === 3) {
                 this.state.player.torches = 1;
                 this.state.player.torchDropFail = 0;
-                console.log(`Player found a torch after 3 failed attempts`);
+                //console.log(`Player found a torch after 3 failed attempts`);
                 this.state.game.getService('ui').writeToLog('You found a discarded torch lying on the ground!');
             }
         } else if (this.state.player.torches < 2) {
@@ -305,7 +305,7 @@ export class Items {
                     randomItem = this.rogItem(50);
                     break;
             }
-            console.log(`Dropping Random item:`, randomItem);
+            //console.log(`Dropping Random item:`, randomItem);
             const escapedItem = this.escapeItemProperties(randomItem);
             droppedItems.push({ ...escapedItem });
         }
@@ -330,12 +330,12 @@ export class Items {
 
         escapeItemProperties(item) {
         const uiService = this.state.game.getService('ui');
-        console.log("Fetching uiService in escapeItemProperties:", uiService);
+        //console.log("Fetching uiService in escapeItemProperties:", uiService);
         if (!uiService || !uiService.utilities) {
             console.error("uiService or uiService.utilities is undefined! Using fallback for item:", item);
             return { ...item };
         }
-        console.log("Escaping item properties for item", item);
+        //console.log("Escaping item properties for item", item);
         return {
             ...item,
             name: uiService.utilities.escapeJsonString(item.name),

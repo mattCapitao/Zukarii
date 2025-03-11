@@ -1,4 +1,4 @@
-﻿console.log("game.js loaded");
+﻿//console.log("game.js loaded");
 
 import { Data } from './Data.js';
 import { Utilities } from './Utilities.js';
@@ -33,7 +33,6 @@ export class Game {
         // Ensure handleInput is defined before binding
         if (typeof this.handleInput !== 'function') {
             console.error('handleInput is not defined in Game class');
-            this.handleInput = () => console.log('handleInput placeholder'); // Temporary fallback
         }
         this.handleInput = this.handleInput.bind(this); // Bind only if defined
         this.lastRenderTime = 0;
@@ -64,28 +63,28 @@ export class Game {
 
    handleInput(event) {
     if (!this.state.gameStarted) {
-        console.log("Starting game...");
+        //console.log("Starting game...");
         this.state.gameStarted = true;
         this.initGame();
         this.state.needsRender = true;
-        console.log("needsRender set to true for init (this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
+        //console.log("needsRender set to true for init (this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
         this.getService('render').renderIfNeeded();
         this.getService('audio').playBackgroundMusic();
         return;
     }
 
     if (this.state.gameOver) {
-        console.log("Game over, input ignored");
+        //console.log("Game over, input ignored");
         return;
     }
 
 
     if (event.key === ' ') {
-        //console.log(`Spacebar detected eventData: `,event );
+        ////console.log(`Spacebar detected eventData: `,event );
 
         if (event.type === 'keydown' && this.state.isRangedMode) {
                 event.preventDefault();
-               //w w console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : skipping input`);
+               //w w //console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : skipping input`);
                 return false;
         }
 
@@ -118,13 +117,13 @@ export class Game {
     if (!mappedKeys.has(event.key)) return;
 
     const mappedKey = keyMap[event.key] || event.key;
-    console.log(`Mapped key: ${mappedKey}`);
+    //console.log(`Mapped key: ${mappedKey}`);
 
     if (event.type === 'keyup') {
         if (mappedKey === ' ') {
             
             this.state.isRangedMode = false;
-            console.log(`Spacebar released detected, ranged mode`,  this.state.isRangedMode);
+            //console.log(`Spacebar released detected, ranged mode`,  this.state.isRangedMode);
             //this.getService('combat').toggleRanged(event); // Always call toggleRanged on keyup
             return;
         }
@@ -135,9 +134,9 @@ export class Game {
 
         if (this.state.isRangedMode && directionalKeys.has(event.key)) {
             const rangedEventKey = keyMap[event.key];
-            console.log(`Directional key pressed: ${event.key} - rangedKey: ${rangedEventKey} state.isRangedMode = ${this.state.isRangedMode}`);
+            //console.log(`Directional key pressed: ${event.key} - rangedKey: ${rangedEventKey} state.isRangedMode = ${this.state.isRangedMode}`);
             this.getService('combat').rangedAttack(rangedEventKey);
-            console.log(`directional key pressed: ${event.key} state.isRanged = ${this.state.isRangedMode} : Ranged attack triggered for`, rangedEventKey);
+            //console.log(`directional key pressed: ${event.key} state.isRanged = ${this.state.isRangedMode} : Ranged attack triggered for`, rangedEventKey);
             this.#endTurn();
             return;
         }
@@ -200,7 +199,7 @@ export class Game {
                 return;
             case ' ':
                 this.getService('combat').toggleRanged(event);
-                console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : before toggleRanged`);
+                //console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : before toggleRanged`);
                 return;
         }
     }
@@ -214,8 +213,8 @@ export class Game {
     let treasureIndex = this.state.treasures[this.state.tier].findIndex(t => t.x === newX && t.y === newY);
 
     this.state.needsRender = true;
-    console.log("needsRender set to true for action at", newX, newY, "(this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
-    console.log(`Checking for treasure at (${newX}, ${newY}): map tile = '${map[newY][newX]}', treasureIndex = ${treasureIndex}`);
+    //console.log("needsRender set to true for action at", newX, newY, "(this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
+    //console.log(`Checking for treasure at (${newX}, ${newY}): map tile = '${map[newY][newX]}', treasureIndex = ${treasureIndex}`);
     if (monster) {
         this.getService('combat').meleeAttack(monster);
         this.getService('player').checkLevelUp();
@@ -233,7 +232,7 @@ export class Game {
         if (upStair) {
             this.state.player.x = upStair.x + 1;
             this.state.player.y = upStair.y;
-            console.log(`Moved down to tier ${this.state.tier}, placed at (${this.state.player.x}, ${this.state.player.y}) next to < at (${upStair.x}, ${upStair.y})`);
+            //console.log(`Moved down to tier ${this.state.tier}, placed at (${this.state.player.x}, ${this.state.player.y}) next to < at (${upStair.x}, ${upStair.y})`);
             if (map[this.state.player.y][this.state.player.x] !== ' ') {
                 const directions = [
                     { x: upStair.x - 1, y: upStair.y },
@@ -244,7 +243,7 @@ export class Game {
                     if (map[dir.y][dir.x] === ' ') {
                         this.state.player.x = dir.x;
                         this.state.player.y = dir.y;
-                        console.log(`Adjusted down position to (${this.state.player.x}, ${this.state.player.y})`);
+                        //console.log(`Adjusted down position to (${this.state.player.x}, ${this.state.player.y})`);
                         break;
                     }
                 }
@@ -269,7 +268,7 @@ export class Game {
             if (downStair) {
                 this.state.player.x = downStair.x + 1;
                 this.state.player.y = downStair.y;
-                console.log(`Moved up to tier ${this.state.tier}, placed at (${this.state.player.x}, ${this.state.player.y}) next to > at (${downStair.x}, ${downStair.y})`);
+                //console.log(`Moved up to tier ${this.state.tier}, placed at (${this.state.player.x}, ${this.state.player.y}) next to > at (${downStair.x}, ${downStair.y})`);
                 if (map[this.state.player.y][this.state.player.x] !== ' ') {
                     const directions = [
                         { x: downStair.x - 1, y: downStair.y },
@@ -280,7 +279,7 @@ export class Game {
                         if (map[dir.y][dir.x] === ' ') {
                             this.state.player.x = dir.x;
                             this.state.player.y = dir.y;
-                            console.log(`Adjusted up position to (${this.state.player.x}, ${this.state.player.y})`);
+                            //console.log(`Adjusted up position to (${this.state.player.x}, ${this.state.player.y})`);
                             break;
                         }
                     }
@@ -297,14 +296,14 @@ export class Game {
             }
             this.state.needsInitialRender = true;
             this.state.needsRender = true;
-            console.log("Triggered initial render for tier", this.state.tier);
+            //console.log("Triggered initial render for tier", this.state.tier);
         }
     } else if (map[newY][newX] === '≅' && fountain) {
         this.getService('actions').useFountain(fountain, this.state.tier);
         this.state.player.x = newX;
         this.state.player.y = newY;
     } else if (map[newY][newX] === '$' && treasureIndex !== -1) {
-        console.log(`Treasure found at (${newX}, ${newY})! Picking up...`);
+        //console.log(`Treasure found at (${newX}, ${newY})! Picking up...`);
         this.state.player.x = newX;
         this.state.player.y = newY;
         this.getService('actions').pickupTreasure(newX, newY);
@@ -328,12 +327,12 @@ export class Game {
 
     #endTurn() {
         if (this.state.gameOver) {
-            console.log("endTurn skipped due to gameOver");
+            //console.log("endTurn skipped due to gameOver");
             return;
         }
         if (this.state.torchExpires > 0) {
             this.state.torchExpires--;
-            console.log(`Torch expires in ${this.state.torchExpires} turns`);
+            //console.log(`Torch expires in ${this.state.torchExpires} turns`);
             if (this.state.torchExpires < 1) {
                 this.getService('actions').torchExpired();
             }
@@ -349,13 +348,13 @@ export class Game {
         this.state.mapDiv = document.getElementById('map');
         this.state.statsDiv = document.getElementById('stats');
         this.state.logDiv = document.getElementById('log');
-        console.log("Game init - DOM elements:", {
+        /*console.log("Game init - DOM elements:", {
             mapDiv: this.state.mapDiv,
             statsDiv: this.state.statsDiv,
             logDiv: this.state.logDiv
-        });
+        });*/ //uncomment for debugging
         this.state.needsRender = true;
-        console.log("needsRender set to true for init (this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
+        //console.log("needsRender set to true for init (this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
         this.getService('render').renderIfNeeded();
         document.addEventListener('keydown', this.handleInput);
         document.addEventListener('keyup', this.handleInput);
@@ -364,6 +363,6 @@ export class Game {
 
     initGame() {
         this.state.initGame();
-        console.log("Treasures after initGame:", this.state.treasures[this.state.tier]);
+        //console.log("Treasures after initGame:", this.state.treasures[this.state.tier]);
     }
 }
