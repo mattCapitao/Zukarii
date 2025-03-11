@@ -46,14 +46,13 @@ export class UI {
     getOverlayDiv(divToCheck) {
 
         // This method handles getting HTML element references and hadnling failures for the #tabs Overlay Child Divs
-
         const divToReturn = document.getElementById(divToCheck);
 
         // if Overlay Div is not found, or Tabs Overlay is not open, log it and return false
         if (!divToReturn) { console.error(`div #${divToCheck} not found`); return false; }
 
         else if (!this.state.ui.overlayOpen) {
-            //console.log(`Overlay not open, Skipping #${divToCheck} Resfresh...`); 
+            console.log(`Overlay not open, Skipping #${divToCheck} Resfresh...`); 
             return false;
         }
 
@@ -63,7 +62,6 @@ export class UI {
         else { //console.log("Error in getOverlayDiv"); 
             return false;
         }
-
     }
 
     updateLog() {
@@ -166,7 +164,15 @@ export class UI {
             slot.innerHTML = item ? `
             <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}'>
         ` : '';
-         
+
+            if (!slot.innerHTML) {
+                slot.classList.remove('equipped');
+                slot.classList.add('empty');
+            } else {
+                slot.classList.remove('empty');
+                slot.classList.add('equipped');
+            }
+
             // Add listeners to slot and item
             if (!slot.dataset.listenersAdded) {
                 slot.addEventListener('dragover', (e) => this.handleDragOver(e));
