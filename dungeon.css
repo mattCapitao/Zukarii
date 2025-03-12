@@ -540,14 +540,18 @@ width: 33% !important;
     border: 0.0625rem solid #ccc; /* ~1px */
 }
 
-#tabs #equipped-items p.empty {
-    width: 4rem;
-    height: 4rem;
-    background-size: 4rem;
-    border-radius: .3125rem; /* ~5px */
-    box-shadow: inset 0 0 10px #000;
-    border: 0.0625rem solid #ccc; /* ~1px */
-}
+
+
+
+
+    #tabs #equipped-items p.empty {
+        width: 4rem;
+        height: 4rem;
+        background-size: 4rem;
+        border-radius: .3125rem; /* ~5px */
+        box-shadow: inset 0 0 10px #000;
+        border: 0.0625rem solid #ccc; /* ~1px */
+    }
 
 #tabs #equipped-items p.empty img.item {
     width: 4rem; /* ~64px */
@@ -694,15 +698,16 @@ border-radius: .625rem;
     }
 }
 
-    .relic,
-    .relic hr,
-    .item-tooltip-class.relic,
-    #tabs #equipped-items p.equip-slot.equipped img.item.relic,
-    #tabs p.inventory-slot.relic img.item,
-    #tabs p.inventory-slot span.item-label.relic {
-        color: gold !important;
-        border-color: gold !important;
-    }
+.relic,
+.relic hr,
+.item-tooltip-class.relic,
+.item-tooltip-class p img.item-tooltip-icon.relic,
+#tabs #equipped-items p.equip-slot.equipped img.item.relic,
+#tabs p.inventory-slot.relic img.item,
+#tabs p.inventory-slot span.item-label.relic {
+    color: gold !important;
+    border-color: gold !important;
+}
 
     .relic hr,
     #tabs #equipped-items p.equip-slot.equipped img.relic.item,
@@ -795,19 +800,41 @@ background-color: whitesmoke !important;
 
 
 .item-tooltip-name {
-width: 100%;
-text-align: center;
-font-weight: bold;
-font-size: 1.125rem; /* ~18px */
-margin-bottom: 0.125rem; /* ~2px */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.125rem; /* ~18px */
+    margin-bottom: 0.6125rem; /* ~10px */
+    line-height: 1.33;
+}
+
+.item-tooltip-icon-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 8rem;
+    margin: .1625rem;
+}
+
+.item-tooltip-icon {
+    width: 8rem;
+    height: 8rem;
+    border-radius: .3125rem; /* ~5px */
+    padding: 0;
+    margin: 0;
+    border: 0.0625rem solid #ccc; /* ~1px */
 }
 
 .item-tooltip-type-tier {
-width: 100%;
-text-align: center;
-font-size: 1rem; /* ~16px */
-font-weight: bold;
-margin-bottom: 0.125rem; /* ~2px */
+    width: 100%;
+    text-align: center;
+    font-size: 1rem; /* ~16px */
+    font-weight: bold;
+    margin-bottom: 0.3125rem; /* ~5px */
 }
 
 

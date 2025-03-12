@@ -8,7 +8,7 @@ export class UI {
         this.utilities = this.state.utilities; // Ensure this line exists
         this.tooltipCache = new Map();
     }
-
+     
     updatePlayerInfo() {
         const playerInfo = document.getElementById('player-info');
         playerInfo.innerHTML = `
@@ -24,13 +24,13 @@ export class UI {
         <div class="player-status-child">Heal Potions: ${this.state.player.healPotions}</div>
         <div class="player-status-child bar">
             <div class="progress-bar">
-                <div class="progress-fill hp-fill" style="width: ${(this.state.player.hp / this.state.player.stats.base.maxHp) * 100}%"></div>
+                <div class="progress-fill hp-fill" style="width: ${(this.state.player.hp / (this.state.player.maxHp || this.state.player.stats.base.maxHp)) * 100}%"></div>
             </div>
              HP: ${this.state.player.hp}/${this.state.player.maxHp}
         </div>
         <div class="player-status-child bar">
             <div class="progress-bar">
-                <div class="progress-fill mana-fill" style="width: ${(this.state.player.mana / this.state.player.stats.base.maxMana) * 100}%"></div>
+                <div class="progress-fill mana-fill" style="width: ${(this.state.player.mana / (this.state.player.maxMana || this.state.player.stats.base.maxMana) ) * 100}%"></div>
             </div>
             Mana: ${this.state.player.mana}/${this.state.player.maxMana}
         </div>
@@ -281,8 +281,18 @@ export class UI {
 
             const name = document.createElement('div');
             name.className = 'item-tooltip-name';
-            name.textContent = itemData.name;
+            name.textContent = this.utilities.escapeJsonString(itemData.name);
             content.appendChild(name);
+
+            const iconContainerParagraph = document.createElement('p');
+            iconContainerParagraph.className = `item-tooltip-icon-wrap ${itemData.itemTier}`;
+            content.appendChild(iconContainerParagraph);
+
+            const icon = document.createElement('img');
+            icon.className = `item-tooltip-icon ${itemData.itemTier}`;
+            icon.src = `img/icons/items/${itemData.icon}`;
+            icon.alt = itemData.name;
+            iconContainerParagraph.appendChild(icon);
 
             const typeTier = document.createElement('div');
             typeTier.className = 'item-tooltip-type-tier';

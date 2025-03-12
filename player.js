@@ -193,7 +193,17 @@ export class Player {
         this.calculateStats();
     }
 
+    adjustCurrentStatByMaxChangeRatio(stat, oldMax, newMax) {
+        const ratio = newMax / oldMax;
+        const current = this.state.player[stat];
+        const newStat = Math.round(current * ratio);
+        this.state.player[stat] = Math.max(1, Math.min(newStat, newMax));
+    }
+
     calculateStats() {
+        const oldMaxHp = this.state.player.maxHp || this.state.player.stats.base.maxHp;
+        const oldMaxMana = this.state.player.maxMana || this.state.player.stats.base.maxMana;
+
         this.state.possibleItemStats.forEach(stat => {
             switch (stat) {
                 case 'maxLuck':
@@ -209,10 +219,33 @@ export class Player {
         });
 
         // Ensure HP and mana are set
-        this.state.player.maxHp = this.state.player.stats.base.maxHp + (this.state.player.stats.gear.maxHp || 0);
-        this.state.player.maxMana = this.state.player.stats.base.maxMana + (this.state.player.stats.gear.maxMana || 0);
-        this.state.player.hp = Math.min(this.state.player.hp, this.state.player.maxHp);
-        this.state.player.mana = Math.min(this.state.player.mana, this.state.player.maxMana);
+        const newMaxHp = this.state.player.stats.base.maxHp + (this.state.player.stats.gear.maxHp || 0);
+        this.state.player.maxHp = newMaxHp;
+        //adjust current by same ratio as max
+        this.adjustCurrentStatByMaxChangeRatio('hp', oldMaxHp, newMaxHp);
+
+        const newMaxMana = this.state.player.stats.base.maxMana + (this.state.player.stats.gear.maxMana || 0);
+        this.state.player.maxMana = newMaxMana;
+        this.adjustCurrentStatByMaxChangeRatio('mana', oldMaxMana, newMaxMana);
+       
+
+
+        /*
+        if (oldMaxHp !== 0 && this.state.player.maxHp !== oldMaxHp) {
+            const hpRatio = this.state.player.maxHp / oldMaxHp; // Percentage change
+            const newHp = Math.round(this.state.player.hp * hpRatio); // Scale current HP
+            this.state.player.hp = Math.max(1, Math.min(newHp, this.state.player.maxHp)); // Clamp HP: 1 to Max HP
+        }
+        if (oldMaxMana !== 0 && this.state.player.maxMana !== oldMaxMana) {
+            const manaRatio = this.state.player.maxMana / oldMaxMana; // Percentage change
+            const newMana = Math.round(this.state.player.hp * manaRatio); // Scale current Mana
+            this.state.player.mana = Math.max(1, Math.min(newMana, this.state.player.maxMana)); // Clamp Mana: 1 to Max Mana
+        }
+        */
+
+
+        //this.state.player.hp = Math.min(this.state.player.hp, this.state.player.maxHp);
+        //this.state.player.mana = Math.min(this.state.player.mana, this.state.player.maxMana);
         /*console.log("After calculateStats:", {
             maxHp: this.state.player.maxHp,
             hp: this.state.player.hp,

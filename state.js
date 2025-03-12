@@ -30,7 +30,7 @@ export class State {
             name: "Leith42",
             level: 1, xp: 0, nextLevelXp: 0,
             dead: false,
-            gold: 0,
+            gold: 12724,
             hp: 0, maxHp: 0,
             mana: 0, maxMana: 0,
             luck: 0, maxLuck: 0, luckTempMod:0,
