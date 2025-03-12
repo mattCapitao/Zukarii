@@ -679,6 +679,21 @@ border: 0.0625rem solid #060; /* ~1px */
 border-radius: .625rem;
 }
 
+.item-icon[icon="golden-skin.png"] {
+    animation: tackySparkle 1.5s infinite;
+}
+
+@keyframes tackySparkle {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(5px, -5px);
+        box-shadow: 0 0 15px gold;
+    }
+}
+
     .relic,
     .relic hr,
     .item-tooltip-class.relic,

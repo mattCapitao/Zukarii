@@ -339,6 +339,11 @@ export class Items {
         return itemChance;
     }
 
+    calculateUniqueItemChance() {
+        let itemChance = 1.0; // Placeholder as per original
+        return itemChance;
+    }
+
     dropTreasure(monster, tier) {
         const uiService = this.state.game.getService('ui');
         const actionsService = this.state.game.getService('actions');
@@ -346,6 +351,7 @@ export class Items {
         const torchChance = this.calculateTorchChance();
         const potionChance = this.calculatePotionChance();
         const itemChance = this.calculateItemChance();
+        const uniqueItemChance = this.calculateUniqueItemChance();
 
         let droppedItems = [];
         let torchDropped = Math.random() < torchChance;
@@ -353,8 +359,15 @@ export class Items {
         let potionDropped = Math.random() < potionChance;
         if (potionDropped) { this.state.player.torchDropFail = 0; } // Should this be potionDropFail?
 
-        if (Math.random() < itemChance) {
+        if (Math.random() < uniqueItemChance) {
 
+            if (monster.uniqueItemsDropped && monster.uniqueItemsDropped.length > 0) {
+                const newItem = monster.uniqueItemsDropped[0]; // First unique for now
+                const escapedItem = this.escapeItemProperties(newItem);
+                droppedItems.push({ ...escapedItem });
+            }
+        }
+        if (Math.random() < itemChance) {
             const newItemTier = this.lootTables.getItemTier();
 
             console.log(`Calling getItem(${newItemTier})`);
@@ -363,6 +376,7 @@ export class Items {
             console.log(`Adding item to treasure object:`, newItem);
             const escapedItem = this.escapeItemProperties(newItem);
             droppedItems.push({ ...escapedItem });
+            
         }
 
         const treasure = {

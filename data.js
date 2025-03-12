@@ -56,7 +56,7 @@ export class Data {
         ];
 
         this._uniqueMonsters = [
-            {
+           /* {
                 x: 0,
                 y: 0,
                 name: "Plinklefart",
@@ -73,7 +73,7 @@ export class Data {
                 affixes: ['poisonGas'],
                 gold: 100,
                 uniqueItemsDropped: ['Golden Khepresh'],
-            },
+            },*/
             {
                 x: 0,
                 y: 0,
@@ -90,7 +90,64 @@ export class Data {
                 isBoss: true,
                 affixes: ['goldTheft'],
                 gold: 0,
-                uniqueItemsDropped: ['Stolen Honor'],
+                uniqueItemsDropped: ['Golden Skin of T`Kore'],
+            },
+        ];
+
+        this._bossMonsters = [
+            /* {
+                 x: 0,
+                 y: 0,
+                 name: "Plinklefart",
+                 classes: "Demon",
+                 avatar: "P",
+                 baseHp: 50,
+                 maxHp: 50,
+                 hp: 50,
+                 minBaseDamage: 4,
+                 maxBaseDamage: 6,
+                 isAggro: false,
+                 isElite: true,
+                 isBoss: true,
+                 affixes: ['poisonGas'],
+                 gold: 100,
+                 uniqueItemsDropped: ['Golden Khepresh'],
+             },*/
+            {
+                x: 0,
+                y: 0,
+                name: "T`Kore-Tickrob",
+                classes: "demon",
+                avatar: "K",
+                baseHp: 100,
+                maxHp: 100,
+                hp: 100,
+                minBaseDamage: 0,
+                maxBaseDamage: 2,
+                isAggro: false,
+                isElite: true,
+                isBoss: true,
+                affixes: ['goldTheft'],
+                gold: 0,
+                uniqueItemsDropped: [{
+                    name: "Golden Skin of T`Kore-Tickrob",
+                    type: "armor",
+                    slot: "armor",
+                    armor: -6,
+                    itemTier: "relic",
+                    stats: {
+                        prowess: 0,
+                        agility: 0,
+                        maxHP: 0,
+                        defense: 0,
+                        block: 0,
+                        maxLuck: -66,
+                    },
+                    description: "Shiny but it doesnt seem to do anything!, Maybe if it was perfectly activated?",
+                    uniqueId: null,
+                    icon: "golden-skin.png",
+                    relicAffixes: [],
+                },],
             },
         ];
 
@@ -205,25 +262,7 @@ export class Data {
                 icon: "golden-khepresh.svg",
                 relicAffixes: [],
             },
-            {
-                name: "Golden Skin of T`Kore-",
-                type: "armor",
-                slot: "armor",
-                armor: -6,
-                itemTier: "relic",
-                stats: {
-                    prowess: 0,
-                    agility: 0,
-                    maxHP: 0,
-                    defense: 0,
-                    block: 0,
-                    maxLuck: -66,
-                },
-                description: "Shiny but it doesnt seem to do anything!, Maybe if it was perfectly activated?",
-                uniqueId: null,
-                icon: "golden-skin.svg",
-                relicAffixes: [],
-            },
+            
         ];
 
     }
@@ -234,6 +273,10 @@ export class Data {
 
     getUniqueMonsters() {
         return JSON.parse(JSON.stringify(this._uniqueMonsters));
+    }
+
+    getBossMonsters() {
+        return JSON.parse(JSON.stringify(this._bossMonsters));
     }
 
     getStartItems() {

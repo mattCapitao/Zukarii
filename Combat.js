@@ -145,7 +145,7 @@ export class Combat {
         if (monsterAlive) {
             this.handleMonsterResponse(monster, combatLogMsg, true);
         }
-
+        this.game.getService('ui').writeToLog(`Your ${slot} attack missed the ${monster.name}!`);
         this.state.needsRender = true;
 
         return true;

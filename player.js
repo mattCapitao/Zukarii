@@ -57,7 +57,7 @@ export class Player {
         return [
             // Add specific start items and unique items if needed
             startItems[0], startItems[1], startItems[2],
-           //uniqueItems[0],
+           uniqueItems[0],
         ];
     }
 

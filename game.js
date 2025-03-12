@@ -28,7 +28,7 @@ export class Game {
         this.playerInventory = new PlayerInventory(this.state); // Initialize before Player
         this.player = new Player(this.state);
         this.player.playerInventory = this.playerInventory; // Link to player
-        this.monsters = new Monsters(this.state); // Fixed: No Lawnmower Man!
+        this.monsters = new Monsters(this.state, this); // Fixed: No Lawnmower Man!
         this.actions = new Actions(this.state);
         this.combat = new Combat(this.state, this); // Pass game instance
 

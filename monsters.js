@@ -3,19 +3,22 @@
 import { State } from './State.js';
 
 export class Monsters {
-    constructor(state) {
+    constructor(state, game) {
         this.state = state;
+        this.game = game;
         this.monsterAffixes = {
             goldTheft: {
                 name: "Gold Theft",
                 description: "Steals gold on hit",
                 onHit: function (monster, player) {
-                    const goldStolen = Math.floor(player.gold * 0.1) +1 ;
-                    player.gold -= goldStolen;
-                    this.state.game.getService('ui').writeToLog(`${monster.name}'s' Greedy Claw attack has stolen ${goldStolen} gold from you!`);
-                    if (player.gold < 0) {
-                        player.gold = 0;
-                        this.state.game.getService('ui').writeToLog(`ALL YOUR GOLD ARE BELONG TO ${monster.name} `);
+ this.state.player.gold
+                    const goldStolen = Math.floor(this.state.player.gold * 0.1) +1 ;
+                    this.state.player.gold -= goldStolen;
+                    this.game.getService('ui').updatePlayerInfo();
+                    this.game.getService('ui').writeToLog(`${monster.name}'s Greedy Claw attack has stolen ${goldStolen} gold from you!`);
+                    if (this.state.player.gold < 0) {
+                        this.state.player.gold = 0;
+                        this.game.getService('ui').writeToLog(`ALL YOUR GOLD ARE BELONG TO ${monster.name} `);
                     }
                 }.bind(this)
             },
@@ -37,13 +40,32 @@ export class Monsters {
         };
     }
 
-    generateMonster(tier, map, rooms, playerX, playerY, unique = false) {
+
+
+    generateMonster(tier, map, rooms, playerX, playerY, spawnPool) {
         const data = this.state.data;
-        const monsterTemplates = unique ? data.getUniqueMonsters() : data.getMonsterTemplates();
+        let newMonster = {};
 
-        let newMonster = { ...monsterTemplates[Math.floor(Math.random() * monsterTemplates.length)] };
+        console.log(`Generating monster for tier ${tier}, spawn pool:`, spawnPool);
+        if (spawnPool.boss) {
+            newMonster = { ...spawnPool.boss }; // Spawn a boss!
+        } else {
+            let normalMonsters = [];
+            let monsterTemplates = [];
+            if (spawnPool.monsterTemplates) {
+                normalMonsters = data.getMonsterTemplates();
+                monsterTemplates = [...normalMonsters];
+            }
+            if (spawnPool.uniqueMonsters) {
+                const uniqueMonsters = data.getUniqueMonsters();
+                if (uniqueMonsters.length > 0) {
+                    monsterTemplates.push(...uniqueMonsters);
+                }
+            }
+            console.log(`Monster templates:`, monsterTemplates);
+            newMonster = { ...monsterTemplates[Math.floor(Math.random() * monsterTemplates.length)] };
+        }
         const room = rooms[Math.floor(Math.random() * rooms.length)];
-
         do {
             newMonster.x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
             newMonster.y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
@@ -59,7 +81,7 @@ export class Monsters {
         return newMonster;
     }
 
-    generateLevelMonsters(tier) {
+    generateLevelMonsters(tier , uniqueMonsters = false) {
         const map = this.state.levels[tier].map;
         const rooms = this.state.levels[tier].rooms;
         const baseMonsterCount = 12;
@@ -67,11 +89,28 @@ export class Monsters {
         const monsterCount = Math.floor(baseMonsterCount * densityFactor);
         let levelMonsters = [];
 
-        //console.log(`Generating ${monsterCount} monsters for tier ${tier} (base: ${baseMonsterCount}, density factor: ${densityFactor.toFixed(2)})`);
+        const spawnPool = {
+            monsterTemplates: true,
+            uniqueMonsters: uniqueMonsters,
+        };
+
+        console.log(`Generating ${monsterCount} monsters for tier ${tier} (base: ${baseMonsterCount}, density factor: ${densityFactor.toFixed(2)})`);
+
+        const bossMonsters = this.state.data.getBossMonsters();
+        const boss = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
+
+        if (boss) {
+            const monsterToPush = this.generateMonster(tier, map, rooms, this.state.player.x, this.state.player.y, {
+                monsterTemplates: false,
+                uniqueMonsters: false,
+                boss: boss
+            });
+            levelMonsters.push(monsterToPush); 
+        }
 
         for (let i = 0; i < monsterCount; i++) {
-            const monsterToPush = this.generateMonster(tier, map, rooms, this.state.player.x, this.state.player.y);
-            //console.log(`Monster to push:`, monsterToPush);
+            const monsterToPush = this.generateMonster(tier, map, rooms, this.state.player.x, this.state.player.y, spawnPool);
+            console.log(`Monster to push:`, monsterToPush);
             levelMonsters.push(monsterToPush);
         }
         return levelMonsters;
@@ -79,11 +118,16 @@ export class Monsters {
 
     moveMonsters() {
         if (this.state.player.dead) return;
-
         const tier = this.state.tier;
-        //console.log(`Moving monsters on tier ${this.state.tier}, monsters:`, this.state.monsters[tier]);
+        if (!this.state.monsters[tier] || !Array.isArray(this.state.monsters[tier])) return;
+        if (!this.state.levels[tier] || !this.state.levels[tier].map) {
+            console.warn(`Level ${tier} not initialized—skipping monster movement`);
+            return;
+        }
+
+        console.log(`Moving monsters on tier ${this.state.tier}, monsters:`, this.state.monsters[tier]);
         if (!this.state.monsters[tier] || !Array.isArray(this.state.monsters[tier])) {
-            //console.log(`No monsters defined for tier ${this.state.tier}`);
+            console.log(`No monsters defined for tier ${this.state.tier}`);
             return;
         }
         let map = this.state.levels[tier].map;
@@ -92,7 +136,7 @@ export class Monsters {
         const AGGRO_RANGE = (this.state.discoveryRadius || 2) + 2;
         this.state.AGGRO_RANGE = AGGRO_RANGE;
         monsters.forEach(monster => {
-            //console.log(`Monster: `, monster);
+            console.log(`Monster: `, monster);
             if (monster.hp <= 0) return;
 
             const dx = this.state.player.x - monster.x;
@@ -227,6 +271,14 @@ export class Monsters {
 
         this.state.player.hp -= damageDealt;
         uiService.writeToLog(`${monster.name} dealt ${damageDealt} damage to You. Attack(${monsterDamage}) - Armor(${armorDmgReduction}) - Defense(${defenseDmgReduction}) `);
+
+        // Trigger goldTheft affix when monster hits player
+        const monstersService = this.game.getService('monsters');
+        if (monster.affixes.includes('goldTheft')) {
+            monstersService.monsterAffixes.goldTheft.onHit(monster, player);
+        }
+
+
         uiService.statRefreshUI();
 
         if (this.state.player.hp <= 0) {
