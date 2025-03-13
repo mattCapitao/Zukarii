@@ -1,6 +1,20 @@
+
 export class LevelTransition {
     constructor(state) {
         this.state = state;
+    }
+
+    findAdjacentTile(map, stairX, stairY) {
+        const directions = [
+            { x: stairX - 1, y: stairY }, { x: stairX + 1, y: stairY },
+            { x: stairX, y: stairY - 1 }, { x: stairX, y: stairY + 1 }
+        ];
+        for (let dir of directions) {
+            if (dir.y >= 0 && dir.y < map.length && dir.x >= 0 && dir.x < map[dir.y].length && map[dir.y][dir.x] === ' ') {
+                return { x: dir.x, y: dir.y };
+            }
+        }
+        throw new Error(`No adjacent walkable tile found near (${stairX}, ${stairY})`);
     }
 
     transitionDown() {
@@ -16,45 +30,20 @@ export class LevelTransition {
             this.state.game.getService('player').awardXp(newTierXP);
         }
 
-        // Initialize the new tier
         this.state.game.getService('level').addLevel(this.state.tier);
-
-        // Access the new tier's map and stairsUp
         const map = this.state.levels[this.state.tier].map;
+        console.log(`State after addLevel: stairsUp[${this.state.tier}] =`, this.state.stairsUp[this.state.tier]);
         const upStair = this.state.stairsUp[this.state.tier];
-        console.log(`upStair for tier ${this.state.tier}:`, upStair);
-
+        console.log(`Tier ${this.state.tier} stairsUp from state: (${upStair?.x}, ${upStair?.y})`);
         if (upStair) {
-            let x = upStair.x + 1;
-            let y = upStair.y;
-            if (y >= 0 && y < map.length && x >= 0 && x < map[y].length && map[y][x] !== ' ') {
-                // Check adjacent tiles if +1 is blocked
-                const directions = [
-                    { x: upStair.x - 1, y: upStair.y },
-                    { x: upStair.x, y: upStair.y + 1 },
-                    { x: upStair.x, y: upStair.y - 1 }
-                ];
-                for (let dir of directions) {
-                    if (y >= 0 && y < map.length && x >= 0 && x < map[y].length && map[dir.y][dir.x] === ' ') {
-                        x = dir.x;
-                        y = dir.y;
-                        break;
-                    }
-                }
-                if (map[y][x] !== ' ') {
-                    console.error(`No walkable tile near < at (${upStair.x}, ${upStair.y}) on tier ${this.state.tier}, defaulting to (1, 1)`);
-                    x = 1;
-                    y = 1;
-                }
-            }
-            this.state.player.x = x;
-            this.state.player.y = y;
-            console.log(`Landed at (${x}, ${y}) near stairsUp on tier ${this.state.tier}`);
+            const pos = this.findAdjacentTile(map, upStair.x, upStair.y);
+            this.state.player.x = pos.x;
+            this.state.player.y = pos.y;
+            console.log(`Landed at (${pos.x}, ${pos.y}) next to stairsUp on tier ${this.state.tier}`);
         } else {
-            console.error(`No stairsUp defined for tier ${this.state.tier}`);
+            console.error(`No stairsUp on tier ${this.state.tier}, defaulting to (1, 1)`);
             this.state.player.x = 1;
             this.state.player.y = 1;
-            console.log(`Fallback landed at (1, 1) on tier ${this.state.tier}`);
         }
         this.state.needsInitialRender = true;
         this.state.needsRender = true;
@@ -72,38 +61,154 @@ export class LevelTransition {
             }
             const map = this.state.levels[this.state.tier].map;
             const downStair = this.state.stairsDown[this.state.tier];
-            console.log(`downStair for tier ${this.state.tier}:`, downStair);
+            console.log(`Tier ${this.state.tier} stairsDown from state: (${downStair?.x}, ${downStair?.y})`);
             if (downStair) {
-                let x = downStair.x + 1;
-                let y = downStair.y;
-                if (y >= 0 && y < map.length && x >= 0 && x < map[y].length && map[y][x] !== ' ') {
-                    // Check adjacent tiles if +1 is blocked
-                    const directions = [
-                        { x: downStair.x - 1, y: downStair.y },
-                        { x: downStair.x, y: downStair.y + 1 },
-                        { x: downStair.x, y: downStair.y - 1 }
-                    ];
-                    for (let dir of directions) {
-                        if (y >= 0 && y < map.length && x >= 0 && x < map[y].length && map[dir.y][dir.x] === ' ') {
-                            x = dir.x;
-                            y = dir.y;
-                            break;
-                        }
-                    }
-                    if (map[y][x] !== ' ') {
-                        console.error(`No walkable tile near > at (${downStair.x}, ${downStair.y}) on tier ${this.state.tier}, defaulting to (1, 1)`);
-                        x = 1;
-                        y = 1;
-                    }
-                }
-                this.state.player.x = x;
-                this.state.player.y = y;
-                console.log(`Landed at (${x}, ${y}) near stairsDown on tier ${this.state.tier}`);
+                const pos = this.findAdjacentTile(map, downStair.x, downStair.y);
+                this.state.player.x = pos.x;
+                this.state.player.y = pos.y;
+                console.log(`Landed at (${pos.x}, ${pos.y}) next to stairsDown on tier ${this.state.tier}`);
             } else {
-                console.error(`No stairsDown defined for tier ${this.state.tier}`);
+                console.error(`No stairsDown on tier ${this.state.tier}, defaulting to (1, 1)`);
                 this.state.player.x = 1;
                 this.state.player.y = 1;
-                console.log(`Fallback landed at (1, 1) on tier ${this.state.tier}`);
+            }
+            this.state.needsInitialRender = true;
+            this.state.needsRender = true;
+        }
+    }
+
+    transitionViaPortal(newX, newY) {
+        let map = this.state.levels[this.state.tier].map;
+        const currentTier = this.state.tier;
+        let minTier = currentTier - 3;
+        let maxTier = currentTier + 3;
+
+        // Standard random tier selection (±3 range, excluding current tier)
+        let destinationTier;
+        do {
+            destinationTier = Math.floor(Math.random() * (maxTier - minTier + 1)) + minTier;
+        } while (destinationTier === currentTier);
+        if (destinationTier < 1) destinationTier = 1;
+
+        // Calculate risk chance (1% per 10 tiers)
+        const riskChance = Math.floor(currentTier / 10);
+        if (Math.random() < riskChance / 100) {
+            // On risk hit, expand range to ±8 and re-pick
+            minTier = currentTier - 8;
+            maxTier = currentTier + 8;
+            do {
+                destinationTier = Math.floor(Math.random() * (maxTier - minTier + 1)) + minTier;
+            } while (destinationTier === currentTier);
+            if (destinationTier < 1) destinationTier = 1;
+        } 
+
+        this.state.game.getService('ui').writeToLog(`You step through a mysterious portal surging with chaotic energy and are transported to Tier ${destinationTier}!`);
+        
+
+        console.log(`Portal transition from tier ${currentTier} to tier ${destinationTier} (standard range: ${currentTier - 3} to ${currentTier + 3}, risk range: ${currentTier - 8} to ${currentTier + 8})`);
+        map[newY][newX] = ' ';
+        this.state.tier = destinationTier;
+
+        if (!this.state.levels[destinationTier]) {
+            this.state.game.getService('level').addLevel(destinationTier);
+        }
+        map = this.state.levels[this.state.tier].map;
+        const upStair = this.state.stairsUp[this.state.tier];
+        console.log(`Tier ${destinationTier} stairsUp from state: (${upStair?.x}, ${upStair?.y})`);
+
+        if (upStair) {
+            const pos = this.findAdjacentTile(map, upStair.x, upStair.y);
+            this.state.player.x = pos.x;
+            this.state.player.y = pos.y;
+            console.log(`Landed at (${pos.x}, ${pos.y}) next to stairsUp on tier ${destinationTier}`);
+        } else {
+            console.error(`No stairsUp on tier ${destinationTier}, defaulting to (1, 1)`);
+            this.state.player.x = 1;
+            this.state.player.y = 1;
+        }
+        this.state.needsInitialRender = true;
+        this.state.needsRender = true;
+    }
+}
+
+
+/*
+export class LevelTransition {
+    constructor(state) {
+        this.state = state;
+    }
+
+    findAdjacentTile(map, stairX, stairY) {
+        const directions = [
+            { x: stairX - 1, y: stairY }, { x: stairX + 1, y: stairY },
+            { x: stairX, y: stairY - 1 }, { x: stairX, y: stairY + 1 }
+        ];
+        for (let dir of directions) {
+            if (dir.y >= 0 && dir.y < map.length && dir.x >= 0 && dir.x < map[dir.y].length && map[dir.y][dir.x] === ' ') {
+                return { x: dir.x, y: dir.y };
+            }
+        }
+        // Removed fallback; throw an error instead to debug
+        throw new Error(`No adjacent walkable tile found near (${stairX}, ${stairY})`);
+    }
+
+    transitionDown() {
+        if (this.state.tier >= Number.MAX_SAFE_INTEGER) return;
+        console.log(`Player location in state at transitionDown Called LevelTransion 22 T:${this.state.tier}, x:${this.state.player.x}, y:${this.state.player.y}`);
+        const newTier = this.state.tier + 1;
+        console.log(`Transitioning down to tier ${newTier}`);
+        this.state.tier = newTier;
+        if (this.state.tier > this.state.highestTier) {
+            this.state.highestTier = this.state.tier;
+            const newTierXP = 5 * this.state.tier;
+            this.state.game.getService('ui').writeToLog(`You Reached Tier ${this.state.tier}`);
+            this.state.game.getService('player').awardXp(newTierXP);
+        }
+
+        this.state.game.getService('level').addLevel(this.state.tier);
+        const map = this.state.levels[this.state.tier].map;
+        console.log(`State after addLevel: stairsUp[${this.state.tier}] =`, this.state.stairsUp[this.state.tier]);
+        const upStair = this.state.stairsUp[this.state.tier];
+        console.log(`Tier ${this.state.tier} stairsUp from state: (${upStair?.x}, ${upStair?.y})`);
+        if (upStair) {
+            const pos = this.findAdjacentTile(map, upStair.x, upStair.y);
+            this.state.player.x = pos.x;
+            this.state.player.y = pos.y;
+            console.log(`Landed at (${pos.x}, ${pos.y}) next to stairsUp on tier ${this.state.tier}`);
+            console.log(`Player location in state after pos.x, pox.y set LevelTransion 43 T:${this.state.tier}, x:${this.state.player.x}, y:${this.state.player.y}`);
+
+        } else {
+            console.error(`No stairsUp on tier ${this.state.tier}, defaulting to (1, 1)`);
+            this.state.player.x = 1;
+            this.state.player.y = 1;
+        }
+        this.state.needsInitialRender = true;
+        this.state.needsRender = true;
+
+    }
+
+    transitionUp() {
+        console.log(`Transitioning up to tier ${this.state.tier - 1}`);
+        if (this.state.tier === 0 || this.state.tier === 1) {
+            this.state.game.getService('player').exit();
+        } else {
+            const newTier = this.state.tier - 1;
+            this.state.tier = newTier;
+            if (!this.state.levels[this.state.tier]?.map) {
+                this.state.game.getService('level').addLevel(this.state.tier);
+            }
+            const map = this.state.levels[this.state.tier].map;
+            const downStair = this.state.stairsDown[this.state.tier];
+            console.log(`Tier ${this.state.tier} stairsDown from state: (${downStair?.x}, ${downStair?.y})`);
+            if (downStair) {
+                const pos = this.findAdjacentTile(map, downStair.x, downStair.y);
+                this.state.player.x = pos.x;
+                this.state.player.y = pos.y;
+                console.log(`Landed at (${pos.x}, ${pos.y}) next to stairsDown on tier ${this.state.tier}`);
+            } else {
+                console.error(`No stairsDown on tier ${this.state.tier}, defaulting to (1, 1)`);
+                this.state.player.x = 1;
+                this.state.player.y = 1;
             }
             this.state.needsInitialRender = true;
             this.state.needsRender = true;
@@ -120,50 +225,37 @@ export class LevelTransition {
             destinationTier = Math.floor(Math.random() * (maxTier - minTier + 1)) + minTier;
         } while (destinationTier === currentTier);
 
-        const riskChance = Math.floor(currentTier / 10) / 100; // 0% at 1-9, 1% at 10-19, etc.
+        
+        const riskChance = Math.floor(currentTier / 10) / 100;
         if (Math.random() < riskChance) {
             destinationTier += 5;
             this.state.game.getService('ui').writeToLog(`The portal surges with chaotic energy, flinging you far ahead to Tier ${destinationTier}!`);
         } else {
             this.state.game.getService('ui').writeToLog(`You step through a mysterious portal to Tier ${destinationTier}!`);
         }
+        
 
-        // Remove the portal
+        this.state.game.getService('ui').writeToLog(`You step through a mysterious portal to Tier ${destinationTier}!`);
+
         map[newY][newX] = ' ';
-        this.state.needsRender = true;
-
-        // Transition to new tier
         this.state.tier = destinationTier;
         if (!this.state.levels[destinationTier]) {
             this.state.game.getService('level').addLevel(destinationTier);
         }
         map = this.state.levels[this.state.tier].map;
-        const centerX = Math.floor(this.state.WIDTH / 2);
-        const centerY = Math.floor(this.state.HEIGHT / 2);
-        let x = centerX;
-        let y = centerY;
-        if (y >= 0 && y < map.length && x >= 0 && x < map[y].length && map[y][x] !== ' ') {
-            const directions = [
-                { x: centerX - 1, y: centerY }, { x: centerX + 1, y: centerY },
-                { x: centerX, y: centerY - 1 }, { x: centerX, y: centerY + 1 }
-            ];
-            for (let dir of directions) {
-                if (map[dir.y][dir.x] === ' ') {
-                    x = dir.x;
-                    y = dir.y;
-                    break;
-                }
-            }
-            if (map[y][x] !== ' ') {
-                console.error(`No walkable tile near center (${centerX}, ${centerY}), defaulting to (1, 1)`);
-                x = 1;
-                y = 1;
-            }
+        const upStair = this.state.stairsUp[this.state.tier];
+        console.log(`Tier ${destinationTier} stairsUp from state: (${upStair?.x}, ${upStair?.y})`);
+        if (upStair) {
+            const pos = this.findAdjacentTile(map, upStair.x, upStair.y);
+            this.state.player.x = pos.x;
+            this.state.player.y = pos.y;
+            console.log(`Landed at (${pos.x}, ${pos.y}) next to stairsUp on tier ${destinationTier}`);
+        } else {
+            console.error(`No stairsUp on tier ${destinationTier}, defaulting to (1, 1)`);
+            this.state.player.x = 1;
+            this.state.player.y = 1;
         }
-        this.state.player.x = x;
-        this.state.player.y = y;
-        console.log(`Landed at (${x}, ${y}) on tier ${destinationTier}`);
         this.state.needsInitialRender = true;
         this.state.needsRender = true;
     }
-}
+} */

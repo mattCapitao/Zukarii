@@ -328,8 +328,12 @@ export class Render {
         }
         //console.log("Checking renderIfNeeded, needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender);
         if (this.state.needsRender === true) {
-            //console.log("Rendering at", Date.now(), "with needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender);
+            console.log("Rendering at", Date.now(), "with needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender);
+            console.log(`Player location in state before render() T:${this.state.tier}, x:${this.state.player.x}, y:${this.state.player.y}`);
+
             this.render();
+            console.log(`Player location in state after render() T:${this.state.tier}, x:${this.state.player.x}, y:${this.state.player.y}`);
+
             this.state.needsRender = false;
             //console.log("needsRender set to false after render (this.state.needsRender:", this.state.needsRender, "typeof:", typeof this.state.needsRender, ")");
         } else {

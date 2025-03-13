@@ -200,14 +200,14 @@ export class Game {
         let monster = this.state.monsters[this.state.tier].find(m => m.x === newX && m.y === newY && m.hp > 0);
         let fountain = this.state.fountains[this.state.tier].find(f => f.x === newX && f.y === newY && !f.used);
         let treasureIndex = this.state.treasures[this.state.tier].findIndex(t => t.x === newX && t.y === newY);
-        console.log(`Checking interactions at (${newX}, ${newY}): monster=${!!monster}, fountain=${!!fountain}, treasureIndex=${treasureIndex}`);
+        console.log(`Checking interactions at (${newX}, ${newY}): map[${newY}][${newX}]='${map[newY][newX]}', monster=${!!monster}, fountain=${!!fountain}, treasureIndex=${treasureIndex}`);
 
         if (monster) {
             if (this.getService('combat').meleeAttack(monster)) {
                 this.#endTurn();
             }
             this.getService('player').checkLevelUp();
-            return; // Added return to block movement through live monsters
+            return;
         }
 
         if (fountain) {
@@ -231,18 +231,34 @@ export class Game {
             return;
         }
 
+        let transitioned = false;
         if (map[newY][newX] === '⇓' && this.state.tier < Number.MAX_SAFE_INTEGER) {
+            console.log(`Transition down triggered at (${newX}, ${newY}) with map value '${map[newY][newX]}'`);
             this.getService('levelTransition').transitionDown();
+            this.state.transitionLock = true;
+            transitioned = true;
         } else if (map[newY][newX] === '⇑' && this.state.tier > 0) {
+            console.log(`Transition up triggered at (${newX}, ${newY}) with map value '${map[newY][newX]}'`);
             this.getService('levelTransition').transitionUp();
+            this.state.transitionLock = true;
+            transitioned = true;
         } else if (map[newY][newX] === '?') {
+            console.log(`Portal transition triggered at (${newX}, ${newY}) with map value '${map[newY][newX]}'`);
             this.getService('levelTransition').transitionViaPortal(newX, newY);
+            this.state.transitionLock = true;
+            transitioned = true;
         }
 
-        // Move player onto the tile after all interactions
-        this.state.player.x = newX;
-        this.state.player.y = newY;
-        this.#endTurn();
+        if (!transitioned && !this.state.transitionLock) {
+            this.state.player.x = newX;
+            this.state.player.y = newY;
+        }
+
+        if (this.state.transitionLock) {
+            this.state.transitionLock = false; // Reset for next frame
+        }
+
+        this.#endTurn(); // Always call endTurn to ensure rendering
 
         if (this.state.player.x === newX && this.state.player.y === newY) {
             this.getService('render').updateMapScroll();
@@ -250,6 +266,8 @@ export class Game {
     }
 
     #endTurn() {
+
+        console.log(`Player location in state at endTurn: T:${this.state.tier}, x:${this.state.player.x}, y:${this.state.player.y}`);
         if (this.state.gameOver) {
             return;
         }
@@ -279,6 +297,18 @@ export class Game {
     }
 
     initGame() {
-        this.state.initGame();
+        const levelService = this.state.game.getService('level');
+        const dataService = this.state.game.getService('data');
+        const splash = document.getElementById('splash');
+        if (splash) splash.remove();
+
+        levelService.addLevel(0, dataService.getCustomLevel(0));
+        if (!this.state.levels[0]) throw new Error('Failed to initialize tier 0');
+        levelService.addLevel(1);
+        this.state.tier = 1; // Start on tier 1
+        this.state.lastPlayerX = null;
+        this.state.lastPlayerY = null;
+        this.state.needsInitialRender = true;
+        this.state.needsRender = true;
     }
 }

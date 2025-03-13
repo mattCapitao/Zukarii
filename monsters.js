@@ -46,7 +46,7 @@ export class Monsters {
         const data = this.state.game.getService('data');
         let newMonster = {};
 
-        console.log(`Generating monster for tier ${tier}, spawn pool:`, spawnPool);
+        //console.log(`Generating monster for tier ${tier}, spawn pool:`, spawnPool);
         if (spawnPool.boss) {
             newMonster = { ...spawnPool.boss }; // Spawn a boss!
         } else {
@@ -62,7 +62,7 @@ export class Monsters {
                     monsterTemplates.push(...uniqueMonsters);
                 }
             }
-            console.log(`Monster templates:`, monsterTemplates);
+         //   console.log(`Monster templates:`, monsterTemplates);
             newMonster = { ...monsterTemplates[Math.floor(Math.random() * monsterTemplates.length)] };
         }
         const room = rooms[Math.floor(Math.random() * rooms.length)];
@@ -92,7 +92,7 @@ export class Monsters {
             uniqueMonsters: uniqueMonsters,
         };
 
-        console.log(`Generating ${monsterCount} monsters for tier ${tier} (base: ${baseMonsterCount}, density factor: ${densityFactor.toFixed(2)})`);
+        //console.log(`Generating ${monsterCount} monsters for tier ${tier} (base: ${baseMonsterCount}, density factor: ${densityFactor.toFixed(2)})`);
 
         if (bossRoom) {
             const bossMonsters = this.state.game.getService('data').getBossMonsters();
@@ -120,11 +120,11 @@ export class Monsters {
         const tier = this.state.tier;
         if (!this.state.monsters[tier] || !Array.isArray(this.state.monsters[tier])) return;
         if (!this.state.levels[tier] || !this.state.levels[tier].map) {
-            console.warn(`Level ${tier} not initialized—skipping monster movement`);
+        //    console.warn(`Level ${tier} not initialized—skipping monster movement`);
             return;
         }
 
-        console.log(`Moving monsters on tier ${this.state.tier}, monsters:`, this.state.monsters[tier]);
+       // console.log(`Moving monsters on tier ${this.state.tier}, monsters:`, this.state.monsters[tier]);
         if (!this.state.monsters[tier] || !Array.isArray(this.state.monsters[tier])) {
             console.log(`No monsters defined for tier ${this.state.tier}`);
             return;
@@ -135,7 +135,7 @@ export class Monsters {
         const AGGRO_RANGE = (this.state.discoveryRadius || 2) + 2;
         this.state.AGGRO_RANGE = AGGRO_RANGE;
         monsters.forEach(monster => {
-            console.log(`Monster: `, monster);
+           // console.log(`Monster: `, monster);
             if (monster.hp <= 0) return;
 
             const dx = this.state.player.x - monster.x;

@@ -76,7 +76,7 @@ export class PlayerInventory {
     }
 
     dropItem(index, item) {
-        console.error("Dropping item:", item, "inventoryIndex: ", index);
+        //console.error("Dropping item:", item, "inventoryIndex: ", index);
         const uiService = this.state.game.getService('ui');
         const actionsService = this.state.game.getService('actions');
         //const item = this.state.player.inventory.items[index];
@@ -94,7 +94,10 @@ export class PlayerInventory {
             healPotions: 0,
             items: [{ ...item }],
         };
-        actionsService.placeTreasure(treasure);
+        const tier = this.state.tier;
+        actionsService.placeTreasure(treasure, tier, this.state.levels[tier].map, this.state.treasures[tier]);
+        // this.state.levels[tier].map, this.state.treasures[tier]
+
         uiService.writeToLog(`Dropped ${item.name} as treasure at (${treasure.x}, ${treasure.y})`);
         uiService.statRefreshUI();
     }

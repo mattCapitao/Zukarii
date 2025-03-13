@@ -148,7 +148,7 @@ export class State {
         }];
         return { map, rooms };
     }
-
+/*
     initGame() {
         const levelService = this.game.getService('level');
         const dataService = this.game.getService('data');
@@ -165,4 +165,5 @@ export class State {
         this.needsInitialRender = true;
         this.needsRender = true;
     }
+    */
 }

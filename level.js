@@ -104,14 +104,26 @@ export class Level {
 
                 levelData = this.generateLevel(hasBossRoom);
 
-                const upRooms = levelData.rooms.filter(r => r.type !== 'AlcoveSpecial' && r.type !== 'BossChamberSpecial');
+                // Handle BossChamberSpecial first if present
+                let bossRoom = levelData.rooms.find(r => r.type === 'BossChamberSpecial');
+                let stairDownX, stairDownY;
+                if (bossRoom && hasBossRoom) {
+                    do {
+                        stairDownX = bossRoom.left + 1 + Math.floor(Math.random() * (bossRoom.w - 2));
+                        stairDownY = bossRoom.top + 1 + Math.floor(Math.random() * (bossRoom.h - 2));
+                    } while (levelData.map[stairDownY][stairDownX] !== ' ');
+                    levelData.map[stairDownY][stairDownX] = '⇓';
+                    levelData.stairsDown = { x: stairDownX, y: stairDownY };
+                    if (forceBossRoom) this.lastBossTier = tier;
+                }
+
+                // Place stairsUp with distance check from boss room
+                const upRooms = levelData.rooms.filter(r => r.type !== 'BossChamberSpecial');
                 const upRoomIndex = Math.floor(Math.random() * upRooms.length);
                 const upRoom = upRooms[upRoomIndex];
                 let stairUpX, stairUpY;
                 let attempts = 0;
                 const MAX_STAIR_ATTEMPTS = 20;
-
-                const bossRoom = levelData.rooms.find(r => r.type === 'BossChamberSpecial');
                 do {
                     stairUpX = upRoom.left + 1 + Math.floor(Math.random() * (upRoom.w - 2));
                     stairUpY = upRoom.top + 1 + Math.floor(Math.random() * (upRoom.h - 2));
@@ -120,18 +132,13 @@ export class Level {
                         console.warn(`Failed to place stairsUp far enough from boss room after ${MAX_STAIR_ATTEMPTS} attempts`);
                         break;
                     }
-                } while (bossRoom && this.calculateDistance(stairUpX, stairUpY, bossRoom.x, bossRoom.y) < this.state.MIN_STAIR_DISTANCE);
-
+                } while (levelData.map[stairUpY][stairUpX] !== ' ' ||
+                    (bossRoom && this.calculateDistance(stairUpX, stairUpY, bossRoom.x, bossRoom.y) < this.state.MIN_STAIR_DISTANCE));
                 levelData.map[stairUpY][stairUpX] = '⇑';
                 levelData.stairsUp = { x: stairUpX, y: stairUpY };
 
-                let downRoom, stairDownX, stairDownY;
-                if (bossRoom) {
-                    downRoom = bossRoom;
-                    stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
-                    stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
-                    if (forceBossRoom) this.lastBossTier = tier;
-                } else {
+                // Place stairsDown in a far room if no boss room
+                if (!bossRoom || !hasBossRoom) {
                     const downOptions = levelData.rooms.map(room => {
                         const centerX = room.left + Math.floor(room.w / 2);
                         const centerY = room.top + Math.floor(room.h / 2);
@@ -141,13 +148,14 @@ export class Level {
                     }).sort((a, b) => b.distance - a.distance);
 
                     const farRooms = downOptions.filter(opt => opt.distance >= this.state.MIN_STAIR_DISTANCE);
-                    downRoom = farRooms.find(opt => opt.room.type === 'AlcoveSpecial')?.room ||
-                        farRooms[0]?.room || downOptions[0].room;
-                    stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
-                    stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
+                    const downRoom = farRooms[0]?.room || downOptions[0].room;
+                    do {
+                        stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
+                        stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
+                    } while (levelData.map[stairDownY][stairDownX] !== ' ');
+                    levelData.map[stairDownY][stairDownX] = '⇓';
+                    levelData.stairsDown = { x: stairDownX, y: stairDownY };
                 }
-                levelData.map[stairDownY][stairDownX] = '⇓';
-                levelData.stairsDown = { x: stairDownX, y: stairDownY };
 
                 levelData.monsters = monstersService.generateLevelMonsters(tier, levelData.map, levelData.rooms, false, bossRoom);
                 levelData.treasures = [];
@@ -172,14 +180,14 @@ export class Level {
                 if (levelData.map[this.state.player.y][this.state.player.x] !== ' ') {
                     this.adjustPlayerPosition(tier, levelData.stairsUp || levelData.stairsDown);
                 }
+            } else if (tier === 1) {
+                this.adjustPlayerPosition(tier, levelData.stairsUp);
             } else if (!customLevel) {
                 this.adjustPlayerPosition(tier, levelData.stairsUp);
             }
 
-            // Run transition checks after level is fully initialized
             this.checkLevelTransitions(tier);
         } else {
-            // If revisiting a level, still run transition checks
             this.checkLevelTransitions(tier);
         }
         this.state.needsInitialRender = true;
