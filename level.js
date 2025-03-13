@@ -21,7 +21,169 @@ export class Level {
         this.INITIAL_MIN_DISTANCE = 12;
         this.MIN_DISTANCE_FLOOR = 3;
         this.BOSS_ROOM_EVERY_X_LEVELS = 3; // Guarantee a boss room every 3 levels
-        this.lastBossTier = -this.BOSS_ROOM_EVERY_X_LEVELS; // Ensure first tier can trigger
+        this.lastBossTier = 0; // Ensure first tier can trigger
+    }
+
+    checkLevelTransitions(tier) {
+        if (!this.state.levels[tier] || !this.state.levels[tier].map) {
+            console.warn(`Cannot run checkLevelTransitions for tier ${tier} - map not initialized`);
+            return;
+        }
+
+        const map = this.state.levels[tier].map;
+        const rooms = this.state.levels[tier].rooms;
+
+        // Check if a portal already exists on the map
+        let hasPortal = false;
+        for (let y = 0; y < map.length; y++) {
+            for (let x = 0; x < map[y].length; x++) {
+                if (map[y][x] === '?') {
+                    hasPortal = true;
+                    break;
+                }
+            }
+            if (hasPortal) break;
+        }
+
+        // If no portal exists, generate one
+        if (!hasPortal) {
+            // Skip tier 0 (surface level)
+            if (tier === 0) return;
+
+            // Skip if custom level has a portal (check map for '?')
+            if (this.state.levels[tier].map.some(row => row.includes('?'))) return;
+
+            // Generate a portal with 100% chance for testing
+            const eligibleRooms = rooms.filter(r => r.type !== 'BossChamberSpecial');
+            if (eligibleRooms.length === 0) return;
+
+            const room = eligibleRooms[Math.floor(Math.random() * eligibleRooms.length)];
+            let x, y;
+            do {
+                x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
+                y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
+            } while (map[y][x] !== ' ');
+
+            map[y][x] = '?';
+            this.state.needsRender = true;
+        }
+
+        // Future checks (e.g., respawns, unlock points) can go here
+    }
+
+    addLevel(tier, customLevel = null) {
+        const monstersService = this.state.game.getService('monsters');
+        if (!this.state.levels[tier]) {
+            let levelData;
+            if (customLevel) {
+                const required = ['map', 'rooms', 'stairsUp', 'stairsDown', 'playerSpawn'];
+                for (const field of required) {
+                    if (!customLevel[field] || (field === 'rooms' && customLevel[field].length === 0)) {
+                        throw new Error(`Custom level for tier ${tier} missing required field: ${field}`);
+                    }
+                }
+                const mapHeight = customLevel.map.length;
+                const mapWidth = customLevel.map[0] ? customLevel.map[0].length : 0;
+                if (mapHeight > 67 || mapWidth > 122) {
+                    throw new Error(`Custom level map for tier ${tier} exceeds 122x67 (${mapWidth}x${mapHeight}) and cannot be trimmed`);
+                }
+
+                levelData = { ...customLevel };
+                levelData.map = this.padMap(customLevel.map);
+                levelData.monsters = customLevel.monsters || [];
+                levelData.treasures = customLevel.treasures || [];
+                levelData.fountains = customLevel.fountains || [];
+
+                if (customLevel.spawn && customLevel.spawn.length > 0) {
+                    this.processSpawn(tier, levelData);
+                }
+            } else {
+                const bossRoomChance = 0.05;
+                const forceBossRoom = (tier === 1) || (tier - this.lastBossTier >= this.BOSS_ROOM_EVERY_X_LEVELS);
+                const hasBossRoom = forceBossRoom || Math.random() < bossRoomChance;
+
+                levelData = this.generateLevel(hasBossRoom);
+
+                const upRooms = levelData.rooms.filter(r => r.type !== 'AlcoveSpecial' && r.type !== 'BossChamberSpecial');
+                const upRoomIndex = Math.floor(Math.random() * upRooms.length);
+                const upRoom = upRooms[upRoomIndex];
+                let stairUpX, stairUpY;
+                let attempts = 0;
+                const MAX_STAIR_ATTEMPTS = 20;
+
+                const bossRoom = levelData.rooms.find(r => r.type === 'BossChamberSpecial');
+                do {
+                    stairUpX = upRoom.left + 1 + Math.floor(Math.random() * (upRoom.w - 2));
+                    stairUpY = upRoom.top + 1 + Math.floor(Math.random() * (upRoom.h - 2));
+                    attempts++;
+                    if (attempts >= MAX_STAIR_ATTEMPTS) {
+                        console.warn(`Failed to place stairsUp far enough from boss room after ${MAX_STAIR_ATTEMPTS} attempts`);
+                        break;
+                    }
+                } while (bossRoom && this.calculateDistance(stairUpX, stairUpY, bossRoom.x, bossRoom.y) < this.state.MIN_STAIR_DISTANCE);
+
+                levelData.map[stairUpY][stairUpX] = '⇑';
+                levelData.stairsUp = { x: stairUpX, y: stairUpY };
+
+                let downRoom, stairDownX, stairDownY;
+                if (bossRoom) {
+                    downRoom = bossRoom;
+                    stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
+                    stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
+                    if (forceBossRoom) this.lastBossTier = tier;
+                } else {
+                    const downOptions = levelData.rooms.map(room => {
+                        const centerX = room.left + Math.floor(room.w / 2);
+                        const centerY = room.top + Math.floor(room.h / 2);
+                        const dx = stairUpX - centerX;
+                        const dy = stairUpY - centerY;
+                        return { room, distance: Math.sqrt(dx * dx + dy * dy) };
+                    }).sort((a, b) => b.distance - a.distance);
+
+                    const farRooms = downOptions.filter(opt => opt.distance >= this.state.MIN_STAIR_DISTANCE);
+                    downRoom = farRooms.find(opt => opt.room.type === 'AlcoveSpecial')?.room ||
+                        farRooms[0]?.room || downOptions[0].room;
+                    stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
+                    stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
+                }
+                levelData.map[stairDownY][stairDownX] = '⇓';
+                levelData.stairsDown = { x: stairDownX, y: stairDownY };
+
+                levelData.monsters = monstersService.generateLevelMonsters(tier, levelData.map, levelData.rooms, false, bossRoom);
+                levelData.treasures = [];
+                levelData.fountains = this.generateFountains(tier, levelData.map, levelData.rooms);
+                this.generateTreasures(tier, levelData.map, levelData.rooms, levelData.treasures);
+            }
+
+            this.state.levels[tier] = levelData;
+            this.state.stairsUp[tier] = levelData.stairsUp;
+            this.state.stairsDown[tier] = levelData.stairsDown;
+            this.state.monsters[tier] = levelData.monsters;
+            this.state.treasures[tier] = levelData.treasures;
+            this.state.fountains[tier] = levelData.fountains;
+            this.state.discoveredWalls[tier] = new Set();
+            this.state.discoveredTileCount[tier] = 0;
+            this.state.visibleTiles[tier] = new Set();
+            this.state.tileMap[tier] = this.buildTileMap(tier);
+
+            if (customLevel && customLevel.playerSpawn) {
+                this.state.player.x = customLevel.playerSpawn.x;
+                this.state.player.y = customLevel.playerSpawn.y;
+                if (levelData.map[this.state.player.y][this.state.player.x] !== ' ') {
+                    this.adjustPlayerPosition(tier, levelData.stairsUp || levelData.stairsDown);
+                }
+            } else if (!customLevel) {
+                this.adjustPlayerPosition(tier, levelData.stairsUp);
+            }
+
+            // Run transition checks after level is fully initialized
+            this.checkLevelTransitions(tier);
+        } else {
+            // If revisiting a level, still run transition checks
+            this.checkLevelTransitions(tier);
+        }
+        this.state.needsInitialRender = true;
+        this.state.needsRender = true;
     }
 
     selectRoomType() {
@@ -418,106 +580,6 @@ export class Level {
         }
     }
 
-
-    addLevel(tier, customLevel = null) {
-        const monstersService = this.state.game.getService('monsters');
-        if (!this.state.levels[tier]) {
-            let levelData;
-            if (customLevel) {
-                const required = ['map', 'rooms', 'stairsUp', 'stairsDown', 'playerSpawn'];
-                for (const field of required) {
-                    if (!customLevel[field] || (field === 'rooms' && customLevel[field].length === 0)) {
-                        throw new Error(`Custom level for tier ${tier} missing required field: ${field}`);
-                    }
-                }
-                const mapHeight = customLevel.map.length;
-                const mapWidth = customLevel.map[0] ? customLevel.map[0].length : 0;
-                if (mapHeight > 67 || mapWidth > 122) {
-                    throw new Error(`Custom level map for tier ${tier} exceeds 122x67 (${mapWidth}x${mapHeight}) and cannot be trimmed`);
-                }
-
-                levelData = { ...customLevel };
-                levelData.map = this.padMap(customLevel.map);
-                levelData.monsters = customLevel.monsters || [];
-                levelData.treasures = customLevel.treasures || [];
-                levelData.fountains = customLevel.fountains || [];
-
-                if (customLevel.spawn && customLevel.spawn.length > 0) {
-                    this.processSpawn(tier, levelData);
-                }
-            } else {
-                levelData = this.generateLevel();
-                const upRooms = levelData.rooms.filter(r => r.type !== 'AlcoveSpecial' && r.type !== 'BossChamberSpecial');
-                const upRoomIndex = Math.floor(Math.random() * upRooms.length);
-                const upRoom = upRooms[upRoomIndex];
-                let stairUpX = upRoom.left + 1 + Math.floor(Math.random() * (upRoom.w - 2));
-                let stairUpY = upRoom.top + 1 + Math.floor(Math.random() * (upRoom.h - 2));
-                levelData.map[stairUpY][stairUpX] = '⇑';
-                levelData.stairsUp = { x: stairUpX, y: stairUpY };
-
-                const downOptions = levelData.rooms.map(room => {
-                    const centerX = room.left + Math.floor(room.w / 2);
-                    const centerY = room.top + Math.floor(room.h / 2);
-                    const dx = stairUpX - centerX;
-                    const dy = stairUpY - centerY;
-                    return { room, distance: Math.sqrt(dx * dx + dy * dy) };
-                }).sort((a, b) => b.distance - a.distance);
-
-                const farRooms = downOptions.filter(opt => opt.distance >= this.state.MIN_STAIR_DISTANCE);
-                const downRoom = farRooms.find(opt => opt.room.type === 'BossChamberSpecial')?.room ||
-                    farRooms.find(opt => opt.room.type === 'AlcoveSpecial')?.room ||
-                    farRooms[0]?.room || downOptions[0].room;
-                const stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
-                const stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
-                levelData.map[stairDownY][stairDownX] = '⇓';
-                levelData.stairsDown = { x: stairDownX, y: stairDownY };
-
-                const bossRoom = levelData.rooms.find(r => r.type === 'BossChamberSpecial');
-                levelData.monsters = monstersService.generateLevelMonsters(tier, levelData.map, levelData.rooms, false, bossRoom);
-                levelData.treasures = [];
-                levelData.fountains = this.generateFountains(tier, levelData.map, levelData.rooms);
-                this.generateTreasures(tier, levelData.map, levelData.rooms, levelData.treasures);
-            }
-
-            this.state.levels[tier] = levelData;
-            this.state.stairsUp[tier] = levelData.stairsUp;
-            this.state.stairsDown[tier] = levelData.stairsDown;
-            this.state.monsters[tier] = levelData.monsters;
-            this.state.treasures[tier] = levelData.treasures;
-            this.state.fountains[tier] = levelData.fountains;
-            this.state.discoveredWalls[tier] = new Set();
-            this.state.discoveredTileCount[tier] = 0;
-            this.state.visibleTiles[tier] = new Set();
-            this.state.tileMap[tier] = this.buildTileMap(tier);
-
-            if (customLevel && customLevel.playerSpawn) {
-                this.state.player.x = customLevel.playerSpawn.x;
-                this.state.player.y = customLevel.playerSpawn.y;
-                if (levelData.map[this.state.player.y][this.state.player.x] !== ' ') {
-                    this.adjustPlayerPosition(tier, levelData.stairsUp || levelData.stairsDown);
-                }
-            } else if (!customLevel) {
-                this.adjustPlayerPosition(tier, levelData.stairsUp);
-            }
-        }
-        this.state.needsInitialRender = true;
-        this.state.needsRender = true;
-    }
-
-/* Deprecated - replaced by padMap()
-    normalizeMap(map) {
-        const targetHeight = 67;
-        const targetWidth = 122;
-        let normalized = [];
-        for (let y = 0; y < targetHeight; y++) {
-            normalized[y] = [];
-            for (let x = 0; x < targetWidth; x++) {
-                normalized[y][x] = (y < map.length && x < map[y].length) ? map[y][x] : '#';
-            }
-        }
-        return normalized;
-    }
-*/
     padMap(map) {
         const targetHeight = 67;
         const targetWidth = 122;
