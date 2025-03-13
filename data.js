@@ -1,4 +1,4 @@
-//console.log("Data.js loaded");
+﻿//console.log("Data.js loaded");
 
 export class Data {
     constructor() {
@@ -265,6 +265,38 @@ export class Data {
             
         ];
 
+        this._customSurfaceLevel = {
+            map: (() => {
+                let map = [];
+                for (let y = 0; y < 67; y++) {
+                    map[y] = [];
+                    for (let x = 0; x < 122; x++) {
+                        if (y < 10 && x < 10) {
+                            map[y][x] = (y === 0 || y === 9 || x === 0 || x === 9) ? '#' : ' ';
+                        } else {
+                            map[y][x] = '#';
+                        }
+                    }
+                }
+                map[2][2] = '⇑'; // Stairs up
+                map[5][5] = '⇓'; // Stairs down
+                return map;
+            })(),
+            rooms: [{ left: 1, top: 1, w: 8, h: 8, x: 5, y: 5, type: 'SurfaceRoom', connections: [] }],
+            stairsUp: { x: 2, y: 2 },
+            stairsDown: { x: 5, y: 5 },
+            playerSpawn: { x: 1, y: 1 },
+            monsters: [],
+            treasures: [],
+            fountains: [],
+            spawn: []
+        };
+
+
+    }
+
+    getCustomLevel(tier) {
+        return tier === 0 ? JSON.parse(JSON.stringify(this._customSurfaceLevel)) : null;
     }
 
     getMonsterTemplates() {

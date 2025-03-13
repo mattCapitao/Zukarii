@@ -43,7 +43,7 @@ export class Monsters {
 
 
     generateMonster(tier, map, rooms, playerX, playerY, spawnPool) {
-        const data = this.state.data;
+        const data = this.state.game.getService('data');
         let newMonster = {};
 
         console.log(`Generating monster for tier ${tier}, spawn pool:`, spawnPool);
@@ -81,9 +81,7 @@ export class Monsters {
         return newMonster;
     }
 
-    generateLevelMonsters(tier , uniqueMonsters = false) {
-        const map = this.state.levels[tier].map;
-        const rooms = this.state.levels[tier].rooms;
+    generateLevelMonsters(tier, map, rooms, uniqueMonsters = false, bossRoom = null) {
         const baseMonsterCount = 12;
         const densityFactor = 1 + tier * 0.1;
         const monsterCount = Math.floor(baseMonsterCount * densityFactor);
@@ -96,20 +94,21 @@ export class Monsters {
 
         console.log(`Generating ${monsterCount} monsters for tier ${tier} (base: ${baseMonsterCount}, density factor: ${densityFactor.toFixed(2)})`);
 
-        const bossMonsters = this.state.data.getBossMonsters();
-        const boss = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
-
-        if (boss) {
-            const monsterToPush = this.generateMonster(tier, map, rooms, this.state.player.x, this.state.player.y, {
+        if (bossRoom) {
+            const bossMonsters = this.state.game.getService('data').getBossMonsters();
+            const boss = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
+            const bossMonster = this.generateMonster(tier, map, [bossRoom], this.state.player.x, this.state.player.y, {
                 monsterTemplates: false,
                 uniqueMonsters: false,
                 boss: boss
             });
-            levelMonsters.push(monsterToPush); 
+            levelMonsters.push(bossMonster);
+            console.log(`Boss ${bossMonster.name} spawned in BossChamberSpecial at (${bossMonster.x}, ${bossMonster.y})`);
         }
 
+        const availableRooms = bossRoom ? rooms.filter(r => r !== bossRoom) : rooms;
         for (let i = 0; i < monsterCount; i++) {
-            const monsterToPush = this.generateMonster(tier, map, rooms, this.state.player.x, this.state.player.y, spawnPool);
+            const monsterToPush = this.generateMonster(tier, map, availableRooms, this.state.player.x, this.state.player.y, spawnPool);
             console.log(`Monster to push:`, monsterToPush);
             levelMonsters.push(monsterToPush);
         }
@@ -228,7 +227,7 @@ export class Monsters {
         const itemsService = this.state.game.getService('items');
         uiService.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
         uiService.writeToLog(`${monster.name} defeated!`);
-        itemsService.dropTreasure(monster, tier);
+        itemsService.dropTreasure(monster, tier, this.state.levels[tier].map, this.state.treasures[tier] );
         const monsterKillXP = this.monsterXpCalc(monster, this.state.tier);
         player.awardXp(monsterKillXP);
     }

@@ -5,7 +5,7 @@ import { State } from './State.js';
 export class Items {
     constructor(state) {
         this.state = state;
-        this.data = this.state.data; // Access Data via State
+        this.data = this.state.game.getService('data'); // Access Data via State
         this.legendaryItems = this.data.getUniqueItems();
         this.relicItems = this.data.getUniqueItems();
         this.artifactItems = this.data.getUniqueItems();
@@ -344,7 +344,7 @@ export class Items {
         return itemChance;
     }
 
-    dropTreasure(monster, tier) {
+    dropTreasure(monster, tier, map, treasures) {
         const uiService = this.state.game.getService('ui');
         const actionsService = this.state.game.getService('actions');
         const goldGain = 10 + Math.floor(Math.random() * 41) + (tier + 1) * 10;
@@ -355,9 +355,9 @@ export class Items {
 
         let droppedItems = [];
         let torchDropped = Math.random() < torchChance;
-        if (torchDropped) { this.state.player.potionDropFail = 0; } // Should this be torchDropFail?
+        if (torchDropped) { this.state.player.torchDropFail = 0; } 
         let potionDropped = Math.random() < potionChance;
-        if (potionDropped) { this.state.player.torchDropFail = 0; } // Should this be potionDropFail?
+        if (potionDropped) { this.state.player.potionDropFail = 0; } 
 
         if (Math.random() < uniqueItemChance) {
 
@@ -390,7 +390,7 @@ export class Items {
             suppressRender: monster.suppressRender,
         };
 
-        actionsService.placeTreasure(treasure);
+        actionsService.placeTreasure(treasure, tier, map, treasures);
 
         if (monster.name && monster.name !== "Treasure Chest") {
             uiService.logDroppedItems(monster, goldGain, torchDropped, droppedItems);

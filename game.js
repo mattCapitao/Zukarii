@@ -17,7 +17,8 @@ import { PlayerInventory } from './PlayerInventory.js';
 
 export class Game {
     constructor() {
-        this.state = new State(new Data(), new Utilities());
+        this.data = new Data();
+        this.state = new State(new Utilities());
         this.state.game = this; // Ensure Game instance is accessible via state
         this.audioManager = new AudioManager();
         this.level = new Level(this.state);
@@ -57,7 +58,8 @@ export class Game {
             'playerInventory': this.playerInventory,
             'monsters': this.monsters,
             'actions': this.actions,
-            'combat': this.combat
+            'combat': this.combat,
+            'data': this.data,
         };
         const service = services[serviceName];
         if (!service) console.error(`Service '${serviceName}' not found!`);
@@ -264,11 +266,12 @@ export class Game {
             this.state.player.x = 1;
             this.state.player.y = 1;
         }
-    } else if (map[newY][newX] === '⇑' && this.state.tier > 0) {
-        this.state.tier--;
-        if (this.state.tier === 0) {
+    } else if (map[newY][newX] === '⇑') {
+        
+        if (this.state.tier === 0 || this.state.tier === 1) {
             this.getService('player').exit();
         } else {
+            this.state.tier--;
             const downStair = this.state.stairsDown[this.state.tier];
             map = this.state.levels[this.state.tier].map;
             if (downStair) {

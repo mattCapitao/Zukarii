@@ -337,10 +337,9 @@ export class Level {
         return { map, rooms };
     }
 
-    generateFountains(tier) {
+
+    generateFountains(tier, map, rooms) {
         const fountainsPerLevel = Math.floor(Math.random() * 3) + 1;
-        const map = this.state.levels[tier].map;
-        const rooms = this.state.levels[tier].rooms;
         let levelFountains = [];
         for (let i = 0; i < fountainsPerLevel; i++) {
             const room = rooms[Math.floor(Math.random() * rooms.length)];
@@ -355,11 +354,9 @@ export class Level {
         return levelFountains;
     }
 
-    generateTreasures(tier) {
+    generateTreasures(tier, map, rooms, treasures) {
         const itemsService = this.state.game.getService('items');
         const treasuresPerLevel = Math.floor(Math.random() * 5) + 3;
-        const map = this.state.levels[tier].map;
-        const rooms = this.state.levels[tier].rooms;
         for (let i = 0; i < treasuresPerLevel; i++) {
             const room = rooms[Math.floor(Math.random() * rooms.length)];
             let x, y;
@@ -376,85 +373,165 @@ export class Level {
                 isAggro: false,
                 suppressRender: true,
             };
-            itemsService.dropTreasure(treasure, tier);
+            itemsService.dropTreasure(treasure, tier, map, treasures);
         }
     }
 
-    addLevel(tier) {
+
+    addLevel(tier, customLevel = null) {
         const monstersService = this.state.game.getService('monsters');
         if (!this.state.levels[tier]) {
-            const newLevelData = this.generateLevel();
-            this.state.levels[tier] = newLevelData;
-            this.state.treasures[tier] = [];
-            this.state.monsters[tier] = [];
-            this.state.fountains[tier] = [];
-            this.state.stairsUp[tier] = null;
-            this.state.stairsDown[tier] = null;
+            let levelData;
+            if (customLevel) {
+                const required = ['map', 'rooms', 'stairsUp', 'stairsDown', 'playerSpawn'];
+                for (const field of required) {
+                    if (!customLevel[field] || (field === 'rooms' && customLevel[field].length === 0)) {
+                        throw new Error(`Custom level for tier ${tier} missing required field: ${field}`);
+                    }
+                }
+                const mapHeight = customLevel.map.length;
+                const mapWidth = customLevel.map[0] ? customLevel.map[0].length : 0;
+                if (mapHeight > 67 || mapWidth > 122) {
+                    throw new Error(`Custom level map for tier ${tier} exceeds 122x67 (${mapWidth}x${mapHeight}) and cannot be trimmed`);
+                }
+
+                levelData = { ...customLevel };
+                levelData.map = this.padMap(customLevel.map);
+                levelData.monsters = customLevel.monsters || [];
+                levelData.treasures = customLevel.treasures || [];
+                levelData.fountains = customLevel.fountains || [];
+
+                if (customLevel.spawn && customLevel.spawn.length > 0) {
+                    this.processSpawn(tier, levelData);
+                }
+            } else {
+                levelData = this.generateLevel();
+                const upRooms = levelData.rooms.filter(r => r.type !== 'AlcoveSpecial' && r.type !== 'BossChamberSpecial');
+                const upRoomIndex = Math.floor(Math.random() * upRooms.length);
+                const upRoom = upRooms[upRoomIndex];
+                let stairUpX = upRoom.left + 1 + Math.floor(Math.random() * (upRoom.w - 2));
+                let stairUpY = upRoom.top + 1 + Math.floor(Math.random() * (upRoom.h - 2));
+                levelData.map[stairUpY][stairUpX] = '⇑';
+                levelData.stairsUp = { x: stairUpX, y: stairUpY };
+
+                const downOptions = levelData.rooms.map(room => {
+                    const centerX = room.left + Math.floor(room.w / 2);
+                    const centerY = room.top + Math.floor(room.h / 2);
+                    const dx = stairUpX - centerX;
+                    const dy = stairUpY - centerY;
+                    return { room, distance: Math.sqrt(dx * dx + dy * dy) };
+                }).sort((a, b) => b.distance - a.distance);
+
+                const farRooms = downOptions.filter(opt => opt.distance >= this.state.MIN_STAIR_DISTANCE);
+                const downRoom = farRooms.find(opt => opt.room.type === 'BossChamberSpecial')?.room ||
+                    farRooms.find(opt => opt.room.type === 'AlcoveSpecial')?.room ||
+                    farRooms[0]?.room || downOptions[0].room;
+                const stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
+                const stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
+                levelData.map[stairDownY][stairDownX] = '⇓';
+                levelData.stairsDown = { x: stairDownX, y: stairDownY };
+
+                const bossRoom = levelData.rooms.find(r => r.type === 'BossChamberSpecial');
+                levelData.monsters = monstersService.generateLevelMonsters(tier, levelData.map, levelData.rooms, false, bossRoom);
+                levelData.treasures = [];
+                levelData.fountains = this.generateFountains(tier, levelData.map, levelData.rooms);
+                this.generateTreasures(tier, levelData.map, levelData.rooms, levelData.treasures);
+            }
+
+            this.state.levels[tier] = levelData;
+            this.state.stairsUp[tier] = levelData.stairsUp;
+            this.state.stairsDown[tier] = levelData.stairsDown;
+            this.state.monsters[tier] = levelData.monsters;
+            this.state.treasures[tier] = levelData.treasures;
+            this.state.fountains[tier] = levelData.fountains;
             this.state.discoveredWalls[tier] = new Set();
             this.state.discoveredTileCount[tier] = 0;
             this.state.visibleTiles[tier] = new Set();
             this.state.tileMap[tier] = this.buildTileMap(tier);
 
-            const upRooms = newLevelData.rooms.filter(r => r.type !== 'AlcoveSpecial' && r.type !== 'BossChamberSpecial');
-            const upRoomIndex = Math.floor(Math.random() * upRooms.length);
-            const upRoom = upRooms[upRoomIndex];
-            let stairUpX = upRoom.left + 1 + Math.floor(Math.random() * (upRoom.w - 2));
-            let stairUpY = upRoom.top + 1 + Math.floor(Math.random() * (upRoom.h - 2));
-            this.state.levels[tier].map[stairUpY][stairUpX] = '⇑';
-            this.state.stairsUp[tier] = { x: stairUpX, y: stairUpY };
-
-            let downRoom, stairDownX, stairDownY;
-            const downOptions = newLevelData.rooms.map(room => {
-                const centerX = room.left + Math.floor(room.w / 2);
-                const centerY = room.top + Math.floor(room.h / 2);
-                const dx = stairUpX - centerX;
-                const dy = stairUpY - centerY;
-                return { room, distance: Math.sqrt(dx * dx + dy * dy) };
-            }).sort((a, b) => b.distance - a.distance);
-
-            const farRooms = downOptions.filter(opt => opt.distance >= this.state.MIN_STAIR_DISTANCE);
-            downRoom = farRooms.find(opt => opt.room.type === 'BossChamberSpecial')?.room ||
-                farRooms.find(opt => opt.room.type === 'AlcoveSpecial')?.room ||
-                farRooms[0]?.room || downOptions[0].room;
-            stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
-            stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
-            this.state.levels[tier].map[stairDownY][stairDownX] = '⇓';
-            this.state.stairsDown[tier] = { x: stairDownX, y: stairDownY }; 
-
-
-
-            this.state.monsters[tier] = monstersService.generateLevelMonsters(tier);
-            //console.log(`Tier Monsters: ${this.state.monsters[tier]}`);
-            this.state.fountains[tier] = this.generateFountains(tier);
-            //console.log(`Initializing treasures for tier ${tier}`);
-            this.generateTreasures(tier);
-
-            this.state.player.x = stairUpX + 1;
-            this.state.player.y = stairUpY;
-            const map = this.state.levels[tier].map;
-            if (map[this.state.player.y][this.state.player.x] !== ' ') {
-                const directions = [
-                    { x: stairUpX - 1, y: stairUpY },
-                    { x: stairUpX, y: stairUpY + 1 },
-                    { x: stairUpX, y: stairUpY - 1 }
-                ];
-                for (let dir of directions) {
-                    if (map[dir.y][dir.x] === ' ') {
-                        this.state.player.x = dir.x;
-                        this.state.player.y = dir.y;
-                        break;
-                    }
+            if (customLevel && customLevel.playerSpawn) {
+                this.state.player.x = customLevel.playerSpawn.x;
+                this.state.player.y = customLevel.playerSpawn.y;
+                if (levelData.map[this.state.player.y][this.state.player.x] !== ' ') {
+                    this.adjustPlayerPosition(tier, levelData.stairsUp || levelData.stairsDown);
                 }
+            } else if (!customLevel) {
+                this.adjustPlayerPosition(tier, levelData.stairsUp);
             }
-            this.state.lastPlayerX = null;
-            this.state.lastPlayerY = null;
-            this.state.needsInitialRender = true;
-            //console.log(`Tier ${tier} added: stairsUp[${tier}] at (${this.state.stairsUp[tier]?.x}, ${this.state.stairsUp[tier]?.y}), stairsDown[${tier}] at (${this.state.stairsDown[tier]?.x}, ${this.state.stairsDown[tier]?.y})`);
-        } else {
-            this.state.needsInitialRender = true;
-            this.state.needsRender = true;
-            //console.log("Triggered initial render for tier", this.state.tier);
         }
+        this.state.needsInitialRender = true;
+        this.state.needsRender = true;
+    }
+
+/* Deprecated - replaced by padMap()
+    normalizeMap(map) {
+        const targetHeight = 67;
+        const targetWidth = 122;
+        let normalized = [];
+        for (let y = 0; y < targetHeight; y++) {
+            normalized[y] = [];
+            for (let x = 0; x < targetWidth; x++) {
+                normalized[y][x] = (y < map.length && x < map[y].length) ? map[y][x] : '#';
+            }
+        }
+        return normalized;
+    }
+*/
+    padMap(map) {
+        const targetHeight = 67;
+        const targetWidth = 122;
+        let padded = [];
+        for (let y = 0; y < targetHeight; y++) {
+            padded[y] = [];
+            for (let x = 0; x < targetWidth; x++) {
+                padded[y][x] = (y < map.length && x < map[y].length) ? map[y][x] : '#';
+            }
+        }
+        return padded;
+    }
+
+    processSpawn(tier, levelData) {
+        const map = levelData.map;
+        const rooms = levelData.rooms;
+        levelData.spawn.forEach(spawnItem => {
+            switch (spawnItem.type) {
+                case 'monster':
+                    const monster = this.state.game.getService('monsters').generateMonster(
+                        tier, map, rooms, this.state.player.x, this.state.player.y,
+                        spawnItem.data || { monsterTemplates: true }
+                    );
+                    levelData.monsters.push(monster);
+                    break;
+                case 'treasure':
+                    this.generateTreasures(tier, 1); // Single treasure
+                    break;
+                case 'fountain':
+                    levelData.fountains.push(...this.generateFountains(tier, 1));
+                    break;
+                default:
+                    console.warn(`Unknown spawn type: ${spawnItem.type}`);
+            }
+        });
+    }
+
+    adjustPlayerPosition(tier, stair) {
+        const map = this.state.levels[tier].map;
+        const directions = [
+            { x: stair.x - 1, y: stair.y },
+            { x: stair.x + 1, y: stair.y },
+            { x: stair.x, y: stair.y - 1 },
+            { x: stair.x, y: stair.y + 1 }
+        ];
+        for (let dir of directions) {
+            if (map[dir.y][dir.x] === ' ') {
+                this.state.player.x = dir.x;
+                this.state.player.y = dir.y;
+                return;
+            }
+        }
+        console.error(`No free space near stair at (${stair.x}, ${stair.y})`);
+        this.state.player.x = 1;
+        this.state.player.y = 1;
     }
 
     buildTileMap(tier) {

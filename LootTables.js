@@ -5,7 +5,7 @@ import { State } from './State.js';
 export class LootTables {
     constructor(state) {
         this.state = state;
-        this.data = this.state.data;
+        this.data = this.state.game.getService('data');
         this.utilities = this.state.utilities;
 
         this.itemTiers = ['junk', 'common', 'rare', 'magic', 'mastercraft', 'legendary', 'relic', 'artifact'];

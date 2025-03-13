@@ -103,18 +103,14 @@ export class Actions {
         renderService.renderIfNeeded();
     }
 
-    placeTreasure(treasure) {
+    placeTreasure(treasure, tier, map, treasures) {
         const renderService = this.state.game.getService('render');
-        const tier = this.state.tier;
-        const map = this.state.levels[tier].map;
-        const tierTreasures = this.state.treasures[tier];
-
-        //console.log(`Placing treasure at (${treasure.x}, ${treasure.y}):`, treasure);
+        console.log(`Placing treasure at (${treasure.x}, ${treasure.y}):`, treasure);
         map[treasure.y][treasure.x] = '$';
 
-        const existingTreasureIndex = tierTreasures.findIndex(t => t.x === treasure.x && t.y === treasure.y);
+        const existingTreasureIndex = treasures.findIndex(t => t.x === treasure.x && t.y === treasure.y);
         if (existingTreasureIndex !== -1) {
-            const existingTreasure = tierTreasures[existingTreasureIndex];
+            const existingTreasure = treasures[existingTreasureIndex];
             existingTreasure.gold = (existingTreasure.gold || 0) + (treasure.gold || 0);
             existingTreasure.torches = (existingTreasure.torches || 0) + (treasure.torches || 0);
             existingTreasure.healPotions = (existingTreasure.healPotions || 0) + (treasure.healPotions || 0);
@@ -123,13 +119,11 @@ export class Actions {
                     if (!existingTreasure.items.some(i => i.uniqueId === newItem.uniqueId)) {
                         existingTreasure.items = existingTreasure.items || [];
                         existingTreasure.items.push(newItem);
-                    } else {
-                        //console.log(`Duplicate item ${newItem.name} (ID: ${newItem.uniqueId}) ignored at (${treasure.x}, ${treasure.y})`);
                     }
                 });
             }
         } else {
-            tierTreasures.push({
+            treasures.push({
                 x: treasure.x,
                 y: treasure.y,
                 name: treasure.name || "Unknown",

@@ -33,8 +33,8 @@ export class Player {
         const itemsService = this.state.game.getService('items');
         const playerInventory = this.state.game.getService('playerInventory');
 
-        const startItems = this.state.data.getStartItems();
-        const uniqueItems = this.state.data.getUniqueItems();
+        const startItems = this.state.game.getService('data').getStartItems();
+        const uniqueItems = this.state.game.getService('data').getUniqueItems();
 
         const itemsToAdd = this.getInitialItems(startItems, uniqueItems); //create array of specific start/unique items
 
