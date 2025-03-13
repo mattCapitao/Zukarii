@@ -20,6 +20,8 @@ export class Level {
         this.MAX_OVERLAP_PERCENT = 0.10;
         this.INITIAL_MIN_DISTANCE = 12;
         this.MIN_DISTANCE_FLOOR = 3;
+        this.BOSS_ROOM_EVERY_X_LEVELS = 3; // Guarantee a boss room every 3 levels
+        this.lastBossTier = -this.BOSS_ROOM_EVERY_X_LEVELS; // Ensure first tier can trigger
     }
 
     selectRoomType() {
@@ -95,12 +97,48 @@ export class Level {
         return false;
     }
 
-    placeRooms(numRooms) {
+    placeRooms(numRooms, hasBossRoom = false) {
         const rooms = [];
-        let bossChamberPlaced = false;
+        let bossChamberPlaced = !hasBossRoom; // If hasBossRoom is true, we haven't placed it yet
         const halfRooms = Math.floor(numRooms / 2);
 
-        for (let i = 0; i < numRooms; i++) {
+        // If we must have a BossChamberSpecial, place it first
+        if (hasBossRoom) {
+            const bossRoomType = roomTypes.find(rt => rt.type === 'BossChamberSpecial');
+            let room = this.generateRoomDimensions(bossRoomType);
+            let placed = false;
+            let attempts = 0;
+            const MAX_PLACEMENT_ATTEMPTS = 20;
+
+            while (!placed && attempts < MAX_PLACEMENT_ATTEMPTS) {
+                room.x = Math.floor(Math.random() * (this.state.WIDTH - room.width - 2 * this.EDGE_BUFFER)) + this.EDGE_BUFFER;
+                room.y = Math.floor(Math.random() * (this.state.HEIGHT - room.height - 2 * this.EDGE_BUFFER)) + this.EDGE_BUFFER;
+
+                if (!this.doesRoomOverlap(room, rooms)) {
+                    rooms.push({
+                        left: room.x,
+                        top: room.y,
+                        w: room.width,
+                        h: room.height,
+                        x: Math.floor(room.x + room.width / 2),
+                        y: Math.floor(room.y + room.height / 2),
+                        type: room.type,
+                        connections: []
+                    });
+                    bossChamberPlaced = true;
+                    placed = true;
+                } else {
+                    room.width = Math.max(this.MIN_ROOM_SIZE, room.width - 1);
+                    room.height = Math.max(this.MIN_ROOM_SIZE, room.height - 1);
+                    if (room.width <= this.MIN_ROOM_SIZE && room.height <= this.MIN_ROOM_SIZE) {
+                        break;
+                    }
+                }
+                attempts++;
+            }
+        }
+
+        for (let i = 0; i < numRooms - (hasBossRoom ? 1 : 0); i++) {
             let roomType = this.selectRoomType();
             if (roomType.type === 'BossChamberSpecial' && bossChamberPlaced) {
                 roomType = roomTypes.find(rt => rt.type === 'AlcoveSpecial');
@@ -133,7 +171,6 @@ export class Level {
                         type: room.type,
                         connections: []
                     });
-                    //console.log(`Room ${rooms.length} (${room.type}) placed at (${room.x}, ${room.y}) size ${room.width}x${room.height}, minDistance: ${minDistance.toFixed(2)}`);
                     placed = true;
                 } else {
                     room.width = Math.max(this.MIN_ROOM_SIZE, room.width - 1);
@@ -145,8 +182,13 @@ export class Level {
                 attempts++;
             }
         }
-        //console.log(`Placed ${rooms.length} out of ${numRooms} rooms`);
         return rooms;
+    }
+
+    calculateDistance(x1, y1, x2, y2) {
+        const dx = x1 - x2;
+        const dy = y1 - y2;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     findNearestRoom(newRoom, existingRooms, excludeRooms = []) {
@@ -313,7 +355,7 @@ export class Level {
         }
     }
 
-    generateLevel() {
+    generateLevel(hasBossRoom = false) {
         let map = [];
         for (let y = 0; y < this.state.HEIGHT; y++) {
             map[y] = [];
@@ -322,7 +364,7 @@ export class Level {
             }
         }
         const roomsPerLevel = Math.floor(Math.random() * 8) + 28;
-        const rooms = this.placeRooms(33);
+        const rooms = this.placeRooms(roomsPerLevel, hasBossRoom);
 
         for (const room of rooms) {
             for (let y = room.top; y < room.top + room.h; y++) {
@@ -333,7 +375,6 @@ export class Level {
         }
 
         this.connectRooms(rooms, map);
-
         return { map, rooms };
     }
 
