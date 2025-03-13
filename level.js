@@ -7,7 +7,7 @@ const roomTypes = [
     { type: 'VerticalRoom', probability: 15, minW: 8, maxW: 11, minH: 8, maxH: 10 },
     { type: 'HorizontalRoom', probability: 40, minW: 14, maxW: 21, minH: 6, maxH: 8 },
     { type: 'AlcoveSpecial', probability: 10, minW: 8, maxW: 8, minH: 4, maxH: 4 },
-    { type: 'BossChamberSpecial', probability: 5, minW: 20, maxW: 24, minH: 5, maxH: 8 }
+    { type: 'BossChamberSpecial', probability: 5, minW: 20, maxW: 24, minH: 10, maxH: 12 }
 ];
 
 export class Level {
@@ -419,7 +419,9 @@ export class Level {
             stairDownX = downRoom.left + 1 + Math.floor(Math.random() * (downRoom.w - 2));
             stairDownY = downRoom.top + 1 + Math.floor(Math.random() * (downRoom.h - 2));
             this.state.levels[tier].map[stairDownY][stairDownX] = '⇓';
-            this.state.stairsDown[tier] = { x: stairDownX, y: stairDownY };
+            this.state.stairsDown[tier] = { x: stairDownX, y: stairDownY }; 
+
+
 
             this.state.monsters[tier] = monstersService.generateLevelMonsters(tier);
             //console.log(`Tier Monsters: ${this.state.monsters[tier]}`);

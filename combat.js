@@ -117,10 +117,10 @@ export class Combat {
 
         let monsterAlive = monster.hp > 0;
         let combatLogMsg = '';
-
+        let logWeaponNeame = '';
         for (const [index, { slot, weapon }] of meleeWeapons.entries()) {
             if (!monsterAlive) break; // Stop if monster dies
-
+            logWeaponNeame = weapon.name;
             // Miss chance: 20% for mainhand, 30% for offhand in dual wield
             const missChance = isDualWield ? (index === 0 ? 20 : 30) : 0;
 
@@ -128,14 +128,18 @@ export class Combat {
                 this.game.getService('ui').writeToLog(`Your ${slot} attack missed the ${monster.name}!`);
                 continue;
             }
-            //console.log('ERROR: Weapon sent to dmg calc:', weapon);
+            console.log('ERROR: Weapon sent to dmg calc:', weapon);
+
+            
             const { damage, combatLogMsg } = this.calculateAndLogDamage(
                 baseStat,
                 weapon,
                 damageBonus,
                 monster
             );
-            //console.log(`Damage calculated: ${damage}, ${combatLogMsg}`, monster);
+
+            console.log(`Damage calculated: ${damage}, ${combatLogMsg}`, monster);
+
             const monsterDied = this.applyDamageToMonster(monster, damage, combatLogMsg);
             if (monsterDied) {
                 monsterAlive = false;
@@ -145,7 +149,7 @@ export class Combat {
         if (monsterAlive) {
             this.handleMonsterResponse(monster, combatLogMsg, true);
         }
-
+        
         this.state.needsRender = true;
 
         return true;

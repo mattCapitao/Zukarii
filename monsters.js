@@ -177,12 +177,15 @@ export class Monsters {
                         isOccupiedByMonster) {
                         continue;
                     }
-
+                     
                     monster.x = newX;
                     monster.y = newY;
                     break;
                 }
             } else {
+                //console.log(`Monster ${monster.name} is not aggroed`);
+               /* 
+                // Wandering disabled for now
                 monster.isAggro = false;
                 let wanderDirections = [
                     { x: 1, y: 0 }, { x: -1, y: 0 },
@@ -207,6 +210,7 @@ export class Monsters {
                     monster.x = newX;
                     monster.y = newY;
                 }
+                */
             }
         });
     }
