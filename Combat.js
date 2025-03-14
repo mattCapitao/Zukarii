@@ -187,122 +187,126 @@ export class Combat {
     }
 
 
-    async rangedAttack(direction) {
-        const uiService = this.game.getService('ui');
-        const renderService = this.game.getService('render');
-        let map = this.state.levels[this.state.tier].map;
-        let dx = 0, dy = 0;
-        switch (direction) {
-            case 'ArrowUp': dy = -1; break;
-            case 'ArrowDown': dy = 1; break;
-            case 'ArrowLeft': dx = -1; break;
-            case 'ArrowRight': dx = 1; break;
-            default: return;
-        }
-        //console.log(`Ranged attack in direction ${direction}`);
+     rangedAttack(direction) {
+         const uiService = this.game.getService('ui');
+         const renderService = this.game.getService('render');
+         let map = this.state.levels[this.state.tier].map;
+         let dx = 0, dy = 0;
+         switch (direction) {
+             case 'ArrowUp': dy = -1; break;
+             case 'ArrowDown': dy = 1; break;
+             case 'ArrowLeft': dx = -1; break;
+             case 'ArrowRight': dx = 1; break;
+             default: return;
+         }
 
-        const weapon = this.getBestRangedWeapon();
-        const isRanged = weapon.attackType === 'ranged';
-        const range = isRanged ? (this.state.player.range || 3) : 1; // Fists limited to melee range
-        const baseStat = isRanged ? this.state.player.intellect : this.state.player.prowess;
-        const damageBonus = isRanged ?
-            (this.state.player.damageBonus + this.state.player.rangedDamageBonus) :
-            (this.state.player.damageBonus + this.state.player.meleeDamageBonus);
+         const weapon = this.getBestRangedWeapon();
+         const isRanged = weapon.attackType === 'ranged';
+         const range = isRanged ? (this.state.player.range || 3) : 1; // Fists limited to melee range
+         const baseStat = isRanged ? this.state.player.intellect : this.state.player.prowess;
+         const damageBonus = isRanged ?
+             (this.state.player.damageBonus + this.state.player.rangedDamageBonus) :
+             (this.state.player.damageBonus + this.state.player.meleeDamageBonus);
 
-        const projectileDiscoveryRadius = 1;
-        const maxDiscoveredTiles = Math.min(5, range);
-        let discoveredTiles = new Set();
-        let newlyDiscoveredCount = 0;
+         const projectileDiscoveryRadius = 1;
+         const maxDiscoveredTiles = Math.min(5, range);
+         let discoveredTiles = new Set();
+         let newlyDiscoveredCount = 0;
 
-        for (let i = 1; i <= range; i++) {
-            let tx = this.state.player.x + dx * i;
-            let ty = this.state.player.y + dy * i;
-            if (tx < 0 || tx >= this.state.WIDTH || ty < 0 || ty >= this.state.HEIGHT || map[ty][tx] === '#') {
-                uiService.writeToLog(`Your ${isRanged ? 'shot' : 'fist'} hit a wall at (${tx}, ${ty})`);
-                break;
-            }
+         const processProjectileStep = (i) => {
+             let tx = this.state.player.x + dx * i;
+             let ty = this.state.player.y + dy * i;
+             if (tx < 0 || tx >= this.state.WIDTH || ty < 0 || ty >= this.state.HEIGHT || map[ty][tx] === '#') {
+                 uiService.writeToLog(`Your ${isRanged ? 'shot' : 'fist'} hit a wall at (${tx}, ${ty})`);
+                 this.state.projectile = null;
+                 this.state.needsRender = true;
+                 renderService.renderIfNeeded();
+                 return;
+             }
 
-            this.state.projectile = { x: tx, y: ty };
-            this.state.needsRender = true;
-            renderService.renderIfNeeded();
-            await new Promise(resolve => setTimeout(resolve, 50));
+             this.state.projectile = { x: tx, y: ty };
+             this.state.needsRender = true;
+             renderService.renderIfNeeded();
 
-            if (i > this.state.discoveryRadius && isRanged) {
-                for (let dyOffset = -projectileDiscoveryRadius; dyOffset <= projectileDiscoveryRadius; dyOffset++) {
-                    for (let dxOffset = -projectileDiscoveryRadius; dxOffset <= projectileDiscoveryRadius; dxOffset++) {
-                        let discX = tx + dxOffset;
-                        let discY = ty + dyOffset;
-                        if (discX >= 0 && discX < this.state.WIDTH && discY >= 0 && discY < this.state.HEIGHT) {
-                            const tileKey = `${discX},${discY}`;
-                            const alreadyDiscoveredWall = this.state.discoveredWalls[this.state.tier].has(tileKey);
-                            const alreadyDiscoveredFloor = this.state.discoveredFloors[this.state.tier]?.has(tileKey);
-                            if (!discoveredTiles.has(tileKey) && !alreadyDiscoveredWall && !alreadyDiscoveredFloor && discoveredTiles.size < maxDiscoveredTiles) {
-                                if (map[discY][discX] === '#') {
-                                    this.state.discoveredWalls[this.state.tier].add(tileKey);
-                                    newlyDiscoveredCount++;
-                                } else if (map[discY][discX] === ' ') {
-                                    this.state.discoveredFloors[this.state.tier] = this.state.discoveredFloors[this.state.tier] || new Set();
-                                    this.state.discoveredFloors[this.state.tier].add(tileKey);
-                                    newlyDiscoveredCount++;
-                                }
-                                discoveredTiles.add(tileKey);
-                                this.state.needsRender = true;
-                                //console.log(`Discovered tile at (${discX}, ${discY})`);
-                            }
-                        }
-                    }
-                }
-            }
+             if (i > this.state.discoveryRadius && isRanged) {
+                 for (let dyOffset = -projectileDiscoveryRadius; dyOffset <= projectileDiscoveryRadius; dyOffset++) {
+                     for (let dxOffset = -projectileDiscoveryRadius; dxOffset <= projectileDiscoveryRadius; dxOffset++) {
+                         let discX = tx + dxOffset;
+                         let discY = ty + dyOffset;
+                         if (discX >= 0 && discX < this.state.WIDTH && discY >= 0 && discY < this.state.HEIGHT) {
+                             const tileKey = `${discX},${discY}`;
+                             const alreadyDiscoveredWall = this.state.discoveredWalls[this.state.tier].has(tileKey);
+                             const alreadyDiscoveredFloor = this.state.discoveredFloors[this.state.tier]?.has(tileKey);
+                             if (!discoveredTiles.has(tileKey) && !alreadyDiscoveredWall && !alreadyDiscoveredFloor && discoveredTiles.size < maxDiscoveredTiles) {
+                                 if (map[discY][discX] === '#') {
+                                     this.state.discoveredWalls[this.state.tier].add(tileKey);
+                                     newlyDiscoveredCount++;
+                                 } else if (map[discY][discX] === ' ') {
+                                     this.state.discoveredFloors[this.state.tier] = this.state.discoveredFloors[this.state.tier] || new Set();
+                                     this.state.discoveredFloors[this.state.tier].add(tileKey);
+                                     newlyDiscoveredCount++;
+                                 }
+                                 discoveredTiles.add(tileKey);
+                                 this.state.needsRender = true;
+                             }
+                         }
+                     }
+                 }
+             }
 
-            this.state.monsters[this.state.tier].forEach(monster => {
-                if (monster.hp > 0) {
-                    const distX = monster.x - tx;
-                    const distY = monster.y - ty;
-                    const distance = Math.sqrt(distX * distX + distY * distY);
-                    if (distance <= this.state.AGGRO_RANGE) {
-                        monster.isAggro = true;
-                        monster.isDetected = true;
-                        //console.log(`Monster at (${monster.x}, ${monster.y}) aggroed and detected by projectile`);
-                    }
-                }
-            });
+             this.state.monsters[this.state.tier].forEach(monster => {
+                 if (monster.hp > 0) {
+                     const distX = monster.x - tx;
+                     const distY = monster.y - ty;
+                     const distance = Math.sqrt(distX * distX + distY * distY);
+                     if (distance <= this.state.AGGRO_RANGE) {
+                         monster.isAggro = true;
+                         monster.isDetected = true;
+                     }
+                 }
+             });
 
-            let monster = this.state.monsters[this.state.tier].find(m => m.x === tx && m.y === ty && m.hp > 0);
-            if (monster) {
-                const { damage, combatLogMsg } = this.calculateAndLogDamage(
-                    baseStat,
-                    weapon,
-                    damageBonus,
-                    monster
-                );
+             let monster = this.state.monsters[this.state.tier].find(m => m.x === tx && m.y === ty && m.hp > 0);
+             if (monster) {
+                 const { damage, combatLogMsg } = this.calculateAndLogDamage(
+                     baseStat,
+                     weapon,
+                     damageBonus,
+                     monster
+                 );
 
-                monster.isDetected = true;
-                const monsterDied = this.applyDamageToMonster(monster, damage, combatLogMsg);
-                if (!monsterDied) {
-                    this.handleMonsterResponse(monster, combatLogMsg, i === 1); // Retaliate only if in melee range
-                }
+                 monster.isDetected = true;
+                 const monsterDied = this.applyDamageToMonster(monster, damage, combatLogMsg);
+                 if (!monsterDied) {
+                     this.handleMonsterResponse(monster, combatLogMsg, i === 1); // Retaliate only if in melee range
+                 }
 
-                this.state.projectile = null;
-                this.state.needsRender = true;
-                renderService.renderIfNeeded();
-                uiService.statRefreshUI();
-                break;
-            }
-        }
+                 this.state.projectile = null;
+                 this.state.needsRender = true;
+                 renderService.renderIfNeeded();
+                 uiService.statRefreshUI();
+                 return;
+             }
 
-        if (newlyDiscoveredCount > 0 && isRanged) {
-            this.state.discoveredTileCount[this.state.tier] += newlyDiscoveredCount;
-            //console.log(`Ranged attack discovered ${newlyDiscoveredCount} new tiles, total for tier ${this.state.tier}: ${this.state.discoveredTileCount[this.state.tier]}`);
-            if (this.state.discoveredTileCount[this.state.tier] >= 1000) {
-                this.state.discoveredTileCount[this.state.tier] = 0;
-                const exploreXP = 25;
-                uiService.writeToLog("Explored 1000 tiles!");
-                this.game.getService('player').awardXp(exploreXP);
-            }
-        }
+             if (i < range) {
+                 setTimeout(() => processProjectileStep(i + 1), 50);
+             } else {
+                 if (newlyDiscoveredCount > 0 && isRanged) {
+                     this.state.discoveredTileCount[this.state.tier] += newlyDiscoveredCount;
+                     if (this.state.discoveredTileCount[this.state.tier] >= 1000) {
+                         this.state.discoveredTileCount[this.state.tier] = 0;
+                         const exploreXP = 25;
+                         uiService.writeToLog("Explored 1000 tiles!");
+                         this.game.getService('player').awardXp(exploreXP);
+                     }
+                 }
 
-        this.state.projectile = null;
-        this.state.needsRender = true;
-        renderService.renderIfNeeded();
-    }
+                 this.state.projectile = null;
+                 this.state.needsRender = true;
+                 renderService.renderIfNeeded();
+             }
+         };
+
+         processProjectileStep(1);
+     }
 }

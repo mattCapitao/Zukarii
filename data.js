@@ -168,7 +168,7 @@ export class Data {
                 type: "armor",
                 attackType: null,
                 slot: "armor",
-                armor: 1,-
+                armor: 1,
                 itemTier: "junk",
                 description: "Musty old ragged robes. Will this actually protect you from anything?",
                 uniqueId: null,
