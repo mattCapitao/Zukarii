@@ -136,7 +136,7 @@ export class Game {
             if (this.state.isRangedMode && directionalKeys.has(event.key)) {
                 const rangedEventKey = keyMap[event.key];
                 this.getService('combat').rangedAttack(rangedEventKey);
-                this.#endTurn();
+                this.#endTurn('rangedAttack');
                 return;
             }
 
@@ -184,15 +184,15 @@ export class Game {
                     return;
                 case 't':
                     this.getService('actions').lightTorch();
-                    this.#endTurn();
+                    this.#endTurn('light Torch');
                     return;
                 case 'h':
                     this.getService('actions').drinkHealPotion();
-                    this.#endTurn();
+                    this.#endTurn('drink potion');
                     return;
                 case ' ':
                     this.getService('combat').toggleRanged(event);
-                    return;
+                    console.log('Ranged mode:', this.state.isRangedMode);
             }
         }
 
@@ -204,15 +204,14 @@ export class Game {
 
         if (monster) {
             if (this.getService('combat').meleeAttack(monster)) {
-                this.#endTurn();
+                this.#endTurn('melee attack');
             }
-            this.getService('player').checkLevelUp();
             return;
         }
 
         if (fountain) {
             this.getService('actions').useFountain(fountain, this.state.tier);
-            this.#endTurn();
+            this.#endTurn('use fountain');
         }
 
         if (treasureIndex !== -1) {
@@ -250,23 +249,30 @@ export class Game {
         }
 
         if (!transitioned && !this.state.transitionLock) {
+            let movement = false;
+            if (this.state.player.x != newX || this.state.player.y != newY ) movement = true;
+
             this.state.player.x = newX;
             this.state.player.y = newY;
+            if (movement) {
+                movement = false;
+                this.state.player.x === newX && this.state.player.y === newY
+                this.getService('render').updateMapScroll();
+                this.#endTurn('movement');
+            }
         }
 
         if (this.state.transitionLock) {
             this.state.transitionLock = false; // Reset for next frame
-        }
-
-        this.#endTurn(); // Always call endTurn to ensure rendering
-
-        if (this.state.player.x === newX && this.state.player.y === newY) {
+            this.#endTurn('transition');
             this.getService('render').updateMapScroll();
+
         }
+
     }
 
-    #endTurn() {
-
+    #endTurn(source) {
+        console.warn('endTurn called by ', source);
         console.log(`Player location in state at endTurn: T:${this.state.tier}, x:${this.state.player.x}, y:${this.state.player.y}`);
         if (this.state.gameOver) {
             return;
@@ -304,8 +310,12 @@ export class Game {
 
         levelService.addLevel(0, dataService.getCustomLevel(0));
         if (!this.state.levels[0]) throw new Error('Failed to initialize tier 0');
-        levelService.addLevel(1);
-        this.state.tier = 1; // Start on tier 1
+
+        const startLevel = 1;
+        this.state.highestTier = startLevel;
+        levelService.addLevel(startLevel);
+        this.state.tier = startLevel; 
+
         this.state.lastPlayerX = null;
         this.state.lastPlayerY = null;
         this.state.needsInitialRender = true;

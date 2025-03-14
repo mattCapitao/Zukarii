@@ -33,7 +33,7 @@ export class Items {
             amulet: {
                 base: ['maxLuck'],
                 bonus: [
-                    'maxHp', 'maxMana', 
+                    'maxHp', 'maxMana',
                     'intellect', 'prowess', 'agility',
                     'range', 'block', 'defense',
                     'meleeDamageBonus', 'rangedDamageBonus', 'damageBonus'
@@ -42,7 +42,7 @@ export class Items {
             ring: {
                 base: ['maxLuck'],
                 bonus: [
-                    'maxHp', 'maxMana', 
+                    'maxHp', 'maxMana',
                     'intellect', 'prowess', 'agility',
                     'range', 'block', 'defense',
                     'meleeDamageBonus', 'rangedDamageBonus', 'damageBonus'
@@ -54,9 +54,7 @@ export class Items {
 
     getItem(tierIndex, item = {}) {
         console.log(`getItem(${tierIndex}) called with item:`, item);
-
-        console.log('this is Items:', this instanceof Items); // Debug context
-
+        console.log('this is Items:', this instanceof Items);
         const maxRogTier = 4;
 
         if (item.tierIndex > maxRogTier) {
@@ -81,47 +79,33 @@ export class Items {
         } else if (!item) {
             error.log('getItem() called with insufficient data to generate an item: ', item);
         }
-        
-
     }
-
 
     #getUniqueItem(item) {
 
         switch (item.itemTier || item.tierIndex) {
 
             case 'legendary': case 5: newItem = this.legendaryItmes[Math.floor(Math.random() * this.legendaryItems.length)]; break;
-
             case 'relic': case 6: newItem = this.relicItems[Math.floor(Math.random() * this.relicItems.length)]; break;
+            case 'artifact': case 7: newItem = this.artifactItems[Math.floor(Math.random() * this.artifactItems.length)]; break;
 
-            case 'artifact': case 7 : newItem = this.artifactItems[Math.floor(Math.random() * this.artifactItems.length)]; break;
-
-            default:
-                error.log('No Unique Item table could be fond for Item: ', item);
-                return null;
+            default: error.log('No Unique Item table could be fond for Item: ', item); return null;
         }
         return newItem;
     }
-
-
 
     #rogItem(item) {
 
         console.log('Generating rogItem for: ', item);
 
         if (!item.itemTier && item.tierIndex > -1) {
-
             item.itemTier = this.itemTiers[tierIndex];
-
         } else if (!(item.tierIndex > -1) && item.itemTier) {
-
             item.tierIndex = this.itemTiers.indexOf(item.itemTier);
-
-        }else if (!item.itemTier && !item.tierIndex) {
+        } else if (!item.itemTier && !item.tierIndex) {
             error.log('the passed item:{} contains insufficient data to generate a ROG item : ', item);
             return;
-        }   
-       
+        }
 
         if (!item.type || item.type === '') {
             let randomType = this.itemTypes[Math.floor(Math.random() * this.itemTypes.length)];
@@ -230,7 +214,6 @@ export class Items {
         return finalRoll; // 50% luck
     }
 
-
     statRoll(stat, item) {
         switch (stat) {
             case 'baseDamageMin':
@@ -294,7 +277,7 @@ export class Items {
         return selectedStats;
     }
 
-    calculateTorchChance() {
+    calculateTorchChance(m) {
         let torchChance;
         if (this.state.player.torches === 0 && !this.state.player.torchLit) {
             torchChance = 0.20;
@@ -312,57 +295,73 @@ export class Items {
         } else {
             torchChance = 0.05;
         }
-        return torchChance;
+        return torchChance * m;
     }
 
-    calculatePotionChance() {
-        let potionChance;
-        if (this.state.player.healPotions === 0) { // Changed from .potions to .healPotions to match usage
-            potionChance = 0.20;
-            this.state.player.potionDropFail++;
-            if (this.state.player.potionDropFail === 3) {
-                this.state.player.potionDropFail = 0;
-                return 1.0;
-            }
-        } else if (this.state.player.healPotions < 2) {
-            potionChance = 0.15;
-        } else if (this.state.player.healPotions <= 5) {
-            potionChance = 0.10;
-        } else {
-            potionChance = 0.05;
+    calculatePotionChance(m) {
+        const p = this.state.player.healPotions
+        let chance = 0.05;       
+        switch (true) {
+            case p === 0: chance = 0.5;
+            case p < 3: chance =  0.25;
+            case p < 5: chance = 0.1;
         }
-        return potionChance;
+        switch (true) {
+            case this.state.player.hp / this.state.player.maxHp < .5: chance += 0.1;
+            case this.state.player.hp / this.state.player.maxHp < .25: chance += 0.1;
+            case this.state.player.hp / this.state.player.maxHp < .1: chance += 0.1;
+        }
+        return chance * m;
     }
 
-    calculateItemChance() {
-        let itemChance = 1.0; // Placeholder as per original
+    calculateItemChance(m) {
+        let itemChance = 0.2 * m ; // Placeholder as per original
         return itemChance;
     }
 
-    calculateUniqueItemChance() {
-        let itemChance = 1.0; // Placeholder as per original
+    calculateUniqueItemChance(m) {
+        let itemChance = 0.1 * m ; // Placeholder as per original
         return itemChance;
     }
 
-    dropTreasure(monster, tier, map, treasures) {
+    calculateGoldgain(m) {
+        let goldGain = 0;
+        if (Math.random() < .75 * m) {
+           goldGain = 10 + Math.floor(Math.random() * 41) + (this.state.tier) * 10;
+        }
+        return goldGain;
+    }
+
+    dropTreasure(treasureSource, tier, map, treasures) {
+        // currently treasureSource can be a monster or a tile treasure (Treasure Chest, Items dropped by Player)
+        //likey want to look at Monsters.hanldeDeath() and Actions.placeTreasure() for more context
         const uiService = this.state.game.getService('ui');
         const actionsService = this.state.game.getService('actions');
-        const goldGain = 10 + Math.floor(Math.random() * 41) + (tier + 1) * 10;
-        const torchChance = this.calculateTorchChance();
-        const potionChance = this.calculatePotionChance();
-        const itemChance = this.calculateItemChance();
-        const uniqueItemChance = this.calculateUniqueItemChance();
+
+        treasureSource.chanceModifiers = {
+            torches: treasureSource?.chanceModifiers?.torches || 1,
+            healPotions: treasureSource?.chanceModifiers?.healPotions || 1,
+            uniqueItem: treasureSource?.chanceModifiers?.uniqueItem || 1,
+            gold: treasureSource?.chanceModifiers?.gold || 1,
+            item: treasureSource?.chanceModifiers?.item || 1,
+        }; 
+
+        const goldGain = this.calculateGoldgain(treasureSource.chanceModifiers.gold);
+        const torchChance = this.calculateTorchChance(treasureSource.chanceModifiers.torches);
+        const potionChance = this.calculatePotionChance(treasureSource.chanceModifiers.healPotions);
+        const itemChance = this.calculateItemChance(treasureSource.chanceModifiers.item);
+        const uniqueItemChance = this.calculateUniqueItemChance(treasureSource.chanceModifiers.uniqueItem);
 
         let droppedItems = [];
         let torchDropped = Math.random() < torchChance;
-        if (torchDropped) { this.state.player.torchDropFail = 0; } 
+        if (torchDropped) { this.state.player.torchDropFail = 0; }
         let potionDropped = Math.random() < potionChance;
-        if (potionDropped) { this.state.player.potionDropFail = 0; } 
+        if (potionDropped) { this.state.player.potionDropFail = 0; }
 
         if (Math.random() < uniqueItemChance) {
 
-            if (monster.uniqueItemsDropped && monster.uniqueItemsDropped.length > 0) {
-                const newItem = monster.uniqueItemsDropped[0]; // First unique for now
+            if (treasureSource.uniqueItemsDropped && treasureSource.uniqueItemsDropped.length > 0) {
+                const newItem = treasureSource.uniqueItemsDropped[0]; // First unique for now
                 const escapedItem = this.escapeItemProperties(newItem);
                 droppedItems.push({ ...escapedItem });
             }
@@ -376,24 +375,24 @@ export class Items {
             console.log(`Adding item to treasure object:`, newItem);
             const escapedItem = this.escapeItemProperties(newItem);
             droppedItems.push({ ...escapedItem });
-            
+
         }
 
         const treasure = {
-            x: monster.x,
-            y: monster.y,
-            name: monster.name || "Treasure Chest",
+            x: treasureSource.x,
+            y: treasureSource.y,
+            name: treasureSource.name || "Treasure Chest",
             gold: goldGain,
             torches: torchDropped ? 1 : 0,
             healPotions: potionDropped ? 1 : 0,
             items: droppedItems,
-            suppressRender: monster.suppressRender,
+            suppressRender: treasureSource.suppressRender,
         };
 
         actionsService.placeTreasure(treasure, tier, map, treasures);
 
-        if (monster.name && monster.name !== "Treasure Chest") {
-            uiService.logDroppedItems(monster, goldGain, torchDropped, droppedItems);
+        if (treasureSource.name && treasureSource.name !== "Treasure Chest") {
+            uiService.logDroppedItems(treasureSource, goldGain, torchDropped, droppedItems);
         }
     }
 
@@ -411,43 +410,5 @@ export class Items {
             description: uiService.utilities.escapeJsonString(item.description),
         };
     }
-
-    
-
-
-
-    // Deprecated code for reference
-
-    /*
-itemDropRoll() {
-    let randomValue = Math.random() * 1;
-    //console.log(`itemDropRoll() randomValue: ${randomValue}`);
-    let dungeonTierBonus = this.state.tier * 0.01;
-    let playerLuckBonus = this.state.player.luck * 0.01;
-
-    let rollTotal = randomValue + dungeonTierBonus + playerLuckBonus;
-
-    //console.log(`itemDropRoll() : dungeonTierBonus = ${dungeonTierBonus} : playerLuckBonus = ${playerLuckBonus} : rollTotal: ${rollTotal}`);
-
-    let itemDropData = { roll: rollTotal, itemTier: '' };
-
-    switch (true) {
-        case randomValue < 0.99:
-            itemDropData.itemTier = 'rog';
-            break;
-        case randomValue < 0.99:
-            itemDropData.itemTier = 'relic';
-            break;
-        case randomValue < 0.999:
-            itemDropData.itemTier = 'artifact';
-            break;
-        default:
-            itemDropData.itemTier = 'rog';
-    }
-
-    //console.log(`itemDropRoll() returning: { roll: ,${itemDropData.roll} itemTier: ${itemDropData.itemTier}}`);
-    return itemDropData;
-}
-*/
 
 }

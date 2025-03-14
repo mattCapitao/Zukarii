@@ -172,6 +172,7 @@ export class Monsters {
                     if (map[newY][newX] === '#' ||
                         map[newY][newX] === '⇑' ||
                         map[newY][newX] === '⇓' ||
+                        map[newY][newX] === '?' ||
                         (newX === this.state.player.x && newY === this.state.player.y) ||
                         isOccupiedByMonster) {
                         continue;

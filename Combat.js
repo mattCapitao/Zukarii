@@ -156,13 +156,15 @@ export class Combat {
     }
 
     toggleRanged(event) {
+        console.log(`toggleRanged called`);
         const uiService = this.game.getService('ui');
         if (event.key === ' ') {
-            event.preventDefault();
+                event.preventDefault();
+            console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : before toggleRanged 163                                     `);
 
             if (event.type === 'keyup') {
                 this.state.isRangedMode = false;
-                //console.log("Ranged mode disabled on keyup");
+                console.log("Ranged mode disabled on keyup");
                 return;
             }
 
@@ -172,8 +174,9 @@ export class Combat {
                 if ((offWeapon?.attackType === "ranged" && offWeapon?.baseRange > 0) ||
                     (mainWeapon?.attackType === "ranged" && mainWeapon?.baseRange > 0)) {
                     this.state.isRangedMode = true;
-                    //console.log("Ranged mode enabled");
-                    //console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : after toggleRanged`);
+                    console.log("Ranged mode enabled");
+                    console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : after toggleRanged`);
+                    return true;
                 } else {
                     this.state.isRangedMode = false;
                     uiService.writeToLog("You need a valid ranged weapon equipped to use ranged mode!");

@@ -24,12 +24,13 @@ export class Level {
         this.lastBossTier = 0; // Ensure first tier can trigger
     }
 
-    checkLevelTransitions(tier) {
+    checkLevelAfterTransitions(tier) {
         if (!this.state.levels[tier] || !this.state.levels[tier].map) {
-            console.warn(`Cannot run checkLevelTransitions for tier ${tier} - map not initialized`);
+            console.warn(`Cannot run checkLevelAfterTransitions for tier ${tier} - map not initialized`);
             return;
         }
 
+        this.state.NeedsCheckLevelAfterTransitions = false;
         const map = this.state.levels[tier].map;
         const rooms = this.state.levels[tier].rooms;
 
@@ -186,9 +187,9 @@ export class Level {
                 this.adjustPlayerPosition(tier, levelData.stairsUp);
             }
 
-            this.checkLevelTransitions(tier);
+            this.checkLevelAfterTransitions(tier);
         } else {
-            this.checkLevelTransitions(tier);
+            this.checkLevelAfterTransitions(tier);
         }
         this.state.needsInitialRender = true;
         this.state.needsRender = true;
@@ -583,6 +584,7 @@ export class Level {
                 maxHp: 0,
                 isAggro: false,
                 suppressRender: true,
+                w: { gold: 2.0, torches: 1.25, healPotions: 1.25, item: .5, uniqueItem: .1 },
             };
             itemsService.dropTreasure(treasure, tier, map, treasures);
         }

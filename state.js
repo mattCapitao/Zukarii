@@ -27,7 +27,7 @@ export class State {
             name: "Leith42",
             level: 1, xp: 0, nextLevelXp: 0,
             dead: false,
-            gold: 12724,
+            gold: 0,
             hp: 0, maxHp: 0,
             mana: 0, maxMana: 0,
             luck: 0, maxLuck: 0, luckTempMod:0,
@@ -46,9 +46,9 @@ export class State {
                 equipped: {}, // Initialized in Player now
                 items: [],
             },
-            healPotions: 5,
+            healPotions: 0,
             potionDropFail: 0,
-            torches: 1,
+            torches: 0,
             torchExpires: 0,
             torchDropFail: 0,
             torchLit: false,
@@ -103,7 +103,7 @@ export class State {
         this.combatLog = [];
         this.isRangedMode = false;
         this.projectile = null;
-        this.highestTier = 1;
+        this.highestTier = 0;
         this.gameStarted = false;
         this.gameOver = false;
         this.discoveryRadiusDefault = 2;
@@ -148,22 +148,4 @@ export class State {
         }];
         return { map, rooms };
     }
-/*
-    initGame() {
-        const levelService = this.game.getService('level');
-        const dataService = this.game.getService('data');
-        const splash = document.getElementById('splash');
-        if (splash) splash.remove();
-
-        levelService.addLevel(0, dataService.getCustomLevel(0));
-        if (!this.levels[0]) throw new Error('Failed to initialize tier 0');
-        levelService.addLevel(1);
-        this.tier = 1;
-
-        this.lastPlayerX = null;
-        this.lastPlayerY = null;
-        this.needsInitialRender = true;
-        this.needsRender = true;
-    }
-    */
 }

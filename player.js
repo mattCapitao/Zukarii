@@ -5,10 +5,6 @@ import { State } from './State.js';
 export class Player {
     constructor(state) {
         this.state = state;
-        this.initializePlayer();
-    }
-
-    initializePlayer() {
         this.statInit();
         this.addStartingItems();
     }
@@ -37,12 +33,11 @@ export class Player {
         const uniqueItems = this.state.game.getService('data').getUniqueItems();
 
         const itemsToAdd = this.getInitialItems(startItems, uniqueItems); //create array of specific start/unique items
-
         const randomStartItems = this.getRandomStartItems(); //create array of start items with some params to send to ROG
 
         randomStartItems.forEach(item => {
-            item.tierIndex = Math.round(Math.random() - .2) || 0; 
-            const rogItem = itemsService.getItem(item);
+            const tierIndex = Math.round(Math.random() - .2) || 0; 
+            const rogItem = itemsService.getItem(tierIndex, item);
             itemsToAdd.push(rogItem);
         });
 
@@ -51,23 +46,22 @@ export class Player {
         });
 
         //console.log("Starting rog items added:", this.state.player.inventory.items);
+        this.state.player.torches = 1;
+        this.state.player.healPotions = 1;
+        this.state.player.gold = 100;
     }
 
     getInitialItems(startItems, uniqueItems) {
-        return [
-            // Add specific start items and unique items if needed
-            startItems[0], startItems[1], startItems[2],
-           uniqueItems[0],
+        return [ // Add specific start items and unique items if needed
+            startItems[0], startItems[1], startItems[2],//uniqueItems[0], 
         ];
     }
 
     getRandomStartItems() {
         return [
+            {},
             //{ type: 'weapon', attackType: 'ranged' }, { type: 'weapon', attackType: 'melee' }, 
             //{ type: 'ring', }, { type: 'ring', }, {type: 'amulet'},
-
-            
-
         ];
     }
 
