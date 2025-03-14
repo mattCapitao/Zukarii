@@ -33,7 +33,7 @@ export class Combat {
         const meleeWeapons = [];
         if (mainWeapon?.attackType === 'melee') meleeWeapons.push({ slot: 'mainhand', weapon: mainWeapon });
         if (offWeapon?.attackType === 'melee') meleeWeapons.push({ slot: 'offhand', weapon: offWeapon });
-        return meleeWeapons.length > 0 ? meleeWeapons : [{ slot: 'fists', weapon: { baseDamageMin: 1, baseDamageMax: 1, attackType: 'melee' , name: 'Fists'} }];
+        return meleeWeapons.length > 0 ? meleeWeapons : [{ slot: 'fists', weapon: { baseDamageMin: 1, baseDamageMax: 1, attackType: 'melee', name: 'Fists' } }];
     }
 
     // Get the best ranged weapon based on mean base damage
@@ -54,7 +54,7 @@ export class Combat {
             return currentMean > bestMean ? current : best;
         }, rangedWeapons[0]);
     }
-    
+
     // Calculate damage and prepare log message
     calculateAndLogDamage(baseStat, weapon, damageBonus, monster) {
         //console.log(`Calculating damage with baseStat: ${baseStat}, weapon: ${weapon.name}, basedmg: ${weapon.baseDm}-  damageBonus: ${damageBonus}`);
@@ -130,7 +130,7 @@ export class Combat {
             }
             console.log('ERROR: Weapon sent to dmg calc:', weapon);
 
-            
+
             const { damage, combatLogMsg } = this.calculateAndLogDamage(
                 baseStat,
                 weapon,
@@ -149,7 +149,7 @@ export class Combat {
         if (monsterAlive) {
             this.handleMonsterResponse(monster, combatLogMsg, true);
         }
-        
+
         this.state.needsRender = true;
 
         return true;
@@ -159,7 +159,7 @@ export class Combat {
         console.log(`toggleRanged called`);
         const uiService = this.game.getService('ui');
         if (event.key === ' ') {
-                event.preventDefault();
+            event.preventDefault();
             console.log(`Spacebar pressed detected state.isRangedMode = ${this.state.isRangedMode} : before toggleRanged 163                                     `);
 
             if (event.type === 'keyup') {
@@ -187,7 +187,7 @@ export class Combat {
     }
 
 
-    async rangedAttack(direction) {
+    rangedAttack(direction) {
         const uiService = this.game.getService('ui');
         const renderService = this.game.getService('render');
         let map = this.state.levels[this.state.tier].map;
@@ -199,7 +199,6 @@ export class Combat {
             case 'ArrowRight': dx = 1; break;
             default: return;
         }
-        //console.log(`Ranged attack in direction ${direction}`);
 
         const weapon = this.getBestRangedWeapon();
         const isRanged = weapon.attackType === 'ranged';
@@ -214,18 +213,22 @@ export class Combat {
         let discoveredTiles = new Set();
         let newlyDiscoveredCount = 0;
 
-        for (let i = 1; i <= range; i++) {
+        const processProjectileStep = (i) => {
             let tx = this.state.player.x + dx * i;
             let ty = this.state.player.y + dy * i;
             if (tx < 0 || tx >= this.state.WIDTH || ty < 0 || ty >= this.state.HEIGHT || map[ty][tx] === '#') {
                 uiService.writeToLog(`Your ${isRanged ? 'shot' : 'fist'} hit a wall at (${tx}, ${ty})`);
-                break;
+                this.state.projectile = null;
+                this.state.needsRender = true;
+                renderService.renderIfNeeded();
+                return;
             }
+
+
 
             this.state.projectile = { x: tx, y: ty };
             this.state.needsRender = true;
             renderService.renderIfNeeded();
-            await new Promise(resolve => setTimeout(resolve, 50));
 
             if (i > this.state.discoveryRadius && isRanged) {
                 for (let dyOffset = -projectileDiscoveryRadius; dyOffset <= projectileDiscoveryRadius; dyOffset++) {
@@ -247,7 +250,6 @@ export class Combat {
                                 }
                                 discoveredTiles.add(tileKey);
                                 this.state.needsRender = true;
-                                //console.log(`Discovered tile at (${discX}, ${discY})`);
                             }
                         }
                     }
@@ -262,7 +264,6 @@ export class Combat {
                     if (distance <= this.state.AGGRO_RANGE) {
                         monster.isAggro = true;
                         monster.isDetected = true;
-                        //console.log(`Monster at (${monster.x}, ${monster.y}) aggroed and detected by projectile`);
                     }
                 }
             });
@@ -286,23 +287,28 @@ export class Combat {
                 this.state.needsRender = true;
                 renderService.renderIfNeeded();
                 uiService.statRefreshUI();
-                break;
+                return;
             }
-        }
 
-        if (newlyDiscoveredCount > 0 && isRanged) {
-            this.state.discoveredTileCount[this.state.tier] += newlyDiscoveredCount;
-            //console.log(`Ranged attack discovered ${newlyDiscoveredCount} new tiles, total for tier ${this.state.tier}: ${this.state.discoveredTileCount[this.state.tier]}`);
-            if (this.state.discoveredTileCount[this.state.tier] >= 1000) {
-                this.state.discoveredTileCount[this.state.tier] = 0;
-                const exploreXP = 25;
-                uiService.writeToLog("Explored 1000 tiles!");
-                this.game.getService('player').awardXp(exploreXP);
+            if (i < range) {
+                setTimeout(() => processProjectileStep(i + 1), 50);
+            } else {
+                if (newlyDiscoveredCount > 0 && isRanged) {
+                    this.state.discoveredTileCount[this.state.tier] += newlyDiscoveredCount;
+                    if (this.state.discoveredTileCount[this.state.tier] >= 1000) {
+                        this.state.discoveredTileCount[this.state.tier] = 0;
+                        const exploreXP = 25;
+                        uiService.writeToLog("Explored 1000 tiles!");
+                        this.game.getService('player').awardXp(exploreXP);
+                    }
+                }
+
+                this.state.projectile = null;
+                this.state.needsRender = true;
+                renderService.renderIfNeeded();
             }
-        }
+        };
 
-        this.state.projectile = null;
-        this.state.needsRender = true;
-        renderService.renderIfNeeded();
+        processProjectileStep(1);
     }
 }
