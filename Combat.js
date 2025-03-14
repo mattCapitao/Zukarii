@@ -224,6 +224,8 @@ export class Combat {
                  return;
              }
 
+
+
              this.state.projectile = { x: tx, y: ty };
              this.state.needsRender = true;
              renderService.renderIfNeeded();

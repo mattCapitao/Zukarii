@@ -140,6 +140,9 @@ export class Game {
                 return;
             }
 
+
+
+
             switch (mappedKey) {
                 case 'ArrowUp': newY--; break;
                 case 'ArrowDown': newY++; break;
