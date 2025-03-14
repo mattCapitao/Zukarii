@@ -186,6 +186,7 @@ export class Combat {
         return false;
     }
 
+
     async rangedAttack(direction) {
         const uiService = this.game.getService('ui');
         const renderService = this.game.getService('render');
