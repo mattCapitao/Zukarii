@@ -21,7 +21,7 @@ export class Player {
         this.state.player.hp = this.state.player.stats.base.maxHp;
         this.state.player.mana = this.state.player.stats.base.maxMana;
         //console.log("Player stats initialized", this.state.player);
-        this.state.player.nextLevelXp = 100;
+        this.state.player.nextLevelXp = 125;
         this.updateGearStats()
     }
 
@@ -65,28 +65,52 @@ export class Player {
         ];
     }
 
+    //change to receive weapon and monster
     calculatePlayerDamage(baseStat, minBaseDamage, maxBaseDamage, damageBonus) {
-        let baseDamage = Math.floor(Math.random() * (maxBaseDamage - minBaseDamage + 1)) + minBaseDamage + this.state.player.level;
-        let playerDamage = Math.round(baseDamage * (baseStat * 0.20)) + damageBonus;
+        
+        console.log("Calculating player damage", { baseStat, minBaseDamage, maxBaseDamage, damageBonus });
+
+        let damageRoll = Math.floor(Math.random() * (maxBaseDamage - minBaseDamage + 1)) + minBaseDamage;
+        console.log("Damage roll: ", damageRoll);
+
+        let baseDamage = damageRoll + this.state.player.level;
+        console.log("Base damage with player level modifier: ", baseDamage);
+
+        let playerDamage = Math.round((baseDamage + damageBonus ) * (1 + (baseStat * 0.02 ) ) ) ;
+        console.log("Player damage after primary stat bonus", playerDamage);
+
         let isCrit = false;
 
-        const critChance = (this.state.player.agility / 10) + 1;
-        if (Math.random() * 100 < critChance) {
-            const critMultiplier = 1.5;
+        const critChance = (this.state.player.agility * .01) ;
+        console.log("Player crit chance with Agilty: ", this.state.player.agility, " = ", critChance);
+
+        let critRoll = Math.random();
+        console.log("Crit roll: ", critRoll);
+        if (critRoll < critChance) {
+            let critMultiplier = 1.5;
             playerDamage = Math.round(playerDamage * critMultiplier);
             isCrit = true;
         }
+        if(isCrit) console.log("Player damage after crit", playerDamage);
 
         return { damage: playerDamage, isCrit };
     }
 
-    awardXp(amount) {
+    awardXp(baseXp) {
+        const LEVEL_SCALING_FACTOR = .5;
+        const xpReductionFloor = 0.5;
+        const multiplierBaseline = 1;
+        const levelscalingMultiplier = Math.max(xpReductionFloor, multiplierBaseline + (this.state.tier - this.state.player.level) * LEVEL_SCALING_FACTOR);
+        const amount = Math.round(baseXp * levelscalingMultiplier);
+
         this.state.player.xp += amount;
         this.state.game.getService('ui').writeToLog(`Gained ${amount} XP (${this.state.player.xp}/${this.state.player.nextLevelXp})`);
         this.checkLevelUp();
     }
 
     checkLevelUp() {
+
+        
         while (this.state.player.xp >= this.state.player.nextLevelXp) {
             const newXp = this.state.player.xp - this.state.player.nextLevelXp;
             this.state.player.level++;
@@ -107,7 +131,7 @@ export class Player {
             this.state.player.hp = this.state.player.maxHp;
             this.state.player.mana = this.state.player.maxMana;
             this.state.player.xp = newXp;
-            this.state.player.nextLevelXp = Math.round(this.state.player.nextLevelXp * 1.5);
+            this.state.player.nextLevelXp = Math.round(this.state.player.nextLevelXp * 1.55);
             this.state.game.getService('ui').writeToLog(`Level up! Now level ${this.state.player.level}, Max HP increased by ${hpIncrease} to ${this.state.player.maxHp}`);
 
             this.state.game.getService('ui').statRefreshUI();

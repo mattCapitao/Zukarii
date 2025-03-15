@@ -100,7 +100,7 @@ export class Level {
                 }
             } else {
                 const bossRoomChance = 0.05;
-                const forceBossRoom = (tier === 1) || (tier - this.lastBossTier >= this.BOSS_ROOM_EVERY_X_LEVELS);
+                const forceBossRoom = (tier - this.lastBossTier >= this.BOSS_ROOM_EVERY_X_LEVELS); //|| (tier === 1);
                 const hasBossRoom = forceBossRoom || Math.random() < bossRoomChance;
 
                 levelData = this.generateLevel(hasBossRoom);

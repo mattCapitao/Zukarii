@@ -42,8 +42,8 @@ export class Game {
         this.handleInput = this.handleInput.bind(this); // Bind only if defined
         this.lastRenderTime = 0;
         this.lastInputTime = 0;
-        this.renderThrottle = 70;
-        this.inputThrottle = 70;
+        this.renderThrottle = 20;
+        this.inputThrottle = 20;
 
         this.init(); // Set up DOM and listeners
     }

@@ -11,7 +11,6 @@ export class Monsters {
                 name: "Gold Theft",
                 description: "Steals gold on hit",
                 onHit: function (monster, player) {
- this.state.player.gold
                     const goldStolen = Math.floor(this.state.player.gold * 0.1) +1 ;
                     this.state.player.gold -= goldStolen;
                     this.game.getService('ui').updatePlayerInfo();
@@ -71,14 +70,38 @@ export class Monsters {
             newMonster.y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
         } while (map[newMonster.y][newMonster.x] !== ' ' || (newMonster.x === playerX && newMonster.y === playerY));
 
-        const newMonsterTierHpSmoothing = 1 + Math.floor(Math.random() * 5);
-        const calculatedMaxMonsterHp = newMonster.baseHp + newMonsterTierHpSmoothing * Math.sqrt(tier + 1);
+        
+        const calculatedMaxMonsterHp = this.getCalculatedMonsterMaxHp(newMonster.baseHp, tier);
         newMonster.maxHp = Math.round(calculatedMaxMonsterHp);
         newMonster.hp = newMonster.maxHp;
         newMonster.minBaseDamage += Math.floor(tier / 3);
         newMonster.maxBaseDamage += Math.floor(tier / 2);
 
         return newMonster;
+    }
+
+    getCalculatedMonsterMaxHp(monsterBaseHp, tier = 1) {
+    // Constants for HP calculation
+    const BASE_GROWTH_RATE = 0.15;         // 15% growth per tier
+    const INITIAL_VARIANCE_FACTOR = 0.1;   // 10% variance at Tier 1
+    const VARIANCE_GROWTH_RATE = 0.005;     // .5% increase in variance per tier
+
+    // Calculate HP
+    const tierAdjustment = tier - 1;   // Adjust tier to start growth from Tier 2
+    const varianceScaling = 1 + VARIANCE_GROWTH_RATE * tierAdjustment; // Variance grows slightly with tier
+    const newMonsterTierHpSmoothing = Math.random() * INITIAL_VARIANCE_FACTOR * varianceScaling; // Random variance
+    const calculatedMaxMonsterHp = monsterBaseHp * (1 + BASE_GROWTH_RATE * tierAdjustment + newMonsterTierHpSmoothing);
+
+    return calculatedMaxMonsterHp;
+    }
+
+    calculateMonsterAttackDamage(enemy) {
+        const tier = this.state.tier;
+        const tierDamageMultiplier = 0.05;
+        const baseDamage = Math.floor(Math.random() * (enemy.maxBaseDamage - enemy.minBaseDamage) + 1) + enemy.minBaseDamage;
+        const damage = Math.round(baseDamage * (tier * (1 + tierDamageMultiplier)));
+        //console.log(`Monster attack damage: ${damage} (base: ${baseDamage}, min: ${enemy.minBaseDamage}, max: ${enemy.maxBaseDamage})`);
+        return damage;
     }
 
     generateLevelMonsters(tier, map, rooms, uniqueMonsters = false, bossRoom = null) {
@@ -215,12 +238,12 @@ export class Monsters {
         });
     }
 
-    monsterXpCalc(monster, tier) {
+    monsterBaseXpCalc(monster, tier) {
         let baseXp = (monster.maxHp / 3) + (monster.minBaseDamage + (monster.maxBaseDamage * 1.5));
-        let xpMultiplier = 1 + (tier * 0.05);
-        return Math.round(baseXp * xpMultiplier);
+        let tierXpMultiplier = 1 + (tier * 0.1);
+        return Math.round(baseXp * tierXpMultiplier);
     }
-
+   
     handleMonsterDeath(monster, player, tier, combatLogMsg) {
         monster.hp = 0;
         monster.isAggro = false;
@@ -229,18 +252,11 @@ export class Monsters {
         uiService.writeToLog(combatLogMsg + `(${monster.hp}/${monster.maxHp})`);
         uiService.writeToLog(`${monster.name} defeated!`);
         itemsService.dropTreasure(monster, tier, this.state.levels[tier].map, this.state.treasures[tier] );
-        const monsterKillXP = this.monsterXpCalc(monster, this.state.tier);
-        player.awardXp(monsterKillXP);
+        const baseXp = this.monsterBaseXpCalc(monster, tier);
+        player.awardXp(baseXp);
     }
 
-    calculateMonsterAttackDamage(enemy) {
-        const tier = this.state.tier;
-        const tierDamageMultiplier = 0.05;
-        const baseDamage = Math.floor(Math.random() * (enemy.maxBaseDamage - enemy.minBaseDamage) + 1) + enemy.minBaseDamage;
-        const damage = Math.round(baseDamage * (tier * (1 + tierDamageMultiplier)));
-        //console.log(`Monster attack damage: ${damage} (base: ${baseDamage}, min: ${enemy.minBaseDamage}, max: ${enemy.maxBaseDamage})`);
-        return damage;
-    }
+    
 
     handleMonsterAttack(monster, player) {
         const uiService = this.state.game.getService('ui');
@@ -265,11 +281,11 @@ export class Monsters {
         let armorDmgReduction = 0;
 
         if (armor > 0) {
-            armorDmgReduction = Math.max(1, Math.floor(monsterDamage * (0.01 * armor * 2)));
+            armorDmgReduction = Math.max(1, Math.floor(monsterDamage * (0.15 * armor)));
         }
         let damageDealt = monsterDamage - armorDmgReduction;
 
-        const defenseDmgReduction = Math.round(monsterDamage * (0.01 * this.state.player.defense));
+        const defenseDmgReduction = Math.round(monsterDamage * (0.10 * this.state.player.defense));
         //console.log(`Monster attack (${monsterDamage}) : Defense (${this.state.player.defense})`, this.state.player);
         damageDealt -= defenseDmgReduction;
 

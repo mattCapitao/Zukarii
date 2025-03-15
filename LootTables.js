@@ -29,10 +29,10 @@ export class LootTables {
             },
             (roll) => {
                 if (roll < 0.15) return 0;  // junk
-                if (roll < 0.78) return 1;  // common
-                if (roll < 0.93) return 2;  // rare
-                if (roll < 0.98) return 3;  // magic
-                if (roll < 0.99) return 4;  // mastercraft
+                if (roll < 0.55) return 1;  // common
+                if (roll < 0.90) return 2;  // rare
+                if (roll < 0.95) return 3;  // magic
+                if (roll < 0.98) return 4;  // mastercraft
                 if (roll < 0.996) return 5; // legendary
                 if (roll < 0.998) return 6; // relic
                 if (roll >= 0.999) return 7; // artifact

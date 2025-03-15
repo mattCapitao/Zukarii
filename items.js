@@ -289,11 +289,11 @@ export class Items {
                 this.state.game.getService('ui').writeToLog('You found a discarded torch lying on the ground!');
             }
         } else if (this.state.player.torches < 2) {
-            torchChance = 0.15;
+            torchChance = 0.125;
         } else if (this.state.player.torches <= 5) {
-            torchChance = 0.10;
+            torchChance = 0.075;
         } else {
-            torchChance = 0.05;
+            torchChance = 0.025;
         }
         return torchChance * m;
     }
@@ -303,8 +303,8 @@ export class Items {
         let chance = 0.05;       
         switch (true) {
             case p === 0: chance = 0.5;
-            case p < 3: chance =  0.25;
-            case p < 5: chance = 0.1;
+            case p < 3: chance =  0.30;
+            case p < 5: chance = 0.125;
         }
         switch (true) {
             case this.state.player.hp / this.state.player.maxHp < .5: chance += 0.1;
@@ -315,7 +315,7 @@ export class Items {
     }
 
     calculateItemChance(m) {
-        let itemChance = 0.2 * m ; // Placeholder as per original
+        let itemChance = 0.3 * m ; // Placeholder as per original
         return itemChance;
     }
 
@@ -326,7 +326,7 @@ export class Items {
 
     calculateGoldgain(m) {
         let goldGain = 0;
-        if (Math.random() < .75 * m) {
+        if (Math.random() < .85 * m) {
            goldGain = 10 + Math.floor(Math.random() * 41) + (this.state.tier) * 10;
         }
         return goldGain;

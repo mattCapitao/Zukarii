@@ -41,7 +41,8 @@ export class Combat {
         const mainWeapon = this.playerInventory.getEquipped("mainhand");
         const offWeapon = this.playerInventory.getEquipped("offhand");
         const rangedWeapons = [];
-        if (mainWeapon?.attackType === 'ranged') rangedWeapons.push(mainWeapon);
+        
+        if (mainWeapon?.attackType === 'ranged' ) rangedWeapons.push(mainWeapon);
         if (offWeapon?.attackType === 'ranged') rangedWeapons.push(offWeapon);
 
         if (rangedWeapons.length === 0) {
@@ -60,6 +61,8 @@ export class Combat {
         //console.log(`Calculating damage with baseStat: ${baseStat}, weapon: ${weapon.name}, basedmg: ${weapon.baseDm}-  damageBonus: ${damageBonus}`);
         const playerService = this.game.getService('player');
         const uiService = this.game.getService('ui');
+
+        // change to pass weapon and monster to calculatePlayerDamage
         const { damage, isCrit } = playerService.calculatePlayerDamage(baseStat, weapon.baseDamageMin, weapon.baseDamageMax, damageBonus);
         const combatLogMsg = `${isCrit ? 'CRITICAL HIT! : ' : ''}You dealt ${damage} damage to ${monster.name} with your ${weapon.name}`;
         return { damage, combatLogMsg };
@@ -117,15 +120,15 @@ export class Combat {
 
         let monsterAlive = monster.hp > 0;
         let combatLogMsg = '';
-        let logWeaponNeame = '';
+        let logWeaponName = '';
         for (const [index, { slot, weapon }] of meleeWeapons.entries()) {
             if (!monsterAlive) break; // Stop if monster dies
-            logWeaponNeame = weapon.name;
+            logWeaponName = weapon.name;
             // Miss chance: 20% for mainhand, 30% for offhand in dual wield
             const missChance = isDualWield ? (index === 0 ? 20 : 30) : 0;
 
             if (Math.random() * 100 < missChance) {
-                this.game.getService('ui').writeToLog(`Your ${slot} attack missed the ${monster.name}!`);
+                this.game.getService('ui').writeToLog(`Your ${slot} ${logWeaponName} attack missed the ${ monster.name }!`);
                 continue;
             }
             console.log('ERROR: Weapon sent to dmg calc:', weapon);
@@ -212,6 +215,7 @@ export class Combat {
         const maxDiscoveredTiles = Math.min(5, range);
         let discoveredTiles = new Set();
         let newlyDiscoveredCount = 0;
+        let combatLogMsg = ''; // Initialize combatLogMsg
 
         const processProjectileStep = (i) => {
             let tx = this.state.player.x + dx * i;
@@ -223,8 +227,6 @@ export class Combat {
                 renderService.renderIfNeeded();
                 return;
             }
-
-
 
             this.state.projectile = { x: tx, y: ty };
             this.state.needsRender = true;
@@ -270,12 +272,14 @@ export class Combat {
 
             let monster = this.state.monsters[this.state.tier].find(m => m.x === tx && m.y === ty && m.hp > 0);
             if (monster) {
-                const { damage, combatLogMsg } = this.calculateAndLogDamage(
+                const { damage, combatLogMsg: newCombatLogMsg } = this.calculateAndLogDamage(
                     baseStat,
                     weapon,
                     damageBonus,
                     monster
                 );
+
+                combatLogMsg += newCombatLogMsg; // Concatenate log messages
 
                 monster.isDetected = true;
                 const monsterDied = this.applyDamageToMonster(monster, damage, combatLogMsg);
