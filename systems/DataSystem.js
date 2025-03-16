@@ -110,3 +110,17 @@ provideUniqueItems({ callback }) {
     callback(JSON.parse(JSON.stringify(this.uniqueItems)));
 }
 }
+
+
+
+
+    /*
+    //add later when player naming and saving is implemented
+PlayerSystem.prototype.mageNames = [
+    "Elarion", "Sylvara", "Tharion", "Lysandra", "Zephyrion", "Morwenna", "Aethric",
+    "Vionelle", "Dravenor", "Celestine", "Kaelith", "Seraphine", "Tormund", "Elowen",
+    "Zarathis", "Lunara", "Veyron", "Ashka", "Rivenna", "Solthar", "Ysmera", "Drenvar",
+    "Thalindra", "Orythia", "Xandrel", "Miravelle", "Korathis", "Eryndor", "Valthira",
+    "Nythera"
+];
+    */

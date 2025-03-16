@@ -14,6 +14,7 @@ export class PlayerSystem extends System {
         this.eventBus.on('PlayerDeath', (data) => this.death(data));
         this.eventBus.on('TorchExpired', () => this.torchExpired());
         this.eventBus.on('LightTorch', () => this.lightTorch());
+        this.eventBus.on('PlayerExit', () => this.exit()); // New event handler for PlayerExit
     }
 
     initializePlayer() {
@@ -49,7 +50,7 @@ export class PlayerSystem extends System {
         playerState.dead = false;
         playerState.torchLit = false;
         playerState.lampLit = false;
-        playerState.name = this.mageNames[Math.floor(Math.random() * this.mageNames.length)] || "Mage";
+        playerState.name = "Mage"; // mageNames removed, placeholder name
 
         const resource = player.getComponent('Resource');
         resource.torches = 1;
@@ -216,13 +217,20 @@ export class PlayerSystem extends System {
             this.eventBus.emit('LogMessage', { message: 'You have no torches left.' });
         }
     }
-}
 
-// Assuming mageNames is available in scope from Game.js
-PlayerSystem.prototype.mageNames = [
-    "Elarion", "Sylvara", "Tharion", "Lysandra", "Zephyrion", "Morwenna", "Aethric",
-    "Vionelle", "Dravenor", "Celestine", "Kaelith", "Seraphine", "Tormund", "Elowen",
-    "Zarathis", "Lunara", "Veyron", "Ashka", "Rivenna", "Solthar", "Ysmera", "Drenvar",
-    "Thalindra", "Orythia", "Xandrel", "Miravelle", "Korathis", "Eryndor", "Valthira",
-    "Nythera"
-];
+    exit() {
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        this.eventBus.emit('LogMessage', { message: 'You exited the dungeon! Game Over.' });
+        document.removeEventListener('keydown', this.handleInput);
+        document.removeEventListener('keyup', this.handleInput);
+        gameState.gameOver = true;
+        this.eventBus.emit('GameOver', { message: 'You exited the dungeon! Too much adventure to handle eh?' });
+        this.eventBus.emit('StatsUpdated', { entityId: 'player' });
+    }
+
+    // Store the handleInput reference for removal
+    handleInput = (event) => {
+        const game = this.entityManager.getEntity('game');
+        if (game) game.handleInput(event);
+    };
+}

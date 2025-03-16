@@ -6,13 +6,6 @@ export class RenderSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'RenderState'];
-        this.mageNames = [
-            "Elarion", "Sylvara", "Tharion", "Lysandra", "Zephyrion", "Morwenna", "Aethric",
-            "Vionelle", "Dravenor", "Celestine", "Kaelith", "Seraphine", "Tormund", "Elowen",
-            "Zarathis", "Lunara", "Veyron", "Ashka", "Rivenna", "Solthar", "Ysmera", "Drenvar",
-            "Thalindra", "Orythia", "Xandrel", "Miravelle", "Korathis", "Eryndor", "Valthira",
-            "Nythera"
-        ];
         this.mapDiv = null;
         this.tileMap = {}; // Cache DOM elements like old Render.js
     }
@@ -127,6 +120,9 @@ export class RenderSystem extends System {
             const maxY = Math.min(height - 1, playerPos.y + visibilityRadius);
 
             const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
+            const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
+
+            // Reset tiles to map state within visibility radius
             for (let y = minY; y <= maxY; y++) {
                 for (let x = minX; x <= maxX; x++) {
                     const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
@@ -135,19 +131,47 @@ export class RenderSystem extends System {
                         let char = map[y][x];
                         let className = tile.element.classList.contains('discovered') ? 'discovered' : 'undiscovered';
 
-                        const monster = monsters.find(m => m.getComponent('Position').x === x && m.getComponent('Position').y === y && m.getComponent('Health').hp > 0);
+                        // Reset to map state first
+                        tile.element.textContent = char;
+                        tile.element.className = className;
+                        tile.char = char;
+                        tile.class = className;
+                    }
+                }
+            }
+
+            // Render entities (player, monsters, projectiles)
+            for (let y = minY; y <= maxY; y++) {
+                for (let x = minX; x <= maxX; x++) {
+                    const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
+                    if (distance <= visibilityRadius) {
+                        const tile = this.tileMap[`${x},${y}`];
+                        let char = map[y][x];
+                        let className = tile.element.classList.contains('discovered') ? 'discovered' : 'undiscovered';
+
+                        // Player rendering
                         if (x === playerPos.x && y === playerPos.y) {
                             char = '𓀠';
                             className = 'player';
                             if (playerState.torchLit) className += ' torch flicker';
-                        } else if (monster && (distance <= visibilityRadius || monster.getComponent('MonsterData').isAggro)) {
-                            const monsterData = monster.getComponent('MonsterData');
-                            monsterData.isDetected = true;
-                            char = monsterData.avatar;
-                            className = `discovered monster detected ${monsterData.classes}`;
-                            if (monsterData.isElite) className += ' elite';
-                            if (monsterData.isBoss) className += ' boss';
-                            monsterData.affixes.forEach(affix => className += ` ${affix}`);
+                        }
+                        // Projectile rendering
+                        else if (projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y)) {
+                            char = '*';
+                            className = 'discovered projectile';
+                        }
+                        // Monster rendering
+                        else {
+                            const monster = monsters.find(m => m.getComponent('Position').x === x && m.getComponent('Position').y === y && m.getComponent('Health').hp > 0);
+                            if (monster && (distance <= visibilityRadius || monster.getComponent('MonsterData').isAggro)) {
+                                const monsterData = monster.getComponent('MonsterData');
+                                monsterData.isDetected = true;
+                                char = monsterData.avatar;
+                                className = `discovered monster detected ${monsterData.classes}`;
+                                if (monsterData.isElite) className += ' elite';
+                                if (monsterData.isBoss) className += ' boss';
+                                monsterData.affixes.forEach(affix => className += ` ${affix}`);
+                            }
                         }
 
                         if (tile.char !== char || tile.class !== className) {

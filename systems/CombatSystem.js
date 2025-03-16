@@ -1,18 +1,96 @@
 ﻿// systems/CombatSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent } from '../core/Components.js';
+import { PositionComponent, HealthComponent } from '../core/Components.js';
+import { ProjectileComponent } from '../core/Components.js';
 
 export class CombatSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'Health'];
-        this.isRangedMode = false;
+        this.frameDelay = 3; // Number of frames to wait before moving projectile (e.g., 3 frames ~50ms at 60 FPS)
+        this.currentFrame = 0; // Counter for frame delay
     }
 
     init() {
         this.eventBus.on('MeleeAttack', (data) => this.handleMeleeAttack(data));
         this.eventBus.on('RangedAttack', (data) => this.handleRangedAttack(data));
         this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
+    }
+
+    update() {
+        this.currentFrame = (this.currentFrame + 1) % this.frameDelay; // Increment and wrap around
+        if (this.currentFrame !== 0) return; // Skip update if not at delay threshold
+
+        const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
+        projectiles.forEach(proj => {
+            const pos = proj.getComponent('Position');
+            const projData = proj.getComponent('Projectile');
+            const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+            const tier = gameState.tier;
+            const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
+            if (!levelEntity) return;
+
+            const map = levelEntity.getComponent('Map').map;
+            const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
+
+            if (projData.rangeLeft > 0) {
+                let dx = 0, dy = 0;
+                switch (projData.direction) {
+                    case 'ArrowUp': dy = -1; break;
+                    case 'ArrowDown': dy = 1; break;
+                    case 'ArrowLeft': dx = -1; break;
+                    case 'ArrowRight': dx = 1; break;
+                }
+
+                const newX = pos.x + dx;
+                const newY = pos.y + dy;
+
+                // Check for wall collision
+                if (newX < 0 || newX >= map[0].length || newY < 0 || newY >= map.length || map[newY][newX] === '#') {
+                    this.entityManager.removeEntity(proj.id);
+                    this.eventBus.emit('LogMessage', { message: 'Your shot hit a wall.' });
+                    this.eventBus.emit('RenderNeeded');
+                    return;
+                }
+
+                // Check for monster collision
+                const target = monsters.find(m => {
+                    const mPos = m.getComponent('Position');
+                    const mHealth = m.getComponent('Health');
+                    return mPos.x === newX && mPos.y === newY && mHealth.hp > 0;
+                });
+
+                if (target) {
+                    const player = this.entityManager.getEntity('player');
+                    const playerInventory = player.getComponent('Inventory');
+                    const playerStats = player.getComponent('Stats');
+                    const weapon = playerInventory.equipped.offhand || playerInventory.equipped.mainhand || { baseDamageMin: 1, baseDamageMax: 2, name: 'Fists' };
+                    const damage = Math.floor(Math.random() * (weapon.baseDamageMax - weapon.baseDamageMin + 1)) + weapon.baseDamageMin + (playerStats.intellect || 0) + (playerStats.rangedDamageBonus || 0);
+                    const targetHealth = target.getComponent('Health');
+                    const targetMonsterData = target.getComponent('MonsterData');
+
+                    targetHealth.hp -= damage;
+                    this.eventBus.emit('LogMessage', {
+                        message: `You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
+                    });
+
+                    if (targetHealth.hp <= 0) {
+                        this.eventBus.emit('MonsterDied', { entityId: target.id });
+                    }
+                    // Continue moving after hitting a monster
+                }
+
+                // Move projectile
+                pos.x = newX;
+                pos.y = newY;
+                projData.rangeLeft--;
+                this.eventBus.emit('PositionChanged', { entityId: proj.id, x: newX, y: newY });
+                this.eventBus.emit('RenderNeeded');
+            } else {
+                this.entityManager.removeEntity(proj.id);
+                this.eventBus.emit('RenderNeeded');
+            }
+        });
     }
 
     handleMeleeAttack({ targetEntityId }) {
@@ -41,72 +119,35 @@ export class CombatSystem extends System {
     handleRangedAttack({ direction }) {
         const player = this.entityManager.getEntity('player');
         if (!player) return;
-        console.log('Ranged Attack Player check succeded', player);
 
         const playerPos = player.getComponent('Position');
         const playerInventory = player.getComponent('Inventory');
-        const playerStats = player.getComponent('Stats');
         const weapon = playerInventory.equipped.offhand || playerInventory.equipped.mainhand || { baseDamageMin: 1, baseDamageMax: 2, baseRange: 1, name: 'Fists' };
         const range = weapon.baseRange || 1;
-        const damage = Math.floor(Math.random() * (weapon.baseDamageMax - weapon.baseDamageMin + 1)) + weapon.baseDamageMin + (playerStats.intellect || 0);
 
-        const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
-        const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
-        if (!levelEntity) return;
-
-        const map = levelEntity.getComponent('Map').map;
-        let targetX = playerPos.x;
-        let targetY = playerPos.y;
-
-        switch (direction) {
-            case 'ArrowUp': targetY -= range; break;
-            case 'ArrowDown': targetY += range; break;
-            case 'ArrowLeft': targetX -= range; break;
-            case 'ArrowRight': targetX += range; break;
-        }
-
-        const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
-        const target = monsters.find(m => {
-            const pos = m.getComponent('Position');
-            return pos.x === targetX && pos.y === targetY && m.getComponent('Health').hp > 0;
-        });
-
-        if (target) {
-            const targetHealth = target.getComponent('Health');
-            const targetMonsterData = target.getComponent('MonsterData');
-            targetHealth.hp -= damage;
-            this.eventBus.emit('LogMessage', {
-                message: `You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
-            });
-
-            if (targetHealth.hp <= 0) {
-                this.eventBus.emit('MonsterDied', { entityId: target.id });
-            }
-        } else {
-            const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
-            this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
-            this.eventBus.emit('RenderNeeded');
-            console.log('Ranged Attack Process - Render Needed Step 1');
-
-            setTimeout(() => {
-                const projPos = projectile.getComponent('Position');
-                projPos.x = targetX;
-                projPos.y = targetY;
-                this.eventBus.emit('PositionChanged', { entityId: projectile.id, x: targetX, y: targetY });
-                this.eventBus.emit('RenderNeeded');
-                console.log('Ranged Attack Process - Render Needed Step 2');
-
-                setTimeout(() => {
-                    this.entityManager.removeEntity(projectile.id);
-                    this.eventBus.emit('RenderNeeded');
-                }, 300);
-            }, 300);
-        }
+        const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
+        this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
+        this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range));
+        this.eventBus.emit('RenderNeeded');
     }
 
     toggleRangedMode({ event }) {
-        console.log('Ranged mode event', event);
-        this.isRangedMode = !this.isRangedMode;
-        console.log('Ranged mode', this.isRangedMode ? 'on' : 'off');
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const playerInventory = this.entityManager.getEntity('player').getComponent('Inventory');
+        const offWeapon = playerInventory.equipped.offhand;
+        const mainWeapon = playerInventory.equipped.mainhand;
+
+        if (event.type === 'keyup' && event.key === ' ') {
+            gameState.isRangedMode = false;
+            console.log('Ranged mode off');
+        } else if (event.type === 'keydown' && event.key === ' ' && !event.repeat) {
+            if ((offWeapon?.attackType === 'ranged' && offWeapon?.baseRange > 0) ||
+                (mainWeapon?.attackType === 'ranged' && mainWeapon?.baseRange > 0)) {
+                gameState.isRangedMode = true;
+                console.log('Ranged mode on');
+            } else {
+                this.eventBus.emit('LogMessage', { message: 'You need a valid ranged weapon equipped to use ranged mode!' });
+            }
+        }
     }
 }

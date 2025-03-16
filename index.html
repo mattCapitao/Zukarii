@@ -18,7 +18,12 @@
         <pre id="map"></pre>
     </div>
     <div id="ui-layer">
-        <div id="player-info"></div>
+        <div id="player-info">
+            <div class="player-info-child">Player: <span id="playerName">`${playerState.name}`</span></div>
+            <div class="player-info-child">Level: <span id="playerLevel">`${playerState.level}`</span></div>
+            <div class="player-info-child">Dungeon Tier: <span id="dungeonTier">`${this.entityManager.getEntity('gameState').getComponent('GameState').tier}`</span></div>
+            <div class="player-info-child">Gold: <span id="playerGold">`${inventory.gold !== undefined ? inventory.gold : 'N/A'}`</span></div>
+        </div>
 
         <div id="tabs" class="hidden">
             <div id="tab-wrapper">
@@ -72,7 +77,28 @@
             </div>
         </div>
 
-        <div id="player-status"></div>
+        <div id="player-status">
+            <div class="player-status-child">Heal Potions: <span id="healPotionCount">`${resource.healPotions}`</span></div><!-- set innerHTML on #healPotionCount -->
+            <div class="player-status-child bar">
+                <div class="progress-bar">
+                    <div id="hpBar" class="progress-fill hp-fill" style="width: `${(health.hp / health.maxHp) * 100}`%"></div> <!-- update CSS Property width on #hpBar-->
+                </div>
+                HP: <span id="hpText">`${health.hp}/${health.maxHp}`</span> <!-- set innerHTML on #hpText -->
+            </div>
+            <div class="player-status-child bar">
+                <div class="progress-bar">
+                    <div id="manaBar" class="progress-fill mana-fill" style="width: `${(mana.mana / mana.maxMana) * 100}`%"></div><!-- update CSS Property width on #manaBar-->
+                </div>
+                Mana: `${mana.mana}/${mana.maxMana}`<!-- set innerHTML on #hpText -->
+            </div>
+            <div class="player-status-child bar">
+                <div class="progress-bar">
+                    <div id="xpBar" class="progress-fill xp-fill" style="width: `${(playerState.xp / playerState.nextLevelXp) * 100}`%"></div><!-- update CSS Property width on #hpBar-->
+                </div>
+                XP: <span id="xpText">`${playerState.xp}/${playerState.nextLevelXp}`</span><!-- set innerHTML on #xpText -->
+            </div>
+            <div class="player-status-child">Torches: <span id="torchCount">`${resource.torches}`</span></div><!-- set innerHTML on #torchCount -->
+        </div>
     </div>
 
     <script type="module" src="/main.js"></script>

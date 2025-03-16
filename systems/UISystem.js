@@ -168,7 +168,7 @@ export class UISystem extends System {
                 ${inventory.items.length ? inventory.items.map((item, index) => `
                     <div class="inventory-item">
                         <p class="inventory-slot ${item.itemTier} ${item.type}">
-                            <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' data-index='${index}' draggable="true" onerror="this.src='img/icons/items/default.svg';">
+                            <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' data-index='${index}' draggable="true";">
                             <span class="item-label ${item.itemTier}">${item.type}</span>
                         </p>
                     </div>
@@ -178,7 +178,7 @@ export class UISystem extends System {
         console.log('Character stats and inventory updated:', { stats: Object.assign({}, stats), inventory: Object.assign({}, inventory), resource: Object.assign({}, resource) });
 
         // Reattach drag-and-drop listeners after rendering
-        this.setupDragAndDrop();
+        this.setupInventoryDragAndDrop();
     }
 
     addLogMessage({ message }) {
@@ -205,35 +205,13 @@ export class UISystem extends System {
 
         console.log('UI update data raw:', { stats: Object.assign({}, stats), health: Object.assign({}, health), mana: Object.assign({}, mana), inventory: Object.assign({}, inventory), playerState: Object.assign({}, playerState), resource: Object.assign({}, resource) });
 
-        this.playerInfo.innerHTML = `
-            <div class="player-info-child">Player: ${playerState.name}</div>
-            <div class="player-info-child">Level: ${playerState.level}</div>
-            <div class="player-info-child">Dungeon Tier: ${this.entityManager.getEntity('gameState').getComponent('GameState').tier}</div>
-            <div class="player-info-child">Gold: ${inventory.gold !== undefined ? inventory.gold : 'N/A'}</div>
-        `;
+        //this.playerInfo.innerHTML
+        // @Grok - REPLACE THIS WITH YOUR CODE TO UPDATE CHILD ELEMENTS OF playerInfo
+            
 
-        this.playerStatus.innerHTML = `
-            <div class="player-status-child">Heal Potions: ${resource.healPotions}</div>
-            <div class="player-status-child bar">
-                <div class="progress-bar">
-                    <div class="progress-fill hp-fill" style="width: ${(health.hp / health.maxHp) * 100}%"></div>
-                </div>
-                HP: ${health.hp}/${health.maxHp}
-            </div>
-            <div class="player-status-child bar">
-                <div class="progress-bar">
-                    <div class="progress-fill mana-fill" style="width: ${(mana.mana / mana.maxMana) * 100}%"></div>
-                </div>
-                Mana: ${mana.mana}/${mana.maxMana}
-            </div>
-            <div class="player-status-child bar">
-                <div class="progress-bar">
-                    <div class="progress-fill xp-fill" style="width: ${(playerState.xp / playerState.nextLevelXp) * 100}%"></div>
-                </div>
-                XP: ${playerState.xp}/${playerState.nextLevelXp}
-            </div>
-            <div class="player-status-child">Torches: ${resource.torches}</div>
-        `;
+        //this.playerStatus.innerHTML
+        // @Grok - REPLACE THIS WITH YOUR CODE TO UPDATE CHILD ELEMENTS OF playerStatus
+            
 
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         if (overlayState.isOpen && overlayState.activeTab === 'character') {
@@ -241,100 +219,78 @@ export class UISystem extends System {
         }
     }
 
-    // Add drag-and-drop setup method
+
+
     setupDragAndDrop() {
-        // Handle drag start for inventory items
+        this.setupEquipDragAndDrop();
+        this.setupInventoryDragAndDrop();
+    }
+
+    // Add drag-and-drop setup method
+    setupInventoryDragAndDrop() {
         const inventoryItems = document.querySelectorAll('.inventory-item .item-icon');
         inventoryItems.forEach(item => {
             item.addEventListener('dragstart', (e) => {
-                const itemData = JSON.parse(e.target.getAttribute('data-item'));
+                const itemData = JSON.parse(e.target.getAttribute('data-item') || '{}');
                 const index = e.target.getAttribute('data-index');
                 e.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, index, source: 'inventory' }));
                 console.log('Dragging item:', itemData);
             });
         });
 
-        // Handle drag start for equipped items (to unequip)
-        const equippedItems = document.querySelectorAll('.equip-slot .item-icon');
-        equippedItems.forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                const itemData = JSON.parse(e.target.getAttribute('data-item'));
-                const slotElement = e.target.closest('.equip-slot');
-                const slotData = JSON.parse(slotElement.getAttribute('data-equip_slot') || '{}');
-                const slotName = slotData.slot;
-                e.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, slot: slotName, source: 'equip' }));
-                console.log('Dragging equipped item:', itemData, 'from slot:', slotName);
-            });
-        });
-
-        // Make equip slots drop zones
-        const equipSlots = document.querySelectorAll('.equip-slot');
-        equipSlots.forEach(slot => {
-            slot.addEventListener('dragover', (e) => {
-                e.preventDefault(); // Allow drop
-            });
-
-            slot.addEventListener('dragenter', (e) => {
-                e.preventDefault();
-                slot.classList.add('drag-over'); // Use existing CSS if defined
-            });
-
-            slot.addEventListener('dragleave', () => {
-                slot.classList.remove('drag-over');
-            });
-
-            slot.addEventListener('drop', (e) => {
-                e.preventDefault();
-                slot.classList.remove('drag-over');
-                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-                const slotData = JSON.parse(slot.getAttribute('data-equip_slot') || '{}');
-                const slotName = slotData.slot;
-
-                if (data.source === 'inventory') {
-                    // Equip item from inventory
-                    const item = data.item;
-                    const index = data.index;
-                    if (this.isSlotCompatible(item, slotName)) {
-                        this.eventBus.emit('EquipItem', { entityId: 'player', item, slot: slotName });
-                        this.updateUI({ entityId: 'player' }); // Force immediate UI update
-                        console.log(`Dropped ${item.name} into ${slotName}`);
-                    } else {
-                        this.eventBus.emit('LogMessage', { message: `Cannot equip ${item.name} to ${slotName}!` });
-                    }
-                } else if (data.source === 'equip') {
-                    // Unequip by dropping to another slot is not supported; use inventory drop
-                    console.log(`Unequip not supported by dragging to another slot; drop back to inventory to unequip.`);
-                }
-            });
-        });
-
-        // Allow dropping back to inventory to unequip
         const inventoryWrapper = document.querySelector('.inventory-item-wrapper');
         if (inventoryWrapper) {
-            inventoryWrapper.addEventListener('dragover', (e) => {
-                e.preventDefault();
-            });
-
-            inventoryWrapper.addEventListener('dragenter', (e) => {
-                e.preventDefault();
-                inventoryWrapper.classList.add('drag-over'); // Use existing CSS if defined
-            });
-
-            inventoryWrapper.addEventListener('dragleave', () => {
-                inventoryWrapper.classList.remove('drag-over');
-            });
-
+            inventoryWrapper.addEventListener('dragover', (e) => e.preventDefault());
             inventoryWrapper.addEventListener('drop', (e) => {
                 e.preventDefault();
-                inventoryWrapper.classList.remove('drag-over');
-                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                const rawData = e.dataTransfer.getData('text/plain');
+                let data;
+                try {
+                    data = JSON.parse(rawData);
+                } catch (err) {
+                    console.error('Inventory drop failed - invalid data:', rawData, err);
+                    return;
+                }
                 if (data.source === 'equip') {
                     this.eventBus.emit('UnequipItem', { entityId: 'player', slot: data.slot });
-                    this.updateUI({ entityId: 'player' }); // Force immediate UI update
-                    console.log(`Dropped equipped item from ${data.slot} back to inventory`);
+                    this.updateUI({ entityId: 'player' });
+                    console.log(`Dropped equipped item from ${data.slot} to inventory`);
                 }
             });
         }
+    }
+
+    setupEquipDragAndDrop() {
+        const equipSlots = document.querySelectorAll('.equip-slot');
+        equipSlots.forEach(slot => {
+            slot.addEventListener('dragstart', (e) => {
+                const itemElement = e.target.closest('.item-icon');
+                if (!itemElement) return;
+                const itemData = JSON.parse(itemElement.getAttribute('data-item') || '{}');
+                const slotName = JSON.parse(slot.getAttribute('data-equip_slot') || '{}').slot;
+                e.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, slot: slotName, source: 'equip' }));
+                console.log('Dragging equipped item:', itemData);
+            });
+            slot.addEventListener('dragover', (e) => e.preventDefault());
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                slot.classList.remove('drag-over');
+                const rawData = e.dataTransfer.getData('text/plain');
+                let data;
+                try {
+                    data = JSON.parse(rawData);
+                } catch (err) {
+                    console.error('Equip drop failed - invalid data:', rawData, err);
+                    return;
+                }
+                const slotName = JSON.parse(slot.getAttribute('data-equip_slot') || '{}').slot;
+                if (data.source === 'inventory' && this.isSlotCompatible(data.item, slotName)) {
+                    this.eventBus.emit('EquipItem', { entityId: 'player', item: data.item, slot: slotName });
+                    this.updateUI({ entityId: 'player' });
+                    console.log(`Dropped ${data.item.name} into ${slotName}`);
+                }
+            });
+        });
     }
 
     // Reuse the slot compatibility logic from InventorySystem

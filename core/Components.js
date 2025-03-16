@@ -209,6 +209,14 @@ export class GameStateComponent {
     }
 }
 
+export class ProjectileComponent {
+    constructor(direction, rangeLeft) {
+        this.type = 'Projectile';
+        this.direction = direction; // 'ArrowUp', 'ArrowDown', etc.
+        this.rangeLeft = rangeLeft; // Remaining tiles to travel
+    }
+}
+
 // Utility function to create default player components (for initialization)
 export function createDefaultPlayerComponents() {
     return {

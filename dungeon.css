@@ -1230,7 +1230,13 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
 span.discovered.monster {
 color: #0f0; /* Green, matching your map style */
 font-family: monospace; /* Ensure consistent rendering */
-z-index: 2; /* Lift above other spans */
+z-index:3; /* Lift above other spans */
+}
+
+.projectile {
+    color: #0f0;
+    font-family: monospace;
+    z-index: 5;
 }
 
 .discovered {

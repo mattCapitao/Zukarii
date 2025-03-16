@@ -56,12 +56,14 @@ export class State {
     }
 
     initializeCoreEntities() {
+        /* // commented out after correctly setting up player post refactor
         // Player entity
         const player = this.entityManager.createEntity('player');
         const playerComponents = createDefaultPlayerComponents();
         Object.values(playerComponents).forEach(component =>
             this.entityManager.addComponentToEntity('player', component)
         );
+        */
 
         // Game state entity
         const gameState = this.entityManager.createEntity('gameState');
