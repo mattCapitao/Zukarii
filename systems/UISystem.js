@@ -191,8 +191,11 @@ export class UISystem extends System {
     }
 
     updateUI({ entityId }) {
+        console.log("UISystem.updateUI() called for: ", entityId); 
         if (entityId !== 'player') return;
+       
         const player = this.entityManager.getEntity('player');
+        console.log("UISystem.updateUI() called for Player : ", player); 
         const stats = player.getComponent('Stats');
         const health = player.getComponent('Health');
         const mana = player.getComponent('Mana');

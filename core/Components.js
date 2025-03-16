@@ -1,4 +1,4 @@
-// Components.js
+﻿// Components.js
 // Defines pure data components for entities in the Component-Based Architecture
 
 export class PositionComponent {
@@ -27,34 +27,44 @@ export class ManaComponent {
 
 export class StatsComponent {
     constructor({
-        intellect = 0,
-        prowess = 0,
-        agility = 0,
-        armor = 0,
-        defense = 0,
-        block = 0,
-        dodge = 0,
-        range = 0,
-        damageBonus = 0,
-        meleeDamageBonus = 0,
-        rangedDamageBonus = 0,
-        luck = 0,
-        maxLuck = 0
+        intellect = 0, prowess = 0, agility = 0, maxHp = 0, maxMana = 0,
+        armor = 0, defense = 0, block = 0, dodge = 0, range = 0, baseRange = 0,
+        damageBonus = 0, meleeDamageBonus = 0, rangedDamageBonus = 0, luck = 0, maxLuck = 0
     } = {}) {
         this.type = 'Stats';
         this.intellect = intellect;
         this.prowess = prowess;
         this.agility = agility;
+        this.maxHp = maxHp;
+        this.maxMana = maxMana;
         this.armor = armor;
         this.defense = defense;
         this.block = block;
         this.dodge = dodge;
         this.range = range;
+        this.baseRange = baseRange;
         this.damageBonus = damageBonus;
         this.meleeDamageBonus = meleeDamageBonus;
         this.rangedDamageBonus = rangedDamageBonus;
         this.luck = luck;
         this.maxLuck = maxLuck;
+        this._internal = {
+            base: {
+                intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0,
+                armor: 0, defense: 0, block: 0, dodge: 0, range: 0, baseRange: 0,
+                damageBonus: 0, meleeDamageBonus: 0, rangedDamageBonus: 0, luck: 0, maxLuck: 0
+            },
+            gear: {
+                intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0,
+                armor: 0, defense: 0, block: 0, dodge: 0, range: 0, baseRange: 0,
+                damageBonus: 0, meleeDamageBonus: 0, rangedDamageBonus: 0, luck: 0, maxLuck: 0
+            },
+            temp: {
+                intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0,
+                armor: 0, defense: 0, block: 0, dodge: 0, range: 0, baseRange: 0,
+                damageBonus: 0, meleeDamageBonus: 0, rangedDamageBonus: 0, luck: 0, maxLuck: 0
+            }
+        };
     }
 }
 
@@ -108,6 +118,7 @@ export class PlayerStateComponent {
         this.lampLit = lampLit;
     }
 }
+
 
 export class MapComponent {
     constructor({

@@ -21,21 +21,26 @@ export class PlayerSystem extends System {
         const utilities = this.entityManager.getEntity('state').getComponent('Utilities').utilities;
 
         const stats = player.getComponent('Stats');
-        stats.base.intellect = utilities.dRoll(4, 3, 3);
-        stats.base.prowess = utilities.dRoll(4, 3, 3);
-        stats.base.agility = utilities.dRoll(4, 3, 3);
-        stats.base.luck = 0;
-        stats.base.maxHp = Math.round(30 * stats.base.prowess * 0.1);
-        stats.base.maxMana = Math.round(10 * stats.base.intellect * 0.05);
-        stats.temp = { intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0, armor: 0, block: 0, range: 0, luck: 0 };
+        stats._internal.base.intellect = utilities.dRoll(4, 3, 3);
+        stats._internal.base.prowess = utilities.dRoll(4, 3, 3);
+        stats._internal.base.agility = utilities.dRoll(4, 3, 3);
+        stats._internal.base.luck = 0;
+        stats._internal.base.maxHp = Math.round(30 * stats._internal.base.prowess * 0.1);
+        stats._internal.base.maxMana = Math.round(10 * stats._internal.base.intellect * 0.05);
+        stats.intellect = stats._internal.base.intellect;
+        stats.prowess = stats._internal.base.prowess;
+        stats.agility = stats._internal.base.agility;
+        stats.luck = stats._internal.base.luck;
+        stats.maxHp = stats._internal.base.maxHp;
+        stats.maxMana = stats._internal.base.maxMana;
 
         const health = player.getComponent('Health');
-        health.hp = stats.base.maxHp;
-        health.maxHp = stats.base.maxHp;
+        health.hp = stats.maxHp;
+        health.maxHp = stats.maxHp;
 
         const mana = player.getComponent('Mana');
-        mana.mana = stats.base.maxMana;
-        mana.maxMana = stats.base.maxMana;
+        mana.mana = stats.maxMana;
+        mana.maxMana = stats.maxMana;
 
         const playerState = player.getComponent('PlayerState');
         playerState.xp = 0;
@@ -43,11 +48,16 @@ export class PlayerSystem extends System {
         playerState.nextLevelXp = 125;
         playerState.dead = false;
         playerState.torchLit = false;
+        playerState.lampLit = false;
+        playerState.name = this.mageNames[Math.floor(Math.random() * this.mageNames.length)] || "Mage";
 
         const resource = player.getComponent('Resource');
         resource.torches = 1;
         resource.healPotions = 1;
         resource.gold = 100;
+        resource.torchExpires = 0;
+        resource.potionDropFail = 0;
+        resource.torchDropFail = 0;
 
         const inventory = player.getComponent('Inventory');
         const startItems = [
@@ -65,18 +75,20 @@ export class PlayerSystem extends System {
         const stats = player.getComponent('Stats');
         const inventory = player.getComponent('Inventory');
 
-        // Clear gear stats
-        stats.gear = { intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0, armor: 0, block: 0, range: 0, luck: 0 };
+        stats._internal.gear = {
+            intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0,
+            armor: 0, defense: 0, block: 0, dodge: 0, range: 0, baseRange: 0,
+            damageBonus: 0, meleeDamageBonus: 0, rangedDamageBonus: 0, luck: 0, maxLuck: 0
+        };
 
-        // Update gear stats from equipped items
         Object.values(inventory.equipped).forEach(item => {
             if (!item) return;
-            if (item.type === 'armor') stats.gear.armor += item.armor || 0;
-            if (item.type === 'weapon' && item.attackType === 'melee') stats.gear.block += item.baseBlock || 0;
-            if (item.type === 'weapon' && item.attackType === 'ranged') stats.gear.range = Math.max(stats.gear.range || 0, item.baseRange || 0);
+            if (item.type === 'armor') stats._internal.gear.armor += item.armor || 0;
+            if (item.type === 'weapon' && item.attackType === 'melee') stats._internal.gear.block += item.baseBlock || 0;
+            if (item.type === 'weapon' && item.attackType === 'ranged') stats._internal.gear.range = Math.max(stats._internal.gear.range || 0, item.baseRange || 0);
             if (item.stats) {
                 Object.entries(item.stats).forEach(([stat, value]) => {
-                    stats.gear[stat] = (stats.gear[stat] || 0) + (value || 0);
+                    stats._internal.gear[stat] = (stats._internal.gear[stat] || 0) + (value || 0);
                 });
             }
         });
@@ -88,33 +100,35 @@ export class PlayerSystem extends System {
         const stats = player.getComponent('Stats');
         const health = player.getComponent('Health');
         const mana = player.getComponent('Mana');
-        const playerState = player.getComponent('PlayerState');
 
-        // Calculate effective stats
-        stats.effective.intellect = stats.base.intellect + (stats.gear.intellect || 0) + (stats.temp.intellect || 0);
-        stats.effective.prowess = stats.base.prowess + (stats.gear.prowess || 0) + (stats.temp.prowess || 0);
-        stats.effective.agility = stats.base.agility + (stats.gear.agility || 0) + (stats.temp.agility || 0);
-        stats.effective.luck = stats.base.luck + (stats.gear.luck || 0) + (stats.temp.luck || 0);
-
-        const oldMaxHp = health.maxHp || stats.base.maxHp;
-        stats.effective.maxHp = stats.base.maxHp + (stats.gear.maxHp || 0) + (stats.temp.maxHp || 0);
-        health.maxHp = stats.effective.maxHp;
+        stats.intellect = stats._internal.base.intellect + (stats._internal.gear.intellect || 0) + (stats._internal.temp.intellect || 0);
+        stats.prowess = stats._internal.base.prowess + (stats._internal.gear.prowess || 0) + (stats._internal.temp.prowess || 0);
+        stats.agility = stats._internal.base.agility + (stats._internal.gear.agility || 0) + (stats._internal.temp.agility || 0);
+        const oldMaxHp = health.maxHp || stats._internal.base.maxHp;
+        stats.maxHp = stats._internal.base.maxHp + (stats._internal.gear.maxHp || 0) + (stats._internal.temp.maxHp || 0);
+        health.maxHp = stats.maxHp;
         if (oldMaxHp !== 0 && health.maxHp !== oldMaxHp) {
             health.hp = Math.round(health.hp * (health.maxHp / oldMaxHp));
             health.hp = Math.max(1, Math.min(health.hp, health.maxHp));
         }
-
-        const oldMaxMana = mana.maxMana || stats.base.maxMana;
-        stats.effective.maxMana = stats.base.maxMana + (stats.gear.maxMana || 0) + (stats.temp.maxMana || 0);
-        mana.maxMana = stats.effective.maxMana;
+        const oldMaxMana = mana.maxMana || stats._internal.base.maxMana;
+        stats.maxMana = stats._internal.base.maxMana + (stats._internal.gear.maxMana || 0) + (stats._internal.temp.maxMana || 0);
+        mana.maxMana = stats.maxMana;
         if (oldMaxMana !== 0 && mana.maxMana !== oldMaxMana) {
             mana.mana = Math.round(mana.mana * (mana.maxMana / oldMaxMana));
             mana.mana = Math.max(1, Math.min(mana.mana, mana.maxMana));
         }
-
-        stats.effective.armor = (stats.gear.armor || 0) + (stats.temp.armor || 0);
-        stats.effective.block = (stats.gear.block || 0) + (stats.temp.block || 0);
-        stats.effective.range = (stats.gear.range || 0) + (stats.temp.range || 0);
+        stats.armor = (stats._internal.gear.armor || 0) + (stats._internal.temp.armor || 0);
+        stats.defense = (stats._internal.gear.defense || 0) + (stats._internal.temp.defense || 0);
+        stats.block = (stats._internal.gear.block || 0) + (stats._internal.temp.block || 0);
+        stats.dodge = (stats._internal.gear.dodge || 0) + (stats._internal.temp.dodge || 0);
+        stats.range = (stats._internal.gear.range || 0) + (stats._internal.temp.range || 0);
+        stats.baseRange = (stats._internal.gear.baseRange || 0) + (stats._internal.temp.baseRange || 0);
+        stats.damageBonus = (stats._internal.gear.damageBonus || 0) + (stats._internal.temp.damageBonus || 0);
+        stats.meleeDamageBonus = (stats._internal.gear.meleeDamageBonus || 0) + (stats._internal.temp.meleeDamageBonus || 0);
+        stats.rangedDamageBonus = (stats._internal.gear.rangedDamageBonus || 0) + (stats._internal.temp.rangedDamageBonus || 0);
+        stats.luck = stats._internal.base.luck + (stats._internal.gear.luck || 0) + (stats._internal.temp.luck || 0);
+        stats.maxLuck = (stats._internal.gear.maxLuck || 0) + (stats._internal.temp.maxLuck || 0);
 
         this.eventBus.emit('StatsUpdated', { entityId: player.id });
     }
@@ -138,18 +152,18 @@ export class PlayerSystem extends System {
             if (playerState.level % 3 === 0) {
                 const statOptions = ['prowess', 'intellect', 'agility'];
                 const statToBoost = statOptions[Math.floor(Math.random() * 3)];
-                stats.base[statToBoost]++;
-                this.eventBus.emit('LogMessage', { message: `Your ${statToBoost} increased to ${stats.base[statToBoost]}!` });
+                stats._internal.base[statToBoost]++;
+                this.eventBus.emit('LogMessage', { message: `Your ${statToBoost} increased to ${stats._internal.base[statToBoost]}!` });
             }
 
-            const hpIncrease = Math.round((6 + playerState.level) * stats.base.prowess * 0.1);
-            const mpIncrease = Math.round((2 + playerState.level) * stats.base.intellect * 0.05);
-            stats.base.maxHp += hpIncrease;
-            stats.base.maxMana += mpIncrease;
+            const hpIncrease = Math.round((6 + playerState.level) * stats._internal.base.prowess * 0.1);
+            const mpIncrease = Math.round((2 + playerState.level) * stats._internal.base.intellect * 0.05);
+            stats._internal.base.maxHp += hpIncrease;
+            stats._internal.base.maxMana += mpIncrease;
             playerState.xp = newXp;
             playerState.nextLevelXp = Math.round(playerState.nextLevelXp * 1.55);
 
-            this.eventBus.emit('LogMessage', { message: `Level up! Now level ${playerState.level}, Max HP increased by ${hpIncrease} to ${stats.base.maxHp}` });
+            this.eventBus.emit('LogMessage', { message: `Level up! Now level ${playerState.level}, Max HP increased by ${hpIncrease} to ${stats._internal.base.maxHp}` });
         }
         this.calculateStats(player);
     }
@@ -203,3 +217,12 @@ export class PlayerSystem extends System {
         }
     }
 }
+
+// Assuming mageNames is available in scope from Game.js
+PlayerSystem.prototype.mageNames = [
+    "Elarion", "Sylvara", "Tharion", "Lysandra", "Zephyrion", "Morwenna", "Aethric",
+    "Vionelle", "Dravenor", "Celestine", "Kaelith", "Seraphine", "Tormund", "Elowen",
+    "Zarathis", "Lunara", "Veyron", "Ashka", "Rivenna", "Solthar", "Ysmera", "Drenvar",
+    "Thalindra", "Orythia", "Xandrel", "Miravelle", "Korathis", "Eryndor", "Valthira",
+    "Nythera"
+];
