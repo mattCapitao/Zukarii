@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,68 +13,72 @@
     <link rel="manifest" href="/site.webmanifest" />
 </head>
 <body>
-<div id="splash"></div>
-<div id="game">
-    <pre id="map"></pre>
-</div>
-<div id="ui-layer">
-    <div id="player-info"></div>
-    
-    <div id="tabs" class="hidden">
-        <div id="tab-wrapper">
-            <div id="tab-menu"></div>
-            <div id="log-content" class="ui-tab">
-                <h2>Adventure Log</h2>
-                <div id="log"></div>
-            </div>
-            <div id="character-content" class="ui-tab">
-                <div id="character">
-                    <h2>Equipped Items</h2>
-                    <div id="equipped-items">
-                        <div class="col">
-                            <div class="equipped-item">
-                                <p class="equip-slot mainhand empty" data-equip_slot='{"slotId": 0, "slot": "mainhand"}'></p>
-                                <span class="item-label">Mainhand</span>
-                            </div>
-                            <div class="equipped-item">
-                                <p class="equip-slot rightring empty" data-equip_slot='{"slotId": 1, "slot": "rightring"}'></p>
-                                <span class="item-label">Right Ring</span>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="equipped-item">
-                                <p class="equip-slot amulet empty" data-equip_slot='{"slotId": 2, "slot": "amulet"}'></p>
-                                <span class="item-label">Amulet</span>
-                            </div>
-                            <div class="equipped-item">
-                                <p class="equip-slot armor empty" data-equip_slot='{"slotId": 3, "slot": "armor"}'></p>
-                                <span class="item-label">Armor</span>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="equipped-item">
-                                <p class="equip-slot offhand empty" data-equip_slot='{"slotId": 4, "slot": "offhand"}'></p>
-                                <span class="item-label">Offhand</span>
-                            </div>
-                            <div class="equipped-item">
-                                <p class="equip-slot leftring empty" data-equip_slot='{"slotId": 5, "slot": "leftring"}'></p>
-                                <span class="item-label">Left Ring</span>
-                            </div>
-                        </div>
-                    </div>
-                    <h2>Character Stats</h2>
-                    <div id="character-stat-wrapper"></div>
-                </div>
-                <div id="inventory">
+    <div id="splash"></div>
+    <div id="game">
+        <pre id="map"></pre>
+    </div>
+    <div id="ui-layer">
+        <div id="player-info"></div>
 
+        <div id="tabs" class="hidden">
+            <div id="tab-wrapper">
+                <div id="tab-menu"></div>
+                <div id="log-content" class="ui-tab">
+                    <h2>Adventure Log</h2>
+                    <div id="log"></div>
+                </div>
+                <div id="character-content" class="ui-tab">
+                    <div id="character">
+                        <h2>Equipped Items</h2>
+                        <div id="equipped-items">
+                            <div class="col">
+                                <div class="equipped-item">
+                                    <p class="equip-slot mainhand empty" data-equip_slot='{"slotId": 0, "slot": "mainhand"}'></p>
+                                    <span class="item-label">Mainhand</span>
+                                </div>
+                                <div class="equipped-item">
+                                    <p class="equip-slot rightring empty" data-equip_slot='{"slotId": 1, "slot": "rightring"}'></p>
+                                    <span class="item-label">Right Ring</span>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="equipped-item">
+                                    <p class="equip-slot amulet empty" data-equip_slot='{"slotId": 2, "slot": "amulet"}'></p>
+                                    <span class="item-label">Amulet</span>
+                                </div>
+                                <div class="equipped-item">
+                                    <p class="equip-slot armor empty" data-equip_slot='{"slotId": 3, "slot": "armor"}'></p>
+                                    <span class="item-label">Armor</span>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="equipped-item">
+                                    <p class="equip-slot offhand empty" data-equip_slot='{"slotId": 4, "slot": "offhand"}'></p>
+                                    <span class="item-label">Offhand</span>
+                                </div>
+                                <div class="equipped-item">
+                                    <p class="equip-slot leftring empty" data-equip_slot='{"slotId": 5, "slot": "leftring"}'></p>
+                                    <span class="item-label">Left Ring</span>
+                                </div>
+                            </div>
+                        </div>
+                        <h2>Character Stats</h2>
+                        <div id="character-stat-wrapper"></div>
+                    </div>
+                    <div id="inventory">
+
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div id="player-status"></div>
     </div>
 
-    <div id="player-status"></div>
-</div>
-     
     <script type="module" src="/main.js"></script>
+    <script type="module" src="/titlescreen.js"></script>
+    <script>
+        }
+    </script>
 </body>
 </html>

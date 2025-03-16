@@ -1,147 +1,228 @@
-﻿//console.log("game.js loaded");
-
-import { Data } from './Data.js';
-import { Utilities } from './Utilities.js';
-import { AudioManager } from './AudioManager.js';
+﻿// Game.js
 import { State } from './State.js';
-import { Level } from './Level.js';
-import { UI } from './UI.js';
-import { Render } from './Render.js';
-import { LootTables } from './LootTables.js';
-import { Items } from './Items.js';
-import { Player } from './Player.js';
-import { Monsters } from './Monsters.js';
-import { Combat } from './Combat.js';
-import { Actions } from './Actions.js';
-import { PlayerInventory } from './PlayerInventory.js';
-import { LevelTransition } from './LevelTransition.js';
+import { ActionSystem } from './systems/ActionSystem.js';
+import { CombatSystem } from './systems/CombatSystem.js';
+import { RenderSystem } from './systems/RenderSystem.js';
+import { PlayerSystem } from './systems/PlayerSystem.js';
+import { MonsterSystem } from './systems/MonsterSystem.js';
+import { LevelSystem } from './systems/LevelSystem.js';
+import { ItemSystem } from './systems/ItemSystem.js';
+import { TreasureSystem } from './systems/TreasureSystem.js';
+import { InventorySystem } from './systems/InventorySystem.js';
+import { UISystem } from './systems/UISystem.js';
+import { LevelTransitionSystem } from './systems/LevelTransitionSystem.js';
+import { AudioSystem } from './systems/AudioSystem.js';
+import { DataSystem } from './systems/DataSystem.js';
+import { LootTableSystem } from './systems/LootTableSystem.js';
+import { createDefaultPlayerComponents } from './core/Components.js';
 
 export class Game {
     constructor() {
-        this.data = new Data();
-        this.state = new State(new Utilities());
-        this.state.game = this; // Ensure Game instance is accessible via state
-        this.audioManager = new AudioManager();
-        this.level = new Level(this.state);
-        this.ui = new UI(this.state);
-        this.render = new Render(this.state);
-        this.lootTables = new LootTables(this.state);
-        this.items = new Items(this.state);
-        this.playerInventory = new PlayerInventory(this.state); // Initialize before Player
-        this.player = new Player(this.state);
-        this.player.playerInventory = this.playerInventory; // Link to player
-        this.monsters = new Monsters(this.state, this);
-        this.actions = new Actions(this.state);
-        this.combat = new Combat(this.state, this);
-        this.levelTransition = new LevelTransition(this.state); // New class
+        this.state = new State();
+        this.entityManager = this.state.entityManager;
+        this.systems = {};
+        this.lastUpdateTime = 0;
+        this.mageNames = [
+            "Elarion", "Sylvara", "Tharion", "Lysandra", "Zephyrion", "Morwenna", "Aethric",
+            "Vionelle", "Dravenor", "Celestine", "Kaelith", "Seraphine", "Tormund", "Elowen",
+            "Zarathis", "Lunara", "Veyron", "Ashka", "Rivenna", "Solthar", "Ysmera", "Drenvar",
+            "Thalindra", "Orythia", "Xandrel", "Miravelle", "Korathis", "Eryndor", "Valthira",
+            "Nythera"
+        ];
 
-        // Ensure handleInput is defined before binding
-        if (typeof this.handleInput !== 'function') {
-            console.error('handleInput is not defined in Game class');
+        console.log('Creating state entity...');
+        let stateEntity = this.entityManager.getEntity('state');
+        if (!stateEntity) {
+            stateEntity = this.entityManager.createEntity('state');
+            this.entityManager.addComponentToEntity('state', {
+                type: 'Utilities',
+                utilities: {
+                    dRoll: (sides, numDice, rolls) => {
+                        let results = [];
+                        for (let i = 0; i < rolls; i++) {
+                            let sum = 0;
+                            for (let j = 0; j < numDice; j++) {
+                                sum += Math.floor(Math.random() * sides) + 1;
+                            }
+                            results.push(sum);
+                        }
+                        return Math.max(...results);
+                    },
+                    generateUniqueId: () => Math.random().toString(36).substr(2, 9)
+                }
+            });
+            this.entityManager.addComponentToEntity('state', { type: 'DiscoveryRadius', discoveryRadiusDefault: 2 });
+            console.log('State entity created:', this.entityManager.getEntity('state'));
         }
-        this.handleInput = this.handleInput.bind(this); // Bind only if defined
-        this.lastRenderTime = 0;
-        this.lastInputTime = 0;
-        this.renderThrottle = 20;
-        this.inputThrottle = 20;
 
-        this.init(); // Set up DOM and listeners
+        console.log('Checking for existing player entity...');
+        let player = this.entityManager.getEntity('player');
+        if (player) {
+            console.log('Player entity exists, resetting it...');
+            this.entityManager.removeEntity('player');
+            player = null;
+        }
+        if (!player) {
+            console.log('Creating new player entity...');
+            player = this.entityManager.createEntity('player');
+            const defaultComponents = createDefaultPlayerComponents();
+            console.log('Default player components:', defaultComponents);
+            Object.values(defaultComponents).forEach(comp => this.entityManager.addComponentToEntity('player', comp));
+            console.log('Player entity created with default components:', this.entityManager.getEntity('player'));
+        }
+
+        const utilities = this.entityManager.getEntity('state').getComponent('Utilities').utilities;
+        const stats = player.getComponent('Stats');
+        const health = player.getComponent('Health');
+        const mana = player.getComponent('Mana');
+        const playerState = player.getComponent('PlayerState');
+        const inventory = player.getComponent('Inventory');
+        const resource = player.getComponent('Resource');
+        const position = player.getComponent('Position');
+        
+        stats.intellect = utilities.dRoll(4, 3, 3);
+        stats.prowess = utilities.dRoll(4, 3, 3);
+        stats.agility = utilities.dRoll(4, 3, 3);
+        health.maxHp = Math.round(5 * stats.prowess * 0.1);
+        mana.maxMana = Math.round(10 * stats.intellect * 0.05);
+        health.hp = health.maxHp;
+        mana.mana = mana.maxMana;
+        playerState.nextLevelXp = 125;
+        playerState.name = this.mageNames[Math.floor(Math.random() * this.mageNames.length)] || "Mage";
+        inventory.items = [];
+        inventory.equipped = inventory.equipped || { mainhand: null, offhand: null, amulet: null, armor: null, leftring: null, rightring: null };
+        resource.torches = 3;
+        resource.healPotions = 1;
+        inventory.gold = 100;
+        position.x = 1;
+        position.y = 1;
+        
+        const startItems = [
+            { name: 'Rusty Dagger', type: 'weapon', attackType: 'melee', baseDamageMin: 1, baseDamageMax: 3, baseBlock: 1, icon: 'dagger.svg', itemTier: 'common' },
+            { name: 'Ragged Robes', type: 'armor', armor: 1, icon: 'robe.svg', itemTier: 'common' },
+            { name: 'Crooked Wand', type: 'weapon', attackType: 'ranged', baseDamageMin: 1, baseDamageMax: 2, baseRange: 2, icon: 'crooked-wand.svg', itemTier: 'common' }
+        ];
+        startItems.forEach(item => {
+            item.uniqueId = utilities.generateUniqueId();
+            inventory.items.push(item);
+        });
+
+        this.state.eventBus.emit('LogMessage', { message: `Starting items added to inventory for ${playerState.name}: Rusty Dagger, Ragged Robes, Crooked Wand, 3 Torches, 1 Heal Potion, 100 Gold.` });
+        this.state.eventBus.emit('PositionChanged', { entityId: 'player', x: position.x, y: position.y });
+        this.state.eventBus.emit('GearChanged', { entityId: 'player' });
+
+        console.log('Player stats after init:', stats);
+        console.log('Player inventory after init:', inventory);
+        console.log('Player resources after init:', resource);
+        console.log('Player fully initialized:', this.entityManager.getEntity('player'));
+
+        console.log('Creating overlayState entity...');
+        let overlayState = this.entityManager.getEntity('overlayState');
+        if (!overlayState) {
+            overlayState = this.entityManager.createEntity('overlayState');
+            this.entityManager.addComponentToEntity('overlayState', {
+                type: 'OverlayState',
+                isOpen: false,
+                activeTab: null,
+                logMessages: []
+            });
+            console.log('OverlayState entity created:', this.entityManager.getEntity('overlayState'));
+        }
+
+        console.log('Creating renderState entity...');
+        let renderStateEntity = this.entityManager.getEntity('renderState');
+        if (!renderStateEntity) {
+            renderStateEntity = this.entityManager.createEntity('renderState');
+            this.entityManager.addComponentToEntity('renderState', {
+                type: 'RenderState',
+                discoveryRadius: 2
+            });
+            console.log('RenderState entity created:', this.entityManager.getEntity('renderState'));
+        }
+
+        console.log('Entities before systems:', this.entityManager.getAllEntities());
+        this.initializeSystems();
+        console.log('Systems initialized');
+        this.setupEventListeners();
     }
 
-    getService(serviceName) {
-        const services = {
-            'audio': this.audioManager,
-            'level': this.level,
-            'ui': this.ui,
-            'render': this.render,
-            'lootTables': this.lootTables,
-            'items': this.items,
-            'player': this.player,
-            'playerInventory': this.playerInventory,
-            'monsters': this.monsters,
-            'actions': this.actions,
-            'combat': this.combat,
-            'data': this.data,
-            'levelTransition': this.levelTransition,
+    initializeSystems() {
+        this.systems = {
+            data: new DataSystem(this.entityManager, this.state.eventBus),
+            action: new ActionSystem(this.entityManager, this.state.eventBus),
+            combat: new CombatSystem(this.entityManager, this.state.eventBus),
+            render: new RenderSystem(this.entityManager, this.state.eventBus),
+            player: new PlayerSystem(this.entityManager, this.state.eventBus),
+            monster: new MonsterSystem(this.entityManager, this.state.eventBus, this.systems.data),
+            level: new LevelSystem(this.entityManager, this.state.eventBus, this.state),
+            item: new ItemSystem(this.entityManager, this.state.eventBus),
+            treasure: new TreasureSystem(this.entityManager, this.state.eventBus),
+            inventory: new InventorySystem(this.entityManager, this.state.eventBus),
+            ui: new UISystem(this.entityManager, this.state.eventBus),
+            levelTransition: new LevelTransitionSystem(this.entityManager, this.state.eventBus),
+            audio: new AudioSystem(this.entityManager, this.state.eventBus),
+            lootTable: new LootTableSystem(this.entityManager, this.state.eventBus)
         };
-        const service = services[serviceName];
-        if (!service) console.error(`Service '${serviceName}' not found!`);
-        return service;
+
+        Object.values(this.systems).forEach(system => system.init());
+    }
+
+    setupEventListeners() {
+        document.addEventListener('keydown', (event) => this.handleInput(event));
+        document.addEventListener('keyup', (event) => this.handleInput(event));
     }
 
     handleInput(event) {
-        if (!this.state.gameStarted) {
-            this.state.gameStarted = true;
-            this.initGame();
-            this.state.needsRender = true;
-            this.getService('render').renderIfNeeded();
-            this.getService('audio').playBackgroundMusic();
+        const gameState = this.state.getGameState()?.getComponent('GameState');
+        if (!gameState) return;
+
+        if (!gameState.gameStarted) {
+            gameState.gameStarted = true;
+            this.state.eventBus.emit('ToggleBackgroundMusic', { play: true });
+            this.state.eventBus.emit('RenderNeeded');
+            this.updateSystems(['audio', 'render', 'ui']);
             return;
         }
 
-        if (this.state.gameOver) {
-            return;
-        }
-
-        if (event.key === ' ') {
-            if (event.type === 'keydown' && this.state.isRangedMode) {
-                event.preventDefault();
-                return;
-            }
-        }
-
-        const now = Date.now();
-        if (now - this.lastInputTime < this.inputThrottle) return;
-        this.lastInputTime = now;
-
-        if (now - this.lastRenderTime < this.renderThrottle) return;
-        this.lastRenderTime = now;
-
-        let map = this.state.levels[this.state.tier]?.map;
-        if (!map) {
-            console.warn(`Map for tier ${this.state.tier} not found, initializing...`);
-            this.getService('level').addLevel(this.state.tier);
-            map = this.state.levels[this.state.tier].map;
-            if (!map) throw new Error(`Failed to initialize map for tier ${this.state.tier}`);
-        }
-
-        let newX = this.state.player.x;
-        let newY = this.state.player.y;
+        if (gameState.gameOver) return;
 
         const keyMap = {
             'w': 'ArrowUp', 'W': 'ArrowUp', 'ArrowUp': 'ArrowUp',
             'a': 'ArrowLeft', 'A': 'ArrowLeft', 'ArrowLeft': 'ArrowLeft',
             's': 'ArrowDown', 'S': 'ArrowDown', 'ArrowDown': 'ArrowDown',
             'd': 'ArrowRight', 'D': 'ArrowRight', 'ArrowRight': 'ArrowRight',
-            'i': 'c', 'I': 'c', 'c': 'c', 'C': 'c', 'l': 'l', 'L': 'l',
-            'escape': 'escape', 'Escape': 'escape', 't': 't', 'T': 't',
-            'h': 'h', 'H': 'h', ' ': ' ', 'Space': ' '
+            'i': 'c', 'I': 'c', 'c': 'c', 'C': 'c',
+            'l': 'l', 'L': 'l',
+            'escape': 'escape', 'Escape': 'escape',
+            't': 't', 'T': 't',
+            'h': 'h', 'H': 'h',
+            ' ': ' ', 'Space': ' '
         };
 
-        const mappedKeys = new Set(Object.keys(keyMap));
-        if (!mappedKeys.has(event.key)) return;
+        const mappedKey = keyMap[event.key];
+        if (!mappedKey) return;
 
-        const mappedKey = keyMap[event.key] || event.key;
-
-        if (event.type === 'keyup') {
-            if (mappedKey === ' ') {
-                this.state.isRangedMode = false;
-                return;
-            }
+        if (event.type === 'keydown' && !event.repeat) {
+            console.log(`Key pressed: ${mappedKey}`);
         }
 
-        if (event.type === 'keydown') {
-            const directionalKeys = new Set(['w', 'W', 'a', 'A', 's', 'S', 'd', 'D', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight']);
+        if (event.type === 'keyup' && mappedKey === ' ') {
+            this.state.eventBus.emit('ToggleRangedMode', { event });
+            console.log('space keyUp detected');
+            this.updateSystems(['player', 'render']);
+            return;
+        }
 
-            if (this.state.isRangedMode && directionalKeys.has(event.key)) {
-                const rangedEventKey = keyMap[event.key];
-                this.getService('combat').rangedAttack(rangedEventKey);
-                this.#endTurn('rangedAttack');
-                return;
-            }
+        if (event.type === 'keydown' && !event.repeat) {
+            const player = this.state.getPlayer();
+            if (!player) return;
+            const playerPos = player.getComponent('Position');
+            const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
+            if (!levelEntity) return;
+            const map = levelEntity.getComponent('Map').map;
 
-
-
+            let newX = playerPos.x;
+            let newY = playerPos.y;
 
             switch (mappedKey) {
                 case 'ArrowUp': newY--; break;
@@ -149,179 +230,154 @@ export class Game {
                 case 'ArrowLeft': newX--; break;
                 case 'ArrowRight': newX++; break;
                 case 'c':
-                    if (!this.state.ui.overlayOpen) {
-                        this.state.ui.overlayOpen = true;
-                        this.state.ui.activeTab = 'character';
-                        if (this.state.tabsDiv) this.state.tabsDiv.classList.remove('hidden');
-                        this.getService('ui').renderOverlay();
-                    } else if (this.state.ui.activeTab.toLowerCase() === 'character') {
-                        this.state.ui.overlayOpen = false;
-                        if (this.state.tabsDiv) this.state.tabsDiv.classList.add('hidden');
-                        this.getService('ui').renderOverlay();
-                    } else {
-                        this.state.ui.activeTab = 'character';
-                        this.getService('ui').renderOverlay();
-                    }
+                    console.log('Emitting ToggleOverlay for character tab');
+                    this.state.eventBus.emit('ToggleOverlay', { tab: 'character' });
+                    this.updateSystems(['ui']);
                     return;
                 case 'l':
-                    if (!this.state.ui.overlayOpen) {
-                        this.state.ui.overlayOpen = true;
-                        this.state.ui.activeTab = 'log';
-                        if (this.state.tabsDiv) this.state.tabsDiv.classList.remove('hidden');
-                        this.getService('ui').renderOverlay();
-                    } else if (this.state.ui.activeTab.toLowerCase() === 'log') {
-                        this.state.ui.overlayOpen = false;
-                        if (this.state.tabsDiv) this.state.tabsDiv.classList.add('hidden');
-                        this.getService('ui').renderOverlay();
-                    } else {
-                        this.state.ui.activeTab = 'log';
-                        this.getService('ui').renderOverlay();
-                    }
+                    console.log('Emitting ToggleOverlay for log tab');
+                    this.state.eventBus.emit('ToggleOverlay', { tab: 'log' });
+                    this.updateSystems(['ui']);
                     return;
                 case 'escape':
-                    if (this.state.ui.overlayOpen) {
-                        this.state.ui.overlayOpen = false;
-                        if (this.state.tabsDiv) this.state.tabsDiv.classList.add('hidden');
-                        this.getService('ui').renderOverlay();
-                    }
+                    console.log('Emitting ToggleOverlay to close');
+                    this.state.eventBus.emit('ToggleOverlay', {});
+                    this.updateSystems(['ui']);
                     return;
                 case 't':
-                    this.getService('actions').lightTorch();
-                    this.#endTurn('light Torch');
+                    this.state.eventBus.emit('LightTorch');
+                    this.updateSystems(['player', 'render', 'ui', 'audio']);
+                    this.state.eventBus.emit('RenderNeeded');
+                    this.endTurn('lightTorch');
                     return;
                 case 'h':
-                    this.getService('actions').drinkHealPotion();
-                    this.#endTurn('drink potion');
+                    this.state.eventBus.emit('DrinkHealPotion');
+                    this.updateSystems(['player', 'render']);
                     return;
                 case ' ':
-                    this.getService('combat').toggleRanged(event);
-                    console.log('Ranged mode:', this.state.isRangedMode);
+                    this.state.eventBus.emit('ToggleRangedMode', { event });
+                    this.updateSystems(['player', 'render']);
+                    console.log('space keyDown detected');
+                    return;
+            }
+
+            if (gameState.isRangedMode && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(mappedKey)) {
+                console.log(`RangedMode: ${gameState.isRangedMode} , Mapped Key: ${mappedKey}`);
+                this.state.eventBus.emit('RangedAttack', { direction: mappedKey });
+                this.endTurn('rangedAttack');
+                return;
+            }
+
+            const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
+            const monster = monsters.find(m => m.getComponent('Position').x === newX && m.getComponent('Position').y === newY && m.getComponent('Health').hp > 0);
+            const fountain = this.entityManager.getEntitiesWith(['Position', 'FountainData']).find(f => f.getComponent('Position').x === newX && f.getComponent('Position').y === newY && !f.getComponent('FountainData').used);
+            const treasure = this.entityManager.getEntitiesWith(['Position', 'TreasureData']).find(t => t.getComponent('Position').x === newX && t.getComponent('Position').y === newY);
+
+            if (monster) {
+                this.state.eventBus.emit('MeleeAttack', { targetEntityId: monster.id });
+                this.endTurn('meleeAttack');
+                return;
+            }
+            if (fountain) {
+                this.state.eventBus.emit('UseFountain', { fountainEntityId: fountain.id, tierEntityId: levelEntity.id });
+                this.endTurn('useFountain');
+                return;
+            }
+            if (treasure) {
+                this.state.eventBus.emit('PickupTreasure', { x: newX, y: newY });
+                this.endTurn('pickupTreasure');
+                return;
+            }
+            if (map[newY][newX] === '#') return;
+
+            if (map[newY][newX] === '⇓') {
+                this.state.eventBus.emit('TransitionDown');
+                this.endTurn('transitionDown');
+                return;
+            }
+            if (map[newY][newX] === '⇑') {
+                this.state.eventBus.emit('TransitionUp');
+                this.endTurn('transitionUp');
+                return;
+            }
+            if (map[newY][newX] === '?') {
+                this.state.eventBus.emit('TransitionViaPortal', { x: newX, y: newY });
+                this.endTurn('transitionPortal');
+                return;
+            }
+
+            if (!gameState.transitionLock && !gameState.isRangedMode) {
+                playerPos.x = newX;
+                playerPos.y = newY;
+                this.state.eventBus.emit('PositionChanged', { entityId: 'player', x: newX, y: newY });
+                this.endTurn('movement');
             }
         }
-
-        // Check interactions (move player at end)
-        let monster = this.state.monsters[this.state.tier].find(m => m.x === newX && m.y === newY && m.hp > 0);
-        let fountain = this.state.fountains[this.state.tier].find(f => f.x === newX && f.y === newY && !f.used);
-        let treasureIndex = this.state.treasures[this.state.tier].findIndex(t => t.x === newX && t.y === newY);
-        console.log(`Checking interactions at (${newX}, ${newY}): map[${newY}][${newX}]='${map[newY][newX]}', monster=${!!monster}, fountain=${!!fountain}, treasureIndex=${treasureIndex}`);
-
-        if (monster) {
-            if (this.getService('combat').meleeAttack(monster)) {
-                this.#endTurn('melee attack');
-            }
-            return;
-        }
-
-        if (fountain) {
-            this.getService('actions').useFountain(fountain, this.state.tier);
-            this.#endTurn('use fountain');
-        }
-
-        if (treasureIndex !== -1) {
-            console.log(`Treasure found at (${newX}, ${newY}), index: ${treasureIndex}`);
-            this.getService('actions').pickupTreasure(newX, newY);
-            this.state.needsRender = true;
-            if (this.state.player.gold >= 1e12) {
-                this.getService('ui').writeToLog("You amassed a trillion gold! Victory!");
-                this.state.isVictory = true;
-                document.removeEventListener('keydown', this.handleInput);
-                document.removeEventListener('keyup', this.handleInput);
-            }
-        }
-
-        if (map[newY][newX] === '#') {
-            return;
-        }
-
-        let transitioned = false;
-        if (map[newY][newX] === '⇓' && this.state.tier < Number.MAX_SAFE_INTEGER) {
-            console.log(`Transition down triggered at (${newX}, ${newY}) with map value '${map[newY][newX]}'`);
-            this.getService('levelTransition').transitionDown();
-            this.state.transitionLock = true;
-            transitioned = true;
-        } else if (map[newY][newX] === '⇑' && this.state.tier > 0) {
-            console.log(`Transition up triggered at (${newX}, ${newY}) with map value '${map[newY][newX]}'`);
-            this.getService('levelTransition').transitionUp();
-            this.state.transitionLock = true;
-            transitioned = true;
-        } else if (map[newY][newX] === '?') {
-            console.log(`Portal transition triggered at (${newX}, ${newY}) with map value '${map[newY][newX]}'`);
-            this.getService('levelTransition').transitionViaPortal(newX, newY);
-            this.state.transitionLock = true;
-            transitioned = true;
-        }
-
-        if (!transitioned && !this.state.transitionLock) {
-            let movement = false;
-            if (this.state.player.x != newX || this.state.player.y != newY ) movement = true;
-
-            this.state.player.x = newX;
-            this.state.player.y = newY;
-            if (movement) {
-                movement = false;
-                this.state.player.x === newX && this.state.player.y === newY
-                this.getService('render').updateMapScroll();
-                this.#endTurn('movement');
-            }
-        }
-
-        if (this.state.transitionLock) {
-            this.state.transitionLock = false; // Reset for next frame
-            this.#endTurn('transition');
-            this.getService('render').updateMapScroll();
-
-        }
-
     }
 
-    #endTurn(source) {
-        console.warn('endTurn called by ', source);
-        console.log(`Player location in state at endTurn: T:${this.state.tier}, x:${this.state.player.x}, y:${this.state.player.y}`);
-        if (this.state.gameOver) {
-            return;
-        }
-        if (this.state.torchExpires > 0) {
-            this.state.torchExpires--;
-            if (this.state.torchExpires < 1) {
-                this.getService('actions').torchExpired();
+    endTurn(source) {
+        const gameState = this.state.getGameState()?.getComponent('GameState');
+        if (!gameState || gameState.gameOver) return;
+
+        const player = this.entityManager.getEntity('player');
+        if (player) {
+            const resource = player.getComponent('Resource');
+            const playerState = player.getComponent('PlayerState');
+            const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
+            const state = this.entityManager.getEntity('state');
+
+            if (resource.torchExpires > 0) {
+                resource.torchExpires--;
+                if (resource.torchExpires < 1) {
+                    this.state.eventBus.emit('TorchExpired');
+                }
             }
+
+            renderState.discoveryRadius = playerState.torchLit ?
+                state.getComponent('DiscoveryRadius').discoveryRadiusDefault + 2 :
+                state.getComponent('DiscoveryRadius').discoveryRadiusDefault;
+            console.log('endTurn - discoveryRadius:', renderState.discoveryRadius);
         }
-        this.getService('player').calculateStats();
-        this.getService('ui').statRefreshUI();
-        this.getService('monsters').moveMonsters();
-        this.state.needsRender = true;
-        this.getService('render').renderIfNeeded();
+
+        this.state.eventBus.emit('MoveMonsters');
+        gameState.transitionLock = false;
+        gameState.needsRender = true;
+        this.state.eventBus.emit('RenderNeeded');
+        this.updateSystems(['player', 'monster', 'render', 'ui']);
     }
 
-    init() {
-        this.state.mapDiv = document.getElementById('map');
-        this.state.statsDiv = document.getElementById('stats');
-        this.state.logDiv = document.getElementById('log');
-        this.state.tabsDiv = document.getElementById('tabs'); // Added tabsDiv
-        this.state.needsRender = true;
-        this.getService('render').renderIfNeeded();
-        document.addEventListener('keydown', this.handleInput);
-        document.addEventListener('keyup', this.handleInput);
-        this.getService('ui').statRefreshUI();
+    updateSystems(systemsToUpdate) {
+        systemsToUpdate.forEach(systemName => this.systems[systemName].update());
+        this.lastUpdateTime = Date.now();
     }
 
-    initGame() {
-        const levelService = this.state.game.getService('level');
-        const dataService = this.state.game.getService('data');
-        const splash = document.getElementById('splash');
-        if (splash) splash.remove();
+    calculateInitialStats(player) {
+        const stats = player.getComponent('Stats');
+        const health = player.getComponent('Health');
+        const mana = player.getComponent('Mana');
+        const inventory = player.getComponent('Inventory');
 
-        levelService.addLevel(0, dataService.getCustomLevel(0));
-        if (!this.state.levels[0]) throw new Error('Failed to initialize tier 0');
+        stats.intellect = stats.intellect || 0;
+        stats.prowess = stats.prowess || 0;
+        stats.agility = stats.agility || 0;
 
-        const startLevel = 1;
-        this.state.highestTier = startLevel;
-        levelService.addLevel(startLevel);
-        this.state.tier = startLevel; 
+        Object.values(inventory.equipped).forEach(item => {
+            if (!item) return;
+            if (item.stats) {
+                Object.entries(item.stats).forEach(([stat, value]) => {
+                    stats[stat] = (stats[stat] || 0) + (value || 0);
+                });
+            }
+            if (item.type === 'armor') stats.armor = (stats.armor || 0) + (item.armor || 0);
+            if (item.type === 'weapon' && item.attackType === 'melee') stats.block = (stats.block || 0) + (item.baseBlock || 0);
+            if (item.type === 'weapon' && item.attackType === 'ranged') stats.range = Math.max(stats.range || 0, item.baseRange || 0);
+        });
 
-        this.state.lastPlayerX = null;
-        this.state.lastPlayerY = null;
-        this.state.needsInitialRender = true;
-        this.state.needsRender = true;
+        health.maxHp = Math.round(5 * stats.prowess * 0.1);
+        mana.maxMana = Math.round(10 * stats.intellect * 0.05);
+        health.hp = health.maxHp;
+        mana.mana = mana.maxMana;
+
+        console.log('Initial stats calculated:', stats);
     }
 }

@@ -1233,6 +1233,16 @@ font-family: monospace; /* Ensure consistent rendering */
 z-index: 2; /* Lift above other spans */
 }
 
+.discovered {
+    color: #0f0;
+    background-color: #161616;
+}
+
+.detected {
+    color: #0f0;
+    background-color: #161616;
+}
+
 .skeleton {
 }
 /* Skeleton */

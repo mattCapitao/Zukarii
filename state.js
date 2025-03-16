@@ -1,128 +1,91 @@
-﻿//console.log("State.js loaded");
+﻿// State.js (Updated)
+// Manages high-level game state using EntityManager and EventBus, stripped of God Object tendencies
+
 import { Utilities } from './Utilities.js';
+import { EntityManager } from './core/EntityManager.js';
+import { EventBus } from './core/EventBus.js';
+import {
+    PositionComponent,
+    HealthComponent,
+    ManaComponent,
+    StatsComponent,
+    InventoryComponent,
+    ResourceComponent,
+    PlayerStateComponent,
+    MapComponent,
+    EntityListComponent,
+    UIComponent,
+    RenderStateComponent,
+    GameStateComponent,
+    createDefaultPlayerComponents,
+    createDefaultLevelComponents
+} from './core/Components.js';
 
 export class State {
-    constructor(utilities) {
+    constructor(utilities = new Utilities()) {
         this.utilities = utilities;
-        this.game = null;
-        this.needsRender=false
+
+        // Core managers replacing old state structure
+        this.entityManager = new EntityManager();
+        this.eventBus = new EventBus();
+
+        // Constants (to be moved later)
         this.WIDTH = 122;
         this.HEIGHT = 67;
-        this.MIN_STAIR_DISTANCE = Math.floor(Math.random()*41) + 20;
+        this.MIN_STAIR_DISTANCE = Math.floor(Math.random() * 41) + 20;
+        this.AGGRO_RANGE = 4;
+        this.discoveryRadiusDefault = 2;
+
+        // DOM references (preserved for now, to be handled by RenderSystem)
         this.mapDiv = null;
         this.statsDiv = null;
         this.logDiv = null;
-        this.levels = [];
-        this.stairsUp = {};
-        this.stairsDown = {};
-        this.tier = 0;
-        this.ui = {
-            overlayOpen: false,
-            activeTab: 'log',
-            logEntries: [],
-            maxLogEntries: 60
-        };
-        this.player = {
-            x: 1, y: 1,
-            name: "Leith42",
-            level: 1, xp: 0, nextLevelXp: 0,
-            dead: false,
-            gold: 0,
-            hp: 0, maxHp: 0,
-            mana: 0, maxMana: 0,
-            luck: 0, maxLuck: 0, luckTempMod:0,
-            prowess: 0,
-            intellect:0,
-            agility: 0, 
-            armor: 0,
-            defense: 0,
-            block: 0,
-            dodge: 0,
-            range: 0,
-            damageBonus: 0,
-            meleeDamageBonus: 0,
-            rangedDamageBonus: 0,
-            inventory: {
-                equipped: {}, // Initialized in Player now
-                items: [],
-            },
-            healPotions: 0,
-            potionDropFail: 0,
-            torches: 0,
-            torchExpires: 0,
-            torchDropFail: 0,
-            torchLit: false,
-            lampLit: false,
-            stats: {
-                base: {
-                    maxHp: 0,
-                    maxMana: 0,
-                    maxLuck: 0,
-                    prowess: 0,
-                    intellect: 0,
-                    agility: 0,
-                    armor: 0,
-                    defense: 0,
-                    block: 0,
-                    dodge: 0,
-                    range: 0,
-                    damageBonus: 0,
-                    meleeDamageBonus: 0,
-                    rangedDamageBonus: 0,
-                },
-                gear: {
-                    maxHp: 0,
-                    maxMana: 0,
-                    maxLuck: 0,
-                    prowess: 0,
-                    intellect: 0,
-                    agility: 0,
-                    armor: 0,
-                    defense: 0,
-                    block: 0,
-                    dodge: 0,
-                    range: 0,
-                    baseRange: 0,
-                    damageBonus: 0,
-                    meleeDamageBonus: 0,
-                    rangedDamageBonus: 0,
-                },
-            }
-        };
-        this.items = [];
+        this.tabsDiv = null;
+
+        // Possible item stats (preserved for PlayerSystem)
         this.possibleItemStats = [
             'maxHp', 'maxMana', 'maxLuck',
             'intellect', 'prowess', 'agility',
             'range', 'block', 'armor', 'defense',
-            'baseBlock', 'baseRange', 
+            'baseBlock', 'baseRange',
             'rangedDamageBonus', 'meleeDamageBonus', 'damageBonus'
         ];
-        this.treasures = {};
-        this.monsters = {};
-        this.fountains = {};
-        this.combatLog = [];
-        this.isRangedMode = false;
-        this.projectile = null;
-        this.highestTier = 0;
-        this.gameStarted = false;
-        this.gameOver = false;
-        this.discoveryRadiusDefault = 2;
-        this.discoveryRadius = 2;
-        this.discoveredWalls = {};
-        this.discoveredFloors = {};
-        this.discoveredTileCount = {};
-        this.visibleTiles = {};
-        this.tileMap = {};
-        this.lastPlayerX = null;
-        this.lastPlayerY = null;
-        this.lastProjectileX = null;
-        this.lastProjectileY = null;
-        this.needsInitialRender = false;
-        this.isVictory = false;
-        this.torchLitOnTurn = false;
-        this.AGGRO_RANGE = 4;
+
+        // Initialize core entities
+        this.initializeCoreEntities();
     }
 
+    initializeCoreEntities() {
+        // Player entity
+        const player = this.entityManager.createEntity('player');
+        const playerComponents = createDefaultPlayerComponents();
+        Object.values(playerComponents).forEach(component =>
+            this.entityManager.addComponentToEntity('player', component)
+        );
+
+        // Game state entity
+        const gameState = this.entityManager.createEntity('gameState');
+        this.entityManager.addComponentToEntity('gameState',
+            new GameStateComponent()
+        );
+
+        // UI entity
+        const ui = this.entityManager.createEntity('ui');
+        this.entityManager.addComponentToEntity('ui',
+            new UIComponent()
+        );
+
+        // Render state entity
+        const renderState = this.entityManager.createEntity('renderState');
+        this.entityManager.addComponentToEntity('renderState',
+            new RenderStateComponent()
+        );
+
+        // Levels will be added dynamically by LevelSystem
+        // Placeholder for tier 0 (surface level) will be handled in LevelSystem
+    }
+
+    // Temporary method to generate surface level (to be moved to LevelSystem)
     generateSurfaceLevel() {
         let map = [];
         for (let y = 0; y < 10; y++) {
@@ -147,5 +110,15 @@ export class State {
             connections: []
         }];
         return { map, rooms };
+    }
+
+    // Helper to get the player entity (convenience for now)
+    getPlayer() {
+        return this.entityManager.getEntity('player');
+    }
+
+    // Helper to get game state (convenience for now)
+    getGameState() {
+        return this.entityManager.getEntity('gameState');
     }
 }
