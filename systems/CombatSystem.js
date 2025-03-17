@@ -117,6 +117,8 @@ export class CombatSystem extends System {
     }
 
     handleRangedAttack({ direction }) {
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        console.log('Ranged attack:', direction, "Game State: ", gameState);
         const player = this.entityManager.getEntity('player');
         if (!player) return;
 
@@ -144,7 +146,7 @@ export class CombatSystem extends System {
             if ((offWeapon?.attackType === 'ranged' && offWeapon?.baseRange > 0) ||
                 (mainWeapon?.attackType === 'ranged' && mainWeapon?.baseRange > 0)) {
                 gameState.isRangedMode = true;
-                console.log('Ranged mode on');
+                console.log('Ranged mode on', gameState);
             } else {
                 this.eventBus.emit('LogMessage', { message: 'You need a valid ranged weapon equipped to use ranged mode!' });
             }
