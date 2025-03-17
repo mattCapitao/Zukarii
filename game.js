@@ -24,6 +24,7 @@ export class Game {
         this.entityManager = this.state.entityManager;
         this.systems = {};
         this.lastUpdateTime = 0;
+        this.lastMouseEventTime = 0; // Track last mouse event timestamp
 
         console.log('Creating state entity...');
         let stateEntity = this.entityManager.getEntity('state');
@@ -103,25 +104,20 @@ export class Game {
     }
 
     initializeSystems() {
-
         console.log('Game.js: initializeSystems start, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
-        console.log('Game.js: EventBus instance:', this.state.eventBus); // Debug log for EventBus instance
-
+        console.log('Game.js: EventBus instance:', this.state.eventBus);
 
         this.systems = {
             data: new DataSystem(this.entityManager, this.state.eventBus),
             action: new ActionSystem(this.entityManager, this.state.eventBus),
             combat: new CombatSystem(this.entityManager, this.state.eventBus),
             render: new RenderSystem(this.entityManager, this.state.eventBus),
-            lootSpawn: new LootSpawnSystem(this.entityManager, this.state.eventBus), // Add LootSpawnSystem
+            lootSpawn: new LootSpawnSystem(this.entityManager, this.state.eventBus),
             lootCollection: new LootCollectionSystem(this.entityManager, this.state.eventBus),
             player: new PlayerSystem(this.entityManager, this.state.eventBus),
             monster: new MonsterSystem(this.entityManager, this.state.eventBus, this.systems.data),
-            //lootSpawn: new LootSpawnSystem(this.entityManager, this.state.eventBus), // Add LootSpawnSystem
-            //lootCollection: new LootCollectionSystem(this.entityManager, this.state.eventBus),
             level: new LevelSystem(this.entityManager, this.state.eventBus, this.state),
             item: new ItemSystem(this.entityManager, this.state.eventBus),
-             
             inventory: new InventorySystem(this.entityManager, this.state.eventBus),
             ui: new UISystem(this.entityManager, this.state.eventBus),
             levelTransition: new LevelTransitionSystem(this.entityManager, this.state.eventBus),
@@ -130,7 +126,7 @@ export class Game {
         };
 
         Object.values(this.systems).forEach(system => {
-            console.log(`Game.js: Initializing system ${system.constructor.name} with EventBus:`, this.state.eventBus); // Debug log for each system
+            console.log(`Game.js: Initializing system ${system.constructor.name} with EventBus:`, this.state.eventBus);
             system.init();
         });
 
@@ -140,6 +136,13 @@ export class Game {
     setupEventListeners() {
         document.addEventListener('keydown', (event) => this.handleInput(event));
         document.addEventListener('keyup', (event) => this.handleInput(event));
+        document.addEventListener('mousedown', () => this.updateLastMouseEvent()); // Track mouse clicks
+        document.addEventListener('mousemove', () => this.updateLastMouseEvent()); // Optional: track movement
+    }
+
+    updateLastMouseEvent() {
+        this.lastMouseEventTime = Date.now();
+        console.log('Mouse event detected, lastMouseEventTime updated:', this.lastMouseEventTime);
     }
 
     handleInput(event) {
@@ -187,6 +190,13 @@ export class Game {
 
         if (event.type === 'keydown' && !event.repeat) {
             console.log(`Key pressed: ${mappedKey}`);
+        }
+
+        // Check if Ctrl is part of a recent click context
+        const isClickContext = Date.now() - this.lastMouseEventTime < 500; // 500ms threshold
+        if (event.type === 'keydown' && event.key === 'Control' && isClickContext) {
+            console.log('Game.js: Ignoring Ctrl key in click context');
+            return; // Allow Ctrl to propagate to click handlers
         }
 
         if (event.type === 'keyup' && mappedKey === ' ') {
@@ -282,7 +292,7 @@ export class Game {
             const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
             const monster = monsters.find(m => m.getComponent('Position').x === newX && m.getComponent('Position').y === newY && m.getComponent('Health').hp > 0);
             const fountain = this.entityManager.getEntitiesWith(['Position', 'FountainData']).find(f => f.getComponent('Position').x === newX && f.getComponent('Position').y === newY && !f.getComponent('FountainData').used);
-            const loot = this.entityManager.getEntitiesWith(['Position', 'LootData']).find(t => t.getComponent('Position').x === newX && t.getComponent('Position').y === newY); // Updated to LootData
+            const loot = this.entityManager.getEntitiesWith(['Position', 'LootData']).find(t => t.getComponent('Position').x === newX && t.getComponent('Position').y === newY);
             if (monster) {
                 this.state.eventBus.emit('MeleeAttack', { targetEntityId: monster.id });
                 this.endTurn('meleeAttack');

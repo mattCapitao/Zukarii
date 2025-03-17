@@ -30,12 +30,13 @@ export class UISystem extends System {
             this.gameOver(data);
         });
 
-        this.eventBus.on('GearChanged', (data) => this.updateUI(data)); // Add GearChanged listener
+        this.eventBus.on('GearChanged', (data) => this.updateUI(data));
         this.updateUI({ entityId: 'player' }); // Initial render
-        this.eventBus.emit('GearChanged', { entityId: 'player' }); // Trigger initial stat calculation
+        this.eventBus.emit('GearChanged', { entityId: 'player' });
 
-        // Initialize drag-and-drop listeners after UI is rendered
-        this.setupDragAndDrop();
+        // Initialize mouse listeners after UI is rendered
+        this.setupInventoryMouseEvents();
+        this.setupEquipDragAndDrop();
     }
 
     toggleOverlay({ tab = null }) {
@@ -166,9 +167,9 @@ export class UISystem extends System {
             <h2>Inventory Items</h2>
             <div class="inventory-item-wrapper">
                 ${inventory.items.length ? inventory.items.map((item, index) => `
-                    <div class="inventory-item">
+                    <div class="inventory-item" data-index="${index}">
                         <p class="inventory-slot ${item.itemTier} ${item.type}">
-                            <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' data-index='${index}' draggable="true";">
+                            <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' data-index='${index}' draggable="true">
                             <span class="item-label ${item.itemTier}">${item.type}</span>
                         </p>
                     </div>
@@ -176,9 +177,6 @@ export class UISystem extends System {
             </div>
         `;
         console.log('Character stats and inventory updated:', { stats: Object.assign({}, stats), inventory: Object.assign({}, inventory), resource: Object.assign({}, resource) });
-
-        // Reattach drag-and-drop listeners after rendering
-        this.setupInventoryDragAndDrop();
     }
 
     addLogMessage({ message }) {
@@ -206,7 +204,7 @@ export class UISystem extends System {
 
         console.log('UI update data raw:', { stats: Object.assign({}, stats), health: Object.assign({}, health), mana: Object.assign({}, mana), inventory: Object.assign({}, inventory), playerState: Object.assign({}, playerState), resource: Object.assign({}, resource) });
 
-        // @Grok - REPLACE THIS WITH YOUR CODE TO UPDATE CHILD ELEMENTS OF playerInfo
+        // Update child elements of playerInfo
         if (this.playerInfo) {
             const playerNameSpan = this.playerInfo.querySelector('#playerName');
             const playerLevelSpan = this.playerInfo.querySelector('#playerLevel');
@@ -218,7 +216,7 @@ export class UISystem extends System {
             if (playerGoldSpan) playerGoldSpan.textContent = resource.gold !== undefined ? resource.gold : 'N/A';
         }
 
-        // @Grok - REPLACE THIS WITH YOUR CODE TO UPDATE CHILD ELEMENTS OF playerStatus
+        // Update child elements of playerStatus
         if (this.playerStatus) {
             const healPotionCountSpan = this.playerStatus.querySelector('#healPotionCount');
             const hpTextSpan = this.playerStatus.querySelector('#hpText');
@@ -245,27 +243,45 @@ export class UISystem extends System {
         }
     }
 
-    setupDragAndDrop() {
-        this.setupEquipDragAndDrop();
+    setupInventoryMouseEvents() {
         this.setupInventoryDragAndDrop();
+        this.setupInventoryDiscardItem();
     }
 
-    // Add drag-and-drop setup method
-    setupInventoryDragAndDrop() {
-        const inventoryItems = document.querySelectorAll('.inventory-item .item-icon');
-        inventoryItems.forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                const itemData = JSON.parse(e.target.getAttribute('data-item') || '{}');
-                const index = e.target.getAttribute('data-index');
-                e.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, index, source: 'inventory' }));
-                console.log('Dragging item:', itemData);
+    setupInventoryDiscardItem() {
+        // Attach listener to the #inventory div (persistent parent)
+        const inventoryContainer = document.getElementById('inventory');
+        if (inventoryContainer) {
+            inventoryContainer.addEventListener('contextmenu', (event) => {
+                event.preventDefault(); // Prevent the default context menu
+                const target = event.target.closest('.inventory-item');
+                if (!target) return;
+                const index = parseInt(target.dataset.index, 10);
+                if (isNaN(index)) return;
+                // Right-click to discard
+                this.eventBus.emit('DropItem', { itemIndex: index });
+                console.log('Right-click: Discarding item at index:', index);
             });
-        });
+        } else {
+            console.error('UISystem: Could not find #inventory for right-click listener');
+        }
+    }
 
-        const inventoryWrapper = document.querySelector('.inventory-item-wrapper');
-        if (inventoryWrapper) {
-            inventoryWrapper.addEventListener('dragover', (e) => e.preventDefault());
-            inventoryWrapper.addEventListener('drop', (e) => {
+    setupInventoryDragAndDrop() {
+        // Attach dragstart listener to the #inventory div (persistent parent)
+        const inventoryContainer = document.getElementById('inventory');
+        if (inventoryContainer) {
+            inventoryContainer.addEventListener('dragstart', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                const index = parseInt(target.closest('.inventory-item').dataset.index, 10);
+                event.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, index, source: 'inventory' }));
+                console.log('Dragging item:', itemData);
+            }, { capture: true });
+
+            inventoryContainer.addEventListener('dragover', (e) => e.preventDefault());
+            inventoryContainer.addEventListener('drop', (e) => {
                 e.preventDefault();
                 const rawData = e.dataTransfer.getData('text/plain');
                 let data;
@@ -281,6 +297,8 @@ export class UISystem extends System {
                     console.log(`Dropped equipped item from ${data.slot} to inventory`);
                 }
             });
+        } else {
+            console.error('UISystem: Could not find #inventory for drag-and-drop listeners');
         }
     }
 
@@ -317,7 +335,6 @@ export class UISystem extends System {
         });
     }
 
-    // Reuse the slot compatibility logic from InventorySystem
     isSlotCompatible(item, slot) {
         const slotMap = {
             amulet: ["amulet"],

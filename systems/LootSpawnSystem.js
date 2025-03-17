@@ -24,6 +24,9 @@ export class LootSpawnSystem extends System {
     }
 
     spawnLootEntity({ treasure, tier }) {
+
+        console.log('LootSpawnSystem: Spawning loot entity with treasure:', treasure, 'tier:', tier);
+
         const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
         if (!levelEntity) {
             console.error(`LootSpawnSystem: No level entity found for tier ${tier}`);
