@@ -223,6 +223,26 @@ export class ExplorationComponent {
     }
 }
 
+// New LootData component
+export class LootData {
+    constructor({
+        name = "Loot Pile",
+        gold = 0,
+        torches = 0,
+        healPotions = 0,
+        items = [],
+        suppressRender = false
+    } = {}) {
+        this.type = 'LootData';
+        this.name = name;
+        this.gold = gold;
+        this.torches = torches;
+        this.healPotions = healPotions;
+        this.items = items; // Array of item objects
+        this.suppressRender = suppressRender;
+    }
+}
+
 // Utility function to create default player components (for initialization)
 export function createDefaultPlayerComponents() {
     return {

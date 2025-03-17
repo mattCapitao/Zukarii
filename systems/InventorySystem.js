@@ -74,7 +74,7 @@ export class InventorySystem extends System {
         }
         this.eventBus.emit('GearChanged', { entityId }); // Use GearChanged instead
     }
-
+    /*
     dropItem({ entityId, itemIndex }) {
         const entity = this.entityManager.getEntity(entityId);
         if (!entity) return;
@@ -100,6 +100,34 @@ export class InventorySystem extends System {
         this.eventBus.emit('PlaceTreasure', { treasure, tier: gameState.tier });
         this.eventBus.emit('LogMessage', { message: `Dropped ${item.name} as treasure at (${pos.x}, ${pos.y})` });
         this.eventBus.emit('GearChanged', { entityId }); // Use GearChanged instead
+    }
+    */
+
+    dropItem({ entityId, itemIndex }) {
+        const entity = this.entityManager.getEntity(entityId);
+        if (!entity) return;
+
+        const inventory = entity.getComponent('Inventory');
+        const pos = entity.getComponent('Position');
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+
+        const item = inventory.items[itemIndex];
+        if (!item) return;
+
+        inventory.items.splice(itemIndex, 1);
+        const loot = {
+            x: pos.x,
+            y: pos.y,
+            name: `${item.name} Loot`,
+            gold: 0,
+            torches: 0,
+            healPotions: 0,
+            items: [{ ...item }]
+        };
+
+        this.eventBus.emit('DiscardItem', { loot, tier: gameState.tier });
+        this.eventBus.emit('LogMessage', { message: `Dropped ${item.name} as loot at (${pos.x}, ${pos.y})` });
+        this.eventBus.emit('GearChanged', { entityId });
     }
 
     isSlotCompatible(item, slot) {

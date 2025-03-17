@@ -156,7 +156,7 @@ export class TreasureSystem extends System {
     }
 
     generateDropItems(sourceEntity) {
-        const items = [];
+       /* const items = [];
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
 
         if (sourceEntity.getComponent('MonsterData')?.uniqueItemsDropped?.length) {
@@ -167,7 +167,7 @@ export class TreasureSystem extends System {
             const tierIndex = Math.floor(Math.random() * 3); // Junk to rare for now
             this.eventBus.emit('GenerateItem', { tierIndex, callback: (item) => items.push(item) });
         }
-
-        return items;
+        return items;*/
+        return [{ name: "Mbphu Greater iLvl Annihilation Staff", type: "weapon", attackType: "ranged", baseRange: 7, slots: ["mainhand", "offhand"], baseDamageMin: 10, baseDamageMax: 15, itemTier: "relic", stats: { intellect: 5, maxMana: 5, agility: 5, damageBonus: 5, rangedDamageBonus: 5 }, description: "The Golden Khepresh has got nothing on this babby!", uniqueId: null, icon: "mbphu-staff.svg" }]
     }
 }

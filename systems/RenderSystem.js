@@ -133,6 +133,7 @@ export class RenderSystem extends System {
 
             const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
             const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
+            const treasures = this.entityManager.getEntitiesWith(['Position', 'TreasureData']);
 
             for (let y = minY; y <= maxY; y++) {
                 for (let x = minX; x <= maxX; x++) {
@@ -148,11 +149,16 @@ export class RenderSystem extends System {
                         tile.char = char;
                         tile.class = className;
 
+                        const treasureMatch = treasures.some(t => t.getComponent('Position').x === x && t.getComponent('Position').y === y);
                         const projectileMatch = projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
                         if (projectileMatch) {
                             console.log('RenderSystem: Projectile detected at', x, y, 'timestamp:', Date.now());
                             char = '*';
                             className = 'discovered projectile';
+                        } else if (treasureMatch) {
+                            char = '$';
+                            className = 'discovered';
+                        
                         } else if (x === playerPos.x && y === playerPos.y) {
                             char = '𓀠';
                             className = 'player';

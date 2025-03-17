@@ -7,7 +7,9 @@ import { PlayerSystem } from './systems/PlayerSystem.js';
 import { MonsterSystem } from './systems/MonsterSystem.js';
 import { LevelSystem } from './systems/LevelSystem.js';
 import { ItemSystem } from './systems/ItemSystem.js';
-import { TreasureSystem } from './systems/TreasureSystem.js';
+//import { TreasureSystem } from './systems/TreasureSystem.js';
+import { LootSpawnSystem } from './systems/LootSpawnSystem.js';
+import { LootCollectionSystem } from './systems/LootCollectionSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
 import { UISystem } from './systems/UISystem.js';
 import { LevelTransitionSystem } from './systems/LevelTransitionSystem.js';
@@ -101,24 +103,37 @@ export class Game {
     }
 
     initializeSystems() {
+
         console.log('Game.js: initializeSystems start, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
+        console.log('Game.js: EventBus instance:', this.state.eventBus); // Debug log for EventBus instance
+
+
         this.systems = {
             data: new DataSystem(this.entityManager, this.state.eventBus),
             action: new ActionSystem(this.entityManager, this.state.eventBus),
             combat: new CombatSystem(this.entityManager, this.state.eventBus),
             render: new RenderSystem(this.entityManager, this.state.eventBus),
+            lootSpawn: new LootSpawnSystem(this.entityManager, this.state.eventBus), // Add LootSpawnSystem
+            lootCollection: new LootCollectionSystem(this.entityManager, this.state.eventBus),
             player: new PlayerSystem(this.entityManager, this.state.eventBus),
             monster: new MonsterSystem(this.entityManager, this.state.eventBus, this.systems.data),
+            //lootSpawn: new LootSpawnSystem(this.entityManager, this.state.eventBus), // Add LootSpawnSystem
+            //lootCollection: new LootCollectionSystem(this.entityManager, this.state.eventBus),
             level: new LevelSystem(this.entityManager, this.state.eventBus, this.state),
             item: new ItemSystem(this.entityManager, this.state.eventBus),
-            treasure: new TreasureSystem(this.entityManager, this.state.eventBus),
+             
             inventory: new InventorySystem(this.entityManager, this.state.eventBus),
             ui: new UISystem(this.entityManager, this.state.eventBus),
             levelTransition: new LevelTransitionSystem(this.entityManager, this.state.eventBus),
             audio: new AudioSystem(this.entityManager, this.state.eventBus),
             lootTable: new LootTableSystem(this.entityManager, this.state.eventBus)
         };
-        Object.values(this.systems).forEach(system => system.init());
+
+        Object.values(this.systems).forEach(system => {
+            console.log(`Game.js: Initializing system ${system.constructor.name} with EventBus:`, this.state.eventBus); // Debug log for each system
+            system.init();
+        });
+
         console.log('Game.js: initializeSystems end, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
     }
 
@@ -267,8 +282,7 @@ export class Game {
             const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
             const monster = monsters.find(m => m.getComponent('Position').x === newX && m.getComponent('Position').y === newY && m.getComponent('Health').hp > 0);
             const fountain = this.entityManager.getEntitiesWith(['Position', 'FountainData']).find(f => f.getComponent('Position').x === newX && f.getComponent('Position').y === newY && !f.getComponent('FountainData').used);
-            const treasure = this.entityManager.getEntitiesWith(['Position', 'TreasureData']).find(t => t.getComponent('Position').x === newX && t.getComponent('Position').y === newY);
-
+            const loot = this.entityManager.getEntitiesWith(['Position', 'LootData']).find(t => t.getComponent('Position').x === newX && t.getComponent('Position').y === newY); // Updated to LootData
             if (monster) {
                 this.state.eventBus.emit('MeleeAttack', { targetEntityId: monster.id });
                 this.endTurn('meleeAttack');
@@ -279,9 +293,9 @@ export class Game {
                 this.endTurn('useFountain');
                 return;
             }
-            if (treasure) {
+            if (loot) {
                 this.state.eventBus.emit('PickupTreasure', { x: newX, y: newY });
-                this.endTurn('pickupTreasure');
+                this.endTurn('pickupLoot');
                 return;
             }
             if (map[newY][newX] === '#') return;

@@ -60,7 +60,7 @@ export class LevelSystem extends System {
                     treasures: customLevel.treasures || [],
                     fountains: customLevel.fountains || []
                 }));
-                this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent()); // Added ExplorationComponent
+                this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent());
                 this.adjustPlayerPosition(levelEntity, customLevel.stairsUp || customLevel.stairsDown);
                 levelData = customLevel;
             } else {
@@ -71,8 +71,12 @@ export class LevelSystem extends System {
                 const entityList = new EntityListComponent();
                 entityList.fountains = this.generateFountains(tier, levelData.map, levelData.rooms);
                 this.entityManager.addComponentToEntity(levelEntity.id, entityList);
-                this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent()); // Added ExplorationComponent
+                this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent());
                 this.placeStairs(levelEntity, levelData, hasBossRoom);
+
+                entityList.treasures = this.generateLootEntities(tier, levelData.map, levelData.rooms);
+                console.log(`Generated ${entityList.treasures.length} loot entities for tier ${tier}`, entityList.treasures);
+
                 // Ensure stairs are set in mapComp after placeStairs
                 mapComp.stairsUp = levelData.stairsUp;
                 mapComp.stairsDown = levelData.stairsDown;
@@ -91,6 +95,7 @@ export class LevelSystem extends System {
             gameState.needsInitialRender = true;
             gameState.needsRender = true;
             this.checkLevelAfterTransitions({ tier });
+            this.ensureRoomConnections(levelEntity); // Added final check for room connections
 
             // Validate MapComponent before emitting LevelAdded
             const mapComponent = levelEntity.getComponent('Map');
@@ -513,6 +518,66 @@ export class LevelSystem extends System {
         }
     }
 
+    generateLootEntities(tier, map, rooms) {
+        const lootPerLevel = 10;
+        const lootEntityIds = [];
+        // Listener to collect entity IDs
+        const collectEntityId = (data) => {
+            if (data.tier === tier) {
+                lootEntityIds.push(data.entityId);
+                console.log(`LevelSystem: Collected entity ID ${data.entityId} for tier ${tier}`);
+            }
+        };
+        this.eventBus.on('LootEntityCreated', collectEntityId);
+
+        for (let i = 0; i < lootPerLevel; i++) {
+            const room = rooms[Math.floor(Math.random() * rooms.length)];
+            let x, y;
+            let attempts = 0;
+            do {
+                x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
+                y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
+                attempts++;
+                if (attempts > 50) {
+                    console.error(`Failed to place loot entity in room after 50 attempts`);
+                    break;
+                }
+            } while (map[y][x] !== ' ');
+
+            if (attempts <= 50) {
+                const loot = {
+                    x: x,
+                    y: y,
+                    name: "Loot Pile",
+                    gold: 10,
+                    torches: 0,
+                    healPotions: 0,
+                    items: [{
+                        name: "Mbphu Greater iLvl Annihilation Staff",
+                        type: "weapon",
+                        attackType: "ranged",
+                        baseRange: 7,
+                        slots: ["mainhand", "offhand"],
+                        baseDamageMin: 10,
+                        baseDamageMax: 15,
+                        itemTier: "relic",
+                        stats: { intellect: 5, maxMana: 5, agility: 5, damageBonus: 5, rangedDamageBonus: 5 },
+                        description: "The Golden Khepresh has got nothing on this babby!",
+                        uniqueId: null,
+                        icon: "mbphu-staff.svg"
+                    }]
+                };
+                console.log(`LevelSystem: Emitting PlaceTreasure for loot at (${x}, ${y}) with tier ${tier}, using EventBus:`, this.eventBus);
+                this.eventBus.emit('PlaceTreasure', { treasure: loot, tier });
+            }
+        }
+
+        // Clean up the listener after the loop
+        this.eventBus.off('LootEntityCreated', collectEntityId);
+        console.log(`Generated ${lootPerLevel} loot entity IDs for tier ${tier}`, lootEntityIds);
+        return lootEntityIds;
+    }
+
     generateFountains(tier, map, rooms) {
         const fountainsPerLevel = Math.floor(Math.random() * 3) + 1;
         const fountains = [];
@@ -594,6 +659,25 @@ export class LevelSystem extends System {
         pos.y = 1;
         console.warn(`LevelSystem: No adjacent walkable tile found near (${stair.x}, ${stair.y}), using fallback position (1, 1)`);
         this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+    }
+
+    ensureRoomConnections(levelEntity) {
+        const mapComp = levelEntity.getComponent('Map');
+        const rooms = mapComp.rooms;
+
+        for (const room of rooms) {
+            if ((room.type === 'AlcoveSpecial' || room.type === 'BossChamberSpecial') && room.connections.length === 0) {
+                console.warn(`Room at (${room.left}, ${room.top}) of type ${room.type} has no connections, adding one`);
+                const nearestRoom = this.findNearestRoom(room, rooms, [room]);
+                if (nearestRoom) {
+                    this.carveCorridor(room, nearestRoom, mapComp.map, rooms);
+                    room.connections.push(nearestRoom);
+                    nearestRoom.connections.push(room);
+                } else {
+                    console.error(`No nearest room found for isolated ${room.type} at (${room.left}, ${room.top})`);
+                }
+            }
+        }
     }
 
     calculateDistance(x1, y1, x2, y2) {
