@@ -132,6 +132,8 @@ export class Game {
         const gameState = this.state.getGameState()?.getComponent('GameState');
         if (!gameState) {
             console.error('Game.js: gameState not found or missing GameState component');
+        } else {
+            console.log('Game.js: handleInput start, gameState:', gameState, 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
         }
 
         // Handle title screen transition for any keypress (keydown or keyup)
@@ -181,6 +183,7 @@ export class Game {
         }
 
         if (event.type === 'keydown' && !event.repeat) {
+            console.log('Game.js: Processing keydown, gameState before switch:', gameState, 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
             const player = this.state.getPlayer();
             if (!player) {
                 console.log('Game.js: Player entity not found');
