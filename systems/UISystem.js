@@ -27,7 +27,7 @@ export class UISystem extends System {
         this.eventBus.on('StatsUpdated', (data) => this.updateUI(data));
         this.eventBus.on('GameOver', (data) => {
             console.log('GameOver event received:', data);
-            this.handleGameOver(data);
+            this.gameOver(data);
         });
 
         this.eventBus.on('GearChanged', (data) => this.updateUI(data)); // Add GearChanged listener
@@ -191,35 +191,59 @@ export class UISystem extends System {
     }
 
     updateUI({ entityId }) {
-        console.log("UISystem.updateUI() called for: ", entityId); 
+        console.log("UISystem.updateUI() called for: ", entityId);
         if (entityId !== 'player') return;
-       
+
         const player = this.entityManager.getEntity('player');
-        console.log("UISystem.updateUI() called for Player : ", player); 
+        console.log("UISystem.updateUI() called for Player : ", player);
         const stats = player.getComponent('Stats');
         const health = player.getComponent('Health');
         const mana = player.getComponent('Mana');
         const inventory = player.getComponent('Inventory');
         const playerState = player.getComponent('PlayerState');
         const resource = player.getComponent('Resource');
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
 
         console.log('UI update data raw:', { stats: Object.assign({}, stats), health: Object.assign({}, health), mana: Object.assign({}, mana), inventory: Object.assign({}, inventory), playerState: Object.assign({}, playerState), resource: Object.assign({}, resource) });
 
-        //this.playerInfo.innerHTML
         // @Grok - REPLACE THIS WITH YOUR CODE TO UPDATE CHILD ELEMENTS OF playerInfo
-            
+        if (this.playerInfo) {
+            const playerNameSpan = this.playerInfo.querySelector('#playerName');
+            const playerLevelSpan = this.playerInfo.querySelector('#playerLevel');
+            const dungeonTierSpan = this.playerInfo.querySelector('#dungeonTier');
+            const playerGoldSpan = this.playerInfo.querySelector('#playerGold');
+            if (playerNameSpan) playerNameSpan.textContent = playerState.name;
+            if (playerLevelSpan) playerLevelSpan.textContent = playerState.level;
+            if (dungeonTierSpan) dungeonTierSpan.textContent = gameState.tier;
+            if (playerGoldSpan) playerGoldSpan.textContent = resource.gold !== undefined ? resource.gold : 'N/A';
+        }
 
-        //this.playerStatus.innerHTML
         // @Grok - REPLACE THIS WITH YOUR CODE TO UPDATE CHILD ELEMENTS OF playerStatus
-            
+        if (this.playerStatus) {
+            const healPotionCountSpan = this.playerStatus.querySelector('#healPotionCount');
+            const hpTextSpan = this.playerStatus.querySelector('#hpText');
+            const manaTextSpan = this.playerStatus.querySelector('#manaText');
+            const manaBarDiv = this.playerStatus.querySelector('#manaBar');
+            const xpTextSpan = this.playerStatus.querySelector('#xpText');
+            const torchCountSpan = this.playerStatus.querySelector('#torchCount');
+            const hpBarDiv = this.playerStatus.querySelector('#hpBar');
+            const xpBarDiv = this.playerStatus.querySelector('#xpBar');
+
+            if (healPotionCountSpan) healPotionCountSpan.textContent = resource.healPotions;
+            if (hpTextSpan) hpTextSpan.textContent = `${health.hp}/${health.maxHp}`;
+            if (manaTextSpan) manaTextSpan.textContent = `${mana.mana}/${mana.maxMana}`;
+            if (manaBarDiv) manaBarDiv.style.width = `${(mana.mana / mana.maxMana) * 100}%`;
+            if (xpTextSpan) xpTextSpan.textContent = `${playerState.xp}/${playerState.nextLevelXp}`;
+            if (torchCountSpan) torchCountSpan.textContent = resource.torches;
+            if (hpBarDiv) hpBarDiv.style.width = `${(health.hp / health.maxHp) * 100}%`;
+            if (xpBarDiv) xpBarDiv.style.width = `${(playerState.xp / playerState.nextLevelXp) * 100}%`;
+        }
 
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         if (overlayState.isOpen && overlayState.activeTab === 'character') {
             this.renderOverlay('character'); // Force render if character tab is open
         }
     }
-
-
 
     setupDragAndDrop() {
         this.setupEquipDragAndDrop();
@@ -303,5 +327,41 @@ export class UISystem extends System {
         };
         const validSlots = slotMap[item.type];
         return validSlots?.includes(slot) || false;
+    }
+
+    gameOver(message) {
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const existingGameOver = document.getElementById('game-over');
+        if (existingGameOver) existingGameOver.remove();
+
+        const gameOver = document.createElement('div');
+        gameOver.id = 'game-over';
+        const headline = gameState.isVictory ? '<h1>VICTORY!</h1>' : '<h1>GAME OVER</h1>';
+        gameOver.innerHTML = headline + '<p>' + message + '</p>';
+        document.getElementById('map').appendChild(gameOver);
+
+        const mapElement = document.getElementById('map');
+        const mapWidth = mapElement.clientWidth;
+        const mapHeight = mapElement.clientHeight;
+        const scrollLeft = mapElement.scrollLeft;
+        const scrollTop = mapElement.scrollTop;
+        const centerX = scrollLeft + (mapWidth / 2);
+        const centerY = scrollTop + (mapHeight / 2);
+
+        gameOver.style.left = `${centerX - (gameOver.offsetWidth / 2)}px`;
+        gameOver.style.top = `${centerY - (gameOver.offsetHeight / 2)}px`;
+
+        gameOver.classList.add(gameState.isVictory ? 'victory' : 'death');
+
+        const restartButton = document.createElement('button');
+        restartButton.id = 'restart-button';
+        restartButton.textContent = 'Play Again?';
+        restartButton.onclick = () => {
+            location.reload(true);
+        };
+        gameOver.appendChild(restartButton);
+
+        // Emit GameOverRendered once the overlay is fully rendered
+        this.eventBus.emit('GameOverRendered');
     }
 }

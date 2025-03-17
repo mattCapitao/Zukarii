@@ -7,12 +7,23 @@ export class LevelTransitionSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.requiredComponents = ['Map', 'Tier']; // For level entities
+        this.pendingTransition = null; // Track pending transition type
     }
 
     init() {
-        this.eventBus.on('TransitionDown', () => this.transitionDown());
-        this.eventBus.on('TransitionUp', () => this.transitionUp());
-        this.eventBus.on('TransitionViaPortal', (data) => this.transitionViaPortal(data));
+        this.eventBus.on('TransitionDown', () => {
+            this.pendingTransition = 'down';
+            this.transitionDown();
+        });
+        this.eventBus.on('TransitionUp', () => {
+            this.pendingTransition = 'up';
+            this.transitionUp();
+        });
+        this.eventBus.on('TransitionViaPortal', (data) => {
+            this.pendingTransition = 'portal';
+            this.transitionViaPortal(data);
+        });
+        this.eventBus.on('LevelAdded', (data) => this.handleLevelAdded(data));
     }
 
     findAdjacentTile(map, stairX, stairY) {
@@ -30,7 +41,6 @@ export class LevelTransitionSystem extends System {
 
     transitionDown() {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
-        const player = this.entityManager.getEntity('player');
         if (gameState.tier >= Number.MAX_SAFE_INTEGER) return;
 
         const newTier = gameState.tier + 1;
@@ -41,24 +51,12 @@ export class LevelTransitionSystem extends System {
             this.eventBus.emit('LogMessage', { message: `You Reached Tier ${newTier}` });
         }
 
+        // Emit AddLevel and wait for LevelAdded
         this.eventBus.emit('AddLevel', { tier: newTier });
-        const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === newTier);
-        const upStair = levelEntity.getComponent('Map').stairsUp;
-        const pos = this.findAdjacentTile(levelEntity.getComponent('Map').map, upStair.x, upStair.y);
-        const playerPos = player.getComponent('Position');
-        playerPos.x = pos.x;
-        playerPos.y = pos.y;
-
-        gameState.needsInitialRender = true;
-        gameState.needsRender = true;
-        gameState.transitionLock = true;
-        this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
-        this.eventBus.emit('RenderNeeded');
     }
 
     transitionUp() {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
-        const player = this.entityManager.getEntity('player');
         if (gameState.tier === 0 || gameState.tier === 1) {
             this.eventBus.emit('PlayerExit', {});
             return;
@@ -67,23 +65,8 @@ export class LevelTransitionSystem extends System {
         const newTier = gameState.tier - 1;
         gameState.tier = newTier;
 
-        let levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === newTier);
-        if (!levelEntity) {
-            this.eventBus.emit('AddLevel', { tier: newTier });
-            levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === newTier);
-        }
-
-        const downStair = levelEntity.getComponent('Map').stairsDown;
-        const pos = this.findAdjacentTile(levelEntity.getComponent('Map').map, downStair.x, downStair.y);
-        const playerPos = player.getComponent('Position');
-        playerPos.x = pos.x;
-        playerPos.y = pos.y;
-
-        gameState.needsInitialRender = true;
-        gameState.needsRender = true;
-        gameState.transitionLock = true;
-        this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
-        this.eventBus.emit('RenderNeeded');
+        // Emit AddLevel and wait for LevelAdded
+        this.eventBus.emit('AddLevel', { tier: newTier });
     }
 
     transitionViaPortal({ x, y }) {
@@ -115,23 +98,58 @@ export class LevelTransitionSystem extends System {
         this.eventBus.emit('LogMessage', { message: `You step through a mysterious portal surging with chaotic energy and are transported to Tier ${destinationTier}!` });
         gameState.tier = destinationTier;
 
-        let levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === destinationTier);
+        // Emit AddLevel and wait for LevelAdded
+        this.eventBus.emit('AddLevel', { tier: destinationTier });
+    }
+
+    handleLevelAdded({ tier, entityId }) {
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const player = this.entityManager.getEntity('player');
+        const levelEntity = this.entityManager.getEntity(entityId);
+
         if (!levelEntity) {
-            this.eventBus.emit('AddLevel', { tier: destinationTier });
-            levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === destinationTier);
+            console.error(`Level entity for tier ${tier} not found after LevelAdded event`);
+            return;
         }
 
-        const upStair = levelEntity.getComponent('Map').stairsUp;
-        const pos = this.findAdjacentTile(levelEntity.getComponent('Map').map, upStair.x, upStair.y);
-        const player = this.entityManager.getEntity('player');
-        const playerPos = player.getComponent('Position');
-        playerPos.x = pos.x;
-        playerPos.y = pos.y;
+        if (this.pendingTransition === 'down') {
+            const upStair = levelEntity.getComponent('Map').stairsUp;
+            const pos = this.findAdjacentTile(levelEntity.getComponent('Map').map, upStair.x, upStair.y);
+            const playerPos = player.getComponent('Position');
+            playerPos.x = pos.x;
+            playerPos.y = pos.y;
 
-        gameState.needsInitialRender = true;
-        gameState.needsRender = true;
-        gameState.transitionLock = true;
-        this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
-        this.eventBus.emit('RenderNeeded');
+            gameState.needsInitialRender = true;
+            gameState.needsRender = true;
+            gameState.transitionLock = true;
+            this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+            this.eventBus.emit('RenderNeeded');
+        } else if (this.pendingTransition === 'up') {
+            const downStair = levelEntity.getComponent('Map').stairsDown;
+            const pos = this.findAdjacentTile(levelEntity.getComponent('Map').map, downStair.x, downStair.y);
+            const playerPos = player.getComponent('Position');
+            playerPos.x = pos.x;
+            playerPos.y = pos.y;
+
+            gameState.needsInitialRender = true;
+            gameState.needsRender = true;
+            gameState.transitionLock = true;
+            this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+            this.eventBus.emit('RenderNeeded');
+        } else if (this.pendingTransition === 'portal') {
+            const upStair = levelEntity.getComponent('Map').stairsUp;
+            const pos = this.findAdjacentTile(levelEntity.getComponent('Map').map, upStair.x, upStair.y);
+            const playerPos = player.getComponent('Position');
+            playerPos.x = pos.x;
+            playerPos.y = pos.y;
+
+            gameState.needsInitialRender = true;
+            gameState.needsRender = true;
+            gameState.transitionLock = true;
+            this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+            this.eventBus.emit('RenderNeeded');
+        }
+
+        this.pendingTransition = null; // Reset pending transition
     }
 }

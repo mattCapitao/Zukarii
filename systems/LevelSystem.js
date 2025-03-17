@@ -50,6 +50,8 @@ export class LevelSystem extends System {
             if (customLevel) {
                 const mapComp = new MapComponent(customLevel);
                 mapComp.map = this.padMap(customLevel.map);
+                if (customLevel.stairsUp) mapComp.stairsUp = customLevel.stairsUp;
+                if (customLevel.stairsDown) mapComp.stairsDown = customLevel.stairsDown;
                 this.entityManager.addComponentToEntity(levelEntity.id, mapComp);
                 this.entityManager.addComponentToEntity(levelEntity.id, new EntityListComponent({
                     monsters: customLevel.monsters || [],
@@ -61,11 +63,15 @@ export class LevelSystem extends System {
             } else {
                 const hasBossRoom = (tier - this.lastBossTier >= this.BOSS_ROOM_EVERY_X_LEVELS) || Math.random() < 0.05;
                 levelData = this.generateLevel(hasBossRoom);
-                this.entityManager.addComponentToEntity(levelEntity.id, new MapComponent(levelData));
+                const mapComp = new MapComponent(levelData);
+                this.entityManager.addComponentToEntity(levelEntity.id, mapComp);
                 const entityList = new EntityListComponent();
                 entityList.fountains = this.generateFountains(tier, levelData.map, levelData.rooms);
                 this.entityManager.addComponentToEntity(levelEntity.id, entityList);
                 this.placeStairs(levelEntity, levelData, hasBossRoom);
+                // Ensure stairs are set in mapComp after placeStairs
+                mapComp.stairsUp = levelData.stairsUp;
+                mapComp.stairsDown = levelData.stairsDown;
                 this.adjustPlayerPosition(levelEntity, levelData.stairsUp);
                 if (hasBossRoom) this.lastBossTier = tier;
 
@@ -81,8 +87,22 @@ export class LevelSystem extends System {
             gameState.needsInitialRender = true;
             gameState.needsRender = true;
             this.checkLevelAfterTransitions({ tier });
+
+            // Validate MapComponent before emitting LevelAdded
+            const mapComponent = levelEntity.getComponent('Map');
+            if (mapComponent && mapComponent.stairsUp && mapComponent.stairsDown) {
+                this.eventBus.emit('LevelAdded', { tier, entityId: levelEntity.id });
+            } else {
+                console.error(`LevelSystem: Invalid MapComponent for tier ${tier}, missing stairsUp or stairsDown`);
+            }
         } else {
             this.checkLevelAfterTransitions({ tier });
+            const mapComponent = levelEntity.getComponent('Map');
+            if (mapComponent && mapComponent.stairsUp && mapComponent.stairsDown) {
+                this.eventBus.emit('LevelAdded', { tier, entityId: levelEntity.id });
+            } else {
+                console.error(`LevelSystem: Invalid MapComponent for existing tier ${tier}, missing stairsUp or stairsDown`);
+            }
         }
     }
 
@@ -394,9 +414,17 @@ export class LevelSystem extends System {
 
         if (hasBossRoom) {
             const bossRoom = levelData.rooms.find(r => r.type === 'BossChamberSpecial');
+            let attempts = 0;
             do {
                 stairDownX = bossRoom.left + 1 + Math.floor(Math.random() * (bossRoom.w - 2));
                 stairDownY = bossRoom.top + 1 + Math.floor(Math.random() * (bossRoom.h - 2));
+                attempts++;
+                if (attempts > 50) {
+                    console.error('Failed to place stairsDown in boss room after 50 attempts');
+                    stairDownX = bossRoom.left + 1;
+                    stairDownY = bossRoom.top + 1;
+                    break;
+                }
             } while (map[stairDownY][stairDownX] !== ' ');
             map[stairDownY][stairDownX] = '⇓';
             levelData.stairsDown = { x: stairDownX, y: stairDownY };
@@ -404,7 +432,7 @@ export class LevelSystem extends System {
             let attempts = 0;
             const mapCenterX = Math.floor(this.state.WIDTH / 2);
             const mapCenterY = Math.floor(this.state.HEIGHT / 2);
-            while (attempts < 20) {
+            while (attempts < 50) {
                 const room = levelData.rooms[Math.floor(Math.random() * levelData.rooms.length)];
                 stairDownX = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
                 stairDownY = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
@@ -416,7 +444,10 @@ export class LevelSystem extends System {
                 attempts++;
             }
             if (!levelData.stairsDown) {
-                console.warn(`Failed to place stairsDown with distance check after 20 attempts`);
+                console.warn(`Failed to place stairsDown with distance check after 50 attempts`);
+                const fallbackRoom = levelData.rooms[0];
+                stairDownX = fallbackRoom.left + 1;
+                stairDownY = fallbackRoom.top + 1;
                 map[stairDownY][stairDownX] = '⇓';
                 levelData.stairsDown = { x: stairDownX, y: stairDownY };
             }
@@ -424,7 +455,7 @@ export class LevelSystem extends System {
 
         const upRooms = hasBossRoom ? levelData.rooms.filter(r => r.type !== 'BossChamberSpecial') : levelData.rooms;
         let attempts = 0;
-        while (attempts < 20) {
+        while (attempts < 50) {
             const room = upRooms[Math.floor(Math.random() * upRooms.length)];
             stairUpX = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
             stairUpY = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
@@ -436,7 +467,10 @@ export class LevelSystem extends System {
             attempts++;
         }
         if (!levelData.stairsUp) {
-            console.warn(`Failed to place stairsUp with distance check after 20 attempts`);
+            console.warn(`Failed to place stairsUp with distance check after 50 attempts`);
+            const fallbackRoom = upRooms[0];
+            stairUpX = fallbackRoom.left + 1;
+            stairUpY = fallbackRoom.top + 1;
             map[stairUpY][stairUpX] = '⇑';
             levelData.stairsUp = { x: stairUpX, y: stairUpY };
         }
@@ -456,15 +490,23 @@ export class LevelSystem extends System {
         for (let i = 0; i < fountainsPerLevel; i++) {
             const room = rooms[Math.floor(Math.random() * rooms.length)];
             let x, y;
+            let attempts = 0;
             do {
                 x = room.left + 1 + Math.floor(Math.random() * (room.w - 2));
                 y = room.top + 1 + Math.floor(Math.random() * (room.h - 2));
+                attempts++;
+                if (attempts > 50) {
+                    console.error(`Failed to place fountain in room after 50 attempts`);
+                    break;
+                }
             } while (map[y][x] !== ' ');
-            map[y][x] = '≅';
-            const fountainEntity = this.entityManager.createEntity(`fountain_${tier}_${i}`);
-            this.entityManager.addComponentToEntity(fountainEntity.id, new PositionComponent(x, y));
-            this.entityManager.addComponentToEntity(fountainEntity.id, { type: 'FountainData', used: false, discovered: false });
-            fountains.push(fountainEntity.id);
+            if (attempts <= 50) {
+                map[y][x] = '≅';
+                const fountainEntity = this.entityManager.createEntity(`fountain_${tier}_${i}`);
+                this.entityManager.addComponentToEntity(fountainEntity.id, new PositionComponent(x, y));
+                this.entityManager.addComponentToEntity(fountainEntity.id, { type: 'FountainData', used: false, discovered: false });
+                fountains.push(fountainEntity.id);
+            }
         }
         return fountains;
     }
@@ -478,7 +520,13 @@ export class LevelSystem extends System {
         }
         map[5][5] = '⇓';
         const rooms = [{ left: 1, top: 1, w: 8, h: 8, x: 5, y: 5, type: 'SurfaceRoom', connections: [] }];
-        return { map: this.padMap(map), rooms, stairsDown: { x: 5, y: 5 }, playerSpawn: { x: 1, y: 1 } };
+        return {
+            map: this.padMap(map),
+            rooms,
+            stairsDown: { x: 5, y: 5 },
+            stairsUp: { x: 0, y: 0 }, // Dummy stairsUp to satisfy validation
+            playerSpawn: { x: 1, y: 1 }
+        };
     }
 
     padMap(map) {
