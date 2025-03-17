@@ -25,7 +25,7 @@ export class RenderSystem extends System {
         if (!gameState || !gameState.needsRender) return;
         if (!gameState.gameStarted) {
             titleScreenContainer.style.display = 'flex';
-            titleScreenContainer.innerHTML = titleScreen; // Use imported titleScreen
+            titleScreenContainer.innerHTML = titleScreen;
             this.mapDiv.style.display = 'none';
             gameState.needsRender = false;
             return;
@@ -36,7 +36,6 @@ export class RenderSystem extends System {
 
         const currentTier = gameState.tier;
         if (currentTier !== this.lastTier) {
-            // Reinitialize tileMap when tier changes
             this.tileMap = {};
             this.lastTier = currentTier;
         }
@@ -53,15 +52,39 @@ export class RenderSystem extends System {
         const width = map[0].length;
         const playerPos = player.getComponent('Position');
         const playerState = player.getComponent('PlayerState');
-        const visibilityRadius = 6; // AGGRO_RANGE (4) + 2, consistent with old code
+        const visibilityRadius = 6; // AGGRO_RANGE (4) + 2
+        const discoveryRadius = renderState.discoveryRadius;
+
+        // Update discovered tiles
+        const minXDiscover = Math.max(0, playerPos.x - discoveryRadius);
+        const maxXDiscover = Math.min(width - 1, playerPos.x + discoveryRadius);
+        const minYDiscover = Math.max(0, playerPos.y - discoveryRadius);
+        const maxYDiscover = Math.min(height - 1, playerPos.y + discoveryRadius);
+
+        for (let y = minYDiscover; y <= maxYDiscover; y++) {
+            for (let x = minXDiscover; x <= maxXDiscover; x++) {
+                const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
+                if (distance <= discoveryRadius) {
+                    const tileKey = `${x},${y}`;
+                    if (map[y][x] === '#') {
+                        renderState.discoveredWalls.add(tileKey);
+                    } else {
+                        renderState.discoveredFloors.add(tileKey);
+                    }
+                }
+            }
+        }
+        renderState.discoveredTileCount = renderState.discoveredWalls.size + renderState.discoveredFloors.size;
 
         if (!Object.keys(this.tileMap).length) {
-            // Initial full render
             let mapDisplay = '';
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
                     let char = map[y][x];
                     let className = 'undiscovered';
+                    if (renderState.discoveredWalls.has(`${x},${y}`) || renderState.discoveredFloors.has(`${x},${y}`)) {
+                        className = 'discovered';
+                    }
                     if (x === playerPos.x && y === playerPos.y) {
                         char = '𓀠';
                         className = 'player';
@@ -82,7 +105,6 @@ export class RenderSystem extends System {
             }
             this.setInitialScroll();
         } else {
-            // Update tiles within visibilityRadius
             const minX = Math.max(0, playerPos.x - visibilityRadius);
             const maxX = Math.min(width - 1, playerPos.x + visibilityRadius);
             const minY = Math.max(0, playerPos.y - visibilityRadius);
@@ -98,9 +120,8 @@ export class RenderSystem extends System {
                         const tileKey = `${x},${y}`;
                         const tile = this.tileMap[tileKey];
                         let char = map[y][x];
-                        let className = tile.element.classList.contains('discovered') ? 'discovered' : 'undiscovered';
+                        let className = renderState.discoveredWalls.has(tileKey) || renderState.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
 
-                        // Reset to map state unless an entity is present
                         if (!(x === playerPos.x && y === playerPos.y)) {
                             const monster = monsters.find(m => m.getComponent('Position').x === x && m.getComponent('Position').y === y && m.getComponent('Health').hp > 0);
                             const projectile = projectiles.find(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
@@ -112,7 +133,6 @@ export class RenderSystem extends System {
                             }
                         }
 
-                        // Render entities
                         if (x === playerPos.x && y === playerPos.y) {
                             char = '𓀠';
                             className = 'player';
