@@ -127,18 +127,28 @@ export class Game {
     }
 
     handleInput(event) {
-        const gameState = this.state.getGameState()?.getComponent('GameState');
-        if (!gameState) return;
+        console.log(`Game.js: Handling ${event.type} event for key: ${event.key}`);
 
-        if (!gameState.gameStarted) {
+        const gameState = this.state.getGameState()?.getComponent('GameState');
+        if (!gameState) {
+            console.error('Game.js: gameState not found or missing GameState component');
+        }
+
+        // Handle title screen transition for any keypress (keydown or keyup)
+        if (gameState && !gameState.gameStarted) {
+            console.log('Game.js: Starting game on first keypress');
             gameState.gameStarted = true;
+            gameState.needsRender = true;
             this.state.eventBus.emit('ToggleBackgroundMusic', { play: true });
             this.state.eventBus.emit('RenderNeeded');
             this.updateSystems(['audio', 'render', 'ui']);
             return;
         }
 
-        if (gameState.gameOver) return;
+        if (gameState.gameOver) {
+            console.log('Game.js: Game over, ignoring input');
+            return;
+        }
 
         const keyMap = {
             'w': 'ArrowUp', 'W': 'ArrowUp', 'ArrowUp': 'ArrowUp',
@@ -154,7 +164,10 @@ export class Game {
         };
 
         const mappedKey = keyMap[event.key];
-        if (!mappedKey) return;
+        if (!mappedKey) {
+            console.log(`Game.js: Key ${event.key} not mapped, ignoring`);
+            return;
+        }
 
         if (event.type === 'keydown' && !event.repeat) {
             console.log(`Key pressed: ${mappedKey}`);
@@ -169,10 +182,16 @@ export class Game {
 
         if (event.type === 'keydown' && !event.repeat) {
             const player = this.state.getPlayer();
-            if (!player) return;
+            if (!player) {
+                console.log('Game.js: Player entity not found');
+                return;
+            }
             const playerPos = player.getComponent('Position');
             const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
-            if (!levelEntity) return;
+            if (!levelEntity) {
+                console.log('Game.js: Level entity not found for current tier');
+                return;
+            }
             const map = levelEntity.getComponent('Map').map;
 
             let newX = playerPos.x;

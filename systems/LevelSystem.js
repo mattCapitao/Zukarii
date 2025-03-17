@@ -44,6 +44,7 @@ export class LevelSystem extends System {
 
         if (!levelEntity) {
             levelEntity = this.entityManager.createEntity(`level_${tier}`);
+            console.log(`Created level entity with ID: ${levelEntity.id} for tier ${tier}`);
             this.entityManager.addComponentToEntity(levelEntity.id, { type: 'Tier', value: tier });
 
             let levelData;
@@ -53,6 +54,7 @@ export class LevelSystem extends System {
                 if (customLevel.stairsUp) mapComp.stairsUp = customLevel.stairsUp;
                 if (customLevel.stairsDown) mapComp.stairsDown = customLevel.stairsDown;
                 this.entityManager.addComponentToEntity(levelEntity.id, mapComp);
+                console.log(`Added MapComponent to ${levelEntity.id} with map size ${mapComp.map.length}x${mapComp.map[0].length}`);
                 this.entityManager.addComponentToEntity(levelEntity.id, new EntityListComponent({
                     monsters: customLevel.monsters || [],
                     treasures: customLevel.treasures || [],
@@ -90,18 +92,43 @@ export class LevelSystem extends System {
 
             // Validate MapComponent before emitting LevelAdded
             const mapComponent = levelEntity.getComponent('Map');
-            if (mapComponent && mapComponent.stairsUp && mapComponent.stairsDown) {
-                this.eventBus.emit('LevelAdded', { tier, entityId: levelEntity.id });
+            if (mapComponent) {
+                console.log(`MapComponent for tier ${tier} contains map: ${mapComponent.map ? 'yes' : 'no'}`);
+                if (tier === 0) {
+                    if (mapComponent.stairsDown) {
+                        this.eventBus.emit('LevelAdded', { tier, entityId: levelEntity.id });
+                    } else {
+                        console.error(`LevelSystem: Invalid MapComponent for tier ${tier}, missing stairsDown`);
+                    }
+                } else {
+                    if (mapComponent.stairsUp && mapComponent.stairsDown) {
+                        this.eventBus.emit('LevelAdded', { tier, entityId: levelEntity.id });
+                    } else {
+                        console.error(`LevelSystem: Invalid MapComponent for tier ${tier}, missing stairsUp or stairsDown`);
+                    }
+                }
             } else {
-                console.error(`LevelSystem: Invalid MapComponent for tier ${tier}, missing stairsUp or stairsDown`);
+                console.error(`LevelSystem: No MapComponent found for tier ${tier}`);
             }
         } else {
             this.checkLevelAfterTransitions({ tier });
             const mapComponent = levelEntity.getComponent('Map');
-            if (mapComponent && mapComponent.stairsUp && mapComponent.stairsDown) {
-                this.eventBus.emit('LevelAdded', { tier, entityId: levelEntity.id });
+            if (mapComponent) {
+                if (tier === 0) {
+                    if (mapComponent.stairsDown) {
+                        this.eventBus.emit('LevelAdded', { tier, entityId: levelEntity.id });
+                    } else {
+                        console.error(`LevelSystem: Invalid MapComponent for existing tier ${tier}, missing stairsDown`);
+                    }
+                } else {
+                    if (mapComponent.stairsUp && mapComponent.stairsDown) {
+                        this.eventBus.emit('LevelAdded', { tier, entityId: levelEntity.id });
+                    } else {
+                        console.error(`LevelSystem: Invalid MapComponent for existing tier ${tier}, missing stairsUp or stairsDown`);
+                    }
+                }
             } else {
-                console.error(`LevelSystem: Invalid MapComponent for existing tier ${tier}, missing stairsUp or stairsDown`);
+                console.error(`LevelSystem: No MapComponent found for existing tier ${tier}`);
             }
         }
     }
@@ -540,7 +567,12 @@ export class LevelSystem extends System {
     }
 
     adjustPlayerPosition(levelEntity, stair) {
-        const map = levelEntity.getComponent('Map').map;
+        const mapComponent = levelEntity.getComponent('Map');
+        if (!mapComponent || !mapComponent.map) {
+            console.error(`LevelSystem: No valid MapComponent or map for entity ${levelEntity.id}`);
+            return; // Fallback to prevent crash
+        }
+        const map = mapComponent.map;
         const directions = [
             { x: stair.x - 1, y: stair.y }, { x: stair.x + 1, y: stair.y },
             { x: stair.x, y: stair.y - 1 }, { x: stair.x, y: stair.y + 1 }
@@ -548,15 +580,17 @@ export class LevelSystem extends System {
         const player = this.entityManager.getEntity('player');
         const pos = player.getComponent('Position');
         for (const dir of directions) {
-            if (map[dir.y][dir.x] === ' ') {
+            if (dir.y >= 0 && dir.y < map.length && dir.x >= 0 && dir.x < map[0].length && map[dir.y][dir.x] === ' ') {
                 pos.x = dir.x;
                 pos.y = dir.y;
                 this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
                 return;
             }
         }
+        // Fallback position if no adjacent walkable tile is found
         pos.x = 1;
         pos.y = 1;
+        console.warn(`LevelSystem: No adjacent walkable tile found near (${stair.x}, ${stair.y}), using fallback position (1, 1)`);
         this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
     }
 

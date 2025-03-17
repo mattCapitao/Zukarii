@@ -56,20 +56,16 @@ export class State {
     }
 
     initializeCoreEntities() {
-        /* // commented out after correctly setting up player post refactor
-        // Player entity
-        const player = this.entityManager.createEntity('player');
-        const playerComponents = createDefaultPlayerComponents();
-        Object.values(playerComponents).forEach(component =>
-            this.entityManager.addComponentToEntity('player', component)
-        );
-        */
-
         // Game state entity
         const gameState = this.entityManager.createEntity('gameState');
         this.entityManager.addComponentToEntity('gameState',
-            new GameStateComponent()
+            new GameStateComponent({
+                gameStarted: false,
+                needsRender: true,          // Set to true to ensure initial render
+                needsInitialRender: true    // Set to true for initial render
+            })
         );
+        console.log('State.js: Created gameState entity with GameState component:', this.entityManager.getEntity('gameState'));
 
         // UI entity
         const ui = this.entityManager.createEntity('ui');
