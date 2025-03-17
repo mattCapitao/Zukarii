@@ -1,6 +1,6 @@
 ﻿// systems/RenderSystem.js
 import { System } from '../core/Systems.js';
-import { titleScreen } from '../titlescreen.js'; // Import titleScreen
+import { titleScreen } from '../titlescreen.js';
 
 export class RenderSystem extends System {
     constructor(entityManager, eventBus) {
@@ -12,17 +12,26 @@ export class RenderSystem extends System {
     }
 
     init() {
-        this.eventBus.on('RenderNeeded', () => this.render());
-        this.eventBus.on('PositionChanged', (data) => this.render());
+        this.eventBus.on('RenderNeeded', () => this.render(true));
+        this.eventBus.on('PositionChanged', (data) => this.render(true));
+        this.eventBus.on('DiscoveredStateUpdated', () => this.render(true));
     }
 
-    render() {
+    update() {
+        this.render(false); // Continuous render without forcing needsRender
+    }
+
+    render(force = false) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
         const player = this.entityManager.getEntity('player');
         const titleScreenContainer = document.getElementById('splash');
 
-        if (!gameState || !gameState.needsRender) return;
+        if (!gameState) return;
+
+        // Only check needsRender for event-driven renders
+        if (!force && !gameState.needsRender) return;
+
         if (!gameState.gameStarted) {
             titleScreenContainer.style.display = 'flex';
             titleScreenContainer.innerHTML = titleScreen;
@@ -40,7 +49,7 @@ export class RenderSystem extends System {
             this.lastTier = currentTier;
         }
 
-        const tierEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === currentTier);
+        const tierEntity = this.entityManager.getEntitiesWith(['Map', 'Tier', 'Exploration']).find(e => e.getComponent('Tier').value === currentTier);
         if (!tierEntity) {
             console.error(`RenderSystem: No level entity found for tier ${currentTier}`);
             gameState.needsRender = false;
@@ -48,33 +57,41 @@ export class RenderSystem extends System {
         }
 
         const map = tierEntity.getComponent('Map').map;
+        const exploration = tierEntity.getComponent('Exploration');
         const height = map.length;
         const width = map[0].length;
         const playerPos = player.getComponent('Position');
         const playerState = player.getComponent('PlayerState');
-        const visibilityRadius = 6; // AGGRO_RANGE (4) + 2
+        const visibilityRadius = 6;
         const discoveryRadius = renderState.discoveryRadius;
 
-        // Update discovered tiles
         const minXDiscover = Math.max(0, playerPos.x - discoveryRadius);
         const maxXDiscover = Math.min(width - 1, playerPos.x + discoveryRadius);
         const minYDiscover = Math.max(0, playerPos.y - discoveryRadius);
         const maxYDiscover = Math.min(height - 1, playerPos.y + discoveryRadius);
 
+        let newDiscoveryCount = 0;
         for (let y = minYDiscover; y <= maxYDiscover; y++) {
             for (let x = minXDiscover; x <= maxXDiscover; x++) {
                 const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
                 if (distance <= discoveryRadius) {
                     const tileKey = `${x},${y}`;
-                    if (map[y][x] === '#') {
-                        renderState.discoveredWalls.add(tileKey);
-                    } else {
-                        renderState.discoveredFloors.add(tileKey);
+                    const wasDiscovered = exploration.discoveredWalls.has(tileKey) || exploration.discoveredFloors.has(tileKey);
+                    if (!wasDiscovered) {
+                        if (map[y][x] === '#') {
+                            exploration.discoveredWalls.add(tileKey);
+                        } else {
+                            exploration.discoveredFloors.add(tileKey);
+                        }
+                        newDiscoveryCount++;
                     }
                 }
             }
         }
-        renderState.discoveredTileCount = renderState.discoveredWalls.size + renderState.discoveredFloors.size;
+        if (newDiscoveryCount > 0) {
+            playerState.discoveredTileCount += newDiscoveryCount;
+            this.eventBus.emit('TilesDiscovered', { count: newDiscoveryCount, total: playerState.discoveredTileCount });
+        }
 
         if (!Object.keys(this.tileMap).length) {
             let mapDisplay = '';
@@ -82,10 +99,15 @@ export class RenderSystem extends System {
                 for (let x = 0; x < width; x++) {
                     let char = map[y][x];
                     let className = 'undiscovered';
-                    if (renderState.discoveredWalls.has(`${x},${y}`) || renderState.discoveredFloors.has(`${x},${y}`)) {
+                    if (exploration.discoveredWalls.has(`${x},${y}`) || exploration.discoveredFloors.has(`${x},${y}`)) {
                         className = 'discovered';
                     }
-                    if (x === playerPos.x && y === playerPos.y) {
+                    const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
+                    const projectileMatch = projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
+                    if (projectileMatch) {
+                        char = '*';
+                        className = 'discovered projectile';
+                    } else if (x === playerPos.x && y === playerPos.y) {
                         char = '𓀠';
                         className = 'player';
                         if (playerState.torchLit) className += ' torch flicker';
@@ -96,7 +118,6 @@ export class RenderSystem extends System {
             }
             this.mapDiv.innerHTML = mapDisplay;
 
-            // Populate tileMap
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
                     const element = this.mapDiv.querySelector(`span[data-x="${x}"][data-y="${y}"]`);
@@ -120,26 +141,22 @@ export class RenderSystem extends System {
                         const tileKey = `${x},${y}`;
                         const tile = this.tileMap[tileKey];
                         let char = map[y][x];
-                        let className = renderState.discoveredWalls.has(tileKey) || renderState.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+                        let className = exploration.discoveredWalls.has(tileKey) || exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
 
-                        if (!(x === playerPos.x && y === playerPos.y)) {
-                            const monster = monsters.find(m => m.getComponent('Position').x === x && m.getComponent('Position').y === y && m.getComponent('Health').hp > 0);
-                            const projectile = projectiles.find(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
-                            if (!monster && !projectile) {
-                                tile.element.textContent = char;
-                                tile.element.className = className;
-                                tile.char = char;
-                                tile.class = className;
-                            }
-                        }
+                        tile.element.textContent = char;
+                        tile.element.className = className;
+                        tile.char = char;
+                        tile.class = className;
 
-                        if (x === playerPos.x && y === playerPos.y) {
+                        const projectileMatch = projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
+                        if (projectileMatch) {
+                            console.log('RenderSystem: Projectile detected at', x, y, 'timestamp:', Date.now());
+                            char = '*';
+                            className = 'discovered projectile';
+                        } else if (x === playerPos.x && y === playerPos.y) {
                             char = '𓀠';
                             className = 'player';
                             if (playerState.torchLit) className += ' torch flicker';
-                        } else if (projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y)) {
-                            char = '*';
-                            className = 'discovered projectile';
                         } else {
                             const monster = monsters.find(m => m.getComponent('Position').x === x && m.getComponent('Position').y === y && m.getComponent('Health').hp > 0);
                             if (monster && (distance <= visibilityRadius || monster.getComponent('MonsterData').isAggro)) {
@@ -164,8 +181,7 @@ export class RenderSystem extends System {
             }
         }
 
-        console.log('Render completed. Discovery:', renderState.discoveryRadius, 'Visibility:', visibilityRadius);
-        gameState.needsRender = false;
+        if (force) gameState.needsRender = false; // Only reset for event-driven renders
         gameState.needsInitialRender = false;
     }
 

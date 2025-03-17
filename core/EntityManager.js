@@ -47,6 +47,7 @@ export class EntityManager {
 
     // Add a component to an entity by ID
     addComponentToEntity(entityId, component) {
+       // console.log('EntityManager: Adding component to entity', entityId, 'component:', component, 'timestamp:', Date.now());
         const entity = this.getEntity(entityId);
         if (!entity) {
             throw new Error(`Entity ${entityId} not found`);

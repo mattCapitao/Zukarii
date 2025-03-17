@@ -106,7 +106,8 @@ export class PlayerStateComponent {
         nextLevelXp = 0,
         dead = false,
         torchLit = false,
-        lampLit = false
+        lampLit = false,
+        discoveredTileCount = 0 // Added for exploration XP tracking
     } = {}) {
         this.type = 'PlayerState';
         this.name = name;
@@ -116,9 +117,9 @@ export class PlayerStateComponent {
         this.dead = dead;
         this.torchLit = torchLit;
         this.lampLit = lampLit;
+        this.discoveredTileCount = discoveredTileCount; // Total discovered tiles across all tiers
     }
 }
-
 
 export class MapComponent {
     constructor({
@@ -166,18 +167,12 @@ export class UIComponent {
 export class RenderStateComponent {
     constructor({
         discoveryRadius = 2,
-        discoveredWalls = new Set(),
-        discoveredFloors = new Set(),
-        discoveredTileCount = 0,
         visibleTiles = new Set(),
         projectile = null,
         torchLitOnTurn = false
     } = {}) {
         this.type = 'RenderState';
         this.discoveryRadius = discoveryRadius;
-        this.discoveredWalls = discoveredWalls;     // Set of "x,y" strings
-        this.discoveredFloors = discoveredFloors;   // Set of "x,y" strings
-        this.discoveredTileCount = discoveredTileCount;
         this.visibleTiles = visibleTiles;           // Set of "x,y" strings
         this.projectile = projectile;               // { x, y } or null
         this.torchLitOnTurn = torchLitOnTurn;
@@ -187,7 +182,7 @@ export class RenderStateComponent {
 export class GameStateComponent {
     constructor({
         tier = 0,
-        highestTier = 0,
+        highestTier = 1,
         gameStarted = false,
         gameOver = false,
         isVictory = false,
@@ -217,6 +212,17 @@ export class ProjectileComponent {
     }
 }
 
+export class ExplorationComponent {
+    constructor({
+        discoveredWalls = new Set(),
+        discoveredFloors = new Set()
+    } = {}) {
+        this.type = 'Exploration';
+        this.discoveredWalls = discoveredWalls;     // Set of "x,y" strings
+        this.discoveredFloors = discoveredFloors;   // Set of "x,y" strings
+    }
+}
+
 // Utility function to create default player components (for initialization)
 export function createDefaultPlayerComponents() {
     return {
@@ -234,6 +240,7 @@ export function createDefaultPlayerComponents() {
 export function createDefaultLevelComponents() {
     return {
         map: new MapComponent(),
-        entityList: new EntityListComponent()
+        entityList: new EntityListComponent(),
+        exploration: new ExplorationComponent()
     };
 }

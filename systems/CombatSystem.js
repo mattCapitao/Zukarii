@@ -23,6 +23,7 @@ export class CombatSystem extends System {
 
         const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
         projectiles.forEach(proj => {
+            console.log('CombatSystem: Updating projectile', proj.id, 'position:', proj.getComponent('Position'), 'timestamp:', Date.now());
             const pos = proj.getComponent('Position');
             const projData = proj.getComponent('Projectile');
             const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
@@ -84,6 +85,8 @@ export class CombatSystem extends System {
                 pos.x = newX;
                 pos.y = newY;
                 projData.rangeLeft--;
+                console.log('CombatSystem: Projectile moved', proj.id, 'new position:', { x: newX, y: newY }, 'rangeLeft:', projData.rangeLeft, 'timestamp:', Date.now());
+
                 this.eventBus.emit('PositionChanged', { entityId: proj.id, x: newX, y: newY });
                 this.eventBus.emit('RenderNeeded');
             } else {
@@ -127,8 +130,12 @@ export class CombatSystem extends System {
         const weapon = playerInventory.equipped.offhand || playerInventory.equipped.mainhand || { baseDamageMin: 1, baseDamageMax: 2, baseRange: 1, name: 'Fists' };
         const range = weapon.baseRange || 1;
 
+        // Start at player's position, no offset
+        let startX = playerPos.x;
+        let startY = playerPos.y;
+
         const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
-        this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
+        this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(startX, startY));
         this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range));
         this.eventBus.emit('RenderNeeded');
     }

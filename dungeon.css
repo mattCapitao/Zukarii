@@ -1236,7 +1236,7 @@ z-index:3; /* Lift above other spans */
 .projectile {
     color: #0f0;
     font-family: monospace;
-    z-index: 5;
+    z-index:4;
 }
 
 .discovered {

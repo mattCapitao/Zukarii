@@ -1,6 +1,6 @@
 ﻿// systems/LevelSystem.js
 import { System } from '../core/Systems.js';
-import { MapComponent, EntityListComponent, PositionComponent } from '../core/Components.js';
+import { MapComponent, EntityListComponent, PositionComponent, ExplorationComponent } from '../core/Components.js';
 
 const roomTypes = [
     { type: 'SquareRoom', probability: 30, minW: 11, maxW: 15, minH: 6, maxH: 8 },
@@ -14,7 +14,7 @@ export class LevelSystem extends System {
     constructor(entityManager, eventBus, state) {
         super(entityManager, eventBus);
         this.state = state;
-        this.requiredComponents = ['Map', 'Tier'];
+        this.requiredComponents = ['Map', 'Tier', 'Exploration']; // Added 'Exploration'
         this.ROOM_EDGE_BUFFER = 4;
         this.CORRIDOR_EDGE_BUFFER = 2;
         this.MIN_ROOM_SIZE = 4;
@@ -60,6 +60,7 @@ export class LevelSystem extends System {
                     treasures: customLevel.treasures || [],
                     fountains: customLevel.fountains || []
                 }));
+                this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent()); // Added ExplorationComponent
                 this.adjustPlayerPosition(levelEntity, customLevel.stairsUp || customLevel.stairsDown);
                 levelData = customLevel;
             } else {
@@ -70,6 +71,7 @@ export class LevelSystem extends System {
                 const entityList = new EntityListComponent();
                 entityList.fountains = this.generateFountains(tier, levelData.map, levelData.rooms);
                 this.entityManager.addComponentToEntity(levelEntity.id, entityList);
+                this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent()); // Added ExplorationComponent
                 this.placeStairs(levelEntity, levelData, hasBossRoom);
                 // Ensure stairs are set in mapComp after placeStairs
                 mapComp.stairsUp = levelData.stairsUp;

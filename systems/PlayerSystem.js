@@ -15,6 +15,7 @@ export class PlayerSystem extends System {
         this.eventBus.on('TorchExpired', () => this.torchExpired());
         this.eventBus.on('LightTorch', () => this.lightTorch());
         this.eventBus.on('PlayerExit', () => this.exit()); // New event handler for PlayerExit
+        this.eventBus.on('TilesDiscovered', (data) => this.handleTilesDiscovered(data));
     }
 
     initializePlayer() {
@@ -233,4 +234,23 @@ export class PlayerSystem extends System {
         const game = this.entityManager.getEntity('game');
         if (game) game.handleInput(event);
     };
+
+    handleTilesDiscovered({ count, total }) {
+        const player = this.entityManager.getEntity('player');
+        const playerState = player.getComponent('PlayerState');
+
+        this.eventBus.emit('LogMessage', { message: `Discovered ${count} new tiles (${total} total)` });
+
+        // Award XP every 1000 tiles
+        const xpThreshold = 1000;
+        const previousTotal = total - count;
+        const previousMilestones = Math.floor(previousTotal / xpThreshold);
+        const currentMilestones = Math.floor(total / xpThreshold);
+
+        if (currentMilestones > previousMilestones) {
+            const xpAward = (currentMilestones - previousMilestones) * 50; // 50 XP per 1000 tiles
+            this.eventBus.emit('AwardXp', { amount: xpAward });
+            this.eventBus.emit('LogMessage', { message: `Exploration milestone reached! Gained ${xpAward} XP for discovering ${currentMilestones * xpThreshold} tiles.` });
+        }
+    }
 }

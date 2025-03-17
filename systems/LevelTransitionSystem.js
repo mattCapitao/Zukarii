@@ -6,7 +6,7 @@ import { System } from '../core/Systems.js';
 export class LevelTransitionSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
-        this.requiredComponents = ['Map', 'Tier']; // For level entities
+        this.requiredComponents = ['Map', 'Tier', 'Exploration']; // For level entities
         this.pendingTransition = null; // Track pending transition type
     }
 
@@ -103,53 +103,76 @@ export class LevelTransitionSystem extends System {
     }
 
     handleLevelAdded({ tier, entityId }) {
+        console.log(`LevelAdded event for tier ${tier}, entityId: ${entityId}`);
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const player = this.entityManager.getEntity('player');
         const levelEntity = this.entityManager.getEntity(entityId);
+        const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
 
         if (!levelEntity) {
             console.error(`Level entity for tier ${tier} not found after LevelAdded event`);
             return;
         }
 
+        const mapComp = levelEntity.getComponent('Map');
+        const explorationComp = levelEntity.getComponent('Exploration');
+        const playerPos = player.getComponent('Position');
+        let pos;
+
+        // Determine if this is a new tier (first visit) by checking if highestTier needs updating
+        const isNewTier = tier > gameState.highestTier;
+
         if (this.pendingTransition === 'down') {
-            const upStair = levelEntity.getComponent('Map').stairsUp;
-            const pos = this.findAdjacentTile(levelEntity.getComponent('Map').map, upStair.x, upStair.y);
-            const playerPos = player.getComponent('Position');
-            playerPos.x = pos.x;
-            playerPos.y = pos.y;
-
-            gameState.needsInitialRender = true;
-            gameState.needsRender = true;
-            gameState.transitionLock = true;
-            this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
-            this.eventBus.emit('RenderNeeded');
+            const upStair = mapComp.stairsUp;
+            pos = this.findAdjacentTile(mapComp.map, upStair.x, upStair.y);
         } else if (this.pendingTransition === 'up') {
-            const downStair = levelEntity.getComponent('Map').stairsDown;
-            const pos = this.findAdjacentTile(levelEntity.getComponent('Map').map, downStair.x, downStair.y);
-            const playerPos = player.getComponent('Position');
-            playerPos.x = pos.x;
-            playerPos.y = pos.y;
-
-            gameState.needsInitialRender = true;
-            gameState.needsRender = true;
-            gameState.transitionLock = true;
-            this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
-            this.eventBus.emit('RenderNeeded');
+            const downStair = mapComp.stairsDown;
+            pos = this.findAdjacentTile(mapComp.map, downStair.x, downStair.y);
         } else if (this.pendingTransition === 'portal') {
-            const upStair = levelEntity.getComponent('Map').stairsUp;
-            const pos = this.findAdjacentTile(levelEntity.getComponent('Map').map, upStair.x, upStair.y);
-            const playerPos = player.getComponent('Position');
-            playerPos.x = pos.x;
-            playerPos.y = pos.y;
-
-            gameState.needsInitialRender = true;
-            gameState.needsRender = true;
-            gameState.transitionLock = true;
-            this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
-            this.eventBus.emit('RenderNeeded');
+            const upStair = mapComp.stairsUp;
+            pos = this.findAdjacentTile(mapComp.map, upStair.x, upStair.y);
         }
 
+        playerPos.x = pos.x;
+        playerPos.y = pos.y;
+
+        // Handle exploration state
+        if (isNewTier) {
+            // New tier: reset exploration and populate initial discovery radius
+            explorationComp.discoveredWalls.clear();
+            explorationComp.discoveredFloors.clear();
+            const discoveryRadius = renderState.discoveryRadius;
+            const height = mapComp.map.length;
+            const width = mapComp.map[0].length;
+            const minX = Math.max(0, pos.x - discoveryRadius);
+            const maxX = Math.min(width - 1, pos.x + discoveryRadius);
+            const minY = Math.max(0, pos.y - discoveryRadius);
+            const maxY = Math.min(height - 1, pos.y + discoveryRadius);
+
+            for (let y = minY; y <= maxY; y++) {
+                for (let x = minX; x <= maxX; x++) {
+                    const distance = Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
+                    if (distance <= discoveryRadius) {
+                        const tileKey = `${x},${y}`;
+                        if (mapComp.map[y][x] === '#') {
+                            explorationComp.discoveredWalls.add(tileKey);
+                        } else {
+                            explorationComp.discoveredFloors.add(tileKey);
+                        }
+                    }
+                }
+            }
+        } // Revisited tiers retain their existing explorationComp state
+
+        gameState.needsInitialRender = true;
+        gameState.needsRender = true;
+        gameState.transitionLock = true;
+        this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+        this.eventBus.emit('DiscoveredStateUpdated', { tier, entityId });
+        this.eventBus.emit('RenderNeeded');
+
+        console.log('Pending transition after switch:', this.pendingTransition, 'Tier:', tier);
+        console.log('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
         this.pendingTransition = null; // Reset pending transition
     }
 }

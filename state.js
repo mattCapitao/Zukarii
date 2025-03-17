@@ -118,7 +118,8 @@ export class State {
     // Helper to get game state (convenience for now)
     getGameState() {
         const entity = this.entityManager.getEntity('gameState');
-        console.log('State.js: getGameState called, entity ID:', entity?.id, 'timestamp:', Date.now());
+        const component = entity?.getComponent('GameState');
+        console.log('State.js: getGameState called, entity ID:', entity?.id, 'component reference:', component, 'timestamp:', Date.now());
         return entity;
     }
 }
