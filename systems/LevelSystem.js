@@ -633,7 +633,7 @@ export class LevelSystem extends System {
         return padded;
     }
 
-    adjustPlayerPosition(levelEntity, stair) {
+    adjustPdPosition(levelEntity, stair) {
         const mapComponent = levelEntity.getComponent('Map');
         if (!mapComponent || !mapComponent.map) {
             console.error(`LevelSystem: No valid MapComponent or map for entity ${levelEntity.id}`);
@@ -646,11 +646,15 @@ export class LevelSystem extends System {
         ];
         const player = this.entityManager.getEntity('player');
         const pos = player.getComponent('Position');
+
+
         for (const dir of directions) {
             if (dir.y >= 0 && dir.y < map.length && dir.x >= 0 && dir.x < map[0].length && map[dir.y][dir.x] === ' ') {
                 pos.x = dir.x;
                 pos.y = dir.y;
                 this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+               
+                console.warn(`LevelSystem:  Set player position to (${pos.x}, ${pos.y}) near stairs at (${stair.x}, ${stair.y})`);
                 return;
             }
         }
@@ -658,7 +662,9 @@ export class LevelSystem extends System {
         pos.x = 1;
         pos.y = 1;
         console.warn(`LevelSystem: No adjacent walkable tile found near (${stair.x}, ${stair.y}), using fallback position (1, 1)`);
-        this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+
+       this.eventBus.emit('PositionChanged ', { entityId: 'player', x: pos.x, y: pos.y });
+        
     }
 
     ensureRoomConnections(levelEntity) {

@@ -9,16 +9,26 @@ export class RenderSystem extends System {
         this.mapDiv = document.getElementById('map');
         this.tileMap = {};
         this.lastTier = null;
+        this.isRenderLocked = false;
+        console.log('RenderSystem: Render Lock initialized with Render Lock Status:', this.isRenderLocked);
     }
 
     init() {
         this.eventBus.on('RenderNeeded', () => this.render(true));
+        this.eventBus.on('RenderLock', () => this.renderLock(true));
+        this.eventBus.on('RenderUnlock', () => this.renderLock(false));
         this.eventBus.on('PositionChanged', (data) => this.render(true));
         this.eventBus.on('DiscoveredStateUpdated', () => this.render(true));
+        this.eventBus.on('ClearOldPlayerPosition', (data) => this.clearOldPlayerPosition(data));
     }
 
     update() {
         this.render(false); // Continuous render without forcing needsRender
+    }
+
+    renderLock(boolFlag) {
+        this.isRenderLocked = boolFlag;
+        console.log(`Render: renderLock = ${this.isRenderLocked}`);
     }
 
     render(force = false) {
@@ -28,7 +38,11 @@ export class RenderSystem extends System {
         const titleScreenContainer = document.getElementById('splash');
 
         if (!gameState) return;
-
+        console.log('RenderSystem: Checking Render Lock with value: isRenderLocked = ', this.isRenderLocked);
+        if (this.isRenderLocked) {
+            console.warn('RenderSystem: Render is locked, skipping render');
+            return;
+        }
         // Only check needsRender for event-driven renders
         if (!force && !gameState.needsRender) return;
 
@@ -61,7 +75,9 @@ export class RenderSystem extends System {
         const height = map.length;
         const width = map[0].length;
         const playerPos = player.getComponent('Position');
+        console.log('RenderSystem: Rendering map for player at', playerPos);
         const playerState = player.getComponent('PlayerState');
+        console.log('RenderSystem: Player state:', playerState);    
         const visibilityRadius = 6;
         const discoveryRadius = renderState.discoveryRadius;
 
@@ -71,6 +87,7 @@ export class RenderSystem extends System {
         const maxYDiscover = Math.min(height - 1, playerPos.y + discoveryRadius);
 
         let newDiscoveryCount = 0;
+        
         for (let y = minYDiscover; y <= maxYDiscover; y++) {
             for (let x = minXDiscover; x <= maxXDiscover; x++) {
                 const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
@@ -88,13 +105,15 @@ export class RenderSystem extends System {
                 }
             }
         }
+        
         if (newDiscoveryCount > 0) {
             playerState.discoveredTileCount += newDiscoveryCount;
             this.eventBus.emit('TilesDiscovered', { count: newDiscoveryCount, total: playerState.discoveredTileCount });
         }
-
+      
         if (!Object.keys(this.tileMap).length) {
             let mapDisplay = '';
+            let playerSpawnLocations = '';
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
                     let char = map[y][x];
@@ -108,6 +127,7 @@ export class RenderSystem extends System {
                         char = '*';
                         className = 'discovered projectile';
                     } else if (x === playerPos.x && y === playerPos.y) {
+                        playerSpawnLocations += `Rendering player at${x},${y}`;
                         char = '𓀠';
                         className = 'player';
                         if (playerState.torchLit) className += ' torch flicker';
@@ -116,7 +136,9 @@ export class RenderSystem extends System {
                 }
                 mapDisplay += '\n';
             }
+            console.log("Player Avatar Locations", playerSpawnLocations); 
             this.mapDiv.innerHTML = mapDisplay;
+
 
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
@@ -124,6 +146,7 @@ export class RenderSystem extends System {
                     this.tileMap[`${x},${y}`] = { char: map[y][x], class: element.className, element };
                 }
             }
+            
             this.setInitialScroll();
         } else {
             const minX = Math.max(0, playerPos.x - visibilityRadius);
@@ -152,13 +175,11 @@ export class RenderSystem extends System {
                         const treasureMatch = treasures.some(t => t.getComponent('Position').x === x && t.getComponent('Position').y === y);
                         const projectileMatch = projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
                         if (projectileMatch) {
-                           // console.log('RenderSystem: Projectile detected at', x, y, 'timestamp:', Date.now());
                             char = '*';
                             className = 'discovered projectile';
                         } else if (treasureMatch) {
                             char = '$';
                             className = 'discovered';
-                        
                         } else if (x === playerPos.x && y === playerPos.y) {
                             char = '𓀠';
                             className = 'player';
@@ -190,6 +211,7 @@ export class RenderSystem extends System {
         if (force) gameState.needsRender = false; // Only reset for event-driven renders
         gameState.needsInitialRender = false;
     }
+
 
     setInitialScroll() {
         const mapElement = document.getElementById('map');

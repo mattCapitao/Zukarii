@@ -97,6 +97,7 @@ export class Game {
         //console.log('Entities before systems:', this.entityManager.getAllEntities());
         this.initializeSystems();
         this.state.eventBus.emit('InitializePlayer');
+        this.state.eventBus.emit('RenderNeeded');
         //console.log('Systems initialized');
         this.setupEventListeners();
         this.startGameLoop();
@@ -310,16 +311,21 @@ export class Game {
             if (map[newY][newX] === '#') return;
 
             if (map[newY][newX] === '⇓') {
+                this.state.eventBus.emit('RenderLock');
+                console.log('Game: Render Locked for  TransitionDown');
                 this.state.eventBus.emit('TransitionDown');
+                
                 this.endTurn('transitionDown');
                 return;
             }
             if (map[newY][newX] === '⇑') {
+                this.state.eventBus.emit('RenderLock');
                 this.state.eventBus.emit('TransitionUp');
                 this.endTurn('transitionUp');
                 return;
             }
             if (map[newY][newX] === '?') {
+                this.state.eventBus.emit('RenderLock');
                 this.state.eventBus.emit('TransitionViaPortal', { x: newX, y: newY });
                 this.endTurn('transitionPortal');
                 return;
@@ -379,7 +385,7 @@ export class Game {
                 ////console.log('Game.js: Game loop heartbeat, frame:', frameCount, 'timestamp:', Date.now());
             }
             this.updateSystems(['combat', 'render', 'player', 'monster', 'ui']);
-            this.state.eventBus.emit('RenderNeeded');
+            //this.state.eventBus.emit('RenderNeeded');
             requestAnimationFrame(gameLoop);
         };
         requestAnimationFrame(gameLoop);
