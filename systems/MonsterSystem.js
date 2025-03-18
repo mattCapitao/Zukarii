@@ -12,7 +12,10 @@ export class MonsterSystem extends System {
     init() {
         this.eventBus.on('MoveMonsters', () => this.moveMonsters());
         this.eventBus.on('MonsterAttack', (data) => this.handleMonsterAttack(data));
-        this.eventBus.on('MonsterDied', (data) => this.handleMonsterDeath(data.entityId));
+        this.eventBus.on('MonsterDied', (data) => {
+            console.log(`MonsterSystem: Received MonsterDied event with data:`, data);
+            this.handleMonsterDeath(data.entityId);
+    });
         this.eventBus.on('SpawnMonsters', (data) => this.handleSpawnMonsters(data));
     }
 
@@ -84,6 +87,7 @@ export class MonsterSystem extends System {
         this.entityManager.addComponentToEntity(entity.id, {
             type: 'MonsterData',
             name: template.name,
+            tier: tier,
             classes: template.classes,
             avatar: template.avatar,
             minBaseDamage: template.minBaseDamage + Math.floor(tier / 3),
@@ -234,5 +238,8 @@ export class MonsterSystem extends System {
         console.log(`Monster defeated: ${monsterData.name}, XP calc - maxHp: ${health.maxHp}, minDmg: ${monsterData.minBaseDamage}, maxDmg: ${monsterData.maxBaseDamage}, tier: ${tier}, baseXp: ${baseXp}`);
         this.eventBus.emit('LogMessage', { message: `${monsterData.name} defeated!` });
         this.eventBus.emit('AwardXp', { amount: baseXp });
+        
+        this.eventBus.emit('DropTreasure', {monster});
+        console.log(`Emitting lootDrop for ${monsterData.name}`);
     }
 }

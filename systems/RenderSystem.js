@@ -152,7 +152,7 @@ export class RenderSystem extends System {
                         const treasureMatch = treasures.some(t => t.getComponent('Position').x === x && t.getComponent('Position').y === y);
                         const projectileMatch = projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
                         if (projectileMatch) {
-                            console.log('RenderSystem: Projectile detected at', x, y, 'timestamp:', Date.now());
+                           // console.log('RenderSystem: Projectile detected at', x, y, 'timestamp:', Date.now());
                             char = '*';
                             className = 'discovered projectile';
                         } else if (treasureMatch) {

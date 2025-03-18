@@ -119,7 +119,7 @@ export class State {
     getGameState() {
         const entity = this.entityManager.getEntity('gameState');
         const component = entity?.getComponent('GameState');
-        console.log('State.js: getGameState called, entity ID:', entity?.id, 'component reference:', component, 'timestamp:', Date.now());
+       // console.log('State.js: getGameState called, entity ID:', entity?.id, 'component reference:', component, 'timestamp:', Date.now());
         return entity;
     }
 }

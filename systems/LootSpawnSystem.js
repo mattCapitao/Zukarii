@@ -19,7 +19,10 @@ export class LootSpawnSystem extends System {
                 console.error('LootSpawnSystem: Invalid data structure:', data);
             }
         });
-        this.eventBus.on('DropTreasure', (data) => this.dropTreasure(data));
+        this.eventBus.on('DropTreasure', (data) => {
+            console.log('LootSpawnSystem: Received DropTreasure event with raw data:', data);
+            this.dropMonsterTreasure(data)
+        });
         this.eventBus.on('DiscardItem', (data) => this.spawnLootEntity(data));
     }
 
@@ -57,23 +60,30 @@ export class LootSpawnSystem extends System {
         }
     }
 
-    dropTreasure({ entityId }) {
-        const sourceEntity = this.entityManager.getEntity(entityId);
-        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+    dropMonsterTreasure(data) { 
+       
+
+        console.log(`LootSpawnSystem: sourceEntity.id: ${data}`, data);
+
+        const sourceEntity = data.monster;
+
+   
+        
         if (!sourceEntity) return;
 
         const sourcePos = sourceEntity.getComponent('Position');
+        const monsterData = sourceEntity.getComponent('MonsterData');
         const loot = {
             x: sourcePos.x,
             y: sourcePos.y,
-            name: `${sourceEntity.name || 'Unknown'} Loot`,
+            name: `${sourceEntity.name || 'Monster'} Loot`,
             gold: this.calculateGoldGain(),
             torches: this.calculateTorchDrop() ? 1 : 0,
             healPotions: this.calculatePotionDrop() ? 1 : 0,
             items: this.generateDropItems(sourceEntity)
         };
-
-        this.spawnLootEntity({ loot, tier: gameState.tier });
+        console.log(`LootSpawnSystem: Dropping loot`, loot);
+        this.spawnLootEntity({ treasure: loot, tier: monsterData.tier });
         this.eventBus.emit('LogMessage', { message: `${sourceEntity.name} dropped ${loot.gold} gold${loot.torches ? ' and a torch' : ''}${loot.items.length ? ` and ${loot.items.map(i => i.name).join(', ')}` : ''}!` });
     }
 

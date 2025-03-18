@@ -7,7 +7,6 @@ import { PlayerSystem } from './systems/PlayerSystem.js';
 import { MonsterSystem } from './systems/MonsterSystem.js';
 import { LevelSystem } from './systems/LevelSystem.js';
 import { ItemSystem } from './systems/ItemSystem.js';
-//import { TreasureSystem } from './systems/TreasureSystem.js';
 import { LootSpawnSystem } from './systems/LootSpawnSystem.js';
 import { LootCollectionSystem } from './systems/LootCollectionSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
@@ -26,7 +25,7 @@ export class Game {
         this.lastUpdateTime = 0;
         this.lastMouseEventTime = 0; // Track last mouse event timestamp
 
-        console.log('Creating state entity...');
+        //console.log('Creating state entity...');
         let stateEntity = this.entityManager.getEntity('state');
         if (!stateEntity) {
             stateEntity = this.entityManager.createEntity('state');
@@ -48,16 +47,16 @@ export class Game {
                 }
             });
             this.entityManager.addComponentToEntity('state', { type: 'DiscoveryRadius', discoveryRadiusDefault: 2 });
-            console.log('State entity created:', this.entityManager.getEntity('state'));
+            //console.log('State entity created:', this.entityManager.getEntity('state'));
         }
 
-        console.log('Checking for existing player entity...');
+        //console.log('Checking for existing player entity...');
         let player = this.entityManager.getEntity('player');
         if (player) {
-            console.log('Player entity exists, resetting it...');
+            //console.log('Player entity exists, resetting it...');
             this.entityManager.removeEntity('player');
         }
-        console.log('Creating new player entity...');
+        //console.log('Creating new player entity...');
         player = this.entityManager.createEntity('player');
         this.entityManager.addComponentToEntity('player', new PositionComponent(1, 1));
         this.entityManager.addComponentToEntity('player', new HealthComponent(0, 0));
@@ -69,9 +68,9 @@ export class Game {
         }));
         this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0, 0));
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, false, ''));
-        console.log('Player entity created with default components:', this.entityManager.getEntity('player'));
+        //console.log('Player entity created with default components:', this.entityManager.getEntity('player'));
 
-        console.log('Creating overlayState entity...');
+        //console.log('Creating overlayState entity...');
         let overlayState = this.entityManager.getEntity('overlayState');
         if (!overlayState) {
             overlayState = this.entityManager.createEntity('overlayState');
@@ -81,10 +80,10 @@ export class Game {
                 activeTab: null,
                 logMessages: []
             });
-            console.log('OverlayState entity created:', this.entityManager.getEntity('overlayState'));
+            //console.log('OverlayState entity created:', this.entityManager.getEntity('overlayState'));
         }
 
-        console.log('Creating renderState entity...');
+        //console.log('Creating renderState entity...');
         let renderStateEntity = this.entityManager.getEntity('renderState');
         if (!renderStateEntity) {
             renderStateEntity = this.entityManager.createEntity('renderState');
@@ -92,20 +91,20 @@ export class Game {
                 type: 'RenderState',
                 discoveryRadius: 2
             });
-            console.log('RenderState entity created:', this.entityManager.getEntity('renderState'));
+            //console.log('RenderState entity created:', this.entityManager.getEntity('renderState'));
         }
 
-        console.log('Entities before systems:', this.entityManager.getAllEntities());
+        //console.log('Entities before systems:', this.entityManager.getAllEntities());
         this.initializeSystems();
         this.state.eventBus.emit('InitializePlayer');
-        console.log('Systems initialized');
+        //console.log('Systems initialized');
         this.setupEventListeners();
         this.startGameLoop();
     }
 
     initializeSystems() {
-        console.log('Game.js: initializeSystems start, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
-        console.log('Game.js: EventBus instance:', this.state.eventBus);
+        //console.log('Game.js: initializeSystems start, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
+        //console.log('Game.js: EventBus instance:', this.state.eventBus);
 
         this.systems = {
             data: new DataSystem(this.entityManager, this.state.eventBus),
@@ -126,11 +125,11 @@ export class Game {
         };
 
         Object.values(this.systems).forEach(system => {
-            console.log(`Game.js: Initializing system ${system.constructor.name} with EventBus:`, this.state.eventBus);
+            //console.log(`Game.js: Initializing system ${system.constructor.name} with EventBus:`, this.state.eventBus);
             system.init();
         });
 
-        console.log('Game.js: initializeSystems end, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
+        //console.log('Game.js: initializeSystems end, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
     }
 
     setupEventListeners() {
@@ -142,20 +141,20 @@ export class Game {
 
     updateLastMouseEvent() {
         this.lastMouseEventTime = Date.now();
-        console.log('Mouse event detected, lastMouseEventTime updated:', this.lastMouseEventTime);
+       // //console.log('Mouse event detected, lastMouseEventTime updated:', this.lastMouseEventTime);
     }
 
     handleInput(event) {
-        console.log(`Game.js: Handling ${event.type} event for key: ${event.key}`);
+        //console.log(`Game.js: Handling ${event.type} event for key: ${event.key}`);
         const gameState = this.state.getGameState()?.getComponent('GameState');
         if (!gameState) {
             console.error('Game.js: gameState not found or missing GameState component');
         } else {
-            console.log('Game.js: handleInput start, gameState:', gameState, 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
+            //console.log('Game.js: handleInput start, gameState:', gameState, 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
         }
 
         if (gameState && !gameState.gameStarted) {
-            console.log('Game.js: Starting game on first keypress');
+            //console.log('Game.js: Starting game on first keypress');
             gameState.gameStarted = true;
             gameState.needsRender = true;
             this.state.eventBus.emit('ToggleBackgroundMusic', { play: true });
@@ -165,7 +164,7 @@ export class Game {
         }
 
         if (gameState.gameOver) {
-            console.log('Game.js: Game over, ignoring input');
+            //console.log('Game.js: Game over, ignoring input');
             return;
         }
 
@@ -184,39 +183,39 @@ export class Game {
 
         const mappedKey = keyMap[event.key];
         if (!mappedKey) {
-            console.log(`Game.js: Key ${event.key} not mapped, ignoring`);
+            //console.log(`Game.js: Key ${event.key} not mapped, ignoring`);
             return;
         }
 
         if (event.type === 'keydown' && !event.repeat) {
-            console.log(`Key pressed: ${mappedKey}`);
+            //console.log(`Key pressed: ${mappedKey}`);
         }
 
         // Check if Ctrl is part of a recent click context
         const isClickContext = Date.now() - this.lastMouseEventTime < 500; // 500ms threshold
         if (event.type === 'keydown' && event.key === 'Control' && isClickContext) {
-            console.log('Game.js: Ignoring Ctrl key in click context');
+            //console.log('Game.js: Ignoring Ctrl key in click context');
             return; // Allow Ctrl to propagate to click handlers
         }
 
         if (event.type === 'keyup' && mappedKey === ' ') {
             this.state.eventBus.emit('ToggleRangedMode', { event });
-            console.log('space keyUp detected');
+            //console.log('space keyUp detected');
             this.updateSystems(['player', 'render']);
             return;
         }
 
         if (event.type === 'keydown' && !event.repeat) {
-            console.log('Game.js: Processing keydown, gameState before switch:', gameState, 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
+            //console.log('Game.js: Processing keydown, gameState before switch:', gameState, 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
             const player = this.state.getPlayer();
             if (!player) {
-                console.log('Game.js: Player entity not found');
+                //console.log('Game.js: Player entity not found');
                 return;
             }
             const playerPos = player.getComponent('Position');
             const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
             if (!levelEntity) {
-                console.log('Game.js: Level entity not found for current tier');
+                //console.log('Game.js: Level entity not found for current tier');
                 return;
             }
             const map = levelEntity.getComponent('Map').map;
@@ -258,17 +257,17 @@ export class Game {
                     newX++;
                     break;
                 case 'c':
-                    console.log('Emitting ToggleOverlay for character tab');
+                    //console.log('Emitting ToggleOverlay for character tab');
                     this.state.eventBus.emit('ToggleOverlay', { tab: 'character' });
                     this.updateSystems(['ui']);
                     return;
                 case 'l':
-                    console.log('Emitting ToggleOverlay for log tab');
+                    //console.log('Emitting ToggleOverlay for log tab');
                     this.state.eventBus.emit('ToggleOverlay', { tab: 'log' });
                     this.updateSystems(['ui']);
                     return;
                 case 'escape':
-                    console.log('Emitting ToggleOverlay to close');
+                    //console.log('Emitting ToggleOverlay to close');
                     this.state.eventBus.emit('ToggleOverlay', {});
                     this.updateSystems(['ui']);
                     return;
@@ -285,7 +284,7 @@ export class Game {
                 case ' ':
                     this.state.eventBus.emit('ToggleRangedMode', { event });
                     this.updateSystems(['player', 'render']);
-                    console.log('space keyDown detected');
+                    //console.log('space keyDown detected');
                     return;
             }
 
@@ -356,7 +355,7 @@ export class Game {
             renderState.discoveryRadius = playerState.torchLit ?
                 state.getComponent('DiscoveryRadius').discoveryRadiusDefault + 2 :
                 state.getComponent('DiscoveryRadius').discoveryRadiusDefault;
-            console.log('endTurn - discoveryRadius:', renderState.discoveryRadius);
+            //console.log('endTurn - discoveryRadius:', renderState.discoveryRadius);
         }
 
         this.state.eventBus.emit('MoveMonsters');
@@ -372,12 +371,12 @@ export class Game {
     }
 
     startGameLoop() {
-        console.log('Game.js: Game loop started, timestamp:', Date.now());
+        //console.log('Game.js: Game loop started, timestamp:', Date.now());
         let frameCount = 0;
         const gameLoop = () => {
             frameCount++;
             if (frameCount % 60 === 0) { // Log every ~1 second at 60 FPS
-                //console.log('Game.js: Game loop heartbeat, frame:', frameCount, 'timestamp:', Date.now());
+                ////console.log('Game.js: Game loop heartbeat, frame:', frameCount, 'timestamp:', Date.now());
             }
             this.updateSystems(['combat', 'render', 'player', 'monster', 'ui']);
             this.state.eventBus.emit('RenderNeeded');

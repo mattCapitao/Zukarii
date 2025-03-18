@@ -76,7 +76,9 @@ export class CombatSystem extends System {
                     });
 
                     if (targetHealth.hp <= 0) {
+                        console.log('CombatSystem: Monster died from projectile', target.id, 'timestamp:', Date.now());
                         this.eventBus.emit('MonsterDied', { entityId: target.id });
+                        console.log('CombatSystem: Monster died event emitted', target.id, 'timestamp:', Date.now());
                     }
                     // Continue moving after hitting a monster
                 }
