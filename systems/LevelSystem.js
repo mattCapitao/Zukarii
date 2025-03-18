@@ -633,7 +633,7 @@ export class LevelSystem extends System {
         return padded;
     }
 
-    adjustPdPosition(levelEntity, stair) {
+    adjustPlayerPosition(levelEntity, stair) {
         const mapComponent = levelEntity.getComponent('Map');
         if (!mapComponent || !mapComponent.map) {
             console.error(`LevelSystem: No valid MapComponent or map for entity ${levelEntity.id}`);
