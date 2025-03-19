@@ -525,7 +525,7 @@ export class LevelSystem extends System {
         const collectEntityId = (data) => {
             if (data.tier === tier) {
                 lootEntityIds.push(data.entityId);
-                console.log(`LevelSystem: Collected entity ID ${data.entityId} for tier ${tier}`);
+                console.log(`LevelSystem: logged entity ID ${data.entityId} for tier ${tier}`);
             }
         };
         this.eventBus.on('LootEntityCreated', collectEntityId);
@@ -632,7 +632,7 @@ export class LevelSystem extends System {
         }
         return padded;
     }
-
+    
     adjustPlayerPosition(levelEntity, stair) {
         const mapComponent = levelEntity.getComponent('Map');
         if (!mapComponent || !mapComponent.map) {

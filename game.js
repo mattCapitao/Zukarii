@@ -9,6 +9,8 @@ import { LevelSystem } from './systems/LevelSystem.js';
 import { ItemSystem } from './systems/ItemSystem.js';
 import { LootSpawnSystem } from './systems/LootSpawnSystem.js';
 import { LootCollectionSystem } from './systems/LootCollectionSystem.js';
+import { ItemROGSystem } from './systems/ItemROGSystem.js'; // Add this
+import { LootManagerSystem } from './systems/LootManagerSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
 import { UISystem } from './systems/UISystem.js';
 import { LevelTransitionSystem } from './systems/LevelTransitionSystem.js';
@@ -114,6 +116,8 @@ export class Game {
             render: new RenderSystem(this.entityManager, this.state.eventBus),
             lootSpawn: new LootSpawnSystem(this.entityManager, this.state.eventBus),
             lootCollection: new LootCollectionSystem(this.entityManager, this.state.eventBus),
+            itemROG: new ItemROGSystem(this.entityManager, this.state.eventBus), 
+            lootManager: new LootManagerSystem(this.entityManager, this.state.eventBus),
             player: new PlayerSystem(this.entityManager, this.state.eventBus),
             monster: new MonsterSystem(this.entityManager, this.state.eventBus, this.systems.data),
             level: new LevelSystem(this.entityManager, this.state.eventBus, this.state),

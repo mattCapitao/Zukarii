@@ -223,6 +223,27 @@ export class ExplorationComponent {
     }
 }
 
+export class LootSourceData {
+    constructor({ sourceType = "unknown", name = "Unknown", tier = 0, position = { x: 0, y: 0 }, sourceDetails = {}, chanceModifiers = {}, maxItems = 1, hasCustomUnique = false, uniqueItemIndex = 0 } = {}) {
+        this.type = 'LootSourceData';
+        this.sourceType = sourceType;
+        this.name = name;
+        this.tier = tier;
+        this.position = position;
+        this.sourceDetails = sourceDetails;
+        this.chanceModifiers = {
+            torches: chanceModifiers.torches || 1,
+            healPotions: chanceModifiers.healPotions || 1,
+            gold: chanceModifiers.gold || 1,
+            item: chanceModifiers.item || 1,
+            uniqueItem: chanceModifiers.uniqueItem || 1
+        };
+        this.maxItems = maxItems;
+        this.hasCustomUnique = hasCustomUnique;
+        this.uniqueItemIndex = uniqueItemIndex;
+    }
+}
+
 // New LootData component
 export class LootData {
     constructor({

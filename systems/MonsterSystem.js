@@ -1,6 +1,6 @@
 ﻿// systems/MonsterSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent, HealthComponent } from '../core/Components.js';
+import { PositionComponent, HealthComponent, LootSourceData } from '../core/Components.js';
 
 export class MonsterSystem extends System {
     constructor(entityManager, eventBus, dataSystem) {
@@ -20,7 +20,7 @@ export class MonsterSystem extends System {
     }
 
     handleSpawnMonsters({ tier, map, rooms, hasBossRoom, spawnPool }) {
-        const baseMonsterCount = 12;
+        const baseMonsterCount = 25;
         const densityFactor = 1 + tier * 0.1;
         const monsterCount = Math.floor(baseMonsterCount * densityFactor);
         const player = this.entityManager.getEntity('player');
@@ -223,6 +223,7 @@ export class MonsterSystem extends System {
         }
     }
 
+
     handleMonsterDeath(entityId) {
         const monster = this.entityManager.getEntity(entityId);
         const player = this.entityManager.getEntity('player');
@@ -238,8 +239,26 @@ export class MonsterSystem extends System {
         console.log(`Monster defeated: ${monsterData.name}, XP calc - maxHp: ${health.maxHp}, minDmg: ${monsterData.minBaseDamage}, maxDmg: ${monsterData.maxBaseDamage}, tier: ${tier}, baseXp: ${baseXp}`);
         this.eventBus.emit('LogMessage', { message: `${monsterData.name} defeated!` });
         this.eventBus.emit('AwardXp', { amount: baseXp });
-        
-        this.eventBus.emit('DropTreasure', {monster});
-        console.log(`Emitting lootDrop for ${monsterData.name}`);
+
+        const lootSource = this.entityManager.createEntity(`loot_source_${monsterData.tier}_${Date.now()}`);
+        this.entityManager.addComponentToEntity(lootSource.id, new LootSourceData({
+            sourceType: "monster",
+            name: monsterData.name,
+            tier: monsterData.tier,
+            position: monster.getComponent('Position'),
+            sourceDetails: { id: monster.id },
+            chanceModifiers: {
+                torches: 1,
+                healPotions: 1,
+                gold: 1,
+                item: 1,
+                uniqueItem: 1
+            },
+            maxItems: 1,            // Default to 1 item drop
+            hasCustomUnique: false, // No custom unique yet
+            uniqueItemIndex: 0      // Default index
+        }));
+        this.eventBus.emit('DropLoot', { lootSource });
+        console.log(`Emitting DropLoot for ${monsterData.name}`);
     }
 }

@@ -239,7 +239,7 @@ export class PlayerSystem extends System {
         const player = this.entityManager.getEntity('player');
         const playerState = player.getComponent('PlayerState');
 
-        this.eventBus.emit('LogMessage', { message: `Discovered ${count} new tiles (${total} total)` });
+        //this.eventBus.emit('LogMessage', { message: `Discovered ${count} new tiles (${total} total)` });
 
         // Award XP every 1000 tiles
         const xpThreshold = 1000;
