@@ -161,8 +161,8 @@ position: absolute;
 top: 50%;
 left: 50%;
 transform: translate(-50%, -50%);
-width: 72vw;
-height: 72vh;
+width: 70vw;
+height: 75vh;
 background: rgba(20, 30, 20, 0.7);
 border: 0.0625rem solid #060; /* ~1px */
 border-radius: .625rem;
@@ -170,7 +170,7 @@ color: #0f0;
 display: none; /* Hidden by default */
 font-family: 'Verdana', Roboto, sans-serif;
 font-size: 0.875rem; /* ~14px */
-padding: 1rem; /* ~16px */
+padding: .75rem; /* ~16px */
 pointer-events: auto; /* Clickable children */
 z-index: 2000; /* Increased to appear above #splash */
 }
@@ -413,10 +413,11 @@ cursor: pointer;
 }
 
 #tab-wrapper {
-height: 100%;
-padding: 0.3125rem; 
-margin: 0;
-overflow-y: hidden;
+    height: 100%;
+    padding: 0 0.3125rem 0 0.3125rem;
+    padding-top: 0;
+    margin: 0;
+    overflow-y: hidden;
 }
 
 #log-content {
@@ -494,7 +495,8 @@ justify-content: center;
 align-content: center;
 }
 
-#equipped-items {
+
+    #equipped-items {
 width: 100%;
 display: flex;
 justify-content: center;
@@ -507,6 +509,7 @@ border-radius: .625rem;
 margin-bottom: 0.625rem; /* ~10px */
 }
 
+
 #equipped-items div.col {
 display: flex;
 flex-direction: column;
@@ -515,20 +518,31 @@ align-items: center;
 width: 33% !important;
 }
 
+
 #tabs #equipped-items div.equipped-item {
     display: flex;
     flex-direction: column;
     padding: .3125rem; /* ~5px */
+    height: 6.75rem;
+    width: 5rem;
+}
+
+#tabs #equipped-items p {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: .3125rem; /* ~5px */
     height: 6rem;
+    width: 5rem;
 }
 
 #tabs #equipped-items p.equipped {
-   
     padding: 0;
     margin: 0;
     text-align: center;
-    width: 5rem; /* ~68px */
-    height: 5rem; /* ~68px */
+    width: 4.25rem; /* ~68px */
+    height: 4.25rem; /* ~68px */
 }
 
 #tabs #equipped-items p.equip-slot.equipped img.item {
@@ -538,6 +552,7 @@ width: 33% !important;
     padding: 0;
     margin: 0;
     border: 0.0625rem solid #ccc; /* ~1px */
+
 }
 
 
@@ -545,27 +560,31 @@ width: 33% !important;
 
 
     #tabs #equipped-items p.empty {
-        width: 4rem;
-        height: 4rem;
-        background-size: 4rem;
+        width: 4.25rem;
+        height: 4.25rem;
+        background-size: 4.25rem;
         border-radius: .3125rem; /* ~5px */
         box-shadow: inset 0 0 10px #000;
         border: 0.0625rem solid #ccc; /* ~1px */
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center center;
     }
 
 #tabs #equipped-items p.empty img.item {
     width: 4rem; /* ~64px */
-    height: 4rem; /* ~64px */
+    height: 4rem; /* ~64px */S
     padding: 0;
     margin: 0;
     border-radius: .3125rem; /* ~5px */
 }
 
 #tabs #equipped-items span {
-margin: 0;
-text-align: center;
-font-size: 0.75rem; /* ~12px */
-width: 4rem; /* ~68px */
+    margin: 0;
+    padding: .25rem 0 .5rem 0;
+    text-align: center;
+    font-size: 0.75rem; /* ~12px */
+    width: 100% /* ~68px */
 }
 
 #tabs #equipped-items p.mainhand.empty {
@@ -611,7 +630,7 @@ background-image: url('img/icons/item-slots/boots.svg');
 #inventory {
 display: flex;
 flex-direction: column;
-height: 30rem; /* ~400px */
+height: 31.75rem; /* ~400px */
 width: 68%;
 margin-top: 0.625rem; /* ~10px */
 }

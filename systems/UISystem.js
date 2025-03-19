@@ -132,15 +132,23 @@ export class UISystem extends System {
             <div>XP: ${playerState.xp}/${playerState.nextLevelXp}</div>
             <div>HP: ${health.hp}/${health.maxHp}</div>
             <div>Mana: ${mana.mana}/${mana.maxMana}</div>
-            <div>Gold: ${inventory.gold !== undefined ? inventory.gold : 'N/A'}</div>
+            <div>Gold: ${resource.gold}</div>
             <div>Torches: ${resource.torches}</div>
             <div><hr></div><div><hr></div>
             <div>${stats.intellect || 0} : Intellect</div>
             <div>${stats.prowess || 0} : Prowess</div>
+
             <div>${stats.agility || 0} : Agility</div>
-            <div>${stats.armor || 0} : Armor</div>
-            <div>${stats.block || 0} : Block</div>
             <div>${stats.range || 0} : Range</div>
+            
+            <div>${stats.damageBonus} : +Damage Bonus</div>
+            <div>${stats.armor || 0} : Armor</div>
+
+            <div>${stats.meleeDamageBonus} : +Melee Dmg</div>
+            <div>${stats.defense} : Defense </div>
+           
+            <div>${stats.rangedDamageBonus} : +Ranged Dmg</div>
+             <div>${stats.block || 0} : Block</div>
         `;
 
         // Update equipped items in existing slots
@@ -151,10 +159,11 @@ export class UISystem extends System {
             const equippedItem = inventory.equipped[slotName] || null;
 
             if (equippedItem) {
-                slot.innerHTML = `
-                    <img src="img/icons/items/${equippedItem.icon}" alt="${equippedItem.name}" class="item item-icon ${equippedItem.itemTier} ${equippedItem.type}" data-item='${JSON.stringify(equippedItem)}' draggable="true" onerror="this.src='img/icons/items/default.svg';">
-                    <span class="item-label ${equippedItem.itemTier}">${slotName}</span>
-                `;
+
+                slot.innerHTML = `<img src="img/icons/items/${equippedItem.icon}" alt="${equippedItem.name}" 
+                class="item item-icon ${equippedItem.itemTier} ${equippedItem.type}" data-item='${JSON.stringify(equippedItem)}' 
+                draggable="true" onerror="this.src='img/icons/items/default.svg';">`;
+
                 slot.classList.remove('empty');
                 slot.classList.add('equipped');
             } else {
