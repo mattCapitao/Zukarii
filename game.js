@@ -204,14 +204,13 @@ export class Game {
         }
 
         if (event.type === 'keyup' && mappedKey === ' ') {
-            event.preventDefault();
             this.state.eventBus.emit('ToggleRangedMode', { event });
             //console.log('space keyUp detected');
             this.updateSystems(['player', 'render']);
             return;
         }
 
-        if (event.type === 'keydown' && !event.repeat) {
+        if (event.type === 'keydown') { // removed  && !event.repeat
             //console.log('Game.js: Processing keydown, gameState before switch:', gameState, 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
             const player = this.state.getPlayer();
             if (!player) {
@@ -288,9 +287,11 @@ export class Game {
                     this.updateSystems(['player', 'render']);
                     return;
                 case ' ':
-                    this.state.eventBus.emit('ToggleRangedMode', { event });
-                    this.updateSystems(['player', 'render']);
-                    //console.log('space keyDown detected');
+                    if (!event.repeat) {
+                        this.state.eventBus.emit('ToggleRangedMode', { event });
+                        this.updateSystems(['player', 'render']);
+                        //console.log('space keyDown detected');
+                    }
                     return;
             }
 
