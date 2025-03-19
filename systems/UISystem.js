@@ -10,6 +10,7 @@ export class UISystem extends System {
         this.tabs = null;
         this.logContent = null;
         this.characterContent = null;
+        this.tooltipCache = new Map(); // Initialize tooltip cach
     }
 
     init() {
@@ -37,6 +38,7 @@ export class UISystem extends System {
         // Initialize mouse listeners after UI is rendered
         this.setupInventoryMouseEvents();
         this.setupEquipDragAndDrop();
+        this.setupTooltipListeners();
     }
 
     toggleOverlay({ tab = null }) {
@@ -248,17 +250,57 @@ export class UISystem extends System {
         this.setupInventoryDiscardItem();
     }
 
+    setupTooltipListeners() {
+        const characterContent = document.getElementById('character-content');
+        if (characterContent) {
+            characterContent.addEventListener('mouseover', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                this.showItemTooltip(itemData, event);
+            }, { capture: true });
+
+            characterContent.addEventListener('mouseout', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                this.hideItemTooltip(itemData);
+            }, { capture: true });
+
+            // Hide tooltip during drag
+            characterContent.addEventListener('dragstart', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                this.hideItemTooltip(itemData);
+            }, { capture: true });
+
+            // Hide tooltip during right-click discard
+            characterContent.addEventListener('contextmenu', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                this.hideItemTooltip(itemData);
+            }, { capture: true });
+        } else {
+            console.error('UISystem: Could not find #character-content for tooltip listeners');
+        }
+    }
+
     setupInventoryDiscardItem() {
-        // Attach listener to the #inventory div (persistent parent)
         const inventoryContainer = document.getElementById('inventory');
         if (inventoryContainer) {
             inventoryContainer.addEventListener('contextmenu', (event) => {
-                event.preventDefault(); // Prevent the default context menu
+                event.preventDefault();
                 const target = event.target.closest('.inventory-item');
                 if (!target) return;
                 const index = parseInt(target.dataset.index, 10);
                 if (isNaN(index)) return;
-                // Right-click to discard
+                const itemElement = event.target.closest('.item-icon');
+                if (itemElement) {
+                    const itemData = JSON.parse(itemElement.getAttribute('data-item') || '{}');
+                    this.hideItemTooltip(itemData); // Hide tooltip on right-click
+                }
                 this.eventBus.emit('DropItem', { itemIndex: index });
                 console.log('Right-click: Discarding item at index:', index);
             });
@@ -268,7 +310,6 @@ export class UISystem extends System {
     }
 
     setupInventoryDragAndDrop() {
-        // Attach dragstart listener to the #inventory div (persistent parent)
         const inventoryContainer = document.getElementById('inventory');
         if (inventoryContainer) {
             inventoryContainer.addEventListener('dragstart', (event) => {
@@ -277,6 +318,7 @@ export class UISystem extends System {
                 const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
                 const index = parseInt(target.closest('.inventory-item').dataset.index, 10);
                 event.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, index, source: 'inventory' }));
+                this.hideItemTooltip(itemData); // Hide tooltip on drag start
                 console.log('Dragging item:', itemData);
             }, { capture: true });
 
@@ -311,6 +353,7 @@ export class UISystem extends System {
                 const itemData = JSON.parse(itemElement.getAttribute('data-item') || '{}');
                 const slotName = JSON.parse(slot.getAttribute('data-equip_slot') || '{}').slot;
                 e.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, slot: slotName, source: 'equip' }));
+                this.hideItemTooltip(itemData); // Hide tooltip on drag start
                 console.log('Dragging equipped item:', itemData);
             });
             slot.addEventListener('dragover', (e) => e.preventDefault());
@@ -381,4 +424,150 @@ export class UISystem extends System {
         // Emit GameOverRendered once the overlay is fully rendered
         this.eventBus.emit('GameOverRendered');
     }
+
+    showItemTooltip(itemData, event) {
+        if (!itemData || !itemData.uniqueId) {
+            console.log("No item data or uniqueId for tooltip", itemData);
+            return;
+        }
+
+        if (!this.tooltipCache) {
+            console.error("Tooltip cache not initialized");
+            this.tooltipCache = new Map(); // Fallback initialization
+        }
+
+        let tooltip = this.tooltipCache.get(itemData.uniqueId);
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = `item-tooltip-${itemData.uniqueId}`;
+            tooltip.className = `item-tooltip-class ${itemData.itemTier}`;
+            tooltip.style.position = 'absolute';
+            tooltip.style.whiteSpace = 'pre-wrap';
+
+            const content = document.createElement('div');
+
+            const name = document.createElement('div');
+            name.className = 'item-tooltip-name';
+            name.textContent = this.escapeJsonString(itemData.name);
+            content.appendChild(name);
+
+            const iconContainerParagraph = document.createElement('p');
+            iconContainerParagraph.className = `item-tooltip-icon-wrap ${itemData.itemTier}`;
+            content.appendChild(iconContainerParagraph);
+
+            const icon = document.createElement('img');
+            icon.className = `item-tooltip-icon ${itemData.itemTier}`;
+            icon.src = `img/icons/items/${itemData.icon}`;
+            icon.alt = itemData.name;
+            iconContainerParagraph.appendChild(icon);
+
+            const typeTier = document.createElement('div');
+            typeTier.className = 'item-tooltip-type-tier';
+            typeTier.textContent = `${itemData.itemTier} ${itemData.type}`;
+            content.appendChild(typeTier);
+
+            if (itemData.type === "weapon") {
+                const damage = document.createElement('div');
+                damage.className = 'item-tooltip-damage';
+                damage.textContent = `Damage: ${itemData.baseDamageMin}-${itemData.baseDamageMax}`;
+                content.appendChild(damage);
+                switch (itemData.attackType) {
+                    case "melee":
+                        const baseBlock = document.createElement('div');
+                        baseBlock.className = 'item-tooltip-base-block';
+                        baseBlock.textContent = `Block: ${itemData.baseBlock || 0}`;
+                        content.appendChild(baseBlock);
+                        break;
+                    case "ranged":
+                        const baseRange = document.createElement('div');
+                        baseRange.className = 'item-tooltip-base-range';
+                        baseRange.textContent = `Range: ${itemData.baseRange || 0}`;
+                        content.appendChild(baseRange);
+                        break;
+                }
+            } else if (itemData.type === "armor") {
+                const armor = document.createElement('div');
+                armor.className = 'item-tooltip-armor';
+                armor.textContent = `Armor: ${itemData.armor || 0}`;
+                content.appendChild(armor);
+            }
+
+            if ('stats' in itemData && itemData.stats) {
+                const divider = document.createElement('hr');
+                divider.className = 'tooltip-divider';
+                content.appendChild(divider);
+
+                const propCount = Object.keys(itemData.stats).length;
+                if (propCount > 0) {
+                    const statsContainer = document.createElement('div');
+                    statsContainer.className = 'tooltip-stats';
+                    Object.entries(itemData.stats).forEach(([stat, value]) => {
+                        const statLine = document.createElement('div');
+                        statLine.className = 'tooltip-stat';
+                        statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.escapeJsonString(stat)}`;
+                        statsContainer.appendChild(statLine);
+                    });
+                    content.appendChild(statsContainer);
+                }
+            }
+
+            const descriptionDivider = document.createElement('hr');
+            descriptionDivider.className = 'tooltip-divider';
+            content.appendChild(descriptionDivider);
+
+            const description = document.createElement('div');
+            description.className = 'tooltip-description';
+            description.textContent = `${itemData.description}`;
+            content.appendChild(description);
+
+            tooltip.appendChild(content);
+            document.body.appendChild(tooltip);
+            this.tooltipCache.set(itemData.uniqueId, tooltip);
+            console.log(`Created tooltip for ${itemData.name} with ID ${itemData.uniqueId}`);
+        }
+
+        tooltip.style.display = 'block';
+        setTimeout(() => {
+            const x = event.pageX - tooltip.offsetWidth - 15;
+            const y = event.pageY - tooltip.offsetHeight + (tooltip.offsetHeight / 2);
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const tooltipWidth = tooltip.offsetWidth;
+            const tooltipHeight = tooltip.offsetHeight;
+
+            tooltip.style.left = `${Math.max(10, Math.min(x, viewportWidth - tooltipWidth - 10))}px`;
+            tooltip.style.top = `${Math.max(10, Math.min(y, viewportHeight - tooltipHeight - 10))}px`;
+            console.log(`Positioned tooltip for ${itemData.name} at (${tooltip.style.left}, ${tooltip.style.top})`);
+        }, 0);
+    }
+
+
+    hideItemTooltip(itemData) {
+        if (!itemData || !itemData.uniqueId) {
+            console.log("No item data or uniqueId for tooltip hide", itemData);
+            return;
+        }
+        if (!this.tooltipCache) {
+            console.error("Tooltip cache not initialized");
+            this.tooltipCache = new Map(); // Fallback initialization
+        }
+        const tooltip = this.tooltipCache.get(itemData.uniqueId);
+        if (tooltip) {
+            tooltip.style.display = 'none';
+            console.log(`Hid tooltip for ${itemData.name} with ID ${itemData.uniqueId}`);
+        }
+    }
+
+    escapeJsonString(str) {
+        if (typeof str !== 'string') return str;
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+
+
 }

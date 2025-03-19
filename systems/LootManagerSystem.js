@@ -96,7 +96,8 @@ export class LootManagerSystem extends System {
             }
         }
 
-        const lootEntity = this.entityManager.createEntity(`loot_${sourceData.tier}_${Date.now()}`);
+        const uniqueId = this.generateUniqueId(); // Use SL-style ID
+        const lootEntity = this.entityManager.createEntity(`loot_${sourceData.tier}_${uniqueId}`);
         const position = new PositionComponent(sourceData.position.x, sourceData.position.y);
         const lootData = new LootData({
             name: `The ${sourceData.name} Loot`,
@@ -120,6 +121,13 @@ export class LootManagerSystem extends System {
             treasure: lootEntity,
             tier: sourceData.tier
         });
+    }
+
+    generateUniqueId() {
+        const time = Date.now().toString(36);
+        const rand1 = Math.random().toString(36).substring(2, 8);
+        const rand2 = Math.random().toString(36).substring(2, 8);
+        return `${time}-${rand1}-${rand2}`;
     }
 
     calculateTorchDrop(resource, state, multiplier) {
@@ -205,7 +213,6 @@ export class LootManagerSystem extends System {
 
     getUniqueItem({ tierIndex, hasCustomUnique = false, uniqueItemIndex = 0 }) {
         if (hasCustomUnique) {
-            // Placeholder for future custom unique lookup via DataSystem
             console.warn('Custom unique not implemented yet, falling back to default uniqueItems');
         }
         const tier = this.itemTiers[tierIndex];

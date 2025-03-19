@@ -1,6 +1,6 @@
 ﻿// systems/LevelSystem.js
 import { System } from '../core/Systems.js';
-import { MapComponent, EntityListComponent, PositionComponent, ExplorationComponent } from '../core/Components.js';
+import { MapComponent, EntityListComponent, PositionComponent, ExplorationComponent, LootSourceData } from '../core/Components.js';
 
 const roomTypes = [
     { type: 'SquareRoom', probability: 30, minW: 11, maxW: 15, minH: 6, maxH: 8 },
@@ -521,7 +521,6 @@ export class LevelSystem extends System {
     generateLootEntities(tier, map, rooms) {
         const lootPerLevel = 10;
         const lootEntityIds = [];
-        // Listener to collect entity IDs
         const collectEntityId = (data) => {
             if (data.tier === tier) {
                 lootEntityIds.push(data.entityId);
@@ -545,34 +544,28 @@ export class LevelSystem extends System {
             } while (map[y][x] !== ' ');
 
             if (attempts <= 50) {
-                const loot = {
-                    x: x,
-                    y: y,
-                    name: "Loot Pile",
-                    gold: 10,
-                    torches: 0,
-                    healPotions: 0,
-                    items: [{
-                        name: "Mbphu Greater iLvl Annihilation Staff",
-                        type: "weapon",
-                        attackType: "ranged",
-                        baseRange: 7,
-                        slots: ["mainhand", "offhand"],
-                        baseDamageMin: 10,
-                        baseDamageMax: 15,
-                        itemTier: "relic",
-                        stats: { intellect: 5, maxMana: 5, agility: 5, damageBonus: 5, rangedDamageBonus: 5 },
-                        description: "The Golden Khepresh has got nothing on this babby!",
-                        uniqueId: null,
-                        icon: "mbphu-staff.svg"
-                    }]
-                };
-                console.log(`LevelSystem: Emitting PlaceTreasure for loot at (${x}, ${y}) with tier ${tier}, using EventBus:`, this.eventBus);
-                this.eventBus.emit('PlaceTreasure', { treasure: loot, tier });
+                const lootSource = this.entityManager.createEntity(`loot_source_${tier}_${Date.now()}_${i}`);
+                this.entityManager.addComponentToEntity(lootSource.id, new LootSourceData({
+                    sourceType: "container",
+                    name: "Treasure Chest",
+                    tier: tier,
+                    position: { x, y },
+                    sourceDetails: {},
+                    chanceModifiers: {
+                        torches: 1,
+                        healPotions: 1,
+                        gold: 1.5,      // More gold from chests
+                        item: 0.5,      // Half ROG item chance
+                        uniqueItem: 0.8 // Slightly less unique chance
+                    },
+                    maxItems: 1,            // One item drop
+                    hasCustomUnique: false, // No custom unique yet
+                    uniqueItemIndex: 0      // Default index
+                }));
+                this.eventBus.emit('DropLoot', { lootSource }); // Emit DropLoot directly
             }
         }
 
-        // Clean up the listener after the loop
         this.eventBus.off('LootEntityCreated', collectEntityId);
         console.log(`Generated ${lootPerLevel} loot entity IDs for tier ${tier}`, lootEntityIds);
         return lootEntityIds;
