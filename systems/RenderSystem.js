@@ -17,7 +17,10 @@ export class RenderSystem extends System {
         this.eventBus.on('RenderNeeded', () => this.render(true));
         this.eventBus.on('RenderLock', () => this.renderLock(true));
         this.eventBus.on('RenderUnlock', () => this.renderLock(false));
-        this.eventBus.on('PositionChanged', (data) => this.render(true));
+        this.eventBus.on('PositionChanged', (data) => {
+            this.render(true);
+            this.viewportEdgeScroll();
+        });
         this.eventBus.on('DiscoveredStateUpdated', () => this.render(true));
         this.eventBus.on('ClearOldPlayerPosition', (data) => this.clearOldPlayerPosition(data));
     }
@@ -207,10 +210,90 @@ export class RenderSystem extends System {
                 }
             }
         }
-
+        
         if (force) gameState.needsRender = false; // Only reset for event-driven renders
         gameState.needsInitialRender = false;
     }
+
+    viewportEdgeScroll() {
+        const mapElement = document.getElementById('map');
+        const player = document.querySelector('.player'); // Assuming the player element has a class of 'player'
+        if (!player || !mapElement) {
+            return;
+        }
+
+        const TILE_SIZE = 16; // Size of each tile in pixels
+        const SCROLL_SPEED = 1; // Speed of the scroll for smoothness
+        const VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25; // 25% threshold for triggering scroll
+
+        const viewportWidth = mapElement.clientWidth;
+        const viewportHeight = mapElement.clientHeight;
+        const mapWidth = mapElement.scrollWidth;
+        const mapHeight = mapElement.scrollHeight;
+
+        const thresholdX = viewportWidth * VIEWPORT_EDGE_THRESHOLD_PERCENT;
+        const thresholdY = viewportHeight * VIEWPORT_EDGE_THRESHOLD_PERCENT;
+
+        const playerX = player.offsetLeft;
+        const playerY = player.offsetTop;
+        const currentScrollX = mapElement.scrollLeft;
+        const currentScrollY = mapElement.scrollTop;
+
+        const playerViewportX = playerX - currentScrollX;
+        const playerViewportY = playerY - currentScrollY;
+
+        let targetScrollX = currentScrollX;
+        let targetScrollY = currentScrollY;
+
+        if (playerViewportX < thresholdX) {
+            targetScrollX = playerX - thresholdX;
+        } else if (playerViewportX + TILE_SIZE > viewportWidth - thresholdX) {
+            targetScrollX = playerX + TILE_SIZE - (viewportWidth - thresholdX);
+        }
+
+        if (playerViewportY < thresholdY) {
+            targetScrollY = playerY - thresholdY;
+        } else if (playerViewportY + TILE_SIZE > viewportHeight - thresholdY) {
+            targetScrollY = playerY + TILE_SIZE - (viewportHeight - thresholdY);
+        }
+
+        targetScrollX = Math.max(0, Math.min(targetScrollX, mapWidth - viewportWidth));
+        targetScrollY = Math.max(0, Math.min(targetScrollY, mapHeight - viewportHeight));
+
+        const scrollThreshold = 4;
+        if (Math.abs(targetScrollX - currentScrollX) < scrollThreshold && Math.abs(targetScrollY - currentScrollY) < scrollThreshold) {
+            return;
+        }
+
+        const duration = 300;
+        let startTime = null;
+        const easeInOutQuad = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+        const animateScroll = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeInOutQuad(progress);
+
+            const currentX = currentScrollX + (targetScrollX - currentScrollX) * easedProgress;
+            const currentY = currentScrollY + (targetScrollY - currentScrollY) * easedProgress;
+
+            mapElement.scrollLeft = Math.max(0, Math.min(currentX, mapWidth - viewportWidth));
+            mapElement.scrollTop = Math.max(0, Math.min(currentY, mapHeight - viewportHeight));
+
+            if (progress < 1) {
+                this.animationFrame = requestAnimationFrame(animateScroll);
+            } else {
+                this.animationFrame = null;
+            }
+        };
+
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+        }
+        this.animationFrame = requestAnimationFrame(animateScroll);
+    }
+
 
 
     setInitialScroll() {

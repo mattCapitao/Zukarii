@@ -146,7 +146,9 @@ export class LevelSystem extends System {
 
         const mapComp = levelEntity.getComponent('Map');
         const hasPortal = mapComp.map.some(row => row.includes('?'));
-        if (tier !== 0 && !hasPortal) {
+        const minPortalPlacemntTier = 3;
+
+        if (tier >= minPortalPlacemntTier && !hasPortal) {
             const rooms = mapComp.rooms.filter(r => r.type !== 'BossChamberSpecial');
             if (rooms.length > 0) {
                 const room = rooms[Math.floor(Math.random() * rooms.length)];

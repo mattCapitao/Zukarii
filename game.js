@@ -204,6 +204,7 @@ export class Game {
         }
 
         if (event.type === 'keyup' && mappedKey === ' ') {
+            event.preventDefault();
             this.state.eventBus.emit('ToggleRangedMode', { event });
             //console.log('space keyUp detected');
             this.updateSystems(['player', 'render']);
