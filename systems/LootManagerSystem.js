@@ -2,8 +2,8 @@
 import { PositionComponent, LootData } from '../core/Components.js';
 
 export class LootManagerSystem extends System {
-    constructor(entityManager, eventBus) {
-        super(entityManager, eventBus);
+    constructor(entityManager, eventBus, utilities) {
+        super(entityManager, eventBus, utilities);
         this.tierTables = [
             (roll) => {
                 if (roll < 0.60) return 0;  // junk
@@ -46,7 +46,6 @@ export class LootManagerSystem extends System {
             { name: "Mbphu Greater iLvl Annihilation Staff", type: "weapon", attackType: "ranged", baseRange: 7, slots: ["mainhand", "offhand"], baseDamageMin: 10, baseDamageMax: 15, itemTier: "relic", stats: { intellect: 5, maxMana: 5, agility: 5, damageBonus: 5, rangedDamageBonus: 5 }, description: "The Golden Khepresh has got nothing on this babby!", uniqueId: null, icon: "mbphu-staff.svg" },
             { name: "The Preciousss", type: "ring", slot: "ring", luck: -15, itemTier: "relic", stats: { maxHp: 20, damageBonus: 10 }, description: "A plain simple gold band, that you mussst possesss.", uniqueId: null, icon: "golden-khepresh.svg" }
         ];
-        this.utilities = this.entityManager.getEntity('state').getComponent('Utilities').utilities;
     }
 
     init() {

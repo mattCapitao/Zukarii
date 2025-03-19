@@ -2,8 +2,8 @@
 import { System } from '../core/Systems.js';
 
 export class InventorySystem extends System {
-    constructor(entityManager, eventBus) {
-        super(entityManager, eventBus);
+    constructor(entityManager, eventBus, utilities) {
+        super(entityManager, eventBus, utilities);
         this.requiredComponents = ['Inventory'];
     }
 
@@ -41,7 +41,7 @@ export class InventorySystem extends System {
             return;
         }
 
-        item.uniqueId = item.uniqueId || this.entityManager.getEntity('state').utilities.generateUniqueId();
+        item.uniqueId = item.uniqueId || this.utilities.generateUniqueId();
         if (!inventory.items.some(i => i.uniqueId === item.uniqueId)) {
             inventory.items.push({ ...item });
             this.eventBus.emit('LogMessage', { message: `Added ${item.name} to inventory` });

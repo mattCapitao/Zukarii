@@ -6,7 +6,6 @@ import { RenderSystem } from './systems/RenderSystem.js';
 import { PlayerSystem } from './systems/PlayerSystem.js';
 import { MonsterSystem } from './systems/MonsterSystem.js';
 import { LevelSystem } from './systems/LevelSystem.js';
-import { ItemSystem } from './systems/ItemSystem.js';
 import { LootSpawnSystem } from './systems/LootSpawnSystem.js';
 import { LootCollectionSystem } from './systems/LootCollectionSystem.js';
 import { ItemROGSystem } from './systems/ItemROGSystem.js'; // Add this
@@ -16,38 +15,23 @@ import { UISystem } from './systems/UISystem.js';
 import { LevelTransitionSystem } from './systems/LevelTransitionSystem.js';
 import { AudioSystem } from './systems/AudioSystem.js';
 import { DataSystem } from './systems/DataSystem.js';
-import { LootTableSystem } from './systems/LootTableSystem.js';
 import { PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent, PlayerStateComponent } from './core/Components.js';
 
 export class Game {
     constructor() {
         this.state = new State();
         this.entityManager = this.state.entityManager;
+        this.utilities = this.state.utilities;
         this.systems = {};
         this.lastUpdateTime = 0;
         this.lastMouseEventTime = 0; // Track last mouse event timestamp
+        this.lastMovementTime = 0; // Track last movement timestamp
+        this.movementThrottleInterval = 100; // Throttle interval in milliseconds
 
         //console.log('Creating state entity...');
         let stateEntity = this.entityManager.getEntity('state');
         if (!stateEntity) {
             stateEntity = this.entityManager.createEntity('state');
-            this.entityManager.addComponentToEntity('state', {
-                type: 'Utilities',
-                utilities: {
-                    dRoll: (sides, numDice, rolls) => {
-                        let results = [];
-                        for (let i = 0; i < rolls; i++) {
-                            let sum = 0;
-                            for (let j = 0; j < numDice; j++) {
-                                sum += Math.floor(Math.random() * sides) + 1;
-                            }
-                            results.push(sum);
-                        }
-                        return Math.max(...results);
-                    },
-                    generateUniqueId: () => Math.random().toString(36).substr(2, 9)
-                }
-            });
             this.entityManager.addComponentToEntity('state', { type: 'DiscoveryRadius', discoveryRadiusDefault: 2 });
             //console.log('State entity created:', this.entityManager.getEntity('state'));
         }
@@ -108,25 +92,26 @@ export class Game {
     initializeSystems() {
         //console.log('Game.js: initializeSystems start, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
         //console.log('Game.js: EventBus instance:', this.state.eventBus);
+        this.systems.data = new DataSystem(this.entityManager, this.state.eventBus);
+        this.systems.data.init();
+
 
         this.systems = {
-            data: new DataSystem(this.entityManager, this.state.eventBus),
+            
             action: new ActionSystem(this.entityManager, this.state.eventBus),
             combat: new CombatSystem(this.entityManager, this.state.eventBus),
             render: new RenderSystem(this.entityManager, this.state.eventBus),
             lootSpawn: new LootSpawnSystem(this.entityManager, this.state.eventBus),
             lootCollection: new LootCollectionSystem(this.entityManager, this.state.eventBus),
-            itemROG: new ItemROGSystem(this.entityManager, this.state.eventBus), 
-            lootManager: new LootManagerSystem(this.entityManager, this.state.eventBus),
-            player: new PlayerSystem(this.entityManager, this.state.eventBus),
+            itemROG: new ItemROGSystem(this.entityManager, this.state.eventBus, this.utilities), 
+            lootManager: new LootManagerSystem(this.entityManager, this.state.eventBus, this.utilities),
+            player: new PlayerSystem(this.entityManager, this.state.eventBus, this.utilities),
             monster: new MonsterSystem(this.entityManager, this.state.eventBus, this.systems.data),
             level: new LevelSystem(this.entityManager, this.state.eventBus, this.state),
-            item: new ItemSystem(this.entityManager, this.state.eventBus),
-            inventory: new InventorySystem(this.entityManager, this.state.eventBus),
-            ui: new UISystem(this.entityManager, this.state.eventBus),
+            inventory: new InventorySystem(this.entityManager, this.state.eventBus, this.utilities),
+            ui: new UISystem(this.entityManager, this.state.eventBus, this.utilities),
             levelTransition: new LevelTransitionSystem(this.entityManager, this.state.eventBus),
             audio: new AudioSystem(this.entityManager, this.state.eventBus),
-            lootTable: new LootTableSystem(this.entityManager, this.state.eventBus)
         };
 
         Object.values(this.systems).forEach(system => {
@@ -338,6 +323,13 @@ export class Game {
             }
 
             if (!gameState.transitionLock && !gameState.isRangedMode) {
+
+                const now = Date.now();
+                if (now - this.lastMovementTime < this.movementThrottleInterval) {
+                    return; // Throttle movement
+                }
+                this.lastMovementTime = now; // Update the last movement time
+
                 playerPos.x = newX;
                 playerPos.y = newY;
                 this.state.eventBus.emit('PositionChanged', { entityId: 'player', x: newX, y: newY });

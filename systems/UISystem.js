@@ -2,8 +2,8 @@
 import { System } from '../core/Systems.js';
 
 export class UISystem extends System {
-    constructor(entityManager, eventBus) {
-        super(entityManager, eventBus);
+    constructor(entityManager, eventBus, utilities) {
+        super(entityManager, eventBus, utilities);
         this.requiredComponents = ['OverlayState'];
         this.playerInfo = null;
         this.playerStatus = null;
@@ -457,7 +457,7 @@ export class UISystem extends System {
 
             const name = document.createElement('div');
             name.className = 'item-tooltip-name';
-            name.textContent = this.escapeJsonString(itemData.name);
+            name.textContent = this.utilities.encodeHTMLEntities(itemData.name);
             content.appendChild(name);
 
             const iconContainerParagraph = document.createElement('p');
@@ -513,7 +513,7 @@ export class UISystem extends System {
                     Object.entries(itemData.stats).forEach(([stat, value]) => {
                         const statLine = document.createElement('div');
                         statLine.className = 'tooltip-stat';
-                        statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.escapeJsonString(stat)}`;
+                        statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.utilities.encodeHTMLEntities(stat)}`;
                         statsContainer.appendChild(statLine);
                     });
                     content.appendChild(statsContainer);
@@ -566,17 +566,4 @@ export class UISystem extends System {
             console.log(`Hid tooltip for ${itemData.name} with ID ${itemData.uniqueId}`);
         }
     }
-
-    escapeJsonString(str) {
-        if (typeof str !== 'string') return str;
-        return str
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
-
-
-
 }

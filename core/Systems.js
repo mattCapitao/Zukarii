@@ -1,8 +1,9 @@
 ﻿// core/Systems.js
 export class System {
-    constructor(entityManager, eventBus) {
+    constructor(entityManager, eventBus, utilities) {
         this.entityManager = entityManager;
         this.eventBus = eventBus;
+        this.utilities = utilities;
         this.requiredComponents = [];
     }
 

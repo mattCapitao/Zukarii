@@ -52,7 +52,42 @@ export class DataSystem extends System {
             treasures: [],
                 fountains: [],
                     spawn: []
-    };
+        };
+        // Stat opotions for ROG System items
+        this.itemStatOptions = {
+            weapon: {
+                ranged: {
+                    base: ['baseDamageMin', 'baseDamageMax', 'attackType', 'baseRange'],
+                    bonus: ['intellect', 'agility', 'range', 'rangedDamageBonus', 'damageBonus'],
+                },
+                melee: {
+                    base: ['baseDamageMin', 'baseDamageMax', 'attackType', 'baseBlock'],
+                    bonus: ['prowess', 'agility', 'block', 'meleeDamageBonus', 'damageBonus'],
+                },
+            },
+            armor: {
+                base: ['armor'],
+                bonus: ['maxHp', 'prowess', 'agility', 'block', 'defense'],
+            },
+            amulet: {
+                base: ['maxLuck'],
+                bonus: [
+                    'maxHp', 'maxMana',
+                    'intellect', 'prowess', 'agility',
+                    'range', 'block', 'defense',
+                    'meleeDamageBonus', 'rangedDamageBonus', 'damageBonus'
+                ],
+            },
+            ring: {
+                base: ['maxLuck'],
+                bonus: [
+                    'maxHp', 'maxMana',
+                    'intellect', 'prowess', 'agility',
+                    'range', 'block', 'defense',
+                    'meleeDamageBonus', 'rangedDamageBonus', 'damageBonus'
+                ],
+            },
+        };
 }
 
 init() {
@@ -62,6 +97,10 @@ init() {
     this.eventBus.on('GetBossMonsters', (data) => this.provideBossMonsters(data));
     this.eventBus.on('GetStartItems', (data) => this.provideStartItems(data));
     this.eventBus.on('GetUniqueItems', (data) => this.provideUniqueItems(data));
+    this.eventBus.on('GetItemStatOptions', (data) => {
+        this.provideItemStatOptions(data);
+        console.log('DataSystem: GetItemStatOptions event received');
+    });
 }
 
 generateSurfaceMap() {
@@ -88,27 +127,31 @@ provideCustomLevel({ tier, callback }) {
     } else {
         callback(null);
     }
-}
+    }
 
-provideMonsterTemplates({ callback }) {
-    callback(JSON.parse(JSON.stringify(this.monsterTemplates)));
-}
+    provideItemStatOptions({ callback }) {
+        callback(JSON.parse(JSON.stringify(this.itemStatOptions)));
+    }
 
-provideUniqueMonsters({ callback }) {
-    callback(JSON.parse(JSON.stringify(this.uniqueMonsters)));
-}
+    provideMonsterTemplates({ callback }) {
+        callback(JSON.parse(JSON.stringify(this.monsterTemplates)));
+    }
 
-provideBossMonsters({ callback }) {
-    callback(JSON.parse(JSON.stringify(this.bossMonsters)));
-}
+    provideUniqueMonsters({ callback }) {
+        callback(JSON.parse(JSON.stringify(this.uniqueMonsters)));
+    }
 
-provideStartItems({ callback }) {
-    callback(JSON.parse(JSON.stringify(this.startItems)));
-}
+    provideBossMonsters({ callback }) {
+        callback(JSON.parse(JSON.stringify(this.bossMonsters)));
+    }
 
-provideUniqueItems({ callback }) {
-    callback(JSON.parse(JSON.stringify(this.uniqueItems)));
-}
+    provideStartItems({ callback }) {
+        callback(JSON.parse(JSON.stringify(this.startItems)));
+    }
+
+    provideUniqueItems({ callback }) {
+        callback(JSON.parse(JSON.stringify(this.uniqueItems)));
+    }
 }
 
 

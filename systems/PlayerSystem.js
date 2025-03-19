@@ -2,8 +2,8 @@
 import { System } from '../core/Systems.js';
 
 export class PlayerSystem extends System {
-    constructor(entityManager, eventBus) {
-        super(entityManager, eventBus);
+    constructor(entityManager, eventBus, utilities) {
+        super(entityManager, eventBus, utilities);
         this.requiredComponents = ['PlayerState', 'Stats', 'Health', 'Mana', 'Inventory', 'Resource'];
     }
 
@@ -20,12 +20,12 @@ export class PlayerSystem extends System {
 
     initializePlayer() {
         const player = this.entityManager.getEntity('player');
-        const utilities = this.entityManager.getEntity('state').getComponent('Utilities').utilities;
+       // const utilities = this.entityManager.getEntity('state').getComponent('Utilities').utilities;
 
         const stats = player.getComponent('Stats');
-        stats._internal.base.intellect = utilities.dRoll(4, 3, 3);
-        stats._internal.base.prowess = utilities.dRoll(4, 3, 3);
-        stats._internal.base.agility = utilities.dRoll(4, 3, 3);
+        stats._internal.base.intellect = this.utilities.dRoll(4, 3, 3);
+        stats._internal.base.prowess = this.utilities.dRoll(4, 3, 3);
+        stats._internal.base.agility = this.utilities.dRoll(4, 3, 3);
         stats._internal.base.luck = 0;
         stats._internal.base.maxHp = Math.round(30 * stats._internal.base.prowess * 0.1);
         stats._internal.base.maxMana = Math.round(10 * stats._internal.base.intellect * 0.05);
@@ -67,7 +67,7 @@ export class PlayerSystem extends System {
             { name: 'Ragged Robes', type: 'armor', armor: 1, icon: 'robe.svg', itemTier: 'common' },
             { name: 'Crooked Wand', type: 'weapon', attackType: 'ranged', baseDamageMin: 1, baseDamageMax: 2, baseRange: 2, icon: 'crooked-wand.svg', itemTier: 'common' }
         ];
-        inventory.items = startItems.map(item => ({ ...item, uniqueId: utilities.generateUniqueId() }));
+        inventory.items = startItems.map(item => ({ ...item, uniqueId: this.utilities.generateUniqueId() }));
 
         this.calculateStats(player);
     }
