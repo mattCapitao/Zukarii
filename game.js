@@ -5,6 +5,7 @@ import { CombatSystem } from './systems/CombatSystem.js';
 import { RenderSystem } from './systems/RenderSystem.js';
 import { PlayerSystem } from './systems/PlayerSystem.js';
 import { MonsterSystem } from './systems/MonsterSystem.js';
+import { DamageCalculationSystem } from './systems/DamageCalculationSystem.js'; 
 import { LevelSystem } from './systems/LevelSystem.js';
 import { LootSpawnSystem } from './systems/LootSpawnSystem.js';
 import { LootCollectionSystem } from './systems/LootCollectionSystem.js';
@@ -99,6 +100,7 @@ export class Game {
         this.systems = {
             
             action: new ActionSystem(this.entityManager, this.state.eventBus),
+            damageCalculation: new DamageCalculationSystem(this.entityManager, this.state.eventBus),
             combat: new CombatSystem(this.entityManager, this.state.eventBus),
             render: new RenderSystem(this.entityManager, this.state.eventBus),
             lootSpawn: new LootSpawnSystem(this.entityManager, this.state.eventBus),

@@ -22,7 +22,6 @@ export class RenderSystem extends System {
             this.viewportEdgeScroll();
         });
         this.eventBus.on('DiscoveredStateUpdated', () => this.render(true));
-        this.eventBus.on('ClearOldPlayerPosition', (data) => this.clearOldPlayerPosition(data));
     }
 
     update() {

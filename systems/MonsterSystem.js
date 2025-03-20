@@ -11,7 +11,6 @@ export class MonsterSystem extends System {
 
     init() {
         this.eventBus.on('MoveMonsters', () => this.moveMonsters());
-        this.eventBus.on('MonsterAttack', (data) => this.handleMonsterAttack(data));
         this.eventBus.on('MonsterDied', (data) => {
             console.log(`MonsterSystem: Received MonsterDied event with data:`, data);
             this.handleMonsterDeath(data.entityId);
@@ -182,47 +181,6 @@ export class MonsterSystem extends System {
             }
         });
     }
-
-    handleMonsterAttack({ entityId }) {
-        const monster = this.entityManager.getEntity(entityId);
-        const player = this.entityManager.getEntity('player');
-        if (!monster || !player || !monster.getComponent('MonsterData').isAggro) return;
-
-        const monsterData = monster.getComponent('MonsterData');
-        const inventory = player.getComponent('Inventory');
-        const stats = player.getComponent('Stats');
-        const health = player.getComponent('Health');
-
-        if (stats.block > 0 || stats.agility > 0) {
-            if (Math.random() * 100 < stats.block) {
-                this.eventBus.emit('LogMessage', { message: `You blocked the ${monsterData.name}'s attack!` });
-                return;
-            }
-            if (Math.random() * 100 < stats.agility * 2) {
-                this.eventBus.emit('LogMessage', { message: `You dodged the ${monsterData.name}'s attack!` });
-                return;
-            }
-        }
-
-        const baseDamage = Math.floor(Math.random() * (monsterData.maxBaseDamage - monsterData.minBaseDamage + 1)) + monsterData.minBaseDamage;
-        const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
-        const damage = Math.round(baseDamage * (1 + tier * 0.05));
-        const armor = inventory.equipped.armor?.armor || 0;
-        const armorReduction = armor > 0 ? Math.max(1, Math.floor(damage * (0.15 * armor))) : 0;
-        const defenseReduction = Math.round(damage * (0.10 * (stats.defense || 0)));
-        const damageDealt = Math.max(0, damage - armorReduction - defenseReduction);
-
-        health.hp -= damageDealt;
-        this.eventBus.emit('LogMessage', { message: `${monsterData.name} dealt ${damageDealt} damage to you. Attack(${damage}) - Armor(${armorReduction}) - Defense(${defenseReduction})` });
-        this.eventBus.emit('StatsUpdated', { entityId: 'player' });
-
-        console.log(`Player HP after attack: ${health.hp} (damage dealt: ${damageDealt})`);
-        if (health.hp <= 0) {
-            console.log(`Emitting PlayerDeath for ${monsterData.name}`);
-            this.eventBus.emit('PlayerDeath', { source: monsterData.name });
-        }
-    }
-
 
     handleMonsterDeath(entityId) {
         const monster = this.entityManager.getEntity(entityId);

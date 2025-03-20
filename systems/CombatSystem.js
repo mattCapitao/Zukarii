@@ -15,6 +15,7 @@ export class CombatSystem extends System {
         this.eventBus.on('MeleeAttack', (data) => this.handleMeleeAttack(data));
         this.eventBus.on('RangedAttack', (data) => this.handleRangedAttack(data));
         this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
+        this.eventBus.on('MonsterAttack', (data) => this.handleMonsterMeleeAttack(data)); // New listener
     }
 
     update() {
@@ -66,21 +67,34 @@ export class CombatSystem extends System {
                     const playerInventory = player.getComponent('Inventory');
                     const playerStats = player.getComponent('Stats');
                     const weapon = playerInventory.equipped.offhand || playerInventory.equipped.mainhand || { baseDamageMin: 1, baseDamageMax: 2, name: 'Fists' };
-                    const damage = Math.floor(Math.random() * (weapon.baseDamageMax - weapon.baseDamageMin + 1)) + weapon.baseDamageMin + (playerStats.intellect || 0) + (playerStats.rangedDamageBonus || 0);
-                    const targetHealth = target.getComponent('Health');
-                    const targetMonsterData = target.getComponent('MonsterData');
 
-                    targetHealth.hp -= damage;
-                    this.eventBus.emit('LogMessage', {
-                        message: `You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
+                    this.eventBus.emit('CalculatePlayerDamage', {
+                        attacker: player,
+                        target: target,
+                        weapon: weapon,
+                        callback: ({ damage, isCritical }) => {
+                            const targetHealth = target.getComponent('Health');
+                            const targetMonsterData = target.getComponent('MonsterData');
+
+                            targetHealth.hp = Math.max(0, targetHealth.hp - damage);
+
+                            this.eventBus.emit('LogMessage', {
+                                message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
+                            });
+
+                            if (targetHealth.hp <= 0) {
+                                this.eventBus.emit('MonsterDied', { entityId: target.id });
+                            }
+                        }
                     });
+                    const isPiercingProjectile = false;
 
-                    if (targetHealth.hp <= 0) {
-                        console.log('CombatSystem: Monster died from projectile', target.id, 'timestamp:', Date.now());
-                        this.eventBus.emit('MonsterDied', { entityId: target.id });
-                        console.log('CombatSystem: Monster died event emitted', target.id, 'timestamp:', Date.now());
+                    if (!isPiercingProjectile) {
+                        projData.rangeLeft = 0; // Stop projectile
+                        this.entityManager.removeEntity(proj.id);
+                        this.eventBus.emit('RenderNeeded');
                     }
-                    // Continue moving after hitting a monster
+                    // continue moving projectile if piercing
                 }
 
                 // Move projectile
@@ -98,6 +112,47 @@ export class CombatSystem extends System {
         });
     }
 
+
+    handleMonsterMeleeAttack({ entityId }) {
+        const monster = this.entityManager.getEntity(entityId);
+        const player = this.entityManager.getEntity('player');
+        if (!monster || !player) return;
+
+        const monsterData = monster.getComponent('MonsterData');
+        if (!monsterData.isAggro) return;
+
+        const playerStats = player.getComponent('Stats');
+        const playerHealth = player.getComponent('Health');
+
+        const dodgeRoll = Math.round(Math.random() * 100 + playerStats.agility / 2 - (monsterData.luck || 0) / 2);
+        if (dodgeRoll >= 85) {
+            this.eventBus.emit('LogMessage', { message: `You dodged the ${monsterData.name}'s attack!` });
+            return;
+        }
+
+        const blockRoll = Math.round(Math.random() * 100 + playerStats.block / 2 - (monsterData.luck || 0) / 2);
+        if (blockRoll >= 85) {
+            this.eventBus.emit('LogMessage', { message: `You blocked the ${monsterData.name}'s attack!` });
+            return;
+        }
+
+        this.eventBus.emit('CalculateMonsterDamage', {
+            attacker: monster,
+            target: player,
+            callback: ({ damage, isCritical, armorReduction, defenseReduction }) => {
+                playerHealth.hp = Math.max(0, playerHealth.hp - damage); // Clamp to 0
+                this.eventBus.emit('LogMessage', {
+                    message: `${isCritical ? ' (Critical Hit!) - ' : ''}${monsterData.name} dealt ${damage} damage to you (${playerHealth.hp}/${playerHealth.maxHp}) reduced by armor: ${armorReduction}, defense: ${defenseReduction}`
+                });
+                this.eventBus.emit('StatsUpdated', { entityId: 'player' });
+
+                if (playerHealth.hp <= 0) {
+                    this.eventBus.emit('PlayerDeath', { source: monsterData.name });
+                }
+            }
+        });
+    }
+
     handleMeleeAttack({ targetEntityId }) {
         const player = this.entityManager.getEntity('player');
         const target = this.entityManager.getEntity(targetEntityId);
@@ -108,17 +163,56 @@ export class CombatSystem extends System {
         const targetHealth = target.getComponent('Health');
         const targetMonsterData = target.getComponent('MonsterData');
 
-        const weapon = playerInventory.equipped.mainhand || { baseDamageMin: 1, baseDamageMax: 2, name: 'Fists' };
-        const damage = Math.floor(Math.random() * (weapon.baseDamageMax - weapon.baseDamageMin + 1)) + weapon.baseDamageMin + (playerStats.prowess || 0);
-        targetHealth.hp -= damage;
+        // Get all melee weapons from equipped slots
+        const meleeWeapons = [];
+        const mainhand = playerInventory.equipped.mainhand;
+        const offhand = playerInventory.equipped.offhand;
+        if (mainhand?.attackType === 'melee') meleeWeapons.push(mainhand);
+        if (offhand?.attackType === 'melee') meleeWeapons.push(offhand);
+        if (meleeWeapons.length === 0) meleeWeapons.push({ baseDamageMin: 0.5, baseDamageMax: 1, name: 'Fists', attackType: 'melee' });
 
-        this.eventBus.emit('LogMessage', {
-            message: `You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
+        const isDualWield = meleeWeapons.length === 2;
+
+        // Process each weapon swing
+        meleeWeapons.forEach((weapon, index) => {
+            if (targetHealth.hp <= 0) return; // Stop if monster dies
+
+            // Miss chance: 15% mainhand, 25% offhand when dual-wielding
+            const missChance = isDualWield ? (index === 0 ? 15 : 25) : 0;
+            if (Math.random() * 100 < missChance) {
+                this.eventBus.emit('LogMessage', { message: `Your ${weapon.name} missed the ${targetMonsterData.name}!` });
+                return;
+            }
+
+            // Dodge/block: 1% flat chance each
+            const dodgeRoll = Math.random() * 100;
+            if (dodgeRoll >= 99) {
+                this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} dodged your ${weapon.name} attack!` });
+                return;
+            }
+
+            const blockRoll = Math.random() * 100;
+            if (blockRoll >= 99) {
+                this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} blocked your ${weapon.name} attack!` });
+                return;
+            }
+
+            this.eventBus.emit('CalculatePlayerDamage', {
+                attacker: player,
+                target: target,
+                weapon: weapon,
+                callback: ({ damage, isCritical }) => {
+                    targetHealth.hp = Math.max(0, targetHealth.hp - damage); // Clamp to 0
+                    this.eventBus.emit('LogMessage', {
+                        message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
+                    });
+
+                    if (targetHealth.hp <= 0) {
+                        this.eventBus.emit('MonsterDied', { entityId: targetEntityId });
+                    }
+                }
+            });
         });
-
-        if (targetHealth.hp <= 0) {
-            this.eventBus.emit('MonsterDied', { entityId: targetEntityId });
-        }
     }
 
     handleRangedAttack({ direction }) {
