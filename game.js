@@ -377,16 +377,20 @@ export class Game {
     }
 
     startGameLoop() {
-        //console.log('Game.js: Game loop started, timestamp:', Date.now());
         let frameCount = 0;
         const gameLoop = () => {
             frameCount++;
-            if (frameCount % 60 === 0) { // Log every ~1 second at 60 FPS
-                ////console.log('Game.js: Game loop heartbeat, frame:', frameCount, 'timestamp:', Date.now());
+            if (frameCount % 60 === 0) {
+                //console.log('Game.js: Game loop heartbeat, frame:', frameCount, 'timestamp:', Date.now());
             }
             this.updateSystems(['combat', 'render', 'player', 'monster', 'ui']);
             //this.state.eventBus.emit('RenderNeeded');
-            requestAnimationFrame(gameLoop);
+
+            // Only recurse if game isn't over
+            const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+            if (!gameState.gameOver) {
+                requestAnimationFrame(gameLoop);
+            }
         };
         requestAnimationFrame(gameLoop);
     }

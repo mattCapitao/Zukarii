@@ -19,7 +19,7 @@ export class MonsterSystem extends System {
     }
 
     handleSpawnMonsters({ tier, map, rooms, hasBossRoom, spawnPool }) {
-        const baseMonsterCount = 25;
+        const baseMonsterCount = 15;
         const densityFactor = 1 + tier * 0.1;
         const monsterCount = Math.floor(baseMonsterCount * densityFactor);
         const player = this.entityManager.getEntity('player');

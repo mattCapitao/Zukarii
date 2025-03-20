@@ -10,9 +10,9 @@ export class DataSystem extends System {
 
         // Monster templates
         this.monsterTemplates = [
-            { x: 0, y: 0, name: "Skeleton", classes: "skeleton", avatar: "s", baseHp: 20, maxHp: 20, hp: 20, minBaseDamage: 2, maxBaseDamage: 3, isAggro: false, isElite: false, isBoss: false, affixes: [] },
-            { x: 0, y: 0, name: "Goblin", classes: "goblin", avatar: "g", baseHp: 23, maxHp: 23, hp: 23, minBaseDamage: 2, maxBaseDamage: 4, isAggro: false, isElite: false, isBoss: false, affixes: [] },
-            { x: 0, y: 0, name: "Orc", classes: "orc", avatar: "o", baseHp: 25, maxHp: 25, hp: 25, minBaseDamage: 3, maxBaseDamage: 4, isAggro: false, isElite: false, isBoss: false, affixes: [] }
+            { x: 0, y: 0, name: "Skeleton", classes: "skeleton", avatar: "s", baseHp: 20, maxHp: 20, hp: 20, minBaseDamage: 1.5, maxBaseDamage: 2.5, isAggro: false, isElite: false, isBoss: false, affixes: [] },
+            { x: 0, y: 0, name: "Goblin", classes: "goblin", avatar: "g", baseHp: 23, maxHp: 23, hp: 23, minBaseDamage: 1.75, maxBaseDamage: 3, isAggro: false, isElite: false, isBoss: false, affixes: [] },
+            { x: 0, y: 0, name: "Orc", classes: "orc", avatar: "o", baseHp: 25, maxHp: 25, hp: 25, minBaseDamage: 2, maxBaseDamage: 3.5, isAggro: false, isElite: false, isBoss: false, affixes: [] }
         ];
 
         // Unique monsters

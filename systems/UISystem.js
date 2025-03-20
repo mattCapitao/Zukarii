@@ -120,7 +120,7 @@ export class UISystem extends System {
     updateLog(logMessages) {
         const logDiv = document.getElementById('log');
         logDiv.innerHTML = logMessages.length
-            ? logMessages.slice(0, 50).map(line => `<p>${line}</p>`).join('')
+            ? logMessages.slice(0, 200).map(line => `<p>${line}</p>`).join('')
             : '<p>Nothing to log yet.</p>';
         console.log('Log content updated');
     }
