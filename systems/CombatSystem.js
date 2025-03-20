@@ -75,7 +75,7 @@ export class CombatSystem extends System {
                         callback: ({ damage, isCritical }) => {
                             const targetHealth = target.getComponent('Health');
                             const targetMonsterData = target.getComponent('MonsterData');
-
+                            targetMonsterData.isAggro = true; // Aggro on player
                             targetHealth.hp = Math.max(0, targetHealth.hp - damage);
 
                             this.eventBus.emit('LogMessage', {
