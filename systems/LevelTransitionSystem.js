@@ -163,7 +163,6 @@ export class LevelTransitionSystem extends System {
             // New tier: reset exploration and populate initial discovery radius
             explorationComp.discoveredWalls.clear();
             explorationComp.discoveredFloors.clear();
-            this.eventBus.emit('ClearOldPlayerPosition', oldPlayerPos);
             const discoveryRadius = renderState.discoveryRadius;
             const height = mapComp.map.length;
             const width = mapComp.map[0].length;

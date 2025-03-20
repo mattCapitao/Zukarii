@@ -40,7 +40,7 @@ export class RenderSystem extends System {
         const titleScreenContainer = document.getElementById('splash');
 
         if (!gameState) return;
-        console.log('RenderSystem: Checking Render Lock with value: isRenderLocked = ', this.isRenderLocked);
+       // console.log('RenderSystem: Checking Render Lock with value: isRenderLocked = ', this.isRenderLocked);
         if (this.isRenderLocked) {
             console.warn('RenderSystem: Render is locked, skipping render');
             return;

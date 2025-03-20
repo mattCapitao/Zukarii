@@ -33,7 +33,7 @@ export class DamageCalculationSystem extends System {
         const agility = attackerStats.agility || 0;
 
         const isRanged = weapon?.attackType === 'ranged';
-        const statBonus = isRanged ? intellect + rangedDamageBonus : prowess + meleeDamageBonus;
+        const statBonus = isRanged ? rangedDamageBonus : meleeDamageBonus;
         const baseStat = isRanged ? intellect : prowess;
 
         // Base damage: roll + level
@@ -56,17 +56,17 @@ export class DamageCalculationSystem extends System {
         const monsterData = attacker.getComponent('MonsterData');
         const targetStats = target.getComponent('Stats');
         const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
-        const tierDamageMultiplier = 0.05;
+        const tierDamageMultiplier = 0.15;
         const armorReductionFactor = 0.15;
         const defenseReductionFactor = 0.10;
 
-        const baseDamageMin = monsterData.minBaseDamage || 1;
-        const baseDamageMax = monsterData.maxBaseDamage || 2;
+        const baseDamageMin = monsterData.minBaseDamage || 2;
+        const baseDamageMax = monsterData.maxBaseDamage || 3;
         const baseDamage = Math.round(Math.random() * (baseDamageMax - baseDamageMin)) + baseDamageMin;
         const scaledDamage = Math.round(baseDamage * (1 + tier * tierDamageMultiplier));
 
-        const critThreshold = 99;
-        const critMultiplier = 1.1;
+        const critThreshold = 95;
+        const critMultiplier = 1.2;
         const critRoll = Math.random() * 100;
         const isCritical = critRoll >= critThreshold;
         const preReductionDamage = isCritical ? Math.round(scaledDamage * critMultiplier) : scaledDamage;

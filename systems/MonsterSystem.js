@@ -34,6 +34,7 @@ export class MonsterSystem extends System {
             });
         };
 
+        hasBossRoom = true; // For testing
         const promises = [];
         if (spawnPool.monsterTemplates) {
             promises.push(fetchData('GetMonsterTemplates'));
@@ -50,6 +51,12 @@ export class MonsterSystem extends System {
                 ...(monsterTemplates || []),
                 ...(uniqueMonsters || [])
             ];
+            console.log('Monster Templates:', monsterTemplates);
+            console.log('All monster templates:', allTemplates); 
+            console.log('Unique monsters:', uniqueMonsters);
+            console.log('Boss monsters:', bossMonsters);
+            console.log('Monster spawn pool:', spawnPool); 
+            console.log(`MonsterSystem: Spawning ${monsterCount} monsters for tier ${tier}`);
 
             if (hasBossRoom) {
                 const bossRoom = rooms.find(r => r.type === 'BossChamberSpecial');
@@ -63,7 +70,12 @@ export class MonsterSystem extends System {
 
             const normalRooms = hasBossRoom ? rooms.filter(r => r.type !== 'BossChamberSpecial') : rooms;
             for (let i = 0; i < monsterCount; i++) {
-                const template = allTemplates[Math.floor(Math.random() * allTemplates.length)];
+                let template = monsterTemplates[Math.floor(Math.random() * monsterTemplates.length)];
+
+                if (spawnPool.uniqueMonsters && Math.randon() > .05 * tier) {
+                    template = uniqueTemplates[Math.floor(Math.random() * uniqueTemplates.length)];
+                }
+
                 this.createMonsterEntity(template, tier, map, normalRooms, playerX, playerY);
             }
         }).catch(err => {

@@ -83,12 +83,14 @@ export class LevelSystem extends System {
                 this.adjustPlayerPosition(levelEntity, levelData.stairsUp);
                 if (hasBossRoom) this.lastBossTier = tier;
 
+                const hasElites = tier > 2;
+
                 this.eventBus.emit('SpawnMonsters', {
                     tier,
                     map: levelData.map,
                     rooms: levelData.rooms,
                     hasBossRoom,
-                    spawnPool: { monsterTemplates: true, uniqueMonsters: false }
+                    spawnPool: { monsterTemplates: true, uniqueMonsters: hasElites }
                 });
             }
 
@@ -521,7 +523,7 @@ export class LevelSystem extends System {
     }
 
     generateLootEntities(tier, map, rooms) {
-        const lootPerLevel = 10;
+        const lootPerLevel = 5;
         const lootEntityIds = [];
         const collectEntityId = (data) => {
             if (data.tier === tier) {
@@ -574,7 +576,7 @@ export class LevelSystem extends System {
     }
 
     generateFountains(tier, map, rooms) {
-        const fountainsPerLevel = Math.floor(Math.random() * 3) + 1;
+        const fountainsPerLevel = Math.floor(Math.random() * 2) + 1;
         const fountains = [];
         for (let i = 0; i < fountainsPerLevel; i++) {
             const room = rooms[Math.floor(Math.random() * rooms.length)];
