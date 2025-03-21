@@ -193,7 +193,7 @@ export class UISystem extends System {
     addLogMessage({ message }) {
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         overlayState.logMessages.unshift(message);
-        if (overlayState.logMessages.length > 50) overlayState.logMessages.pop();
+        if (overlayState.logMessages.length > 200) overlayState.logMessages.pop();
         if (overlayState.isOpen && overlayState.activeTab === 'log') {
             this.renderOverlay('log');
         }

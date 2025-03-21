@@ -3,13 +3,12 @@
 export class ItemROGSystem extends System {
     constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus, utilities);
-        //this.utilities = this.entityManager.getEntity('state').getComponent('Utilities').utilities;
         this.requestItemStatOptions();
     }
 
     init() {
-        this.eventBus.on('GenerateROGItem', ({ tierIndex, dungeonTier, callback }) => {
-            const item = this.generateRogItem({ tierIndex, dungeonTier });
+        this.eventBus.on('GenerateROGItem', ({ partialItem, dungeonTier, callback }) => {
+            const item = this.generateRogItem({ partialItem, dungeonTier });
             callback(item);
         });
     }
@@ -18,65 +17,108 @@ export class ItemROGSystem extends System {
         this.eventBus.emit('GetItemStatOptions', {
             callback: (itemStatOptions) => {
                 this.itemStatOptions = itemStatOptions;
-                console.log('ItemROGSystem: Recieved Item stat options:', this.itemStatOptions);
+                console.log('ItemROGSystem: Received Item stat options:', this.itemStatOptions);
             }
         });
     }
 
-    generateRogItem({ tierIndex, dungeonTier }) {
+    generateRogItem({ partialItem = { tierIndex: 0 }, dungeonTier }) {
+        const item = { ...partialItem };
         const itemTiers = ['junk', 'common', 'rare', 'magic', 'mastercraft', 'legendary', 'relic', 'artifact'];
-        const item = { tierIndex, itemTier: itemTiers[tierIndex] };
-
         const itemTypes = ['weapon', 'armor', 'amulet', 'ring'];
-        item.type = itemTypes[Math.floor(Math.random() * itemTypes.length)];
 
-        if (tierIndex < 2) {
-            if (item.type === 'ring') item.type = 'weapon';
-            if (item.type === 'amulet') item.type = 'armor';
+        // Tier handling
+        if (item.tierIndex === undefined) {
+            console.warn("tierIndex missing in partialItem, defaulting to 0 (junk)");
+            item.tierIndex = 0;
+        }
+        item.itemTier = itemTiers[item.tierIndex];
+        if (partialItem.itemTier && partialItem.itemTier !== item.itemTier) {
+            console.warn(`Tier mismatch: partialItem.itemTier '${partialItem.itemTier}' ignored, using tierIndex ${item.tierIndex} ('${item.itemTier}')`);
         }
 
+        // Type handling
+        if (item.type) {
+            if (!itemTypes.includes(item.type)) {
+                console.warn(`Invalid type '${item.type}' provided, randomizing instead`);
+                delete item.type;
+            }
+        }
+        if (!item.type) {
+            item.type = itemTypes[Math.floor(Math.random() * itemTypes.length)];
+            if (item.tierIndex < 2) {
+                if (item.type === 'ring') item.type = 'weapon';
+                if (item.type === 'amulet') item.type = 'armor';
+            }
+        }
+
+        // Base stats and weapon-specific logic
         let statOptions = this.itemStatOptions[item.type];
-
         if (item.type === 'weapon') {
-
-            item.attackType = Math.random() < 0.5 ? 'melee' : 'ranged';
-            item.baseDamageMin = Math.floor(Math.random() * 2) + this.statRoll("baseDamageMin", item) || 1;
-            item.baseDamageMax = item.baseDamageMin + Math.floor(Math.random() * 5) + this.statRoll("baseDamageMax", item);
-            item.icon = item.attackType === 'melee' ? 'dagger.svg' : 'orb-wand.svg';
-
+            if (item.attackType) {
+                if (!['melee', 'ranged'].includes(item.attackType)) {
+                    console.warn(`Invalid attackType '${item.attackType}' provided, randomizing instead`);
+                    delete item.attackType;
+                }
+            }
+            if (!item.attackType) {
+                item.attackType = Math.random() < 0.5 ? 'melee' : 'ranged';
+            }
             statOptions = statOptions[item.attackType];
-            
-            if (item.attackType === 'melee') item.baseBlock = Math.floor(Math.random() * 2) + this.statRoll("baseBlock", item);
-            if (item.attackType === 'ranged') item.baseRange = Math.floor(Math.random() * 2) + this.statRoll("baseRange", item);
-
+            if (item.baseDamageMin === undefined || item.baseDamageMin === 0) {
+                item.baseDamageMin = Math.floor(Math.random() * 2) + this.statRoll("baseDamageMin", item) || 1;
+                if (item.tierIndex === 0) item.baseDamageMin = 1;
+            }
+            if (item.baseDamageMax === undefined || item.baseDamageMax === 0) {
+                item.baseDamageMax = item.baseDamageMin + Math.floor(Math.random() * 5) + this.statRoll("baseDamageMax", item);
+                if (item.tierIndex === 0) item.baseDamageMax = item.baseDamageMin + 1;
+                if (item.tierIndex === 0 && item.attackType === 'ranged') item.baseDamageMax++;)
+            }
+            item.icon = item.attackType === 'melee' ? 'dagger.svg' : 'orb-wand.svg';
+            if (item.attackType === 'melee' && (item.baseBlock === undefined || item.baseBlock === 0)) {
+                item.baseBlock = Math.floor(Math.random() * 2) + this.statRoll("baseBlock", item);
+                if (item.tierIndex === 0) item.baseBlock = 1;
+            }
+            if (item.attackType === 'ranged' && (item.baseRange === undefined || item.baseRange === 0)) {
+                item.baseRange = Math.floor(Math.random() * 2) + this.statRoll("baseRange", item);
+                if (item.tierIndex === 0 && item.baseRange > 3) item.baseRange = 3;
+            }
         } else if (item.type === 'armor') {
-
-            item.armor = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
+            if (item.armor === undefined || item.armor === 0) {
+                item.armor = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
+                if (item.tierIndex === 0) item.armor = 1;)
+            }
             item.icon = 'armor.svg';
-
         } else if (item.type === 'amulet' || item.type === 'ring') {
-
-            item.maxLuck = this.rollMaxLuck(item, dungeonTier);
+            if (item.maxLuck === undefined || item.maxLuck === 0) {
+                item.maxLuck = this.rollMaxLuck(item, dungeonTier);
+            }
             item.icon = item.type === 'amulet' ? 'amulet.svg' : 'ring.svg';
         }
 
-        if (item.tierIndex > 1) { item.stats = this.getBonusStats(statOptions.bonus, item); }
+        // Bonus stats
+        if (!item.stats || Object.keys(item.stats).length === 0) {
+            if (item.tierIndex > 1) {
+                item.stats = this.getBonusStats(statOptions.bonus, item);
+            }
+        }
 
-        item.name = `${item.itemTier} ${item.type}`;
-        item.uniqueId = this.utilities.generateUniqueId();
-        item.description = `A ${item.itemTier} ${item.type}`;
+        // Required properties
+        item.name = item.name || `${item.itemTier} ${item.type}`;
+        item.uniqueId = item.uniqueId || this.utilities.generateUniqueId();
+        item.description = item.description || `${item.itemTier} ${item.type}`;
+
         console.log(`ItemROGSystem: Generated item:`, item);
         return item;
     }
 
     getBonusStats(statArray, item) {
-        console.log(`getBonusStats() called with statArray:`, statArray, `for item: `, item);
+        console.log(`getBonusStats() called with statArray:`, statArray, `for item:`, item);
         const itemTier = item.tierIndex;
         let availableStats = [...statArray];
         let selectedStats = {};
 
         const count = itemTier;
-
         for (let i = 0; i < count && availableStats.length > 0; i++) {
             const index = Math.floor(Math.random() * availableStats.length);
             const stat = availableStats.splice(index, 1)[0];
@@ -108,6 +150,7 @@ export class ItemROGSystem extends System {
     }
 
     statRoll(stat, item) {
+        if (item[stat] !== undefined && item[stat] !== 0) return 0; // Skip base stats if provided and non-zero
         switch (stat) {
             case 'baseDamageMin': return Math.floor(item.tierIndex * 1.5);
             case 'baseDamageMax': return Math.floor(Math.random() * item.tierIndex) + 1;
@@ -117,7 +160,7 @@ export class ItemROGSystem extends System {
             case 'maxHp': return item.tierIndex * 2;
             case 'maxMana': return Math.floor(item.tierIndex / 2);
             case 'prowess': return Math.floor(item.tierIndex / 2);
-            case 'agility':  return Math.floor(item.tierIndex / 2);
+            case 'agility': return Math.floor(item.tierIndex / 2);
             case 'intellect': return Math.floor(item.tierIndex / 2);
             case 'defense': return Math.floor(item.tierIndex) + 1;
             case 'damageBonus': return Math.floor(item.tierIndex) + 1;
@@ -128,10 +171,6 @@ export class ItemROGSystem extends System {
             default:
                 console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
                 return 0;
-
         }
     }
-
-
-    
 }

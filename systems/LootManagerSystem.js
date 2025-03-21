@@ -45,6 +45,8 @@ export class LootManagerSystem extends System {
         this.uniqueItems = [
             { name: "Mbphu Greater iLvl Annihilation Staff", type: "weapon", attackType: "ranged", baseRange: 7, slots: ["mainhand", "offhand"], baseDamageMin: 10, baseDamageMax: 15, itemTier: "relic", stats: { intellect: 5, maxMana: 5, agility: 5, damageBonus: 5, rangedDamageBonus: 5 }, description: "The Golden Khepresh has got nothing on this babby!", uniqueId: null, icon: "mbphu-staff.svg" },
             { name: "The Preciousss", type: "ring", slot: "ring", luck: -15, itemTier: "relic", stats: { maxHp: 20, damageBonus: 10 }, description: "A plain simple gold band, that you mussst possesss.", uniqueId: null, icon: "golden-khepresh.svg" }
+
+
         ];
     }
 
@@ -77,13 +79,11 @@ export class LootManagerSystem extends System {
         let items = [];
         if (Math.random() < this.calculateItemChance(modifiers.item || 1)) {
             for (let i = 0; i < sourceData.maxItems; i++) {
-
                 const tierIndex = this.getItemTier(sourceData.tier, player);
-
                 if (tierIndex >= 0) {
                     if (tierIndex <= 4) {
                         this.eventBus.emit('GenerateROGItem', {
-                            tierIndex,
+                            partialItem: { tierIndex }, // Updated to new format
                             dungeonTier: sourceData.tier,
                             callback: (item) => {
                                 if (item) items.push(item);
@@ -97,7 +97,7 @@ export class LootManagerSystem extends System {
             }
         }
 
-        const uniqueId = this.utilities.generateUniqueId(); 
+        const uniqueId = this.utilities.generateUniqueId();
         const lootEntity = this.entityManager.createEntity(`loot_${sourceData.tier}_${uniqueId}`);
         const position = new PositionComponent(sourceData.position.x, sourceData.position.y);
         const lootData = new LootData({

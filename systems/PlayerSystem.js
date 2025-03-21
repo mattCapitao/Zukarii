@@ -62,14 +62,42 @@ export class PlayerSystem extends System {
         resource.torchDropFail = 0;
 
         const inventory = player.getComponent('Inventory');
-        const startItems = [
-            { name: 'Rusty Dagger', type: 'weapon', attackType: 'melee', baseDamageMin: 1, baseDamageMax: 3, baseBlock: 1, icon: 'dagger.svg', itemTier: 'common' },
-            { name: 'Ragged Robes', type: 'armor', armor: 1, icon: 'robe.svg', itemTier: 'common' },
-            { name: 'Crooked Wand', type: 'weapon', attackType: 'ranged', baseDamageMin: 1, baseDamageMax: 2, baseRange: 2, icon: 'crooked-wand.svg', itemTier: 'common' }
-        ];
-        inventory.items = startItems.map(item => ({ ...item, uniqueId: this.utilities.generateUniqueId() }));
+
+        // Use Promise.then to handle async item generation without await
+        this.getRandomStartItems().then(startItems => {
+            inventory.items = startItems.map(item => ({ ...item, uniqueId: this.utilities.generateUniqueId() }));
+        });
 
         this.calculateStats(player);
+    }
+
+    getRandomStartItems() {
+
+        const randomStartItemTierIndex = Math.random() < 0.5 ? 0: 1;
+        const partialItems = [
+            { tierIndex: randomStartItemTierIndex}, // Random Junk or common item
+            { tierIndex: 0, type: 'armor'}, // Junk armor
+            { tierIndex: 0, type: 'weapon', attackType: 'ranged' }, // Junk ranged weapon
+            { tierIndex: 0, type: 'weapon', attackType: 'melee' }, // Junk melee weapon
+        ];
+
+        // Use Promise.all to handle async item generation via EventBus
+        return Promise.all(partialItems.map(partialItem => {
+            return new Promise((resolve) => {
+                this.eventBus.emit('GenerateROGItem', {
+                    partialItem,
+                    dungeonTier: 0, // Starting at tier 0 (surface level)
+                    callback: (item) => {
+                        if (item) {
+                            resolve(item);
+                        } else {
+                            console.warn('Failed to generate start item for partialItem:', partialItem);
+                            resolve(null); // Fallback to avoid breaking
+                        }
+                    }
+                });
+            });
+        })).then(items => items.filter(item => item !== null)); // Filter out any failed generations
     }
 
     updateGearStats(entityId) {

@@ -224,7 +224,7 @@ export class ExplorationComponent {
 }
 
 export class LootSourceData {
-    constructor({ sourceType = "unknown", name = "Unknown", tier = 0, position = { x: 0, y: 0 }, sourceDetails = {}, chanceModifiers = {}, maxItems = 1, hasCustomUnique = false, uniqueItemIndex = 0 } = {}) {
+    constructor({ sourceType = "unknown", name = "Unknown", tier = 0, position = { x: 0, y: 0 }, sourceDetails = {}, chanceModifiers = {}, maxItems = 1, items = [] } = {}) {
         this.type = 'LootSourceData';
         this.sourceType = sourceType;
         this.name = name;
@@ -239,8 +239,7 @@ export class LootSourceData {
             uniqueItem: chanceModifiers.uniqueItem || 1
         };
         this.maxItems = maxItems;
-        this.hasCustomUnique = hasCustomUnique;
-        this.uniqueItemIndex = uniqueItemIndex;
+        this.items = items;
     }
 }
 
