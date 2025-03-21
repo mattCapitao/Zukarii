@@ -18,7 +18,7 @@ export class MonsterSystem extends System {
         this.eventBus.on('SpawnMonsters', (data) => this.handleSpawnMonsters(data));
     }
 
-    handleSpawnMonsters({ tier, map, rooms, hasBossRoom, spawnPool }) {
+    async handleSpawnMonsters({ tier, map, rooms, hasBossRoom, spawnPool }) {
         const baseMonsterCount = 15;
         const densityFactor = 1 + tier * 0.1;
         const monsterCount = Math.floor(baseMonsterCount * densityFactor);
@@ -35,27 +35,33 @@ export class MonsterSystem extends System {
         };
 
         hasBossRoom = true; // For testing
+        spawnPool = { randomMonsters: true, uniqueMonsters: true }; // For testing
         const promises = [];
-        if (spawnPool.monsterTemplates) {
-            promises.push(fetchData('GetMonsterTemplates'));
+        if (spawnPool.randomMonsters) {
+            promises.push(fetchData('GetRandomMonsters'));
+        } else {
+            promises.push(Promise.resolve([])); // Placeholder for randomMonsters
         }
         if (spawnPool.uniqueMonsters) {
             promises.push(fetchData('GetUniqueMonsters'));
+        } else {
+            promises.push(Promise.resolve([])); // Placeholder for uniqueMonsters
         }
         if (hasBossRoom) {
             promises.push(fetchData('GetBossMonsters'));
+        } else {
+            promises.push(Promise.resolve([])); // Placeholder for bossMonsters
         }
 
-        Promise.all(promises).then(([monsterTemplates, uniqueMonsters, bossMonsters]) => {
+        Promise.all(promises).then(([randomMonsters, uniqueMonsters, bossMonsters]) => {
             const allTemplates = [
-                ...(monsterTemplates || []),
+                ...(randomMonsters || []),
                 ...(uniqueMonsters || [])
             ];
-            console.log('Monster Templates:', monsterTemplates);
-            console.log('All monster templates:', allTemplates); 
-            console.log('Unique monsters:', uniqueMonsters);
-            console.log('Boss monsters:', bossMonsters);
-            console.log('Monster spawn pool:', spawnPool); 
+            console.log('MonsterSystem: Random monsters:', randomMonsters);
+            console.log('MonsterSystem: Unique monsters:', uniqueMonsters);
+            console.log('MonsterSystem: Boss monsters:', bossMonsters);
+            console.log('MonsterSystem: Monster spawn pool:', spawnPool);
             console.log(`MonsterSystem: Spawning ${monsterCount} monsters for tier ${tier}`);
 
             if (hasBossRoom) {
@@ -64,16 +70,26 @@ export class MonsterSystem extends System {
                     const bossTemplate = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
                     const boss = this.createMonsterEntity(bossTemplate, tier, map, [bossRoom], playerX, playerY);
                     boss.getComponent('MonsterData').isBoss = true;
-                    console.log(`Boss ${boss.getComponent('MonsterData').name} spawned at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`);
+                    console.log(`MonsterSystem: Boss ${boss.getComponent('MonsterData').name} spawned at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`);
                 }
             }
 
             const normalRooms = hasBossRoom ? rooms.filter(r => r.type !== 'BossChamberSpecial') : rooms;
             for (let i = 0; i < monsterCount; i++) {
-                let template = monsterTemplates[Math.floor(Math.random() * monsterTemplates.length)];
 
-                if (spawnPool.uniqueMonsters && Math.randon() > .05 * tier) {
-                    template = uniqueTemplates[Math.floor(Math.random() * uniqueTemplates.length)];
+                if (!randomMonsters || randomMonsters.length === 0) {
+                    console.warn('MonsterSystem: No random monsters available to spawn');
+                    break;
+                }
+
+                let template = randomMonsters[Math.floor(Math.random() * randomMonsters.length)];
+
+                if (spawnPool.uniqueMonsters && Math.random() > .05 * tier) {
+                    if (uniqueMonsters && uniqueMonsters.length > 0) {
+                        template = uniqueMonsters[Math.floor(Math.random() * uniqueMonsters.length)]; // Fixed variable name: uniqueTemplates to uniqueMonsters
+                    } else {
+                        console.warn('MonsterSystem: No unique monsters available, falling back to random monster');
+                    }
                 }
 
                 this.createMonsterEntity(template, tier, map, normalRooms, playerX, playerY);
@@ -206,7 +222,7 @@ export class MonsterSystem extends System {
 
         const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
         const baseXp = Math.round((health.maxHp / 3 + (monsterData.minBaseDamage + monsterData.maxBaseDamage * 1.5)) * (1 + tier * 0.1));
-        console.log(`Monster defeated: ${monsterData.name}, XP calc - maxHp: ${health.maxHp}, minDmg: ${monsterData.minBaseDamage}, maxDmg: ${monsterData.maxBaseDamage}, tier: ${tier}, baseXp: ${baseXp}`);
+        console.log(`MonsterSystem: Monster defeated: ${monsterData.name}, XP calc - maxHp: ${health.maxHp}, minDmg: ${monsterData.minBaseDamage}, maxDmg: ${monsterData.maxBaseDamage}, tier: ${tier}, baseXp: ${baseXp}`);
         this.eventBus.emit('LogMessage', { message: `${monsterData.name} defeated!` });
         this.eventBus.emit('AwardXp', { amount: baseXp });
 
@@ -225,10 +241,9 @@ export class MonsterSystem extends System {
                 uniqueItem: 1
             },
             maxItems: 1,            // Default to 1 item drop
-            hasCustomUnique: false, // No custom unique yet
-            uniqueItemIndex: 0      // Default index
+            items: [],               // No items to start
         }));
         this.eventBus.emit('DropLoot', { lootSource });
-        console.log(`Emitting DropLoot for ${monsterData.name}`);
+        console.log(`MonsterSystem: Emitting DropLoot for ${monsterData.name}`);
     }
 }

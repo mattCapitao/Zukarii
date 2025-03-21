@@ -90,7 +90,7 @@ export class LevelSystem extends System {
                     map: levelData.map,
                     rooms: levelData.rooms,
                     hasBossRoom,
-                    spawnPool: { monsterTemplates: true, uniqueMonsters: hasElites }
+                    spawnPool: { randomMonsters: true, uniqueMonsters: hasElites }
                 });
             }
 
@@ -563,8 +563,7 @@ export class LevelSystem extends System {
                         uniqueItem: 0.8 // Slightly less unique chance
                     },
                     maxItems: 1,            // One item drop
-                    hasCustomUnique: false, // No custom unique yet
-                    uniqueItemIndex: 0      // Default index
+                    items: [],              // No items yet
                 }));
                 this.eventBus.emit('DropLoot', { lootSource }); // Emit DropLoot directly
             }

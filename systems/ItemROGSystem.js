@@ -1,28 +1,38 @@
-﻿import { System } from '../core/Systems.js';
+﻿// systems/ItemROGSystem.js
+import { System } from '../core/Systems.js';
 
 export class ItemROGSystem extends System {
     constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus, utilities);
-        this.requestItemStatOptions();
+        this.itemStatOptions = null; // Initialize as null, will be set asynchronously
     }
 
-    init() {
+    async init() {
+        await this.requestItemStatOptions(); // Wait for itemStatOptions to be loaded
         this.eventBus.on('GenerateROGItem', ({ partialItem, dungeonTier, callback }) => {
             const item = this.generateRogItem({ partialItem, dungeonTier });
             callback(item);
         });
     }
 
-    requestItemStatOptions() {
-        this.eventBus.emit('GetItemStatOptions', {
-            callback: (itemStatOptions) => {
-                this.itemStatOptions = itemStatOptions;
-                console.log('ItemROGSystem: Received Item stat options:', this.itemStatOptions);
-            }
+    async requestItemStatOptions() {
+        return new Promise((resolve) => {
+            this.eventBus.emit('GetItemStatOptions', {
+                callback: (itemStatOptions) => {
+                    this.itemStatOptions = itemStatOptions;
+                    console.log('ItemROGSystem: Received Item stat options:', this.itemStatOptions);
+                    resolve(); // Resolve the promise once data is received
+                }
+            });
         });
     }
 
     generateRogItem({ partialItem = { tierIndex: 0 }, dungeonTier }) {
+        if (!this.itemStatOptions) {
+            console.warn('ItemROGSystem: itemStatOptions not loaded, using fallback behavior');
+            return this.generateFallbackItem(partialItem, dungeonTier); // Fallback if data isn’t available
+        }
+
         const item = { ...partialItem };
         const itemTiers = ['junk', 'common', 'rare', 'magic', 'mastercraft', 'legendary', 'relic', 'artifact'];
         const itemTypes = ['weapon', 'armor', 'amulet', 'ring'];
@@ -72,7 +82,7 @@ export class ItemROGSystem extends System {
             if (item.baseDamageMax === undefined || item.baseDamageMax === 0) {
                 item.baseDamageMax = item.baseDamageMin + Math.floor(Math.random() * 5) + this.statRoll("baseDamageMax", item);
                 if (item.tierIndex === 0) item.baseDamageMax = item.baseDamageMin + 1;
-                if (item.tierIndex === 0 && item.attackType === 'ranged') item.baseDamageMax++;)
+                if (item.tierIndex === 0 && item.attackType === 'ranged') item.baseDamageMax++;
             }
             item.icon = item.attackType === 'melee' ? 'dagger.svg' : 'orb-wand.svg';
             if (item.attackType === 'melee' && (item.baseBlock === undefined || item.baseBlock === 0)) {
@@ -86,7 +96,7 @@ export class ItemROGSystem extends System {
         } else if (item.type === 'armor') {
             if (item.armor === undefined || item.armor === 0) {
                 item.armor = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
-                if (item.tierIndex === 0) item.armor = 1;)
+                if (item.tierIndex === 0) item.armor = 1;
             }
             item.icon = 'armor.svg';
         } else if (item.type === 'amulet' || item.type === 'ring') {
@@ -113,6 +123,10 @@ export class ItemROGSystem extends System {
     }
 
     getBonusStats(statArray, item) {
+        if (!this.itemStatOptions || !statArray) {
+            console.warn('ItemROGSystem: itemStatOptions or statArray not available, returning empty stats');
+            return {};
+        }
         console.log(`getBonusStats() called with statArray:`, statArray, `for item:`, item);
         const itemTier = item.tierIndex;
         let availableStats = [...statArray];
@@ -172,5 +186,18 @@ export class ItemROGSystem extends System {
                 console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
                 return 0;
         }
+    }
+
+    // Fallback method if itemStatOptions is not available
+    generateFallbackItem(partialItem, dungeonTier) {
+        const item = { ...partialItem };
+        item.tierIndex = item.tierIndex || 0;
+        item.itemTier = ['junk', 'common', 'rare', 'magic', 'mastercraft', 'legendary', 'relic', 'artifact'][item.tierIndex];
+        item.type = item.type || ['weapon', 'armor'][Math.floor(Math.random() * 2)];
+        item.name = `${item.itemTier} ${item.type}`;
+        item.uniqueId = this.utilities.generateUniqueId();
+        item.description = `${item.itemTier} ${item.type}`;
+        console.warn('ItemROGSystem: Generated fallback item:', item);
+        return item;
     }
 }

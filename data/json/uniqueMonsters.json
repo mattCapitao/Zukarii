@@ -1,0 +1,18 @@
+﻿[
+  {
+    "x": 0,
+    "y": 0,
+    "name": "Orc Chieftan",
+    "classes": "orc",
+    "avatar": "O",
+    "baseHp": 30,
+    "maxHp": 30,
+    "hp": 30,
+    "minBaseDamage": 3,
+    "maxBaseDamage": 5,
+    "isAggro": false,
+    "isElite": true,
+    "isBoss": false,
+    "affixes": []
+  }
+]

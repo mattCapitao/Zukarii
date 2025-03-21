@@ -42,19 +42,23 @@ export class LootManagerSystem extends System {
             }
         ];
         this.itemTiers = ['junk', 'common', 'rare', 'magic', 'mastercraft', 'legendary', 'relic', 'artifact'];
-        this.uniqueItems = [
-            { name: "Mbphu Greater iLvl Annihilation Staff", type: "weapon", attackType: "ranged", baseRange: 7, slots: ["mainhand", "offhand"], baseDamageMin: 10, baseDamageMax: 15, itemTier: "relic", stats: { intellect: 5, maxMana: 5, agility: 5, damageBonus: 5, rangedDamageBonus: 5 }, description: "The Golden Khepresh has got nothing on this babby!", uniqueId: null, icon: "mbphu-staff.svg" },
-            { name: "The Preciousss", type: "ring", slot: "ring", luck: -15, itemTier: "relic", stats: { maxHp: 20, damageBonus: 10 }, description: "A plain simple gold band, that you mussst possesss.", uniqueId: null, icon: "golden-khepresh.svg" }
 
-
-        ];
+        // Fetch unique items from DataSystem
+        this.uniqueItemsPromise = new Promise((resolve) => {
+            this.eventBus.emit('GetUniqueItems', {
+                callback: (uniqueItems) => {
+                    console.log('LootManagerSystem: Received unique items from DataSystem:', uniqueItems);
+                    resolve(uniqueItems);
+                }
+            });
+        });
     }
 
     init() {
         this.eventBus.on('DropLoot', (data) => this.handleLootDrop(data));
     }
 
-    handleLootDrop({ lootSource }) {
+    async handleLootDrop({ lootSource }) {
         const sourceData = lootSource.getComponent('LootSourceData');
         if (!sourceData) {
             console.error('LootManagerSystem: No LootSourceData found on lootSource entity');
@@ -77,21 +81,48 @@ export class LootManagerSystem extends System {
         const healPotions = this.calculatePotionDrop(playerResource, playerHealth, modifiers.healPotions || 1);
 
         let items = [];
-        if (Math.random() < this.calculateItemChance(modifiers.item || 1)) {
-            for (let i = 0; i < sourceData.maxItems; i++) {
+        // Process specified items in sourceData.items
+        if (sourceData.items && sourceData.items.length > 0) {
+            for (const stub of sourceData.items) {
+                if (stub.type === "rog") {
+                    // Partial ROG item
+                    const tierIndex = stub.data.tierIndex !== undefined ? stub.data.tierIndex : this.getItemTier(sourceData.tier, player);
+                    this.eventBus.emit('GenerateROGItem', {
+                        partialItem: { tierIndex, ...stub.data },
+                        dungeonTier: sourceData.tier,
+                        callback: (item) => {
+                            if (item) items.push(item);
+                        }
+                    });
+                } else if (stub.type === "randomUnique") {
+                    // Random unique item (guaranteed drop)
+                    const uniqueItem = await this.getUniqueItem({ type: "randomUnique", data: stub.data });
+                    if (uniqueItem) items.push(uniqueItem);
+                } else if (stub.type === "customUnique") {
+                    // Specific unique item
+                    const uniqueItem = await this.getUniqueItem({ type: "customUnique", data: stub.data });
+                    if (uniqueItem) items.push(uniqueItem);
+                }
+            }
+        }
+
+        // Process random generation for remaining slots
+        const remainingSlots = Math.max(0, sourceData.maxItems - (sourceData.items ? sourceData.items.length : 0));
+        if (remainingSlots > 0 && Math.random() < this.calculateItemChance(modifiers.item || 1)) {
+            for (let i = 0; i < remainingSlots; i++) {
                 const tierIndex = this.getItemTier(sourceData.tier, player);
                 if (tierIndex >= 0) {
                     if (tierIndex <= 4) {
                         this.eventBus.emit('GenerateROGItem', {
-                            partialItem: { tierIndex }, // Updated to new format
+                            partialItem: { tierIndex },
                             dungeonTier: sourceData.tier,
                             callback: (item) => {
                                 if (item) items.push(item);
                             }
                         });
                     } else if (Math.random() < this.calculateUniqueItemChance(modifiers.uniqueItem || 1)) {
-                        const item = this.getUniqueItem({ tierIndex, hasCustomUnique: sourceData.hasCustomUnique, uniqueItemIndex: sourceData.uniqueItemIndex });
-                        if (item) items.push(item);
+                        const uniqueItem = await this.getUniqueItem({ data: { tierIndex } });
+                        if (uniqueItem) items.push(uniqueItem);
                     }
                 }
             }
@@ -205,13 +236,24 @@ export class LootManagerSystem extends System {
         return Math.floor(this.utilities.dRoll(100, 1, luck) / 100);
     }
 
-    getUniqueItem({ tierIndex, hasCustomUnique = false, uniqueItemIndex = 0 }) {
-        if (hasCustomUnique) {
-            console.warn('Custom unique not implemented yet, falling back to default uniqueItems');
+    async getUniqueItem({ type = "randomUnique", data = {} }) {
+        const uniqueItems = await this.uniqueItemsPromise;
+        let uniqueItem;
+        if (type === "customUnique") {
+            // Fetch specific unique by name
+            uniqueItem = uniqueItems.find(i => i.name === data.name);
+            if (!uniqueItem) {
+                console.warn(`Unique item '${data.name}' not found in uniqueItems`);
+                return null;
+            }
+        } else {
+            // Random unique (from items[] or random generation loop)
+            let tierIndex = data.tierIndex; // Extract tierIndex from data
+            if (!tierIndex || tierIndex < 5) tierIndex = 6; // Hardcoded to relic tier until more unique items are added
+            const tier = this.itemTiers[tierIndex];
+            uniqueItem = uniqueItems.find(i => i.itemTier === tier);
+            if (!uniqueItem) return null;
         }
-        const tier = this.itemTiers[tierIndex];
-        const uniqueItem = this.uniqueItems.find(i => i.itemTier === tier);
-        if (!uniqueItem) return null;
         return { ...uniqueItem, uniqueId: this.utilities.generateUniqueId() };
     }
 }

@@ -1,0 +1,94 @@
+﻿[
+  {
+    "name": "Mbphu Greater iLvl Annihilation Staff",
+    "type": "weapon",
+    "attackType": "ranged",
+    "baseRange": 7,
+    "slots": [ "mainhand", "offhand" ],
+    "baseDamageMin": 10,
+    "baseDamageMax": 15,
+    "tierIndex": 6,
+    "itemTier": "relic",
+    "stats": {
+      "intellect": 5,
+      "maxMana": 5,
+      "agility": 5,
+      "damageBonus": 5,
+      "rangedDamageBonus": 5
+    },
+    "description": "The Golden Khepresh has got nothing on this babby!",
+    "uniqueId": null,
+    "icon": "mbphu-staff.svg",
+    "relicAffixes": []
+  },
+  {
+    "name": "The Preciousss",
+    "type": "ring",
+    "slot": "ring",
+    "luck": -15,
+    "tierIndex": 6,
+    "itemTier": "relic",
+    "stats": {
+      "maxHp": 20,
+      "damageBonus": 10
+    },
+    "description": "A plain simple gold band, that you mussst possesss.",
+    "uniqueId": null,
+    "icon": "golden-khepresh.svg",
+    "relicAffixes": []
+  },
+  {
+    "name": "Stolen Honor",
+    "type": "amulet",
+    "slot": "amulet",
+    "luck": 10,
+    "tierIndex": 6,
+    "itemTier": "relic",
+    "stats": {
+      "intellect": 5,
+      "agility": 15,
+      "damageBonus": 15
+    },
+    "description": "An amulet radiating malicious energy.",
+    "uniqueId": null,
+    "icon": "golden-khepresh.svg",
+    "relicAffixes": []
+  },
+  {
+    "name": "Golden Khepresh",
+    "type": "armor",
+    "slot": "armor",
+    "armor": 5,
+    "tierIndex": 6,
+    "itemTier": "relic",
+    "stats": {
+      "prowess": 5,
+      "maxHp": 30,
+      "agility": 5
+    },
+    "description": "A majestic helm worthy of a king.",
+    "uniqueId": null,
+    "icon": "golden-khepresh.svg",
+    "relicAffixes": []
+  },
+  {
+    "name": "Golden Skin of T`Kore-Tickrob",
+    "type": "armor",
+    "slot": "armor",
+    "armor": -6,
+    "tierIndex": 6,
+    "itemTier": "relic",
+    "stats": {
+      "prowess": 0,
+      "agility": 0,
+      "maxHp": 0,
+      "defense": 0,
+      "block": 0,
+      "maxLuck": -66
+    },
+    "description": "Shiny, but it doesn't seem to do anything! Maybe if it was perfectly activated?",
+    "uniqueId": null,
+    "icon": "golden-skin.png",
+    "relicAffixes": []
+  }
+]

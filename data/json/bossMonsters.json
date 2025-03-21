@@ -1,0 +1,43 @@
+﻿[
+  {
+    "x": 0,
+    "y": 0,
+    "name": "Plinklefart",
+    "classes": "Demon",
+    "avatar": "P",
+    "baseHp": 50,
+    "maxHp": 50,
+    "hp": 50,
+    "minBaseDamage": 1,
+    "maxBaseDamage": 6,
+    "isAggro": false,
+    "isElite": true,
+    "isBoss": true,
+    "affixes": [], 
+    "gold": 100,
+    "uniqueItemsDropped": [
+      { "name": "Golden Khepresh"}
+    ]
+  },
+  {
+    "x": 0,
+    "y": 0,
+    "name": "T`Kore-Tickrob",
+    "classes": "demon",
+    "avatar": "K",
+    "baseHp": 50,
+    "maxHp": 50,
+    "hp": 50,
+    "minBaseDamage": 1,
+    "maxBaseDamage": 3,
+    "isAggro": false,
+    "isElite": true,
+    "isBoss": true,
+    "affixes": [ "goldTheft" ],
+    "gold": 0,
+    "uniqueItemsDropped": [
+      {
+        "name": "Golden Skin of T`Kore-Tickrob"}
+    ]
+  }
+]

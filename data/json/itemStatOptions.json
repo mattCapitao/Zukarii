@@ -1,0 +1,48 @@
+﻿{
+  "weapon": {
+    "ranged": {
+      "base": [ "baseDamageMin", "baseDamageMax", "attackType", "baseRange" ],
+      "bonus": [ "intellect", "agility", "range", "rangedDamageBonus", "damageBonus" ]
+    },
+    "melee": {
+      "base": [ "baseDamageMin", "baseDamageMax", "attackType", "baseBlock" ],
+      "bonus": [ "prowess", "agility", "block", "meleeDamageBonus", "damageBonus" ]
+    }
+  },
+  "armor": {
+    "base": [ "armor" ],
+    "bonus": [ "maxHp", "prowess", "agility", "block", "defense" ]
+  },
+  "amulet": {
+    "base": [ "maxLuck" ],
+    "bonus": [
+      "maxHp",
+      "maxMana",
+      "intellect",
+      "prowess",
+      "agility",
+      "range",
+      "block",
+      "defense",
+      "meleeDamageBonus",
+      "rangedDamageBonus",
+      "damageBonus"
+    ]
+  },
+  "ring": {
+    "base": [ "maxLuck" ],
+    "bonus": [
+      "maxHp",
+      "maxMana",
+      "intellect",
+      "prowess",
+      "agility",
+      "range",
+      "block",
+      "defense",
+      "meleeDamageBonus",
+      "rangedDamageBonus",
+      "damageBonus"
+    ]
+  }
+}

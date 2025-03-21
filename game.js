@@ -82,46 +82,43 @@ export class Game {
         }
 
         //console.log('Entities before systems:', this.entityManager.getAllEntities());
-        this.initializeSystems();
-        this.state.eventBus.emit('InitializePlayer');
-        this.state.eventBus.emit('RenderNeeded');
-        //console.log('Systems initialized');
+        this.initializeSystems().then(() => {
+            this.state.eventBus.emit('InitializePlayer');
+            this.state.eventBus.emit('RenderNeeded');
+            console.log('Systems initialized and player initialized');
+        });
         this.setupEventListeners();
         this.startGameLoop();
     }
 
-    initializeSystems() {
-        //console.log('Game.js: initializeSystems start, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
-        //console.log('Game.js: EventBus instance:', this.state.eventBus);
+    async initializeSystems() {
+        console.log('Game.js: initializeSystems start, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
+        console.log('Game.js: EventBus instance:', this.state.eventBus);
+
         this.systems.data = new DataSystem(this.entityManager, this.state.eventBus);
-        this.systems.data.init();
+        this.systems.action = new ActionSystem(this.entityManager, this.state.eventBus);
+        this.systems.damageCalculation = new DamageCalculationSystem(this.entityManager, this.state.eventBus);
+        this.systems.combat = new CombatSystem(this.entityManager, this.state.eventBus);
+        this.systems.render = new RenderSystem(this.entityManager, this.state.eventBus);
+        this.systems.lootSpawn = new LootSpawnSystem(this.entityManager, this.state.eventBus);
+        this.systems.lootCollection = new LootCollectionSystem(this.entityManager, this.state.eventBus);
+        this.systems.itemROG = new ItemROGSystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.lootManager = new LootManagerSystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.player = new PlayerSystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.monster = new MonsterSystem(this.entityManager, this.state.eventBus, this.systems.data);
+        this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state);
+        this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.ui = new UISystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.levelTransition = new LevelTransitionSystem(this.entityManager, this.state.eventBus);
+        this.systems.audio = new AudioSystem(this.entityManager, this.state.eventBus);
 
+        // Await all system initializations
+        await Promise.all(Object.values(this.systems).map(system => {
+            console.log(`Game.js: Initializing system ${system.constructor.name} with EventBus:`, this.state.eventBus);
+            return system.init();
+        }));
 
-        this.systems = {
-            
-            action: new ActionSystem(this.entityManager, this.state.eventBus),
-            damageCalculation: new DamageCalculationSystem(this.entityManager, this.state.eventBus),
-            combat: new CombatSystem(this.entityManager, this.state.eventBus),
-            render: new RenderSystem(this.entityManager, this.state.eventBus),
-            lootSpawn: new LootSpawnSystem(this.entityManager, this.state.eventBus),
-            lootCollection: new LootCollectionSystem(this.entityManager, this.state.eventBus),
-            itemROG: new ItemROGSystem(this.entityManager, this.state.eventBus, this.utilities), 
-            lootManager: new LootManagerSystem(this.entityManager, this.state.eventBus, this.utilities),
-            player: new PlayerSystem(this.entityManager, this.state.eventBus, this.utilities),
-            monster: new MonsterSystem(this.entityManager, this.state.eventBus, this.systems.data),
-            level: new LevelSystem(this.entityManager, this.state.eventBus, this.state),
-            inventory: new InventorySystem(this.entityManager, this.state.eventBus, this.utilities),
-            ui: new UISystem(this.entityManager, this.state.eventBus, this.utilities),
-            levelTransition: new LevelTransitionSystem(this.entityManager, this.state.eventBus),
-            audio: new AudioSystem(this.entityManager, this.state.eventBus),
-        };
-
-        Object.values(this.systems).forEach(system => {
-            //console.log(`Game.js: Initializing system ${system.constructor.name} with EventBus:`, this.state.eventBus);
-            system.init();
-        });
-
-        //console.log('Game.js: initializeSystems end, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
+        console.log('Game.js: initializeSystems end, gameState:', this.state.getGameState()?.getComponent('GameState'), 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
     }
 
     setupEventListeners() {
