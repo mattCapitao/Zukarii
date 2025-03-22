@@ -334,6 +334,7 @@ export class LevelSystem extends System {
     }
 
     placeRooms(numRooms, hasBossRoom, levelEntityId, tier) {
+        const roomOrigins = new Set();
         const roomEntityIds = [];
         let bossChamberPlaced = !hasBossRoom;
         const halfRooms = Math.floor(numRooms / 2);
@@ -345,6 +346,13 @@ export class LevelSystem extends System {
             while (attempts < this.MAX_PLACEMENT_ATTEMPTS) {
                 room.x = Math.floor(Math.random() * (this.state.WIDTH - room.width - 2 * this.ROOM_EDGE_BUFFER)) + this.ROOM_EDGE_BUFFER;
                 room.y = Math.floor(Math.random() * (this.state.HEIGHT - room.height - 2 * this.ROOM_EDGE_BUFFER)) + this.ROOM_EDGE_BUFFER;
+
+                if (roomOrigins.has(`${room.x},${room.y}`)) {
+                    attempts++;
+                    continue;
+                }
+
+
                 const existingRooms = roomEntityIds.map(id => this.entityManager.getEntity(id).getComponent('Room'));
                 if (!this.doesRoomOverlap(room, existingRooms)) {
                     const roomEntity = this.entityManager.createEntity(`room_${tier}_${room.x}_${room.y}`);
@@ -356,6 +364,7 @@ export class LevelSystem extends System {
                         type: room.type
                     }));
                     roomEntityIds.push(roomEntity.id);
+                    roomOrigins.add(`${room.x},${room.y}`);
                     bossChamberPlaced = true;
                     break;
                 } else {
@@ -383,6 +392,13 @@ export class LevelSystem extends System {
             while (attempts < this.MAX_PLACEMENT_ATTEMPTS) {
                 room.x = Math.floor(Math.random() * (this.state.WIDTH - room.width - 2 * this.ROOM_EDGE_BUFFER)) + this.ROOM_EDGE_BUFFER;
                 room.y = Math.floor(Math.random() * (this.state.HEIGHT - room.height - 2 * this.ROOM_EDGE_BUFFER)) + this.ROOM_EDGE_BUFFER;
+
+                if (roomOrigins.has(`${room.x},${room.y}`)) {
+                    attempts++;
+                    continue;
+                }
+
+
                 const existingRooms = roomEntityIds.map(id => this.entityManager.getEntity(id).getComponent('Room'));
                 if (!this.doesRoomOverlap(room, existingRooms) && (roomEntityIds.length === 0 || !this.isTooClose(room, existingRooms, minDistance))) {
                     const roomEntity = this.entityManager.createEntity(`room_${tier}_${room.x}_${room.y}`);
@@ -394,6 +410,7 @@ export class LevelSystem extends System {
                         type: room.type
                     }));
                     roomEntityIds.push(roomEntity.id);
+                    roomOrigins.add(`${room.x},${room.y}`);
                     break;
                 } else {
                     room.width = Math.max(this.MIN_ROOM_SIZE, room.width - 1);
@@ -403,6 +420,7 @@ export class LevelSystem extends System {
                 attempts++;
             }
         }
+        roomOrigins.clear();
         return roomEntityIds;
     }
 
@@ -417,9 +435,9 @@ export class LevelSystem extends System {
     }
 
     generateRoomDimensions(roomType) {
-        const w = Math.floor(Math.random() * (roomType.maxW - roomType.minW + 1)) + roomType.minW;
-        const h = Math.floor(Math.random() * (roomType.maxH - roomType.minH + 1)) + roomType.minH;
-        return { width: w, height: h, type: roomType.type };
+        const width = Math.floor(Math.random() * (roomType.maxW - roomType.minW + 1)) + roomType.minW;
+        const height = Math.floor(Math.random() * (roomType.maxH - roomType.minH + 1)) + roomType.minH;
+        return { width, height, type: roomType.type };
     }
 
     doesRoomOverlap(newRoom, existingRooms) {

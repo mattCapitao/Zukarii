@@ -1,4 +1,4 @@
-﻿// systems/RenderSystem.js
+﻿// systems/RenderSystem.js - Updated
 import { System } from '../core/Systems.js';
 import { titleScreen } from '../titlescreen.js';
 
@@ -9,14 +9,11 @@ export class RenderSystem extends System {
         this.mapDiv = document.getElementById('map');
         this.tileMap = {};
         this.lastTier = null;
-        this.isRenderLocked = false;
-        console.log('RenderSystem: Render Lock initialized with Render Lock Status:', this.isRenderLocked);
+        console.log('RenderSystem: Render Lock initialized');
     }
 
     init() {
         this.eventBus.on('RenderNeeded', () => this.render(true));
-        this.eventBus.on('RenderLock', () => this.renderLock(true));
-        this.eventBus.on('RenderUnlock', () => this.renderLock(false));
         this.eventBus.on('PositionChanged', (data) => {
             this.render(true);
             this.viewportEdgeScroll();
@@ -28,19 +25,15 @@ export class RenderSystem extends System {
         this.render(false); // Continuous render without forcing needsRender
     }
 
-    renderLock(boolFlag) {
-        this.isRenderLocked = boolFlag;
-        console.log(`Render: renderLock = ${this.isRenderLocked}`);
-    }
-
     render(force = false) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
+        const renderControl = this.entityManager.getEntity('renderState')?.getComponent('RenderControl');
         const player = this.entityManager.getEntity('player');
         const titleScreenContainer = document.getElementById('splash');
 
         if (!gameState) return;
-        if (this.isRenderLocked) {
+        if (renderControl.locked) {
             console.warn('RenderSystem: Render is locked, skipping render');
             return;
         }
@@ -74,43 +67,12 @@ export class RenderSystem extends System {
         const exploration = tierEntity.getComponent('Exploration');
         const height = map.length;
         const width = map[0].length;
-        console.log(`RenderSystem: Rendering map with dimensions ${width}x${height} for tier ${currentTier}`); // Added log to confirm map size
+        console.log(`RenderSystem: Rendering map with dimensions ${width}x${height} for tier ${currentTier}`);
         const playerPos = player.getComponent('Position');
         console.log('RenderSystem: Rendering map for player at', playerPos);
         const playerState = player.getComponent('PlayerState');
         console.log('RenderSystem: Player state:', playerState);
-        const visibilityRadius = 6;
-        const discoveryRadius = renderState.discoveryRadius;
-
-        const minXDiscover = Math.max(0, playerPos.x - discoveryRadius);
-        const maxXDiscover = Math.min(width - 1, playerPos.x + discoveryRadius);
-        const minYDiscover = Math.max(0, playerPos.y - discoveryRadius);
-        const maxYDiscover = Math.min(height - 1, playerPos.y + discoveryRadius);
-
-        let newDiscoveryCount = 0;
-
-        for (let y = minYDiscover; y <= maxYDiscover; y++) {
-            for (let x = minXDiscover; x <= maxXDiscover; x++) {
-                const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
-                if (distance <= discoveryRadius) {
-                    const tileKey = `${x},${y}`;
-                    const wasDiscovered = exploration.discoveredWalls.has(tileKey) || exploration.discoveredFloors.has(tileKey);
-                    if (!wasDiscovered) {
-                        if (map[y][x] === '#') {
-                            exploration.discoveredWalls.add(tileKey);
-                        } else {
-                            exploration.discoveredFloors.add(tileKey);
-                        }
-                        newDiscoveryCount++;
-                    }
-                }
-            }
-        }
-
-        if (newDiscoveryCount > 0) {
-            playerState.discoveredTileCount += newDiscoveryCount;
-            this.eventBus.emit('TilesDiscovered', { count: newDiscoveryCount, total: playerState.discoveredTileCount });
-        }
+        const renderRadius = renderState.renderRadius; // Updated to use renderRadius
 
         if (!Object.keys(this.tileMap).length) {
             let mapDisplay = '';
@@ -149,10 +111,10 @@ export class RenderSystem extends System {
 
             this.setInitialScroll();
         } else {
-            const minX = Math.max(0, playerPos.x - visibilityRadius);
-            const maxX = Math.min(width - 1, playerPos.x + visibilityRadius);
-            const minY = Math.max(0, playerPos.y - visibilityRadius);
-            const maxY = Math.min(height - 1, playerPos.y + visibilityRadius);
+            const minX = Math.max(0, playerPos.x - renderRadius); // Updated to use renderRadius
+            const maxX = Math.min(width - 1, playerPos.x + renderRadius);
+            const minY = Math.max(0, playerPos.y - renderRadius);
+            const maxY = Math.min(height - 1, playerPos.y + renderRadius);
 
             const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
             const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
@@ -161,7 +123,7 @@ export class RenderSystem extends System {
             for (let y = minY; y <= maxY; y++) {
                 for (let x = minX; x <= maxX; x++) {
                     const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
-                    if (distance <= visibilityRadius) {
+                    if (distance <= renderRadius) { // Updated to use renderRadius
                         const tileKey = `${x},${y}`;
                         const tile = this.tileMap[tileKey];
                         let char = map[y][x];
@@ -186,7 +148,7 @@ export class RenderSystem extends System {
                             if (playerState.torchLit) className += ' torch flicker';
                         } else {
                             const monster = monsters.find(m => m.getComponent('Position').x === x && m.getComponent('Position').y === y && m.getComponent('Health').hp > 0);
-                            if (monster && (distance <= visibilityRadius || monster.getComponent('MonsterData').isAggro)) {
+                            if (monster && (distance <= renderRadius || monster.getComponent('MonsterData').isAggro)) { // Updated to use renderRadius
                                 const monsterData = monster.getComponent('MonsterData');
                                 monsterData.isDetected = true;
                                 char = monsterData.avatar;
@@ -208,7 +170,7 @@ export class RenderSystem extends System {
             }
         }
 
-        if (force) gameState.needsRender = false; // Only reset for event-driven renders
+        if (force) gameState.needsRender = false;
         gameState.needsInitialRender = false;
     }
 
@@ -303,7 +265,6 @@ export class RenderSystem extends System {
         let scrollX = (playerPos.x * 16) - (viewportWidth / 2);
         let scrollY = (playerPos.y * 16) - (viewportHeight / 2);
 
-        // Ensure scroll positions are within bounds
         scrollX = Math.max(0, Math.min(scrollX, mapWidth - viewportWidth));
         scrollY = Math.max(0, Math.min(scrollY, mapHeight - viewportHeight));
 

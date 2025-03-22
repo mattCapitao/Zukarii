@@ -17,6 +17,7 @@ import { LevelTransitionSystem } from './systems/LevelTransitionSystem.js';
 import { AudioSystem } from './systems/AudioSystem.js';
 import { DataSystem } from './systems/DataSystem.js';
 import { PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent, PlayerStateComponent } from './core/Components.js';
+import { ExplorationSystem } from './systems/ExplorationSystem.js';
 
 export class Game {
     constructor() {
@@ -28,13 +29,6 @@ export class Game {
         this.lastMouseEventTime = 0; // Track last mouse event timestamp
         this.lastMovementTime = 0; // Track last movement timestamp
         this.movementThrottleInterval = 100; // Throttle interval in milliseconds
-
-        // Create state entity (global)
-        let stateEntity = this.entityManager.getEntity('state');
-        if (!stateEntity) {
-            stateEntity = this.entityManager.createEntity('state', true);
-            this.entityManager.addComponentToEntity('state', { type: 'DiscoveryRadius', discoveryRadiusDefault: 2 });
-        }
 
         // Create player entity (global)
         let player = this.entityManager.getEntity('player');
@@ -67,6 +61,11 @@ export class Game {
 
         // renderState is already created in State.js as a global entity, no need to create it here
 
+        let stateEntity = this.entityManager.getEntity('state');
+        if (!stateEntity) {
+            console.warn('Game.js: Warning - state entity not found after State initialization');
+        }
+
         this.initializeSystems().then(() => {
             this.state.eventBus.emit('InitializePlayer');
             this.state.eventBus.emit('RenderNeeded');
@@ -96,6 +95,7 @@ export class Game {
         this.systems.ui = new UISystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.levelTransition = new LevelTransitionSystem(this.entityManager, this.state.eventBus);
         this.systems.audio = new AudioSystem(this.entityManager, this.state.eventBus);
+        this.systems.exploration = new ExplorationSystem(this.entityManager, this.state.eventBus);
 
         // Await all system initializations
         await Promise.all(Object.values(this.systems).map(system => {
@@ -385,8 +385,8 @@ export class Game {
             if (frameCount % 60 === 0) {
                 //console.log('Game.js: Game loop heartbeat, frame:', frameCount, 'timestamp:', Date.now());
             }
-            this.updateSystems(['combat', 'render', 'player', 'monster', 'ui']);
-            //this.state.eventBus.emit('RenderNeeded');
+
+            this.updateSystems(['combat', 'render', 'player', 'monster', 'ui', 'exploration']);
 
             const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
             if (!gameState.gameOver) {

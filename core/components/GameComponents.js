@@ -1,6 +1,4 @@
-﻿// core/components/GameComponents.js
-// Defines game-related components for entities in the Component-Based Architecture
-
+﻿// core/components/GameComponents.js - Updated
 export class UIComponent {
     constructor({
         overlayOpen = false,
@@ -21,13 +19,15 @@ export class RenderStateComponent {
         discoveryRadius = 2,
         visibleTiles = new Set(),
         projectile = null,
-        torchLitOnTurn = false
+        torchLitOnTurn = false,
+        renderRadius = 6 // Added renderRadius with default of 6
     } = {}) {
         this.type = 'RenderState';
         this.discoveryRadius = discoveryRadius;
         this.visibleTiles = visibleTiles;
         this.projectile = projectile;
         this.torchLitOnTurn = torchLitOnTurn;
+        this.renderRadius = renderRadius;
     }
 }
 
@@ -100,5 +100,14 @@ export class LootData {
         this.healPotions = healPotions;
         this.items = items;
         this.suppressRender = suppressRender;
+    }
+}
+
+export class RenderControlComponent {
+    constructor({
+        locked = false
+    } = {}) {
+        this.type = 'RenderControl';
+        this.locked = locked;
     }
 }

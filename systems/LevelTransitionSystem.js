@@ -1,13 +1,11 @@
-﻿// systems/LevelTransitionSystem.js
-// Manages level transitions (up, down, portals)
-
+﻿// systems/LevelTransitionSystem.js - Updated
 import { System } from '../core/Systems.js';
 
 export class LevelTransitionSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
-        this.requiredComponents = ['Map', 'Tier', 'Exploration']; // For level entities
-        this.pendingTransition = null; // Track pending transition type
+        this.requiredComponents = ['Map', 'Tier', 'Exploration'];
+        this.pendingTransition = null;
     }
 
     init() {
@@ -39,11 +37,13 @@ export class LevelTransitionSystem extends System {
         throw new Error(`No adjacent walkable tile found near (${stairX}, ${stairY})`);
     }
 
-
-
-    transitionDown() { 
+    transitionDown() {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
         if (gameState.tier >= Number.MAX_SAFE_INTEGER) return;
+
+        renderControl.locked = true;
+        console.log('LevelTransitionSystem: Render locked for TransitionDown');
 
         const newTier = gameState.tier + 1;
         gameState.tier = newTier;
@@ -53,26 +53,29 @@ export class LevelTransitionSystem extends System {
             this.eventBus.emit('LogMessage', { message: `You Reached Tier ${newTier}` });
         }
 
-        // Emit AddLevel and wait for LevelAdded
         this.eventBus.emit('AddLevel', { tier: newTier });
     }
 
     transitionUp() {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
         if (gameState.tier === 0 || gameState.tier === 1) {
             this.eventBus.emit('PlayerExit', {});
             return;
         }
 
+        renderControl.locked = true;
+        console.log('LevelTransitionSystem: Render locked for TransitionUp');
+
         const newTier = gameState.tier - 1;
         gameState.tier = newTier;
 
-        // Emit AddLevel and wait for LevelAdded
         this.eventBus.emit('AddLevel', { tier: newTier });
     }
 
     transitionViaPortal({ x, y }) {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
         const currentLevel = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
         if (!currentLevel) return;
 
@@ -100,11 +103,12 @@ export class LevelTransitionSystem extends System {
         this.eventBus.emit('LogMessage', { message: `You step through a mysterious portal surging with chaotic energy and are transported to Tier ${destinationTier}!` });
         gameState.tier = destinationTier;
 
-        // Emit AddLevel and wait for LevelAdded
+        renderControl.locked = true;
+        console.log('LevelTransitionSystem: Render locked for TransitionViaPortal');
+
         this.eventBus.emit('RenderNeeded');
         this.eventBus.emit('AddLevel', { tier: destinationTier });
     }
-
 
     clearPlayerPosition() {
         const player = this.entityManager.getEntity('player');
@@ -117,6 +121,7 @@ export class LevelTransitionSystem extends System {
     handleLevelAdded({ tier, entityId }) {
         console.log(`LevelAdded event for tier ${tier}, entityId: ${entityId}`);
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
         const player = this.entityManager.getEntity('player');
         const levelEntity = this.entityManager.getEntity(entityId);
         const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
@@ -131,7 +136,6 @@ export class LevelTransitionSystem extends System {
         const playerPos = player.getComponent('Position');
         let pos;
 
-        // Determine if this is a new tier (first visit) by checking if highestTier needs updating
         const isNewTier = tier > gameState.highestTier;
 
         if (this.pendingTransition === 'down') {
@@ -146,21 +150,15 @@ export class LevelTransitionSystem extends System {
         }
 
         if (tier > 1) {
-            // Clear any old player position data from the previous level
-            const oldPlayerPos = { x: playerPos.x, y: playerPos.y };
-            this.eventBus.emit('ClearOldPlayerPosition', oldPlayerPos);
+            this.eventBus.emit('ClearOldPlayerPosition', { x: playerPos.x, y: playerPos.y });
         }
 
-        //Ensure the player's position is correctly updated
-       playerPos.x = pos.x;
-       playerPos.y = pos.y;
+        playerPos.x = pos.x;
+        playerPos.y = pos.y;
 
-        // Log the player's new position
-      console.log(`LevelTransitionSystem: Player position updated to: (${playerPos.x}, ${playerPos.y})`);
+        console.log(`LevelTransitionSystem: Player position updated to: (${playerPos.x}, ${playerPos.y})`);
 
-        // Handle exploration state
         if (isNewTier) {
-            // New tier: reset exploration and populate initial discovery radius
             explorationComp.discoveredWalls.clear();
             explorationComp.discoveredFloors.clear();
             const discoveryRadius = renderState.discoveryRadius;
@@ -184,25 +182,24 @@ export class LevelTransitionSystem extends System {
                     }
                 }
             }
-        } // Revisited tiers retain their existing explorationComp state
+        }
 
         gameState.needsInitialRender = true;
         gameState.needsRender = true;
         gameState.transitionLock = true;
-    
-        this.eventBus.emit('RenderUnlock');
-        console.log('LevelTransitionSystem emitting RenderUnlock');
+
+        renderControl.locked = false;
+        console.log('LevelTransitionSystem: Render unlocked');
 
         this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
         console.log('LevelTransitionSystem emitting PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
 
         this.eventBus.emit('DiscoveredStateUpdated', { tier, entityId });
-        
+
         this.eventBus.emit('RenderNeeded');
 
         console.log('Pending transition after switch:', this.pendingTransition, 'Tier:', tier);
         console.log('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
-        this.pendingTransition = null; // Reset pending transition
+        this.pendingTransition = null;
     }
-
 }

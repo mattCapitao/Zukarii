@@ -28,7 +28,8 @@ import {
     GameStateComponent,
     ProjectileComponent,
     LootSourceData,
-    LootData
+    LootData,
+    RenderControlComponent
 } from './components/GameComponents.js';
 
 import {
@@ -63,6 +64,7 @@ export {
     ProjectileComponent,
     LootSourceData,
     LootData,
+    RenderControlComponent, 
 
     // Common components
     PositionComponent,

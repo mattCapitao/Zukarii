@@ -1,4 +1,4 @@
-﻿// State.js (Updated)
+﻿// State.js - Updated
 // Manages high-level game state using EntityManager and EventBus, stripped of God Object tendencies
 
 import { Utilities } from './Utilities.js';
@@ -17,6 +17,7 @@ import {
     UIComponent,
     RenderStateComponent,
     GameStateComponent,
+    RenderControlComponent, // Added
     createDefaultPlayerComponents,
     createDefaultLevelComponents
 } from './core/Components.js';
@@ -78,6 +79,22 @@ export class State {
         this.entityManager.addComponentToEntity('renderState',
             new RenderStateComponent()
         );
+        this.entityManager.addComponentToEntity('renderState',
+            new RenderControlComponent()
+        );
+
+        // Add LevelDimensions to state entity
+
+        const state = this.entityManager.createEntity('state', true);
+        this.entityManager.addComponentToEntity('state', {
+            type: 'DiscoveryRadius',
+            discoveryRadiusDefault: 2
+        });
+        this.entityManager.addComponentToEntity('state', {
+            type: 'LevelDimensions',
+            WIDTH: this.WIDTH,
+            HEIGHT: this.HEIGHT
+        });
 
         // Levels will be added dynamically by LevelSystem
         // Placeholder for tier 0 (surface level) will be handled in LevelSystem
