@@ -1,203 +1,314 @@
-﻿// systems/ItemROGSystem.js
+﻿// systems/RenderSystem.js
 import { System } from '../core/Systems.js';
+import { titleScreen } from '../titlescreen.js';
 
-export class ItemROGSystem extends System {
-    constructor(entityManager, eventBus, utilities) {
-        super(entityManager, eventBus, utilities);
-        this.itemStatOptions = null; // Initialize as null, will be set asynchronously
+export class RenderSystem extends System {
+    constructor(entityManager, eventBus) {
+        super(entityManager, eventBus);
+        this.requiredComponents = [];
+        this.mapDiv = document.getElementById('map');
+        this.tileMap = {};
+        this.lastTier = null;
+        this.isRenderLocked = false;
+        console.log('RenderSystem: Render Lock initialized with Render Lock Status:', this.isRenderLocked);
     }
 
-    async init() {
-        await this.requestItemStatOptions(); // Wait for itemStatOptions to be loaded
-        this.eventBus.on('GenerateROGItem', ({ partialItem, dungeonTier, callback }) => {
-            const item = this.generateRogItem({ partialItem, dungeonTier });
-            callback(item);
+    init() {
+        this.eventBus.on('RenderNeeded', () => this.render(true));
+        this.eventBus.on('RenderLock', () => this.renderLock(true));
+        this.eventBus.on('RenderUnlock', () => this.renderLock(false));
+        this.eventBus.on('PositionChanged', (data) => {
+            this.render(true);
+            this.viewportEdgeScroll();
         });
+        this.eventBus.on('DiscoveredStateUpdated', () => this.render(true));
     }
 
-    async requestItemStatOptions() {
-        return new Promise((resolve) => {
-            this.eventBus.emit('GetItemStatOptions', {
-                callback: (itemStatOptions) => {
-                    this.itemStatOptions = itemStatOptions;
-                    console.log('ItemROGSystem: Received Item stat options:', this.itemStatOptions);
-                    resolve(); // Resolve the promise once data is received
+    update() {
+        this.render(false); // Continuous render without forcing needsRender
+    }
+
+    renderLock(boolFlag) {
+        this.isRenderLocked = boolFlag;
+        console.log(`Render: renderLock = ${this.isRenderLocked}`);
+    }
+
+    render(force = false) {
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
+        const player = this.entityManager.getEntity('player');
+        const titleScreenContainer = document.getElementById('splash');
+
+        if (!gameState) return;
+        if (this.isRenderLocked) {
+            console.warn('RenderSystem: Render is locked, skipping render');
+            return;
+        }
+        if (!force && !gameState.needsRender) return;
+
+        if (!gameState.gameStarted) {
+            titleScreenContainer.style.display = 'flex';
+            titleScreenContainer.innerHTML = titleScreen;
+            this.mapDiv.style.display = 'none';
+            gameState.needsRender = false;
+            return;
+        }
+
+        titleScreenContainer.style.display = 'none';
+        this.mapDiv.style.display = 'block';
+
+        const currentTier = gameState.tier;
+        if (currentTier !== this.lastTier) {
+            this.tileMap = {};
+            this.lastTier = currentTier;
+        }
+
+        const tierEntity = this.entityManager.getEntitiesWith(['Map', 'Tier', 'Exploration']).find(e => e.getComponent('Tier').value === currentTier);
+        if (!tierEntity) {
+            console.error(`RenderSystem: No level entity found for tier ${currentTier}`);
+            gameState.needsRender = false;
+            return;
+        }
+
+        const map = tierEntity.getComponent('Map').map;
+        const exploration = tierEntity.getComponent('Exploration');
+        const height = map.length;
+        const width = map[0].length;
+        console.log(`RenderSystem: Rendering map with dimensions ${width}x${height} for tier ${currentTier}`); // Added log to confirm map size
+        const playerPos = player.getComponent('Position');
+        console.log('RenderSystem: Rendering map for player at', playerPos);
+        const playerState = player.getComponent('PlayerState');
+        console.log('RenderSystem: Player state:', playerState);
+        const visibilityRadius = 6;
+        const discoveryRadius = renderState.discoveryRadius;
+
+        const minXDiscover = Math.max(0, playerPos.x - discoveryRadius);
+        const maxXDiscover = Math.min(width - 1, playerPos.x + discoveryRadius);
+        const minYDiscover = Math.max(0, playerPos.y - discoveryRadius);
+        const maxYDiscover = Math.min(height - 1, playerPos.y + discoveryRadius);
+
+        let newDiscoveryCount = 0;
+
+        for (let y = minYDiscover; y <= maxYDiscover; y++) {
+            for (let x = minXDiscover; x <= maxXDiscover; x++) {
+                const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
+                if (distance <= discoveryRadius) {
+                    const tileKey = `${x},${y}`;
+                    const wasDiscovered = exploration.discoveredWalls.has(tileKey) || exploration.discoveredFloors.has(tileKey);
+                    if (!wasDiscovered) {
+                        if (map[y][x] === '#') {
+                            exploration.discoveredWalls.add(tileKey);
+                        } else {
+                            exploration.discoveredFloors.add(tileKey);
+                        }
+                        newDiscoveryCount++;
+                    }
                 }
-            });
-        });
-    }
-
-    generateRogItem({ partialItem = { tierIndex: 0 }, dungeonTier }) {
-        if (!this.itemStatOptions) {
-            console.warn('ItemROGSystem: itemStatOptions not loaded, using fallback behavior');
-            return this.generateFallbackItem(partialItem, dungeonTier); // Fallback if data isn’t available
-        }
-
-        const item = { ...partialItem };
-        const itemTiers = ['junk', 'common', 'rare', 'magic', 'mastercraft', 'legendary', 'relic', 'artifact'];
-        const itemTypes = ['weapon', 'armor', 'amulet', 'ring'];
-
-        // Tier handling
-        if (item.tierIndex === undefined) {
-            console.warn("tierIndex missing in partialItem, defaulting to 0 (junk)");
-            item.tierIndex = 0;
-        }
-        item.itemTier = itemTiers[item.tierIndex];
-        if (partialItem.itemTier && partialItem.itemTier !== item.itemTier) {
-            console.warn(`Tier mismatch: partialItem.itemTier '${partialItem.itemTier}' ignored, using tierIndex ${item.tierIndex} ('${item.itemTier}')`);
-        }
-
-        // Type handling
-        if (item.type) {
-            if (!itemTypes.includes(item.type)) {
-                console.warn(`Invalid type '${item.type}' provided, randomizing instead`);
-                delete item.type;
-            }
-        }
-        if (!item.type) {
-            item.type = itemTypes[Math.floor(Math.random() * itemTypes.length)];
-            if (item.tierIndex < 2) {
-                if (item.type === 'ring') item.type = 'weapon';
-                if (item.type === 'amulet') item.type = 'armor';
             }
         }
 
-        // Base stats and weapon-specific logic
-        let statOptions = this.itemStatOptions[item.type];
-        if (item.type === 'weapon') {
-            if (item.attackType) {
-                if (!['melee', 'ranged'].includes(item.attackType)) {
-                    console.warn(`Invalid attackType '${item.attackType}' provided, randomizing instead`);
-                    delete item.attackType;
+        if (newDiscoveryCount > 0) {
+            playerState.discoveredTileCount += newDiscoveryCount;
+            this.eventBus.emit('TilesDiscovered', { count: newDiscoveryCount, total: playerState.discoveredTileCount });
+        }
+
+        if (!Object.keys(this.tileMap).length) {
+            let mapDisplay = '';
+            let playerSpawnLocations = '';
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    let char = map[y][x];
+                    let className = 'undiscovered';
+                    if (exploration.discoveredWalls.has(`${x},${y}`) || exploration.discoveredFloors.has(`${x},${y}`)) {
+                        className = 'discovered';
+                    }
+                    const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
+                    const projectileMatch = projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
+                    if (projectileMatch) {
+                        char = '*';
+                        className = 'discovered projectile';
+                    } else if (x === playerPos.x && y === playerPos.y) {
+                        playerSpawnLocations += `Rendering player at${x},${y}`;
+                        char = '𓀠';
+                        className = 'player';
+                        if (playerState.torchLit) className += ' torch flicker';
+                    }
+                    mapDisplay += `<span class="${className}" data-x="${x}" data-y="${y}">${char}</span>`;
+                }
+                mapDisplay += '\n';
+            }
+            console.log("Player Avatar Locations", playerSpawnLocations);
+            this.mapDiv.innerHTML = mapDisplay;
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const element = this.mapDiv.querySelector(`span[data-x="${x}"][data-y="${y}"]`);
+                    this.tileMap[`${x},${y}`] = { char: map[y][x], class: element.className, element };
                 }
             }
-            if (!item.attackType) {
-                item.attackType = Math.random() < 0.5 ? 'melee' : 'ranged';
+
+            this.setInitialScroll();
+        } else {
+            const minX = Math.max(0, playerPos.x - visibilityRadius);
+            const maxX = Math.min(width - 1, playerPos.x + visibilityRadius);
+            const minY = Math.max(0, playerPos.y - visibilityRadius);
+            const maxY = Math.min(height - 1, playerPos.y + visibilityRadius);
+
+            const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
+            const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
+            const treasures = this.entityManager.getEntitiesWith(['Position', 'TreasureData']);
+
+            for (let y = minY; y <= maxY; y++) {
+                for (let x = minX; x <= maxX; x++) {
+                    const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
+                    if (distance <= visibilityRadius) {
+                        const tileKey = `${x},${y}`;
+                        const tile = this.tileMap[tileKey];
+                        let char = map[y][x];
+                        let className = exploration.discoveredWalls.has(tileKey) || exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+
+                        tile.element.textContent = char;
+                        tile.element.className = className;
+                        tile.char = char;
+                        tile.class = className;
+
+                        const treasureMatch = treasures.some(t => t.getComponent('Position').x === x && t.getComponent('Position').y === y);
+                        const projectileMatch = projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
+                        if (projectileMatch) {
+                            char = '*';
+                            className = 'discovered projectile';
+                        } else if (treasureMatch) {
+                            char = '$';
+                            className = 'discovered';
+                        } else if (x === playerPos.x && y === playerPos.y) {
+                            char = '𓀠';
+                            className = 'player';
+                            if (playerState.torchLit) className += ' torch flicker';
+                        } else {
+                            const monster = monsters.find(m => m.getComponent('Position').x === x && m.getComponent('Position').y === y && m.getComponent('Health').hp > 0);
+                            if (monster && (distance <= visibilityRadius || monster.getComponent('MonsterData').isAggro)) {
+                                const monsterData = monster.getComponent('MonsterData');
+                                monsterData.isDetected = true;
+                                char = monsterData.avatar;
+                                className = `discovered monster detected ${monsterData.classes}`;
+                                if (monsterData.isElite) className += ' elite';
+                                if (monsterData.isBoss) className += ' boss';
+                                monsterData.affixes.forEach(affix => className += ` ${affix}`);
+                            }
+                        }
+
+                        if (tile.char !== char || tile.class !== className) {
+                            tile.element.textContent = char;
+                            tile.element.className = className;
+                            tile.char = char;
+                            tile.class = className;
+                        }
+                    }
+                }
             }
-            statOptions = statOptions[item.attackType];
-            if (item.baseDamageMin === undefined || item.baseDamageMin === 0) {
-                item.baseDamageMin = Math.floor(Math.random() * 2) + this.statRoll("baseDamageMin", item) || 1;
-                if (item.tierIndex === 0) item.baseDamageMin = 1;
-            }
-            if (item.baseDamageMax === undefined || item.baseDamageMax === 0) {
-                item.baseDamageMax = item.baseDamageMin + Math.floor(Math.random() * 5) + this.statRoll("baseDamageMax", item);
-                if (item.tierIndex === 0) item.baseDamageMax = item.baseDamageMin + 1;
-                if (item.tierIndex === 0 && item.attackType === 'ranged') item.baseDamageMax++;
-            }
-            item.icon = item.attackType === 'melee' ? 'dagger.svg' : 'orb-wand.svg';
-            if (item.attackType === 'melee' && (item.baseBlock === undefined || item.baseBlock === 0)) {
-                item.baseBlock = Math.floor(Math.random() * 2) + this.statRoll("baseBlock", item);
-                if (item.tierIndex === 0) item.baseBlock = 1;
-            }
-            if (item.attackType === 'ranged' && (item.baseRange === undefined || item.baseRange === 0)) {
-                item.baseRange = Math.floor(Math.random() * 2) + this.statRoll("baseRange", item);
-                if (item.tierIndex === 0 && item.baseRange > 3) item.baseRange = 3;
-            }
-        } else if (item.type === 'armor') {
-            if (item.armor === undefined || item.armor === 0) {
-                item.armor = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
-                if (item.tierIndex === 0) item.armor = 1;
-            }
-            item.icon = 'armor.svg';
-        } else if (item.type === 'amulet' || item.type === 'ring') {
-            if (item.maxLuck === undefined || item.maxLuck === 0) {
-                item.maxLuck = this.rollMaxLuck(item, dungeonTier);
-            }
-            item.icon = item.type === 'amulet' ? 'amulet.svg' : 'ring.svg';
         }
 
-        // Bonus stats
-        if (!item.stats || Object.keys(item.stats).length === 0) {
-            if (item.tierIndex > 1) {
-                item.stats = this.getBonusStats(statOptions.bonus, item);
-            }
-        }
-
-        // Required properties
-        item.name = item.name || `${item.itemTier} ${item.type}`;
-        item.uniqueId = item.uniqueId || this.utilities.generateUniqueId();
-        item.description = item.description || `${item.itemTier} ${item.type}`;
-
-        console.log(`ItemROGSystem: Generated item:`, item);
-        return item;
+        if (force) gameState.needsRender = false; // Only reset for event-driven renders
+        gameState.needsInitialRender = false;
     }
 
-    getBonusStats(statArray, item) {
-        if (!this.itemStatOptions || !statArray) {
-            console.warn('ItemROGSystem: itemStatOptions or statArray not available, returning empty stats');
-            return {};
+    viewportEdgeScroll() {
+        const mapElement = document.getElementById('map');
+        const player = document.querySelector('.player');
+        if (!player || !mapElement) {
+            return;
         }
-        console.log(`getBonusStats() called with statArray:`, statArray, `for item:`, item);
-        const itemTier = item.tierIndex;
-        let availableStats = [...statArray];
-        let selectedStats = {};
 
-        const count = itemTier;
-        for (let i = 0; i < count && availableStats.length > 0; i++) {
-            const index = Math.floor(Math.random() * availableStats.length);
-            const stat = availableStats.splice(index, 1)[0];
-            const statValue = this.statRoll(stat, item);
+        const TILE_SIZE = 16;
+        const SCROLL_SPEED = 1;
+        const VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25;
 
-            if (selectedStats.hasOwnProperty(stat)) {
-                selectedStats[stat] += statValue;
+        const viewportWidth = mapElement.clientWidth;
+        const viewportHeight = mapElement.clientHeight;
+        const mapWidth = mapElement.scrollWidth;
+        const mapHeight = mapElement.scrollHeight;
+
+        const thresholdX = viewportWidth * VIEWPORT_EDGE_THRESHOLD_PERCENT;
+        const thresholdY = viewportHeight * VIEWPORT_EDGE_THRESHOLD_PERCENT;
+
+        const playerX = player.offsetLeft;
+        const playerY = player.offsetTop;
+        const currentScrollX = mapElement.scrollLeft;
+        const currentScrollY = mapElement.scrollTop;
+
+        const playerViewportX = playerX - currentScrollX;
+        const playerViewportY = playerY - currentScrollY;
+
+        let targetScrollX = currentScrollX;
+        let targetScrollY = currentScrollY;
+
+        if (playerViewportX < thresholdX) {
+            targetScrollX = playerX - thresholdX;
+        } else if (playerViewportX + TILE_SIZE > viewportWidth - thresholdX) {
+            targetScrollX = playerX + TILE_SIZE - (viewportWidth - thresholdX);
+        }
+
+        if (playerViewportY < thresholdY) {
+            targetScrollY = playerY - thresholdY;
+        } else if (playerViewportY + TILE_SIZE > viewportHeight - thresholdY) {
+            targetScrollY = playerY + TILE_SIZE - (viewportHeight - thresholdY);
+        }
+
+        targetScrollX = Math.max(0, Math.min(targetScrollX, mapWidth - viewportWidth));
+        targetScrollY = Math.max(0, Math.min(targetScrollY, mapHeight - viewportHeight));
+
+        const scrollThreshold = 4;
+        if (Math.abs(targetScrollX - currentScrollX) < scrollThreshold && Math.abs(targetScrollY - currentScrollY) < scrollThreshold) {
+            return;
+        }
+
+        const duration = 300;
+        let startTime = null;
+        const easeInOutQuad = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+        const animateScroll = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeInOutQuad(progress);
+
+            const currentX = currentScrollX + (targetScrollX - currentScrollX) * easedProgress;
+            const currentY = currentScrollY + (targetScrollY - currentScrollY) * easedProgress;
+
+            mapElement.scrollLeft = Math.max(0, Math.min(currentX, mapWidth - viewportWidth));
+            mapElement.scrollTop = Math.max(0, Math.min(currentY, mapHeight - viewportHeight));
+
+            if (progress < 1) {
+                this.animationFrame = requestAnimationFrame(animateScroll);
             } else {
-                selectedStats[stat] = statValue;
+                this.animationFrame = null;
             }
+        };
+
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
         }
-        console.log(`Returning selected stats:`, selectedStats);
-        return selectedStats;
+        this.animationFrame = requestAnimationFrame(animateScroll);
     }
 
-    rollMaxLuck(item, dungeonTier) {
-        const baseRoll = Math.floor(Math.random() * 12) - 4;
-        const tierFactor = item.tierIndex + Math.floor(dungeonTier / 5);
-        const positiveCap = tierFactor * 2 + 1;
-        const negativeCap = -Math.floor(tierFactor * 2 / 3);
-        let scaledRoll = baseRoll < 0 ? baseRoll : baseRoll + 1;
-        scaledRoll = Math.max(Math.min(scaledRoll, positiveCap), negativeCap);
-        const finalRoll = scaledRoll + Math.floor(Math.random() * 2);
-        const rangeWidth = positiveCap - negativeCap + 1;
-        const gapSize = Math.floor(rangeWidth * 0.5);
-        const centerThresholdLow = Math.floor((negativeCap + positiveCap) / 2 - gapSize / 2);
-        const centerThresholdHigh = centerThresholdLow + gapSize - 1;
-        return (finalRoll >= centerThresholdLow && finalRoll <= centerThresholdHigh) ? 0 : finalRoll;
-    }
+    setInitialScroll() {
+        const mapElement = document.getElementById('map');
+        const player = this.entityManager.getEntity('player');
+        const playerPos = player.getComponent('Position');
+        const viewportWidth = mapElement.clientWidth;
+        const viewportHeight = mapElement.clientHeight;
+        const mapWidth = mapElement.scrollWidth;
+        const mapHeight = mapElement.scrollHeight;
 
-    statRoll(stat, item) {
-        if (item[stat] !== undefined && item[stat] !== 0) return 0; // Skip base stats if provided and non-zero
-        switch (stat) {
-            case 'baseDamageMin': return Math.floor(item.tierIndex * 1.5);
-            case 'baseDamageMax': return Math.floor(Math.random() * item.tierIndex) + 1;
-            case 'range': return Math.floor(Math.random() * 2) + 1;
-            case 'block': return Math.floor(Math.random() * 2) + 1;
-            case 'armor': return Math.floor(item.tierIndex) + 1;
-            case 'maxHp': return item.tierIndex * 2;
-            case 'maxMana': return Math.floor(item.tierIndex / 2);
-            case 'prowess': return Math.floor(item.tierIndex / 2);
-            case 'agility': return Math.floor(item.tierIndex / 2);
-            case 'intellect': return Math.floor(item.tierIndex / 2);
-            case 'defense': return Math.floor(item.tierIndex) + 1;
-            case 'damageBonus': return Math.floor(item.tierIndex) + 1;
-            case 'meleeDamageBonus': return Math.floor(item.tierIndex) + 1;
-            case 'rangedDamageBonus': return Math.floor(item.tierIndex) + 1;
-            case 'baseBlock': return Math.floor(item.tierIndex) + 1;
-            case 'baseRange': return Math.floor(item.tierIndex) + 4;
-            default:
-                console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
-                return 0;
-        }
-    }
+        let scrollX = (playerPos.x * 16) - (viewportWidth / 2);
+        let scrollY = (playerPos.y * 16) - (viewportHeight / 2);
 
-    // Fallback method if itemStatOptions is not available
-    generateFallbackItem(partialItem, dungeonTier) {
-        const item = { ...partialItem };
-        item.tierIndex = item.tierIndex || 0;
-        item.itemTier = ['junk', 'common', 'rare', 'magic', 'mastercraft', 'legendary', 'relic', 'artifact'][item.tierIndex];
-        item.type = item.type || ['weapon', 'armor'][Math.floor(Math.random() * 2)];
-        item.name = `${item.itemTier} ${item.type}`;
-        item.uniqueId = this.utilities.generateUniqueId();
-        item.description = `${item.itemTier} ${item.type}`;
-        console.warn('ItemROGSystem: Generated fallback item:', item);
-        return item;
+        // Ensure scroll positions are within bounds
+        scrollX = Math.max(0, Math.min(scrollX, mapWidth - viewportWidth));
+        scrollY = Math.max(0, Math.min(scrollY, mapHeight - viewportHeight));
+
+        mapElement.scrollLeft = scrollX;
+        mapElement.scrollTop = scrollY;
+        console.log(`RenderSystem: Set initial scroll to (${scrollX}, ${scrollY}) for player at (${playerPos.x}, ${playerPos.y})`);
     }
 }

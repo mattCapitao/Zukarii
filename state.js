@@ -30,8 +30,8 @@ export class State {
         this.eventBus = new EventBus();
 
         // Constants (to be moved later)
-        this.WIDTH = 122;
-        this.HEIGHT = 67;
+        this.WIDTH = 64;
+        this.HEIGHT = 48;
         this.MIN_STAIR_DISTANCE = Math.floor(Math.random() * 41) + 20;
         this.AGGRO_RANGE = 4;
         this.discoveryRadiusDefault = 2;
@@ -56,8 +56,8 @@ export class State {
     }
 
     initializeCoreEntities() {
-        // Game state entity
-        const gameState = this.entityManager.createEntity('gameState');
+        // Game state entity (global)
+        const gameState = this.entityManager.createEntity('gameState', true);
         this.entityManager.addComponentToEntity('gameState',
             new GameStateComponent({
                 gameStarted: false,
@@ -67,14 +67,14 @@ export class State {
         );
         console.log('State.js: Created gameState entity with GameState component:', this.entityManager.getEntity('gameState'));
 
-        // UI entity
-        const ui = this.entityManager.createEntity('ui');
+        // UI entity (global)
+        const ui = this.entityManager.createEntity('ui', true);
         this.entityManager.addComponentToEntity('ui',
             new UIComponent()
         );
 
-        // Render state entity
-        const renderState = this.entityManager.createEntity('renderState');
+        // Render state entity (global)
+        const renderState = this.entityManager.createEntity('renderState', true);
         this.entityManager.addComponentToEntity('renderState',
             new RenderStateComponent()
         );
@@ -119,7 +119,7 @@ export class State {
     getGameState() {
         const entity = this.entityManager.getEntity('gameState');
         const component = entity?.getComponent('GameState');
-       // console.log('State.js: getGameState called, entity ID:', entity?.id, 'component reference:', component, 'timestamp:', Date.now());
+        // console.log('State.js: getGameState called, entity ID:', entity?.id, 'component reference:', component, 'timestamp:', Date.now());
         return entity;
     }
 }

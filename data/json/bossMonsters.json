@@ -3,7 +3,9 @@
     "x": 0,
     "y": 0,
     "name": "Plinklefart",
-    "classes": "Demon",
+    "classes": "plinklefart",
+    "family": "demon",
+    "minDungeonTier": 3,
     "avatar": "P",
     "baseHp": 50,
     "maxHp": 50,
@@ -13,17 +15,22 @@
     "isAggro": false,
     "isElite": true,
     "isBoss": true,
-    "affixes": [], 
+    "affixes": [],
     "gold": 100,
     "uniqueItemsDropped": [
-      { "name": "Golden Khepresh"}
+      {
+        "type": "customUnique",
+        "data": { "name": "Golden Khepresh" }
+      }
     ]
   },
   {
     "x": 0,
     "y": 0,
     "name": "T`Kore-Tickrob",
-    "classes": "demon",
+    "classes": "t-kore-tickrob",
+    "family": "demon",
+    "minDungeonTier": 3,
     "avatar": "K",
     "baseHp": 50,
     "maxHp": 50,
@@ -37,7 +44,9 @@
     "gold": 0,
     "uniqueItemsDropped": [
       {
-        "name": "Golden Skin of T`Kore-Tickrob"}
+        "type": "customUnique",
+        "data": { "name": "Golden Skin of T`Kore-Tickrob" }
+      }
     ]
   }
 ]

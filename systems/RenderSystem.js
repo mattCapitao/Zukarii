@@ -40,12 +40,10 @@ export class RenderSystem extends System {
         const titleScreenContainer = document.getElementById('splash');
 
         if (!gameState) return;
-       // console.log('RenderSystem: Checking Render Lock with value: isRenderLocked = ', this.isRenderLocked);
         if (this.isRenderLocked) {
             console.warn('RenderSystem: Render is locked, skipping render');
             return;
         }
-        // Only check needsRender for event-driven renders
         if (!force && !gameState.needsRender) return;
 
         if (!gameState.gameStarted) {
@@ -76,10 +74,11 @@ export class RenderSystem extends System {
         const exploration = tierEntity.getComponent('Exploration');
         const height = map.length;
         const width = map[0].length;
+        console.log(`RenderSystem: Rendering map with dimensions ${width}x${height} for tier ${currentTier}`); // Added log to confirm map size
         const playerPos = player.getComponent('Position');
         console.log('RenderSystem: Rendering map for player at', playerPos);
         const playerState = player.getComponent('PlayerState');
-        console.log('RenderSystem: Player state:', playerState);    
+        console.log('RenderSystem: Player state:', playerState);
         const visibilityRadius = 6;
         const discoveryRadius = renderState.discoveryRadius;
 
@@ -89,7 +88,7 @@ export class RenderSystem extends System {
         const maxYDiscover = Math.min(height - 1, playerPos.y + discoveryRadius);
 
         let newDiscoveryCount = 0;
-        
+
         for (let y = minYDiscover; y <= maxYDiscover; y++) {
             for (let x = minXDiscover; x <= maxXDiscover; x++) {
                 const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
@@ -107,12 +106,12 @@ export class RenderSystem extends System {
                 }
             }
         }
-        
+
         if (newDiscoveryCount > 0) {
             playerState.discoveredTileCount += newDiscoveryCount;
             this.eventBus.emit('TilesDiscovered', { count: newDiscoveryCount, total: playerState.discoveredTileCount });
         }
-      
+
         if (!Object.keys(this.tileMap).length) {
             let mapDisplay = '';
             let playerSpawnLocations = '';
@@ -138,9 +137,8 @@ export class RenderSystem extends System {
                 }
                 mapDisplay += '\n';
             }
-            console.log("Player Avatar Locations", playerSpawnLocations); 
+            console.log("Player Avatar Locations", playerSpawnLocations);
             this.mapDiv.innerHTML = mapDisplay;
-
 
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
@@ -148,7 +146,7 @@ export class RenderSystem extends System {
                     this.tileMap[`${x},${y}`] = { char: map[y][x], class: element.className, element };
                 }
             }
-            
+
             this.setInitialScroll();
         } else {
             const minX = Math.max(0, playerPos.x - visibilityRadius);
@@ -209,21 +207,21 @@ export class RenderSystem extends System {
                 }
             }
         }
-        
+
         if (force) gameState.needsRender = false; // Only reset for event-driven renders
         gameState.needsInitialRender = false;
     }
 
     viewportEdgeScroll() {
         const mapElement = document.getElementById('map');
-        const player = document.querySelector('.player'); // Assuming the player element has a class of 'player'
+        const player = document.querySelector('.player');
         if (!player || !mapElement) {
             return;
         }
 
-        const TILE_SIZE = 16; // Size of each tile in pixels
-        const SCROLL_SPEED = 1; // Speed of the scroll for smoothness
-        const VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25; // 25% threshold for triggering scroll
+        const TILE_SIZE = 16;
+        const SCROLL_SPEED = 1;
+        const VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25;
 
         const viewportWidth = mapElement.clientWidth;
         const viewportHeight = mapElement.clientHeight;
@@ -293,13 +291,24 @@ export class RenderSystem extends System {
         this.animationFrame = requestAnimationFrame(animateScroll);
     }
 
-
-
     setInitialScroll() {
         const mapElement = document.getElementById('map');
         const player = this.entityManager.getEntity('player');
         const playerPos = player.getComponent('Position');
-        mapElement.scrollLeft = (playerPos.x * 16) - (mapElement.clientWidth / 2);
-        mapElement.scrollTop = (playerPos.y * 16) - (mapElement.clientHeight / 2);
+        const viewportWidth = mapElement.clientWidth;
+        const viewportHeight = mapElement.clientHeight;
+        const mapWidth = mapElement.scrollWidth;
+        const mapHeight = mapElement.scrollHeight;
+
+        let scrollX = (playerPos.x * 16) - (viewportWidth / 2);
+        let scrollY = (playerPos.y * 16) - (viewportHeight / 2);
+
+        // Ensure scroll positions are within bounds
+        scrollX = Math.max(0, Math.min(scrollX, mapWidth - viewportWidth));
+        scrollY = Math.max(0, Math.min(scrollY, mapHeight - viewportHeight));
+
+        mapElement.scrollLeft = scrollX;
+        mapElement.scrollTop = scrollY;
+        console.log(`RenderSystem: Set initial scroll to (${scrollX}, ${scrollY}) for player at (${playerPos.x}, ${playerPos.y})`);
     }
 }

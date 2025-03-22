@@ -1,4 +1,5 @@
-﻿import { System } from '../core/Systems.js';
+﻿// systems/LootManagerSystem.js
+import { System } from '../core/Systems.js';
 import { PositionComponent, LootData } from '../core/Components.js';
 
 export class LootManagerSystem extends System {
@@ -243,9 +244,10 @@ export class LootManagerSystem extends System {
             // Fetch specific unique by name
             uniqueItem = uniqueItems.find(i => i.name === data.name);
             if (!uniqueItem) {
-                console.warn(`Unique item '${data.name}' not found in uniqueItems`);
+                console.warn(`LootManagerSystem: Unique item '${data.name}' not found in uniqueItems`);
                 return null;
             }
+            console.log(`LootManagerSystem: Fetched custom unique item '${data.name}':`, uniqueItem);
         } else {
             // Random unique (from items[] or random generation loop)
             let tierIndex = data.tierIndex; // Extract tierIndex from data
@@ -253,6 +255,7 @@ export class LootManagerSystem extends System {
             const tier = this.itemTiers[tierIndex];
             uniqueItem = uniqueItems.find(i => i.itemTier === tier);
             if (!uniqueItem) return null;
+            console.log(`LootManagerSystem: Selected random unique item for tier '${tier}':`, uniqueItem);
         }
         return { ...uniqueItem, uniqueId: this.utilities.generateUniqueId() };
     }

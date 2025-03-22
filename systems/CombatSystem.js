@@ -19,6 +19,9 @@ export class CombatSystem extends System {
     }
 
     update() {
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        if (gameState.gameOver) return; // Stop updating if game is over
+
         this.currentFrame = (this.currentFrame + 1) % this.frameDelay; // Increment and wrap around
         if (this.currentFrame !== 0) return; // Skip update if not at delay threshold
 
@@ -114,6 +117,9 @@ export class CombatSystem extends System {
 
 
     handleMonsterMeleeAttack({ entityId }) {
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        if (gameState.gameOver) return; // Stop if game is over
+
         const monster = this.entityManager.getEntity(entityId);
         const player = this.entityManager.getEntity('player');
         if (!monster || !player) return;

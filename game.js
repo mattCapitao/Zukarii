@@ -5,11 +5,11 @@ import { CombatSystem } from './systems/CombatSystem.js';
 import { RenderSystem } from './systems/RenderSystem.js';
 import { PlayerSystem } from './systems/PlayerSystem.js';
 import { MonsterSystem } from './systems/MonsterSystem.js';
-import { DamageCalculationSystem } from './systems/DamageCalculationSystem.js'; 
+import { DamageCalculationSystem } from './systems/DamageCalculationSystem.js';
 import { LevelSystem } from './systems/LevelSystem.js';
 import { LootSpawnSystem } from './systems/LootSpawnSystem.js';
 import { LootCollectionSystem } from './systems/LootCollectionSystem.js';
-import { ItemROGSystem } from './systems/ItemROGSystem.js'; // Add this
+import { ItemROGSystem } from './systems/ItemROGSystem.js';
 import { LootManagerSystem } from './systems/LootManagerSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
 import { UISystem } from './systems/UISystem.js';
@@ -29,22 +29,19 @@ export class Game {
         this.lastMovementTime = 0; // Track last movement timestamp
         this.movementThrottleInterval = 100; // Throttle interval in milliseconds
 
-        //console.log('Creating state entity...');
+        // Create state entity (global)
         let stateEntity = this.entityManager.getEntity('state');
         if (!stateEntity) {
-            stateEntity = this.entityManager.createEntity('state');
+            stateEntity = this.entityManager.createEntity('state', true);
             this.entityManager.addComponentToEntity('state', { type: 'DiscoveryRadius', discoveryRadiusDefault: 2 });
-            //console.log('State entity created:', this.entityManager.getEntity('state'));
         }
 
-        //console.log('Checking for existing player entity...');
+        // Create player entity (global)
         let player = this.entityManager.getEntity('player');
         if (player) {
-            //console.log('Player entity exists, resetting it...');
             this.entityManager.removeEntity('player');
         }
-        //console.log('Creating new player entity...');
-        player = this.entityManager.createEntity('player');
+        player = this.entityManager.createEntity('player', true);
         this.entityManager.addComponentToEntity('player', new PositionComponent(1, 1));
         this.entityManager.addComponentToEntity('player', new HealthComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new ManaComponent(0, 0));
@@ -55,33 +52,21 @@ export class Game {
         }));
         this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0, 0));
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, false, ''));
-        //console.log('Player entity created with default components:', this.entityManager.getEntity('player'));
 
-        //console.log('Creating overlayState entity...');
+        // Create overlayState entity (global)
         let overlayState = this.entityManager.getEntity('overlayState');
         if (!overlayState) {
-            overlayState = this.entityManager.createEntity('overlayState');
+            overlayState = this.entityManager.createEntity('overlayState', true);
             this.entityManager.addComponentToEntity('overlayState', {
                 type: 'OverlayState',
                 isOpen: false,
                 activeTab: null,
                 logMessages: []
             });
-            //console.log('OverlayState entity created:', this.entityManager.getEntity('overlayState'));
         }
 
-        //console.log('Creating renderState entity...');
-        let renderStateEntity = this.entityManager.getEntity('renderState');
-        if (!renderStateEntity) {
-            renderStateEntity = this.entityManager.createEntity('renderState');
-            this.entityManager.addComponentToEntity('renderState', {
-                type: 'RenderState',
-                discoveryRadius: 2
-            });
-            //console.log('RenderState entity created:', this.entityManager.getEntity('renderState'));
-        }
+        // renderState is already created in State.js as a global entity, no need to create it here
 
-        //console.log('Entities before systems:', this.entityManager.getAllEntities());
         this.initializeSystems().then(() => {
             this.state.eventBus.emit('InitializePlayer');
             this.state.eventBus.emit('RenderNeeded');
@@ -124,17 +109,15 @@ export class Game {
     setupEventListeners() {
         document.addEventListener('keydown', (event) => this.handleInput(event));
         document.addEventListener('keyup', (event) => this.handleInput(event));
-        document.addEventListener('mousedown', () => this.updateLastMouseEvent()); // Track mouse clicks
-        document.addEventListener('mousemove', () => this.updateLastMouseEvent()); // Optional: track movement
+        document.addEventListener('mousedown', () => this.updateLastMouseEvent());
+        document.addEventListener('mousemove', () => this.updateLastMouseEvent());
     }
 
     updateLastMouseEvent() {
         this.lastMouseEventTime = Date.now();
-       // //console.log('Mouse event detected, lastMouseEventTime updated:', this.lastMouseEventTime);
     }
 
     handleInput(event) {
-        //console.log(`Game.js: Handling ${event.type} event for key: ${event.key}`);
         const gameState = this.state.getGameState()?.getComponent('GameState');
         if (!gameState) {
             console.error('Game.js: gameState not found or missing GameState component');
@@ -143,7 +126,6 @@ export class Game {
         }
 
         if (gameState && !gameState.gameStarted) {
-            //console.log('Game.js: Starting game on first keypress');
             gameState.gameStarted = true;
             gameState.needsRender = true;
             this.state.eventBus.emit('ToggleBackgroundMusic', { play: true });
@@ -153,7 +135,6 @@ export class Game {
         }
 
         if (gameState.gameOver) {
-            //console.log('Game.js: Game over, ignoring input');
             return;
         }
 
@@ -172,7 +153,6 @@ export class Game {
 
         const mappedKey = keyMap[event.key];
         if (!mappedKey) {
-            //console.log(`Game.js: Key ${event.key} not mapped, ignoring`);
             return;
         }
 
@@ -180,35 +160,30 @@ export class Game {
             //console.log(`Key pressed: ${mappedKey}`);
         }
 
-        // Check if Ctrl is part of a recent click context
-        const isClickContext = Date.now() - this.lastMouseEventTime < 500; // 500ms threshold
+        const isClickContext = Date.now() - this.lastMouseEventTime < 500;
         if (event.type === 'keydown' && event.key === 'Control' && isClickContext) {
-            //console.log('Game.js: Ignoring Ctrl key in click context');
-            return; // Allow Ctrl to propagate to click handlers
+            return;
         }
 
         if (event.type === 'keyup' && mappedKey === ' ') {
             event.preventDefault();
             this.state.eventBus.emit('ToggleRangedMode', { event });
-            //console.log('space keyUp detected');
             this.updateSystems(['player', 'render']);
             return;
         }
 
-        if (event.type === 'keydown') { // removed  && !event.repeat
-            //console.log('Game.js: Processing keydown, gameState before switch:', gameState, 'entity ID:', this.state.getGameState()?.id, 'timestamp:', Date.now());
+        if (event.type === 'keydown') {
             const player = this.state.getPlayer();
             if (!player) {
-                //console.log('Game.js: Player entity not found');
                 return;
             }
             const playerPos = player.getComponent('Position');
             const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
             if (!levelEntity) {
-                //console.log('Game.js: Level entity not found for current tier');
                 return;
             }
-            const map = levelEntity.getComponent('Map').map;
+
+            console.log(`Game.js: Current tier: ${gameState.tier}, Player position: (${playerPos.x}, ${playerPos.y})`);
 
             let newX = playerPos.x;
             let newY = playerPos.y;
@@ -247,17 +222,14 @@ export class Game {
                     newX++;
                     break;
                 case 'c':
-                    //console.log('Emitting ToggleOverlay for character tab');
                     this.state.eventBus.emit('ToggleOverlay', { tab: 'character' });
                     this.updateSystems(['ui']);
                     return;
                 case 'l':
-                    //console.log('Emitting ToggleOverlay for log tab');
                     this.state.eventBus.emit('ToggleOverlay', { tab: 'log' });
                     this.updateSystems(['ui']);
                     return;
                 case 'escape':
-                    //console.log('Emitting ToggleOverlay to close');
                     this.state.eventBus.emit('ToggleOverlay', {});
                     this.updateSystems(['ui']);
                     return;
@@ -274,68 +246,99 @@ export class Game {
                 case ' ':
                     event.preventDefault();
                     if (!event.repeat) {
-                        
                         this.state.eventBus.emit('ToggleRangedMode', { event });
                         this.updateSystems(['player', 'render']);
-                        //console.log('space keyDown detected');
                     }
                     return;
             }
 
-            const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
-            const monster = monsters.find(m => m.getComponent('Position').x === newX && m.getComponent('Position').y === newY && m.getComponent('Health').hp > 0);
-            const fountain = this.entityManager.getEntitiesWith(['Position', 'FountainData']).find(f => f.getComponent('Position').x === newX && f.getComponent('Position').y === newY && !f.getComponent('FountainData').used);
-            const loot = this.entityManager.getEntitiesWith(['Position', 'LootData']).find(t => t.getComponent('Position').x === newX && t.getComponent('Position').y === newY);
+            const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
+                const pos = e.getComponent('Position');
+                return pos.x === newX && pos.y === newY;
+            });
+            console.log(`Game.js: Entities at (${newX}, ${newY}):`, entitiesAtTarget.map(e => ({
+                id: e.id,
+                components: e.getComponentTypes()
+            })));
+
+            const mapComp = levelEntity.getComponent('Map');
+            console.log(`Game.js: Map tile at (${newX}, ${newY}): ${mapComp.map[newY][newX]}`);
+
+            const monster = entitiesAtTarget.find(e =>
+                e.hasComponent('Health') && e.hasComponent('MonsterData') &&
+                e.getComponent('Health').hp > 0
+            );
             if (monster) {
                 this.state.eventBus.emit('MeleeAttack', { targetEntityId: monster.id });
                 this.endTurn('meleeAttack');
                 return;
             }
+
+            const fountain = entitiesAtTarget.find(e =>
+                e.hasComponent('Fountain') && !e.getComponent('Fountain').used
+            );
             if (fountain) {
                 this.state.eventBus.emit('UseFountain', { fountainEntityId: fountain.id, tierEntityId: levelEntity.id });
                 this.endTurn('useFountain');
                 return;
             }
+
+            const loot = entitiesAtTarget.find(e => e.hasComponent('LootData'));
             if (loot) {
                 this.state.eventBus.emit('PickupTreasure', { x: newX, y: newY });
                 this.endTurn('pickupLoot');
                 return;
             }
-            if (map[newY][newX] === '#') return;
 
-            if (map[newY][newX] === '⇓') {
-                this.state.eventBus.emit('RenderLock');
-                console.log('Game: Render Locked for  TransitionDown');
-                this.state.eventBus.emit('TransitionDown');
-                
-                this.endTurn('transitionDown');
-                return;
+            const stair = entitiesAtTarget.find(e => e.hasComponent('Stair'));
+            if (stair) {
+                const stairComp = stair.getComponent('Stair');
+                if (stairComp.direction === 'down') {
+                    this.state.eventBus.emit('RenderLock');
+                    console.log('Game: Render Locked for TransitionDown');
+                    this.state.eventBus.emit('TransitionDown');
+                    this.endTurn('transitionDown');
+                    return;
+                } else if (stairComp.direction === 'up') {
+                    this.state.eventBus.emit('RenderLock');
+                    this.state.eventBus.emit('TransitionUp');
+                    this.endTurn('transitionUp');
+                    return;
+                }
             }
-            if (map[newY][newX] === '⇑') {
-                this.state.eventBus.emit('RenderLock');
-                this.state.eventBus.emit('TransitionUp');
-                this.endTurn('transitionUp');
-                return;
-            }
-            if (map[newY][newX] === '?') {
+
+            const portal = entitiesAtTarget.find(e => e.hasComponent('Portal'));
+            if (portal) {
                 this.state.eventBus.emit('RenderLock');
                 this.state.eventBus.emit('TransitionViaPortal', { x: newX, y: newY });
                 this.endTurn('transitionPortal');
                 return;
             }
 
-            if (!gameState.transitionLock && !gameState.isRangedMode) {
+            const wall = entitiesAtTarget.find(e => e.hasComponent('Wall'));
+            if (wall) {
+                console.log(`Game.js: Wall found at (${newX}, ${newY}), blocking movement`);
+                return;
+            }
 
+            const floor = entitiesAtTarget.find(e => e.hasComponent('Floor'));
+            console.log(`Game.js: Floor at (${newX}, ${newY}):`, floor ? floor.id : 'none');
+            console.log(`Game.js: Conditions - transitionLock: ${gameState.transitionLock}, isRangedMode: ${gameState.isRangedMode}, throttle: ${Date.now() - this.lastMovementTime < this.movementThrottleInterval}`);
+            if (!gameState.transitionLock && !gameState.isRangedMode && floor) {
                 const now = Date.now();
                 if (now - this.lastMovementTime < this.movementThrottleInterval) {
-                    return; // Throttle movement
+                    console.log(`Game.js: Movement throttled at (${newX}, ${newY})`);
+                    return;
                 }
-                this.lastMovementTime = now; // Update the last movement time
+                this.lastMovementTime = now;
 
                 playerPos.x = newX;
                 playerPos.y = newY;
                 this.state.eventBus.emit('PositionChanged', { entityId: 'player', x: newX, y: newY });
+                console.log(`Game.js: Player moved to (${newX}, ${newY})`);
                 this.endTurn('movement');
+            } else {
+                console.log(`Game.js: Movement blocked at (${newX}, ${newY}) - transitionLock: ${gameState.transitionLock}, isRangedMode: ${gameState.isRangedMode}, floor: ${!!floor}`);
             }
         }
     }
@@ -361,7 +364,6 @@ export class Game {
             renderState.discoveryRadius = playerState.torchLit ?
                 state.getComponent('DiscoveryRadius').discoveryRadiusDefault + 2 :
                 state.getComponent('DiscoveryRadius').discoveryRadiusDefault;
-            //console.log('endTurn - discoveryRadius:', renderState.discoveryRadius);
         }
 
         this.state.eventBus.emit('MoveMonsters');
@@ -386,7 +388,6 @@ export class Game {
             this.updateSystems(['combat', 'render', 'player', 'monster', 'ui']);
             //this.state.eventBus.emit('RenderNeeded');
 
-            // Only recurse if game isn't over
             const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
             if (!gameState.gameOver) {
                 requestAnimationFrame(gameLoop);
