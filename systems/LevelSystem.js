@@ -38,7 +38,7 @@ export class LevelSystem extends System {
         this.lastBossTier = 0;
         this.MAX_PLACEMENT_ATTEMPTS = 20;
         this.MIN_STAIR_DISTANCE = 12;
-        this.roomsPerLevel = 10;
+        this.roomsPerLevel = 30;
     }
 
     init() {

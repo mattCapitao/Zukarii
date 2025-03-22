@@ -18,6 +18,7 @@ export class MonsterSystem extends System {
         this.eventBus.on('SpawnMonsters', (data) => this.handleSpawnMonsters(data));
     }
 
+    // systems/MonsterSystem.js - Updated handleSpawnMonsters method // remove map from signature when updating LevelSsytem.
     async handleSpawnMonsters({ tier, map, rooms, hasBossRoom, spawnPool }) {
         const baseMonsterCount = 15;
         const densityFactor = 1 + tier * 0.1;
@@ -63,7 +64,6 @@ export class MonsterSystem extends System {
             console.log(`MonsterSystem: Spawning ${monsterCount} monsters for tier ${tier}`);
 
             if (hasBossRoom) {
-                // Fetch the boss room by ID and get its RoomComponent
                 const bossRoomId = rooms.find(roomId => {
                     const roomEntity = this.entityManager.getEntity(roomId);
                     const roomComp = roomEntity.getComponent('Room');
@@ -71,7 +71,7 @@ export class MonsterSystem extends System {
                 });
                 if (bossRoomId && bossMonsters) {
                     const bossTemplate = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
-                    const boss = this.createMonsterEntity(bossTemplate, tier, map, [bossRoomId], playerX, playerY);
+                    const boss = this.createMonsterEntity(bossTemplate, tier, [bossRoomId], playerX, playerY);
                     if (boss) {
                         boss.getComponent('MonsterData').isBoss = true;
                         console.log(`MonsterSystem: Boss ${boss.getComponent('MonsterData').name} spawned at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`);
@@ -101,7 +101,7 @@ export class MonsterSystem extends System {
                         console.warn('MonsterSystem: No unique monsters available, falling back to random monster');
                     }
                 }
-                const monster = this.createMonsterEntity(template, tier, map, normalRoomIds, playerX, playerY);
+                const monster = this.createMonsterEntity(template, tier, normalRoomIds, playerX, playerY);
                 if (monster) {
                     const entityList = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier).getComponent('EntityList');
                     entityList.monsters.push(monster.id);
@@ -112,7 +112,8 @@ export class MonsterSystem extends System {
         });
     }
 
-    createMonsterEntity(template, tier, map, roomIds, playerX, playerY) {
+    // systems/MonsterSystem.js - Updated createMonsterEntity method
+    createMonsterEntity(template, tier, roomIds, playerX, playerY) {
         if (!roomIds || roomIds.length === 0) {
             console.error(`MonsterSystem.js: No rooms provided for spawning monsters on tier ${tier}`);
             return null;
@@ -130,10 +131,27 @@ export class MonsterSystem extends System {
             return null;
         }
         let x, y;
+        let attempts = 0;
+        const maxAttempts = 50; // Prevent infinite loop
+        let isOccupied = false; // Declare outside the do block
         do {
+            if (attempts >= maxAttempts) {
+                console.warn(`MonsterSystem.js: Failed to find valid spawn position for ${template.name} in room ${roomId} after ${maxAttempts} attempts`);
+                return null;
+            }
             x = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
             y = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
-        } while (map[y][x] !== ' ' || (x === playerX && y === playerY));
+            const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
+                const ePos = e.getComponent('Position');
+                return ePos.x === x && ePos.y === y;
+            });
+            isOccupied = entitiesAtTarget.some(e => e.hasComponent('MonsterData'));
+            attempts++;
+        } while (
+            !this.isWalkable(x, y) ||
+            isOccupied ||
+            (x === playerX && y === playerY)
+        );
 
         const maxHp = this.calculateMonsterMaxHp(template.baseHp, tier);
         this.entityManager.addComponentToEntity(entity.id, new PositionComponent(x, y));
@@ -151,7 +169,7 @@ export class MonsterSystem extends System {
             isElite: template.isElite || false,
             isBoss: template.isBoss || false,
             affixes: template.affixes || [],
-            uniqueItemsDropped: template.uniqueItemsDropped || [] // Pass through uniqueItemsDropped
+            uniqueItemsDropped: template.uniqueItemsDropped || []
         });
         console.log(`MonsterSystem.js: Spawned monster ${entity.id} at (${x}, ${y}) on tier ${tier}`);
         return entity;
@@ -167,6 +185,7 @@ export class MonsterSystem extends System {
         return Math.round(baseHp * (1 + BASE_GROWTH_RATE * tierAdjustment + variance));
     }
 
+    // systems/MonsterSystem.js - Updated moveMonsters method
     moveMonsters() {
         const player = this.entityManager.getEntity('player');
         if (!player || player.getComponent('PlayerState').dead) return;
@@ -175,7 +194,6 @@ export class MonsterSystem extends System {
         const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
         if (!levelEntity) return;
 
-        const map = levelEntity.getComponent('Map').map;
         const monsters = this.entityManager.getEntitiesWith(this.requiredComponents);
         const AGGRO_RANGE = 4;
 
@@ -220,13 +238,9 @@ export class MonsterSystem extends System {
                         m.getComponent('Position').x === newX &&
                         m.getComponent('Position').y === newY
                     );
+                    const isPlayerPosition = (newX === playerPos.x && newY === playerPos.y);
 
-                    if (map[newY][newX] === '#' ||
-                        map[newY][newX] === '⇑' ||
-                        map[newY][newX] === '⇓' ||
-                        map[newY][newX] === '?' ||
-                        (newX === playerPos.x && newY === playerPos.y) ||
-                        isOccupied) {
+                    if (!this.isWalkable(newX, newY) || isOccupied || isPlayerPosition) {
                         continue;
                     }
 
@@ -289,5 +303,21 @@ export class MonsterSystem extends System {
         }));
         console.log(`MonsterSystem: Emitting DropLoot for ${monsterData.name} with items:`, items);
         this.eventBus.emit('DropLoot', { lootSource });
+    }
+
+    // systems/MonsterSystem.js - New isWalkable method
+    isWalkable(x, y) {
+        const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
+            const ePos = e.getComponent('Position');
+            return ePos.x === x && ePos.y === y;
+        });
+        const isBlocked = entitiesAtTarget.some(e =>
+            e.hasComponent('Wall') ||
+            e.hasComponent('Stair') ||
+            e.hasComponent('Portal') ||
+            e.hasComponent('Fountain')
+        );
+        const hasFloor = entitiesAtTarget.some(e => e.hasComponent('Floor'));
+        return !isBlocked && hasFloor;
     }
 }

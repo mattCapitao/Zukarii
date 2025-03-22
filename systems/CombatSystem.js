@@ -18,6 +18,7 @@ export class CombatSystem extends System {
         this.eventBus.on('MonsterAttack', (data) => this.handleMonsterMeleeAttack(data)); // New listener
     }
 
+    // systems/CombatSystem.js - Updated update method
     update() {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         if (gameState.gameOver) return; // Stop updating if game is over
@@ -50,8 +51,14 @@ export class CombatSystem extends System {
                 const newX = pos.x + dx;
                 const newY = pos.y + dy;
 
-                // Check for wall collision
-                if (newX < 0 || newX >= map[0].length || newY < 0 || newY >= map.length || map[newY][newX] === '#') {
+                // Check for boundary and wall collision
+                const isOutOfBounds = newX < 0 || newX >= map[0].length || newY < 0 || newY >= map.length;
+                const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
+                    const ePos = e.getComponent('Position');
+                    return ePos.x === newX && ePos.y === newY;
+                });
+                const hitsWall = entitiesAtTarget.some(e => e.hasComponent('Wall'));
+                if (isOutOfBounds || hitsWall) {
                     this.entityManager.removeEntity(proj.id);
                     this.eventBus.emit('LogMessage', { message: 'Your shot hit a wall.' });
                     this.eventBus.emit('RenderNeeded');

@@ -25,10 +25,10 @@ export class LootSpawnSystem extends System {
         this.eventBus.on('DiscardItem', (data) => this.spawnLootEntity(data));
     }
 
+    // systems/LootSpawnSystem.js - Updated spawnLootEntity method
     spawnLootEntity({ treasure, tier }) {
         console.log('LootSpawnSystem: Spawning loot entity with treasure:', treasure, 'tier:', tier);
 
-        // treasure is now an Entity from LootManagerSystem
         const position = treasure.getComponent('Position');
         const lootData = treasure.getComponent('LootData');
         if (!position || !lootData) {
@@ -42,13 +42,9 @@ export class LootSpawnSystem extends System {
             return;
         }
 
-        const map = levelEntity.getComponent('Map').map;
         const entityList = levelEntity.getComponent('EntityList');
 
-        // Use the existing entity instead of creating a new one
-        const lootEntity = treasure; // Already created by LootManagerSystem
-        map[position.y][position.x] = '$';
-        console.log(`LootSpawnSystem: Set map[${position.y}][${position.x}] to '$', actual value: ${map[position.y][position.x]}`);
+        const lootEntity = treasure;
         entityList.treasures.push(lootEntity.id);
         this.eventBus.emit('LootEntityCreated', { entityId: lootEntity.id, tier });
 

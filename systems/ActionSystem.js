@@ -13,7 +13,7 @@ export class ActionSystem extends System {
         this.eventBus.on('DrinkHealPotion', () => this.drinkHealPotion());
     }
 
-    // ActionSystem.js - useFountain method
+    // ActionSystem.js - Updated useFountain method
     useFountain({ fountainEntityId, tierEntityId }) {
         const player = this.entityManager.getEntity('player');
         const fountainEntity = this.entityManager.getEntity(fountainEntityId);
@@ -21,7 +21,7 @@ export class ActionSystem extends System {
 
         if (!player || !fountainEntity || !tierEntity) return;
 
-        const fountainData = fountainEntity.getComponent('Fountain') || { used: false }; // Updated to 'Fountain'
+        const fountainData = fountainEntity.getComponent('Fountain') || { used: false };
         if (fountainData.used) return;
 
         const playerStats = player.getComponent('Stats');
@@ -44,8 +44,6 @@ export class ActionSystem extends System {
         }
 
         fountainData.used = true;
-        const mapComp = tierEntity.getComponent('Map');
-        mapComp.map[fountainEntity.getComponent('Position').y][fountainEntity.getComponent('Position').x] = ' ';
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
         this.eventBus.emit('RenderNeeded');
     }

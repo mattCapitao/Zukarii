@@ -11,6 +11,7 @@ export class LootCollectionSystem extends System {
         this.eventBus.on('PickupTreasure', (data) => this.collectLoot(data));
     }
 
+    // systems/LootCollectionSystem.js - Updated collectLoot method
     collectLoot({ x, y }) {
         const player = this.entityManager.getEntity('player');
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
@@ -77,7 +78,6 @@ export class LootCollectionSystem extends System {
 
         entityList.treasures.splice(lootIndex, 1);
         this.entityManager.removeEntity(lootEntity.id);
-        levelEntity.getComponent('Map').map[y][x] = ' ';
         this.eventBus.emit('RenderNeeded');
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
 
