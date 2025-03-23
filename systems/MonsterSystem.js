@@ -91,8 +91,9 @@ export class MonsterSystem extends System {
                     console.warn('MonsterSystem: No random monsters available to spawn');
                     break;
                 }
-
-                let template = randomMonsters[Math.floor(Math.random() * randomMonsters.length)];
+                const tierMonsters = randomMonsters.filter(m => m.minDungeonTier <= tier);
+                let template = tierMonsters[Math.floor(Math.random() * tierMonsters.length)];
+                //let template = randomMonsters[Math.floor(Math.random() * randomMonsters.length)];
 
                 if (spawnPool.uniqueMonsters && Math.random() < .05 * tier) {
                     if (uniqueMonsters && uniqueMonsters.length > 0) {
@@ -158,6 +159,7 @@ export class MonsterSystem extends System {
         this.entityManager.addComponentToEntity(entity.id, new HealthComponent(maxHp, maxHp));
         this.entityManager.addComponentToEntity(entity.id, {
             type: 'MonsterData',
+            hpBarWidth: 16,
             name: template.name,
             tier: tier,
             classes: template.classes,
@@ -171,7 +173,7 @@ export class MonsterSystem extends System {
             affixes: template.affixes || [],
             uniqueItemsDropped: template.uniqueItemsDropped || []
         });
-        console.log(`MonsterSystem.js: Spawned monster ${entity.id} at (${x}, ${y}) on tier ${tier}`);
+        console.log(`MonsterSystem.js: Spawned monster ${entity.id} at (${x}, ${y}) on tier ${tier}`, entity);
         return entity;
     }
 
@@ -199,10 +201,12 @@ export class MonsterSystem extends System {
 
         monsters.forEach(monster => {
             const health = monster.getComponent('Health');
+            const hpBarWidth = Math.floor((health.hp / health.maxHp) * 16);
             if (health.hp <= 0) return;
 
             const pos = monster.getComponent('Position');
             const monsterData = monster.getComponent('MonsterData');
+            monsterData.hpBarWidth = hpBarWidth;
             const playerPos = player.getComponent('Position');
             const dx = playerPos.x - pos.x;
             const dy = playerPos.y - pos.y;

@@ -273,6 +273,12 @@ export class RenderSystem extends System {
                                     if (monsterData.isBoss) className += ' boss';
                                     monsterData.affixes.forEach(affix => className += ` ${affix}`);
                                 }
+                                if (monster) {
+                                    const monsterData = monster.getComponent('MonsterData');
+                                    console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, monster);
+                                    tile.element.style.backgroundSize = `${monsterData.hpBarWidth}px 1px`;
+
+                                }
                             }
                         }
                     }
@@ -284,6 +290,7 @@ export class RenderSystem extends System {
                     tile.char = char;
                     tile.class = className;
                 }
+                
             }
         }
 

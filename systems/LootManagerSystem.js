@@ -66,7 +66,7 @@ export class LootManagerSystem extends System {
             return;
         }
 
-        if (Math.random() >= 0.85) {
+        if (Math.random() >= 0.9) {
             this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped nothing.` });
             return;
         }
@@ -78,7 +78,7 @@ export class LootManagerSystem extends System {
 
         const modifiers = sourceData.chanceModifiers || {};
         const gold = this.calculateGoldGain(modifiers.gold || 1);
-        const torches = this.calculateTorchDrop(playerResource, playerState, modifiers.torches || 1);
+        const torches = this.calculateTorchDrop(playerResource, lightingState, modifiers.torches || 1);
         const healPotions = this.calculatePotionDrop(playerResource, playerHealth, modifiers.healPotions || 1);
 
         let items = [];
@@ -198,11 +198,11 @@ export class LootManagerSystem extends System {
     }
 
     calculateItemChance(multiplier) {
-        return 1; // Always drop an item for testing
+        return .7; // Always drop an item for testing
     }
 
     calculateUniqueItemChance(multiplier) {
-        return 1; // Always drop a unique item for testing
+        return .05; // Always drop a unique item for testing
     }
 
     getItemTier(dungeonTier, player) {

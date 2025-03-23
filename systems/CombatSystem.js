@@ -75,9 +75,9 @@ export class CombatSystem extends System {
                 if (target) {
                     const player = this.entityManager.getEntity('player');
                     const playerInventory = player.getComponent('Inventory');
-                    const playerStats = player.getComponent('Stats');
-                    const weapon = playerInventory.equipped.offhand || playerInventory.equipped.mainhand || { baseDamageMin: 1, baseDamageMax: 2, name: 'Fists' };
-
+                    //const weapon = playerInventory.equipped.offhand || playerInventory.equipped.mainhand || { baseDamageMin: 1, baseDamageMax: 2, name: 'Fists' };
+                    const bestRangedWeapon = this.getBestRangedWeapon();
+                    const weapon = bestRangedWeapon ? bestRangedWeapon : { baseDamageMin: 1, baseDamageMax: 2, name: 'Fists' };
                     this.eventBus.emit('CalculatePlayerDamage', {
                         attacker: player,
                         target: target,
@@ -87,6 +87,12 @@ export class CombatSystem extends System {
                             const targetMonsterData = target.getComponent('MonsterData');
                             targetMonsterData.isAggro = true; // Aggro on player
                             targetHealth.hp = Math.max(0, targetHealth.hp - damage);
+
+                            const health = target.getComponent('Health');
+                            const hpBarWidth = Math.floor((health.hp / health.maxHp) * 16);
+                            const monsterData = target.getComponent('MonsterData');
+                            monsterData.hpBarWidth = hpBarWidth;
+                            console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, target);
 
                             this.eventBus.emit('LogMessage', {
                                 message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
@@ -122,6 +128,27 @@ export class CombatSystem extends System {
         });
     }
 
+
+    getBestRangedWeapon() {
+        const player = this.entityManager.getEntity('player');
+        const playerInventory = player.getComponent('Inventory');
+        const mainWeapon = playerInventory.equipped.mainhand;
+        const offWeapon = playerInventory.equipped.offhand
+        const rangedWeapons = [];
+
+        if (mainWeapon?.attackType === 'ranged') rangedWeapons.push(mainWeapon);
+        if (offWeapon?.attackType === 'ranged') rangedWeapons.push(offWeapon);
+        console.warn('Ranged weapons:', rangedWeapons);
+        if (rangedWeapons.length === 0) {
+            return null;
+
+            return rangedWeapons.reduce((best, current) => {
+                const bestMean = (best.baseDamageMin + best.baseDamageMax) * 0.5;
+                const currentMean = (current.baseDamageMin + current.baseDamageMax) * 0.5;
+                return currentMean > bestMean ? current : best;
+            }, rangedWeapons[0]);
+        }
+    }
 
     handleMonsterMeleeAttack({ entityId }) {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
@@ -216,6 +243,14 @@ export class CombatSystem extends System {
                 weapon: weapon,
                 callback: ({ damage, isCritical }) => {
                     targetHealth.hp = Math.max(0, targetHealth.hp - damage); // Clamp to 0
+
+                    // set the wdith of the hp bar to a % of health left
+                    const health = target.getComponent('Health');
+                    const hpBarWidth = Math.floor((health.hp / health.maxHp) * 16);
+                    const monsterData = target.getComponent('MonsterData');
+                    monsterData.hpBarWidth = hpBarWidth;
+                    console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, target );
+
                     this.eventBus.emit('LogMessage', {
                         message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
                     });
@@ -223,6 +258,7 @@ export class CombatSystem extends System {
                     if (targetHealth.hp <= 0) {
                         this.eventBus.emit('MonsterDied', { entityId: targetEntityId });
                     }
+                    this.eventBus.emit('RenderNeeded');
                 }
             });
         });
@@ -237,7 +273,7 @@ export class CombatSystem extends System {
         const playerPos = player.getComponent('Position');
         const playerInventory = player.getComponent('Inventory');
         const weapon = playerInventory.equipped.offhand || playerInventory.equipped.mainhand || { baseDamageMin: 1, baseDamageMax: 2, baseRange: 1, name: 'Fists' };
-        const range = weapon.baseRange || 1;
+        const range = player.range || 1;
 
         // Start at player's position, no offset
         let startX = playerPos.x;
