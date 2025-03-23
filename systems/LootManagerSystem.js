@@ -53,6 +53,41 @@ export class LootManagerSystem extends System {
                 }
             });
         });
+
+        // Constants
+        this.BASE_DROP_CHANCE = 0.9;
+
+        //GOLD
+        this.BASE_GOLD_CHANCE = 0.85;
+        this.BASE_GOLD_MIN = 10;
+        this.BASE_GOLD_MAX = 50;
+
+        //ITEMS
+        this.BASE_ITEM_CHANCE = 0.7;
+        this.BASE_UNIQUE_CHANCE = 0.05;
+
+        //POTIONS
+        this.BASE_POTION_CHANCE = 0.02;
+        this.POTION_CHANCE_NO_POTIONS = 0.5;
+        this.POTION_CHANCE_FEW_POTIONS = 0.30;
+        this.POTION_CHANCE_SOME_POTIONS = 0.125;
+        this.POTION_THRESHOLD_NO_POTIONS = 0;
+        this.POTION_THRESHOLD_FEW_POTIONS = 3;
+        this.POTION_THRESHOLD_SOME_POTIONS = 5;
+        this.HEALTH_TRESHOLD_INJURED = 0.5;
+        this.HEALTH_THRESHOLD_CRITICAL = 0.25;
+        this.HEALTH_THRESHOLD_IMMINENT_DEATH = 0.1;
+        this.HEALTH_THRESHOLD_INCREMENT = 0.1;
+
+        //TORCHES
+        this.BASE_TORCH_CHANCE = 0.025;
+        this.TORCH_CHANCE_LOW_TORCHES = 0.125;
+        this.TORCH_CHANCE_MEDIUM_TORCHES = 0.075;
+        this.TORCH_DESPERATION_CHANCE = 0.20;
+        this.TORCH_DROP_FAIL_THRESHOLD = 3;
+        
+        
+       
     }
 
     init() {
@@ -62,11 +97,11 @@ export class LootManagerSystem extends System {
     async handleLootDrop({ lootSource }) {
         const sourceData = lootSource.getComponent('LootSourceData');
         if (!sourceData) {
-            console.error('LootManagerSystem: No LootSourceData found on lootSource entity');
+            console.error(`LootManagerSystem: No LootSourceData found on lootSource entity with ID: ${lootSource.id}`);
             return;
         }
 
-        if (Math.random() >= 0.9) {
+        if (Math.random() >= this.BASE_DROP_CHANCE) {
             this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped nothing.` });
             return;
         }
@@ -81,6 +116,36 @@ export class LootManagerSystem extends System {
         const torches = this.calculateTorchDrop(playerResource, lightingState, modifiers.torches || 1);
         const healPotions = this.calculatePotionDrop(playerResource, playerHealth, modifiers.healPotions || 1);
 
+        const items = await this.buildItemsDropped(sourceData, player, modifiers);
+
+        const uniqueId = this.utilities.generateUniqueId();
+        const lootEntity = this.entityManager.createEntity(`loot_${sourceData.tier}_${uniqueId}`);
+        const position = new PositionComponent(sourceData.position.x, sourceData.position.y);
+        const lootData = new LootData({
+            name: `The ${sourceData.name} Loot`,
+            gold,
+            torches,
+            healPotions,
+            items
+        });
+        this.entityManager.addComponentToEntity(lootEntity.id, position);
+        this.entityManager.addComponentToEntity(lootEntity.id, lootData);
+
+        const dropMessage = [
+            gold ? `${gold} gold` : '',
+            torches ? `${torches} torch${torches > 1 ? 'es' : ''}` : '',
+            healPotions ? `${healPotions} heal potion${healPotions > 1 ? 's' : ''}` : '',
+            items.length ? items.map(i => i.name).join(', ') : ''
+        ].filter(Boolean).join(', ');
+        this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped ${dropMessage}!` });
+
+        this.eventBus.emit('SpawnLoot', {
+            treasure: lootEntity,
+            tier: sourceData.tier
+        });
+    }
+
+  async buildItemsDropped(sourceData, player, modifiers) {
         let items = [];
         // Process specified items in sourceData.items
         if (sourceData.items && sourceData.items.length > 0) {
@@ -127,82 +192,61 @@ export class LootManagerSystem extends System {
                     }
                 }
             }
-        }
-
-        const uniqueId = this.utilities.generateUniqueId();
-        const lootEntity = this.entityManager.createEntity(`loot_${sourceData.tier}_${uniqueId}`);
-        const position = new PositionComponent(sourceData.position.x, sourceData.position.y);
-        const lootData = new LootData({
-            name: `The ${sourceData.name} Loot`,
-            gold,
-            torches,
-            healPotions,
-            items
-        });
-        this.entityManager.addComponentToEntity(lootEntity.id, position);
-        this.entityManager.addComponentToEntity(lootEntity.id, lootData);
-
-        const dropMessage = [
-            gold ? `${gold} gold` : '',
-            torches ? `${torches} torch${torches > 1 ? 'es' : ''}` : '',
-            healPotions ? `${healPotions} heal potion${healPotions > 1 ? 's' : ''}` : '',
-            items.length ? items.map(i => i.name).join(', ') : ''
-        ].filter(Boolean).join(', ');
-        this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped ${dropMessage}!` });
-
-        this.eventBus.emit('SpawnLoot', {
-            treasure: lootEntity,
-            tier: sourceData.tier
-        });
+      }
+      //console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) returning Item Array: ", sourceData, player, modifiers, items);
+      return items;
     }
 
     calculateTorchDrop(resource, lightingState, multiplier) {
-        let torchChance;
+        let torchChance = this.BASE_TORCH_CHANCE;
         if (resource.torches === 0 && !lightingState.isLit) {
-            torchChance = 0.20;
+            torchChance = this.TORCH_DESPERATION_CHANCE;
             resource.torchDropFail = (resource.torchDropFail || 0) + 1;
-            if (resource.torchDropFail >= 3) {
+            if (resource.torchDropFail >= this.TORCH_DROP_FAIL_THRESHOLD) {
                 resource.torches = 1;
                 resource.torchDropFail = 0;
                 this.eventBus.emit('LogMessage', { message: 'You found a discarded torch lying on the ground!' });
-                return 1; // Mercy torch
+                return 1; // Mercy torch - if no active torch and no torches in inventory, give 1 torch after 3 failed drops
             }
         } else if (resource.torches < 2) {
-            torchChance = 0.125;
+            torchChance = this.TORCH_CHANCE_LOW_TORCHES;
         } else if (resource.torches <= 5) {
-            torchChance = 0.075;
-        } else {
-            torchChance = 0.025;
+            torchChance = this.TORCH_CHANCE_MEDIUM_TORCHES;
         }
+
         return Math.random() < torchChance * multiplier ? 1 : 0;
     }
 
     calculatePotionDrop(resource, health, multiplier) {
-        let chance = 0.05;
+
+        let chance = this.BASE_POTION_CHANCE;
+
         switch (true) {
-            case resource.healPotions === 0: chance = 0.5; break;
-            case resource.healPotions < 3: chance = 0.30; break;
-            case resource.healPotions < 5: chance = 0.125; break;
-            default: chance = 0.05;
+            case resource.healPotions === this.POTION_THRESHOLD_NO_POTIONS: chance = this.POTION_CHANCE_NO_POTIONS; break;
+            case resource.healPotions < this.POTION_THRESHOLD_FEW_POTIONS: chance = this.POTION_CHANCE_FEW_POTIONS; break;
+            case resource.healPotions < this.POTION_CHANCE_SOME_POTIONS: chance = this.POTION_CHANCE_SOME_POTIONS; break;
+            default: chance = this.BASE_POTION_CHANCE;
         }
-        switch (true) {
-            case health.hp / health.maxHp < 0.5: chance += 0.1;
-            case health.hp / health.maxHp < 0.25: chance += 0.1;
-            case health.hp / health.maxHp < 0.1: chance += 0.1;
+        if (resource.healPotions < 3) { 
+            switch (true) { // add 10% chance for each health threshold DO NOT ADD BREAKS HERE IT WILL BREAK THE CODE
+                case health.hp / health.maxHp < this.HEALTH_TRESHOLD_INJURED: chance += this.HEALTH_THRESHOLD_INCREMENT;
+                case health.hp / health.maxHp < this.HEALTH_THRESHOLD_CRITICAL: chance += this.HEALTH_THRESHOLD_INCREMENT;
+                case health.hp / health.maxHp < this.HEALTH_THRESHOLD_IMMINENT_DEATH: chance += this.HEALTH_THRESHOLD_INCREMENT;
+            }
         }
-        return Math.random() < chance * multiplier ? 1 : 0;
+        return Math.random() < (chance * multiplier) ? 1 : 0;
     }
 
     calculateGoldGain(multiplier) {
-        return Math.random() < 0.85 * multiplier ? 10 + Math.floor(Math.random() * 41) + this.entityManager.getEntity('gameState').getComponent('GameState').tier * 10 : 0;
+        return Math.random() < this.BASE_GOLD_CHANCE * multiplier ? this.BASE_GOLD_MIN + Math.floor(Math.random() * (this.BASE_GOLD_MAX - this.BASE_GOLD_MIN + 1)) + this.entityManager.getEntity('gameState').getComponent('GameState').tier * 10 : 0;
     }
 
     calculateItemChance(multiplier) {
-        return .7; // Always drop an item for testing
+        return this.BASE_ITEM_CHANCE;
     }
 
     calculateUniqueItemChance(multiplier) {
-        return .05; // Always drop a unique item for testing
+        return this.BASE_UNIQUE_CHANCE;
     }
 
     getItemTier(dungeonTier, player) {

@@ -92,7 +92,7 @@ export class CombatSystem extends System {
                             const hpBarWidth = Math.floor((health.hp / health.maxHp) * 16);
                             const monsterData = target.getComponent('MonsterData');
                             monsterData.hpBarWidth = hpBarWidth;
-                            console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, target);
+                            //console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, target);
 
                             this.eventBus.emit('LogMessage', {
                                 message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
@@ -138,16 +138,15 @@ export class CombatSystem extends System {
 
         if (mainWeapon?.attackType === 'ranged') rangedWeapons.push(mainWeapon);
         if (offWeapon?.attackType === 'ranged') rangedWeapons.push(offWeapon);
-        console.warn('Ranged weapons:', rangedWeapons);
         if (rangedWeapons.length === 0) {
             return null;
-
+        }
             return rangedWeapons.reduce((best, current) => {
                 const bestMean = (best.baseDamageMin + best.baseDamageMax) * 0.5;
                 const currentMean = (current.baseDamageMin + current.baseDamageMax) * 0.5;
-                return currentMean > bestMean ? current : best;
+                const selectedWeapon = currentMean > bestMean ? current : best;
+                return selectedWeapon;
             }, rangedWeapons[0]);
-        }
     }
 
     handleMonsterMeleeAttack({ entityId }) {
@@ -266,14 +265,15 @@ export class CombatSystem extends System {
 
     handleRangedAttack({ direction }) {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
-        console.log('Ranged attack:', direction, "Game State: ", gameState);
+        console.log('CombatSystem.handleRangedAttack(): Ranged attack:', direction, "Game State: ", gameState);
         const player = this.entityManager.getEntity('player');
         if (!player) return;
 
         const playerPos = player.getComponent('Position');
-        const playerInventory = player.getComponent('Inventory');
-        const weapon = playerInventory.equipped.offhand || playerInventory.equipped.mainhand || { baseDamageMin: 1, baseDamageMax: 2, baseRange: 1, name: 'Fists' };
-        const range = player.range || 1;
+        const stats = player.getComponent('Stats');
+        const weapon = this.getBestRangedWeapon();
+        const range = stats.range || weapon.baseRange || 3;
+        //console.log('CombatSystem.handleRangedAttack(): Ranged attack - player range stat:', stats.range, ' weapon baseRange:', weapon.baseRange, 'calculated range:', range);
 
         // Start at player's position, no offset
         let startX = playerPos.x;

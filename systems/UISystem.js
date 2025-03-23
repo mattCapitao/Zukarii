@@ -27,7 +27,7 @@ export class UISystem extends System {
         this.eventBus.on('LogMessage', (data) => this.addLogMessage(data));
         this.eventBus.on('StatsUpdated', (data) => this.updateUI(data));
         this.eventBus.on('GameOver', (data) => {
-            console.log('GameOver event received:', data);
+            //console.log('GameOver event received:', data);
             this.gameOver(data);
         });
 
@@ -42,11 +42,11 @@ export class UISystem extends System {
     }
 
     toggleOverlay({ tab = null }) {
-        console.log(`ToggleOverlay called with tab: ${tab}`);
+        //console.log(`ToggleOverlay called with tab: ${tab}`);
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         const currentTab = overlayState.activeTab;
 
-        console.log(`Current state - isOpen: ${overlayState.isOpen}, activeTab: ${currentTab}`);
+        //console.log(`Current state - isOpen: ${overlayState.isOpen}, activeTab: ${currentTab}`);
         if (tab === currentTab || !tab) {
             overlayState.isOpen = !overlayState.isOpen;
             overlayState.activeTab = overlayState.isOpen ? (currentTab || 'character') : null;
@@ -55,17 +55,17 @@ export class UISystem extends System {
             overlayState.activeTab = tab;
         }
 
-        console.log(`New state - isOpen: ${overlayState.isOpen}, activeTab: ${overlayState.activeTab}`);
+        //console.log(`New state - isOpen: ${overlayState.isOpen}, activeTab: ${overlayState.activeTab}`);
         this.tabs.style.display = overlayState.isOpen ? 'block' : 'none';
         this.tabs.className = overlayState.isOpen ? '' : 'hidden';
-        console.log(`Tabs display set to: ${this.tabs.style.display}, className: ${this.tabs.className}`);
+        //console.log(`Tabs display set to: ${this.tabs.style.display}, className: ${this.tabs.className}`);
         if (overlayState.isOpen) {
             this.renderOverlay(overlayState.activeTab);
         }
     }
 
     renderOverlay(tab) {
-        console.log(`Rendering overlay for tab: ${tab}`);
+        //console.log(`Rendering overlay for tab: ${tab}`);
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         const player = this.entityManager.getEntity('player');
         const stats = player.getComponent('Stats');
@@ -75,12 +75,12 @@ export class UISystem extends System {
         const playerState = player.getComponent('PlayerState');
         const resource = player.getComponent('Resource');
 
-        console.log('Overlay data raw:', { stats: Object.assign({}, stats), inventory: Object.assign({}, inventory), resource: Object.assign({}, resource) });
+        //console.log('Overlay data raw:', { stats: Object.assign({}, stats), inventory: Object.assign({}, inventory), resource: Object.assign({}, resource) });
 
         this.overlayTabButtons(tab);
         this.logContent.style.display = tab === 'log' ? 'block' : 'none';
         this.characterContent.style.display = tab === 'character' ? 'flex' : 'none';
-        console.log(`Log display: ${this.logContent.style.display}, Character display: ${this.characterContent.style.display}`);
+        //console.log(`Log display: ${this.logContent.style.display}, Character display: ${this.characterContent.style.display}`);
 
         if (tab === 'log') {
             this.updateLog(overlayState.logMessages);
@@ -104,15 +104,15 @@ export class UISystem extends System {
         const closeTabsButton = document.getElementById('close-tabs');
 
         logTab?.addEventListener('click', () => {
-            console.log("Switching to Log tab");
+            //console.log("Switching to Log tab");
             this.toggleOverlay({ tab: 'log' });
         });
         characterTab?.addEventListener('click', () => {
-            console.log("Switching to Character tab");
+            //console.log("Switching to Character tab");
             this.toggleOverlay({ tab: 'character' });
         });
         closeTabsButton?.addEventListener('click', () => {
-            console.log("Overlay closed via close button");
+            //console.log("Overlay closed via close button");
             this.toggleOverlay({});
         });
     }
@@ -122,7 +122,7 @@ export class UISystem extends System {
         logDiv.innerHTML = logMessages.length
             ? logMessages.slice(0, 200).map(line => `<p>${line}</p>`).join('')
             : '<p>Nothing to log yet.</p>';
-        console.log('Log content updated');
+        //console.log('Log content updated');
     }
 
     updateCharacter(stats, health, mana, inventory, playerState, resource) {
@@ -187,7 +187,7 @@ export class UISystem extends System {
                 `).join('') : '<p>Inventory empty.</p>'}
             </div>
         `;
-        console.log('Character stats and inventory updated:', { stats: Object.assign({}, stats), inventory: Object.assign({}, inventory), resource: Object.assign({}, resource) });
+        //console.log('Character stats and inventory updated:', { stats: Object.assign({}, stats), inventory: Object.assign({}, inventory), resource: Object.assign({}, resource) });
     }
 
     addLogMessage({ message }) {
@@ -200,11 +200,11 @@ export class UISystem extends System {
     }
 
     updateUI({ entityId }) {
-        console.log("UISystem.updateUI() called for: ", entityId);
+        //console.log("UISystem.updateUI() called for: ", entityId);
         if (entityId !== 'player') return;
 
         const player = this.entityManager.getEntity('player');
-        console.log("UISystem.updateUI() called for Player : ", player);
+        //console.log("UISystem.updateUI() called for Player : ", player);
         const stats = player.getComponent('Stats');
         const health = player.getComponent('Health');
         const mana = player.getComponent('Mana');
@@ -213,7 +213,7 @@ export class UISystem extends System {
         const resource = player.getComponent('Resource');
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
 
-        console.log('UI update data raw:', { stats: Object.assign({}, stats), health: Object.assign({}, health), mana: Object.assign({}, mana), inventory: Object.assign({}, inventory), playerState: Object.assign({}, playerState), resource: Object.assign({}, resource) });
+        //console.log('UI update data raw:', { stats: Object.assign({}, stats), health: Object.assign({}, health), mana: Object.assign({}, mana), inventory: Object.assign({}, inventory), playerState: Object.assign({}, playerState), resource: Object.assign({}, resource) });
 
         // Update child elements of playerInfo
         if (this.playerInfo) {
@@ -311,7 +311,7 @@ export class UISystem extends System {
                     this.hideItemTooltip(itemData); // Hide tooltip on right-click
                 }
                 this.eventBus.emit('DropItem', { itemIndex: index });
-                console.log('Right-click: Discarding item at index:', index);
+                //console.log('Right-click: Discarding item at index:', index);
             });
         } else {
             console.error('UISystem: Could not find #inventory for right-click listener');
@@ -328,7 +328,7 @@ export class UISystem extends System {
                 const index = parseInt(target.closest('.inventory-item').dataset.index, 10);
                 event.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, index, source: 'inventory' }));
                 this.hideItemTooltip(itemData); // Hide tooltip on drag start
-                console.log('Dragging item:', itemData);
+                //console.log('Dragging item:', itemData);
             }, { capture: true });
 
             inventoryContainer.addEventListener('dragover', (e) => e.preventDefault());
@@ -345,7 +345,7 @@ export class UISystem extends System {
                 if (data.source === 'equip') {
                     this.eventBus.emit('UnequipItem', { entityId: 'player', slot: data.slot });
                     this.updateUI({ entityId: 'player' });
-                    console.log(`Dropped equipped item from ${data.slot} to inventory`);
+                    //console.log(`Dropped equipped item from ${data.slot} to inventory`);
                 }
             });
         } else {
@@ -363,7 +363,7 @@ export class UISystem extends System {
                 const slotName = JSON.parse(slot.getAttribute('data-equip_slot') || '{}').slot;
                 e.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, slot: slotName, source: 'equip' }));
                 this.hideItemTooltip(itemData); // Hide tooltip on drag start
-                console.log('Dragging equipped item:', itemData);
+                //console.log('Dragging equipped item:', itemData);
             });
             slot.addEventListener('dragover', (e) => e.preventDefault());
             slot.addEventListener('drop', (e) => {
@@ -381,7 +381,7 @@ export class UISystem extends System {
                 if (data.source === 'inventory' && this.isSlotCompatible(data.item, slotName)) {
                     this.eventBus.emit('EquipItem', { entityId: 'player', item: data.item, slot: slotName });
                     this.updateUI({ entityId: 'player' });
-                    console.log(`Dropped ${data.item.name} into ${slotName}`);
+                    //console.log(`Dropped ${data.item.name} into ${slotName}`);
                 }
             });
         });
@@ -436,7 +436,7 @@ export class UISystem extends System {
 
     showItemTooltip(itemData, event) {
         if (!itemData || !itemData.uniqueId) {
-            console.log("No item data or uniqueId for tooltip", itemData);
+            //console.log("No item data or uniqueId for tooltip", itemData);
             return;
         }
 
@@ -532,7 +532,7 @@ export class UISystem extends System {
             tooltip.appendChild(content);
             document.body.appendChild(tooltip);
             this.tooltipCache.set(itemData.uniqueId, tooltip);
-            console.log(`Created tooltip for ${itemData.name} with ID ${itemData.uniqueId}`);
+            //console.log(`Created tooltip for ${itemData.name} with ID ${itemData.uniqueId}`);
         }
 
         tooltip.style.display = 'block';
@@ -546,14 +546,14 @@ export class UISystem extends System {
 
             tooltip.style.left = `${Math.max(10, Math.min(x, viewportWidth - tooltipWidth - 10))}px`;
             tooltip.style.top = `${Math.max(10, Math.min(y, viewportHeight - tooltipHeight - 10))}px`;
-            console.log(`Positioned tooltip for ${itemData.name} at (${tooltip.style.left}, ${tooltip.style.top})`);
+            //console.log(`Positioned tooltip for ${itemData.name} at (${tooltip.style.left}, ${tooltip.style.top})`);
         }, 0);
     }
 
 
     hideItemTooltip(itemData) {
         if (!itemData || !itemData.uniqueId) {
-            console.log("No item data or uniqueId for tooltip hide", itemData);
+            //console.log("No item data or uniqueId for tooltip hide", itemData);
             return;
         }
         if (!this.tooltipCache) {
@@ -563,7 +563,7 @@ export class UISystem extends System {
         const tooltip = this.tooltipCache.get(itemData.uniqueId);
         if (tooltip) {
             tooltip.style.display = 'none';
-            console.log(`Hid tooltip for ${itemData.name} with ID ${itemData.uniqueId}`);
+            //console.log(`Hid tooltip for ${itemData.name} with ID ${itemData.uniqueId}`);
         }
     }
 }

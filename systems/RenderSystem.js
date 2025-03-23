@@ -14,7 +14,7 @@ export class RenderSystem extends System {
         this.VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25;
         this.SCROLL_THRESHOLD = 4;
         this.SCROLL_DURATION = 300;
-        console.log('RenderSystem: Render Lock initialized');
+        //console.log('RenderSystem: Render Lock initialized');
     }
 
     init() {
@@ -40,10 +40,10 @@ export class RenderSystem extends System {
         const state = this.entityManager.getEntity('state');
 
         if (force) {
-            console.log(`RenderSystem: Accessing gameState - tier: ${gameState?.tier}, gameStarted: ${gameState?.gameStarted}, needsRender: ${gameState?.needsRender}, needsInitialRender: ${gameState?.needsInitialRender}`);
-            console.log(`RenderSystem: Accessing renderState - renderRadius: ${renderState?.renderRadius}, activeRenderZone: ${renderState?.activeRenderZone?.size}`);
-            console.log(`RenderSystem: Accessing renderControl - locked: ${renderControl?.locked}`);
-            console.log(`RenderSystem: Accessing player - position: (${player?.getComponent('Position')?.x}, ${player?.getComponent('Position')?.y})`);
+            //console.log(`RenderSystem: Accessing gameState - tier: ${gameState?.tier}, gameStarted: ${gameState?.gameStarted}, needsRender: ${gameState?.needsRender}, needsInitialRender: ${gameState?.needsInitialRender}`);
+            //console.log(`RenderSystem: Accessing renderState - renderRadius: ${renderState?.renderRadius}, activeRenderZone: ${renderState?.activeRenderZone?.size}`);
+            //console.log(`RenderSystem: Accessing renderControl - locked: ${renderControl?.locked}`);
+            //console.log(`RenderSystem: Accessing player - position: (${player?.getComponent('Position')?.x}, ${player?.getComponent('Position')?.y})`);
         }
 
         if (!gameState) return;
@@ -80,15 +80,15 @@ export class RenderSystem extends System {
         const exploration = tierEntity.getComponent('Exploration');
         const WIDTH = state.getComponent('LevelDimensions').WIDTH;
         const HEIGHT = state.getComponent('LevelDimensions').HEIGHT;
-        console.log(`RenderSystem: Rendering map with dimensions ${WIDTH}x${HEIGHT} for tier ${currentTier}`);
+        //console.log(`RenderSystem: Rendering map with dimensions ${WIDTH}x${HEIGHT} for tier ${currentTier}`);
         const playerPos = player.getComponent('Position');
-        console.log('RenderSystem: Rendering map for player at', playerPos);
+        //console.log('RenderSystem: Rendering map for player at', playerPos);
         const playerState = player.getComponent('PlayerState');
-        console.log('RenderSystem: Player state:', playerState);
+        //console.log('RenderSystem: Player state:', playerState);
         const renderRadius = renderState.renderRadius;
 
         if (force) {
-            console.log(`RenderSystem: Accessing exploration state - discoveredWalls: ${exploration.discoveredWalls.size}, discoveredFloors: ${exploration.discoveredFloors.size}`);
+            //console.log(`RenderSystem: Accessing exploration state - discoveredWalls: ${exploration.discoveredWalls.size}, discoveredFloors: ${exploration.discoveredFloors.size}`);
         }
 
         const walls = this.entityManager.getEntitiesWith(['Position', 'Wall']);
@@ -101,7 +101,7 @@ export class RenderSystem extends System {
         const portals = this.entityManager.getEntitiesWith(['Position', 'Portal']);
 
         if (force) {
-            console.log(`RenderSystem: Entity query - walls: ${walls.length}, floors: ${floors.length}, monsters: ${monsters.length}, projectiles: ${projectiles.length}, treasures: ${treasures.length}, fountains: ${fountains.length}, stairs: ${stairs.length}, portals: ${portals.length}`);
+            //console.log(`RenderSystem: Entity query - walls: ${walls.length}, floors: ${floors.length}, monsters: ${monsters.length}, projectiles: ${projectiles.length}, treasures: ${treasures.length}, fountains: ${fountains.length}, stairs: ${stairs.length}, portals: ${portals.length}`);
         }
 
         if (!Object.keys(this.tileMap).length) {
@@ -185,7 +185,7 @@ export class RenderSystem extends System {
                 }
                 mapDisplay += '\n';
             }
-            console.log("Player Avatar Locations", playerSpawnLocations);
+            //console.log("Player Avatar Locations", playerSpawnLocations);
             this.mapDiv.innerHTML = mapDisplay;
 
             for (let y = 0; y < HEIGHT; y++) {
@@ -275,7 +275,7 @@ export class RenderSystem extends System {
                                 }
                                 if (monster) {
                                     const monsterData = monster.getComponent('MonsterData');
-                                    console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, monster);
+                                    //console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, monster);
                                     tile.element.style.backgroundSize = `${monsterData.hpBarWidth}px 1px`;
 
                                 }
@@ -312,7 +312,7 @@ export class RenderSystem extends System {
         const mapWidth = state.getComponent('LevelDimensions').WIDTH * this.TILE_SIZE;
         const mapHeight = state.getComponent('LevelDimensions').HEIGHT * this.TILE_SIZE;
 
-        console.log(`RenderSystem: viewportEdgeScroll - Map dimensions: ${mapWidth}x${mapHeight}`);
+        //console.log(`RenderSystem: viewportEdgeScroll - Map dimensions: ${mapWidth}x${mapHeight}`);
 
         const thresholdX = viewportWidth * this.VIEWPORT_EDGE_THRESHOLD_PERCENT;
         const thresholdY = viewportHeight * this.VIEWPORT_EDGE_THRESHOLD_PERCENT;
@@ -390,7 +390,7 @@ export class RenderSystem extends System {
         const mapWidth = state.getComponent('LevelDimensions').WIDTH * this.TILE_SIZE;
         const mapHeight = state.getComponent('LevelDimensions').HEIGHT * this.TILE_SIZE;
 
-        console.log(`RenderSystem: setInitialScroll - Map dimensions: ${mapWidth}x${mapHeight}`);
+        //console.log(`RenderSystem: setInitialScroll - Map dimensions: ${mapWidth}x${mapHeight}`);
 
         let scrollX = (playerPos.x * this.TILE_SIZE) - (viewportWidth / 2);
         let scrollY = (playerPos.y * this.TILE_SIZE) - (viewportHeight / 2);
@@ -400,6 +400,6 @@ export class RenderSystem extends System {
 
         mapElement.scrollLeft = scrollX;
         mapElement.scrollTop = scrollY;
-        console.log(`RenderSystem: Set initial scroll to (${scrollX}, ${scrollY}) for player at (${playerPos.x}, ${playerPos.y})`);
+        //console.log(`RenderSystem: Set initial scroll to (${scrollX}, ${scrollY}) for player at (${playerPos.x}, ${playerPos.y})`);
     }
 }

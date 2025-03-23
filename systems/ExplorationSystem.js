@@ -14,14 +14,14 @@ export class ExplorationSystem extends System {
             }
         });
         this.eventBus.on('InitializePlayer', () => {
-            console.log('ExplorationSystem: InitializePlayer event received, setting initial visible radius');
+            //console.log('ExplorationSystem: InitializePlayer event received, setting initial visible radius');
             this.updateExploration();
         });
         this.eventBus.on('LightingStateChanged', (data) => {
-            console.log('ExplorationSystem: LightingStateChanged event received, visibleRadius:', data.visibleRadius);
+            //console.log('ExplorationSystem: LightingStateChanged event received, visibleRadius:', data.visibleRadius);
             const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
             renderState.visibleRadius = data.visibleRadius;
-            console.log('ExplorationSystem: Updated renderState:', renderState);
+            //console.log('ExplorationSystem: Updated renderState:', renderState);
             this.updateExploration();
         });
     }
@@ -82,8 +82,8 @@ export class ExplorationSystem extends System {
             return;
         }
 
-        console.log(`ExplorationSystem: Updating exploration - tier: ${gameState.tier}, player position: (${player.getComponent('Position').x}, ${player.getComponent('Position').y}), visibleRadius: ${renderState.visibleRadius}`);
-        console.log('ExplorationSystem: RenderState:', renderState);
+        //console.log(`ExplorationSystem: Updating exploration - tier: ${gameState.tier}, player position: (${player.getComponent('Position').x}, ${player.getComponent('Position').y}), visibleRadius: ${renderState.visibleRadius}`);
+        //console.log('ExplorationSystem: RenderState:', renderState);
 
         const playerState = player.getComponent('PlayerState');
         const playerPos = player.getComponent('Position');
@@ -117,7 +117,7 @@ export class ExplorationSystem extends System {
                         return pos.x === x && pos.y === y;
                     });
                     const isWall = entitiesAtTarget.some(e => e.hasComponent('Wall'));
-                    console.log(`ExplorationSystem: Tile (${x},${y}) - entitiesAtTarget: ${entitiesAtTarget.length}, isWall: ${isWall}, wasDiscovered: ${wasDiscovered}`);
+                    //console.log(`ExplorationSystem: Tile (${x},${y}) - entitiesAtTarget: ${entitiesAtTarget.length}, isWall: ${isWall}, wasDiscovered: ${wasDiscovered}`);
                     if (!wasDiscovered) {
                         if (isWall) {
                             exploration.discoveredWalls.add(tileKey);
@@ -143,7 +143,7 @@ export class ExplorationSystem extends System {
             }
         }
 
-        console.log(`ExplorationSystem: Updated - new discoveries: ${newDiscoveryCount}, activeRenderZone size: ${renderState.activeRenderZone.size}`);
+        //console.log(`ExplorationSystem: Updated - new discoveries: ${newDiscoveryCount}, activeRenderZone size: ${renderState.activeRenderZone.size}`);
 
         if (newDiscoveryCount > 0) {
             playerState.discoveredTileCount += newDiscoveryCount;

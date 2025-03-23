@@ -1249,6 +1249,7 @@ span.discovered.monster {
     background-size: 16px 1px;
     background-repeat: no-repeat;
     background-position: top left;
+    padding-top:1px;
 }
 
 
