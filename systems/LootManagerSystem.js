@@ -73,7 +73,7 @@ export class LootManagerSystem extends System {
 
         const player = this.entityManager.getEntity('player');
         const playerResource = player ? player.getComponent('Resource') : { torches: 0, healPotions: 0 };
-        const playerState = player ? player.getComponent('PlayerState') : { torchLit: false };
+        const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState') || { isLit: false };
         const playerHealth = player ? player.getComponent('Health') : { hp: 0, maxHp: 1 };
 
         const modifiers = sourceData.chanceModifiers || {};
@@ -156,9 +156,9 @@ export class LootManagerSystem extends System {
         });
     }
 
-    calculateTorchDrop(resource, state, multiplier) {
+    calculateTorchDrop(resource, lightingState, multiplier) {
         let torchChance;
-        if (resource.torches === 0 && !state.torchLit) {
+        if (resource.torches === 0 && !lightingState.isLit) {
             torchChance = 0.20;
             resource.torchDropFail = (resource.torchDropFail || 0) + 1;
             if (resource.torchDropFail >= 3) {

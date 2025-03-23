@@ -65,22 +65,15 @@ export class InventoryComponent {
     }
 }
 
+// Update ResourceComponent to remove torchExpires
 export class ResourceComponent {
-    constructor({
-        gold = 0,
-        torches = 0,
-        healPotions = 0,
-        torchExpires = 0,
-        torchDropFail = 0,
-        potionDropFail = 0
-    } = {}) {
+    constructor(torches = 0, healPotions = 0, gold = 0, potionDropFail = 0, torchDropFail = 0) {
         this.type = 'Resource';
-        this.gold = gold;
         this.torches = torches;
         this.healPotions = healPotions;
-        this.torchExpires = torchExpires;
-        this.torchDropFail = torchDropFail;
+        this.gold = gold;
         this.potionDropFail = potionDropFail;
+        this.torchDropFail = torchDropFail;
     }
 }
 
@@ -91,7 +84,6 @@ export class PlayerStateComponent {
         xp = 0,
         nextLevelXp = 0,
         dead = false,
-        torchLit = false,
         lampLit = false,
         discoveredTileCount = 0
     } = {}) {
@@ -101,7 +93,6 @@ export class PlayerStateComponent {
         this.xp = xp;
         this.nextLevelXp = nextLevelXp;
         this.dead = dead;
-        this.torchLit = torchLit;
         this.lampLit = lampLit;
         this.discoveredTileCount = discoveredTileCount;
     }

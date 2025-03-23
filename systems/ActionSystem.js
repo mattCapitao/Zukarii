@@ -82,47 +82,21 @@ export class ActionSystem extends System {
         if (!player) return;
 
         const resource = player.getComponent('Resource');
-        const playerState = player.getComponent('PlayerState');
-        const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
-
+        console.log('ActionSystem: - LightTorch: resource:', resource);
         if (resource.torches <= 0) {
             this.eventBus.emit('LogMessage', { message: 'You have no torches left.' });
             return;
         }
 
         resource.torches--;
-        playerState.torchLit = true;
-        resource.torchExpires = 1000;
-        renderState.discoveryRadius = this.entityManager.getEntity('state').discoveryRadiusDefault + 2;
+        this.eventBus.emit('LightSourceActivated', { type: 'torch' });
+        this.eventBus.emit('StatsUpdated', { entityId: 'player' });
 
         let message = 'The darkness is at bay... for now!';
         if (resource.torches < 1) {
             message = 'You light your last torch!';
-            renderState.torchLitOnTurn = true;
-            this.eventBus.emit('RenderNeeded');
         }
-
         this.eventBus.emit('LogMessage', { message });
-        this.eventBus.emit('PlayAudio', { sound: 'torch', play: true });
-        if (renderState.torchLitOnTurn) this.eventBus.emit('RenderNeeded');
-    }
-
-    torchExpired() {
-        const player = this.entityManager.getEntity('player');
-        const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
-        const mapDiv = document.getElementById('map');
-
-        player.getComponent('PlayerState').torchLit = false;
-        player.getComponent('Resource').torchExpires = 0;
-        renderState.discoveryRadius = this.entityManager.getEntity('state').discoveryRadiusDefault;
-
-        const playerSpan = mapDiv.querySelector('.player');
-        if (playerSpan) {
-            playerSpan.classList.remove('torch', 'flicker');
-        }
-
-        this.eventBus.emit('LogMessage', { message: 'The torch has burned out!' });
-        this.eventBus.emit('PlayAudio', { sound: 'torch', play: false });
-        this.eventBus.emit('RenderNeeded');
+        console.log('ActionSystem: - LightTorch: resource:', resource);
     }
 }

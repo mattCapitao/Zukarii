@@ -1,4 +1,4 @@
-﻿// Game.js
+﻿// Game.js - Updated
 import { State } from './State.js';
 import { ActionSystem } from './systems/ActionSystem.js';
 import { CombatSystem } from './systems/CombatSystem.js';
@@ -16,8 +16,9 @@ import { UISystem } from './systems/UISystem.js';
 import { LevelTransitionSystem } from './systems/LevelTransitionSystem.js';
 import { AudioSystem } from './systems/AudioSystem.js';
 import { DataSystem } from './systems/DataSystem.js';
-import { PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent, PlayerStateComponent } from './core/Components.js';
 import { ExplorationSystem } from './systems/ExplorationSystem.js';
+import { LightingSystem } from './systems/LightingSystem.js';
+import { PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent, PlayerStateComponent, LightingState, LightSourceDefinitions } from './core/Components.js';
 
 export class Game {
     constructor() {
@@ -26,9 +27,9 @@ export class Game {
         this.utilities = this.state.utilities;
         this.systems = {};
         this.lastUpdateTime = 0;
-        this.lastMouseEventTime = 0; // Track last mouse event timestamp
-        this.lastMovementTime = 0; // Track last movement timestamp
-        this.movementThrottleInterval = 100; // Throttle interval in milliseconds
+        this.lastMouseEventTime = 0;
+        this.lastMovementTime = 0;
+        this.movementThrottleInterval = 100;
 
         // Create player entity (global)
         let player = this.entityManager.getEntity('player');
@@ -44,8 +45,8 @@ export class Game {
             equipped: { mainhand: null, offhand: null, armor: null, amulet: null, leftring: null, rightring: null },
             items: []
         }));
-        this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0, 0));
-        this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, false, ''));
+        this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0));
+        this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
 
         // Create overlayState entity (global)
         let overlayState = this.entityManager.getEntity('overlayState');
@@ -59,7 +60,14 @@ export class Game {
             });
         }
 
-        // renderState is already created in State.js as a global entity, no need to create it here
+        // Create lightingState entity (global)
+        let lightingState = this.entityManager.getEntity('lightingState');
+        if (lightingState) {
+            this.entityManager.removeEntity('lightingState');
+        }
+        lightingState = this.entityManager.createEntity('lightingState', true);
+        this.entityManager.addComponentToEntity('lightingState', new LightingState());
+        this.entityManager.addComponentToEntity('lightingState', new LightSourceDefinitions());
 
         let stateEntity = this.entityManager.getEntity('state');
         if (!stateEntity) {
@@ -96,8 +104,8 @@ export class Game {
         this.systems.levelTransition = new LevelTransitionSystem(this.entityManager, this.state.eventBus);
         this.systems.audio = new AudioSystem(this.entityManager, this.state.eventBus);
         this.systems.exploration = new ExplorationSystem(this.entityManager, this.state.eventBus);
+        this.systems.lighting = new LightingSystem(this.entityManager, this.state.eventBus);
 
-        // Await all system initializations
         await Promise.all(Object.values(this.systems).map(system => {
             console.log(`Game.js: Initializing system ${system.constructor.name} with EventBus:`, this.state.eventBus);
             return system.init();
@@ -347,25 +355,7 @@ export class Game {
         const gameState = this.state.getGameState()?.getComponent('GameState');
         if (!gameState || gameState.gameOver) return;
 
-        const player = this.entityManager.getEntity('player');
-        if (player) {
-            const resource = player.getComponent('Resource');
-            const playerState = player.getComponent('PlayerState');
-            const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
-            const state = this.entityManager.getEntity('state');
-
-            if (resource.torchExpires > 0) {
-                resource.torchExpires--;
-                if (resource.torchExpires < 1) {
-                    this.state.eventBus.emit('TorchExpired');
-                }
-            }
-
-            renderState.discoveryRadius = playerState.torchLit ?
-                state.getComponent('DiscoveryRadius').discoveryRadiusDefault + 2 :
-                state.getComponent('DiscoveryRadius').discoveryRadiusDefault;
-        }
-
+        this.state.eventBus.emit('TurnEnded');
         this.state.eventBus.emit('MoveMonsters');
         gameState.transitionLock = false;
         gameState.needsRender = true;

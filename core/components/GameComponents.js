@@ -16,15 +16,15 @@ export class UIComponent {
 
 export class RenderStateComponent {
     constructor({
-        discoveryRadius = 2,
-        visibleTiles = new Set(),
+        visibleRadius = 2, // Renamed from discoveryRadius
+        activeRenderZone = new Set(), // Renamed from visibleTiles
         projectile = null,
         torchLitOnTurn = false,
-        renderRadius = 6 // Added renderRadius with default of 6
+        renderRadius = 7
     } = {}) {
         this.type = 'RenderState';
-        this.discoveryRadius = discoveryRadius;
-        this.visibleTiles = visibleTiles;
+        this.visibleRadius = visibleRadius;
+        this.activeRenderZone = activeRenderZone;
         this.projectile = projectile;
         this.torchLitOnTurn = torchLitOnTurn;
         this.renderRadius = renderRadius;
@@ -109,5 +109,26 @@ export class RenderControlComponent {
     } = {}) {
         this.type = 'RenderControl';
         this.locked = locked;
+    }
+}
+
+// Add to GameComponents.js
+export class LightingState {
+    constructor({ isLit = false, expiresOnTurn = 0, visibleRadius = 2 } = {}) {
+        this.type = 'LightingState';
+        this.isLit = isLit;
+        this.expiresOnTurn = expiresOnTurn;
+        this.visibleRadius = visibleRadius;
+        this.remainingDuration = 0; // Number of turns left for the light source
+    }
+}
+
+export class LightSourceDefinitions {
+    constructor() {
+        this.type = 'LightSourceDefinitions';
+        this.definitions = {
+            torch: { duration: 200, visibleRadius: 4 }, // Adjusted for testing
+            lamp: { duration: 500, visibleRadius: 5 } // For future extensibility
+        };
     }
 }

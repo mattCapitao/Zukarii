@@ -1,141 +1,252 @@
-﻿// State.js - Updated
-// Manages high-level game state using EntityManager and EventBus, stripped of God Object tendencies
+﻿// systems/PlayerSystem.js - Updated
+import { System } from '../core/Systems.js';
 
-import { Utilities } from './Utilities.js';
-import { EntityManager } from './core/EntityManager.js';
-import { EventBus } from './core/EventBus.js';
-import {
-    PositionComponent,
-    HealthComponent,
-    ManaComponent,
-    StatsComponent,
-    InventoryComponent,
-    ResourceComponent,
-    PlayerStateComponent,
-    MapComponent,
-    EntityListComponent,
-    UIComponent,
-    RenderStateComponent,
-    GameStateComponent,
-    RenderControlComponent, // Added
-    createDefaultPlayerComponents,
-    createDefaultLevelComponents
-} from './core/Components.js';
+export class PlayerSystem extends System {
+    constructor(entityManager, eventBus, utilities) {
+        super(entityManager, eventBus, utilities);
+        this.requiredComponents = ['PlayerState', 'Stats', 'Health', 'Mana', 'Inventory', 'Resource'];
+    }
 
-export class State {
-    constructor(utilities = new Utilities()) {
-        this.utilities = utilities;
+    init() {
+        this.eventBus.on('InitializePlayer', () => this.initializePlayer());
+        this.eventBus.on('GearChanged', (data) => this.updateGearStats(data.entityId));
+        this.eventBus.on('AwardXp', (data) => this.awardXp(data));
+        this.eventBus.on('PlayerDeath', (data) => this.death(data));
+        this.eventBus.on('PlayerExit', () => this.exit());
+        this.eventBus.on('TilesDiscovered', (data) => this.handleTilesDiscovered(data));
+    }
 
-        // Core managers replacing old state structure
-        this.entityManager = new EntityManager();
-        this.eventBus = new EventBus();
+    initializePlayer() {
+        const player = this.entityManager.getEntity('player');
+        const stats = player.getComponent('Stats');
+        stats._internal.base.intellect = this.utilities.dRoll(4, 3, 3);
+        stats._internal.base.prowess = this.utilities.dRoll(4, 3, 3);
+        stats._internal.base.agility = this.utilities.dRoll(4, 3, 3);
+        stats._internal.base.luck = 0;
+        stats._internal.base.maxHp = Math.round(30 * stats._internal.base.prowess * 0.1);
+        stats._internal.base.maxMana = Math.round(10 * stats._internal.base.intellect * 0.05);
+        stats.intellect = stats._internal.base.intellect;
+        stats.prowess = stats._internal.base.prowess;
+        stats.agility = stats._internal.base.agility;
+        stats.luck = stats._internal.base.luck;
+        stats.maxHp = stats._internal.base.maxHp;
+        stats.maxMana = stats._internal.base.maxMana;
 
-        // Constants (to be moved later)
-        this.WIDTH = 122;
-        this.HEIGHT = 67;
-        this.MIN_STAIR_DISTANCE = Math.floor(Math.random() * 41) + 20;
-        this.AGGRO_RANGE = 4;
-        this.discoveryRadiusDefault = 2;
+        const health = player.getComponent('Health');
+        health.hp = stats.maxHp;
+        health.maxHp = stats.maxHp;
 
-        // DOM references (preserved for now, to be handled by RenderSystem)
-        this.mapDiv = null;
-        this.statsDiv = null;
-        this.logDiv = null;
-        this.tabsDiv = null;
+        const mana = player.getComponent('Mana');
+        mana.mana = stats.maxMana;
+        mana.maxMana = stats.maxMana;
 
-        // Possible item stats (preserved for PlayerSystem)
-        this.possibleItemStats = [
-            'maxHp', 'maxMana', 'maxLuck',
-            'intellect', 'prowess', 'agility',
-            'range', 'block', 'armor', 'defense',
-            'baseBlock', 'baseRange',
-            'rangedDamageBonus', 'meleeDamageBonus', 'damageBonus'
+        const playerState = player.getComponent('PlayerState');
+        playerState.xp = 0;
+        playerState.level = 1;
+        playerState.nextLevelXp = 125;
+        playerState.dead = false;
+        playerState.lampLit = false;
+        playerState.name = "Mage";
+
+        const resource = player.getComponent('Resource');
+        resource.torches = 1;
+        resource.healPotions = 1;
+        resource.gold = 100;
+        resource.potionDropFail = 0;
+        resource.torchDropFail = 0;
+
+        const inventory = player.getComponent('Inventory');
+
+        this.getRandomStartItems().then(startItems => {
+            inventory.items = startItems.map(item => ({ ...item, uniqueId: this.utilities.generateUniqueId() }));
+        });
+
+        this.calculateStats(player);
+    }
+
+    getRandomStartItems() {
+        const randomStartItemTierIndex = Math.random() < 0.5 ? 0 : 1;
+        const partialItems = [
+            { tierIndex: randomStartItemTierIndex },
+            { tierIndex: 0, type: 'armor' },
+            { tierIndex: 0, type: 'weapon', attackType: 'ranged' },
+            { tierIndex: 0, type: 'weapon', attackType: 'melee' },
         ];
 
-        // Initialize core entities
-        this.initializeCoreEntities();
+        return Promise.all(partialItems.map(partialItem => {
+            return new Promise((resolve) => {
+                this.eventBus.emit('GenerateROGItem', {
+                    partialItem,
+                    dungeonTier: 0,
+                    callback: (item) => {
+                        if (item) {
+                            resolve(item);
+                        } else {
+                            console.warn('Failed to generate start item for partialItem:', partialItem);
+                            resolve(null);
+                        }
+                    }
+                });
+            });
+        })).then(items => items.filter(item => item !== null));
     }
 
-    initializeCoreEntities() {
-        // Game state entity (global)
-        const gameState = this.entityManager.createEntity('gameState', true);
-        this.entityManager.addComponentToEntity('gameState',
-            new GameStateComponent({
-                gameStarted: false,
-                needsRender: true,          // Set to true to ensure initial render
-                needsInitialRender: true    // Set to true for initial render
-            })
-        );
-        console.log('State.js: Created gameState entity with GameState component:', this.entityManager.getEntity('gameState'));
+    updateGearStats(entityId) {
+        const player = this.entityManager.getEntity(entityId);
+        const stats = player.getComponent('Stats');
+        const inventory = player.getComponent('Inventory');
 
-        // UI entity (global)
-        const ui = this.entityManager.createEntity('ui', true);
-        this.entityManager.addComponentToEntity('ui',
-            new UIComponent()
-        );
+        stats._internal.gear = {
+            intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0,
+            armor: 0, defense: 0, block: 0, dodge: 0, range: 0, baseRange: 0,
+            damageBonus: 0, meleeDamageBonus: 0, rangedDamageBonus: 0, luck: 0, maxLuck: 0
+        };
 
-        // Render state entity (global)
-        const renderState = this.entityManager.createEntity('renderState', true);
-        this.entityManager.addComponentToEntity('renderState',
-            new RenderStateComponent()
-        );
-        this.entityManager.addComponentToEntity('renderState',
-            new RenderControlComponent()
-        );
-
-        // Add LevelDimensions to state entity
-        const state = this.entityManager.getEntity('state');
-        this.entityManager.addComponentToEntity('state', {
-            type: 'DiscoveryRadius',
-            discoveryRadiusDefault: 2
-        });
-        this.entityManager.addComponentToEntity('state', {
-            type: 'LevelDimensions',
-            WIDTH: this.WIDTH,
-            HEIGHT: this.HEIGHT
-        });
-
-        // Levels will be added dynamically by LevelSystem
-        // Placeholder for tier 0 (surface level) will be handled in LevelSystem
-    }
-
-    // Temporary method to generate surface level (to be moved to LevelSystem)
-    generateSurfaceLevel() {
-        let map = [];
-        for (let y = 0; y < 10; y++) {
-            map[y] = [];
-            for (let x = 0; x < 10; x++) {
-                if (y === 0 || y === 9 || x === 0 || x === 9) {
-                    map[y][x] = '#';
-                } else {
-                    map[y][x] = ' ';
-                }
+        Object.values(inventory.equipped).forEach(item => {
+            if (!item) return;
+            if (item.type === 'armor') stats._internal.gear.armor += item.armor || 0;
+            if (item.type === 'weapon' && item.attackType === 'melee') stats._internal.gear.block += item.baseBlock || 0;
+            if (item.type === 'weapon' && item.attackType === 'ranged') stats._internal.gear.range = Math.max(stats._internal.gear.range || 0, item.baseRange || 0);
+            if (item.stats) {
+                Object.entries(item.stats).forEach(([stat, value]) => {
+                    stats._internal.gear[stat] = (stats._internal.gear[stat] || 0) + (value || 0);
+                });
             }
+        });
+
+        this.calculateStats(player);
+    }
+
+    calculateStats(player) {
+        const stats = player.getComponent('Stats');
+        const health = player.getComponent('Health');
+        const mana = player.getComponent('Mana');
+
+        stats.intellect = stats._internal.base.intellect + (stats._internal.gear.intellect || 0) + (stats._internal.temp.intellect || 0);
+        stats.prowess = stats._internal.base.prowess + (stats._internal.gear.prowess || 0) + (stats._internal.temp.prowess || 0);
+        stats.agility = stats._internal.base.agility + (stats._internal.gear.agility || 0) + (stats._internal.temp.agility || 0);
+        const oldMaxHp = health.maxHp || stats._internal.base.maxHp;
+        stats.maxHp = stats._internal.base.maxHp + (stats._internal.gear.maxHp || 0) + (stats._internal.temp.maxHp || 0);
+        health.maxHp = stats.maxHp;
+        if (oldMaxHp !== 0 && health.maxHp !== oldMaxHp) {
+            health.hp = Math.round(health.hp * (health.maxHp / oldMaxHp));
+            health.hp = Math.max(1, Math.min(health.hp, health.maxHp));
         }
-        map[5][5] = '⇓';
-        const rooms = [{
-            left: 1,
-            top: 1,
-            w: 8,
-            h: 8,
-            x: 5,
-            y: 5,
-            type: 'SurfaceRoom',
-            connections: []
-        }];
-        return { map, rooms };
+        const oldMaxMana = mana.maxMana || stats._internal.base.maxMana;
+        stats.maxMana = stats._internal.base.maxMana + (stats._internal.gear.maxMana || 0) + (stats._internal.temp.maxMana || 0);
+        mana.maxMana = stats.maxMana;
+        if (oldMaxMana !== 0 && mana.maxMana !== oldMaxMana) {
+            mana.mana = Math.round(mana.mana * (mana.maxMana / oldMaxMana));
+            mana.mana = Math.max(1, Math.min(mana.mana, mana.maxMana));
+        }
+        stats.armor = (stats._internal.gear.armor || 0) + (stats._internal.temp.armor || 0);
+        stats.defense = (stats._internal.gear.defense || 0) + (stats._internal.temp.defense || 0);
+        stats.block = (stats._internal.gear.block || 0) + (stats._internal.temp.block || 0);
+        stats.dodge = (stats._internal.gear.dodge || 0) + (stats._internal.temp.dodge || 0);
+        stats.range = (stats._internal.gear.range || 0) + (stats._internal.temp.range || 0);
+        stats.baseRange = (stats._internal.gear.baseRange || 0) + (stats._internal.temp.baseRange || 0);
+        stats.damageBonus = (stats._internal.gear.damageBonus || 0) + (stats._internal.temp.damageBonus || 0);
+        stats.meleeDamageBonus = (stats._internal.gear.meleeDamageBonus || 0) + (stats._internal.temp.meleeDamageBonus || 0);
+        stats.rangedDamageBonus = (stats._internal.gear.rangedDamageBonus || 0) + (stats._internal.temp.rangedDamageBonus || 0);
+        stats.luck = stats._internal.base.luck + (stats._internal.gear.luck || 0) + (stats._internal.temp.luck || 0);
+        stats.maxLuck = (stats._internal.gear.maxLuck || 0) + (stats._internal.temp.maxLuck || 0);
+
+        this.eventBus.emit('StatsUpdated', { entityId: player.id });
     }
 
-    // Helper to get the player entity (convenience for now)
-    getPlayer() {
-        return this.entityManager.getEntity('player');
+    awardXp({ amount }) {
+        const player = this.entityManager.getEntity('player');
+        const playerState = player.getComponent('PlayerState');
+        playerState.xp += amount;
+        this.eventBus.emit('LogMessage', { message: `Gained ${amount} XP (${playerState.xp}/${playerState.nextLevelXp})` });
+        this.checkLevelUp(player);
     }
 
-    // Helper to get game state (convenience for now)
-    getGameState() {
-        const entity = this.entityManager.getEntity('gameState');
-        const component = entity?.getComponent('GameState');
-        // console.log('State.js: getGameState called, entity ID:', entity?.id, 'component reference:', component, 'timestamp:', Date.now());
-        return entity;
+    checkLevelUp(player) {
+        const playerState = player.getComponent('PlayerState');
+        const stats = player.getComponent('Stats');
+
+        while (playerState.xp >= playerState.nextLevelXp) {
+            const newXp = playerState.xp - playerState.nextLevelXp;
+            playerState.level++;
+
+            if (playerState.level % 3 === 0) {
+                const statOptions = ['prowess', 'intellect', 'agility'];
+                const statToBoost = statOptions[Math.floor(Math.random() * 3)];
+                stats._internal.base[statToBoost]++;
+                this.eventBus.emit('LogMessage', { message: `Your ${statToBoost} increased to ${stats._internal.base[statToBoost]}!` });
+            }
+
+            const hpIncrease = Math.round((6 + playerState.level) * stats._internal.base.prowess * 0.1);
+            const mpIncrease = Math.round((2 + playerState.level) * stats._internal.base.intellect * 0.05);
+            stats._internal.base.maxHp += hpIncrease;
+            stats._internal.base.maxMana += mpIncrease;
+            playerState.xp = newXp;
+            playerState.nextLevelXp = Math.round(playerState.nextLevelXp * 1.55);
+
+            this.eventBus.emit('LogMessage', { message: `Level up! Now level ${playerState.level}, Max HP increased by ${hpIncrease} to ${stats._internal.base.maxHp}` });
+        }
+        this.calculateStats(player);
+    }
+
+    death({ source }) {
+        const player = this.entityManager.getEntity('player');
+        const health = player.getComponent('Health');
+        const playerState = player.getComponent('PlayerState');
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+
+        health.hp = 0;
+        playerState.dead = true;
+        gameState.gameOver = true;
+
+        this.eventBus.emit('LogMessage', { message: 'You died! Game Over.' });
+        this.eventBus.emit('GameOver', { message: `You have been killed by a ${source}!` });
+        this.eventBus.emit('StatsUpdated', { entityId: 'player' });
+    }
+
+    lightTorch() {
+        const player = this.entityManager.getEntity('player');
+        const resource = player.getComponent('Resource');
+
+        if (resource.torches > 0) {
+            resource.torches--;
+            this.eventBus.emit('LightSourceActivated', { type: 'torch' });
+            this.eventBus.emit('LogMessage', { message: `Lit a torch. ${resource.torches} torches remaining.` });
+            this.eventBus.emit('PlayAudio', { sound: 'torchBurning', play: true });
+            this.eventBus.emit('RenderNeeded');
+        } else {
+            this.eventBus.emit('LogMessage', { message: 'You have no torches left.' });
+        }
+    }
+
+    exit() {
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        this.eventBus.emit('LogMessage', { message: 'You exited the dungeon! Game Over.' });
+        document.removeEventListener('keydown', this.handleInput);
+        document.removeEventListener('keyup', this.handleInput);
+        gameState.gameOver = true;
+        this.eventBus.emit('GameOver', { message: 'You exited the dungeon! Too much adventure to handle eh?' });
+        this.eventBus.emit('StatsUpdated', { entityId: 'player' });
+    }
+
+    handleInput = (event) => {
+        const game = this.entityManager.getEntity('game');
+        if (game) game.handleInput(event);
+    };
+
+    handleTilesDiscovered({ count, total }) {
+        const player = this.entityManager.getEntity('player');
+        const playerState = player.getComponent('PlayerState');
+
+        const xpThreshold = 1000;
+        const previousTotal = total - count;
+        const previousMilestones = Math.floor(previousTotal / xpThreshold);
+        const currentMilestones = Math.floor(total / xpThreshold);
+
+        if (currentMilestones > previousMilestones) {
+            const xpAward = (currentMilestones - previousMilestones) * 50;
+            this.eventBus.emit('AwardXp', { amount: xpAward });
+            this.eventBus.emit('LogMessage', { message: `Exploration milestone reached! Gained ${xpAward} XP for discovering ${currentMilestones * xpThreshold} tiles.` });
+        }
     }
 }

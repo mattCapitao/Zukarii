@@ -1,4 +1,4 @@
-﻿// systems/PlayerSystem.js
+﻿// systems/PlayerSystem.js - Updated
 import { System } from '../core/Systems.js';
 
 export class PlayerSystem extends System {
@@ -12,16 +12,12 @@ export class PlayerSystem extends System {
         this.eventBus.on('GearChanged', (data) => this.updateGearStats(data.entityId));
         this.eventBus.on('AwardXp', (data) => this.awardXp(data));
         this.eventBus.on('PlayerDeath', (data) => this.death(data));
-        this.eventBus.on('TorchExpired', () => this.torchExpired());
-        this.eventBus.on('LightTorch', () => this.lightTorch());
-        this.eventBus.on('PlayerExit', () => this.exit()); // New event handler for PlayerExit
+        this.eventBus.on('PlayerExit', () => this.exit());
         this.eventBus.on('TilesDiscovered', (data) => this.handleTilesDiscovered(data));
     }
 
     initializePlayer() {
         const player = this.entityManager.getEntity('player');
-       // const utilities = this.entityManager.getEntity('state').getComponent('Utilities').utilities;
-
         const stats = player.getComponent('Stats');
         stats._internal.base.intellect = this.utilities.dRoll(4, 3, 3);
         stats._internal.base.prowess = this.utilities.dRoll(4, 3, 3);
@@ -49,21 +45,18 @@ export class PlayerSystem extends System {
         playerState.level = 1;
         playerState.nextLevelXp = 125;
         playerState.dead = false;
-        playerState.torchLit = false;
         playerState.lampLit = false;
-        playerState.name = "Mage"; // mageNames removed, placeholder name
+        playerState.name = "Mage";
 
         const resource = player.getComponent('Resource');
         resource.torches = 1;
         resource.healPotions = 1;
         resource.gold = 100;
-        resource.torchExpires = 0;
         resource.potionDropFail = 0;
         resource.torchDropFail = 0;
 
         const inventory = player.getComponent('Inventory');
 
-        // Use Promise.then to handle async item generation without await
         this.getRandomStartItems().then(startItems => {
             inventory.items = startItems.map(item => ({ ...item, uniqueId: this.utilities.generateUniqueId() }));
         });
@@ -72,32 +65,30 @@ export class PlayerSystem extends System {
     }
 
     getRandomStartItems() {
-
-        const randomStartItemTierIndex = Math.random() < 0.5 ? 0: 1;
+        const randomStartItemTierIndex = Math.random() < 0.5 ? 0 : 1;
         const partialItems = [
-            { tierIndex: randomStartItemTierIndex}, // Random Junk or common item
-            { tierIndex: 0, type: 'armor'}, // Junk armor
-            { tierIndex: 0, type: 'weapon', attackType: 'ranged' }, // Junk ranged weapon
-            { tierIndex: 0, type: 'weapon', attackType: 'melee' }, // Junk melee weapon
+            { tierIndex: randomStartItemTierIndex },
+            { tierIndex: 0, type: 'armor' },
+            { tierIndex: 0, type: 'weapon', attackType: 'ranged' },
+            { tierIndex: 0, type: 'weapon', attackType: 'melee' },
         ];
 
-        // Use Promise.all to handle async item generation via EventBus
         return Promise.all(partialItems.map(partialItem => {
             return new Promise((resolve) => {
                 this.eventBus.emit('GenerateROGItem', {
                     partialItem,
-                    dungeonTier: 0, // Starting at tier 0 (surface level)
+                    dungeonTier: 0,
                     callback: (item) => {
                         if (item) {
                             resolve(item);
                         } else {
                             console.warn('Failed to generate start item for partialItem:', partialItem);
-                            resolve(null); // Fallback to avoid breaking
+                            resolve(null);
                         }
                     }
                 });
             });
-        })).then(items => items.filter(item => item !== null)); // Filter out any failed generations
+        })).then(items => items.filter(item => item !== null));
     }
 
     updateGearStats(entityId) {
@@ -213,40 +204,6 @@ export class PlayerSystem extends System {
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
     }
 
-    torchExpired() {
-        const player = this.entityManager.getEntity('player');
-        const playerState = player.getComponent('PlayerState');
-        const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
-        const state = this.entityManager.getEntity('state');
-
-        playerState.torchLit = false;
-        player.getComponent('Resource').torchExpires = 0;
-        renderState.discoveryRadius = state.getComponent('DiscoveryRadius').discoveryRadiusDefault;
-
-        this.eventBus.emit('LogMessage', { message: 'The torch has burned out!' });
-        this.eventBus.emit('PlayAudio', { sound: 'torchBurning', play: false });
-        this.eventBus.emit('RenderNeeded');
-    }
-
-    lightTorch() {
-        const player = this.entityManager.getEntity('player');
-        const resource = player.getComponent('Resource');
-        const playerState = player.getComponent('PlayerState');
-        const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
-
-        if (resource.torches > 0 && !playerState.torchLit) {
-            resource.torches--;
-            resource.torchExpires = 50;
-            playerState.torchLit = true;
-            if (renderState) renderState.discoveryRadius = 5;
-            this.eventBus.emit('LogMessage', { message: `Lit a torch. ${resource.torches} torches remaining.` });
-            this.eventBus.emit('PlayAudio', { sound: 'torchBurning', play: true });
-            this.eventBus.emit('RenderNeeded');
-        } else if (resource.torches <= 0) {
-            this.eventBus.emit('LogMessage', { message: 'You have no torches left.' });
-        }
-    }
-
     exit() {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         this.eventBus.emit('LogMessage', { message: 'You exited the dungeon! Game Over.' });
@@ -257,7 +214,6 @@ export class PlayerSystem extends System {
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
     }
 
-    // Store the handleInput reference for removal
     handleInput = (event) => {
         const game = this.entityManager.getEntity('game');
         if (game) game.handleInput(event);
@@ -267,16 +223,13 @@ export class PlayerSystem extends System {
         const player = this.entityManager.getEntity('player');
         const playerState = player.getComponent('PlayerState');
 
-        //this.eventBus.emit('LogMessage', { message: `Discovered ${count} new tiles (${total} total)` });
-
-        // Award XP every 1000 tiles
         const xpThreshold = 1000;
         const previousTotal = total - count;
         const previousMilestones = Math.floor(previousTotal / xpThreshold);
         const currentMilestones = Math.floor(total / xpThreshold);
 
         if (currentMilestones > previousMilestones) {
-            const xpAward = (currentMilestones - previousMilestones) * 50; // 50 XP per 1000 tiles
+            const xpAward = (currentMilestones - previousMilestones) * 50;
             this.eventBus.emit('AwardXp', { amount: xpAward });
             this.eventBus.emit('LogMessage', { message: `Exploration milestone reached! Gained ${xpAward} XP for discovering ${currentMilestones * xpThreshold} tiles.` });
         }

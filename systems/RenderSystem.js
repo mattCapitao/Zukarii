@@ -1,4 +1,4 @@
-﻿// systems/RenderSystem.js - Updated
+﻿// systems/RenderSystem.js - Corrected
 import { System } from '../core/Systems.js';
 import { titleScreen } from '../titlescreen.js';
 
@@ -9,6 +9,11 @@ export class RenderSystem extends System {
         this.mapDiv = document.getElementById('map');
         this.tileMap = {};
         this.lastTier = null;
+        this.TILE_SIZE = 16;
+        this.SCROLL_SPEED = 1;
+        this.VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25;
+        this.SCROLL_THRESHOLD = 4;
+        this.SCROLL_DURATION = 300;
         console.log('RenderSystem: Render Lock initialized');
     }
 
@@ -19,10 +24,11 @@ export class RenderSystem extends System {
             this.viewportEdgeScroll();
         });
         this.eventBus.on('DiscoveredStateUpdated', () => this.render(true));
+        this.eventBus.on('LightingStateChanged', () => {this.render(true);});
     }
 
     update() {
-        this.render(false); // Continuous render without forcing needsRender
+        this.render(false);
     }
 
     render(force = false) {
@@ -31,6 +37,14 @@ export class RenderSystem extends System {
         const renderControl = this.entityManager.getEntity('renderState')?.getComponent('RenderControl');
         const player = this.entityManager.getEntity('player');
         const titleScreenContainer = document.getElementById('splash');
+        const state = this.entityManager.getEntity('state');
+
+        if (force) {
+            console.log(`RenderSystem: Accessing gameState - tier: ${gameState?.tier}, gameStarted: ${gameState?.gameStarted}, needsRender: ${gameState?.needsRender}, needsInitialRender: ${gameState?.needsInitialRender}`);
+            console.log(`RenderSystem: Accessing renderState - renderRadius: ${renderState?.renderRadius}, activeRenderZone: ${renderState?.activeRenderZone?.size}`);
+            console.log(`RenderSystem: Accessing renderControl - locked: ${renderControl?.locked}`);
+            console.log(`RenderSystem: Accessing player - position: (${player?.getComponent('Position')?.x}, ${player?.getComponent('Position')?.y})`);
+        }
 
         if (!gameState) return;
         if (renderControl.locked) {
@@ -56,45 +70,117 @@ export class RenderSystem extends System {
             this.lastTier = currentTier;
         }
 
-        const tierEntity = this.entityManager.getEntitiesWith(['Map', 'Tier', 'Exploration']).find(e => e.getComponent('Tier').value === currentTier);
+        const tierEntity = this.entityManager.getEntitiesWith(['Tier', 'Exploration']).find(e => e.getComponent('Tier').value === currentTier);
         if (!tierEntity) {
             console.error(`RenderSystem: No level entity found for tier ${currentTier}`);
             gameState.needsRender = false;
             return;
         }
 
-        const map = tierEntity.getComponent('Map').map;
         const exploration = tierEntity.getComponent('Exploration');
-        const height = map.length;
-        const width = map[0].length;
-        console.log(`RenderSystem: Rendering map with dimensions ${width}x${height} for tier ${currentTier}`);
+        const WIDTH = state.getComponent('LevelDimensions').WIDTH;
+        const HEIGHT = state.getComponent('LevelDimensions').HEIGHT;
+        console.log(`RenderSystem: Rendering map with dimensions ${WIDTH}x${HEIGHT} for tier ${currentTier}`);
         const playerPos = player.getComponent('Position');
         console.log('RenderSystem: Rendering map for player at', playerPos);
         const playerState = player.getComponent('PlayerState');
         console.log('RenderSystem: Player state:', playerState);
-        const renderRadius = renderState.renderRadius; // Updated to use renderRadius
+        const renderRadius = renderState.renderRadius;
+
+        if (force) {
+            console.log(`RenderSystem: Accessing exploration state - discoveredWalls: ${exploration.discoveredWalls.size}, discoveredFloors: ${exploration.discoveredFloors.size}`);
+        }
+
+        const walls = this.entityManager.getEntitiesWith(['Position', 'Wall']);
+        const floors = this.entityManager.getEntitiesWith(['Position', 'Floor']);
+        const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
+        const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
+        const treasures = this.entityManager.getEntitiesWith(['Position', 'LootData']);
+        const fountains = this.entityManager.getEntitiesWith(['Position', 'Fountain']);
+        const stairs = this.entityManager.getEntitiesWith(['Position', 'Stair']);
+        const portals = this.entityManager.getEntitiesWith(['Position', 'Portal']);
+
+        if (force) {
+            console.log(`RenderSystem: Entity query - walls: ${walls.length}, floors: ${floors.length}, monsters: ${monsters.length}, projectiles: ${projectiles.length}, treasures: ${treasures.length}, fountains: ${fountains.length}, stairs: ${stairs.length}, portals: ${portals.length}`);
+        }
 
         if (!Object.keys(this.tileMap).length) {
             let mapDisplay = '';
             let playerSpawnLocations = '';
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    let char = map[y][x];
+            for (let y = 0; y < HEIGHT; y++) {
+                for (let x = 0; x < WIDTH; x++) {
+                    const tileKey = `${x},${y}`;
+                    let char = ' ';
                     let className = 'undiscovered';
-                    if (exploration.discoveredWalls.has(`${x},${y}`) || exploration.discoveredFloors.has(`${x},${y}`)) {
+
+                    if (exploration.discoveredWalls.has(tileKey) || exploration.discoveredFloors.has(tileKey)) {
                         className = 'discovered';
                     }
-                    const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
-                    const projectileMatch = projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
-                    if (projectileMatch) {
+
+                    const wall = walls.find(w => {
+                        const pos = w.getComponent('Position');
+                        return pos.x === x && pos.y === y;
+                    });
+                    if (wall) {
+                        char = '#';
+                        className = exploration.discoveredWalls.has(tileKey) ? 'discovered' : 'undiscovered';
+                    }
+
+                    const floor = floors.find(f => {
+                        const pos = f.getComponent('Position');
+                        return pos.x === x && pos.y === y;
+                    });
+                    if (floor && !wall) {
+                        char = ' ';
+                        className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+                    }
+
+                    const projectile = projectiles.find(p => {
+                        const pos = p.getComponent('Position');
+                        return pos.x === x && pos.y === y;
+                    });
+                    if (projectile) {
                         char = '*';
                         className = 'discovered projectile';
                     } else if (x === playerPos.x && y === playerPos.y) {
                         playerSpawnLocations += `Rendering player at${x},${y}`;
                         char = '𓀠';
                         className = 'player';
-                        if (playerState.torchLit) className += ' torch flicker';
+                        const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
+
+                        if (lightingState?.isLit) { className += ' torch flicker'; }
+
+                    } else {
+                        const fountain = fountains.find(f => {
+                            const pos = f.getComponent('Position');
+                            const fountainData = f.getComponent('Fountain');
+                            return pos.x === x && pos.y === y && !fountainData.used;
+                        });
+                        if (fountain) {
+                            char = '≅';
+                            className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+                        } else {
+                            const stair = stairs.find(s => {
+                                const pos = s.getComponent('Position');
+                                return pos.x === x && pos.y === y;
+                            });
+                            if (stair) {
+                                const stairComp = stair.getComponent('Stair');
+                                char = stairComp.direction === 'down' ? '⇓' : '⇑';
+                                className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+                            } else {
+                                const portal = portals.find(p => {
+                                    const pos = p.getComponent('Position');
+                                    return pos.x === x && pos.y === y;
+                                });
+                                if (portal) {
+                                    char = '?';
+                                    className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+                                }
+                            }
+                        }
                     }
+
                     mapDisplay += `<span class="${className}" data-x="${x}" data-y="${y}">${char}</span>`;
                 }
                 mapDisplay += '\n';
@@ -102,70 +188,101 @@ export class RenderSystem extends System {
             console.log("Player Avatar Locations", playerSpawnLocations);
             this.mapDiv.innerHTML = mapDisplay;
 
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
+            for (let y = 0; y < HEIGHT; y++) {
+                for (let x = 0; x < WIDTH; x++) {
                     const element = this.mapDiv.querySelector(`span[data-x="${x}"][data-y="${y}"]`);
-                    this.tileMap[`${x},${y}`] = { char: map[y][x], class: element.className, element };
+                    const tileKey = `${x},${y}`;
+                    let char = ' ';
+                    if (walls.some(w => w.getComponent('Position').x === x && w.getComponent('Position').y === y)) {
+                        char = '#';
+                    }
+                    this.tileMap[tileKey] = { char, class: element.className, element };
                 }
             }
 
             this.setInitialScroll();
         } else {
-            const minX = Math.max(0, playerPos.x - renderRadius); // Updated to use renderRadius
-            const maxX = Math.min(width - 1, playerPos.x + renderRadius);
-            const minY = Math.max(0, playerPos.y - renderRadius);
-            const maxY = Math.min(height - 1, playerPos.y + renderRadius);
+            for (const tileKey of renderState.activeRenderZone) {
+                const [x, y] = tileKey.split(',').map(Number);
+                const tile = this.tileMap[tileKey];
+                let char = ' ';
+                let className = exploration.discoveredWalls.has(tileKey) || exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
 
-            const monsters = this.entityManager.getEntitiesWith(['Position', 'Health', 'MonsterData']);
-            const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
-            const treasures = this.entityManager.getEntitiesWith(['Position', 'TreasureData']);
+                const wall = walls.find(w => {
+                    const pos = w.getComponent('Position');
+                    return pos.x === x && pos.y === y;
+                });
+                if (wall) {
+                    char = '#';
+                }
 
-            for (let y = minY; y <= maxY; y++) {
-                for (let x = minX; x <= maxX; x++) {
-                    const distance = Math.sqrt(Math.pow(playerPos.x - x, 2) + Math.pow(playerPos.y - y, 2));
-                    if (distance <= renderRadius) { // Updated to use renderRadius
-                        const tileKey = `${x},${y}`;
-                        const tile = this.tileMap[tileKey];
-                        let char = map[y][x];
-                        let className = exploration.discoveredWalls.has(tileKey) || exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+                const treasure = treasures.find(t => {
+                    const pos = t.getComponent('Position');
+                    return pos.x === x && pos.y === y;
+                });
+                const projectile = projectiles.find(p => {
+                    const pos = p.getComponent('Position');
+                    return pos.x === x && pos.y === y;
+                });
+                if (projectile) {
+                    char = '*';
+                    className = 'discovered projectile';
+                } else if (treasure) {
+                    char = '$';
+                } else if (x === playerPos.x && y === playerPos.y) {
+                    char = '𓀠';
+                    className = 'player';
 
-                        tile.element.textContent = char;
-                        tile.element.className = className;
-                        tile.char = char;
-                        tile.class = className;
+                    const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
+                    if (lightingState?.isLit) { className += ' torch flicker'; }
 
-                        const treasureMatch = treasures.some(t => t.getComponent('Position').x === x && t.getComponent('Position').y === y);
-                        const projectileMatch = projectiles.some(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
-                        if (projectileMatch) {
-                            char = '*';
-                            className = 'discovered projectile';
-                        } else if (treasureMatch) {
-                            char = '$';
-                            className = 'discovered';
-                        } else if (x === playerPos.x && y === playerPos.y) {
-                            char = '𓀠';
-                            className = 'player';
-                            if (playerState.torchLit) className += ' torch flicker';
+                } else {
+                    const fountain = fountains.find(f => {
+                        const pos = f.getComponent('Position');
+                        const fountainData = f.getComponent('Fountain');
+                        return pos.x === x && pos.y === y && !fountainData.used;
+                    });
+                    if (fountain) {
+                        char = '≅';
+                    } else {
+                        const stair = stairs.find(s => {
+                            const pos = s.getComponent('Position');
+                            return pos.x === x && pos.y === y;
+                        });
+                        if (stair) {
+                            const stairComp = stair.getComponent('Stair');
+                            char = stairComp.direction === 'down' ? '⇓' : '⇑';
                         } else {
-                            const monster = monsters.find(m => m.getComponent('Position').x === x && m.getComponent('Position').y === y && m.getComponent('Health').hp > 0);
-                            if (monster && (distance <= renderRadius || monster.getComponent('MonsterData').isAggro)) { // Updated to use renderRadius
-                                const monsterData = monster.getComponent('MonsterData');
-                                monsterData.isDetected = true;
-                                char = monsterData.avatar;
-                                className = `discovered monster detected ${monsterData.classes}`;
-                                if (monsterData.isElite) className += ' elite';
-                                if (monsterData.isBoss) className += ' boss';
-                                monsterData.affixes.forEach(affix => className += ` ${affix}`);
+                            const portal = portals.find(p => {
+                                const pos = p.getComponent('Position');
+                                return pos.x === x && pos.y === y;
+                            });
+                            if (portal) {
+                                char = '?';
+                            } else {
+                                const monster = monsters.find(m => {
+                                    const pos = m.getComponent('Position');
+                                    return pos.x === x && pos.y === y && m.getComponent('Health').hp > 0;
+                                });
+                                if (monster && (renderState.activeRenderZone.has(tileKey) || monster.getComponent('MonsterData').isAggro)) {
+                                    const monsterData = monster.getComponent('MonsterData');
+                                    monsterData.isDetected = true;
+                                    char = monsterData.avatar;
+                                    className = `discovered monster detected ${monsterData.classes}`;
+                                    if (monsterData.isElite) className += ' elite';
+                                    if (monsterData.isBoss) className += ' boss';
+                                    monsterData.affixes.forEach(affix => className += ` ${affix}`);
+                                }
                             }
                         }
-
-                        if (tile.char !== char || tile.class !== className) {
-                            tile.element.textContent = char;
-                            tile.element.className = className;
-                            tile.char = char;
-                            tile.class = className;
-                        }
                     }
+                }
+
+                if (tile.char !== char || tile.class !== className) {
+                    tile.element.textContent = char;
+                    tile.element.className = className;
+                    tile.char = char;
+                    tile.class = className;
                 }
             }
         }
@@ -176,25 +293,26 @@ export class RenderSystem extends System {
 
     viewportEdgeScroll() {
         const mapElement = document.getElementById('map');
-        const player = document.querySelector('.player');
-        if (!player || !mapElement) {
+        const player = this.entityManager.getEntity('player');
+        const state = this.entityManager.getEntity('state');
+        if (!player || !mapElement || !state) {
+            console.warn('RenderSystem: viewportEdgeScroll - Missing required elements', { player, mapElement, state });
             return;
         }
 
-        const TILE_SIZE = 16;
-        const SCROLL_SPEED = 1;
-        const VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25;
-
         const viewportWidth = mapElement.clientWidth;
         const viewportHeight = mapElement.clientHeight;
-        const mapWidth = mapElement.scrollWidth;
-        const mapHeight = mapElement.scrollHeight;
+        const mapWidth = state.getComponent('LevelDimensions').WIDTH * this.TILE_SIZE;
+        const mapHeight = state.getComponent('LevelDimensions').HEIGHT * this.TILE_SIZE;
 
-        const thresholdX = viewportWidth * VIEWPORT_EDGE_THRESHOLD_PERCENT;
-        const thresholdY = viewportHeight * VIEWPORT_EDGE_THRESHOLD_PERCENT;
+        console.log(`RenderSystem: viewportEdgeScroll - Map dimensions: ${mapWidth}x${mapHeight}`);
 
-        const playerX = player.offsetLeft;
-        const playerY = player.offsetTop;
+        const thresholdX = viewportWidth * this.VIEWPORT_EDGE_THRESHOLD_PERCENT;
+        const thresholdY = viewportHeight * this.VIEWPORT_EDGE_THRESHOLD_PERCENT;
+
+        const playerPos = player.getComponent('Position');
+        const playerX = playerPos.x * this.TILE_SIZE;
+        const playerY = playerPos.y * this.TILE_SIZE;
         const currentScrollX = mapElement.scrollLeft;
         const currentScrollY = mapElement.scrollTop;
 
@@ -206,32 +324,30 @@ export class RenderSystem extends System {
 
         if (playerViewportX < thresholdX) {
             targetScrollX = playerX - thresholdX;
-        } else if (playerViewportX + TILE_SIZE > viewportWidth - thresholdX) {
-            targetScrollX = playerX + TILE_SIZE - (viewportWidth - thresholdX);
+        } else if (playerViewportX + this.TILE_SIZE > viewportWidth - thresholdX) {
+            targetScrollX = playerX + this.TILE_SIZE - (viewportWidth - thresholdX);
         }
 
         if (playerViewportY < thresholdY) {
             targetScrollY = playerY - thresholdY;
-        } else if (playerViewportY + TILE_SIZE > viewportHeight - thresholdY) {
-            targetScrollY = playerY + TILE_SIZE - (viewportHeight - thresholdY);
+        } else if (playerViewportY + this.TILE_SIZE > viewportHeight - thresholdY) {
+            targetScrollY = playerY + this.TILE_SIZE - (viewportHeight - thresholdY);
         }
 
         targetScrollX = Math.max(0, Math.min(targetScrollX, mapWidth - viewportWidth));
         targetScrollY = Math.max(0, Math.min(targetScrollY, mapHeight - viewportHeight));
 
-        const scrollThreshold = 4;
-        if (Math.abs(targetScrollX - currentScrollX) < scrollThreshold && Math.abs(targetScrollY - currentScrollY) < scrollThreshold) {
+        if (Math.abs(targetScrollX - currentScrollX) < this.SCROLL_THRESHOLD && Math.abs(targetScrollY - currentScrollY) < this.SCROLL_THRESHOLD) {
             return;
         }
 
-        const duration = 300;
         let startTime = null;
         const easeInOutQuad = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
         const animateScroll = (timestamp) => {
             if (!startTime) startTime = timestamp;
             const elapsed = timestamp - startTime;
-            const progress = Math.min(elapsed / duration, 1);
+            const progress = Math.min(elapsed / this.SCROLL_DURATION, 1);
             const easedProgress = easeInOutQuad(progress);
 
             const currentX = currentScrollX + (targetScrollX - currentScrollX) * easedProgress;
@@ -256,14 +372,21 @@ export class RenderSystem extends System {
     setInitialScroll() {
         const mapElement = document.getElementById('map');
         const player = this.entityManager.getEntity('player');
+        const state = this.entityManager.getEntity('state');
+        if (!mapElement || !player || !state) {
+            console.warn('RenderSystem: setInitialScroll - Missing required elements', { mapElement, player, state });
+            return;
+        }
         const playerPos = player.getComponent('Position');
         const viewportWidth = mapElement.clientWidth;
         const viewportHeight = mapElement.clientHeight;
-        const mapWidth = mapElement.scrollWidth;
-        const mapHeight = mapElement.scrollHeight;
+        const mapWidth = state.getComponent('LevelDimensions').WIDTH * this.TILE_SIZE;
+        const mapHeight = state.getComponent('LevelDimensions').HEIGHT * this.TILE_SIZE;
 
-        let scrollX = (playerPos.x * 16) - (viewportWidth / 2);
-        let scrollY = (playerPos.y * 16) - (viewportHeight / 2);
+        console.log(`RenderSystem: setInitialScroll - Map dimensions: ${mapWidth}x${mapHeight}`);
+
+        let scrollX = (playerPos.x * this.TILE_SIZE) - (viewportWidth / 2);
+        let scrollY = (playerPos.y * this.TILE_SIZE) - (viewportHeight / 2);
 
         scrollX = Math.max(0, Math.min(scrollX, mapWidth - viewportWidth));
         scrollY = Math.max(0, Math.min(scrollY, mapHeight - viewportHeight));
