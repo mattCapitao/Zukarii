@@ -49,7 +49,7 @@ export class State {
             'intellect', 'prowess', 'agility',
             'range', 'block', 'armor', 'defense',
             'baseBlock', 'baseRange',
-            'rangedDamageBonus', 'meleeDamageBonus', 'damageBonus'
+            'rangedBonus', 'meleeBonus', 'damageBonus'
         ];
 
         // Initialize core entities

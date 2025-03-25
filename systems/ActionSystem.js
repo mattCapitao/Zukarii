@@ -17,7 +17,8 @@ export class ActionSystem extends System {
     useFountain({ fountainEntityId, tierEntityId }) {
         const player = this.entityManager.getEntity('player');
         const fountainEntity = this.entityManager.getEntity(fountainEntityId);
-        const tierEntity = this.entityManager.getEntity(tierEntityId);
+        const tierEntity = this.entityManager.getEntity(tierEntityId); 
+    
 
         if (!player || !fountainEntity || !tierEntity) return;
 
@@ -28,17 +29,20 @@ export class ActionSystem extends System {
         const playerHealth = player.getComponent('Health');
         const critChance = playerStats.critChance || (playerStats.agility * 0.02);
 
-        let healAmount;
+        
         if (Math.random() < critChance) {
             const maxHpBoost = Math.round(1 + (2 * (tierEntity.getComponent('Tier').value / 10)));
-            playerHealth.maxHp += maxHpBoost;
-            healAmount = playerHealth.maxHp - playerHealth.hp;
+
+            this.eventBus.emit('LogMessage', { message: `The fountain surges with power! Fully healed and Max HP increased!` });
+
+            this.eventBus.emit('ModifyBaseStat', { stat: 'maxHp', value: maxHpBoost });
+            // Keep direct write to playerHealth for now (consistent with drinkHealPotion)
             playerHealth.hp = playerHealth.maxHp;
-            this.eventBus.emit('LogMessage', { message: `The fountain surges with power! Fully healed and Max HP increased by ${maxHpBoost} to ${playerHealth.maxHp}!` });
+
         } else {
             const missingHp = playerHealth.maxHp - playerHealth.hp;
             const healPercent = Math.random() * (0.5 - 0.3) + 0.3;
-            healAmount = Math.round(missingHp * healPercent);
+            const healAmount = Math.round(missingHp * healPercent);
             playerHealth.hp = Math.min(playerHealth.hp + healAmount, playerHealth.maxHp);
             this.eventBus.emit('LogMessage', { message: `The fountain restores ${healAmount} HP. Current HP: ${playerHealth.hp}/${playerHealth.maxHp}` });
         }

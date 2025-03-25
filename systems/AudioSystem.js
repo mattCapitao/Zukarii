@@ -7,6 +7,7 @@ export class AudioSystem extends System {
         this.sounds = {};
         this.musicVolume = 0.05;
         this.torchVolume = 0.04;
+        this.dingVolume = 0.1;
         this.preloadSounds();
     }
 
@@ -18,7 +19,8 @@ export class AudioSystem extends System {
     preloadSounds() {
         const soundFiles = {
             torchBurning: '/audio/torch-burning.mp3',
-            backgroundMusic: '/audio/haunted.wav'
+            backgroundMusic: '/audio/haunted.wav',
+            ding: '/audio/ding.mp3'
         };
 
         for (const [key, path] of Object.entries(soundFiles)) {
@@ -35,6 +37,10 @@ export class AudioSystem extends System {
             this.sounds.torchBurning.loop = true;
             this.sounds.torchBurning.volume = this.torchVolume;
             play ? this.sounds.torchBurning.play() : this.sounds.torchBurning.pause();
+        }
+        if (sound === 'ding') {
+            this.sounds.ding.volume = this.dingVolume;
+            this.sounds.ding.play();
         }
     }
 

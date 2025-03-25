@@ -178,8 +178,8 @@ export class ItemROGSystem extends System {
             case 'intellect': return Math.floor(item.tierIndex / 2);
             case 'defense': return Math.floor(item.tierIndex) + 1;
             case 'damageBonus': return Math.floor(item.tierIndex) + 1;
-            case 'meleeDamageBonus': return Math.floor(item.tierIndex) + 1;
-            case 'rangedDamageBonus': return Math.floor(item.tierIndex) + 1;
+            case 'meleeBonus': return Math.floor(item.tierIndex) + 1;
+            case 'rangedBonus': return Math.floor(item.tierIndex) + 1;
             case 'baseBlock': return Math.floor(item.tierIndex) + 1;
             case 'baseRange': return Math.floor(item.tierIndex) + 4;
             default:

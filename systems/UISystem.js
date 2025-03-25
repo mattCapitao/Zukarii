@@ -10,7 +10,7 @@ export class UISystem extends System {
         this.tabs = null;
         this.logContent = null;
         this.characterContent = null;
-        this.tooltipCache = new Map(); // Initialize tooltip cach
+        this.tooltipCache = new Map(); // Initialize tooltip cache
     }
 
     init() {
@@ -34,11 +34,16 @@ export class UISystem extends System {
         this.eventBus.on('GearChanged', (data) => this.updateUI(data));
         this.updateUI({ entityId: 'player' }); // Initial render
         this.eventBus.emit('GearChanged', { entityId: 'player' });
+        
+
+
+
 
         // Initialize mouse listeners after UI is rendered
         this.setupInventoryMouseEvents();
         this.setupEquipDragAndDrop();
         this.setupTooltipListeners();
+        this.setupStatIncrementListeners();
     }
 
     toggleOverlay({ tab = null }) {
@@ -85,7 +90,7 @@ export class UISystem extends System {
         if (tab === 'log') {
             this.updateLog(overlayState.logMessages);
         } else if (tab === 'character') {
-            this.updateCharacter(stats, health, mana, inventory, playerState, resource);
+            this.updateCharacter(stats, inventory);  
         }
     }
 
@@ -125,31 +130,52 @@ export class UISystem extends System {
         //console.log('Log content updated');
     }
 
-    updateCharacter(stats, health, mana, inventory, playerState, resource) {
+    updateCharacter(stats, inventory) {
         const statWrapper = document.getElementById('character-stat-wrapper');
-        statWrapper.innerHTML = `
-            <div>Level: ${playerState.level}</div>
-            <div>XP: ${playerState.xp}/${playerState.nextLevelXp}</div>
-            <div>HP: ${health.hp}/${health.maxHp}</div>
-            <div>Mana: ${mana.mana}/${mana.maxMana}</div>
-            <div>Gold: ${resource.gold}</div>
-            <div>Torches: ${resource.torches}</div>
-            <div><hr></div><div><hr></div>
-            <div>${stats.intellect || 0} : Intellect</div>
-            <div>${stats.prowess || 0} : Prowess</div>
 
-            <div>${stats.agility || 0} : Agility</div>
-            <div>${stats.range || 0} : Range</div>
-            
-            <div>${stats.damageBonus} : +Damage Bonus</div>
-            <div>${stats.armor || 0} : Armor</div>
+        const statList = [
+            { stat: 'intellect', incrementable: true },
+            { stat: 'resistMagic', incrementable: false },
+            { stat: 'prowess', incrementable: true },
+            { stat: 'block', incrementable: false },
+            { stat: 'agility', incrementable: true },
+            { stat: 'dodge', incrementable: false },
+            { stat: 'defense', incrementable: false },
+            { stat: 'damageBonus', incrementable: false },
+            { stat: 'meleeBonus', incrementable: false },
+            { stat: 'rangedBonus', incrementable: false }
+        ];
 
-            <div>${stats.meleeDamageBonus} : +Melee Dmg</div>
-            <div>${stats.defense} : Defense </div>
-           
-            <div>${stats.rangedDamageBonus} : +Ranged Dmg</div>
-             <div>${stats.block || 0} : Block</div>
-        `;
+        let statHtml = `
+        <div>Stat Points: <span>${stats.unallocated}</span></div>
+        <div>Skill Points: <span>0</span></div>
+        <div><span class="increment hidden"> </span><span class="stat-value">${stats.armor || 0}</span> : Armor</div>
+        <div><span class="increment hidden"> </span><span class="stat-value">${stats.range || 0}</span> : Range</div>
+        <div><hr></div><div><hr></div>`;
+
+        statList.forEach(statEntry => {
+            const statName = statEntry.stat;
+            const isIncrementable = statEntry.incrementable;
+            const displayName = this.utilities.camelToTitleCase(statName);
+            const statValue = stats[statName] || 0;
+            const incrementSpan = isIncrementable
+                ? `<span id="increment-${statName}" title="Add point to ${displayName}" class="increment hidden">+</span>`
+                : `<span class="increment hidden"> </span>`;
+            statHtml += `
+            <div>${incrementSpan}<span class="stat-value">${statValue}</span> : ${displayName}</div>`;
+        });
+
+        statWrapper.innerHTML = statHtml;
+
+        const canAllocate = stats.unallocated > 0 && !stats.isLocked;
+        statList.forEach(statEntry => {
+            if (statEntry.incrementable) {
+                const incrementSpan = document.getElementById(`increment-${statEntry.stat}`);
+                if (incrementSpan) {
+                    incrementSpan.classList.toggle('hidden', !canAllocate);
+                }
+            }
+        })
 
         // Update equipped items in existing slots
         const equipSlots = document.querySelectorAll('.equip-slot');
@@ -257,6 +283,39 @@ export class UISystem extends System {
     setupInventoryMouseEvents() {
         this.setupInventoryDragAndDrop();
         this.setupInventoryDiscardItem();
+    }
+
+    // Replace the existing setupStatIncrementListeners() method
+    setupStatIncrementListeners() {
+        const statWrapper = document.getElementById('character-stat-wrapper');
+        const player = this.entityManager.getEntity('player');
+        const stats = player.getComponent('Stats');
+
+        // Remove any existing listener (to prevent duplicates)
+        if (this.statIncrementListener) {
+            statWrapper.removeEventListener('click', this.statIncrementListener);
+        }
+
+        // Add delegated click listener for visible increment spans
+        this.statIncrementListener = (event) => {
+            const target = event.target.closest('.increment:not(.hidden)');
+            if (!target) return;
+
+        const currentStats = this.entityManager.getEntity('player').getComponent('Stats');
+            if (currentStats.unallocated < 1 || currentStats.isLocked) {
+                return;
+            }
+
+            // Extract the stat name from the ID (e.g., increment-intellect -> intellect)
+            const statId = target.id; // e.g., increment-intellect
+            if (!statId) return;
+            const stat = statId.replace('increment-', ''); // e.g., intellect
+
+            // Emit AllocateStat event
+            this.eventBus.emit('AllocateStat', { stat });
+        };
+
+        statWrapper.addEventListener('click', this.statIncrementListener);
     }
 
     setupTooltipListeners() {

@@ -28,12 +28,12 @@ export class DamageCalculationSystem extends System {
         const prowess = attackerStats.prowess || 0;
         const intellect = attackerStats.intellect || 0;
         const damageBonus = attackerStats.damageBonus || 0; // All attacks
-        const meleeDamageBonus = attackerStats.meleeDamageBonus || 0;
-        const rangedDamageBonus = attackerStats.rangedDamageBonus || 0;
+        const meleeBonus = attackerStats.meleeBonus || 0;
+        const rangedBonus = attackerStats.rangedBonus || 0;
         const agility = attackerStats.agility || 0;
 
         const isRanged = weapon?.attackType === 'ranged';
-        const statBonus = isRanged ? rangedDamageBonus : meleeDamageBonus;
+        const statBonus = isRanged ? rangedBonus : meleeBonus;
         const baseStat = isRanged ? intellect : prowess;
 
         // Base damage: roll + level

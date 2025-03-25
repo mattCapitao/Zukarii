@@ -2,11 +2,11 @@
   "weapon": {
     "ranged": {
       "base": [ "baseDamageMin", "baseDamageMax", "attackType", "baseRange" ],
-      "bonus": [ "intellect", "agility", "range", "rangedDamageBonus", "damageBonus" ]
+      "bonus": [ "intellect", "agility", "range", "rangedBonus", "damageBonus" ]
     },
     "melee": {
       "base": [ "baseDamageMin", "baseDamageMax", "attackType", "baseBlock" ],
-      "bonus": [ "prowess", "agility", "block", "meleeDamageBonus", "damageBonus" ]
+      "bonus": [ "prowess", "agility", "block", "meleeBonus", "damageBonus" ]
     }
   },
   "armor": {
@@ -22,10 +22,11 @@
       "prowess",
       "agility",
       "range",
+      "resistMagic",
       "block",
       "defense",
-      "meleeDamageBonus",
-      "rangedDamageBonus",
+      "meleeBonus",
+      "rangedBonus",
       "damageBonus"
     ]
   },
@@ -38,10 +39,11 @@
       "prowess",
       "agility",
       "range",
+      "resistMagic",
       "block",
       "defense",
-      "meleeDamageBonus",
-      "rangedDamageBonus",
+      "meleeBonus",
+      "rangedBonus",
       "damageBonus"
     ]
   }

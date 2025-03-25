@@ -205,7 +205,7 @@ export class Data {
                     maxMana: 5,
                     agility: 5,
                     damageBonus: 5,
-                    rangedDamageBonus: 5,
+                    rangedBonus: 5,
                 },
                 description: "The Golden Khepresh has got nothing on this babby! ",
                 uniqueId: null,
