@@ -51,7 +51,7 @@ export class PlayerSystem extends System {
         playerState.nextLevelXp = 125;
         playerState.dead = false;
         playerState.lampLit = false;
-        playerState.name = "Mage";
+        playerState.name = "Zukarnii";
 
         const resource = player.getComponent('Resource');
         resource.torches = 1;

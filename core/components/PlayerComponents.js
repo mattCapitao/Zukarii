@@ -86,7 +86,7 @@ export class ResourceComponent {
 
 export class PlayerStateComponent {
     constructor({
-        name = "Leith42",
+        name = "",
         level = 1,
         xp = 0,
         nextLevelXp = 0,
