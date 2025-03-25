@@ -1,7 +1,7 @@
-console.log("titlescreen.js loaded");
+﻿console.log("titlescreen.js loaded");
 
-export const titleScreen = `<h1>Grok Mage Dungeon</h1>
- <h5>Collect One Trillion Gold to WIN!</h5>
+export const titleScreen = `<h1>Zukarnii</h1>
+ <h5> The Descent!</h5>
 <pre style="font-size:.225rem;">
 
 
