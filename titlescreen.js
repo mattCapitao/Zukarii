@@ -127,8 +127,7 @@ export const titleScreen = `<h1>Zukarnii</h1>
                 </li><li>T key: Light Torch
                 </li><li>C key: Character
                 </li><li>L key: Adventure Log
-                </li><li>F11 to start Gam in Full Screen
-                </li><li>Any Key to start in standard browser mode</li>
+                </li><li>Press any Key to start!</li>
             </ul>
         </td>
         <td>
