@@ -18,9 +18,9 @@ export class AudioSystem extends System {
 
     preloadSounds() {
         const soundFiles = {
-            torchBurning: '/audio/torch-burning.mp3',
-            backgroundMusic: '/audio/haunted.wav',
-            ding: '/audio/ding.mp3'
+            torchBurning: 'audio/torch-burning.mp3',
+            backgroundMusic: 'audio/haunted.wav',
+            ding: 'audio/ding.mp3'
         };
 
         for (const [key, path] of Object.entries(soundFiles)) {
