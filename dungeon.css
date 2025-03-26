@@ -606,7 +606,7 @@ width: 33% !important;
 }
 
 #tabs #equipped-items p.mainhand.empty {
-    background-image: url("/img/icons/item_slots/mainhand.svg");
+    background-image: url("img/icons/item_slots/mainhand.svg");
 }
 #tabs #equipped-items p.offhand.empty {
     background-image: url("img/icons/item_slots/offhand.svg");

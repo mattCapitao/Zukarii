@@ -10,7 +10,7 @@ export class DataSystem extends System {
 
         // Load random monsters from JSON file asynchronously
         console.log('DataSystem: Starting fetch for randomMonsters.json');
-        this.randomMonstersPromise = fetch('/data/json/randomMonsters.json')
+        this.randomMonstersPromise = fetch('data/json/randomMonsters.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received (randomMonsters):', response);
                 if (!response.ok) {
@@ -30,7 +30,7 @@ export class DataSystem extends System {
 
         // Load unique monsters from JSON file asynchronously
         console.log('DataSystem: Starting fetch for uniqueMonsters.json');
-        this.uniqueMonstersPromise = fetch('/data/json/uniqueMonsters.json')
+        this.uniqueMonstersPromise = fetch('data/json/uniqueMonsters.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received (uniqueMonsters):', response);
                 if (!response.ok) {
@@ -50,7 +50,7 @@ export class DataSystem extends System {
 
         // Load boss monsters from JSON file asynchronously
         console.log('DataSystem: Starting fetch for bossMonsters.json');
-        this.bossMonstersPromise = fetch('/data/json/bossMonsters.json')
+        this.bossMonstersPromise = fetch('data/json/bossMonsters.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received (bossMonsters):', response);
                 if (!response.ok) {
@@ -70,7 +70,7 @@ export class DataSystem extends System {
 
         // Load unique items from JSON file asynchronously
         console.log('DataSystem: Starting fetch for uniqueItems.json');
-        this.uniqueItemsPromise = fetch('/data/json/uniqueItems.json')
+        this.uniqueItemsPromise = fetch('data/json/uniqueItems.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received:', response);
                 if (!response.ok) {
@@ -103,7 +103,7 @@ export class DataSystem extends System {
 
         // Load item stat options from JSON file asynchronously
         console.log('DataSystem: Starting fetch for itemStatOptions.json');
-        this.itemStatOptionsPromise = fetch('/data/json/itemStatOptions.json')
+        this.itemStatOptionsPromise = fetch('data/json/itemStatOptions.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received (itemStatOptions):', response);
                 if (!response.ok) {
