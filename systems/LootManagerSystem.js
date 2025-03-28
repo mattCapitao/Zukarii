@@ -137,8 +137,12 @@ export class LootManagerSystem extends System {
             healPotions ? `${healPotions} heal potion${healPotions > 1 ? 's' : ''}` : '',
             items.length ? items.map(i => i.name).join(', ') : ''
         ].filter(Boolean).join(', ');
-        this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped ${dropMessage}!` });
-
+        //Suppress message for treasure chestsn eed to change this later
+        //soucreData needs to have enum types eg.world, monster, quest etc to manage message emitting
+        if (sourceData.name !== 'Treasure Chest') { 
+            this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped ${dropMessage}!` });
+        }
+        
         this.eventBus.emit('SpawnLoot', {
             treasure: lootEntity,
             tier: sourceData.tier
