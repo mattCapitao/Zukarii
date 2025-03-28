@@ -139,7 +139,7 @@ width: 15rem;
 /* The filled portion of the bar */
 .progress-fill {
 height: 100%;
-transition: width 0.3s ease; /* Smooth fill animation */
+transition: width 0.2s ease; /* Smooth fill animation */
 }
 
 /* Specific colors for each stat */
@@ -152,7 +152,8 @@ background-color: #1d4ed8; /* Blue for Mana */
 }
 
 .xp-fill {
-background-color: #facc15; /* Yellow for XP */
+    background-color: #facc15; /* Yellow for XP */
+    transition: width 0.5s ease; /* Slower xp fill animation */
 }
 
 
@@ -201,17 +202,43 @@ color: #000;
 }
 
 #game-over {
-position: absolute;
-font-size: 1.125rem; /* ~18px */
-z-index: 10;
-text-align: center;
-padding: 1.25rem; /* ~20px */
-border-radius: 0.625rem; /* ~10px */
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.125rem; /* ~18px */
+    z-index: 10;
+    text-align: center;
+    padding: 1.25rem; /* ~20px */
+    border-radius: 0.625rem; /* ~10px */
+    border: 0.0625rem solid #2c672c;
+    pointer-events: auto; /* Clickable children */
+    /* ~1px */
 }
 
-#game-over h1 {
-font-size: 3rem; /* ~48px */
+    #game-over h1 {
+        font-size: 3rem; /* ~48px */
+        margin: .625rem; /* ~5px */
+    }
+
+#game-over-message {
+    margin: .625rem; /* ~5px */
 }
+#game-over button {
+    margin: .625rem; /* ~5px */
+    padding: 0.625rem 1.25rem; /* ~10px 20px */
+    background: #2c672c;
+    color: #000;
+    border-radius: 0.3125rem; /* ~5px */
+    cursor: pointer;
+    font-family: 'Verdana', Roboto, sans-serif;
+}
+
+    #game-over button:hover {
+        background: #0f0;
+    }
 
 #game-over.death {
 color: red;
@@ -226,6 +253,8 @@ text-shadow: 0 0 0.625rem #0f0; /* ~10px */
 animation: victoryPulse 1.5s infinite ease-in-out;
 }
 
+
+
 @keyframes fadeIn {
 from {
 opacity: 0;
@@ -237,35 +266,23 @@ opacity: 1;
 }
 
 @keyframes victoryPulse {
-0% {
-transform: scale(1);
-opacity: 1;
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
-50% {
-transform: scale(1.1);
-opacity: 0.9;
-}
 
-100% {
-transform: scale(1);
-opacity: 1;
-}
-}
-
-#restart-button {
-background: #0f0;
-color: #000;
-padding: 0.625rem 1.25rem; /* ~10px 20px */
-border: none;
-border-radius: 0.3125rem; /* ~5px */
-cursor: pointer;
-font-family: 'Verdana', Roboto, sans-serif;
-}
-
-#restart-button:hover {
-background: #00ff00;
-}
 
 #stats-overlay {
 position: absolute;
@@ -414,10 +431,13 @@ cursor: pointer;
 
 #tab-wrapper {
     height: 100%;
+    width: 100%; /* Ensure it takes the full width of #tabs */
     padding: 0 0.3125rem 0 0.3125rem;
     padding-top: 0;
     margin: 0;
     overflow-y: hidden;
+    display: flex; /* Ensure it supports the flex layout of its children */
+    flex-direction: column; /* Stack #tab-menu and the content vertically */
 }
 
 #log-content {
@@ -464,11 +484,12 @@ width: 29%;
 margin-top: 0.625rem; /* ~10px */
 }
 
+
 #tabs h2 {
-font-size: 1.125rem; /* ~18px */
-font-weight: bold;
-text-align: center;
-margin: 0 0 0.625rem 0; /* ~5px */
+    font-size: 1.125rem; /* ~18px */
+    font-weight: bold;
+    text-align: center;
+    margin: 0 0 0.625rem 0; /* ~5px */
 }
 
 #character-stat-wrapper {
@@ -573,10 +594,6 @@ width: 33% !important;
 
 }
 
-
-
-
-
     #tabs #equipped-items p.empty {
         width: 4.25rem;
         height: 4.25rem;
@@ -640,12 +657,95 @@ background-image: url('img/icons/item-slots/boots.svg');
 }
 
 
+#menu-content {
+    height: 30rem; /* ~400px, matches #character-content */
+    width: 100%;
+    display: flex; /* Ensure flexbox is applied */
+    flex-direction: row; /* Explicitly set to row to ensure side-by-side layout */
+    justify-content: space-between; /* Distribute space between the two columns */
+    gap: 0.625rem; /* ~10px, add a small gap between columns */
+    flex-wrap: nowrap; /* Prevent wrapping */
+}
+
+#game-menu {
+    display: flex;
+    flex-direction: column;
+    height: 30rem; /* ~400px */
+    width: 20%;
+    margin-top: 0.625rem; /* ~10px */
+}
+
+#menu-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    justify-content: flex-start; /* Align buttons at the top */
+    align-items: center; /* Center buttons horizontally */
+    padding: 0.625rem; /* ~10px */
+    background: rgba(20, 30, 20, 0.7);
+    border: 0.0625rem solid #0f0; /* ~1px */
+    border-radius: .625rem;
+    margin-bottom: 0.625rem; /* ~10px */
+    height: 100%; /* Ensure it stretches to fill #game-menu */
+    box-sizing: border-box;
+}
+
+
+    #menu-buttons button {
+        width: 90%; /* Full width of the container */
+        margin: 0.3125rem 0; /* ~5px vertical margin */
+        padding: 0.625rem; /* ~10px */
+        background: #2c672c;
+        color: #000;
+        border-radius: .3125rem; /* ~5px */
+        cursor: pointer;
+        font-family: 'Verdana', Roboto, sans-serif;
+        text-align: center;
+    }
+
+#menu-data-wrapper button:disabled {
+    background: #555;
+    color: #999;
+    cursor: not-allowed;
+}
+
+
+    #menu-buttons button:hover {
+        background: #0f0;
+    }
+        #menu-buttons button:active {
+            background: #0f0;
+        }
+#menu-panel {
+    display: flex;
+    flex-direction: column;
+    height: 30rem; /* ~400px, matches #inventory */
+    width: 78%; /* Matches #inventory’s width */
+    margin-top: 0.625rem; /* ~10px, matches #inventory */
+}
+
+#menu-data-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Fill the height of #menu-panel */
+    width: 100%;
+    padding: 0.625rem; /* ~10px */
+    background: rgba(20, 30, 20, 0.7);
+    border: 0.0625rem solid #0f0; /* ~1px */
+    border-radius: .625rem;
+    overflow-y: auto;
+    scrollbar-color: #0f0 #111;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+}
+
+
 #inventory {
-display: flex;
-flex-direction: column;
-height: 31.75rem; /* ~400px */
-width: 68%;
-margin-top: 0.625rem; /* ~10px */
+    display: flex;
+    flex-direction: column;
+    height: 31.75rem; /* ~400px */
+    width: 68%;
+    margin-top: 0.625rem; /* ~10px */
 }
 
 #tabs div.inventory-item-wrapper {

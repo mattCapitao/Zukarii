@@ -14,6 +14,21 @@ export class UIComponent {
     }
 }
 
+export class OverlayStateComponent {
+    constructor({
+        isOpen = false,
+        activeTab = null,
+        logMessages = [],
+        activeMenuSection = 'controls-button' // Add this property
+    } = {}) {
+        this.type = 'OverlayState';
+        this.isOpen = isOpen;           // Boolean: Whether the overlay is open
+        this.activeTab = activeTab;     // String: The currently active tab ('menu', 'log', 'character', or null)
+        this.logMessages = logMessages; // Array: List of log messages
+        this.activeMenuSection = activeMenuSection; // Persist the active menu
+    }
+}
+
 export class RenderStateComponent {
     constructor({
         visibleRadius = 2, // Renamed from discoveryRadius

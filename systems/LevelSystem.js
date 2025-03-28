@@ -45,6 +45,7 @@ export class LevelSystem extends System {
         this.eventBus.on('AddLevel', (data) => this.addLevel(data));
         this.eventBus.on('CheckLevelAfterTransitions', (data) => this.checkLevelAfterTransitions(data));
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const isNewGame = gameState.tier === 0; // Tier 0 indicates a new game (default before save load)
         if (!this.entityManager.getEntitiesWith(['Tier']).some(e => e.getComponent('Tier').value === 0)) {
             // Set active tier to 0 before creating level_0
             this.entityManager.setActiveTier(0);
@@ -52,9 +53,18 @@ export class LevelSystem extends System {
             this.entityManager.addComponentToEntity(levelEntity.id, { type: 'Tier', value: 0 });
             console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier 0 in init`);
             this.addLevel({ tier: 0, customLevel: this.generateSurfaceLevel(levelEntity) });
-            gameState.tier = 1;
-            this.addLevel({ tier: 1 });
-            console.log(`LevelSystem.js: init - gameState.tier set to ${gameState.tier} after creating levels 0 and 1`);
+
+            if (isNewGame) {
+                gameState.tier = 1;
+                this.addLevel({ tier: 1 });
+                console.log(`LevelSystem.js: init - gameState.tier set to ${gameState.tier} after creating levels 0 and 1 (new game)`);
+            } else {
+                // Generate levels up to the loaded tier
+                for (let tier = 1; tier <= gameState.tier; tier++) {
+                    this.addLevel({ tier });
+                }
+                console.log(`LevelSystem.js: init - Preserved loaded tier ${gameState.tier}, generated levels 0 to ${gameState.tier}`);
+            }
         }
     }
 

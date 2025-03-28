@@ -14,10 +14,14 @@
 </head>
 <body>
     <div id="splash"></div>
+    
     <div id="game">
         <pre id="map"></pre>
     </div>
     <div id="ui-layer">
+
+        
+
         <div id="player-info">
             <div class="player-info-child">Player: <span id="playerName"></span></div>
             <div class="player-info-child">Level: <span id="playerLevel"></span></div>
@@ -25,9 +29,79 @@
             <div class="player-info-child">Gold: <span id="playerGold"></span></div>
         </div>
 
+        <div id="game-over" class="death">
+            <h1>GAME OVER</h1>
+            <p id="game-over-message"></p>
+            <button id="view-log"> View Log </button><button id="restart-button"> Play Again </button><button id="menu"> Menu </button>
+        </div>
+
         <div id="tabs" class="hidden">
             <div id="tab-wrapper">
                 <div id="tab-menu"></div>
+                
+                <div id="menu-content" class="ui-tab">
+                    
+                    <div id="game-menu">
+                        <h2>Game Menu</h2>
+                        <div id="menu-buttons">
+                            <button id="controls-button"> Controls </button>
+                            <button id="map-key-button"> Map Key </button>
+                            <button id="options-button"> Options </button>
+                            <button id="save-games-button"> Save Game </button>
+                            <button id="load-games-button"> Load Game </button>
+                            <button id="new-game-button"> New Game </button>
+                            <button id="credits-button"> Credits </button>
+                        </div>
+                    </div>
+                    
+                    <div id="menu-panel">
+                        <h2>Menu Options Detailed Info</h2>
+                        <div id="menu-data-wrapper">
+                            <div id="controls-data">
+                                <h3>Controls: </h3><hr /><br />
+                                <ul>
+                                    <li>Arrow keys: Move / Mele Attack</li>
+                                    <li>wasd: Move / Mele Attack</li>
+                                    <li>Hold Space: + WASD / Arrows: Ranged attack (*)</li>
+                                    <li>T key: Light Torch</li>
+                                    <li>C key: Character</li>
+                                    <li>L key: Adventure Log</li>
+                                    <li>Esc key: Menu</li>
+                                </ul>
+                            </div>
+                            <div id="map-key-data" style="display:none;">
+                                <h3>Map Key:</h3><hr /><br />
+                                <ul>
+                                    <li>𓀠: The Battle Mage - (You) </li>
+                                    <li> $: Treasure (aka Da Lootz!)</li>
+                                    <li> a-z, A-Z: Monster (Kill or Be Killed)</li>
+                                    <li>≅: Magic Fountain (Heal, Boost, ???)</li>
+                                    <li>#: Wall (You Can't Go Here)</li>
+                                    <li> ⇓: Stairs Down ∞ (Infinite) </li>
+                                    <li>⇑: Stairs Up (Tier 1 Exit Game)</li>
+                                </ul>
+                            </div>
+                            <div id="options-data" style="display:none;"><h3>Options:</h3><hr /><br /></div>
+                            <div id="save-games-data" style="display:none;"><h3>Saved Games:</h3><hr /><br /> </div>
+                            <div id="load-games-data" style="display:none;"><h3>Load Games:</h3><hr /><br /></div>
+                            <div id="new-game-data" style="display:none;"><h3>New Game: - Create Character</h3><hr /><br /></div>
+                            <div id="credits-data" style="display:none;">
+                                <h3>Credits:</h3><hr /><br />
+                                <h4>Developers:</h4><br />
+                                                    <br /><ul>
+                                    <li>Creator / Game Director / Lead Engineer: Matt Capitao</li>
+                                </ul><br />
+                                    <h4>AI Devs</h4><br />
+                                                    <br /><ul>
+                                        <li>Supporting AI - Architect / Engineer: Grok3</li>
+                                        <li>Supporting AI - QA / Debug Engineer : GitHub Copilot</li>
+                                    </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
                 <div id="log-content" class="ui-tab">
                     <h2>Adventure Log</h2>
                     <div id="log"></div>
@@ -71,7 +145,9 @@
                         <div id="character-stat-wrapper"></div>
                     </div>
                     <div id="inventory">
-
+                        <h2>Inventory Items</h2>
+                        <div class="inventory-item-wrapper">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -99,6 +175,7 @@
             </div>
             <div class="player-status-child">Torches: <span id="torchCount"></span></div><!-- set innerHTML on #torchCount -->
         </div>
+
     </div>
 
     <script type="module" src="init.js"></script>

@@ -1,4 +1,4 @@
-// EventBus.js
+﻿// EventBus.js
 // Provides a simple event system for loose coupling between systems in the Component-Based Architecture
 
 export class EventBus {
@@ -31,13 +31,12 @@ export class EventBus {
         }
     }
 
-    // Emit an event with optional data
-    emit(eventName, data = null) {
+    emit(eventName, ...args) {
         if (!this.listeners.has(eventName)) return;
         const callbacks = this.listeners.get(eventName).slice(); // Copy to avoid mutation issues
         callbacks.forEach(callback => {
             try {
-                callback(data);
+                callback(...args);
             } catch (error) {
                 console.error(`Error in callback for event ${eventName}:`, error);
             }

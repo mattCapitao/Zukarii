@@ -18,7 +18,8 @@ import { AudioSystem } from './systems/AudioSystem.js';
 import { DataSystem } from './systems/DataSystem.js';
 import { ExplorationSystem } from './systems/ExplorationSystem.js';
 import { LightingSystem } from './systems/LightingSystem.js';
-import { PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent, PlayerStateComponent, LightingState, LightSourceDefinitions } from './core/Components.js';
+import { GameDataIOSystem } from './systems/GameDataIOSystem.js';
+import { PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent, PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent } from './core/Components.js';
 
 export class Game {
     constructor() {
@@ -30,8 +31,8 @@ export class Game {
         this.lastMouseEventTime = 0;
         this.lastMovementTime = 0;
         this.movementThrottleInterval = 100;
+        this.gameLoopId = null;
 
-        // Create player entity (global)
         let player = this.entityManager.getEntity('player');
         if (player) {
             this.entityManager.removeEntity('player');
@@ -48,19 +49,17 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0));
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
 
-        // Create overlayState entity (global)
         let overlayState = this.entityManager.getEntity('overlayState');
         if (!overlayState) {
             overlayState = this.entityManager.createEntity('overlayState', true);
-            this.entityManager.addComponentToEntity('overlayState', {
-                type: 'OverlayState',
+            this.entityManager.addComponentToEntity('overlayState', new OverlayStateComponent({
                 isOpen: false,
                 activeTab: null,
-                logMessages: []
-            });
+                logMessages: [],
+                activeMenuSection: 'controls-button'
+            }));
         }
 
-        // Create lightingState entity (global)
         let lightingState = this.entityManager.getEntity('lightingState');
         if (lightingState) {
             this.entityManager.removeEntity('lightingState');
@@ -105,6 +104,7 @@ export class Game {
         this.systems.audio = new AudioSystem(this.entityManager, this.state.eventBus);
         this.systems.exploration = new ExplorationSystem(this.entityManager, this.state.eventBus);
         this.systems.lighting = new LightingSystem(this.entityManager, this.state.eventBus);
+        this.systems.gameDataIO = new GameDataIOSystem(this.entityManager, this.state.eventBus, this.utilities);
 
         await Promise.all(Object.values(this.systems).map(system => {
             console.log(`Game.js: Initializing system ${system.constructor.name} with EventBus:`, this.state.eventBus);
@@ -115,10 +115,27 @@ export class Game {
     }
 
     setupEventListeners() {
-        document.addEventListener('keydown', (event) => this.handleInput(event));
-        document.addEventListener('keyup', (event) => this.handleInput(event));
-        document.addEventListener('mousedown', () => this.updateLastMouseEvent());
-        document.addEventListener('mousemove', () => this.updateLastMouseEvent());
+        this.keydownHandler = (event) => this.handleInput(event);
+        this.keyupHandler = (event) => this.handleInput(event);
+        this.mousedownHandler = () => this.updateLastMouseEvent();
+        this.mousemoveHandler = () => this.updateLastMouseEvent();
+
+        document.addEventListener('keydown', this.keydownHandler);
+        document.addEventListener('keyup', this.keyupHandler);
+        document.addEventListener('mousedown', this.mousedownHandler);
+        document.addEventListener('mousemove', this.mousemoveHandler);
+    }
+
+    destroy() {
+        document.removeEventListener('keydown', this.keydownHandler);
+        document.removeEventListener('keyup', this.keyupHandler);
+        document.removeEventListener('mousedown', this.mousedownHandler);
+        document.removeEventListener('mousemove', this.mousemoveHandler);
+        if (this.gameLoopId) {
+            cancelAnimationFrame(this.gameLoopId);
+            console.log('Game.js: Game loop stopped');
+        }
+        console.log('Game.js: Instance destroyed');
     }
 
     updateLastMouseEvent() {
@@ -371,6 +388,7 @@ export class Game {
     startGameLoop() {
         let frameCount = 0;
         const gameLoop = () => {
+            this.gameLoopId = requestAnimationFrame(gameLoop);
             frameCount++;
             if (frameCount % 60 === 0) {
                 //console.log('Game.js: Game loop heartbeat, frame:', frameCount, 'timestamp:', Date.now());
@@ -380,9 +398,9 @@ export class Game {
 
             const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
             if (!gameState.gameOver) {
-                requestAnimationFrame(gameLoop);
+                // Continue the loop
             }
         };
-        requestAnimationFrame(gameLoop);
+        this.gameLoopId = requestAnimationFrame(gameLoop);
     }
 }

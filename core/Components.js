@@ -31,7 +31,8 @@ import {
     LootData,
     RenderControlComponent,
     LightingState,
-    LightSourceDefinitions
+    LightSourceDefinitions,
+    OverlayStateComponent
 } from './components/GameComponents.js';
 
 import {
@@ -69,6 +70,7 @@ export {
     RenderControlComponent, 
     LightingState,
     LightSourceDefinitions,
+    OverlayStateComponent,
 
     // Common components
     PositionComponent,

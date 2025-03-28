@@ -139,6 +139,7 @@ export const titleScreen = `<h1>Zukarnii</h1>
                </li><li>#: Wall (You Can't Go Here)
                </li><li> ⇓: Stairs Down ∞ (Infinite)
                </li><li>⇑: Stairs Up (Tier 1 Exit Game)</li>
+            </ul>
         </td>
     </tr>
 </table>

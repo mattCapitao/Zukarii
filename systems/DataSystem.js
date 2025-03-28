@@ -6,7 +6,7 @@ import { System } from '../core/Systems.js';
 export class DataSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
-        this.requiredComponents = []; // No entity requirements, acts as a data provider
+        this.requiredComponents = [];
 
         // Load random monsters from JSON file asynchronously
         console.log('DataSystem: Starting fetch for randomMonsters.json');
@@ -25,7 +25,7 @@ export class DataSystem extends System {
             .catch(error => {
                 console.error('DataSystem: Failed to load randomMonsters.json:', error);
                 console.log('DataSystem: Returning empty array as fallback for randomMonsters');
-                return []; // Fallback to empty array if fetch fails
+                return [];
             });
 
         // Load unique monsters from JSON file asynchronously
@@ -45,7 +45,7 @@ export class DataSystem extends System {
             .catch(error => {
                 console.error('DataSystem: Failed to load uniqueMonsters.json:', error);
                 console.log('DataSystem: Returning empty array as fallback for uniqueMonsters');
-                return []; // Fallback to empty array if fetch fails
+                return [];
             });
 
         // Load boss monsters from JSON file asynchronously
@@ -65,7 +65,7 @@ export class DataSystem extends System {
             .catch(error => {
                 console.error('DataSystem: Failed to load bossMonsters.json:', error);
                 console.log('DataSystem: Returning empty array as fallback for bossMonsters');
-                return []; // Fallback to empty array if fetch fails
+                return [];
             });
 
         // Load unique items from JSON file asynchronously
@@ -85,7 +85,7 @@ export class DataSystem extends System {
             .catch(error => {
                 console.error('DataSystem: Failed to load uniqueItems.json:', error);
                 console.log('DataSystem: Returning empty array as fallback for uniqueItems');
-                return []; // Fallback to empty array if fetch fails
+                return [];
             });
 
         // Custom surface level
@@ -118,7 +118,7 @@ export class DataSystem extends System {
             .catch(error => {
                 console.error('DataSystem: Failed to load itemStatOptions.json:', error);
                 console.log('DataSystem: Returning empty object as fallback for itemStatOptions');
-                return {}; // Fallback to empty object if fetch fails
+                return {};
             });
     }
 
@@ -132,6 +132,59 @@ export class DataSystem extends System {
             this.provideItemStatOptions(data);
             console.log('DataSystem: GetItemStatOptions event received');
         });
+        this.eventBus.on('RequestSaveGameToStorage', (data) => this.saveGame(data));
+        this.eventBus.on('RequestLoadGameFromStorage', (data, callback) => this.loadGame(data, callback));
+        this.eventBus.on('RequestSavedGamesList', (callback) => this.getSavedGamesList(callback));
+    }
+
+    // Updated: Make saveGame async
+    async saveGame({ key, data }) {
+        console.log('DataSystem: Attempting to save game with key:', key, 'data:', data);
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+            console.log('DataSystem: Successfully saved game with key:', key);
+            this.eventBus.emit('GameSaved', { key, success: true, message: `Game saved to ${key}` });
+        } catch (error) {
+            console.error('DataSystem: Failed to save game:', error);
+            this.eventBus.emit('GameSaved', { key, success: false, message: 'Failed to save game' });
+        }
+        return Promise.resolve();
+    }
+
+    // Updated: Make loadGame async
+    async loadGame({ key }, callback) {
+        try {
+            const savedData = localStorage.getItem(key);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                callback(data);
+            } else {
+                callback(null);
+            }
+        } catch (error) {
+            console.error('DataSystem: Failed to load game:', error);
+            callback(null);
+        }
+        return Promise.resolve();
+    }
+
+    // Updated: Make getSavedGamesList async
+    async getSavedGamesList(callback) {
+        const savedGames = [];
+        console.log('DataSystem: Fetching saved games from localStorage, total keys:', localStorage.length);
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            console.log('DataSystem: Processing key:', key);
+            try {
+                const data = JSON.parse(localStorage.getItem(key));
+                savedGames.push({ key, data });
+            } catch (error) {
+                console.error(`DataSystem: Failed to parse saved game for key ${key}:`, error);
+            }
+        }
+        console.log('DataSystem: Saved games fetched:', savedGames);
+        callback(savedGames);
+        return Promise.resolve();
     }
 
     generateSurfaceMap() {
@@ -172,7 +225,7 @@ export class DataSystem extends System {
             });
     }
 
-    async provideRandomMonsters({ callback }) { //renamed from provideMonsterTemplates to provideRandomMonsters
+    async provideRandomMonsters({ callback }) {
         try {
             const randomMonsters = await this.randomMonstersPromise;
             console.log('DataSystem: Providing random monsters:', randomMonsters);

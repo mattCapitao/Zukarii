@@ -1,4 +1,4 @@
-﻿// systems/UISystem.js - Updated with PlayerStateUpdated Listener
+﻿// systems/UISystem.js
 import { System } from '../core/Systems.js';
 
 export class UISystem extends System {
@@ -11,7 +11,7 @@ export class UISystem extends System {
         this.logContent = null;
         this.characterContent = null;
         this.menuContent = null;
-        this.activeMenuSection = 'controls-button';
+        this.activeMenuSection = 'controls-button'; // Default to 'controls'
         this.tooltipCache = new Map();
 
         this.statusDOM = {
@@ -59,16 +59,7 @@ export class UISystem extends System {
             throw new Error('Player status elements not found');
         }
 
-        this.eventBus.off('ToggleOverlay');
-        this.eventBus.off('LogMessage');
-        this.eventBus.off('StatsUpdated');
-        this.eventBus.off('GameOver');
-        this.eventBus.off('GearChanged');
-        this.eventBus.off('GameSaved');
-        this.eventBus.off('GameLoaded');
-        this.eventBus.off('SaveCompleted');
-        this.eventBus.off('PlayerStateUpdated');
-
+        // EventBus listeners
         this.eventBus.on('ToggleOverlay', (data) => this.toggleOverlay(data));
         this.eventBus.on('LogMessage', (data) => {
             console.log('UISystem: LogMessage event received:', data);
@@ -86,12 +77,7 @@ export class UISystem extends System {
         });
         this.eventBus.on('GameLoaded', ({ saveId, success, message }) => {
             console.log('UISystem: GameLoaded event received:', { saveId, success, message });
-            if (success) {
-                this.eventBus.emit('LogMessage', { message: 'Load saved game complete' });
-                this.toggleOverlay({ tab: 'log' });
-            } else {
-                this.eventBus.emit('LogMessage', { message });
-            }
+            this.eventBus.emit('LogMessage', { message });
         });
         this.eventBus.on('SaveCompleted', ({ key, success, message }) => {
             console.log('UISystem: SaveCompleted event received:', { key, success, message });
@@ -100,15 +86,17 @@ export class UISystem extends System {
                 this.updateMenu();
             }
         });
-        this.eventBus.on('PlayerStateUpdated', (data) => this.updateUI(data));
 
+        // Initial render
         this.updateUI({ entityId: 'player' });
         this.eventBus.emit('GearChanged', { entityId: 'player' });
 
+        // Setup all event listeners once during init
         this.setupEventListeners();
     }
 
     setupEventListeners() {
+        // Menu buttons (delegated listener for menu section buttons)
         const menuButtons = document.getElementById('menu-buttons');
         if (menuButtons) {
             menuButtons.addEventListener('click', (event) => {
@@ -120,51 +108,43 @@ export class UISystem extends System {
             });
         }
 
+        // Save/load/delete buttons (delegated listener for menu-data-wrapper)
         const menuDataWrapper = document.getElementById('menu-data-wrapper');
         if (menuDataWrapper) {
-            let saveClickCount = 0;
-
-            const handleMenuClick = (event) => {
+            menuDataWrapper.addEventListener('click', (event) => {
                 const saveButton = event.target.closest('.save-game');
                 const overwriteButton = event.target.closest('.overwrite-game');
                 const loadButton = event.target.closest('.load-game');
                 const deleteButton = event.target.closest('.delete-game');
 
                 if (saveButton) {
-                    saveClickCount++;
-                    console.log('UISystem: Save button clicked, emitting RequestSaveGame, count:', saveClickCount, 'timestamp:', Date.now());
                     const saveId = saveButton.dataset.saveId === 'new' ? null : saveButton.dataset.saveId;
                     this.eventBus.emit('RequestSaveGame', { saveId });
                 }
 
                 if (overwriteButton) {
-                    console.log('UISystem: Overwrite button clicked, emitting RequestSaveGame');
                     const saveId = overwriteButton.dataset.saveId;
                     this.eventBus.emit('RequestSaveGame', { saveId });
                 }
 
                 if (loadButton && !loadButton.disabled) {
-                    console.log('UISystem: Load button clicked, emitting RequestLoadGame');
                     const saveId = loadButton.dataset.saveId;
                     this.eventBus.emit('RequestLoadGame', { saveId }, (result) => {
                         if (result.success) {
-                            console.log('UISystem: Load successful, waiting for TransitionLoad');
+                            window.restartGame(saveId);
                         }
                     });
                 }
 
                 if (deleteButton) {
-                    console.log('UISystem: Delete button clicked, emitting DeleteSave');
                     const saveId = deleteButton.dataset.saveId;
                     this.eventBus.emit('DeleteSave', { saveId });
                     this.updateMenu();
                 }
-            };
-
-            menuDataWrapper.removeEventListener('click', handleMenuClick);
-            menuDataWrapper.addEventListener('click', handleMenuClick);
+            });
         }
 
+        // Tab buttons (delegated listener for tab-menu)
         const tabMenu = document.getElementById('tab-menu');
         if (tabMenu) {
             tabMenu.addEventListener('click', (event) => {
@@ -181,6 +161,7 @@ export class UISystem extends System {
             });
         }
 
+        // Inventory drag-and-drop and discard
         const inventory = document.getElementById('inventory');
         if (inventory) {
             inventory.addEventListener('dragstart', (event) => {
@@ -224,6 +205,7 @@ export class UISystem extends System {
             });
         }
 
+        // Equip drag-and-drop
         const equippedItems = document.getElementById('equipped-items');
         if (equippedItems) {
             equippedItems.addEventListener('dragstart', (event) => {
@@ -259,6 +241,7 @@ export class UISystem extends System {
             });
         }
 
+        // Tooltip listeners
         const characterContent = document.getElementById('character-content');
         if (characterContent) {
             characterContent.addEventListener('mouseover', (event) => {
@@ -290,6 +273,7 @@ export class UISystem extends System {
             }, { capture: true });
         }
 
+        // Stat increment listeners
         const statWrapper = document.getElementById('character-stat-wrapper');
         if (statWrapper) {
             statWrapper.addEventListener('click', (event) => {
@@ -308,6 +292,7 @@ export class UISystem extends System {
             });
         }
 
+        // Game over buttons
         const gameOver = document.getElementById('game-over');
         if (gameOver) {
             gameOver.addEventListener('click', (event) => {
@@ -425,7 +410,6 @@ export class UISystem extends System {
                 const isSaveMode = this.activeMenuSection === 'save-games-button';
                 const targetDiv = document.getElementById(isSaveMode ? 'save-games-data' : 'load-games-data');
                 if (targetDiv) {
-                    console.log(`UISystem: Emitting GetSavedGamesMetadata for section ${this.activeMenuSection}, timestamp: ${Date.now()}`);
                     this.eventBus.emit('GetSavedGamesMetadata', (metadata) => {
                         let html = `<h3>${isSaveMode ? 'Save Game' : 'Load Game'}</h3>`;
                         html += '<ul>';

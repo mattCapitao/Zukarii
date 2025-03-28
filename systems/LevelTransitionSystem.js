@@ -9,19 +9,11 @@ export class LevelTransitionSystem extends System {
     }
 
     init() {
-        this.eventBus.on('TransitionDown', () => {
-            this.pendingTransition = 'down';
-            this.transitionDown();
-        });
-        this.eventBus.on('TransitionUp', () => {
-            this.pendingTransition = 'up';
-            this.transitionUp();
-        });
-        this.eventBus.on('TransitionViaPortal', (data) => {
-            this.pendingTransition = 'portal';
-            this.transitionViaPortal(data);
-        });
+        this.eventBus.on('TransitionDown', () => { this.pendingTransition = 'down'; this.transitionDown(); });
+        this.eventBus.on('TransitionUp', () => { this.pendingTransition = 'up'; this.transitionUp(); });
+        this.eventBus.on('TransitionViaPortal', (data) => { this.pendingTransition = 'portal'; this.transitionViaPortal(data); });
         this.eventBus.on('LevelAdded', (data) => this.handleLevelAdded(data));
+        this.eventBus.on('TransitionLoad', ({ tier, data }) => this.transitionViaLoad(tier, data));
     }
 
     findAdjacentTile(map, stairX, stairY) {
@@ -133,6 +125,7 @@ export class LevelTransitionSystem extends System {
 
         const mapComp = levelEntity.getComponent('Map');
         const explorationComp = levelEntity.getComponent('Exploration');
+        const entityList = levelEntity.getComponent('EntityList');
         const playerPos = player.getComponent('Position');
         let pos;
 
@@ -144,9 +137,13 @@ export class LevelTransitionSystem extends System {
         } else if (this.pendingTransition === 'up') {
             const downStair = mapComp.stairsDown;
             pos = this.findAdjacentTile(mapComp.map, downStair.x, downStair.y);
-        } else if (this.pendingTransition === 'portal') {
+        } else if (this.pendingTransition === 'portal' || this.pendingTransition === 'load') {
             const upStair = mapComp.stairsUp;
             pos = this.findAdjacentTile(mapComp.map, upStair.x, upStair.y);
+        } else {
+            // Fallback case (shouldn't typically happen, but preserved for safety)
+            const stairsDown = entityList.stairsDown || { x: 5, y: 5 };
+            pos = this.findAdjacentTile(mapComp.map, stairsDown.x, stairsDown.y);
         }
 
         if (tier > 1) {
@@ -201,5 +198,48 @@ export class LevelTransitionSystem extends System {
         console.log('Pending transition after switch:', this.pendingTransition, 'Tier:', tier);
         console.log('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
         this.pendingTransition = null;
+
+        // Trigger UI update after loading
+        this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
+    }
+
+    transitionViaLoad(tier, data) {
+        console.log('LevelTransitionSystem: Starting transitionViaLoad for tier:', tier);
+
+        // Update gameState
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        Object.assign(gameState, data.gameState.GameState);
+        gameState.tier = tier;
+
+        // Update player (exclude Position)
+        const player = this.entityManager.getEntity('player');
+        console.log('Player Data: ', data.player);
+        Object.entries(data.player).forEach(([compName, compData]) => {
+            if (compName !== 'Position') {
+                const comp = player.getComponent(compName);
+                if (comp) Object.assign(comp, compData);
+            }
+        });
+
+        // Update overlay
+        const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
+        Object.assign(overlayState, data.overlayState.OverlayState);
+
+        // Clear and regenerate level
+        let levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
+        if (levelEntity) {
+            this.clearLevelEntities(tier);
+        }
+
+        // Set pendingTransition to 'load' to indicate a load operation
+        this.pendingTransition = 'load';
+        this.eventBus.emit('AddLevel', { tier });
+    }
+
+    clearLevelEntities(tier) {
+        const entities = this.entityManager.getEntitiesWith(['Tier']).filter(e => e.getComponent('Tier').value === tier);
+        entities.forEach(entity => this.entityManager.removeEntity(entity.id));
+        const tierEntities = this.entityManager.entitiesByTier.get(tier) || new Map();
+        tierEntities.forEach((_, id) => this.entityManager.removeEntity(id));
     }
 }
