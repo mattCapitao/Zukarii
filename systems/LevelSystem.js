@@ -14,13 +14,22 @@ import {
     RoomComponent
 } from '../core/Components.js';
 
-
+/*
 const roomTypes = [
     { type: 'SquareRoom', probability: 30, minW: 11, maxW: 15, minH: 6, maxH: 8 },
     { type: 'VerticalRoom', probability: 15, minW: 8, maxW: 11, minH: 8, maxH: 10 },
     { type: 'HorizontalRoom', probability: 40, minW: 14, maxW: 21, minH: 6, maxH: 8 },
     { type: 'AlcoveSpecial', probability: 10, minW: 8, maxW: 8, minH: 4, maxH: 4 },
     { type: 'BossChamberSpecial', probability: 5, minW: 20, maxW: 24, minH: 10, maxH: 12 }
+];
+*/
+
+const roomTypes = [
+    { type: 'SquareRoom', probability: 30, minW: 17, maxW: 23, minH: 9, maxH: 12 },
+    { type: 'VerticalRoom', probability: 20, minW: 12, maxW: 14, minH: 14, maxH: 18 },
+    { type: 'HorizontalRoom', probability: 35, minW: 21, maxW: 32, minH: 9, maxH: 12 },
+    { type: 'AlcoveSpecial', probability: 10, minW: 12, maxW: 12, minH: 6, maxH: 6 },
+    { type: 'BossChamberSpecial', probability: 5, minW: 30, maxW: 36, minH: 15, maxH: 18 }
 ];
 
 export class LevelSystem extends System {
@@ -30,15 +39,15 @@ export class LevelSystem extends System {
         this.requiredComponents = ['Map', 'Tier', 'Exploration'];
         this.ROOM_EDGE_BUFFER = 4;
         this.CORRIDOR_EDGE_BUFFER = 2;
-        this.MIN_ROOM_SIZE = 4;
+        this.MIN_ROOM_SIZE = 8;
         this.MAX_OVERLAP_PERCENT = 0.10;
-        this.INITIAL_MIN_DISTANCE = 12;
+        this.INITIAL_MIN_DISTANCE =  30;
         this.MIN_DISTANCE_FLOOR = 3;
         this.BOSS_ROOM_EVERY_X_LEVELS = 3;
         this.lastBossTier = 0;
-        this.MAX_PLACEMENT_ATTEMPTS = 20;
-        this.MIN_STAIR_DISTANCE = 12;
-        this.roomsPerLevel = 30;
+        this.MAX_PLACEMENT_ATTEMPTS = 200;
+        this.MIN_STAIR_DISTANCE = 18;
+        this.roomsPerLevel = 50;
     }
 
     init() {
@@ -362,7 +371,6 @@ export class LevelSystem extends System {
                     continue;
                 }
 
-
                 const existingRooms = roomEntityIds.map(id => this.entityManager.getEntity(id).getComponent('Room'));
                 if (!this.doesRoomOverlap(room, existingRooms)) {
                     const roomEntity = this.entityManager.createEntity(`room_${tier}_${room.x}_${room.y}`);
@@ -383,6 +391,9 @@ export class LevelSystem extends System {
                     if (room.width < this.MIN_ROOM_SIZE || room.height < this.MIN_ROOM_SIZE) break;
                 }
                 attempts++;
+            }
+            if (attempts >= this.MAX_PLACEMENT_ATTEMPTS) {
+                console.warn(`LevelSystem.js: Failed to place BossChamberSpecial after ${this.MAX_PLACEMENT_ATTEMPTS} attempts`);
             }
         }
 
@@ -408,7 +419,6 @@ export class LevelSystem extends System {
                     continue;
                 }
 
-
                 const existingRooms = roomEntityIds.map(id => this.entityManager.getEntity(id).getComponent('Room'));
                 if (!this.doesRoomOverlap(room, existingRooms) && (roomEntityIds.length === 0 || !this.isTooClose(room, existingRooms, minDistance))) {
                     const roomEntity = this.entityManager.createEntity(`room_${tier}_${room.x}_${room.y}`);
@@ -429,7 +439,11 @@ export class LevelSystem extends System {
                 }
                 attempts++;
             }
+            if (attempts >= this.MAX_PLACEMENT_ATTEMPTS) {
+                console.warn(`LevelSystem.js: Failed to place room of type ${roomType.type} after ${this.MAX_PLACEMENT_ATTEMPTS} attempts`);
+            }
         }
+        console.log(`LevelSystem.js: Placed ${roomEntityIds.length} out of ${numRooms} rooms for tier ${tier}`);
         roomOrigins.clear();
         return roomEntityIds;
     }
@@ -497,6 +511,13 @@ export class LevelSystem extends System {
             if ((room.roomType === 'AlcoveSpecial' || room.roomType === 'BossChamberSpecial') && room.connections.length > 1) {
                 room.connections = [room.connections[0]];
             }
+        }
+
+        // Add logging to check room types and connections
+        console.log(`LevelSystem.js: Room connections after connectRooms for tier ${tier}:`);
+        for (const roomId of roomEntityIds) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length} (${room.connections.join(', ')})`);
         }
     }
 
@@ -1191,7 +1212,7 @@ export class LevelSystem extends System {
                 return;
             }
         }
-
+         
         pos.x = 1;
         pos.y = 1;
         console.warn(`LevelSystem: No adjacent walkable tile found near (${stair.x}, ${stair.y}), using fallback position (1, 1)`);
@@ -1205,6 +1226,13 @@ export class LevelSystem extends System {
 
         const rooms = Array.isArray(entityList.rooms) ? entityList.rooms : [];
         console.log(`LevelSystem.js: Ensuring room connections for tier ${tier}, rooms: ${JSON.stringify(rooms)}`);
+
+        // Log room types and initial connection counts
+        console.log(`LevelSystem.js: Room types and connections before ensuring connections:`);
+        for (const roomId of rooms) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length}`);
+        }
 
         for (const roomId of rooms) {
             const room = this.entityManager.getEntity(roomId).getComponent('Room');

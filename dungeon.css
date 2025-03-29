@@ -419,13 +419,16 @@ width: 50%;
 }
 
 #tab-menu {
-display: flex;
-align-content:flex-start;
+    display: flex;
+    align-content: flex-start;
+    gap: 1rem; /* ~10px */
 }
 
-.tabs-button {
-flex: 15;
-cursor: pointer;
+
+#tab-menu button.tabs-button {
+    flex: 15;
+    cursor: pointer;
+    width:20%;
 }
 #close-tabs {
 flex: 1;
@@ -489,10 +492,37 @@ margin-top: 0.625rem; /* ~10px */
 
 
 #tabs h2 {
+    font-size: 1.375rem; /* ~22px */
+    font-weight: bold;
+    text-align: center;
+    margin: 0 0 0.625rem 0; /* ~5px */
+}
+
+#tabs h3 {
+    font-size: 1.25rem; /* ~20px */
+    font-weight: bold;
+    text-align: center;
+    margin: 0 0 0.625rem 0; /* ~5px */
+}
+
+#tabs h4 {
     font-size: 1.125rem; /* ~18px */
     font-weight: bold;
     text-align: center;
     margin: 0 0 0.625rem 0; /* ~5px */
+}
+
+#tabs button {
+    
+    margin: 0.3125rem 0; /* ~5px vertical margin */
+    padding: 0.625rem; /* ~10px */
+    background: #2c672c;
+    color: #000;
+    border-radius: .3125rem; /* ~5px */
+    cursor: pointer;
+    font-family: 'Verdana', Roboto, sans-serif;
+    text-align: center;
+    font-weight: bold;
 }
 
 #character-stat-wrapper {
@@ -706,11 +736,6 @@ background-image: url('img/icons/item-slots/boots.svg');
         text-align: center;
     }
 
-#menu-data-wrapper button:disabled {
-    background: #555;
-    color: #999;
-    cursor: not-allowed;
-}
 
 
     #menu-buttons button:hover {
@@ -742,14 +767,66 @@ background-image: url('img/icons/item-slots/boots.svg');
     scrollbar-gutter: stable;
 }
 
+    #menu-data-wrapper h3 {
+        text-align: left;
+        padding-bottom: .3125rem; /* ~5px */
+        border-bottom: 0.125rem solid #2c672c; /* ~2px */
+    }
 
-#inventory {
-    display: flex;
-    flex-direction: column;
-    height: 31.75rem; /* ~400px */
-    width: 68%;
-    margin-top: 0.625rem; /* ~10px */
+    #menu-data-wrapper h4 {
+        margin: 0.625rem 0; /* ~10px */
+    }
+
+    #menu-data-wrapper li {
+        margin: 0;
+        padding: 0.3125rem; /* ~5px */
+        font-size: 1rem;
+        line-height: 1.2;
+        line-height: 1.2;
+    }
+
+    #menu-data-wrapper button {
+        padding: 0.1625rem 0.625rem; /* ~10px */
+        margin: 0 0.3125rem; /* ~5px vertical margin */
+    }
+
+li.new-save-game {
+    padding-bottom: .625rem; /* ~10px */
+    border-bottom: 0.0625rem solid #2c672c; /* ~1px */
 }
+
+#save-name-input {
+    border: 0.0625rem solid #ccc;
+    background-color: #2c672c80;
+    color: #080;
+}
+.save-game-name {
+    display: inline-block;
+    width: 30rem;
+}
+
+
+#menu-data-wrapper button:disabled {
+    background: #555;
+    color: #999;
+    cursor: not-allowed;
+}
+#about-data ul li, #about-data h4 {
+    width: 100%;
+    margin-top: .625rem; /* ~10px */
+    text-align: center;
+}
+#about-data h4 {
+    margin-top: 1.3125rem;
+}
+
+    #inventory {
+        display: flex;
+        flex-direction: column;
+        height: 31.75rem; /* ~400px */
+        width: 68%;
+        margin-top: 0.625rem; /* ~10px */
+    }
 
 #tabs div.inventory-item-wrapper {
 display: flex;

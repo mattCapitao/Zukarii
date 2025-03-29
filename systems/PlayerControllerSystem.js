@@ -35,12 +35,17 @@ export class PlayerControllerSystem {
         const inputState = player.getComponent('InputState');
         const position = player.getComponent('Position');
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+
+
+        // ADDED LOGGING: Check if transitionLock or gameOver is blocking movement
+        //console.log("PlayerControllerSystem: gameState checks - transitionLock:", gameState?.transitionLock, "gameOver:", gameState?.gameOver);
+
         if (!gameState || gameState.gameOver || gameState.transitionLock) return;
 
         const currentKeys = JSON.stringify(inputState.keys);
         const lastKeys = JSON.stringify(this.lastInputState);
         if (currentKeys !== lastKeys) {
-            console.log('Controller InputState:', inputState.keys);
+            console.log('PlayerControllerSystem: InputState changed - current:', inputState.keys, 'last:', this.lastInputState);
             this.lastInputState = { ...inputState.keys };
         }
 
@@ -88,6 +93,7 @@ export class PlayerControllerSystem {
         }
 
         if (!moved) return;
+        console.log('PlayerControllerSystem: Attempting move to:', newX, newY);
 
         const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
         if (!levelEntity) return;

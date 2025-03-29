@@ -118,6 +118,9 @@ export class LevelTransitionSystem extends System {
         const levelEntity = this.entityManager.getEntity(entityId);
         const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
 
+        console.log("LevelTransitionSystem: Initial transitionLock:", gameState.transitionLock);
+
+
         if (!levelEntity) {
             console.error(`Level entity for tier ${tier} not found after LevelAdded event`);
             return;
@@ -154,6 +157,7 @@ export class LevelTransitionSystem extends System {
         playerPos.y = pos.y;
 
         console.log(`LevelTransitionSystem: Player position updated to: (${playerPos.x}, ${playerPos.y})`);
+        console.log("LevelTransitionSystem: Tile at player position:", mapComp.map[playerPos.y][playerPos.x]);
 
         if (isNewTier) {
             explorationComp.discoveredWalls.clear();
@@ -195,6 +199,11 @@ export class LevelTransitionSystem extends System {
 
         this.eventBus.emit('RenderNeeded');
 
+        if (this.pendingTransition === 'load') {
+            gameState.transitionLock = false;
+            console.log("LevelTransitionSystem: transitionLock reset to false after load");
+        }
+
         console.log('Pending transition after switch:', this.pendingTransition, 'Tier:', tier);
         console.log('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
         this.pendingTransition = null;
@@ -234,6 +243,8 @@ export class LevelTransitionSystem extends System {
         // Set pendingTransition to 'load' to indicate a load operation
         this.pendingTransition = 'load';
         this.eventBus.emit('AddLevel', { tier });
+
+        // #Grok3 - do you think it makes sense to just set the transitionlock to false here?
     }
 
     clearLevelEntities(tier) {

@@ -33,7 +33,7 @@ export class State {
         // Constants (to be moved later)
         this.WIDTH = 122;
         this.HEIGHT = 67;
-        this.MIN_STAIR_DISTANCE = Math.floor(Math.random() * 41) + 20;
+        this.MIN_STAIR_DISTANCE = Math.floor(Math.random() * 31) + 30;
         this.AGGRO_RANGE = 4;
         this.discoveryRadiusDefault = 2;
 

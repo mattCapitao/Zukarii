@@ -36,10 +36,15 @@ export class PlayerInputSystem {
     }
 
     handleKeyDown(event) {
-        if (event.repeat) return;
         console.log('PlayerInputSystem: handleKeyDown - raw key:', event.key);
         const mappedKey = this.keyMap[event.key];
         console.log('PlayerInputSystem: handleKeyDown - mappedKey:', mappedKey);
+
+        if (document.activeElement.id === 'save-name-input' && mappedKey != 'escape') {
+            return; // Ignore keypresses when the save-name-input field is focused
+        }
+        if (event.repeat) return;
+        
         if (mappedKey) {
             this.keysPressed[mappedKey] = true;
             this.updateInputState();
@@ -52,7 +57,14 @@ export class PlayerInputSystem {
         console.log('PlayerInputSystem: handleKeyUp - raw key:', event.key);
         const mappedKey = this.keyMap[event.key];
         console.log('KeyUp Event Fired:', event.key, 'Mapped:', mappedKey);
+
+        
+        
         if (mappedKey) {
+            if (document.activeElement.id === 'save-name-input' && mappedKey != 'escape') {
+                return; // Ignore keypresses when the save-name-input field is focused
+            }
+
             delete this.keysPressed[mappedKey];
             this.updateInputState();
             console.log('Key Up:', mappedKey, 'keysPressed:', JSON.stringify(this.keysPressed));
@@ -67,7 +79,7 @@ export class PlayerInputSystem {
         if (player) {
             const inputState = player.getComponent('InputState');
             inputState.keys = { ...this.keysPressed };
-            console.log('InputState Updated:', JSON.stringify(inputState.keys));
+            console.log('PlayerInputSystem: InputState updated with keys:', JSON.stringify(inputState.keys));
         }
     }
 
