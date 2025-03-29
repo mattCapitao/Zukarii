@@ -91,6 +91,8 @@ export class ActionSystem extends System {
             this.eventBus.emit('LogMessage', { message: 'You have no torches left.' });
             return;
         }
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        if (gameState) gameState.needsRender = true;
 
         resource.torches--;
         this.eventBus.emit('LightSourceActivated', { type: 'torch' });

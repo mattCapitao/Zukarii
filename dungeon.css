@@ -380,19 +380,22 @@ position: relative;
 display: none;
 }
 
-#map span {
-display: inline-block;
-width: 1rem; /* ~16px */
-height: 1rem; /* ~16px */
-text-align: center;
-line-height: 1rem; /* ~16px */
-vertical-align: top;
-}
+    #map span {
+        display: inline-block;
+        width: 1rem; /* ~16px */
+        height: 1rem; /* ~16px */
+        text-align: center;
+        line-height: 1rem; /* ~16px */
+        vertical-align: top;
+        transition: transform 0.016s linear; /* Smooth at ~60 FPS */
+    }
 
 .undiscovered {
 color: #000;
 background-color: #000;
 }
+
+
 
 .discovered {
 color: #0f0;
@@ -997,10 +1000,11 @@ padding: 0.625rem; /* ~10px */
 /*////////////////////////////////////////////////////  PLAYER - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 .player {
+ position:relative;
 background-color: #161616;
 transform: scale(1.2);
 transform-origin: center;
-z-index: 3; /* Lift above other spans */
+z-index: 100 !important; /* Lift above other spans */
 }
 
 .player.torch {
@@ -1010,8 +1014,16 @@ box-shadow: 0 0 4em 2em #8b6a4b74;
         
 }
 
+
 .player.torch.flicker {
-animation: torchFlicker 0.5s infinite, torchShadow 0.5s infinite;
+    animation: torchFlicker 0.5s infinite, torchShadow 0.5s infinite;
+}
+
+.discovered.projectile {
+    color: orange;
+    z-index: 5 !important;
+    font-size:.5rem;
+    
 }
 
 @keyframes torchFlicker {

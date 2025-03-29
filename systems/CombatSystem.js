@@ -14,7 +14,6 @@ export class CombatSystem extends System {
     init() {
         this.eventBus.on('MeleeAttack', (data) => this.handleMeleeAttack(data));
         this.eventBus.on('RangedAttack', (data) => this.handleRangedAttack(data));
-        this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
         this.eventBus.on('MonsterAttack', (data) => this.handleMonsterMeleeAttack(data)); // New listener
     }
 
@@ -285,24 +284,5 @@ export class CombatSystem extends System {
         this.eventBus.emit('RenderNeeded');
     }
 
-    toggleRangedMode({ event }) {
-        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
-        console.log('CombatSystem: toggleRangedMode start, gameState:', gameState, 'entity ID:', this.entityManager.getEntity('gameState')?.id, 'timestamp:', Date.now());
-        const playerInventory = this.entityManager.getEntity('player').getComponent('Inventory');
-        const offWeapon = playerInventory.equipped.offhand;
-        const mainWeapon = playerInventory.equipped.mainhand;
-
-        if (event.type === 'keyup' && event.key === ' ') {
-            gameState.isRangedMode = false;
-            console.log('Ranged mode off');
-        } else if (event.type === 'keydown' && event.key === ' ' && !event.repeat) {
-            if ((offWeapon?.attackType === 'ranged' && offWeapon?.baseRange > 0) ||
-                (mainWeapon?.attackType === 'ranged' && mainWeapon?.baseRange > 0)) {
-                gameState.isRangedMode = true;
-                console.log('Ranged mode on', 'updated gameState:', gameState, 'entity ID:', this.entityManager.getEntity('gameState')?.id, 'timestamp:', Date.now());
-            } else {
-                this.eventBus.emit('LogMessage', { message: 'You need a valid ranged weapon equipped to use ranged mode!' });
-            }
-        }
-    }
+    
 }

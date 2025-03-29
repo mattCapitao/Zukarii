@@ -272,17 +272,10 @@ export class PlayerSystem extends System {
     exit() {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         this.eventBus.emit('LogMessage', { message: 'You exited the dungeon! Game Over.' });
-        document.removeEventListener('keydown', this.handleInput);
-        document.removeEventListener('keyup', this.handleInput);
         gameState.gameOver = true;
         this.eventBus.emit('GameOver', { message: 'You exited the dungeon! Too much adventure to handle eh?' });
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
     }
-
-    handleInput = (event) => {
-        const game = this.entityManager.getEntity('game');
-        if (game) game.handleInput(event);
-    };
 
     handleTilesDiscovered({ count, total }) {
         const player = this.entityManager.getEntity('player');

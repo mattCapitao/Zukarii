@@ -14,17 +14,30 @@ export class RenderSystem extends System {
         this.VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25;
         this.SCROLL_THRESHOLD = 4;
         this.SCROLL_DURATION = 300;
-        //console.log('RenderSystem: Render Lock initialized');
+        this.previousProjectilePositions = new Map();
     }
 
     init() {
         this.eventBus.on('RenderNeeded', () => this.render(true));
         this.eventBus.on('PositionChanged', (data) => {
+            if (data.entityId.startsWith('projectile_')) {
+                const projectile = this.entityManager.getEntity(data.entityId);
+                if (projectile) {
+                    const oldPos = this.previousProjectilePositions.get(data.entityId);
+                    if (oldPos) {
+                        const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
+                        if (renderState && renderState.activeRenderZone) {
+                            renderState.activeRenderZone.add(`${oldPos.x},${oldPos.y}`);
+                        }
+                    }
+                    this.previousProjectilePositions.set(data.entityId, { x: data.x, y: data.y });
+                }
+            }
             this.render(true);
             this.viewportEdgeScroll();
         });
         this.eventBus.on('DiscoveredStateUpdated', () => this.render(true));
-        this.eventBus.on('LightingStateChanged', () => {this.render(true);});
+        this.eventBus.on('LightingStateChanged', () => { this.render(true); });
     }
 
     update() {
@@ -40,10 +53,10 @@ export class RenderSystem extends System {
         const state = this.entityManager.getEntity('state');
 
         if (force) {
-            //console.log(`RenderSystem: Accessing gameState - tier: ${gameState?.tier}, gameStarted: ${gameState?.gameStarted}, needsRender: ${gameState?.needsRender}, needsInitialRender: ${gameState?.needsInitialRender}`);
-            //console.log(`RenderSystem: Accessing renderState - renderRadius: ${renderState?.renderRadius}, activeRenderZone: ${renderState?.activeRenderZone?.size}`);
-            //console.log(`RenderSystem: Accessing renderControl - locked: ${renderControl?.locked}`);
-            //console.log(`RenderSystem: Accessing player - position: (${player?.getComponent('Position')?.x}, ${player?.getComponent('Position')?.y})`);
+            console.log(`RenderSystem: Accessing gameState - tier: ${gameState?.tier}, gameStarted: ${gameState?.gameStarted}, needsRender: ${gameState?.needsRender}, needsInitialRender: ${gameState?.needsInitialRender}`);
+            console.log(`RenderSystem: Accessing renderState - renderRadius: ${renderState?.renderRadius}, activeRenderZone: ${renderState?.activeRenderZone?.size}`);
+            console.log(`RenderSystem: Accessing renderControl - locked: ${renderControl?.locked}`);
+            console.log(`RenderSystem: Accessing player - position: (${player?.getComponent('Position')?.x}, ${player?.getComponent('Position')?.y})`);
         }
 
         if (!gameState) return;
@@ -80,11 +93,8 @@ export class RenderSystem extends System {
         const exploration = tierEntity.getComponent('Exploration');
         const WIDTH = state.getComponent('LevelDimensions').WIDTH;
         const HEIGHT = state.getComponent('LevelDimensions').HEIGHT;
-        //console.log(`RenderSystem: Rendering map with dimensions ${WIDTH}x${HEIGHT} for tier ${currentTier}`);
         const playerPos = player.getComponent('Position');
-        //console.log('RenderSystem: Rendering map for player at', playerPos);
         const playerState = player.getComponent('PlayerState');
-        //console.log('RenderSystem: Player state:', playerState);
         const renderRadius = renderState.renderRadius;
 
         if (force) {
@@ -139,17 +149,15 @@ export class RenderSystem extends System {
                         const pos = p.getComponent('Position');
                         return pos.x === x && pos.y === y;
                     });
-                    if (projectile) {
-                        char = '*';
-                        className = 'discovered projectile';
-                    } else if (x === playerPos.x && y === playerPos.y) {
+                    if (x === playerPos.x && y === playerPos.y) {
                         playerSpawnLocations += `Rendering player at${x},${y}`;
                         char = '𓀠';
                         className = 'player';
                         const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
-
                         if (lightingState?.isLit) { className += ' torch flicker'; }
-
+                    } else if (projectile) {
+                        char = '*';
+                        className = 'discovered projectile';
                     } else {
                         const fountain = fountains.find(f => {
                             const pos = f.getComponent('Position');
@@ -202,6 +210,27 @@ export class RenderSystem extends System {
 
             this.setInitialScroll();
         } else {
+            // *** CHANGED: Force re-render of all old projectile positions ***
+            const playerTileKey = `${playerPos.x},${playerPos.y}`;
+            const tilesToClear = new Set();
+            projectiles.forEach(proj => {
+                const projId = proj.id;
+                const currentPos = proj.getComponent('Position');
+                const oldPos = this.previousProjectilePositions.get(projId);
+                if (oldPos && (oldPos.x !== currentPos.x || oldPos.y !== currentPos.y)) {
+                    const oldTileKey = `${oldPos.x},${oldPos.y}`;
+                    // Only add to tilesToClear if it's not the player's current position
+                    if (oldTileKey !== playerTileKey) {
+                        tilesToClear.add(oldTileKey);
+                    }
+                }
+            });
+
+            // Add all old positions to activeRenderZone, even if not currently in it
+            tilesToClear.forEach(tileKey => {
+                renderState.activeRenderZone.add(tileKey);
+            });
+
             for (const tileKey of renderState.activeRenderZone) {
                 const [x, y] = tileKey.split(',').map(Number);
                 const tile = this.tileMap[tileKey];
@@ -224,18 +253,16 @@ export class RenderSystem extends System {
                     const pos = p.getComponent('Position');
                     return pos.x === x && pos.y === y;
                 });
-                if (projectile) {
-                    char = '*';
-                    className = 'discovered projectile';
-                } else if (treasure) {
+                if (treasure) {
                     char = '$';
                 } else if (x === playerPos.x && y === playerPos.y) {
                     char = '𓀠';
-                    className = 'player';
-
+                    className = 'player discovered';
                     const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
                     if (lightingState?.isLit) { className += ' torch flicker'; }
-
+                } else if (projectile) {
+                    char = '*';
+                    className = 'discovered projectile';
                 } else {
                     const fountain = fountains.find(f => {
                         const pos = f.getComponent('Position');
@@ -275,9 +302,7 @@ export class RenderSystem extends System {
                                 }
                                 if (monster) {
                                     const monsterData = monster.getComponent('MonsterData');
-                                    //console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, monster);
                                     tile.element.style.backgroundSize = `${monsterData.hpBarWidth}px 1px`;
-
                                 }
                             }
                         }
@@ -290,7 +315,19 @@ export class RenderSystem extends System {
                     tile.char = char;
                     tile.class = className;
                 }
-                
+            }
+
+            // *** CHANGED: Clean up removed projectiles ***
+            const currentProjectileIds = new Set(projectiles.map(p => p.id));
+            for (const [projId] of this.previousProjectilePositions) {
+                if (!currentProjectileIds.has(projId)) {
+                    const oldPos = this.previousProjectilePositions.get(projId);
+                    const oldTileKey = `${oldPos.x},${oldPos.y}`;
+                    if (oldTileKey !== playerTileKey) {
+                        renderState.activeRenderZone.add(oldTileKey);
+                    }
+                    this.previousProjectilePositions.delete(projId);
+                }
             }
         }
 
@@ -311,8 +348,6 @@ export class RenderSystem extends System {
         const viewportHeight = mapElement.clientHeight;
         const mapWidth = state.getComponent('LevelDimensions').WIDTH * this.TILE_SIZE;
         const mapHeight = state.getComponent('LevelDimensions').HEIGHT * this.TILE_SIZE;
-
-        //console.log(`RenderSystem: viewportEdgeScroll - Map dimensions: ${mapWidth}x${mapHeight}`);
 
         const thresholdX = viewportWidth * this.VIEWPORT_EDGE_THRESHOLD_PERCENT;
         const thresholdY = viewportHeight * this.VIEWPORT_EDGE_THRESHOLD_PERCENT;
@@ -390,8 +425,6 @@ export class RenderSystem extends System {
         const mapWidth = state.getComponent('LevelDimensions').WIDTH * this.TILE_SIZE;
         const mapHeight = state.getComponent('LevelDimensions').HEIGHT * this.TILE_SIZE;
 
-        //console.log(`RenderSystem: setInitialScroll - Map dimensions: ${mapWidth}x${mapHeight}`);
-
         let scrollX = (playerPos.x * this.TILE_SIZE) - (viewportWidth / 2);
         let scrollY = (playerPos.y * this.TILE_SIZE) - (viewportHeight / 2);
 
@@ -400,6 +433,5 @@ export class RenderSystem extends System {
 
         mapElement.scrollLeft = scrollX;
         mapElement.scrollTop = scrollY;
-        //console.log(`RenderSystem: Set initial scroll to (${scrollX}, ${scrollY}) for player at (${playerPos.x}, ${playerPos.y})`);
     }
 }

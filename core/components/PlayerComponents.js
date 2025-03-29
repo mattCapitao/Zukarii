@@ -104,3 +104,12 @@ export class PlayerStateComponent {
         this.discoveredTileCount = discoveredTileCount;
     }
 }
+
+export class InputStateComponent {
+    constructor({
+        keys = {} // e.g., { ArrowUp: true, ArrowLeft: true }
+    } = {}) {
+        this.type = 'InputState';
+        this.keys = keys;
+    }
+}

@@ -37,6 +37,7 @@ export class AudioSystem extends System {
             this.sounds.torchBurning.loop = true;
             this.sounds.torchBurning.volume = this.torchVolume;
             play ? this.sounds.torchBurning.play() : this.sounds.torchBurning.pause();
+            console.log('AudioSystem: Playing torchBurning');
         }
         if (sound === 'ding') {
             this.sounds.ding.volume = this.dingVolume;
