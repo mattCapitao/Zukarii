@@ -244,7 +244,6 @@ export class LevelTransitionSystem extends System {
         this.pendingTransition = 'load';
         this.eventBus.emit('AddLevel', { tier });
 
-        // #Grok3 - do you think it makes sense to just set the transitionlock to false here?
     }
 
     clearLevelEntities(tier) {

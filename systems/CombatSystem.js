@@ -59,6 +59,8 @@ export class CombatSystem extends System {
                 const hitsWall = entitiesAtTarget.some(e => e.hasComponent('Wall'));
                 if (isOutOfBounds || hitsWall) {
                     this.entityManager.removeEntity(proj.id);
+                    const sfx = 'firehit0';
+                    this.eventBus.emit('PlaySfx', { sfx, volume: .1 }); 
                     this.eventBus.emit('LogMessage', { message: 'Your shot hit a wall.' });
                     this.eventBus.emit('RenderNeeded');
                     return;
@@ -73,8 +75,6 @@ export class CombatSystem extends System {
 
                 if (target) {
                     const player = this.entityManager.getEntity('player');
-                    const playerInventory = player.getComponent('Inventory');
-                    //const weapon = playerInventory.equipped.offhand || playerInventory.equipped.mainhand || { baseDamageMin: 1, baseDamageMax: 2, name: 'Fists' };
                     const bestRangedWeapon = this.getBestRangedWeapon();
                     const weapon = bestRangedWeapon ? bestRangedWeapon : { baseDamageMin: 1, baseDamageMax: 2, name: 'Fists' };
                     this.eventBus.emit('CalculatePlayerDamage', {
@@ -92,7 +92,8 @@ export class CombatSystem extends System {
                             const monsterData = target.getComponent('MonsterData');
                             monsterData.hpBarWidth = hpBarWidth;
                             //console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, target);
-
+                            const sfx = 'firehit0';
+                            this.eventBus.emit('PlaySfx', { sfx, volume: .1 }); 
                             this.eventBus.emit('LogMessage', {
                                 message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
                             });

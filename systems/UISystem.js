@@ -364,15 +364,40 @@ export class UISystem extends System {
         }
     }
 
+    sortItemsByTypeAttackTier(items) {
+        return items.sort((a, b) => {
+            // 1. Sort by type (alphabetical: "armor" before "weapon")
+            if (a.type !== b.type) {
+                return a.type.localeCompare(b.type);
+            }
+
+            // 2. If types are equal, sort by attackType (melee before ranged, undefined last)
+            if (a.type === "weapon" && b.type === "weapon") {
+                const attackTypeA = a.attackType || "z"; // Undefined attackType goes last
+                const attackTypeB = b.attackType || "z";
+                if (attackTypeA !== attackTypeB) {
+                    return attackTypeA.localeCompare(attackTypeB);
+                }
+            }
+
+            // 3. If type and attackType are equal, sort by tierIndex (highest to lowest)
+            return b.tierIndex - a.tierIndex;
+        });
+    }
+
     renderOverlay(tab) {
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         const player = this.entityManager.getEntity('player');
         const stats = player.getComponent('Stats');
+        const inventory = player.getComponent('Inventory');
+        console.log('Inventory:', inventory);
+
+        /*
         const health = player.getComponent('Health');
         const mana = player.getComponent('Mana');
-        const inventory = player.getComponent('Inventory');
         const playerState = player.getComponent('PlayerState');
         const resource = player.getComponent('Resource');
+        */
 
         this.overlayTabButtons(tab);
         this.menuContent.style.display = tab === 'menu' ? 'flex' : 'none';
@@ -537,10 +562,8 @@ export class UISystem extends System {
             }
         });
 
-        const inventoryDiv = document.getElementById('inventory');
+        const inventoryDiv = document.getElementById('inventory-item-wrapper');
         inventoryDiv.innerHTML = `
-            <h2>Inventory Items</h2>
-            <div class="inventory-item-wrapper">
                 ${inventory.items.length ? inventory.items.map((item, index) => `
                     <div class="inventory-item" data-index="${index}">
                         <p class="inventory-slot ${item.itemTier} ${item.type}">
@@ -549,7 +572,6 @@ export class UISystem extends System {
                         </p>
                     </div>
                 `).join('') : '<p>Inventory empty.</p>'}
-            </div>
         `;
     }
 

@@ -62,6 +62,8 @@ export class PlayerControllerSystem {
                 // Key was just pressed, emit RangedAttack
                 if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
                     console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: ${direction}`);
+                    const sfx = 'firecast0';
+                    this.eventBus.emit('PlaySfx', {sfx, volume:.1  }); 
                     this.eventBus.emit('RangedAttack', { direction });
                     attackSpeed.elapsedSinceLastAttack = 0;
                     this.endTurn('rangedAttack');

@@ -183,10 +183,10 @@ export class ItemROGSystem extends System {
             case 'block': return randomizeStatRoll(Math.round(item.tierIndex * .5), item);
             case 'defense': return randomizeStatRoll(Math.round(item.tierIndex * .5), item);
 
-            case 'damageBonus': return randomizeStatRoll(item.tierIndex + 1, item);
-            case 'meleeBonus': return randomizeStatRoll(item.tierIndex + 1, item);
-            case 'rangedBonus': return randomizeStatRoll(item.tierIndex + 1, item);
-            case 'resistMagic': return randomizeStatRoll(item.tierIndex + 1, item); 
+            case 'damageBonus': return randomizeStatRoll((item.tierIndex + 1), item);
+            case 'meleeBonus': return randomizeStatRoll((item.tierIndex + 1), item);
+            case 'rangedBonus': return randomizeStatRoll((item.tierIndex + 1), item);
+            case 'resistMagic': return randomizeStatRoll((item.tierIndex + 1), item); 
             
             default:
                 console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);

@@ -27,6 +27,10 @@ export class AudioSystem extends System {
             backgroundMusic: 'audio/haunted.wav',
             ding: 'audio/ding.mp3',
             loot0: 'audio/loot/loot_0.wav',
+            portal0: 'audio/portal/portal_0.wav',
+            //spellcasting sfx
+            firecast0: 'audio/spell/cast/firecast_0.wav',
+            firehit0: 'audio/spell/hit/firehit_0.wav',
             //Miss Sfx
             miss0: 'audio/miss/miss_0.wav',
             miss1: 'audio/miss/miss_1.wav',

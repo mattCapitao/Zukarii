@@ -78,6 +78,7 @@ export class Game {
             this.state.eventBus.emit('InitializePlayer');
             this.state.eventBus.emit('RenderNeeded');
             console.log('Systems initialized and player initialized');
+            
         });
         this.setupEventListeners();
 

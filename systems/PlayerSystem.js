@@ -65,7 +65,7 @@ export class PlayerSystem extends System {
         this.getRandomStartItems().then(startItems => {
             inventory.items = startItems.map(item => ({ ...item, uniqueId: this.utilities.generateUniqueId() }));
         });
-
+        
         this.calculateStats(player);
     }
 
