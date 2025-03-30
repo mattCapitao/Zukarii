@@ -13,6 +13,7 @@ export class UISystem extends System {
         this.menuContent = null;
         this.activeMenuSection = 'controls-button';
         this.tooltipCache = new Map();
+        this.activeInventoryTab = 'all';
 
         this.statusDOM = {
             hpBar: null,
@@ -213,14 +214,52 @@ export class UISystem extends System {
                 event.preventDefault();
                 const target = event.target.closest('.inventory-item');
                 if (!target) return;
-                const index = parseInt(target.dataset.index, 10);
-                if (isNaN(index)) return;
+
                 const itemElement = event.target.closest('.item-icon');
-                if (itemElement) {
-                    const itemData = JSON.parse(itemElement.getAttribute('data-item') || '{}');
-                    this.hideItemTooltip(itemData);
+                if (!itemElement) return;
+                const itemData = JSON.parse(itemElement.getAttribute('data-item') || '{}');
+                if (!itemData.uniqueId) {
+                    console.error('UISystem: Item missing uniqueId for deletion:', itemData);
+                    return;
                 }
-                this.eventBus.emit('DropItem', { itemIndex: index });
+                this.hideItemTooltip(itemData);
+                this.eventBus.emit('DropItem', { uniqueId: itemData.uniqueId });
+            });
+        }
+
+        const inventoryTabs = document.getElementById('inventory-tabs');
+        if (inventoryTabs) {
+            inventoryTabs.addEventListener('click', (event) => {
+                const target = event.target.closest('.inventory-tab-button');
+                if (!target) return;
+
+                const player = this.entityManager.getEntity('player');
+                const stats = player.getComponent('Stats');
+                const inventory = player.getComponent('Inventory');
+
+                if (target.id === 'sort-inventory-tab') {
+                    // Sort button: re-apply filter and sort
+                    this.updateCharacter(stats, inventory);
+                } else if (target.classList.contains('tab')) {
+                    // Filter tab: update active tab, filter, sort, and render
+                    const tabMap = {
+                        'inventory-tab-all': 'all',
+                        'inventory-tab-armor': 'armor',
+                        'inventory-tab-weapon-melee': 'weapon-melee',
+                        'inventory-tab-weapon-ranged': 'weapon-ranged',
+                        'inventory-tab-amulet': 'amulet',
+                        'inventory-tab-ring': 'ring'
+                    };
+                    const newTab = tabMap[target.id];
+                    if (newTab && newTab !== this.activeInventoryTab) {
+                        this.activeInventoryTab = newTab;
+                        // Update active class
+                        inventoryTabs.querySelectorAll('.tab').forEach(tab => {
+                            tab.classList.toggle('active', tab.id === target.id);
+                        });
+                        this.updateCharacter(stats, inventory);
+                    }
+                }
             });
         }
 
@@ -383,6 +422,35 @@ export class UISystem extends System {
             // 3. If type and attackType are equal, sort by tierIndex (highest to lowest)
             return b.tierIndex - a.tierIndex;
         });
+    }
+
+    filterItems(items, tab) {
+        let filteredItems = [];
+        switch (tab) {
+            case 'all':
+                filteredItems = items;
+                break;
+            case 'armor':
+                filteredItems = items.filter(item => item.type === 'armor');
+                break;
+            case 'weapon-melee':
+                filteredItems = items.filter(item => item.type === 'weapon' && item.attackType === 'melee');
+                break;
+            case 'weapon-ranged':
+                filteredItems = items.filter(item => item.type === 'weapon' && item.attackType === 'ranged');
+                break;
+            case 'amulet':
+                filteredItems = items.filter(item => item.type === 'amulet');
+                break;
+            case 'ring':
+                filteredItems = items.filter(item => item.type === 'ring');
+                break;
+            default:
+                console.warn(`UISystem: Unknown inventory tab "${tab}", defaulting to all items`);
+                filteredItems = items; // Edge case: return all items
+                break;
+        }
+        return filteredItems;
     }
 
     renderOverlay(tab) {
@@ -563,16 +631,19 @@ export class UISystem extends System {
         });
 
         const inventoryDiv = document.getElementById('inventory-item-wrapper');
+        // CHANGED: Filter and sort items
+        let filteredItems = this.filterItems(inventory.items, this.activeInventoryTab);
+        const sortedItems = this.sortItemsByTypeAttackTier(filteredItems);
         inventoryDiv.innerHTML = `
-                ${inventory.items.length ? inventory.items.map((item, index) => `
-                    <div class="inventory-item" data-index="${index}">
-                        <p class="inventory-slot ${item.itemTier} ${item.type}">
-                            <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' data-index='${index}' draggable="true">
-                            <span class="item-label ${item.itemTier}">${item.type}</span>
-                        </p>
-                    </div>
-                `).join('') : '<p>Inventory empty.</p>'}
-        `;
+        ${sortedItems.length ? sortedItems.map((item, index) => `
+            <div class="inventory-item" data-index="${index}">
+                <p class="inventory-slot ${item.itemTier} ${item.type}">
+                    <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' data-index='${index}' draggable="true">
+                    <span class="item-label ${item.itemTier}">${item.type}</span>
+                </p>
+            </div>
+        `).join('') : '<p>Inventory empty.</p>'}
+    `;
     }
 
     addLogMessage({ message }) {

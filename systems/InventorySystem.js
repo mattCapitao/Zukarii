@@ -115,7 +115,7 @@ export class InventorySystem extends System {
         this.eventBus.emit('GearChanged', { entityId });
     }
 
-    discardItem({ itemIndex }) {
+    discardItem({ uniqueId }) {
 
         const player = this.entityManager.getEntity('player');
         if (!player) { return; }
@@ -125,7 +125,15 @@ export class InventorySystem extends System {
         const position = player.getComponent('Position');
         if (!position) {return;}
 
-        if (itemIndex < 0 || itemIndex >= inventory.items.length) {return;}
+
+
+        const itemIndex = inventory.items.findIndex(item => item.uniqueId === uniqueId);
+        if (itemIndex === -1) {
+            console.error('InventorySystem: Item with uniqueId not found:', uniqueId);
+            return;
+        }
+
+
 
         const item = inventory.items[itemIndex];
         inventory.items.splice(itemIndex, 1);
@@ -147,8 +155,8 @@ export class InventorySystem extends System {
             items: [item]
         }));
 
-        const uniqueId = this.utilities.generateUniqueId();
-        const lootEntity = this.entityManager.createEntity(`loot_${tier}_${uniqueId}`);
+        const uniqueIdLoot = this.utilities.generateUniqueId();
+        const lootEntity = this.entityManager.createEntity(`loot_${tier}_${uniqueIdLoot}`);
         const lootPosition = new PositionComponent(position.x, position.y);
         const lootData = new LootData(loot);
         this.entityManager.addComponentToEntity(lootEntity.id, lootPosition);
