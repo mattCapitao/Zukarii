@@ -80,6 +80,8 @@ export class LootCollectionSystem extends System {
         this.entityManager.removeEntity(lootEntity.id);
         this.eventBus.emit('RenderNeeded');
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
+        const sfx = 'loot0';
+        this.eventBus.emit('PlaySfx', { sfx, volume: .7 }); 
 
         if (playerResource.gold >= 1e12) {
             gameState.isVictory = true;

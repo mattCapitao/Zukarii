@@ -38,7 +38,9 @@ import {
 
 import {
     PositionComponent,
-    HealthComponent
+    HealthComponent,
+    AttackSpeedComponent,
+    MovementSpeedComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -76,7 +78,9 @@ export {
 
     // Common components
     PositionComponent,
-    HealthComponent
+    HealthComponent,
+    AttackSpeedComponent,
+    MovementSpeedComponent,
 };
 
 // Utility functions

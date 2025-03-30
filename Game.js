@@ -23,7 +23,7 @@ import { PlayerInputSystem } from './systems/PlayerInputSystem.js'; // New
 import { PlayerControllerSystem } from './systems/PlayerControllerSystem.js'; // New
 import {
     PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
-    PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent
+    PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent, AttackSpeedComponent,MovementSpeedComponent,
 } from './core/Components.js';
 
 export class Game {
@@ -51,7 +51,9 @@ export class Game {
         }));
         this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0));
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
-        this.entityManager.addComponentToEntity('player', new InputStateComponent()); // New
+        this.entityManager.addComponentToEntity('player', new InputStateComponent());
+        this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
+        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(200));
 
         let overlayState = this.entityManager.getEntity('overlayState');
         if (!overlayState) {
@@ -78,7 +80,7 @@ export class Game {
             console.log('Systems initialized and player initialized');
         });
         this.setupEventListeners();
-        this.startGameLoop();
+
     }
 
     async initializeSystems() {
@@ -113,6 +115,7 @@ export class Game {
         this.mousemoveHandler = () => this.updateLastMouseEvent();
         document.addEventListener('mousedown', this.mousedownHandler);
         document.addEventListener('mousemove', this.mousemoveHandler);
+        this.state.eventBus.on('StartGame', () => this.start());
     }
 
     destroy() {
@@ -146,7 +149,7 @@ export class Game {
             lastTime = currentTime;
 
             // *** NEW: Log deltaTime ***
-           // console.log('Game.js: Game loop - deltaTime:', deltaTime);
+            // console.log('Game.js: Game loop - deltaTime:', deltaTime);
 
             // *** CHANGED: Pass deltaTime to updateSystems ***
             this.updateSystems([
@@ -167,4 +170,23 @@ export class Game {
         };
         this.gameLoopId = requestAnimationFrame(gameLoop);
     }
+
+    start() {
+        const gameState = this.entityManager.getEntity('gameState');
+        if (!gameState) {
+            const newGameState = this.entityManager.createEntity('gameState', true);
+            this.entityManager.addComponentToEntity('gameState', new GameStateComponent({
+                gameStarted: true, // Set to true when starting
+                gameOver: false,
+                tier: 1, // Assuming initial tier
+                // Add other GameState properties as needed
+            }));
+        } else {
+            const gameStateComp = gameState.getComponent('GameState');
+            gameStateComp.gameStarted = true;
+        }
+        this.startGameLoop();
+        console.log('Game.js: Game started');
+    }
+
 }

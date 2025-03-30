@@ -36,6 +36,15 @@ export class PlayerInputSystem {
     }
 
     handleKeyDown(event) {
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        if (!gameState.gameStarted) {
+            this.eventBus.emit('StartGame');
+            gameState.needsRender = true;
+            this.eventBus.emit('ToggleBackgroundMusic', { play: true });
+            this.eventBus.emit('RenderNeeded');
+            return;
+        }
+
         console.log('PlayerInputSystem: handleKeyDown - raw key:', event.key);
         const mappedKey = this.keyMap[event.key];
         console.log('PlayerInputSystem: handleKeyDown - mappedKey:', mappedKey);
@@ -57,8 +66,6 @@ export class PlayerInputSystem {
         console.log('PlayerInputSystem: handleKeyUp - raw key:', event.key);
         const mappedKey = this.keyMap[event.key];
         console.log('KeyUp Event Fired:', event.key, 'Mapped:', mappedKey);
-
-        
         
         if (mappedKey) {
             if (document.activeElement.id === 'save-name-input' && mappedKey != 'escape') {
@@ -87,14 +94,6 @@ export class PlayerInputSystem {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
 
         if (!gameState || gameState.gameOver || event.repeat) return;
-
-        if (!gameState.gameStarted) {
-            gameState.gameStarted = true;
-            gameState.needsRender = true;
-            this.eventBus.emit('ToggleBackgroundMusic', { play: true });
-            this.eventBus.emit('RenderNeeded');
-            return;
-        }
 
             switch (mappedKey) {
                 case 'c':

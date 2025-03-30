@@ -15,4 +15,20 @@ export class HealthComponent {
         this.hp = hp;
         this.maxHp = maxHp;
     }
+} 
+
+export class AttackSpeedComponent {
+    constructor(attackSpeed = 0) {
+        this.type = 'AttackSpeed';
+        this.attackSpeed = attackSpeed;
+        this.elapsedSinceLastAttack = 0;
+    }
+}
+
+export class MovementSpeedComponent {
+    constructor(movementSpeed = 0) {
+        this.type = 'MovementSpeed';
+        this.movementSpeed = movementSpeed; // Cooldown in milliseconds
+        this.elapsedSinceLastMove = 0; // Time since last move in ms
+    }
 }

@@ -1,8 +1,9 @@
 ﻿// systems/InventorySystem.js
 import { System } from '../core/Systems.js';
+import { PositionComponent, LootData } from '../core/Components.js';
 
 export class InventorySystem extends System {
-    constructor(entityManager, eventBus, utilities) {
+    constructor(entityManager, eventBus, utilities) { 
         super(entityManager, eventBus, utilities);
         this.requiredComponents = ['Inventory'];
     }
@@ -114,80 +115,46 @@ export class InventorySystem extends System {
         this.eventBus.emit('GearChanged', { entityId });
     }
 
-    // systems/InventorySystem.js (partial)
     discardItem({ itemIndex }) {
-       // console.log('InventorySystem: discardItem called with itemIndex:', itemIndex);
-        const player = this.entityManager.getEntity('player');
-        if (!player) {
-          //  console.error('InventorySystem: Player entity not found');
-            return;
-        }
-       // console.log('InventorySystem: Player entity found:', player);
 
+        const player = this.entityManager.getEntity('player');
+        if (!player) { return; }
         const inventory = player.getComponent('Inventory');
-        if (!inventory) {
-            console.error('InventorySystem: Inventory component not found on player');
-            return;
-        }
-        //console.log('InventorySystem: Inventory component found:', inventory);
+        if (!inventory) {return;}
 
         const position = player.getComponent('Position');
-        if (!position) {
-          //  console.error('InventorySystem: Position component not found on player');
-            return;
-        }
-        //console.log('InventorySystem: Position component found:', position);
+        if (!position) {return;}
 
-        if (itemIndex < 0 || itemIndex >= inventory.items.length) {
-          //  console.error('InventorySystem: Invalid itemIndex', itemIndex, 'Inventory length:', inventory.items.length);
-            return;
-        }
-        //console.log('InventorySystem: Item index valid, retrieving item...');
+        if (itemIndex < 0 || itemIndex >= inventory.items.length) {return;}
 
         const item = inventory.items[itemIndex];
-        //console.log('InventorySystem: Item retrieved:', item);
         inventory.items.splice(itemIndex, 1);
-       // console.log('InventorySystem: Item removed from inventory, new inventory:', inventory.items);
 
         const gameStateEntity = this.entityManager.getEntity('gameState');
-        if (!gameStateEntity) {
-           // console.error('InventorySystem: gameState entity not found');
-            return;
-        }
-       // console.log('InventorySystem: gameState entity found:', gameStateEntity);
+        if (!gameStateEntity) {return;}
 
         const gameState = gameStateEntity.getComponent('GameState');
-        if (!gameState) {
-           // console.error('InventorySystem: GameState component not found on gameState entity');
-            return;
-        }
-       // console.log('InventorySystem: GameState component found:', gameState);
+        if (!gameState) { return;}
 
         const tier = gameState.tier;
-        if (tier === undefined) {
-           // console.error('InventorySystem: gameState.tier is undefined', gameState);
-            return;
-        }
-        //console.log('InventorySystem: Tier retrieved:', tier);
+        if (tier === undefined) {return;}
 
         const loot = JSON.parse(JSON.stringify({
-            x: position.x,
-            y: position.y,
             name: `${item.name} (Discarded)`,
             gold: 0,
             torches: 0,
             healPotions: 0,
             items: [item]
         }));
-       // console.log('InventorySystem: Loot object constructed (deep copy):', loot);
 
-        //console.log('InventorySystem: Emitting DiscardItem with data:', { loot, tier });
-
-        this.eventBus.emit('DiscardItem', { treasure: loot, tier });
-       // console.log('InventorySystem: DiscardItem event emitted');
-
+        const uniqueId = this.utilities.generateUniqueId();
+        const lootEntity = this.entityManager.createEntity(`loot_${tier}_${uniqueId}`);
+        const lootPosition = new PositionComponent(position.x, position.y);
+        const lootData = new LootData(loot);
+        this.entityManager.addComponentToEntity(lootEntity.id, lootPosition);
+        this.entityManager.addComponentToEntity(lootEntity.id, lootData);
+        this.eventBus.emit('DiscardItem', { treasure: lootEntity, tier });
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
-       // console.log('InventorySystem: StatsUpdated event emitted');
     }
 
     isSlotCompatible(item, slot) {

@@ -56,9 +56,9 @@ export class DamageCalculationSystem extends System {
         const monsterData = attacker.getComponent('MonsterData');
         const targetStats = target.getComponent('Stats');
         const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
-        const tierDamageMultiplier = 0.15;
-        const armorReductionFactor = 0.15;
-        const defenseReductionFactor = 0.10;
+        const tierDamageMultiplier = 0.20;
+        const armorReductionFactor = 0.08;
+        const defenseReductionFactor = 0.025;
 
         const baseDamageMin = monsterData.minBaseDamage || 2;
         const baseDamageMax = monsterData.maxBaseDamage || 3;
@@ -77,6 +77,7 @@ export class DamageCalculationSystem extends System {
         const totalDamage = Math.round(Math.max(0, preReductionDamage - armorReduction - defenseReduction));
 
         return {
+            attackDmg: preReductionDamage,
             damage: totalDamage,
             isCritical,
             armorReduction,

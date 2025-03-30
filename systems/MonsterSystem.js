@@ -1,6 +1,6 @@
 ﻿// systems/MonsterSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent, HealthComponent, LootSourceData } from '../core/Components.js';
+import { PositionComponent, HealthComponent, LootSourceData, AttackSpeedComponent, MovementSpeedComponent } from '../core/Components.js';
 
 export class MonsterSystem extends System {
     constructor(entityManager, eventBus, dataSystem) {
@@ -10,12 +10,88 @@ export class MonsterSystem extends System {
     }
 
     init() {
-        this.eventBus.on('MoveMonsters', () => this.moveMonsters());
+       // this.eventBus.on('MoveMonsters', () => this.moveMonsters());
         this.eventBus.on('MonsterDied', (data) => {
             console.log(`MonsterSystem: Received MonsterDied event with data:`, data);
             this.handleMonsterDeath(data.entityId);
         });
         this.eventBus.on('SpawnMonsters', (data) => this.handleSpawnMonsters(data));
+    }
+
+    update(deltaTime) {
+
+        const player = this.entityManager.getEntity('player');
+        if (!player || player.getComponent('PlayerState').dead) return;
+
+        const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
+        const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
+        if (!levelEntity) return;
+
+        const monsters = this.entityManager.getEntitiesWith(this.requiredComponents);
+        const AGGRO_RANGE = 4;
+
+        monsters.forEach(monster => {
+            const health = monster.getComponent('Health');
+            const hpBarWidth = Math.floor((health.hp / health.maxHp) * 16);
+            if (health.hp <= 0) return;
+
+            const pos = monster.getComponent('Position');
+            const monsterData = monster.getComponent('MonsterData');
+            const attackSpeed = monster.getComponent('AttackSpeed');
+            const movementSpeed = monster.getComponent('MovementSpeed');
+            monsterData.hpBarWidth = hpBarWidth;
+            const playerPos = player.getComponent('Position');
+            const dx = playerPos.x - pos.x;
+            const dy = playerPos.y - pos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Accumulate time (deltaTime in seconds, convert to ms)
+            attackSpeed.elapsedSinceLastAttack += deltaTime * 1000;
+            movementSpeed.elapsedSinceLastMove += deltaTime * 1000;
+
+            if (distance <= AGGRO_RANGE + 2) {monsterData.isDetected = true;}
+
+            if (distance <= AGGRO_RANGE) {monsterData.isAggro = true;}
+
+            if (monsterData.isAggro) {
+                const isAdjacentCardinal = (dx === 0 && Math.abs(dy) === 1) || (dy === 0 && Math.abs(dx) === 1);
+                if (isAdjacentCardinal) {
+                    if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
+                        this.eventBus.emit('MonsterAttack', { entityId: monster.id });
+                        attackSpeed.elapsedSinceLastAttack = 0;
+                    }
+                    return;
+                }
+
+                if (movementSpeed.elapsedSinceLastMove >= movementSpeed.movementSpeed) {
+
+                    const directions = [
+                        { x: Math.sign(dx), y: 0, dist: Math.abs(dx) },
+                        { x: 0, y: Math.sign(dy), dist: Math.abs(dy) }
+                    ].sort((a, b) => b.dist - a.dist);
+
+                    for (const dir of directions) {
+                        const newX = pos.x + dir.x;
+                        const newY = pos.y + dir.y;
+                        const isOccupied = monsters.some(m =>
+                            m.id !== monster.id &&
+                            m.getComponent('Health').hp > 0 &&
+                            m.getComponent('Position').x === newX &&
+                            m.getComponent('Position').y === newY
+                        );
+                        const isPlayerPosition = (newX === playerPos.x && newY === playerPos.y);
+                        if (!this.isWalkable(newX, newY) || isOccupied || isPlayerPosition) {
+                            continue;
+                        }
+                        pos.x = newX;
+                        pos.y = newY;
+                        this.eventBus.emit('PositionChanged', { entityId: monster.id, x: newX, y: newY });
+                        movementSpeed.elapsedSinceLastMove = 0; // Reset move timer
+                        break;
+                    }
+                }
+            }
+        });
     }
 
     // systems/MonsterSystem.js - Updated handleSpawnMonsters method // remove map from signature when updating LevelSsytem.
@@ -157,6 +233,8 @@ export class MonsterSystem extends System {
         const maxHp = this.calculateMonsterMaxHp(template.baseHp, tier);
         this.entityManager.addComponentToEntity(entity.id, new PositionComponent(x, y));
         this.entityManager.addComponentToEntity(entity.id, new HealthComponent(maxHp, maxHp));
+        this.entityManager.addComponentToEntity(entity.id, new AttackSpeedComponent(1000));
+        this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(500));
         this.entityManager.addComponentToEntity(entity.id, {
             type: 'MonsterData',
             hpBarWidth: 16,
@@ -178,7 +256,7 @@ export class MonsterSystem extends System {
     }
 
     calculateMonsterMaxHp(baseHp, tier) {
-        const BASE_GROWTH_RATE = 0.15;
+        const BASE_GROWTH_RATE = 0.25;
         const INITIAL_VARIANCE_FACTOR = 0.1;
         const VARIANCE_GROWTH_RATE = 0.005;
         const tierAdjustment = tier - 1;
@@ -187,74 +265,7 @@ export class MonsterSystem extends System {
         return Math.round(baseHp * (1 + BASE_GROWTH_RATE * tierAdjustment + variance));
     }
 
-    // systems/MonsterSystem.js - Updated moveMonsters method
-    moveMonsters() {
-        const player = this.entityManager.getEntity('player');
-        if (!player || player.getComponent('PlayerState').dead) return;
-
-        const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
-        const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
-        if (!levelEntity) return;
-
-        const monsters = this.entityManager.getEntitiesWith(this.requiredComponents);
-        const AGGRO_RANGE = 4;
-
-        monsters.forEach(monster => {
-            const health = monster.getComponent('Health');
-            const hpBarWidth = Math.floor((health.hp / health.maxHp) * 16);
-            if (health.hp <= 0) return;
-
-            const pos = monster.getComponent('Position');
-            const monsterData = monster.getComponent('MonsterData');
-            monsterData.hpBarWidth = hpBarWidth;
-            const playerPos = player.getComponent('Position');
-            const dx = playerPos.x - pos.x;
-            const dy = playerPos.y - pos.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance <= AGGRO_RANGE + 2) {
-                monsterData.isDetected = true;
-            }
-
-            if (distance <= AGGRO_RANGE) {
-                monsterData.isAggro = true;
-            }
-
-            if (monsterData.isAggro) {
-                const isAdjacentCardinal = (dx === 0 && Math.abs(dy) === 1) || (dy === 0 && Math.abs(dx) === 1);
-                if (isAdjacentCardinal) {
-                    this.eventBus.emit('MonsterAttack', { entityId: monster.id });
-                    return;
-                }
-
-                const directions = [
-                    { x: Math.sign(dx), y: 0, dist: Math.abs(dx) },
-                    { x: 0, y: Math.sign(dy), dist: Math.abs(dy) }
-                ].sort((a, b) => b.dist - a.dist);
-
-                for (const dir of directions) {
-                    const newX = pos.x + dir.x;
-                    const newY = pos.y + dir.y;
-
-                    const isOccupied = monsters.some(m =>
-                        m.id !== monster.id &&
-                        m.getComponent('Health').hp > 0 &&
-                        m.getComponent('Position').x === newX &&
-                        m.getComponent('Position').y === newY
-                    );
-                    const isPlayerPosition = (newX === playerPos.x && newY === playerPos.y);
-
-                    if (!this.isWalkable(newX, newY) || isOccupied || isPlayerPosition) {
-                        continue;
-                    }
-
-                    pos.x = newX;
-                    pos.y = newY;
-                    this.eventBus.emit('PositionChanged', { entityId: monster.id, x: newX, y: newY });
-                    break;
-                }
-            }
-        });
+    moveMonsters(deltaTime) {
     }
 
     handleMonsterDeath(entityId) {

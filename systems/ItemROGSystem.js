@@ -165,27 +165,48 @@ export class ItemROGSystem extends System {
 
     statRoll(stat, item) {
         if (item[stat] !== undefined && item[stat] !== 0) return 0; // Skip base stats if provided and non-zero
+
         switch (stat) {
             case 'baseDamageMin': return Math.floor(item.tierIndex * 1.5);
             case 'baseDamageMax': return Math.floor(Math.random() * item.tierIndex) + 1;
-            case 'range': return Math.floor(Math.random() * 2) + 1;
-            case 'block': return Math.floor(Math.random() * 2) + 1;
+            case 'baseBlock': return Math.floor(item.tierIndex) + 1;
+            case 'baseRange': return Math.floor(item.tierIndex) + 4;
             case 'armor': return Math.floor(item.tierIndex) + 1;
-            case 'maxHp': return item.tierIndex * 2;
+            case 'maxHp': return item.tierIndex * 5 + Math.round(Math.random() * (item.tierIndex * 5));
+
             case 'maxMana': return Math.floor(item.tierIndex / 2);
             case 'prowess': return Math.floor(item.tierIndex / 2);
             case 'agility': return Math.floor(item.tierIndex / 2);
             case 'intellect': return Math.floor(item.tierIndex / 2);
-            case 'defense': return Math.floor(item.tierIndex) + 1;
-            case 'damageBonus': return Math.floor(item.tierIndex) + 1;
-            case 'meleeBonus': return Math.floor(item.tierIndex) + 1;
-            case 'rangedBonus': return Math.floor(item.tierIndex) + 1;
-            case 'baseBlock': return Math.floor(item.tierIndex) + 1;
-            case 'baseRange': return Math.floor(item.tierIndex) + 4;
+
+            case 'range': return randomizeStatRoll(Math.round(item.tierIndex * .5), item);
+            case 'block': return randomizeStatRoll(Math.round(item.tierIndex * .5), item);
+            case 'defense': return randomizeStatRoll(Math.round(item.tierIndex * .5), item);
+
+            case 'damageBonus': return randomizeStatRoll(item.tierIndex + 1, item);
+            case 'meleeBonus': return randomizeStatRoll(item.tierIndex + 1, item);
+            case 'rangedBonus': return randomizeStatRoll(item.tierIndex + 1, item);
+            case 'resistMagic': return randomizeStatRoll(item.tierIndex + 1, item); 
+            
             default:
                 console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
                 return 0;
         }
+    }
+
+    randomizeStatRoll(max, item) {
+        const baseroll = Math.floor(Math.random() * max) + 1;
+        let roll = baseroll;
+
+        if (item.tierIndex >= 3 && roll < (max - 1) && Math.random() < .05) {
+            roll++;
+        } else if ((item.tierIndex >= 3 && roll < (max - 1) && Math.random() < .01)) {
+            roll++;
+        } else if (item.tierIndex >= 3 && roll === max && Math.random() < .001) {
+            roll++;
+        }
+        if (item.tierIndex >= 5 && roll < max && Math.random() < .005) { roll++; }
+        return roll;
     }
 
     // Fallback method if itemStatOptions is not available

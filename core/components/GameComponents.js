@@ -45,7 +45,7 @@ export class RenderStateComponent {
         this.renderRadius = renderRadius;
     }
 }
-
+ 
 export class GameStateComponent {
     constructor({
         tier = 0,

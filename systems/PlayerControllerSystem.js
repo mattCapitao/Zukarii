@@ -1,19 +1,17 @@
 ﻿// PlayerControllerSystem.js (Pre-deltaTime)
+
+import { AttackSpeedComponent, MovementSpeedComponent } from '../core/Components.js';
 export class PlayerControllerSystem {
     constructor(entityManager, eventBus) {
         this.entityManager = entityManager;
         this.eventBus = eventBus;
-        this.lastMovementTime = 0;
-        this.movementThrottleInterval = 200 ; // 100ms throttle (original value)
         this.lastInputState = {};
-
         this.previousKeyStates = {
             ArrowUp: false,
             ArrowDown: false,
             ArrowLeft: false,
             ArrowRight: false
         };
-
     }
 
     async init() {
@@ -28,17 +26,19 @@ export class PlayerControllerSystem {
         this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
     }
 
-    update() {
+    update(deltaTime) {
         const player = this.entityManager.getEntity('player');
         if (!player) return;
 
         const inputState = player.getComponent('InputState');
         const position = player.getComponent('Position');
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        const attackSpeed = player.getComponent('AttackSpeed');
+        const movementSpeed = player.getComponent('MovementSpeed');
 
-
-        // ADDED LOGGING: Check if transitionLock or gameOver is blocking movement
-        //console.log("PlayerControllerSystem: gameState checks - transitionLock:", gameState?.transitionLock, "gameOver:", gameState?.gameOver);
+        attackSpeed.elapsedSinceLastAttack += deltaTime * 1000;
+        movementSpeed.elapsedSinceLastMove += deltaTime * 1000;
+        
 
         if (!gameState || gameState.gameOver || gameState.transitionLock) return;
 
@@ -49,9 +49,6 @@ export class PlayerControllerSystem {
             this.lastInputState = { ...inputState.keys };
         }
 
-        const now = Date.now();
-        if (now - this.lastMovementTime < this.movementThrottleInterval) return;
-
         let newX = position.x;
         let newY = position.y;
         let moved = false;
@@ -61,12 +58,15 @@ export class PlayerControllerSystem {
             const isPressed = !!inputState.keys[direction];
             const wasPressed = this.previousKeyStates[direction];
 
-            if (isPressed && !wasPressed && gameState.isRangedMode) {
+            if (isPressed && gameState.isRangedMode) {
                 // Key was just pressed, emit RangedAttack
-                console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: ${direction}`);
-                this.eventBus.emit('RangedAttack', { direction });
-                this.endTurn('rangedAttack');
-                this.previousKeyStates[direction] = true;
+                if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
+                    console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: ${direction}`);
+                    this.eventBus.emit('RangedAttack', { direction });
+                    attackSpeed.elapsedSinceLastAttack = 0;
+                    this.endTurn('rangedAttack');
+                    this.previousKeyStates[direction] = true;
+                }
                 return;
             } else if (!isPressed && wasPressed) {
                 // Key was released, update state
@@ -74,6 +74,8 @@ export class PlayerControllerSystem {
             }
         }
         if (gameState.isRangedMode) { return; }
+
+        if (movementSpeed.elapsedSinceLastMove < movementSpeed.movementSpeed) return;
 
         if (inputState.keys['ArrowUp']) {
             newY--;
@@ -105,14 +107,19 @@ export class PlayerControllerSystem {
 
         const monster = entitiesAtTarget.find(e => e.hasComponent('Health') && e.hasComponent('MonsterData') && e.getComponent('Health').hp > 0);
         if (monster) {
-            this.eventBus.emit('MeleeAttack', { targetEntityId: monster.id });
-            this.endTurn('meleeAttack');
+            if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
+                this.eventBus.emit('MeleeAttack', { targetEntityId: monster.id });
+                attackSpeed.elapsedSinceLastAttack = 0;
+                this.endTurn('meleeAttack');
+            }
+            movementSpeed.elapsedSinceLastMove = 0;
             return;
         }
 
         const fountain = entitiesAtTarget.find(e => e.hasComponent('Fountain') && !e.getComponent('Fountain').used);
         if (fountain) {
             this.eventBus.emit('UseFountain', { fountainEntityId: fountain.id, tierEntityId: levelEntity.id });
+            movementSpeed.elapsedSinceLastMove = 0;
             this.endTurn('useFountain');
             return;
         }
@@ -120,6 +127,7 @@ export class PlayerControllerSystem {
         const loot = entitiesAtTarget.find(e => e.hasComponent('LootData'));
         if (loot) {
             this.eventBus.emit('PickupTreasure', { x: newX, y: newY });
+            movementSpeed.elapsedSinceLastMove = 0;
             this.endTurn('pickupLoot');
             return;
         }
@@ -155,18 +163,17 @@ export class PlayerControllerSystem {
         if (floor) {
             position.x = newX;
             position.y = newY;
-            this.lastMovementTime = now;
+            movementSpeed.elapsedSinceLastMove = 0;
             this.eventBus.emit('PositionChanged', { entityId: 'player', x: newX, y: newY });
             this.endTurn('movement');
         }
     }
-
+     
     endTurn(source) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (!gameState || gameState.gameOver) return;
 
         this.eventBus.emit('TurnEnded');
-        this.eventBus.emit('MoveMonsters');
         gameState.transitionLock = false;
         gameState.needsRender = true;
         this.eventBus.emit('RenderNeeded');

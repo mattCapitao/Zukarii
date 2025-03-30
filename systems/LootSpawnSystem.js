@@ -52,6 +52,4 @@ export class LootSpawnSystem extends System {
             this.eventBus.emit('RenderNeeded');
         }
     }
-
-    // Remove generateMonsterLoot and related methods since they're now in LootManagerSystem
 }

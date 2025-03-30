@@ -127,6 +127,32 @@ export class CombatSystem extends System {
         });
     }
 
+    combatSfx(type) {
+
+        console.log('CombatSystem: combatSfx called with :', type);
+        const hitFileCount = 27;
+        const missFileCount = 9;
+        const blockFileCount = 9;
+
+        let sfx = '';
+
+        switch (type) {
+            case 'hit':
+                sfx = `${type}${Math.floor(Math.random() * hitFileCount)}`;
+                break;
+            case 'miss':
+                sfx = `${type}${Math.floor(Math.random() * missFileCount)}`;
+                break;
+            case 'block':
+                sfx = `${type}${Math.floor(Math.random() * blockFileCount)}`;
+                break;
+            default:
+                console.log('CombatSystem: Invalid combat sfx type:', type);
+                return
+        }
+        console.log('CombatSystem: Playing combat sfx:', sfx);
+        this.eventBus.emit('PlaySfx', {sfx, volume: .1});
+    }
 
     getBestRangedWeapon() {
         const player = this.entityManager.getEntity('player');
@@ -165,22 +191,28 @@ export class CombatSystem extends System {
         const dodgeRoll = Math.round(Math.random() * 100 + playerStats.agility / 2 - (monsterData.luck || 0) / 2);
         if (dodgeRoll >= 85) {
             this.eventBus.emit('LogMessage', { message: `You dodged the ${monsterData.name}'s attack!` });
+            console.log("player dodged the attack"); 
+            this.combatSfx('miss');
             return;
         }
 
         const blockRoll = Math.round(Math.random() * 100 + playerStats.block / 2 - (monsterData.luck || 0) / 2);
         if (blockRoll >= 85) {
             this.eventBus.emit('LogMessage', { message: `You blocked the ${monsterData.name}'s attack!` });
+            console.log("player blocked the attack");
+            this.combatSfx('block');
             return;
         }
+        console.log("player was hit by the attack");
+        this.combatSfx('hit');
 
         this.eventBus.emit('CalculateMonsterDamage', {
             attacker: monster,
             target: player,
-            callback: ({ damage, isCritical, armorReduction, defenseReduction }) => {
+            callback: ({ attackDmg, damage, isCritical, armorReduction, defenseReduction }) => {
                 playerHealth.hp = Math.max(0, playerHealth.hp - damage); // Clamp to 0
                 this.eventBus.emit('LogMessage', {
-                    message: `${isCritical ? ' (Critical Hit!) - ' : ''}${monsterData.name} dealt ${damage} damage to you (${playerHealth.hp}/${playerHealth.maxHp}) reduced by armor: ${armorReduction}, defense: ${defenseReduction}`
+                    message: `${isCritical ? ' (Critical Hit!) - ' : ''}${monsterData.name} hits for ${attackDmg}, armor protects you from: ${armorReduction}, defense skill mitigates: ${defenseReduction} resulting in ${damage} damage dealt to you (${playerHealth.hp}/${playerHealth.maxHp})`
                 });
                 this.eventBus.emit('StatsUpdated', { entityId: 'player' });
 
@@ -219,6 +251,8 @@ export class CombatSystem extends System {
             const missChance = isDualWield ? (index === 0 ? 15 : 25) : 0;
             if (Math.random() * 100 < missChance) {
                 this.eventBus.emit('LogMessage', { message: `Your ${weapon.name} missed the ${targetMonsterData.name}!` });
+                this.combatSfx('miss');
+                console.log("player missed the attack");
                 return;
             }
 
@@ -226,15 +260,20 @@ export class CombatSystem extends System {
             const dodgeRoll = Math.random() * 100;
             if (dodgeRoll >= 99) {
                 this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} dodged your ${weapon.name} attack!` });
+                console.log("monster dodged the attack");
+                this.combatSfx('miss');
                 return;
             }
 
             const blockRoll = Math.random() * 100;
             if (blockRoll >= 99) {
                 this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} blocked your ${weapon.name} attack!` });
+                console.log("monster blocked the attack");
+                this.combatSfx('block');
                 return;
             }
-
+            console.log("monster was hit by the attack");
+            this.combatSfx('hit');
             this.eventBus.emit('CalculatePlayerDamage', {
                 attacker: player,
                 target: target,
