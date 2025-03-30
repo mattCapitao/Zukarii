@@ -120,7 +120,12 @@ export class DataSystem extends System {
                 console.log('DataSystem: Returning empty object as fallback for itemStatOptions');
                 return {};
             });
+
+        
     }
+
+
+
 
     init() {
         this.eventBus.on('GetCustomLevel', (data) => this.provideCustomLevel(data));
@@ -135,6 +140,41 @@ export class DataSystem extends System {
         this.eventBus.on('RequestSaveGameToStorage', (data) => this.saveGame(data));
         this.eventBus.on('RequestLoadGameFromStorage', (data, callback) => this.loadGame(data, callback));
         this.eventBus.on('RequestSavedGamesList', (callback) => this.getSavedGamesList(callback));
+
+        // Preload data
+        this.loadData();
+    }
+
+
+    async loadData() {
+        try {
+            console.log('DataSystem: Starting fetch for randomMonsters.json');
+            this.randomMonsters = await fetch('data/json/randomMonsters.json').then(r => r.json());
+            console.log('DataSystem: Successfully loaded randomMonsters.json:', this.randomMonsters);
+
+            console.log('DataSystem: Starting fetch for uniqueMonsters.json');
+            this.uniqueMonsters = await fetch('data/json/uniqueMonsters.json').then(r => r.json());
+            console.log('DataSystem: Successfully loaded uniqueMonsters.json:', this.uniqueMonsters);
+
+            console.log('DataSystem: Starting fetch for bossMonsters.json');
+            this.bossMonsters = await fetch('data/json/bossMonsters.json').then(r => r.json());
+            console.log('DataSystem: Successfully loaded bossMonsters.json:', this.bossMonsters);
+
+            console.log('DataSystem: Starting fetch for uniqueItems.json');
+            this.uniqueItems = await fetch('data/json/uniqueItems.json').then(r => r.json());
+            console.log('DataSystem: Successfully loaded uniqueItems.json:', this.uniqueItems);
+
+            console.log('DataSystem: Starting fetch for itemStatOptions.json');
+            this.itemStatOptions = await fetch('data/json/itemStatOptions.json').then(r => r.json());
+            console.log('DataSystem: Successfully loaded itemStatOptions.json:', this.itemStatOptions);
+        } catch (error) {
+            console.error('DataSystem: Failed to load data:', error);
+            this.randomMonsters = [];
+            this.uniqueMonsters = [];
+            this.bossMonsters = [];
+            this.uniqueItems = [];
+            this.itemStatOptions = {};
+        }
     }
 
     // Updated: Make saveGame async

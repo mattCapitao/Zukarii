@@ -157,6 +157,8 @@ export class LevelSystem extends System {
                 this.adjustPlayerPosition(levelEntity, levelData.stairsUp || levelData.stairsDown);
             } else {
                 const hasBossRoom = (tier - this.lastBossTier >= this.BOSS_ROOM_EVERY_X_LEVELS) || Math.random() < 0.05;
+                this.eventBus.emit('PlaySfx', { sfx: 'bossLevel0', volume: 0.5 }); 
+                console.log(`Has boss room = ${hasBossRoom} for tier ${tier}, last boss tier: ${this.lastBossTier}`);
                 levelData = this.generateLevel(hasBossRoom, tier, levelEntity.id);
                 console.log(`LevelSystem.js: Generated level data for tier ${tier}, roomEntityIds: ${JSON.stringify(levelData.roomEntityIds)}`);
 
@@ -1002,6 +1004,7 @@ export class LevelSystem extends System {
         }
 
         if (hasBossRoom) {
+            console.log(`Has boss room = ${hasBossRoom}, checking stairsDown distance to map center`);
             const bossRoomId = levelData.roomEntityIds.find(rId => this.entityManager.getEntity(rId).getComponent('Room').roomType === 'BossChamberSpecial');
             const bossRoom = this.entityManager.getEntity(bossRoomId).getComponent('Room');
             const paddedDistance = this.MIN_STAIR_DISTANCE + Math.floor((bossRoom.width + bossRoom.height) / 2);

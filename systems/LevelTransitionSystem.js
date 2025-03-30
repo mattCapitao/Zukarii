@@ -100,6 +100,8 @@ export class LevelTransitionSystem extends System {
 
         this.eventBus.emit('RenderNeeded');
         this.eventBus.emit('AddLevel', { tier: destinationTier });
+
+        
     }
 
     clearPlayerPosition() {

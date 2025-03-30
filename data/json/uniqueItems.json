@@ -72,7 +72,7 @@
     "relicAffixes": []
   },
   {
-    "name": "Golden Skin of T`Kore-Tickrob",
+    "name": "Golden Skin of Avarice",
     "type": "armor",
     "slot": "armor",
     "armor": -6,
@@ -86,7 +86,7 @@
       "block": 0,
       "maxLuck": -66
     },
-    "description": "Shiny, but it doesn't seem to do anything! Maybe if it was perfectly activated?",
+    "description": "Fancy Shiny Golden Armor with fancy magic swirlies, Its beauty is the envy of all, but it does not seem to do anything, and leaves you feeling like you just broke a mirror while trying to avoid stepping on a black cat as you walked under a ladder!",
     "uniqueId": null,
     "icon": "golden-skin.png",
     "relicAffixes": []

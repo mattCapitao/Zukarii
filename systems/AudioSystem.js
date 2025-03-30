@@ -28,6 +28,8 @@ export class AudioSystem extends System {
             ding: 'audio/ding.mp3',
             loot0: 'audio/loot/loot_0.wav',
             portal0: 'audio/portal/portal_0.wav',
+            bossLevel0: 'audio/boss/level/boss-level_0.wav', 
+            fountain0: 'audio/fountain/fountain_0.wav',
             //spellcasting sfx
             firecast0: 'audio/spell/cast/firecast_0.wav',
             firehit0: 'audio/spell/hit/firehit_0.wav',

@@ -7,6 +7,8 @@ export class MonsterSystem extends System {
         super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'Health', 'MonsterData'];
         this.dataSystem = dataSystem;
+
+        this.MIN_SPAWN_DISTANCE = 6; 
     }
 
     init() {
@@ -139,21 +141,42 @@ export class MonsterSystem extends System {
             console.log('MonsterSystem: Monster spawn pool:', spawnPool);
             console.log(`MonsterSystem: Spawning ${monsterCount} monsters for tier ${tier}`);
 
+            this.entityManager.setActiveTier(tier); // NEW: Ensure tier sync
+            console.log(`MonsterSystem: Active tier set to ${tier}, rooms: ${rooms}`);
+
             if (hasBossRoom) {
+                console.log('MonsterSystem: Starting Boss Monster RoomSelection');
                 const bossRoomId = rooms.find(roomId => {
                     const roomEntity = this.entityManager.getEntity(roomId);
+                    if (!roomEntity) {
+                        console.error(`MonsterSystem: Entity ${roomId} not found in tier ${tier}`);
+                        return false;
+                    }
+
                     const roomComp = roomEntity.getComponent('Room');
-                    return roomComp.type === 'BossChamberSpecial';
+                    if (!roomComp) {
+                        console.error(`MonsterSystem: No Room component for ${roomId}`);
+                        return false;
+                    }
+                    return roomComp.roomType === 'BossChamberSpecial';
+
                 });
+                console.log(`MonsterSystem: Boss room ID: ${bossRoomId}`);
                 if (bossRoomId && bossMonsters) {
                     const bossTemplate = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
                     const boss = this.createMonsterEntity(bossTemplate, tier, [bossRoomId], playerX, playerY);
+                    console.log(`MonsterSystem: Selected Boss ${bossTemplate.name} to spawn at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`, boss);
+
                     if (boss) {
                         boss.getComponent('MonsterData').isBoss = true;
                         console.log(`MonsterSystem: Boss ${boss.getComponent('MonsterData').name} spawned at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`);
                         const entityList = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier).getComponent('EntityList');
                         entityList.monsters.push(boss.id);
+                    } else {
+                        console.error(`MonsterSystem: Failed to spawn boss ${bossTemplate.name} in room ${bossRoomId}`);
                     }
+                } else {
+                    console.error(`MonsterSystem: No boss room (${bossRoomId}) or bossMonsters (${bossMonsters.length}) for tier ${tier}`);
                 }
             }
 
@@ -195,7 +218,7 @@ export class MonsterSystem extends System {
             console.error(`MonsterSystem.js: No rooms provided for spawning monsters on tier ${tier}`);
             return null;
         }
-        const entity = this.entityManager.createEntity(`monster_${tier}_${Math.random().toString(36).substr(2, 9)}`);
+        const entity = this.entityManager.createEntity(`monster_${tier}_${Math.random().toString(36).substring(2, 11)}`);
         const roomId = roomIds[Math.floor(Math.random() * roomIds.length)];
         const roomEntity = this.entityManager.getEntity(roomId);
         if (!roomEntity) {
@@ -211,6 +234,10 @@ export class MonsterSystem extends System {
         let attempts = 0;
         const maxAttempts = 50; // Prevent infinite loop
         let isOccupied = false; // Declare outside the do block
+
+        const MIN_SPAWN_DISTANCE = this.MIN_SPAWN_DISTANCE; // Aggro range (4) + 2 buffer
+
+        let distance;
         do {
             if (attempts >= maxAttempts) {
                 console.warn(`MonsterSystem.js: Failed to find valid spawn position for ${template.name} in room ${roomId} after ${maxAttempts} attempts`);
@@ -223,11 +250,16 @@ export class MonsterSystem extends System {
                 return ePos.x === x && ePos.y === y;
             });
             isOccupied = entitiesAtTarget.some(e => e.hasComponent('MonsterData'));
+
+            const dx = playerX - x;
+            const dy = playerY - y;
+            distance = Math.sqrt(dx * dx + dy * dy);
             attempts++;
         } while (
             !this.isWalkable(x, y) ||
             isOccupied ||
-            (x === playerX && y === playerY)
+            (x === playerX && y === playerY) || // Keep exact position check
+             distance < MIN_SPAWN_DISTANCE// NEW: Enforce min distance
         );
 
         const maxHp = this.calculateMonsterMaxHp(template.baseHp, tier);

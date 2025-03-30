@@ -120,8 +120,10 @@ export class PlayerControllerSystem {
 
         const fountain = entitiesAtTarget.find(e => e.hasComponent('Fountain') && !e.getComponent('Fountain').used);
         if (fountain) {
+
             this.eventBus.emit('UseFountain', { fountainEntityId: fountain.id, tierEntityId: levelEntity.id });
             movementSpeed.elapsedSinceLastMove = 0;
+            this.eventBus.emit('PlaySfx', { sfx: 'fountain0', volume: .5 });
             this.endTurn('useFountain');
             return;
         }
@@ -152,6 +154,7 @@ export class PlayerControllerSystem {
 
         const portal = entitiesAtTarget.find(e => e.hasComponent('Portal'));
         if (portal) {
+            this.eventBus.emit('PlaySfx', { sfx: 'portal0', volume: .5 });
             this.eventBus.emit('RenderLock');
             this.eventBus.emit('TransitionViaPortal', { x: newX, y: newY });
             this.endTurn('transitionPortal');
