@@ -805,6 +805,17 @@ export class UISystem extends System {
                 }
             }
 
+            if (itemData.affix && itemData.affix !== '') {
+                const affixDivider = document.createElement('hr');
+                affixDivider.className = 'tooltip-divider';
+                content.appendChild(affixDivider);
+
+                const affix = document.createElement('div');
+                affix.className = 'tooltip-affix';
+                affix.textContent = `${itemData.affix}`;
+                content.appendChild(affix);
+            }
+
             const descriptionDivider = document.createElement('hr');
             descriptionDivider.className = 'tooltip-divider';
             content.appendChild(descriptionDivider);

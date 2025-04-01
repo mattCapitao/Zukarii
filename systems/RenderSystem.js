@@ -53,10 +53,10 @@ export class RenderSystem extends System {
         const state = this.entityManager.getEntity('state');
 
         if (force) {
-            console.log(`RenderSystem: Accessing gameState - tier: ${gameState?.tier}, gameStarted: ${gameState?.gameStarted}, needsRender: ${gameState?.needsRender}, needsInitialRender: ${gameState?.needsInitialRender}`);
-            console.log(`RenderSystem: Accessing renderState - renderRadius: ${renderState?.renderRadius}, activeRenderZone: ${renderState?.activeRenderZone?.size}`);
-            console.log(`RenderSystem: Accessing renderControl - locked: ${renderControl?.locked}`);
-            console.log(`RenderSystem: Accessing player - position: (${player?.getComponent('Position')?.x}, ${player?.getComponent('Position')?.y})`);
+            //console.log(`RenderSystem: Accessing gameState - tier: ${gameState?.tier}, gameStarted: ${gameState?.gameStarted}, needsRender: ${gameState?.needsRender}, needsInitialRender: ${gameState?.needsInitialRender}`);
+            //console.log(`RenderSystem: Accessing renderState - renderRadius: ${renderState?.renderRadius}, activeRenderZone: ${renderState?.activeRenderZone?.size}`);
+            //console.log(`RenderSystem: Accessing renderControl - locked: ${renderControl?.locked}`);
+            //console.log(`RenderSystem: Accessing player - position: (${player?.getComponent('Position')?.x}, ${player?.getComponent('Position')?.y})`);
         }
 
         if (!gameState) return;
@@ -98,7 +98,7 @@ export class RenderSystem extends System {
         const renderRadius = renderState.renderRadius;
 
         if (force) {
-            //console.log(`RenderSystem: Accessing exploration state - discoveredWalls: ${exploration.discoveredWalls.size}, discoveredFloors: ${exploration.discoveredFloors.size}`);
+            ////console.log(`RenderSystem: Accessing exploration state - discoveredWalls: ${exploration.discoveredWalls.size}, discoveredFloors: ${exploration.discoveredFloors.size}`);
         }
 
         const walls = this.entityManager.getEntitiesWith(['Position', 'Wall']);
@@ -111,7 +111,7 @@ export class RenderSystem extends System {
         const portals = this.entityManager.getEntitiesWith(['Position', 'Portal']);
 
         if (force) {
-            //console.log(`RenderSystem: Entity query - walls: ${walls.length}, floors: ${floors.length}, monsters: ${monsters.length}, projectiles: ${projectiles.length}, treasures: ${treasures.length}, fountains: ${fountains.length}, stairs: ${stairs.length}, portals: ${portals.length}`);
+            ////console.log(`RenderSystem: Entity query - walls: ${walls.length}, floors: ${floors.length}, monsters: ${monsters.length}, projectiles: ${projectiles.length}, treasures: ${treasures.length}, fountains: ${fountains.length}, stairs: ${stairs.length}, portals: ${portals.length}`);
         }
 
         if (!Object.keys(this.tileMap).length) {
@@ -193,7 +193,7 @@ export class RenderSystem extends System {
                 }
                 mapDisplay += '\n';
             }
-            //console.log("Player Avatar Locations", playerSpawnLocations);
+            ////console.log("Player Avatar Locations", playerSpawnLocations);
             this.mapDiv.innerHTML = mapDisplay;
 
             for (let y = 0; y < HEIGHT; y++) {

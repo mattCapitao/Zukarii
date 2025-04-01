@@ -15,13 +15,13 @@ export class PlayerControllerSystem {
     }
 
     async init() {
-        console.log('PlayerControllerSystem initialized');
+        //console.log('PlayerControllerSystem initialized');
         const player = this.entityManager.getEntity('player');
         if (player) {
             const position = player.getComponent('Position');
             // *** NEW: Ensure position is set correctly ***
             this.lastInputState = {};
-            console.log('PlayerControllerSystem: Initial player position:', position.x, position.y);
+            //console.log('PlayerControllerSystem: Initial player position:', position.x, position.y);
         }
         this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
     }
@@ -45,7 +45,7 @@ export class PlayerControllerSystem {
         const currentKeys = JSON.stringify(inputState.keys);
         const lastKeys = JSON.stringify(this.lastInputState);
         if (currentKeys !== lastKeys) {
-            console.log('PlayerControllerSystem: InputState changed - current:', inputState.keys, 'last:', this.lastInputState);
+            //console.log('PlayerControllerSystem: InputState changed - current:', inputState.keys, 'last:', this.lastInputState);
             this.lastInputState = { ...inputState.keys };
         }
 
@@ -61,7 +61,7 @@ export class PlayerControllerSystem {
             if (isPressed && gameState.isRangedMode) {
                 // Key was just pressed, emit RangedAttack
                 if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
-                    console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: ${direction}`);
+                    //console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: ${direction}`);
                     const sfx = 'firecast0';
                     this.eventBus.emit('PlaySfx', {sfx, volume:.1  }); 
                     this.eventBus.emit('RangedAttack', { direction });
@@ -97,7 +97,7 @@ export class PlayerControllerSystem {
         }
 
         if (!moved) return;
-        console.log('PlayerControllerSystem: Attempting move to:', newX, newY);
+        //console.log('PlayerControllerSystem: Attempting move to:', newX, newY);
 
         const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
         if (!levelEntity) return;
@@ -186,7 +186,7 @@ export class PlayerControllerSystem {
 
 
     toggleRangedMode({ event }) {
-        console.log('PlayerControllerSystem: toggleRangedMode - event:', event.type, 'key:', event.key, 'repeat:', event.repeat);
+        //console.log('PlayerControllerSystem: toggleRangedMode - event:', event.type, 'key:', event.key, 'repeat:', event.repeat);
 
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const playerInventory = this.entityManager.getEntity('player').getComponent('Inventory');
@@ -195,13 +195,13 @@ export class PlayerControllerSystem {
 
         if (event.type === 'keyup' && event.key === ' ') {
             gameState.isRangedMode = false;
-            console.log('Ranged mode off');
+            //console.log('Ranged mode off');
             this.eventBus.emit('RenderNeeded');
         } else if (event.type === 'keydown' && event.key === ' ' && !event.repeat) {
             if ((offWeapon?.attackType === 'ranged' && offWeapon?.baseRange > 0) ||
                 (mainWeapon?.attackType === 'ranged' && mainWeapon?.baseRange > 0)) {
                 gameState.isRangedMode = true;
-                console.log('Ranged mode on', 'gameState:', gameState);
+                //console.log('Ranged mode on', 'gameState:', gameState);
                 this.eventBus.emit('RenderNeeded');
             } else {
                 this.eventBus.emit('LogMessage', { message: 'You need a valid ranged weapon equipped to use ranged mode!' });

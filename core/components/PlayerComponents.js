@@ -92,7 +92,8 @@ export class PlayerStateComponent {
         nextLevelXp = 0,
         dead = false,
         lampLit = false,
-        discoveredTileCount = 0
+        discoveredTileCount = 0,
+        isInCombat = false
     } = {}) {
         this.type = 'PlayerState';
         this.name = name;
@@ -102,6 +103,7 @@ export class PlayerStateComponent {
         this.dead = dead;
         this.lampLit = lampLit;
         this.discoveredTileCount = discoveredTileCount;
+        this.isInCombat = isInCombat;
     }
 }
 

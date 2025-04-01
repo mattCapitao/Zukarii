@@ -21,6 +21,7 @@ import { LightingSystem } from './systems/LightingSystem.js';
 import { GameDataIOSystem } from './systems/GameDataIOSystem.js';
 import { PlayerInputSystem } from './systems/PlayerInputSystem.js'; // New
 import { PlayerControllerSystem } from './systems/PlayerControllerSystem.js'; // New
+import { PlayerTimerSystem } from './systems/PlayerTimerSystem.js'; // New }
 import {
     PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent, AttackSpeedComponent,MovementSpeedComponent,
@@ -104,8 +105,9 @@ export class Game {
         this.systems.exploration = new ExplorationSystem(this.entityManager, this.state.eventBus);
         this.systems.lighting = new LightingSystem(this.entityManager, this.state.eventBus);
         this.systems.gameDataIO = new GameDataIOSystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.playerInput = new PlayerInputSystem(this.entityManager, this.state.eventBus); // New
-        this.systems.playerController = new PlayerControllerSystem(this.entityManager, this.state.eventBus); // New
+        this.systems.playerInput = new PlayerInputSystem(this.entityManager, this.state.eventBus); 
+        this.systems.playerController = new PlayerControllerSystem(this.entityManager, this.state.eventBus); 
+        this.systems.playerTimer = new PlayerTimerSystem(this.entityManager, this.state.eventBus); // New
 
         await Promise.all(Object.values(this.systems).map(system => system.init()));
         console.log('Game.js: Systems initialized');
@@ -157,6 +159,7 @@ export class Game {
                 'playerInput',
                 'playerController',
                 'combat',
+                'playerTimer',
                 'render',
                 'player',
                 'monster',

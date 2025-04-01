@@ -27,7 +27,7 @@ export class CombatSystem extends System {
 
         const projectiles = this.entityManager.getEntitiesWith(['Position', 'Projectile']);
         projectiles.forEach(proj => {
-            console.log('CombatSystem: Updating projectile', proj.id, 'position:', proj.getComponent('Position'), 'timestamp:', Date.now());
+            //console.log('CombatSystem: Updating projectile', proj.id, 'position:', proj.getComponent('Position'), 'timestamp:', Date.now());
             const pos = proj.getComponent('Position');
             const projData = proj.getComponent('Projectile');
             const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
@@ -91,7 +91,7 @@ export class CombatSystem extends System {
                             const hpBarWidth = Math.floor((health.hp / health.maxHp) * 16);
                             const monsterData = target.getComponent('MonsterData');
                             monsterData.hpBarWidth = hpBarWidth;
-                            //console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, target);
+                            ////console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, target);
                             const sfx = 'firehit0';
                             this.eventBus.emit('PlaySfx', { sfx, volume: .1 }); 
                             this.eventBus.emit('LogMessage', {
@@ -117,7 +117,7 @@ export class CombatSystem extends System {
                 pos.x = newX;
                 pos.y = newY;
                 projData.rangeLeft--;
-                console.log('CombatSystem: Projectile moved', proj.id, 'new position:', { x: newX, y: newY }, 'rangeLeft:', projData.rangeLeft, 'timestamp:', Date.now());
+                //console.log('CombatSystem: Projectile moved', proj.id, 'new position:', { x: newX, y: newY }, 'rangeLeft:', projData.rangeLeft, 'timestamp:', Date.now());
 
                 this.eventBus.emit('PositionChanged', { entityId: proj.id, x: newX, y: newY });
                 this.eventBus.emit('RenderNeeded');
@@ -130,7 +130,7 @@ export class CombatSystem extends System {
 
     combatSfx(type) {
 
-        console.log('CombatSystem: combatSfx called with :', type);
+        //console.log('CombatSystem: combatSfx called with :', type);
         const hitFileCount = 27;
         const missFileCount = 9;
         const blockFileCount = 9;
@@ -148,10 +148,10 @@ export class CombatSystem extends System {
                 sfx = `${type}${Math.floor(Math.random() * blockFileCount)}`;
                 break;
             default:
-                console.log('CombatSystem: Invalid combat sfx type:', type);
+                //console.log('CombatSystem: Invalid combat sfx type:', type);
                 return
         }
-        console.log('CombatSystem: Playing combat sfx:', sfx);
+        //console.log('CombatSystem: Playing combat sfx:', sfx);
         this.eventBus.emit('PlaySfx', {sfx, volume: .1});
     }
 
@@ -186,13 +186,15 @@ export class CombatSystem extends System {
         const monsterData = monster.getComponent('MonsterData');
         if (!monsterData.isAggro) return;
 
+        this.eventBus.emit('PlayerWasHit', { entityId: 'player' });
+
         const playerStats = player.getComponent('Stats');
         const playerHealth = player.getComponent('Health');
 
         const dodgeRoll = Math.round(Math.random() * 100 + playerStats.agility / 2 - (monsterData.luck || 0) / 2);
         if (dodgeRoll >= 85) {
             this.eventBus.emit('LogMessage', { message: `You dodged the ${monsterData.name}'s attack!` });
-            console.log("player dodged the attack"); 
+            //console.log("player dodged the attack"); 
             this.combatSfx('miss');
             return;
         }
@@ -200,11 +202,11 @@ export class CombatSystem extends System {
         const blockRoll = Math.round(Math.random() * 100 + playerStats.block / 2 - (monsterData.luck || 0) / 2);
         if (blockRoll >= 85) {
             this.eventBus.emit('LogMessage', { message: `You blocked the ${monsterData.name}'s attack!` });
-            console.log("player blocked the attack");
+            //console.log("player blocked the attack");
             this.combatSfx('block');
             return;
         }
-        console.log("player was hit by the attack");
+        //console.log("player was hit by the attack");
         this.combatSfx('hit');
 
         this.eventBus.emit('CalculateMonsterDamage', {
@@ -228,6 +230,7 @@ export class CombatSystem extends System {
         const player = this.entityManager.getEntity('player');
         const target = this.entityManager.getEntity(targetEntityId);
         if (!player || !target) return;
+        this.eventBus.emit('PlayerInitiatedAttack', { entityId: 'player' });
 
         const playerStats = player.getComponent('Stats');
         const playerInventory = player.getComponent('Inventory');
@@ -253,7 +256,7 @@ export class CombatSystem extends System {
             if (Math.random() * 100 < missChance) {
                 this.eventBus.emit('LogMessage', { message: `Your ${weapon.name} missed the ${targetMonsterData.name}!` });
                 this.combatSfx('miss');
-                console.log("player missed the attack");
+                //console.log("player missed the attack");
                 return;
             }
 
@@ -261,7 +264,7 @@ export class CombatSystem extends System {
             const dodgeRoll = Math.random() * 100;
             if (dodgeRoll >= 99) {
                 this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} dodged your ${weapon.name} attack!` });
-                console.log("monster dodged the attack");
+                //console.log("monster dodged the attack");
                 this.combatSfx('miss');
                 return;
             }
@@ -269,11 +272,11 @@ export class CombatSystem extends System {
             const blockRoll = Math.random() * 100;
             if (blockRoll >= 99) {
                 this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} blocked your ${weapon.name} attack!` });
-                console.log("monster blocked the attack");
+                //console.log("monster blocked the attack");
                 this.combatSfx('block');
                 return;
             }
-            console.log("monster was hit by the attack");
+            //console.log("monster was hit by the attack");
             this.combatSfx('hit');
             this.eventBus.emit('CalculatePlayerDamage', {
                 attacker: player,
@@ -287,7 +290,7 @@ export class CombatSystem extends System {
                     const hpBarWidth = Math.floor((health.hp / health.maxHp) * 16);
                     const monsterData = target.getComponent('MonsterData');
                     monsterData.hpBarWidth = hpBarWidth;
-                    console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, target );
+                    //console.log(`Monster HP Bar Width: ${monsterData.hpBarWidth}`, target );
 
                     this.eventBus.emit('LogMessage', {
                         message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
@@ -304,15 +307,18 @@ export class CombatSystem extends System {
 
     handleRangedAttack({ direction }) {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
-        console.log('CombatSystem.handleRangedAttack(): Ranged attack:', direction, "Game State: ", gameState);
+        //console.log('CombatSystem.handleRangedAttack(): Ranged attack:', direction, "Game State: ", gameState);
         const player = this.entityManager.getEntity('player');
         if (!player) return;
+       
+        this.eventBus.emit('PlayerInitiatedAttack', { entityId: 'player' });
+        //this.eventBus.emit('LogMessage', { message: `Initiated Ranged attack!` });
 
         const playerPos = player.getComponent('Position');
         const stats = player.getComponent('Stats');
         const weapon = this.getBestRangedWeapon();
         const range = stats.range || weapon.baseRange || 3;
-        //console.log('CombatSystem.handleRangedAttack(): Ranged attack - player range stat:', stats.range, ' weapon baseRange:', weapon.baseRange, 'calculated range:', range);
+        ////console.log('CombatSystem.handleRangedAttack(): Ranged attack - player range stat:', stats.range, ' weapon baseRange:', weapon.baseRange, 'calculated range:', range);
 
         // Start at player's position, no offset
         let startX = playerPos.x;

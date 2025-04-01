@@ -16,13 +16,14 @@ export class PlayerSystem extends System {
         this.eventBus.on('TilesDiscovered', (data) => this.handleTilesDiscovered(data));
         this.eventBus.on('AllocateStat', (data) => this.handleStatAllocation(data));
         this.eventBus.on('ModifyBaseStat', (data) => this.modifyBaseStat(data));
+        this.eventBus.on('PlayerInitiatedAttack', ({ entityId }) => this.handlePlayerInitiatedAttack(entityId));
+        this.eventBus.on('PlayerWasHit', ({ entityId }) => this.handlePlayerWasHit(entityId));
+        this.eventBus.on('CombatEnded', ({ entityId }) => this.exitCombat(entityId));
     }
 
     initializePlayer() {
         const player = this.entityManager.getEntity('player');
         const stats = player.getComponent('Stats');
-        //New - 1d5 + 7 should give us a range of 8-12 for each stat maintianing randomness but keeping it more balanced
-        //Old - 3d4 + 3 method could give 6 - 15 which is a bit too much variance to balance around for low levels
         stats._internal.base.intellect = this.utilities.dRoll(3, 1, 8);
         stats._internal.base.prowess = this.utilities.dRoll(3, 1, 8);
         stats._internal.base.agility = this.utilities.dRoll(3, 1, 8);
@@ -233,12 +234,14 @@ export class PlayerSystem extends System {
 
     checkLevelUp(player) {
         const playerState = player.getComponent('PlayerState');
+        const playerHealth = player.getComponent('Health');
         const stats = player.getComponent('Stats');
         let statAllocationMessage = '';;
-
+        let levelUp = false;
         while (playerState.xp >= playerState.nextLevelXp) {
             const newXp = playerState.xp - playerState.nextLevelXp;
             playerState.level++;
+            levelUp = true
 
             if (playerState.level % 3 === 0) {
                 stats.unallocated++;
@@ -251,7 +254,10 @@ export class PlayerSystem extends System {
             this.eventBus.emit('PlayAudio', { sound: 'ding', play: true });
             this.eventBus.emit('LogMessage', { message: `Level up! Now level ${playerState.level}, ${statAllocationMessage}` });
         }
-        this.calculateStats(player);
+        if (levelUp) { 
+            this.calculateStats(player);
+            playerHealth.hp = stats.maxHp; // Reset health to full on level up
+        }
     }
 
     death({ source }) {
@@ -290,6 +296,36 @@ export class PlayerSystem extends System {
             const xpAward = (currentMilestones - previousMilestones) * 50;
             this.eventBus.emit('AwardXp', { amount: xpAward });
             this.eventBus.emit('LogMessage', { message: `Exploration milestone reached! Gained ${xpAward} XP for discovering ${currentMilestones * xpThreshold} tiles.` });
+        }
+    }
+
+    handlePlayerInitiatedAttack(entityId) {
+        const player = this.entityManager.getEntity(entityId);
+        if (!player) return;
+        const playerState = player.getComponent('PlayerState');
+        if (!playerState.isInCombat) {
+            playerState.isInCombat = true;
+            this.eventBus.emit('LogMessage', { message: 'You enter combat by attacking!' });
+        }
+    }
+
+    handlePlayerWasHit(entityId) {
+        const player = this.entityManager.getEntity(entityId);
+        if (!player) return;
+        const playerState = player.getComponent('PlayerState');
+        if (!playerState.isInCombat) {
+            playerState.isInCombat = true;
+            this.eventBus.emit('LogMessage', { message: 'You enter combat after being hit!' });
+        }
+    }
+
+    exitCombat(entityId) {
+        const player = this.entityManager.getEntity(entityId);
+        if (!player) return;
+        const playerState = player.getComponent('PlayerState');
+        if (playerState.isInCombat) {
+            playerState.isInCombat = false;
+            this.eventBus.emit('LogMessage', { message: 'You are no longer in combat.' });
         }
     }
 }

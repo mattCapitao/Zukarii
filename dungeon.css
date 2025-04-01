@@ -165,7 +165,7 @@ transform: translate(-50%, -50%);
 width: 70vw;
 height: 75vh;
 background: rgba(20, 30, 20, 0.7);
-border: 0.0625rem solid #060; /* ~1px */
+border: 0.125rem solid #060; /* ~1px */
 border-radius: .625rem;
 color: #0f0;
 display: none; /* Hidden by default */
@@ -188,7 +188,7 @@ flex: 0 0 auto;
 #close-tabs {
 background: #000;
 color: #0f0;
-border: 0.0625rem solid #0f0; /* ~1px */
+border: 0.125rem solid #0f0; /* ~1px */
 padding: 0.3125rem 0.625rem; /* ~5px 10px */
 cursor: pointer;
 font-size: 1rem; /* ~16px */
@@ -213,7 +213,7 @@ color: #000;
     text-align: center;
     padding: 1.25rem; /* ~20px */
     border-radius: 0.625rem; /* ~10px */
-    border: 0.0625rem solid #2c672c;
+    border: 0.125rem solid #2c672c;
     pointer-events: auto; /* Clickable children */
     /* ~1px */
 }
@@ -458,7 +458,7 @@ flex-direction:column;
 width: 100%;
 height: 28rem; /* Keep max height but let content dictate rows */
 padding: 0.625rem; /* Outer padding */
-border: 0.0625rem solid #0f0;
+border: 0.125rem solid #0f0;
 border-radius: .625rem;
 overflow-y: auto;
 scrollbar-color: #0f0 #111;
@@ -536,7 +536,7 @@ flex-wrap: wrap;
 font-size: 0.75rem; /* ~12px */
 padding: 0.625rem; /* ~10px */
 background: rgba(20, 30, 20, 0.7);
-border: 0.0625rem solid #0f0; /* ~1px */
+border: 0.125rem solid #0f0; /* ~1px */
 border-radius: .625rem;
 }
 
@@ -576,7 +576,7 @@ align-content: center;
     font-size: 0.75rem; /* ~12px */
     padding: 0.625rem; /* ~10px */
     background: rgba(20, 30, 20, 0.7);
-    border: 0.0625rem solid #0f0; /* ~1px */
+    border: 0.125rem solid #0f0; /* ~1px */
     border-radius: .625rem;
     margin-bottom: 0.625rem; /* ~10px */
 }
@@ -623,7 +623,7 @@ width: 33% !important;
     border-radius: .3125rem; /* ~5px */
     padding: 0;
     margin: 0;
-    border: 0.0625rem solid #ccc; /* ~1px */
+    border: 0.125rem solid #ccc; /* ~1px */
 
 }
 
@@ -633,7 +633,7 @@ width: 33% !important;
         background-size: 4.25rem;
         border-radius: .3125rem; /* ~5px */
         box-shadow: inset 0 0 10px #000;
-        border: 0.0625rem solid #ccc; /* ~1px */
+        border: 0.125rem solid #ccc; /* ~1px */
         background-repeat: no-repeat;
         background-attachment: fixed;
         background-position: center center;
@@ -716,7 +716,7 @@ background-image: url('img/icons/item-slots/boots.svg');
     align-items: center; /* Center buttons horizontally */
     padding: 0.625rem; /* ~10px */
     background: rgba(20, 30, 20, 0.7);
-    border: 0.0625rem solid #0f0; /* ~1px */
+    border: 0.125rem solid #0f0; /* ~1px */
     border-radius: .625rem;
     margin-bottom: 0.625rem; /* ~10px */
     height: 100%; /* Ensure it stretches to fill #game-menu */
@@ -759,7 +759,7 @@ background-image: url('img/icons/item-slots/boots.svg');
     width: 100%;
     padding: 0.625rem; /* ~10px */
     background: rgba(20, 30, 20, 0.7);
-    border: 0.0625rem solid #0f0; /* ~1px */
+    border: 0.125rem solid #0f0; /* ~1px */
     border-radius: .625rem;
     overflow-y: auto;
     scrollbar-color: #0f0 #111;
@@ -792,11 +792,11 @@ background-image: url('img/icons/item-slots/boots.svg');
 
 li.new-save-game {
     padding-bottom: .625rem; /* ~10px */
-    border-bottom: 0.0625rem solid #2c672c; /* ~1px */
+    border-bottom: 0.125rem solid #2c672c; /* ~1px */
 }
 
 #save-name-input {
-    border: 0.0625rem solid #ccc;
+    border: 0.125rem solid #ccc;
     background-color: #2c672c80;
     color: #080;
 }
@@ -878,7 +878,7 @@ li.new-save-game {
     width: 100%;
     height: 27.25rem; /* Keep max height but let content dictate rows */
     padding: 0.625rem; /* Outer padding */
-    border: 0.0625rem solid #0f0;
+    border: 0.125rem solid #0f0;
     -moz-border-radius: 0px;
     -webkit-border-radius: 0px 0px .625rem .625rem;
     border-radius: 0px 0px .625rem .625rem;
@@ -910,7 +910,7 @@ padding: 0;
 #tabs p.inventory-slot img.item {
 width: 3.85rem; /* Match the 64px design */
 height: 3.85rem; /* Match the 64px design */
-border: 0.0625rem solid #0f0;
+border: 0.125rem solid #0f0;
 padding: 0;
 margin: 0;
 border-radius: .3125rem;
@@ -932,7 +932,7 @@ color: #0f0;
 z-index: 1000;
 max-width: 15rem; /* ~200px */
 background: rgba(20, 30, 20, 1);
-border: 0.0625rem solid #060; /* ~1px */
+border: 0.125rem solid #060; /* ~1px */
 border-radius: .625rem;
 }
 
@@ -951,9 +951,27 @@ border-radius: .625rem;
     }
 }
 
+
+.artifact,
+.artifact hr,
+.item-tooltip-class.artifact,
+.item-tooltip-class p img.item-tooltip-icon.artifact,
+#tabs #equipped-items p.equip-slot.equipped img.item.artifact,
+#tabs p.inventory-slot.artifact img.item,
+#tabs p.inventory-slot span.item-label.artifact {
+    color: GoldenRod !important;
+    border-color: GoldenRod !important;
+}
+
+    .artifact hr, .item-tooltip-icon-wrap.artifact,
+    #tabs #equipped-items p.equip-slot.equipped img.artifact.item,
+    #tabs p.inventory-slot.artifact img.item {
+        background-color: GoldenRod !important;
+    }
+
 .relic,
 .relic hr,
-.item-tooltip-class.relic,
+.item-tooltip-class.relic, 
 .item-tooltip-class p img.item-tooltip-icon.relic,
 #tabs #equipped-items p.equip-slot.equipped img.item.relic,
 #tabs p.inventory-slot.relic img.item,
@@ -962,43 +980,59 @@ border-radius: .625rem;
     border-color: gold !important;
 }
 
-    .relic hr,
+    .relic hr, .item-tooltip-icon.relic,
     #tabs #equipped-items p.equip-slot.equipped img.relic.item,
     #tabs p.inventory-slot.relic img.item {
         background-color: gold !important;
     }
 
-
-    .magic,
-    .magic hr,
-    .item-tooltip-class.magic,
-    #tabs #equipped-items p.equip-slot.equipped img.magic.item,
-    #tabs p.inventory-slot.magic img.item,
-    #tabs p.inventory-slot span.item-label.magic {
-        color: blueviolet !important;
-        border-color: blueviolet !important;
-    }
-.mastercraft hr,
-#tabs #equipped-items p.equip-slot.equipped img.magic.item,
-#tabs p.inventory-slot.magic img.item {
-    background-color: darkorchid !important;
+.legendary,
+.legendary hr,
+.item-tooltip-class.legendary,
+.item-tooltip-class p img.item-tooltip-icon.legendary,
+#tabs #equipped-items p.equip-slot.equipped img.item.legendary,
+#tabs p.inventory-slot.legendary img.item,
+#tabs p.inventory-slot span.item-label.legendary {
+    color: darkorange !important;
+    border-color: darkorange !important;
 }
+
+    .legendary hr, .item-tooltip-icon.legendary,
+    #tabs #equipped-items p.equip-slot.equipped img.legendary.item,
+    #tabs p.inventory-slot.legendary img.item {
+        background-color: darkorange !important;
+    }
 
 .mastercraft,
 .mastercraft hr,
+.item-tooltip-class.mastercraft,
+#tabs #equipped-items p.equip-slot.equipped img.mastercraft.item,
+#tabs p.inventory-slot.mastercraft img.item,
+#tabs p.inventory-slot span.item-label.mastercraft {
+    color: darkmagenta !important;
+    border-color: darkmagenta !important;
+}
+    .mastercraft hr, .item-tooltip-icon.mastercraft,
+    #tabs #equipped-items p.equip-slot.equipped img.mastercraft.item,
+    #tabs p.inventory-slot.mastercraft img.item {
+        background-color: darkmagenta !important;
+    }
+
+.magic,
+.magic hr,
 .item-tooltip-class.magic,
 #tabs #equipped-items p.equip-slot.equipped img.magic.item,
 #tabs p.inventory-slot.magic img.item,
 #tabs p.inventory-slot span.item-label.magic {
-    color: darkorchid !important;
-    border-color: darkorchid !important;
+    color: blueviolet !important;
+    border-color: Blueviolet !important;
 }
 
-.magic hr,
-#tabs #equipped-items p.equip-slot.equipped img.magic.item,
-#tabs p.inventory-slot.magic img.item {
-    background-color: blueviolet !important;
-}
+    .magic hr, .item-tooltip-icon.magic,
+    #tabs #equipped-items p.equip-slot.equipped img.magic.item,
+    #tabs p.inventory-slot.magic img.item {
+        background-color: BlueViolet !important;
+    }
 
 .rare,
 .rare hr,
@@ -1010,7 +1044,7 @@ border-radius: .625rem;
     border-color: blue !important;
 }
 
-    .rare hr,
+    .rare hr, .item-tooltip-icon.rare,
     #tabs #equipped-items p.equip-slot.equipped img.rare.item,
     #tabs p.inventory-slot.rare img.item {
         background-color: blue !important;
@@ -1027,11 +1061,11 @@ border-radius: .625rem;
     border-color: #0f0 !important;
 }
 
-.common hr,
-#tabs #equipped-items p.equip-slot.equipped img.common.item,
-#tabs p.inventory-slot.common img.item {
-background-color: #0f0 !important;
-}
+    .common hr, .item-tooltip-icon.common,
+    #tabs #equipped-items p.equip-slot.equipped img.common.item,
+    #tabs p.inventory-slot.common img.item {
+        background-color: #0f0 !important;
+    }
 
 
 
@@ -1045,11 +1079,11 @@ color: whitesmoke !important;
 border-color: whitesmoke !important;
 }
 
-.junk hr,
-#tabs #equipped-items p.equip-slot.equipped img.junk.item,
-#tabs p.inventory-slot.junk img.item {
-background-color: whitesmoke !important;
-}
+    .junk hr, .item-tooltip-icon.junk,
+    #tabs #equipped-items p.equip-slot.equipped img.junk.item,
+    #tabs p.inventory-slot.junk img.item {
+        background-color: whitesmoke !important;
+    }
 
 
 .item-tooltip-name {
@@ -1079,7 +1113,7 @@ background-color: whitesmoke !important;
     border-radius: .3125rem; /* ~5px */
     padding: 0;
     margin: 0;
-    border: 0.0625rem solid #ccc; /* ~1px */
+    border: 0.125rem solid #ccc; /* ~1px */
 }
 
 .item-tooltip-type-tier {

@@ -6,42 +6,93 @@ export class LootManagerSystem extends System {
     constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus, utilities);
         this.tierTables = [
-            (roll) => {
-                if (roll < 0.60) return 0;  // junk
-                if (roll < 0.95) return 1;  // common
-                if (roll < 0.995) return 2; // rare
-                if (roll >= 0.995) return 3; // magic
-                return 1;                   // common (default)
+            (roll) => { // Tier 0: Levels 1-4
+                if (roll < 0.60) return 0;  // junk: 60%
+                if (roll < 0.995) return 1; // common: 39.5% 
+                if (roll >= 0.995) return 2; // rare: 0.5%
+                return 0;                   // junk (fallback)
             },
-            (roll) => {
-                if (roll < 0.40) return 0;  // junk
-                if (roll < 0.75) return 1;  // common
-                if (roll < 0.95) return 2;  // rare
-                if (roll < 0.98) return 3;  // magic
-                if (roll >= 0.98) return 4; // mastercraft
-                return 1;                   // common (default)
+            (roll) => { // Tier 1: Levels 5-9
+                if (roll < 0.45) return 0;  // junk: 45%
+                if (roll < 0.99) return 1; // common: 54%
+                if (roll >= 0.99) return 2; // rare: 1%
+                return 0;                   // junk (fallback)
             },
-            (roll) => {
-                if (roll < 0.15) return 0;  // junk
-                if (roll < 0.55) return 1;  // common
-                if (roll < 0.90) return 2;  // rare
-                if (roll < 0.95) return 3;  // magic
-                if (roll < 0.98) return 4;  // mastercraft
-                if (roll < 0.996) return 5; // legendary
-                if (roll < 0.998) return 6; // relic
-                if (roll >= 0.998) return 7; // artifact
-                return 1;                   // common (default)
+            (roll) => { // Tier 2: Levels 10-14
+                if (roll < 0.30) return 0;  // junk: 30%
+                if (roll < 0.98) return 1; // common: 68%
+                if (roll >= 0.98) return 2; // rare: 2%
+                return 0;                   // junk (fallback)
             },
-            (roll) => {
-                if (roll < 0.67) return 2;  // rare
-                if (roll < 0.87) return 3;  // magic
-                if (roll < 0.93) return 4;  // mastercraft
-                if (roll < 0.97) return 5;  // legendary
-                if (roll < 0.99) return 6;  // relic
-                if (roll >= 0.99) return 7; // artifact
-                return 1;                   // common (default)
+            (roll) => { // Tier 3: Levels 15-19
+                if (roll < 0.20) return 0;  // junk: 20%
+                if (roll < 0.80) return 1;  // common: 60%
+                if (roll < 0.995) return 2; // rare: 19.5%
+                if (roll >= 0.995) return 3; // magic: 0.5%
+                return 0;                   // junk (fallback)
+            },
+            (roll) => { // Tier 4: Levels 20-24
+                if (roll < 0.05) return 0;  // junk: 5%
+                if (roll < 0.65) return 1;  // common: 60%
+                if (roll < 0.99) return 2; // rare: 34%
+                if (roll >= 0.99) return 3; // magic: 1%
+                return 0;                   // junk (fallback)
+            },
+            (roll) => { // Tier 5: Levels 25-29
+                if (roll < 0.60) return 1;  // common: 60%
+                if (roll < 0.90) return 2;  // rare: 30%
+                if (roll < 0.995) return 3; // magic: 9.5%
+                if (roll >= 0.995) return 4; // mastercraft: 0.5%
+                return 1;                   // common (fallback)
+            },
+            (roll) => { // Tier 6: Levels 30-34
+                if (roll < 0.40) return 1;  // common: 40%
+                if (roll < 0.85) return 2;  // rare: 45%
+                if (roll < 0.99) return 3; // magic: 14%
+                if (roll >= 0.99) return 4; // mastercraft: 1%
+                return 1;                   // common (fallback)
+            },
+            (roll) => { // Tier 7: Levels 35-39
+                if (roll < 0.20) return 1;  // common: 20%
+                if (roll < 0.70) return 2;  // rare: 50%
+                if (roll < 0.95) return 3;  // magic: 25%
+                if (roll < 0.995) return 4; // mastercraft: 4.5%
+                if (roll >= 0.995) return 5; // legendary: 0.5%
+                return 1;                   // common (fallback)
+            },
+            (roll) => { // Tier 8: Levels 40-44
+                if (roll < 0.05) return 1;  // common: 5%
+                if (roll < 0.55) return 2;  // rare: 50%
+                if (roll < 0.90) return 3; // magic: 35%
+                if (roll < 0.99) return 4; // mastercraft: 9%
+                if (roll >= 0.99) return 5; // legendary: 1%
+                return 1;                   // common (fallback)
+            },
+            (roll) => { // Tier 9: Levels 45-49
+                if (roll < 0.40) return 2;  // rare: 40%
+                if (roll < 0.85) return 3;  // magic: 45%
+                if (roll < 0.98) return 4; // mastercraft: 13%
+                if (roll < 0.995) return 5; // legendary: 1.5%
+                if (roll >= 0.995) return 6; // relic: 0.5%
+                return 2;                   // rare (fallback)
+            },
+            (roll) => { // Tier 10: Levels 50+
+                if (roll < 0.05) return 3;   // magic: 5%
+                if (roll < 0.70) return 4;   // mastercraft: 65%
+                if (roll < 0.90) return 5;   // legendary: 20%
+                if (roll < 0.995) return 6;  // relic: 9.5%
+                if (roll >= 0.995) return 7; // artifact: 0.5%
+                return 3;                    // junk (fallback)
+            },
+            (roll) => { // Tier 11: Levels 50+ with lucky tier roll (unchanged)
+                if (roll < 0.60) return 4;  // mastercraft: 60%
+                if (roll < 0.85) return 5;  // legendary: 25%
+                if (roll < 0.99) return 6;  // relic: 14%
+                if (roll >= 0.99) return 7; // artifact: 1%
+                return 4;                    // common (fallback)
             }
         ];
+         
         this.itemTiers = ['junk', 'common', 'rare', 'magic', 'mastercraft', 'legendary', 'relic', 'artifact'];
 
         // Fetch unique items from DataSystem
@@ -56,7 +107,7 @@ export class LootManagerSystem extends System {
         this.BASE_GOLD_MAX = 50;
 
         //ITEMS
-        this.BASE_ITEM_CHANCE = 0.7;
+        this.BASE_ITEM_CHANCE = 1;
         this.BASE_UNIQUE_CHANCE = 0.05;
 
         //POTIONS
@@ -77,10 +128,7 @@ export class LootManagerSystem extends System {
         this.TORCH_CHANCE_LOW_TORCHES = 0.125;
         this.TORCH_CHANCE_MEDIUM_TORCHES = 0.075;
         this.TORCH_DESPERATION_CHANCE = 0.20;
-        this.TORCH_DROP_FAIL_THRESHOLD = 3;
-        
-        
-       
+        this.TORCH_DROP_FAIL_THRESHOLD = 3; 
     }
 
     init() {
@@ -92,76 +140,6 @@ export class LootManagerSystem extends System {
             }
         });
     }
-    /*
-    async handleLootDrop({ lootSource }) {
-        if (!this.uniqueItems) {
-            console.warn('LootManagerSystem: uniqueItems not loaded, fetching synchronously...');
-            await new Promise(resolve => {
-                this.eventBus.emit('GetUniqueItems', {
-                    callback: (uniqueItems) => {
-                        this.uniqueItems = uniqueItems;
-                        resolve();
-                    }
-                });
-            });
-        }
-        const sourceData = lootSource.getComponent('LootSourceData');
-        if (!sourceData) {
-            console.error(`LootManagerSystem: No LootSourceData found on lootSource entity with ID: ${lootSource.id}`);
-            return;
-        } else {
-            console.log(`LootManagerSystem: handleLootDrop() called with lootSource:`, sourceData);
-        }
-
-        if (false) {//(Math.random() >= this.BASE_DROP_CHANCE) {
-            this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped nothing.` });
-            return;
-        }
-
-        const player = this.entityManager.getEntity('player');
-        const playerResource = player ? player.getComponent('Resource') : { torches: 0, healPotions: 0 };
-        const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState') || { isLit: false };
-        const playerHealth = player ? player.getComponent('Health') : { hp: 0, maxHp: 1 };
-
-        const modifiers = sourceData.chanceModifiers || {};
-        const gold = this.calculateGoldGain(modifiers.gold || 1);
-        const torches = this.calculateTorchDrop(playerResource, lightingState, modifiers.torches || 1);
-        const healPotions = this.calculatePotionDrop(playerResource, playerHealth, modifiers.healPotions || 1);
-
-        const items = await this.buildItemsDropped(sourceData, player, modifiers);
-        console.log(`LootManagerSystem: handleLootDrop() generated items:`, items);
-
-        const uniqueId = this.utilities.generateUniqueId();
-        const lootEntity = this.entityManager.createEntity(`loot_${sourceData.tier}_${uniqueId}`);
-        const position = new PositionComponent(sourceData.position.x, sourceData.position.y);
-        const lootData = new LootData({
-            name: `The ${sourceData.name} Loot`,
-            gold,
-            torches,
-            healPotions,
-            items
-        });
-        this.entityManager.addComponentToEntity(lootEntity.id, position);
-        this.entityManager.addComponentToEntity(lootEntity.id, lootData);
-
-        const dropMessage = [
-            gold ? `${gold} gold` : '',
-            torches ? `${torches} torch${torches > 1 ? 'es' : ''}` : '',
-            healPotions ? `${healPotions} heal potion${healPotions > 1 ? 's' : ''}` : '',
-            items.length ? items.map(i => i.name).join(', ') : ''
-        ].filter(Boolean).join(', ');
-        //Suppress message for treasure chestsn eed to change this later
-        //soucreData needs to have enum types eg.world, monster, quest etc to manage message emitting
-        if (sourceData.name !== 'Treasure Chest') { 
-            this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped ${dropMessage}!` });
-        }
-        
-        this.eventBus.emit('SpawnLoot', {
-            treasure: lootEntity,
-            tier: sourceData.tier
-        });
-    }
-    */
 
     async handleLootDrop({ lootSource }) {
         const sourceData = lootSource.getComponent('LootSourceData');
@@ -220,7 +198,7 @@ export class LootManagerSystem extends System {
     }
 
   async buildItemsDropped(sourceData, player, modifiers) {
-        let items = [];
+        let items = []; 
         // Process specified items in sourceData.items
         if (sourceData.items && sourceData.items.length > 0) {
             for (const stub of sourceData.items) {
@@ -256,7 +234,7 @@ export class LootManagerSystem extends System {
             for (let i = 0; i < remainingSlots; i++) {
                 const tierIndex = this.getItemTier(sourceData.tier, player);
                 if (tierIndex >= 0) {
-                    if (tierIndex <= 4) {
+                    if (tierIndex <= 5) {
                         this.eventBus.emit('GenerateROGItem', {
                             partialItem: { tierIndex },
                             dungeonTier: sourceData.tier,
@@ -331,14 +309,14 @@ export class LootManagerSystem extends System {
         console.log("getItemTier() called");
         let tableIndex = 0;
         switch (true) {
-            case dungeonTier < 2:
+            case dungeonTier < 5:
                 tableIndex = 0;
                 break;
-            case dungeonTier < 3:
-                tableIndex = 1;
+            case dungeonTier <= 50:
+                tableIndex = Math.floor(dungeonTier / 5);
                 break;
-            case dungeonTier >= 3:
-                tableIndex = 2;
+            case dungeonTier > 50:
+                tableIndex = 10;
                 break;
             default:
                 tableIndex = 0;

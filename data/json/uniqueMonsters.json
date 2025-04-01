@@ -25,6 +25,10 @@
           "attackType": "melee",
           "name": "Orc Boss Chopper"
         }
+      },
+      {
+        "type": "rog",
+        "data": { }
       }
     ]
   },
@@ -62,6 +66,17 @@
     "isAggro": false,
     "isElite": true,
     "isBoss": false,
-    "affixes": []
+    "affixes": [],
+    "uniqueItemsDropped": [
+      {
+        "type": "rog",
+        "data": {
+          "tierIndex": 5,
+          "type": "weapon",
+          "attackType": "ranged",
+          "name": "Wyrm Staff"
+        }
+      }
+    ]
   }
 ]

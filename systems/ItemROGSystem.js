@@ -132,7 +132,12 @@ export class ItemROGSystem extends System {
         let availableStats = [...statArray];
         let selectedStats = {};
 
-        const count = itemTier;
+        let count = itemTier;
+        let randomAffix = false;
+        if (itemTier > 4) {
+            count = 4;
+            randomAffix = true;
+        }
         for (let i = 0; i < count && availableStats.length > 0; i++) {
             const index = Math.floor(Math.random() * availableStats.length);
             const stat = availableStats.splice(index, 1)[0];
@@ -144,8 +149,28 @@ export class ItemROGSystem extends System {
                 selectedStats[stat] = statValue;
             }
         }
+
+        if (randomAffix) {
+            const affix = this.getRandomAffix();
+            if (affix) {
+                item.affix = affix;
+            } else { 
+                console.warn('ItemROGSystem: getRandomAffix returned an empty string');
+            }
+        }
+
         console.log(`Returning selected stats:`, selectedStats);
         return selectedStats;
+    }
+
+    getRandomAffix() {
+        if (!this.itemStatOptions) {
+            console.warn('ItemROGSystem: itemStatOptions not available, cannot generate random affix');
+            return '';
+        }
+        const itemAffixOptions = ['moveSpeed','healthRegen'];
+        const index = Math.floor(Math.random() * itemAffixOptions.length);
+        return itemAffixOptions[index];
     }
 
     rollMaxLuck(item, dungeonTier) {
@@ -179,14 +204,14 @@ export class ItemROGSystem extends System {
             case 'agility': return Math.floor(item.tierIndex / 2);
             case 'intellect': return Math.floor(item.tierIndex / 2);
 
-            case 'range': return randomizeStatRoll(Math.round(item.tierIndex * .5), item);
-            case 'block': return randomizeStatRoll(Math.round(item.tierIndex * .5), item);
-            case 'defense': return randomizeStatRoll(Math.round(item.tierIndex * .5), item);
+            case 'range': return this.randomizeStatRoll(Math.round(item.tierIndex * .5), item);
+            case 'block': return this.randomizeStatRoll(Math.round(item.tierIndex * .5), item);
+            case 'defense': return this.randomizeStatRoll(Math.round(item.tierIndex * .5), item);
 
-            case 'damageBonus': return randomizeStatRoll((item.tierIndex + 1), item);
-            case 'meleeBonus': return randomizeStatRoll((item.tierIndex + 1), item);
-            case 'rangedBonus': return randomizeStatRoll((item.tierIndex + 1), item);
-            case 'resistMagic': return randomizeStatRoll((item.tierIndex + 1), item); 
+            case 'damageBonus': return this.randomizeStatRoll((item.tierIndex + 1), item);
+            case 'meleeBonus': return this.randomizeStatRoll((item.tierIndex + 1), item);
+            case 'rangedBonus': return this.randomizeStatRoll((item.tierIndex + 1), item);
+            case 'resistMagic': return this.randomizeStatRoll((item.tierIndex + 1), item); 
             
             default:
                 console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
