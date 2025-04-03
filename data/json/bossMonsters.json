@@ -7,21 +7,21 @@
     "family": "demon",
     "minDungeonTier": 3,
     "avatar": "P",
-    "baseHp": 50,
-    "maxHp": 50,
-    "hp": 50,
+    "baseHp": 60,
+    "maxHp": 60,
+    "hp": 60,
     "minBaseDamage": 1,
     "maxBaseDamage": 6,
     "isAggro": false,
     "isElite": true,
     "isBoss": true,
     "affixes": [],
-    "gold": 100,
+    "gold": 500,
     "uniqueItemsDropped": [
-      {
-        "type": "customUnique",
-        "data": { "name": "Golden Khepresh" }
-      }
+      {"type": "customUnique","dropChance": 0.2,"data":{ "name": "Golden Khepresh" }},
+      {"type": "rog", "dropChance": 0.1, "data": { "tierIndex": 3}},
+      {"type": "rog","dropChance": 1, "data": {}}
+       
     ]
   },
   {
@@ -32,21 +32,20 @@
     "family": "demon",
     "minDungeonTier": 3,
     "avatar": "K",
-    "baseHp": 50,
-    "maxHp": 50,
-    "hp": 50,
+    "baseHp": 200,
+    "maxHp": 200,
+    "hp": 200,
     "minBaseDamage": 1,
-    "maxBaseDamage": 3,
+    "maxBaseDamage": 2,
     "isAggro": false,
     "isElite": true,
     "isBoss": true,
     "affixes": [ "goldTheft" ],
     "gold": 0,
     "uniqueItemsDropped": [
-      {
-        "type": "customUnique",
-        "data": { "name": "Golden Skin of Avarice" }
-      }
+      {"type": "customUnique","dropChance": 0.2,"data": { "name": "Golden Skin of Avarice" }},
+      {"type": "rog", "dropChance": 0.1, "data": { "tierIndex": 3}},
+      {"type": "rog","dropChance": 1, "data": {}}
     ]
   }
 ]

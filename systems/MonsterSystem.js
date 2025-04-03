@@ -185,18 +185,30 @@ export class MonsterSystem extends System {
                 const roomComp = roomEntity.getComponent('Room');
                 return roomComp.type !== 'BossChamberSpecial';
             }) : rooms;
+            let eliteMonsterCount = 0;
+
+            const tierMonsters = (randomMonsters || []).filter(m => m.minDungeonTier <= tier);
+            const tierUniqueMonsters = (uniqueMonsters || []).filter(m => m.minDungeonTier <= tier);
+
+            if (tierMonsters.length === 0 && tierUniqueMonsters.length === 0) {
+                console.warn(`MonsterSystem: No monsters available for tier ${tier}`);
+                return;
+            }
+
             for (let i = 0; i < monsterCount; i++) {
-                if (!randomMonsters || randomMonsters.length === 0) {
+                if (!tierMonsters || tierMonsters.length === 0) {
                     console.warn('MonsterSystem: No random monsters available to spawn');
                     break;
                 }
-                const tierMonsters = randomMonsters.filter(m => m.minDungeonTier <= tier);
+                
                 let template = tierMonsters[Math.floor(Math.random() * tierMonsters.length)];
                 //let template = randomMonsters[Math.floor(Math.random() * randomMonsters.length)];
 
-                if (spawnPool.uniqueMonsters && Math.random() < .05 * tier) {
-                    if (uniqueMonsters && uniqueMonsters.length > 0) {
-                        template = uniqueMonsters[Math.floor(Math.random() * uniqueMonsters.length)];
+                if (spawnPool.uniqueMonsters && Math.random() < .05 * tier && eliteMonsterCount <= monsterCount * .2) { 
+
+                    if (tierUniqueMonsters.length > 0) {
+                        eliteMonsterCount++;
+                        template = tierUniqueMonsters[Math.floor(Math.random() * tierUniqueMonsters.length)];
                     } else {
                         console.warn('MonsterSystem: No unique monsters available, falling back to random monster');
                     }

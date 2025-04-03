@@ -483,7 +483,7 @@ export class LevelSystem extends System {
     isTooClose(newRoom, existingRooms, minDistance) {
         return existingRooms.some(room => this.calculateDistance(newRoom.x, newRoom.y, room.centerX, room.centerY) < minDistance);
     }
-
+    /*
     connectRooms(roomEntityIds, map, floors, walls, floorPositions, tier) {
         if (roomEntityIds.length === 0) return;
         const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
@@ -516,6 +516,81 @@ export class LevelSystem extends System {
         }
 
         // Add logging to check room types and connections
+        console.log(`LevelSystem.js: Room connections after connectRooms for tier ${tier}:`);
+        for (const roomId of roomEntityIds) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length} (${room.connections.join(', ')})`);
+        }
+    }
+    */
+
+    connectRooms(roomEntityIds, map, floors, walls, floorPositions, tier) {
+        if (roomEntityIds.length === 0) return;
+        const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
+        const connectedRooms = [roomEntityIds[0]];
+
+        for (let i = 1; i < roomEntityIds.length; i++) {
+            const newRoomId = roomEntityIds[i];
+            const newRoom = this.entityManager.getEntity(newRoomId).getComponent('Room');
+            // Prefer non-special rooms for special room connections
+            let nearestRoomId = this.findNearestRoom(newRoomId, connectedRooms,
+                newRoom.roomType === 'AlcoveSpecial' || newRoom.roomType === 'BossChamberSpecial'
+                    ? connectedRooms.map(id => this.entityManager.getEntity(id).getComponent('Room').roomType)
+                        .filter(type => type === 'AlcoveSpecial' || type === 'BossChamberSpecial')
+                        .map((_, idx) => connectedRooms[idx])
+                    : []
+            );
+            this.carveCorridor(newRoomId, nearestRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity);
+            newRoom.connections.push(nearestRoomId);
+            const nearestRoom = this.entityManager.getEntity(nearestRoomId).getComponent('Room');
+            nearestRoom.connections.push(newRoomId);
+            connectedRooms.push(newRoomId);
+        }
+
+        // Existing extra connection logic for non-special rooms
+        for (const roomId of roomEntityIds) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            if (room.connections.length < 2 && roomEntityIds.length > 2 && room.roomType !== 'AlcoveSpecial' && room.roomType !== 'BossChamberSpecial') {
+                const farRoomId = this.findFarRoom(roomId, roomEntityIds, [roomId, ...room.connections]);
+                if (farRoomId) {
+                    this.carveCorridor(roomId, farRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity);
+                    const farRoom = this.entityManager.getEntity(farRoomId).getComponent('Room');
+                    room.connections.push(farRoomId);
+                    farRoom.connections.push(roomId);
+                }
+            }
+            if ((room.roomType === 'AlcoveSpecial' || room.roomType === 'BossChamberSpecial') && room.connections.length > 1) {
+                room.connections = [room.connections[0]];
+            }
+        }
+
+        // New check for special room pairs
+        for (const roomId of roomEntityIds) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            if ((room.roomType === 'AlcoveSpecial' || room.roomType === 'BossChamberSpecial') && room.connections.length === 1) {
+                const connectedRoomId = room.connections[0];
+                const connectedRoom = this.entityManager.getEntity(connectedRoomId).getComponent('Room');
+                if (connectedRoom.roomType === 'AlcoveSpecial' || connectedRoom.roomType === 'BossChamberSpecial') {
+                    // Isolated pair detected
+                    console.warn(`Isolated pair detected: ${roomId} (${room.roomType}) and ${connectedRoomId} (${connectedRoom.roomType})`);
+                    const nonSpecialRoomId = this.findNearestRoom(roomId, roomEntityIds,
+                        roomEntityIds.filter(id => {
+                            const r = this.entityManager.getEntity(id).getComponent('Room');
+                            return r.roomType === 'AlcoveSpecial' || r.roomType === 'BossChamberSpecial' || id === roomId || id === connectedRoomId;
+                        })
+                    );
+                    if (nonSpecialRoomId) {
+                        this.carveCorridor(roomId, nonSpecialRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity);
+                        const nonSpecialRoom = this.entityManager.getEntity(nonSpecialRoomId).getComponent('Room');
+                        room.connections = [nonSpecialRoomId]; // Replace connection to other special room
+                        nonSpecialRoom.connections.push(roomId);
+                        connectedRoom.connections = []; // Will be caught by ensureRoomConnections if still isolated
+                    }
+                }
+            }
+        }
+
+        // Log final connections
         console.log(`LevelSystem.js: Room connections after connectRooms for tier ${tier}:`);
         for (const roomId of roomEntityIds) {
             const room = this.entityManager.getEntity(roomId).getComponent('Room');

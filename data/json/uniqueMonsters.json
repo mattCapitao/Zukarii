@@ -19,6 +19,7 @@
     "uniqueItemsDropped": [
       {
         "type": "rog",
+        "dropChance": 0.1,
         "data": {
           "tierIndex": 2,
           "type": "weapon",
@@ -38,7 +39,7 @@
     "name": "Ghoul",
     "classes": "ghoul",
     "family": "undead",
-    "minDungeonTier": 4,
+    "minDungeonTier": 5,
     "avatar": "G",
     "baseHp": 27,
     "maxHp": 27,
@@ -48,7 +49,22 @@
     "isAggro": false,
     "isElite": true,
     "isBoss": false,
-    "affixes": []
+    "affixes": [],
+    "uniqueItemsDropped": [
+      {
+        "type": "rog",
+        "dropChance": 0.05,
+        "data": {
+          "tierIndex": 3,
+          "type": "amulet",
+          "name": "Holy Trinket"
+        }
+      },
+      {
+        "type": "rog",
+        "data": {}
+      }
+    ]
   },
   {
     "x": 0,
@@ -56,7 +72,7 @@
     "name": "Wyrmling",
     "classes": "wyrmling",
     "family": "dragon",
-    "minDungeonTier": 6,
+    "minDungeonTier": 15,
     "avatar": "W",
     "baseHp": 33,
     "maxHp": 33,
@@ -70,12 +86,17 @@
     "uniqueItemsDropped": [
       {
         "type": "rog",
+        "dropChance": 0.01,
         "data": {
           "tierIndex": 5,
           "type": "weapon",
           "attackType": "ranged",
           "name": "Wyrm Staff"
         }
+      },
+      {
+        "type": "rog",
+        "data": {}
       }
     ]
   }

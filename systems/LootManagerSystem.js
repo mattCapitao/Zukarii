@@ -102,12 +102,12 @@ export class LootManagerSystem extends System {
         this.BASE_DROP_CHANCE = 0.9;
 
         //GOLD
-        this.BASE_GOLD_CHANCE = 0.85;
+        this.BASE_GOLD_CHANCE = 0.95;
         this.BASE_GOLD_MIN = 10;
         this.BASE_GOLD_MAX = 50;
 
         //ITEMS
-        this.BASE_ITEM_CHANCE = 1;
+        this.BASE_ITEM_CHANCE = .85;
         this.BASE_UNIQUE_CHANCE = 0.05;
 
         //POTIONS
@@ -202,28 +202,29 @@ export class LootManagerSystem extends System {
         // Process specified items in sourceData.items
         if (sourceData.items && sourceData.items.length > 0) {
             for (const stub of sourceData.items) {
-                if (stub.type === "rog") {
-                    // Partial ROG item
-                    const tierIndex = stub.data.tierIndex !== undefined ? stub.data.tierIndex : this.getItemTier(sourceData.tier, player);
-                    this.eventBus.emit('GenerateROGItem', {
-                        partialItem: { tierIndex, ...stub.data },
-                        dungeonTier: sourceData.tier,
-                        callback: (item) => {
-                            if (item) items.push(item);
-                        }
-                    });
-                } else if (stub.type === "randomUnique") {
-                    // Random unique item (guaranteed drop)
-                    console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) randomUnique stub.data: ", stub.data);
-                    const uniqueItem = await this.getUniqueItem({ type: "randomUnique", data: stub.data });
-                    console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) randomUnique uniqueItem: ", uniqueItem);
-                    if (uniqueItem) items.push(uniqueItem);
-                } else if (stub.type === "customUnique") {
-                    console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) customUnique stub.data: ", stub.data);
-                    // Specific unique item
-                    const uniqueItem = await this.getUniqueItem({ type: "customUnique", data: stub.data });
-                    console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) customUnique uniqueItem: ", uniqueItem);
-                    if (uniqueItem) items.push(uniqueItem);
+
+                const itemDropChance = stub.dropChance || 1;
+                if (Math.random() < itemDropChance) {
+                    if (stub.type === "rog") {
+                        // Partial ROG item
+                        const tierIndex = (stub.data.tierIndex !== undefined && stub.data.tierIndex > sourceData.tier/5)? stub.data.tierIndex : this.getItemTier(sourceData.tier, player);
+                        this.eventBus.emit('GenerateROGItem', {
+                            partialItem: { tierIndex, ...stub.data },
+                            dungeonTier: sourceData.tier,
+                            callback: (item) => { if (item) items.push(item);}
+                        });
+                    } else if (stub.type === "randomUnique") {
+                        console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) randomUnique stub.data: ", stub.data);
+                        const uniqueItem = await this.getUniqueItem({ type: "randomUnique", data: stub.data });
+                        console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) randomUnique uniqueItem: ", uniqueItem);
+                        if (uniqueItem) items.push(uniqueItem);
+                    } else if (stub.type === "customUnique") {
+                        console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) customUnique stub.data: ", stub.data);
+                        // Specific unique item
+                        const uniqueItem = await this.getUniqueItem({ type: "customUnique", data: stub.data });
+                        console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) customUnique uniqueItem: ", uniqueItem);
+                        if (uniqueItem) items.push(uniqueItem);
+                    }
                 }
             }
         }

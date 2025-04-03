@@ -108,7 +108,7 @@ export class ItemROGSystem extends System {
 
         // Bonus stats
         if (!item.stats || Object.keys(item.stats).length === 0) {
-            if (item.tierIndex > 1) {
+            if ((item.tierIndex === 1 && Math.random() < .5) || item.tierIndex > 1) { 
                 item.stats = this.getBonusStats(statOptions.bonus, item);
             }
         }
@@ -199,10 +199,10 @@ export class ItemROGSystem extends System {
             case 'armor': return Math.floor(item.tierIndex) + 1;
             case 'maxHp': return item.tierIndex * 5 + Math.round(Math.random() * (item.tierIndex * 5));
 
-            case 'maxMana': return Math.floor(item.tierIndex / 2);
-            case 'prowess': return Math.floor(item.tierIndex / 2);
-            case 'agility': return Math.floor(item.tierIndex / 2);
-            case 'intellect': return Math.floor(item.tierIndex / 2);
+            case 'maxMana': return Math.floor(item.tierIndex / 2) || 1;
+            case 'prowess': return Math.floor(item.tierIndex / 2) || 1;
+            case 'agility': return Math.floor(item.tierIndex / 2) || 1;
+            case 'intellect': return Math.floor(item.tierIndex / 2) || 1;
 
             case 'range': return this.randomizeStatRoll(Math.round(item.tierIndex * .5), item);
             case 'block': return this.randomizeStatRoll(Math.round(item.tierIndex * .5), item);

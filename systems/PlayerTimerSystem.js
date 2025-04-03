@@ -38,13 +38,7 @@ export class PlayerTimerSystem extends System {
                     }
                 }
             }
-            /*
-            // Special case for combat flag
-            const playerState = entity.getComponent('PlayerState');
-            if (!timers.has('combat') && playerState.isInCombat) {
-                playerState.isInCombat = false; // Optional: Sync state directly
-            }
-            */
+
         }
     }
 
