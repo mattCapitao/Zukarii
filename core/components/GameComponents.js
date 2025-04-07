@@ -142,8 +142,16 @@ export class LightSourceDefinitions {
     constructor() {
         this.type = 'LightSourceDefinitions';
         this.definitions = {
-            torch: { duration: 200, visibleRadius: 4 }, // Adjusted for testing
+            torch: { duration: 300, visibleRadius: 4 }, // Adjusted for testing
             lamp: { duration: 500, visibleRadius: 5 } // For future extensibility
         };
+    }
+}
+
+export class DataProcessQueues {
+    constructor() {
+        this.type = 'DataProcessQueues';
+        this.HealthUpdates = [];
+        this.ManaUpdates = [];
     }
 }

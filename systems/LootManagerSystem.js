@@ -13,74 +13,74 @@ export class LootManagerSystem extends System {
                 return 0;                   // junk (fallback)
             },
             (roll) => { // Tier 1: Levels 5-9
-                if (roll < 0.45) return 0;  // junk: 45%
-                if (roll < 0.99) return 1; // common: 54%
-                if (roll >= 0.99) return 2; // rare: 1%
+                if (roll < 0.30) return 0;  // junk: 30%
+                if (roll < 0.95) return 1; // common: 65%
+                if (roll >= 0.95) return 2; // rare: 5%
                 return 0;                   // junk (fallback)
             },
             (roll) => { // Tier 2: Levels 10-14
-                if (roll < 0.30) return 0;  // junk: 30%
-                if (roll < 0.98) return 1; // common: 68%
-                if (roll >= 0.98) return 2; // rare: 2%
+                if (roll < 0.10) return 0;  // junk: 10%
+                if (roll < 0.85) return 1; // common: 75%
+                if (roll >= 0.85) return 2; // rare: 15%
                 return 0;                   // junk (fallback)
             },
             (roll) => { // Tier 3: Levels 15-19
-                if (roll < 0.20) return 0;  // junk: 20%
-                if (roll < 0.80) return 1;  // common: 60%
-                if (roll < 0.995) return 2; // rare: 19.5%
-                if (roll >= 0.995) return 3; // magic: 0.5%
-                return 0;                   // junk (fallback)
-            },
-            (roll) => { // Tier 4: Levels 20-24
                 if (roll < 0.05) return 0;  // junk: 5%
-                if (roll < 0.65) return 1;  // common: 60%
-                if (roll < 0.99) return 2; // rare: 34%
+                if (roll < 0.75) return 1;  // common: 70%
+                if (roll < 0.99) return 2; // rare: 24.%
                 if (roll >= 0.99) return 3; // magic: 1%
                 return 0;                   // junk (fallback)
             },
+            (roll) => { // Tier 4: Levels 20-24
+                if (roll < 0.01) return 0;  // junk: 1%
+                if (roll < 0.61) return 1;  // common: 60%
+                if (roll < 0.95) return 2; // rare: 34%
+                if (roll >= 0.95) return 3; // magic: 5%
+                return 0;                   // junk (fallback)
+            },
             (roll) => { // Tier 5: Levels 25-29
-                if (roll < 0.60) return 1;  // common: 60%
-                if (roll < 0.90) return 2;  // rare: 30%
-                if (roll < 0.995) return 3; // magic: 9.5%
-                if (roll >= 0.995) return 4; // mastercraft: 0.5%
+                if (roll < 0.50) return 1;  // common: 50%
+                if (roll < 0.89) return 2;  // rare: 39%
+                if (roll < 0.99) return 3; // magic: 10%
+                if (roll >= 0.99) return 4; // mastercraft: 1%
                 return 1;                   // common (fallback)
             },
             (roll) => { // Tier 6: Levels 30-34
-                if (roll < 0.40) return 1;  // common: 40%
-                if (roll < 0.85) return 2;  // rare: 45%
-                if (roll < 0.99) return 3; // magic: 14%
-                if (roll >= 0.99) return 4; // mastercraft: 1%
+                if (roll < 0.30) return 1;  // common: 30%
+                if (roll < 0.75) return 2;  // rare: 45%
+                if (roll < 0.95) return 3; // magic: 20%
+                if (roll >= 0.95) return 4; // mastercraft: 5%
                 return 1;                   // common (fallback)
             },
             (roll) => { // Tier 7: Levels 35-39
                 if (roll < 0.20) return 1;  // common: 20%
                 if (roll < 0.70) return 2;  // rare: 50%
-                if (roll < 0.95) return 3;  // magic: 25%
-                if (roll < 0.995) return 4; // mastercraft: 4.5%
-                if (roll >= 0.995) return 5; // legendary: 0.5%
-                return 1;                   // common (fallback)
-            },
-            (roll) => { // Tier 8: Levels 40-44
-                if (roll < 0.05) return 1;  // common: 5%
-                if (roll < 0.55) return 2;  // rare: 50%
-                if (roll < 0.90) return 3; // magic: 35%
+                if (roll < 0.89) return 3;  // magic: 24.%
                 if (roll < 0.99) return 4; // mastercraft: 9%
                 if (roll >= 0.99) return 5; // legendary: 1%
                 return 1;                   // common (fallback)
             },
+            (roll) => { // Tier 8: Levels 40-44
+                if (roll < 0.05) return 1;  // common: 5%
+                if (roll < 0.40) return 2;  // rare: 35%
+                if (roll < 0.90) return 3; // magic: 45%
+                if (roll < 0.99) return 4; // mastercraft:13%
+                if (roll >= 0.99) return 5; // legendary: 2%
+                return 1;                   // common (fallback)
+            },
             (roll) => { // Tier 9: Levels 45-49
-                if (roll < 0.40) return 2;  // rare: 40%
-                if (roll < 0.85) return 3;  // magic: 45%
-                if (roll < 0.98) return 4; // mastercraft: 13%
-                if (roll < 0.995) return 5; // legendary: 1.5%
+                if (roll < 0.35) return 2;  // rare: 35%
+                if (roll < 0.80) return 3;  // magic: 45%
+                if (roll < 0.95) return 4; // mastercraft: 15%
+                if (roll < 0.995) return 5; // legendary: 4.5%
                 if (roll >= 0.995) return 6; // relic: 0.5%
                 return 2;                   // rare (fallback)
             },
             (roll) => { // Tier 10: Levels 50+
                 if (roll < 0.05) return 3;   // magic: 5%
                 if (roll < 0.70) return 4;   // mastercraft: 65%
-                if (roll < 0.90) return 5;   // legendary: 20%
-                if (roll < 0.995) return 6;  // relic: 9.5%
+                if (roll < 0.97) return 5;   // legendary: 27%
+                if (roll < 0.995) return 6;  // relic: 2.5%
                 if (roll >= 0.995) return 7; // artifact: 0.5%
                 return 3;                    // junk (fallback)
             },
@@ -107,7 +107,7 @@ export class LootManagerSystem extends System {
         this.BASE_GOLD_MAX = 50;
 
         //ITEMS
-        this.BASE_ITEM_CHANCE = .85;
+        this.BASE_ITEM_CHANCE = .65;
         this.BASE_UNIQUE_CHANCE = 0.05;
 
         //POTIONS

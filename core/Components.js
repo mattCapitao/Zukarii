@@ -33,7 +33,8 @@ import {
     RenderControlComponent,
     LightingState,
     LightSourceDefinitions,
-    OverlayStateComponent
+    OverlayStateComponent,
+    DataProcessQueues
 } from './components/GameComponents.js';
 
 import {
@@ -41,6 +42,7 @@ import {
     HealthComponent,
     AttackSpeedComponent,
     MovementSpeedComponent,
+    AffixComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -75,12 +77,14 @@ export {
     LightingState,
     LightSourceDefinitions,
     OverlayStateComponent,
+    DataProcessQueues,
 
     // Common components
     PositionComponent,
     HealthComponent,
     AttackSpeedComponent,
     MovementSpeedComponent,
+    AffixComponent,
 };
 
 // Utility functions

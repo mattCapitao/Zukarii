@@ -19,12 +19,16 @@ import { DataSystem } from './systems/DataSystem.js';
 import { ExplorationSystem } from './systems/ExplorationSystem.js';
 import { LightingSystem } from './systems/LightingSystem.js';
 import { GameDataIOSystem } from './systems/GameDataIOSystem.js';
-import { PlayerInputSystem } from './systems/PlayerInputSystem.js'; // New
-import { PlayerControllerSystem } from './systems/PlayerControllerSystem.js'; // New
-import { PlayerTimerSystem } from './systems/PlayerTimerSystem.js'; // New }
+import { PlayerInputSystem } from './systems/PlayerInputSystem.js'; 
+import { PlayerControllerSystem } from './systems/PlayerControllerSystem.js'; 
+import { PlayerTimerSystem } from './systems/PlayerTimerSystem.js'; 
+import { AffixSystem } from './systems/AffixSystem.js'; 
+import { EffectsSystem } from './systems/EffectsSystem.js'; // NEW: Added
+import { ComponentManagerSystem } from './systems/ComponentManagerSystem.js'; 
 import {
     PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
-    PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent, AttackSpeedComponent,MovementSpeedComponent,
+    PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
+    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues
 } from './core/Components.js';
 
 export class Game {
@@ -55,6 +59,7 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new InputStateComponent());
         this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
         this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(200));
+        this.entityManager.addComponentToEntity('player', new AffixComponent()); // New component added
 
         let overlayState = this.entityManager.getEntity('overlayState');
         if (!overlayState) {
@@ -74,6 +79,8 @@ export class Game {
         lightingState = this.entityManager.createEntity('lightingState', true);
         this.entityManager.addComponentToEntity('lightingState', new LightingState());
         this.entityManager.addComponentToEntity('lightingState', new LightSourceDefinitions());
+
+        this.entityManager.addComponentToEntity('gameState', new DataProcessQueues());
 
         this.initializeSystems().then(() => {
             this.state.eventBus.emit('InitializePlayer');
@@ -107,7 +114,10 @@ export class Game {
         this.systems.gameDataIO = new GameDataIOSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.playerInput = new PlayerInputSystem(this.entityManager, this.state.eventBus); 
         this.systems.playerController = new PlayerControllerSystem(this.entityManager, this.state.eventBus); 
-        this.systems.playerTimer = new PlayerTimerSystem(this.entityManager, this.state.eventBus); // New
+        this.systems.playerTimer = new PlayerTimerSystem(this.entityManager, this.state.eventBus); 
+        this.systems.affix = new AffixSystem(this.entityManager, this.state.eventBus);
+        this.systems.effects = new EffectsSystem(this.entityManager, this.state.eventBus); // New system added
+        this.systems.componentManager = new ComponentManagerSystem(this.entityManager, this.state.eventBus);
 
         await Promise.all(Object.values(this.systems).map(system => system.init()));
         console.log('Game.js: Systems initialized');
@@ -156,6 +166,7 @@ export class Game {
 
             // *** CHANGED: Pass deltaTime to updateSystems ***
             this.updateSystems([
+                'componentManager',
                 'playerInput',
                 'playerController',
                 'combat',
@@ -164,7 +175,9 @@ export class Game {
                 'player',
                 'monster',
                 'ui',
-                'exploration'
+                'exploration',
+                'affix',
+                'effects'
             ], deltaTime);
 
             const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
@@ -192,5 +205,4 @@ export class Game {
         this.startGameLoop();
         console.log('Game.js: Game started');
     }
-
 }

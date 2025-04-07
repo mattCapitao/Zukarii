@@ -32,3 +32,10 @@ export class MovementSpeedComponent {
         this.elapsedSinceLastMove = 0; // Time since last move in ms
     }
 }
+
+export class AffixComponent {
+    constructor(affixes = []) {
+        this.type = 'Affix';
+        this.affixes = affixes; // Array of { type, trigger, effect, params }
+    }
+}

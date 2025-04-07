@@ -805,15 +805,18 @@ export class UISystem extends System {
                 }
             }
 
-            if (itemData.affix && itemData.affix !== '') {
+            if (itemData.affixes && itemData.affixes.length > 0) { // CHANGED: Fixed typo .length() to .length
                 const affixDivider = document.createElement('hr');
                 affixDivider.className = 'tooltip-divider';
                 content.appendChild(affixDivider);
-
-                const affix = document.createElement('div');
-                affix.className = 'tooltip-affix';
-                affix.textContent = `${itemData.affix}`;
-                content.appendChild(affix);
+                itemData.affixes.forEach(affix => {
+                    const affixElement = document.createElement('div');
+                    affixElement.className = 'tooltip-affix';
+                    // Use affix.name (capitalized) and description, with fallbacks
+                    const affixName = affix.name ? affix.name.charAt(0).toUpperCase() + affix.name.slice(1) : 'Unnamed';
+                    affixElement.textContent = `${affixName}: ${affix.description || 'No description'}`;
+                    content.appendChild(affixElement);
+                });
             }
 
             const descriptionDivider = document.createElement('hr');

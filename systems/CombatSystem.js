@@ -98,6 +98,12 @@ export class CombatSystem extends System {
                                 message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
                             });
 
+                            this.eventBus.emit('MonsterWasHit', {
+                                entityId: target.id,
+                                attackerId: 'player',
+                                damageDealt: damage
+                            });
+
                             if (targetHealth.hp <= 0) {
                                 this.eventBus.emit('MonsterDied', { entityId: target.id });
                             }
@@ -186,7 +192,7 @@ export class CombatSystem extends System {
         const monsterData = monster.getComponent('MonsterData');
         if (!monsterData.isAggro) return;
 
-        this.eventBus.emit('PlayerWasHit', { entityId: 'player' });
+        this.eventBus.emit('PlayerWasAttacked', { entityId: 'player', attackerId: entityId });
 
         const playerStats = player.getComponent('Stats');
         const playerHealth = player.getComponent('Health');
@@ -218,6 +224,9 @@ export class CombatSystem extends System {
                     message: `${isCritical ? ' (Critical Hit!) - ' : ''}${monsterData.name} hits for ${attackDmg}, armor protects you from: ${armorReduction}, defense skill mitigates: ${defenseReduction} resulting in ${damage} damage dealt to you (${playerHealth.hp}/${playerHealth.maxHp})`
                 });
                 this.eventBus.emit('StatsUpdated', { entityId: 'player' });
+
+                this.eventBus.emit('PlayerWasHit', { entityId: 'player', attackerId: entityId });
+                console.log(`CombatSystem: Emitted PlayerWasHit for attacker ${entityId}`);
 
                 if (playerHealth.hp <= 0) {
                     this.eventBus.emit('PlayerDeath', { source: monsterData.name });
@@ -294,6 +303,12 @@ export class CombatSystem extends System {
 
                     this.eventBus.emit('LogMessage', {
                         message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${damage} damage to ${targetMonsterData.name} with your ${weapon.name} (${targetHealth.hp}/${targetHealth.maxHp})`
+                    });
+
+                    this.eventBus.emit('MonsterWasHit', {
+                        entityId: targetEntityId,
+                        attackerId: 'player',
+                        damageDealt: damage
                     });
 
                     if (targetHealth.hp <= 0) {

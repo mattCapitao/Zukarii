@@ -6,6 +6,8 @@ export class InventorySystem extends System {
     constructor(entityManager, eventBus, utilities) { 
         super(entityManager, eventBus, utilities);
         this.requiredComponents = ['Inventory'];
+
+        
     }
 
     init() {
@@ -87,6 +89,26 @@ export class InventorySystem extends System {
         inventory.items.splice(index, 1);
         inventory.equipped[slot] = { ...item, equippedSlot: slot };
         this.eventBus.emit('LogMessage', { message: `Equipped ${item.name} to ${slot}` });
+
+        // CHANGED: Apply item affixes to player's AffixComponent
+        if (item.affixes && Array.isArray(item.affixes)) {
+            const affixComponent = entity.getComponent('Affix') || new AffixComponent([]);
+            item.affixes.forEach(affix => {
+                const affixData = {
+                    name: affix.name,         // e.g., "resilience"
+                    type: affix.type,         // e.g., 'combat'
+                    trigger: affix.trigger,   // e.g., 'hitByAttack'
+                    effect: affix.effect,     // e.g., 'instantHeal'
+                    params: affix.params,     // e.g., { chanceToHeal: 0.05, ... }
+                    sourceId: item.uniqueId   // Track origin for removal
+                };
+                affixComponent.affixes.push(affixData);
+            });
+            this.entityManager.addComponentToEntity(entityId, affixComponent);
+            console.log(`InventorySystem: Applied affixes from ${item.name} to ${entityId}:`, affixComponent.affixes);
+        }
+
+
         this.eventBus.emit('GearChanged', { entityId });
     }
 
@@ -108,6 +130,16 @@ export class InventorySystem extends System {
         if (!item) return;
 
         inventory.equipped[slot] = null;
+
+        // CHANGED: Remove item affixes from player's AffixComponent
+        const affixComponent = entity.getComponent('Affix');
+        if (affixComponent && item.affixes) {
+            affixComponent.affixes = affixComponent.affixes.filter(affix => affix.sourceId !== item.uniqueId);
+            this.entityManager.addComponentToEntity(entityId, affixComponent);
+            console.log(`InventorySystem: Removed affixes from ${item.name} for ${entityId}:`, affixComponent.affixes);
+        }
+
+
         if (toInventory) {
             inventory.items.push({ ...item, equippedSlot: undefined });
             if (!silent) this.eventBus.emit('LogMessage', { message: `Unequipped ${item.name} to inventory` });

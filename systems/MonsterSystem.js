@@ -1,6 +1,6 @@
 ﻿// systems/MonsterSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent, HealthComponent, LootSourceData, AttackSpeedComponent, MovementSpeedComponent } from '../core/Components.js';
+import { PositionComponent, HealthComponent, LootSourceData, AttackSpeedComponent, MovementSpeedComponent, AffixComponent } from '../core/Components.js';
 
 export class MonsterSystem extends System {
     constructor(entityManager, eventBus, dataSystem) {
@@ -9,6 +9,16 @@ export class MonsterSystem extends System {
         this.dataSystem = dataSystem;
 
         this.MIN_SPAWN_DISTANCE = 6; 
+
+        // Temporary static affix map (to be moved to DataSystem later)
+        this.AFFIX_MAP = {
+            "goldTheft": {
+                type: "combat",
+                trigger: "attackHitTarget",
+                effect: "stealGold",
+                params: { stealPercentage: 0.1, minSteal: 1 }
+            }
+        };
     }
 
     init() {
@@ -163,7 +173,8 @@ export class MonsterSystem extends System {
                 });
                 console.log(`MonsterSystem: Boss room ID: ${bossRoomId}`);
                 if (bossRoomId && bossMonsters) {
-                    const bossTemplate = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
+                    const bossTemplate = bossMonsters[1]; // hard code specific boss for testing
+                    //const bossTemplate = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
                     const boss = this.createMonsterEntity(bossTemplate, tier, [bossRoomId], playerX, playerY);
                     console.log(`MonsterSystem: Selected Boss ${bossTemplate.name} to spawn at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`, boss);
 
@@ -295,6 +306,30 @@ export class MonsterSystem extends System {
             affixes: template.affixes || [],
             uniqueItemsDropped: template.uniqueItemsDropped || []
         });
+
+        // Add AffixComponent for each affix in template.affixes
+        const affixDefinitions = (template.affixes || []).map(affixName => {
+            const affixData = this.AFFIX_MAP[affixName];
+            if (affixData) {
+                return {
+                    type: affixData.type, // e.g., 'combat'
+                    trigger: affixData.trigger,
+                    effect: affixData.effect,
+                    params: affixData.params
+                };
+            }
+            console.warn(`MonsterSystem: Unknown affix ${affixName} for ${template.name}`);
+            return null;
+        }).filter(Boolean);
+
+        if (affixDefinitions.length > 0) {
+            this.entityManager.addComponentToEntity(entity.id, new AffixComponent(affixDefinitions));
+            console.log(`MonsterSystem: Added affixes to ${template.name}:`, affixDefinitions);
+        }
+
+        console.log(`MonsterSystem: Entity ${entity.id} components:`, Array.from(entity.components.keys()));
+
+
         console.log(`MonsterSystem.js: Spawned monster ${entity.id} at (${x}, ${y}) on tier ${tier}`, entity);
         return entity;
     }

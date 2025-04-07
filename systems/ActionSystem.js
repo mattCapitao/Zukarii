@@ -4,7 +4,8 @@ import { System } from '../core/Systems.js';
 export class ActionSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
-        this.requiredComponents = ['Position', 'Resource', 'PlayerState'];
+        this.requiredComponents = ['Position', 'Resource', 'PlayerState']; 
+        this.healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
     }
 
     init() {
@@ -28,7 +29,7 @@ export class ActionSystem extends System {
         const playerStats = player.getComponent('Stats');
         const playerHealth = player.getComponent('Health');
         const critChance = playerStats.critChance || (playerStats.agility * 0.02);
-
+        const healAmount = 0;
         
         if (Math.random() < critChance) {
             const maxHpBoost = Math.round(1 + (2 * (tierEntity.getComponent('Tier').value / 10)));
@@ -36,14 +37,18 @@ export class ActionSystem extends System {
             this.eventBus.emit('LogMessage', { message: `The fountain surges with power! Fully healed and Max HP increased!` });
 
             this.eventBus.emit('ModifyBaseStat', { stat: 'maxHp', value: maxHpBoost });
-            // Keep direct write to playerHealth for now (consistent with drinkHealPotion)
-            playerHealth.hp = playerHealth.maxHp;
+
+            healAmount = (playerHealth.maxHp + maxHpBoost) - playerHealth.hp;
+
+            this.healthUpdates.push({ entityId, amount: healAmount });
 
         } else {
             const missingHp = playerHealth.maxHp - playerHealth.hp;
             const healPercent = Math.random() * (0.5 - 0.3) + 0.3;
-            const healAmount = Math.round(missingHp * healPercent);
-            playerHealth.hp = Math.min(playerHealth.hp + healAmount, playerHealth.maxHp);
+
+            healAmount = Math.min(playerHealth.hp + Math.round(missingHp * healPercent), playerHealth.maxHp);
+            this.healthUpdates.push({ entityId, amount: healAmount });
+
             this.eventBus.emit('LogMessage', { message: `The fountain restores ${healAmount} HP. Current HP: ${playerHealth.hp}/${playerHealth.maxHp}` });
         }
 
@@ -71,7 +76,9 @@ export class ActionSystem extends System {
             critHealText = 'is of exceptional quality and ';
         }
 
-        health.hp = Math.min(health.hp + healAmount, health.maxHp);
+       healAmount = Math.min(health.hp + healAmount, health.maxHp);
+        this.healthUpdates.push({ entityId, amount: healAmount });
+
         resource.healPotions--;
 
         const message = health.hp >= health.maxHp

@@ -19,7 +19,7 @@
     "description": "The Golden Khepresh has got nothing on this babby!",
     "uniqueId": null,
     "icon": "mbphu-staff.svg",
-    "relicAffixes": []
+    "affixes": []
   },
   {
     "name": "The Preciousss",
@@ -35,7 +35,7 @@
     "description": "A plain simple gold band, that you mussst possesss.",
     "uniqueId": null,
     "icon": "golden-khepresh.svg",
-    "relicAffixes": []
+    "affixes": []
   },
   {
     "name": "Stolen Honor",
@@ -52,7 +52,7 @@
     "description": "An amulet radiating malicious energy.",
     "uniqueId": null,
     "icon": "golden-khepresh.svg",
-    "relicAffixes": []
+    "affixes": []
   },
   {
     "name": "Golden Khepresh",
@@ -69,7 +69,22 @@
     "description": "A majestic helm worthy of a king.",
     "uniqueId": null,
     "icon": "golden-khepresh.svg",
-    "relicAffixes": []
+    "affixes": [
+      {
+        "name": "resilience",
+        "type": "combat",
+        "trigger": "hitByAttack",
+        "effect": "instantHeal",
+        "params": {
+          "minHealPercentage": 0.05,
+          "maxHealPercentage": 0.10,
+          "chanceToHeal": 0.05
+        },
+        "description": "Chance to recover a percentage of missing health on being hit."
+
+      }
+
+    ]
   },
   {
     "name": "Golden Skin of Avarice",
@@ -89,6 +104,6 @@
     "description": "Shiny golden armor with fancy magic swirlies, Its beauty is the envy of all, but it does not seem to do anything. the thought of wearing it leaves you feeling like you just broke a mirror while trying to avoid stepping on a black cat as you walked under a ladder!",
     "uniqueId": null,
     "icon": "golden-skin.png",
-    "relicAffixes": []
+    "affixes": []
   }
 ]

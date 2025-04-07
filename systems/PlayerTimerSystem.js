@@ -15,7 +15,7 @@ export class PlayerTimerSystem extends System {
 
     init() {
         this.eventBus.on('PlayerInitiatedAttack', ({ entityId }) => this.manageTimer(entityId, 'combat', 3000));
-        this.eventBus.on('PlayerWasHit', ({ entityId }) => this.manageTimer(entityId, 'combat', 3000));
+        this.eventBus.on('PlayerWasAttacked', ({ entityId, attackerId }) => this.manageTimer(entityId, 'combat', 3000));
     }
 
     update(deltaTime) {

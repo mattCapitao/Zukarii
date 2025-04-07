@@ -86,12 +86,28 @@
     "uniqueItemsDropped": [
       {
         "type": "rog",
-        "dropChance": 0.01,
+        "dropChance": 1, 
         "data": {
           "tierIndex": 5,
           "type": "weapon",
           "attackType": "ranged",
-          "name": "Wyrm Staff"
+          "name": "Wyrm Staff",
+          "affixes": [
+            {
+              "name": "lifeSteal",
+              "type": "combat",
+              "trigger": "attackHitTarget",
+              "effect": "lifeSteal",
+              "params": {
+                "minDmageHealedPercentage": 0.10,
+                "maxDamageHealedPercentage": 0.25,
+                "chanceToStealLife": 0.05
+              },
+              "description": "Chance to heal for a portion of damage dealt when hitting an enemy."
+
+            }
+           
+          ]
         }
       },
       {

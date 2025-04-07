@@ -17,7 +17,7 @@ export class PlayerSystem extends System {
         this.eventBus.on('AllocateStat', (data) => this.handleStatAllocation(data));
         this.eventBus.on('ModifyBaseStat', (data) => this.modifyBaseStat(data));
         this.eventBus.on('PlayerInitiatedAttack', ({ entityId }) => this.handlePlayerInitiatedAttack(entityId));
-        this.eventBus.on('PlayerWasHit', ({ entityId }) => this.handlePlayerWasHit(entityId));
+        this.eventBus.on('PlayerWasAttacked', ({ entityId, attackerId }) => this.handlePlayerWasAttacked(entityId));
         this.eventBus.on('CombatEnded', ({ entityId }) => this.exitCombat(entityId));
     }
 
@@ -309,7 +309,7 @@ export class PlayerSystem extends System {
         }
     }
 
-    handlePlayerWasHit(entityId) {
+    handlePlayerWasAttacked(entityId) {
         const player = this.entityManager.getEntity(entityId);
         if (!player) return;
         const playerState = player.getComponent('PlayerState');
