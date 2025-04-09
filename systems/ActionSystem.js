@@ -16,7 +16,8 @@ export class ActionSystem extends System {
 
     // ActionSystem.js - Updated useFountain method
     useFountain({ fountainEntityId, tierEntityId }) {
-        const player = this.entityManager.getEntity('player');
+        const entityId = 'player'; 
+        const player = this.entityManager.getEntity(entityId);
         const fountainEntity = this.entityManager.getEntity(fountainEntityId);
         const tierEntity = this.entityManager.getEntity(tierEntityId); 
     
@@ -29,7 +30,7 @@ export class ActionSystem extends System {
         const playerStats = player.getComponent('Stats');
         const playerHealth = player.getComponent('Health');
         const critChance = playerStats.critChance || (playerStats.agility * 0.02);
-        const healAmount = 0;
+        let healAmount = 0;
         
         if (Math.random() < critChance) {
             const maxHpBoost = Math.round(1 + (2 * (tierEntity.getComponent('Tier').value / 10)));
@@ -58,7 +59,8 @@ export class ActionSystem extends System {
     }
 
     drinkHealPotion() {
-        const player = this.entityManager.getEntity('player');
+        const entityId = 'player'; 
+        const player = this.entityManager.getEntity(entityId);
         if (!player) return;
 
         const resource = player.getComponent('Resource');

@@ -4,7 +4,7 @@ export class UIComponent {
         overlayOpen = false,
         activeTab = 'log',
         logEntries = [],
-        maxLogEntries = 60
+        maxLogEntries = 60,
     } = {}) {
         this.type = 'UI';
         this.overlayOpen = overlayOpen;
@@ -72,10 +72,13 @@ export class GameStateComponent {
 }
 
 export class ProjectileComponent {
-    constructor(direction, rangeLeft) {
+    constructor(direction, rangeLeft, sourceEntityId, weapon = null, isPiercing = false) {
         this.type = 'Projectile';
         this.direction = direction;
         this.rangeLeft = rangeLeft;
+        this.sourceEntityId = sourceEntityId;
+        this.weapon = weapon;
+        this.isPiercing = isPiercing;
     }
 }
 

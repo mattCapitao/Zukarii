@@ -35,23 +35,38 @@ export class MonsterSystem extends System {
         const player = this.entityManager.getEntity('player');
         if (!player || player.getComponent('PlayerState').dead) return;
 
+
+
         const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
         const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
         if (!levelEntity) return;
-
-        const monsters = this.entityManager.getEntitiesWith(this.requiredComponents);
         const AGGRO_RANGE = 4;
 
+        const monsters = this.entityManager.getEntitiesWith(this.requiredComponents);
+        
+        const now = Date.now();
         monsters.forEach(monster => {
+
             const health = monster.getComponent('Health');
             const hpBarWidth = Math.floor((health.hp / health.maxHp) * 16);
-            if (health.hp <= 0) return;
+            const monsterData = monster.getComponent('MonsterData');
+            monsterData.hpBarWidth = hpBarWidth;
+
+            const dead = monster.getComponent('Dead');
+            if (dead) {
+                if (dead.state === 'new') {
+                    this.handleMonsterDeath(monster.id);
+                    dead.state = 'handling';
+                }
+                if (dead.expiresAt < now && dead.state === 'processed') { 
+                    this.entityManager.removeEntity(monster.id);
+                }
+                return;
+            }
 
             const pos = monster.getComponent('Position');
-            const monsterData = monster.getComponent('MonsterData');
             const attackSpeed = monster.getComponent('AttackSpeed');
             const movementSpeed = monster.getComponent('MovementSpeed');
-            monsterData.hpBarWidth = hpBarWidth;
             const playerPos = player.getComponent('Position');
             const dx = playerPos.x - pos.x;
             const dy = playerPos.y - pos.y;

@@ -191,6 +191,23 @@ export class LootManagerSystem extends System {
             this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped ${dropMessage}!` });
         }
 
+        const sourceEntityId = sourceData.sourceDetails?.id;
+        if (sourceEntityId) {
+            const sourceEntity = this.entityManager.getEntity(sourceEntityId);
+            if (sourceEntity) {
+                const dead = sourceEntity.getComponent('Dead');
+                if (dead && dead.state === 'handling') {
+                    dead.state = 'processed';
+                } else if (!dead) {
+                    console.warn(`LootManagerSystem: No DeadComponent found on source entity ${sourceEntityId}`);
+                }
+            } else {
+                console.warn(`LootManagerSystem: Source entity ${sourceEntityId} not found for processed flag`);
+            }
+        } else {
+            console.warn(`LootManagerSystem: No sourceDetails.id found in lootSource for ${sourceData.name}`);
+        }
+
         this.eventBus.emit('SpawnLoot', {
             treasure: lootEntity,
             tier: sourceData.tier

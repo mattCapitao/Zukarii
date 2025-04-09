@@ -25,10 +25,11 @@ import { PlayerTimerSystem } from './systems/PlayerTimerSystem.js';
 import { AffixSystem } from './systems/AffixSystem.js'; 
 import { EffectsSystem } from './systems/EffectsSystem.js'; // NEW: Added
 import { ComponentManagerSystem } from './systems/ComponentManagerSystem.js'; 
+import { ProjectileSystem } from './systems/ProjectileSystem.js'; 
 import {
     PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
-    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues
+    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent,
 } from './core/Components.js';
 
 export class Game {
@@ -97,6 +98,7 @@ export class Game {
         this.systems.action = new ActionSystem(this.entityManager, this.state.eventBus);
         this.systems.damageCalculation = new DamageCalculationSystem(this.entityManager, this.state.eventBus);
         this.systems.combat = new CombatSystem(this.entityManager, this.state.eventBus);
+        this.systems.projectile = new ProjectileSystem(this.entityManager, this.state.eventBus);
         this.systems.render = new RenderSystem(this.entityManager, this.state.eventBus);
         this.systems.lootSpawn = new LootSpawnSystem(this.entityManager, this.state.eventBus);
         this.systems.lootCollection = new LootCollectionSystem(this.entityManager, this.state.eventBus);
@@ -167,6 +169,7 @@ export class Game {
             // *** CHANGED: Pass deltaTime to updateSystems ***
             this.updateSystems([
                 'componentManager',
+                'projectile',
                 'playerInput',
                 'playerController',
                 'combat',

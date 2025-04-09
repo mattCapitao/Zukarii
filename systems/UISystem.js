@@ -14,6 +14,7 @@ export class UISystem extends System {
         this.activeMenuSection = 'controls-button';
         this.tooltipCache = new Map();
         this.activeInventoryTab = 'all';
+        this.playerEntity = this.entityManager.getEntity('player');
 
         this.statusDOM = {
             hpBar: null,
@@ -107,6 +108,20 @@ export class UISystem extends System {
         this.eventBus.emit('GearChanged', { entityId: 'player' });
 
         this.setupEventListeners();
+    }
+
+    update() {
+        const player = this.entityManager.getEntity('player');
+        if (!player) {
+            console.error('UISystem: Player entity not found');
+            return;
+          }
+        if (this.playerEntity.getComponent('Health').updated) {
+            this.updateUI({ entityId: 'player' })
+            console.log(`UISystem: update called Player health updated = ${this.playerEntity.getComponent('Health').updated}`);
+            this.playerEntity.getComponent('Health').updated = false;
+            console.log(`UISystem: update called Player health updated = ${this.playerEntity.getComponent('Health').updated}`)
+        }
     }
 
     setupEventListeners() {

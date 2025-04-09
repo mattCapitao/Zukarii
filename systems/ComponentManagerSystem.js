@@ -1,5 +1,6 @@
 ﻿// systems/ComponentManagerSystem.js
 import { System } from '../core/Systems.js';
+import { DeadComponent } from '../core/Components.js';
 
 export class ComponentManagerSystem extends System {
     constructor(entityManager, eventBus) {
@@ -10,51 +11,35 @@ export class ComponentManagerSystem extends System {
         this.healthUpdates = this.queues.HealthUpdates || [];
     }
 
-    init() {
-        // No events needed—game loop drives update
-    }
-
     update(deltaTime) {
         
 
         if (this.healthUpdates.length > 0) {
-            this.healthUpdates.forEach(({ entityId, amount }) => {
-                this.modifyHealth(entityId, amount);
+            this.healthUpdates.forEach(({ entityId, amount, attackerId }) => {
+                this.modifyHealth(entityId, amount, attackerId);
             });
             this.healthUpdates.length = 0; // Clear queue
             console.log('ComponentManagerSystem: Processed and cleared HealthUpdates');
         }
         // Future: this.manaUpdates.forEach(...), etc.
-    }
+    } 
 
-    modifyHealth(entityId, amount) {
+   
+    modifyHealth(entityId, amount, attackerId) {
         const entity = this.entityManager.getEntity(entityId);
-        if (!entity) {
-            console.warn(`ComponentManagerSystem: Entity ${entityId} not found for modifyHealth`);
-            return;
-        }
-
+        if (!entity || entity.hasComponent('Dead')) return;
         const health = entity.getComponent('Health');
-        if (!health) {
-            console.warn(`ComponentManagerSystem: Entity ${entityId} has no Health component`);
-            return;
-        }
-
-        if (health.hp <= 0) {
-            health.hp = 0; // Ensure HP doesn't go negative
-            // Optionally, you could emit an event or log a message here
-            console.warn(`ComponentManagerSystem: Entity ${entityId} is already dead, cannot modify health`);
-            return;
-        }
-
+        if (!health) return;
+        const oldHp = health.hp;
         health.hp = Math.min(Math.max(health.hp + amount, 0), health.maxHp);
-        console.log(`ComponentManagerSystem: Modified health for ${entityId} by ${amount}. Now: ${health.hp}/${health.maxHp}`);
-        /*
-        if (health.hp > 0) {
-            this.eventBus.emit('LogMessage', {
-                message: `Health changed for ${entityId} by ${amount} (${health.hp}/${health.maxHp})`
-            });
+        health.updated = true;
+        if (health.hp === 0 && oldHp > 0) {
+            const expiresAt = Date.now() + 5000;
+            entity.addComponent(new DeadComponent(expiresAt));
+            if (entity.id === 'player') {
+                const source = this.entityManager.getEntity(attackerId)?.getComponent('MonsterData')?.name || 'unknown';
+                this.eventBus.emit('PlayerDeath', { source });
+            }
         }
-        */
     }
 }

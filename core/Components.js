@@ -43,6 +43,8 @@ import {
     AttackSpeedComponent,
     MovementSpeedComponent,
     AffixComponent,
+    InCombatComponent,
+    DeadComponent
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -85,6 +87,8 @@ export {
     AttackSpeedComponent,
     MovementSpeedComponent,
     AffixComponent,
+    InCombatComponent,
+    DeadComponent
 };
 
 // Utility functions

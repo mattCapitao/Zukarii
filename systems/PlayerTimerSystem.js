@@ -1,59 +1,30 @@
-﻿// systems/PlayerTimerSystem.js
+﻿import { System } from '../core/Systems.js';
+import { InCombatComponent } from '../core/Components.js'; 
 
-import { System } from '../core/Systems.js';
 export class PlayerTimerSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
-        this.timers = new Map();
-        this.requiredComponents = ['PlayerState'];
-        // Map timer names to expiration events
-        this.timerEvents = {
-            'combat': 'CombatEnded'
-            // Add more later: 'attack': 'AttackReady', 'buff': 'BuffExpired'
-        };
+        this.requiredComponents = ['PlayerState', 'InCombat'];
     }
 
     init() {
-        this.eventBus.on('PlayerInitiatedAttack', ({ entityId }) => this.manageTimer(entityId, 'combat', 3000));
-        this.eventBus.on('PlayerWasAttacked', ({ entityId, attackerId }) => this.manageTimer(entityId, 'combat', 3000));
+
     }
 
     update(deltaTime) {
-        const deltaMs = deltaTime * 1000;
 
-        for (const [entityId, timers] of this.timers) {
-            const entity = this.entityManager.getEntity(entityId);
-            if (!entity) {
-                this.timers.delete(entityId);
-                continue;
+        const entities = this.getEntities();
+        const deltaMs = deltaTime * 1000; 
+
+        for (const entity of entities) {
+            const combat = entity.getComponent('InCombat');
+            if (!combat) continue;
+            combat.elapsed += deltaMs;
+
+            if (combat.elapsed >= combat.duration) {
+                entity.removeComponent('InCombat');
+                this.eventBus.emit('LogMessage', { message: 'You are no longer in combat.' });
             }
-
-            for (const [timerName, timer] of timers) {
-                timer.elapsed += deltaMs;
-                if (timer.elapsed >= timer.duration) {
-                    const eventName = this.timerEvents[timerName];
-                    if (eventName) {
-                        this.eventBus.emit(eventName, { entityId });
-                        timers.delete(timerName); // Clear expired timer
-                    }
-                }
-            }
-
         }
-    }
-
-    manageTimer(entityId, timerName, duration) {
-        if (!this.timers.has(entityId)) {
-            this.timers.set(entityId, new Map());
-        }
-        const timers = this.timers.get(entityId);
-        timers.set(timerName, {
-            duration: duration,
-            elapsed: 0
-        });
-    }
-
-    clearTimers(entityId) {
-        this.timers.delete(entityId);
     }
 }

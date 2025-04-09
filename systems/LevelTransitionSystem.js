@@ -73,8 +73,8 @@ export class LevelTransitionSystem extends System {
 
         currentLevel.getComponent('Map').map[y][x] = ' ';
         const currentTier = gameState.tier;
-        let minTier = currentTier - 3;
-        let maxTier = currentTier + 3;
+        let minTier = currentTier - 1; 
+        let maxTier = currentTier + 5;
         let destinationTier;
 
         do {
@@ -84,8 +84,8 @@ export class LevelTransitionSystem extends System {
 
         const riskChance = Math.floor(currentTier / 10);
         if (Math.random() < riskChance / 100) {
-            minTier = currentTier - 8;
-            maxTier = currentTier + 8;
+            minTier = currentTier - 2;
+            maxTier = currentTier + 10;
             do {
                 destinationTier = Math.floor(Math.random() * (maxTier - minTier + 1)) + minTier;
             } while (destinationTier === currentTier);
@@ -254,4 +254,4 @@ export class LevelTransitionSystem extends System {
         const tierEntities = this.entityManager.entitiesByTier.get(tier) || new Map();
         tierEntities.forEach((_, id) => this.entityManager.removeEntity(id));
     }
-}
+}  

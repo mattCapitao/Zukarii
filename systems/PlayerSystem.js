@@ -16,9 +16,16 @@ export class PlayerSystem extends System {
         this.eventBus.on('TilesDiscovered', (data) => this.handleTilesDiscovered(data));
         this.eventBus.on('AllocateStat', (data) => this.handleStatAllocation(data));
         this.eventBus.on('ModifyBaseStat', (data) => this.modifyBaseStat(data));
-        this.eventBus.on('PlayerInitiatedAttack', ({ entityId }) => this.handlePlayerInitiatedAttack(entityId));
-        this.eventBus.on('PlayerWasAttacked', ({ entityId, attackerId }) => this.handlePlayerWasAttacked(entityId));
-        this.eventBus.on('CombatEnded', ({ entityId }) => this.exitCombat(entityId));
+    }
+
+    exitCombat(entityId) {
+        const player = this.entityManager.getEntity(entityId);
+        if (!player) return;
+        const playerState = player.getComponent('PlayerState');
+        if (playerState.isInCombat) {
+            playerState.isInCombat = false;
+            this.eventBus.emit('LogMessage', { message: 'You are no longer in combat.' });
+        }
     }
 
     initializePlayer() {
@@ -299,33 +306,5 @@ export class PlayerSystem extends System {
         }
     }
 
-    handlePlayerInitiatedAttack(entityId) {
-        const player = this.entityManager.getEntity(entityId);
-        if (!player) return;
-        const playerState = player.getComponent('PlayerState');
-        if (!playerState.isInCombat) {
-            playerState.isInCombat = true;
-            this.eventBus.emit('LogMessage', { message: 'You enter combat by attacking!' });
-        }
-    }
-
-    handlePlayerWasAttacked(entityId) {
-        const player = this.entityManager.getEntity(entityId);
-        if (!player) return;
-        const playerState = player.getComponent('PlayerState');
-        if (!playerState.isInCombat) {
-            playerState.isInCombat = true;
-            this.eventBus.emit('LogMessage', { message: 'You enter combat after being hit!' });
-        }
-    }
-
-    exitCombat(entityId) {
-        const player = this.entityManager.getEntity(entityId);
-        if (!player) return;
-        const playerState = player.getComponent('PlayerState');
-        if (playerState.isInCombat) {
-            playerState.isInCombat = false;
-            this.eventBus.emit('LogMessage', { message: 'You are no longer in combat.' });
-        }
-    }
+  
 }

@@ -10,10 +10,11 @@ export class PositionComponent {
 }
 
 export class HealthComponent {
-    constructor(hp = 0, maxHp = 0) {
+    constructor(hp = 0, maxHp = 0, updated=false) {
         this.type = 'Health';
         this.hp = hp;
         this.maxHp = maxHp;
+        this.updated = updated; // Indicates if the health has been updated
     }
 } 
 
@@ -22,6 +23,14 @@ export class AttackSpeedComponent {
         this.type = 'AttackSpeed';
         this.attackSpeed = attackSpeed;
         this.elapsedSinceLastAttack = 0;
+    }
+}
+
+export class InCombatComponent {
+    constructor(duration = 3000) { // ms
+        this.type = 'InCombat';
+        this.duration = duration;
+        this.elapsed = 0;
     }
 }
 
@@ -37,5 +46,13 @@ export class AffixComponent {
     constructor(affixes = []) {
         this.type = 'Affix';
         this.affixes = affixes; // Array of { type, trigger, effect, params }
+    }
+}
+
+export class DeadComponent {
+    constructor(expiresAt) { // Absolute expiry time in ms
+        this.type = 'Dead';
+        this.expiresAt = expiresAt; // Set by system
+        this.state = 'new'; 
     }
 }

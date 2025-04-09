@@ -5,18 +5,39 @@ export class DamageCalculationSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.requiredComponents = [];
+
+        this.queues = this.entityManager.getEntity('gameState')?.getComponent('DataProcessQueues') || {};
+        this.healthUpdates = this.queues.HealthUpdates || [];
     }
 
+    
     init() {
-        this.eventBus.on('CalculatePlayerDamage', ({ attacker, target, weapon, callback }) => {
-            const result = this.calculatePlayerToMonsterDamage({ attacker, target, weapon });
-            callback(result);
-        });
+        this.eventBus.on('CalculateDamage', ({ attacker, target, weapon }) => {
+            const result = attacker.hasComponent('PlayerState')
+                ? this.calculatePlayerToMonsterDamage({ attacker, target, weapon })
+                : this.calculateMonsterToPlayerDamage({ attacker, target });
 
-        this.eventBus.on('CalculateMonsterDamage', ({ attacker, target, callback }) => {
-            const result = this.calculateMonsterToPlayerDamage({ attacker, target });
-            callback(result);
+            // NEW: Emit WasHit + set isAggro
+            if (target.hasComponent('MonsterData')) {
+                const monsterData = target.getComponent('MonsterData');
+                if (!monsterData.isAggro) monsterData.isAggro = true;
+                this.eventBus.emit('MonsterWasHit', {
+                    entityId: target.id,
+                    attackerId: attacker.id,
+                    damageDealt: result.damage
+                });
+            } else if (target.hasComponent('PlayerState')) {
+                this.eventBus.emit('PlayerWasHit', {
+                    entityId: target.id,
+                    attackerId: attacker.id,
+                    damageDealt: result.damage
+                });
+            }
         });
+    }
+
+    update(deltaTime) {
+        // NEW: Empty—pure ECS, no per-frame logic needed
     }
 
     calculatePlayerToMonsterDamage({ attacker, target, weapon }) {
@@ -49,7 +70,15 @@ export class DamageCalculationSystem extends System {
         const isCritical = critRoll < critChance;
         const totalDamage = Math.round(isCritical ? preCritDamage * 1.5 : preCritDamage);
 
-        return { damage: totalDamage, isCritical };
+        this.healthUpdates.push({ entityId: target.id, amount: -totalDamage , attackerId:'player'});
+
+        // NEW: Log—includes monster HP (matches current CombatSystem), revisit later
+        const targetHealth = target.getComponent('Health');
+        this.eventBus.emit('LogMessage', {
+            message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${totalDamage} damage to ${target.getComponent('MonsterData').name} with your ${weapon?.name || 'Fists'} (${targetHealth.hp - totalDamage}/${targetHealth.maxHp})`
+        });
+
+        return { damage: totalDamage };
     }
 
     calculateMonsterToPlayerDamage({ attacker, target }) {
@@ -76,13 +105,15 @@ export class DamageCalculationSystem extends System {
         const defenseReduction = Math.round(preReductionDamage * (defenseReductionFactor * (targetStats.defense || 0)));
         const totalDamage = Math.round(Math.max(0, preReductionDamage - armorReduction - defenseReduction));
 
-        return {
-            attackDmg: preReductionDamage,
-            damage: totalDamage,
-            isCritical,
-            armorReduction,
-            defenseReduction
-        };
+        // NEW: Queue damage—state goes to HealthUpdates
+        this.healthUpdates.push({ entityId: target.id, amount: -totalDamage, attackerId: attacker });
+
+        // NEW: Log—no player HP, per your call
+        this.eventBus.emit('LogMessage', {
+            message: `${isCritical ? ' (Critical Hit!) - ' : ''}${monsterData.name} hits for ${preReductionDamage}, armor protects you from: ${armorReduction}, defense skill mitigates: ${defenseReduction} resulting in ${totalDamage} damage dealt to you`
+        });
+
+        return { damage: totalDamage };
     }
 }
 
