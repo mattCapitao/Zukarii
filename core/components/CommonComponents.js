@@ -56,3 +56,12 @@ export class DeadComponent {
         this.state = 'new'; 
     }
 }
+
+
+export class NeedsRenderComponent {
+    constructor(x = 0, y = 0) {
+        this.type = 'NeedsRender';
+        this.x = x;
+        this.y = y;
+    }
+}

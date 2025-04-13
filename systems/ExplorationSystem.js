@@ -1,6 +1,6 @@
 ﻿// systems/ExplorationSystem.js - Updated with Debug Logging
 import { System } from '../core/Systems.js';
-
+import { PositionComponent, PlayerStateComponent, NeedsRenderComponent } from '../core/Components.js';
 export class ExplorationSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
@@ -149,7 +149,8 @@ export class ExplorationSystem extends System {
             playerState.discoveredTileCount += newDiscoveryCount;
             this.eventBus.emit('TilesDiscovered', { count: newDiscoveryCount, total: playerState.discoveredTileCount });
         }
-
-        this.eventBus.emit('RenderNeeded');
+        if (!player.hasComponent('NeedsRender')) {
+            this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(player.x, player.y));
+        }
     }
 }

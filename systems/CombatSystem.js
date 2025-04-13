@@ -1,6 +1,6 @@
 ﻿// systems/CombatSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent, HealthComponent, ProjectileComponent, MovementSpeedComponent, InCombatComponent } from '../core/Components.js';
+import { PositionComponent, HealthComponent, ProjectileComponent, MovementSpeedComponent, InCombatComponent, NeedsRenderComponent } from '../core/Components.js';
 
 export class CombatSystem extends System {
     constructor(entityManager, eventBus) {
@@ -185,7 +185,8 @@ export class CombatSystem extends System {
         const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
         this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
         this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, 'player', weapon, isPiercing));
-        this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(50)); // 50ms = current 20 tiles/s
-        this.eventBus.emit('RenderNeeded');
+        this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(100)); // 50ms = current 20 tiles/s
+        this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
+        //this.eventBus.emit('RenderNeeded');
     }
 }

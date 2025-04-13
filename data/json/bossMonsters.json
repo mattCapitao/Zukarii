@@ -18,8 +18,18 @@
     "affixes": [],
     "gold": 500,
     "uniqueItemsDropped": [
-      {"type": "customUnique","dropChance": 0.2,"data":{ "name": "Golden Khepresh" }},
-      {"type": "rog", "dropChance": 0.1, "data": { "tierIndex": 3}},
+      {
+        "type": "customUnique",
+        "dropChance": 1,
+        "data": { "name": "Golden Khepresh" }
+      },
+      {
+        "type": "randomUnique",
+        "dropChance": 0.05,
+        "data": { }
+      },
+     
+      {"type": "rog", "dropChance": 0.2, "data": { "tierIndex": 3}},
       {"type": "rog","dropChance": 1, "data": {}}
        
     ]
@@ -43,9 +53,26 @@
     "affixes": [ "goldTheft" ],
     "gold": 0,
     "uniqueItemsDropped": [
-      {"type": "customUnique","dropChance": 0.2,"data": { "name": "Golden Skin of Avarice" }},
-      {"type": "rog", "dropChance": 0.1, "data": { "tierIndex": 3}},
-      {"type": "rog","dropChance": 1, "data": {}}
+      {
+        "type": "customUnique",
+        "dropChance": 0.01,
+        "data": { "name": "Golden Skin of Avarice" }
+      },
+      {
+        "type": "randomUnique",
+        "dropChance": 0.05,
+        "data": {}
+      },
+      {
+        "type": "rog",
+        "dropChance": 0.2,
+        "data": { "tierIndex": 3 }
+      },
+      {
+        "type": "rog",
+        "dropChance": 1,
+        "data": {}
+      }
     ]
   }
 ]

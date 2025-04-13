@@ -295,7 +295,7 @@ export class LevelSystem extends System {
                 this.entityManager.addComponentToEntity(portalEntity.id, new PortalComponent());
                 entityList.portals.push(portalEntity.id);
                 mapComp.map[y][x] = '?';
-                this.eventBus.emit('RenderNeeded');
+                this.eventBus.emit('dd');
             }
         }
     }

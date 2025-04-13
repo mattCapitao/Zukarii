@@ -1,7 +1,8 @@
-# Ignore Visual Studio folder
+﻿# Ignore Visual Studio folder
 .vs/
 
 # Ignore the /ignore directory
 /ignore/
+/ipNotes/
 
 __NEW_CODE_F0R_DIFF___.JS

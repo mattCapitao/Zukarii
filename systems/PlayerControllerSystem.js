@@ -1,6 +1,6 @@
 ﻿// PlayerControllerSystem.js (Pre-deltaTime)
 
-import { AttackSpeedComponent, MovementSpeedComponent } from '../core/Components.js';
+import { AttackSpeedComponent, MovementSpeedComponent, NeedsRenderComponent } from '../core/Components.js';
 export class PlayerControllerSystem {
     constructor(entityManager, eventBus) {
         this.entityManager = entityManager;
@@ -18,7 +18,7 @@ export class PlayerControllerSystem {
         //console.log('PlayerControllerSystem initialized');
         const player = this.entityManager.getEntity('player');
         if (player) {
-            const position = player.getComponent('Position');
+            this.position = player.getComponent('Position');
             // *** NEW: Ensure position is set correctly ***
             this.lastInputState = {};
             //console.log('PlayerControllerSystem: Initial player position:', position.x, position.y);
@@ -132,7 +132,7 @@ export class PlayerControllerSystem {
         if (loot) {
             this.eventBus.emit('PickupTreasure', { x: newX, y: newY });
             movementSpeed.elapsedSinceLastMove = 0;
-            this.endTurn('pickupLoot');
+            this.endTurn('pickupLoot', newX, newY);
             return;
         }
 
@@ -157,7 +157,7 @@ export class PlayerControllerSystem {
             this.eventBus.emit('PlaySfx', { sfx: 'portal0', volume: .5 });
             this.eventBus.emit('RenderLock');
             this.eventBus.emit('TransitionViaPortal', { x: newX, y: newY });
-            this.endTurn('transitionPortal');
+            this.endTurn('transitionPortal', newX, newY);
             return;
         }
 
@@ -170,18 +170,19 @@ export class PlayerControllerSystem {
             position.y = newY;
             movementSpeed.elapsedSinceLastMove = 0;
             this.eventBus.emit('PositionChanged', { entityId: 'player', x: newX, y: newY });
-            this.endTurn('movement');
+            this.endTurn('movement', newX, newY);
         }
     }
      
-    endTurn(source) {
+    endTurn(source,x = this.position.x ,y = this.position.y) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (!gameState || gameState.gameOver) return;
 
         this.eventBus.emit('TurnEnded');
         gameState.transitionLock = false;
         gameState.needsRender = true;
-        this.eventBus.emit('RenderNeeded');
+       // this.eventBus.emit('RenderNeeded');
+        this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(x, y));
     }
 
 
@@ -196,13 +197,13 @@ export class PlayerControllerSystem {
         if (event.type === 'keyup' && event.key === ' ') {
             gameState.isRangedMode = false;
             //console.log('Ranged mode off');
-            this.eventBus.emit('RenderNeeded');
+
         } else if (event.type === 'keydown' && event.key === ' ' && !event.repeat) {
             if ((offWeapon?.attackType === 'ranged' && offWeapon?.baseRange > 0) ||
                 (mainWeapon?.attackType === 'ranged' && mainWeapon?.baseRange > 0)) {
                 gameState.isRangedMode = true;
                 //console.log('Ranged mode on', 'gameState:', gameState);
-                this.eventBus.emit('RenderNeeded');
+
             } else {
                 this.eventBus.emit('LogMessage', { message: 'You need a valid ranged weapon equipped to use ranged mode!' });
             }

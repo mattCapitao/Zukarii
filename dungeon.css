@@ -57,9 +57,9 @@ display: flex;
 flex-direction: row;
 background-color: #000;
 margin: 0;
-padding:0;
-width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
-height: calc(100vh - 3.125rem); /* Account for border (1px each side) */
+padding: 128px 288px 128px 288px;
+width: calc(100vw - 4rem); /* Account for border (1px each side) */
+height: calc(100vh - 4rem); /* Account for border (1px each side) */
 }
 
 #ui-layer {
@@ -350,13 +350,14 @@ font-size: 0.75rem; /* ~12px */
 
 #map {
 font-family: monospace;
-font-size: 1rem; /* ~16px */
-line-height: 1rem; /* ~16px */
+font-size: 2rem; /* ~16px */
+line-height: 2rem; /* ~16px */
 white-space: pre;
 color: #0f0;
 border: 0;
 padding: 0;
 margin: 0;
+transform: scale(2);
 
 /*////////////////////////////////////////////// BEGIN WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
@@ -382,10 +383,10 @@ display: none;
 
     #map span {
         display: inline-block;
-        width: 1rem; /* ~16px */
-        height: 1rem; /* ~16px */
+        width: 2rem; /* ~16px */
+        height: 2rem; /* ~16px */
         text-align: center;
-        line-height: 1rem; /* ~16px */
+        line-height: 2rem; /* ~16px */
         vertical-align: top;
         transition: transform 0.016s linear; /* Smooth at ~60 FPS */
     }
@@ -397,7 +398,7 @@ background-color: #000;
 
 
 
-.discovered {
+.discovered.wall {
 color: #0f0;
 background-color: #161616;
 }
@@ -641,7 +642,7 @@ width: 33% !important;
 
 #tabs #equipped-items p.empty img.item {
     width: 4rem; /* ~64px */
-    height: 4rem; /* ~64px */S
+    height: 4rem; /* ~64px */
     padding: 0;
     margin: 0;
     border-radius: .3125rem; /* ~5px */
@@ -1138,6 +1139,7 @@ text-align: center;
 font-size: 1.5rem; /* ~24px */
 }
 
+
 #stats {
 margin: 0;
 padding: 0.625rem; /* ~10px */
@@ -1152,13 +1154,26 @@ padding: 0.625rem; /* ~10px */
 /*////////////////////////////////////////////////////  PLAYER - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 .player {
- position:relative;
-background-color: #161616;
-transform: scale(1.2);
-transform-origin: center;
-z-index: 100 !important; /* Lift above other spans */
+    position: relative;
+    transition: transform 0.016s linear; /* Smooth at ~60 FPS */
+    display: inline-block;
+    background-image: url('img/map/floor.png');
+    background-size: 32px;
+    transform-origin: center;
+    z-index: 100 !important; /* Lift above other spans */
 }
 
+    .player img {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        margin: 0;
+        filter: drop-shadow(0 0 0.1rem #cccccc90); /* Creates an evenly distributed outline */
+        /*
+       filter: drop-shadow(.0065rem 0 0 #88888868 ) drop-shadow(-.0065rem 0 #88888868) drop-shadow(0 .0065rem #88888868) drop-shadow(0 -.0065rem 0 #88888868) drop-shadow(.0065rem .0065rem 0 #88888868 ) drop-shadow(-.0065rem .0065rem 0 #88888868) drop-shadow(.0065rem -.0065rem 0 #88888868) drop-shadow(-.0065rem -.0065rem 0 #88888868);
+         */
+    }
+    
 .player.torch {
 background: rgba(139, 106, 75, 0.40);
 border-radius: 50%;
@@ -1526,7 +1541,7 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
 span.discovered.monster {
     color: #0f0; /* Green, matching your map style */
     font-family: monospace; /* Ensure consistent rendering */
-    z-index: 3; /* Lift above other spans */
+    z-index: 10; /* Lift above other spans */
     background-image: url('img/1x1_red.png');
     background-size: 16px 1px;
     background-repeat: no-repeat;
@@ -1537,13 +1552,13 @@ span.discovered.monster {
 
 .discovered {
     color: #0f0;
-    background-color: #161616;
+    /*background-color: #161616;*/
 }
 
 .detected {
     color: #0f0;
-    background-color: #161616;
-}
+    /*background-color: #161616;*/
+} 
 
 .skeleton {
 }
@@ -1579,3 +1594,30 @@ color: #0f0;
 font-size: 0.8em;
 }
 /*//////////////////////////////// END MONSTERS ||||||||||||||||||||||||||||||||||*/
+
+
+/*//////////////////////////////// START MAP ELEMENTS ||||||||||||||||||||||||||||||||||*/
+
+.discovered.floor {
+    background-image: url('img/map/floor.png') !important;
+    background-size: 32px;
+}
+.discovered.wall {
+    background-image: url('img/map/wall.png') !important;
+    background-size: 32px;
+}
+.stairs{
+
+}
+.stairs.up{
+
+}
+    .stairs.down {
+    }
+    .fountain{
+
+    }
+    .portal{
+
+    }
+/*//////////////////////////////// END MAP ELEMENTS ||||||||||||||||||||||||||||||||||*/

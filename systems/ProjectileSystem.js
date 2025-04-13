@@ -1,5 +1,5 @@
 ﻿import { System } from '../core/Systems.js';
-import { PositionComponent, ProjectileComponent, MovementSpeedComponent } from '../core/Components.js';
+import { PositionComponent, ProjectileComponent, MovementSpeedComponent, NeedsRenderComponent } from '../core/Components.js';
 
 export class ProjectileSystem extends System {
     constructor(entityManager, eventBus) {
@@ -56,6 +56,7 @@ export class ProjectileSystem extends System {
                     this.eventBus.emit('PlaySfx', { sfx: 'firehit0', volume: .1 });
                     this.eventBus.emit('LogMessage', { message: 'Your shot hit a wall.' });
                     this.eventBus.emit('RenderNeeded');
+
                     continue;
                 }
 
@@ -82,6 +83,7 @@ export class ProjectileSystem extends System {
 
                     if (!projData.isPiercing) {
                         this.entityManager.removeEntity(proj.id);
+
                         this.eventBus.emit('RenderNeeded');
                         continue;
                     }

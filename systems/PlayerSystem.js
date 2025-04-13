@@ -59,7 +59,7 @@ export class PlayerSystem extends System {
         playerState.nextLevelXp = 125;
         playerState.dead = false;
         playerState.lampLit = false;
-        playerState.name = "Zukarnii";
+        playerState.name = "Zukarii";
 
         const resource = player.getComponent('Resource');
         resource.torches = 1;
@@ -300,7 +300,7 @@ export class PlayerSystem extends System {
         const currentMilestones = Math.floor(total / xpThreshold);
 
         if (currentMilestones > previousMilestones) {
-            const xpAward = (currentMilestones - previousMilestones) * 50;
+            const xpAward = (currentMilestones - previousMilestones) * 100 * playerState.level;
             this.eventBus.emit('AwardXp', { amount: xpAward });
             this.eventBus.emit('LogMessage', { message: `Exploration milestone reached! Gained ${xpAward} XP for discovering ${currentMilestones * xpThreshold} tiles.` });
         }

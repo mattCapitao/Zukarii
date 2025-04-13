@@ -31,8 +31,9 @@ export class OverlayStateComponent {
 
 export class RenderStateComponent {
     constructor({
-        visibleRadius = 2, // Renamed from discoveryRadius
-        activeRenderZone = new Set(), // Renamed from visibleTiles
+        visibleRadius = 2, 
+        activeRenderZone = new Set(),
+        redrawTiles = new Set(), // set of tiles to be added to activeRenderZone at next render (old moster positions)
         projectile = null,
         torchLitOnTurn = false,
         renderRadius = 7
@@ -40,6 +41,7 @@ export class RenderStateComponent {
         this.type = 'RenderState';
         this.visibleRadius = visibleRadius;
         this.activeRenderZone = activeRenderZone;
+        this.redrawTiles = redrawTiles; 
         this.projectile = projectile;
         this.torchLitOnTurn = torchLitOnTurn;
         this.renderRadius = renderRadius;

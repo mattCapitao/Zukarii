@@ -3,7 +3,7 @@
     "name": "Mbphu Greater iLvl Annihilation Staff",
     "type": "weapon",
     "attackType": "ranged",
-    "baseRange": 7,
+    "baseRange": 9,
     "slots": [ "mainhand", "offhand" ],
     "baseDamageMin": 10,
     "baseDamageMax": 15,
@@ -16,9 +16,45 @@
       "damageBonus": 5,
       "rangedBonus": 5
     },
-    "description": "The Golden Khepresh has got nothing on this babby!",
+    "description": "Crafted in acnient times by the finest Zukarath artificers and inspired by the works of the legendary Zu Mage Mbphu, this staff is singualr in purpose. To seek out and destroy dark magic used by inferior arcane artificers.",
     "uniqueId": null,
     "icon": "mbphu-staff.svg",
+    "affixes": [
+      {
+        "name": "lifeSteal",
+        "type": "combat",
+        "trigger": "attackHitTarget",
+        "effect": "lifeSteal",
+        "params": {
+          "minDmageHealedPercentage": 0.25,
+          "maxDamageHealedPercentage": 0.50,
+          "chanceToStealLife": 0.15
+        },
+        "description": "Chance to heal for a portion of damage dealt when hitting an enemy."
+
+      }
+
+    ]
+  },
+  {
+    "name": "Emrhys Krys",
+    "type": "weapon",
+    "attackType": "melee",
+    "slots": [ "mainhand", "offhand" ],
+    "baseDamageMin": 10,
+    "baseDamageMax": 15,
+    "tierIndex": 6,
+    "itemTier": "relic",
+    "stats": {
+      "prowess": 5,
+      "block": 5,
+      "agility": 5,
+      "damageBonus": 5,
+      "meleeBonus": 5
+    },
+    "description": "An ancient reproduction of the Krys Knife of Emrhys, one of the greatest Karn mages the order has ever known. This blade was never carried by Emrhys, it is a functional replica forged for some of the most powerful Karn in the order.",
+    "uniqueId": null,
+    "icon": "dagger.svg",
     "affixes": []
   },
   {
@@ -29,8 +65,9 @@
     "tierIndex": 6,
     "itemTier": "relic",
     "stats": {
-      "maxHp": 20,
-      "damageBonus": 10
+      "maxHp": 60,
+      "damageBonus": 10,
+      "intellect": -5
     },
     "description": "A plain simple gold band, that you mussst possesss.",
     "uniqueId": null,
@@ -63,10 +100,11 @@
     "itemTier": "relic",
     "stats": {
       "prowess": 5,
-      "maxHp": 30,
+      "intellect": 5,
+      "maxHp": 50,
       "agility": 5
     },
-    "description": "A majestic helm worthy of a king.",
+    "description": "A majestic helm worthy of a monarch.",
     "uniqueId": null,
     "icon": "golden-khepresh.svg",
     "affixes": [
@@ -101,7 +139,7 @@
       "block": 0,
       "maxLuck": -66
     },
-    "description": "Shiny golden armor with fancy magic swirlies, Its beauty is the envy of all, but it does not seem to do anything. the thought of wearing it leaves you feeling like you just broke a mirror while trying to avoid stepping on a black cat as you walked under a ladder!",
+    "description": "Shiny golden armor with fancy magic swirlies, Its beauty is the envy of all, but it does not seem to do anything. The thought of wearing it leaves you feeling like you just broke a mirror while trying to avoid stepping on a black cat as you walked under a ladder!",
     "uniqueId": null,
     "icon": "golden-skin.png",
     "affixes": []

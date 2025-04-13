@@ -1,0 +1,16 @@
+﻿/* dungeon32px.css */
+
+
+/* MAP DIV */
+#map {
+    font-size: 2rem; /* Changed from 1rem (~16px) */
+    line-height: 2rem; /* Changed from 1rem (~16px) */
+}
+
+    #map span {
+        width: 2rem; /* Changed from 1rem (~16px) */
+        height: 2rem; /* Changed from 1rem (~16px) */
+        line-height: 2rem; /* Changed from 1rem (~16px) */
+    }
+
+

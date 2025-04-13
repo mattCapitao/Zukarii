@@ -9,6 +9,7 @@ export class MonsterSystem extends System {
         this.dataSystem = dataSystem;
 
         this.MIN_SPAWN_DISTANCE = 6; 
+        this.TILE_SIZE = 32; // Assuming each tile is 32x32 pixels
 
         // Temporary static affix map (to be moved to DataSystem later)
         this.AFFIX_MAP = {
@@ -28,13 +29,13 @@ export class MonsterSystem extends System {
             this.handleMonsterDeath(data.entityId);
         });
         this.eventBus.on('SpawnMonsters', (data) => this.handleSpawnMonsters(data));
+        this.redrawTiles = this.entityManager.getEntity('renderState').getComponent('RenderState').redrawTiles || new Set();
     }
 
     update(deltaTime) {
 
         const player = this.entityManager.getEntity('player');
         if (!player || player.getComponent('PlayerState').dead) return;
-
 
 
         const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
@@ -45,10 +46,11 @@ export class MonsterSystem extends System {
         const monsters = this.entityManager.getEntitiesWith(this.requiredComponents);
         
         const now = Date.now();
+       
         monsters.forEach(monster => {
 
             const health = monster.getComponent('Health');
-            const hpBarWidth = Math.floor((health.hp / health.maxHp) * 16);
+            const hpBarWidth = Math.floor((health.hp / health.maxHp) * this.TILE_SIZE);
             const monsterData = monster.getComponent('MonsterData');
             monsterData.hpBarWidth = hpBarWidth;
 
@@ -110,6 +112,8 @@ export class MonsterSystem extends System {
                         if (!this.isWalkable(newX, newY) || isOccupied || isPlayerPosition) {
                             continue;
                         }
+                        const oldTileKey = `${pos.x},${pos.y}`; // Store old tile key for rendering
+                        this.redrawTiles.add(oldTileKey);
                         pos.x = newX;
                         pos.y = newY;
                         this.eventBus.emit('PositionChanged', { entityId: monster.id, x: newX, y: newY });
@@ -119,6 +123,8 @@ export class MonsterSystem extends System {
                 }
             }
         });
+        
+
     }
 
     // systems/MonsterSystem.js - Updated handleSpawnMonsters method // remove map from signature when updating LevelSsytem.
@@ -188,7 +194,7 @@ export class MonsterSystem extends System {
                 });
                 console.log(`MonsterSystem: Boss room ID: ${bossRoomId}`);
                 if (bossRoomId && bossMonsters) {
-                    const bossTemplate = bossMonsters[1]; // hard code specific boss for testing
+                    const bossTemplate = bossMonsters[0]; // hard code specific boss for testing
                     //const bossTemplate = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
                     const boss = this.createMonsterEntity(bossTemplate, tier, [bossRoomId], playerX, playerY);
                     console.log(`MonsterSystem: Selected Boss ${bossTemplate.name} to spawn at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`, boss);
@@ -307,7 +313,7 @@ export class MonsterSystem extends System {
         this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(500));
         this.entityManager.addComponentToEntity(entity.id, {
             type: 'MonsterData',
-            hpBarWidth: 16,
+            hpBarWidth: this.TILE_SIZE,
             name: template.name,
             tier: tier,
             classes: template.classes,

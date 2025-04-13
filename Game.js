@@ -29,7 +29,7 @@ import { ProjectileSystem } from './systems/ProjectileSystem.js';
 import {
     PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
-    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent,
+    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent
 } from './core/Components.js';
 
 export class Game {
@@ -59,8 +59,9 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
         this.entityManager.addComponentToEntity('player', new InputStateComponent());
         this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
-        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(200));
+        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(250));
         this.entityManager.addComponentToEntity('player', new AffixComponent()); // New component added
+        this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(1, 1));
 
         let overlayState = this.entityManager.getEntity('overlayState');
         if (!overlayState) {
@@ -80,12 +81,11 @@ export class Game {
         lightingState = this.entityManager.createEntity('lightingState', true);
         this.entityManager.addComponentToEntity('lightingState', new LightingState());
         this.entityManager.addComponentToEntity('lightingState', new LightSourceDefinitions());
-
+       
         this.entityManager.addComponentToEntity('gameState', new DataProcessQueues());
 
         this.initializeSystems().then(() => {
             this.state.eventBus.emit('InitializePlayer');
-            this.state.eventBus.emit('RenderNeeded');
             console.log('Systems initialized and player initialized');
             
         });

@@ -63,6 +63,11 @@
       {
         "type": "rog",
         "data": {}
+      },
+      {
+        "type": "customUnique",
+        "dropChance": 1,
+        "data": { "name": "Mbphu Greater iLvl Annihilation Staff" }
       }
     ]
   },
@@ -86,7 +91,7 @@
     "uniqueItemsDropped": [
       {
         "type": "rog",
-        "dropChance": 1, 
+        "dropChance": 0.05, 
         "data": {
           "tierIndex": 5,
           "type": "weapon",
@@ -99,9 +104,9 @@
               "trigger": "attackHitTarget",
               "effect": "lifeSteal",
               "params": {
-                "minDmageHealedPercentage": 0.10,
-                "maxDamageHealedPercentage": 0.25,
-                "chanceToStealLife": 0.05
+                "minDmageHealedPercentage": 0.15,
+                "maxDamageHealedPercentage": 0.35,
+                "chanceToStealLife": 0.10
               },
               "description": "Chance to heal for a portion of damage dealt when hitting an enemy."
 
