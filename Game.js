@@ -27,7 +27,7 @@ import { EffectsSystem } from './systems/EffectsSystem.js'; // NEW: Added
 import { ComponentManagerSystem } from './systems/ComponentManagerSystem.js'; 
 import { ProjectileSystem } from './systems/ProjectileSystem.js'; 
 import {
-    PositionComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
+    PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent
 } from './core/Components.js';
@@ -48,6 +48,7 @@ export class Game {
         }
         player = this.entityManager.createEntity('player', true);
         this.entityManager.addComponentToEntity('player', new PositionComponent(1, 1));
+        this.entityManager.addComponentToEntity('player', new VisualsComponent(32, 32));
         this.entityManager.addComponentToEntity('player', new HealthComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new ManaComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new StatsComponent());

@@ -9,6 +9,16 @@ export class PositionComponent {
     }
 }
 
+export class VisualsComponent {
+    constructor(h = 32, w = 32) {
+        this.type = 'Visuals';
+        this.avatar = null; // Placeholder for avatar image
+        this.h = h;
+        this.w = w;
+        this.animations = []
+    }
+}
+
 export class HealthComponent {
     constructor(hp = 0, maxHp = 0, updated=false) {
         this.type = 'Health';

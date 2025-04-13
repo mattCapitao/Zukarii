@@ -1,5 +1,5 @@
 ﻿import { System } from '../core/Systems.js';
-import { PositionComponent, LootData } from '../core/Components.js';
+import { PositionComponent, VisualsComponent, LootData } from '../core/Components.js';
 
 export class LootSpawnSystem extends System {
     constructor(entityManager, eventBus) {
@@ -46,6 +46,11 @@ export class LootSpawnSystem extends System {
 
         const lootEntity = treasure;
         entityList.treasures.push(lootEntity.id);
+
+        lootEntity.addComponent(new PositionComponent(position.x, position.y));
+        const lootVisuals = lootEntity.addComponent(new VisualsComponent(16, 24));
+        lootVisuals.avatar = 'img/avatars/chest.png';
+ 
         this.eventBus.emit('LootEntityCreated', { entityId: lootEntity.id, tier });
 
         if (!lootData.suppressRender) {

@@ -4,6 +4,7 @@ import {
     MapComponent,
     EntityListComponent,
     PositionComponent,
+    VisualsComponent,
     ExplorationComponent,
     LootSourceData,
     WallComponent,
@@ -279,7 +280,7 @@ export class LevelSystem extends System {
         }
 
         const hasPortal = entityList.portals.length > 0;
-        const minPortalPlacementTier = 3;
+        const minPortalPlacementTier = 1;
         if (tier >= minPortalPlacementTier && !hasPortal) {
             const rooms = entityList.rooms.map(id => this.entityManager.getEntity(id).getComponent('Room'));
             const validRooms = rooms.filter(r => r.roomType !== 'BossChamberSpecial');
@@ -293,6 +294,8 @@ export class LevelSystem extends System {
                 const portalEntity = this.entityManager.createEntity(`portal_${tier}_portal_${entityList.portals.length}`);
                 this.entityManager.addComponentToEntity(portalEntity.id, new PositionComponent(x, y));
                 this.entityManager.addComponentToEntity(portalEntity.id, new PortalComponent());
+                const visuals = this.entityManager.addComponentToEntity(portalEntity.id, new VisualsComponent(32, 32));
+                visuals.avatar = 'img/avatars/portal.png';
                 entityList.portals.push(portalEntity.id);
                 mapComp.map[y][x] = '?';
                 this.eventBus.emit('dd');
@@ -1136,6 +1139,10 @@ export class LevelSystem extends System {
                     maxItems: 1,
                     items: [],
                 }));
+                const lootVisuals =  lootSource.addComponent(new VisualsComponent(16, 24));       
+                lootVisuals.avatar = 'img/avatars/chest.png'; 
+
+
                 this.eventBus.emit('DropLoot', { lootSource });
             }
         }

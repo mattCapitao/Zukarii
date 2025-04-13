@@ -1617,7 +1617,32 @@ font-size: 0.8em;
     .fountain{
 
     }
-    .portal{
-
+.portal {
+    position: relative;
+    height: 32px;
+    width: 32px;
+}
+    .portal img {
+        position: absolute;
+        bottom: 0;
+        left: 0px;
+        padding: 0;
+        margin: 0;
+        filter: drop-shadow(0 0 0.15rem #0b1ef499); /* Creates an evenly distributed outline */
     }
+
+.treasure {
+    position: relative;
+    height: 32px;
+    width: 32px;
+    
+}
+.treasure img {
+    position: absolute;
+    bottom: 0;
+    left: 4px;
+    padding: 0;
+    margin: 0 auto;
+    filter: drop-shadow(0 0 0.1rem gold); /* Creates an evenly distributed outline */
+}
 /*//////////////////////////////// END MAP ELEMENTS ||||||||||||||||||||||||||||||||||*/

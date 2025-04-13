@@ -30,6 +30,8 @@ export class PlayerSystem extends System {
 
     initializePlayer() {
         const player = this.entityManager.getEntity('player');
+        const visuals = player.getComponent('Visuals');
+        visuals.avatar = 'img/avatars/player.png'; // Set the avatar image for the player
         const stats = player.getComponent('Stats');
         stats._internal.base.intellect = this.utilities.dRoll(3, 1, 8);
         stats._internal.base.prowess = this.utilities.dRoll(3, 1, 8);

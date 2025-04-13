@@ -39,6 +39,7 @@ import {
 
 import {
     PositionComponent,
+    VisualsComponent,
     HealthComponent,
     AttackSpeedComponent,
     MovementSpeedComponent,
@@ -84,6 +85,7 @@ export {
 
     // Common components
     PositionComponent,
+    VisualsComponent,
     HealthComponent,
     AttackSpeedComponent,
     MovementSpeedComponent,

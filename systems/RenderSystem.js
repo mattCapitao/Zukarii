@@ -130,6 +130,7 @@ export class RenderSystem extends System {
             ////console.log(`RenderSystem: Entity query - walls: ${walls.length}, floors: ${floors.length}, monsters: ${monsters.length}, projectiles: ${projectiles.length}, treasures: ${treasures.length}, fountains: ${fountains.length}, stairs: ${stairs.length}, portals: ${portals.length}`);
         }
         let avatar = '';
+
         if (!Object.keys(this.tileMap).length) {
             let mapDisplay = '';
             let playerSpawnLocations = '';
@@ -174,7 +175,7 @@ export class RenderSystem extends System {
                     });
                     if (x === playerPos.x && y === playerPos.y) {
                         playerSpawnLocations += `Rendering player at${x},${y}`;
-                        avatar = 'img/avatars/player.png'; 
+                        avatar = player.getComponent('Visuals').avatar;
                         className = 'player';
                         char = ' ';
                         const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
@@ -208,9 +209,34 @@ export class RenderSystem extends System {
                                     return pos.x === x && pos.y === y;
                                 });
                                 if (portal) {
-                                    char = '?';
+                                    console.log('RenderSystem: Found portal at', x, y, portal);
+                                    const a = portal.getComponent('Visuals').avatar;
+                                    console.log('RenderSystem: Found portal avatar', a);
+                                    if (a) {
+                                        char = `<img src="${avatar}" height="326px" width="32px;"/>`;
+                                    } else {
+                                        char = '?';
+                                    }
+                                   
                                     className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
-                                    className += ' portal';
+                                    className += ' portal floor';
+                                } else {
+                                    const treasure = treasures.find(t => {
+                                        const pos = t.getComponent('Position');
+                                        const source = t.getComponent('LootData');
+                                        return pos.x === x && pos.y === y;
+                                    });
+                                    if (treasure) {
+                                        console.log('RenderSystem: Found treasure at', x, y,treasure);
+                                        const a = treasure.getComponent('Visuals').avatar;
+                                        console.log('RenderSystem: Found treasure avatar', a);
+                                        if (a) {
+                                            char = `<img src="${avatar}" height="16px" width="24px;"/>`;
+                                        } else {
+                                            char = '$';
+                                        }
+                                        className += ' treasure';
+                                    }
                                 }
                             }
                         }
@@ -264,14 +290,7 @@ export class RenderSystem extends System {
                     }
                 }
             });
-            /*moving to new renerState.redrawTiles
-            // Add all old positions to activeRenderZone, even if not currently in it
-            tilesToClear.forEach(tileKey => {
-                renderState.activeRenderZone.add(tileKey);
-            });
-            */
 
-            //add redrawTiles to activeRenderZone
             
             redrawTiles.forEach(tileKey => {
                 renderState.activeRenderZone.add(tileKey);
@@ -316,9 +335,11 @@ export class RenderSystem extends System {
                     return pos.x === x && pos.y === y;
                 });
                 if (treasure) {
-                    char = '$';
+                    avatar = 'img/avatars/chest.png'; 
+                    char = `<img src="${avatar}" height="16px" width="24px;"/>`;
+                    className = 'discovered treasure floor';
                 } else if (x === playerPos.x && y === playerPos.y) {
-                    avatar = 'img/avatars/player.png';
+                    avatar = player.getComponent('Visuals').avatar;
                     char = `<img src="${avatar}" />`; 
                     className = 'player discovered floor';
                     const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
@@ -348,7 +369,9 @@ export class RenderSystem extends System {
                                 return pos.x === x && pos.y === y;
                             });
                             if (portal) {
-                                char = '?';
+                                avatar = portal.getComponent('Visuals').avatar || 'img/avatars/portal.png';;
+                                char = `<img src="${avatar}" />`;
+                                className = 'portal discovered floor';
                             } else {
                                 const monster = monsters.find(m => {
                                     const pos = m.getComponent('Position');
@@ -376,9 +399,9 @@ export class RenderSystem extends System {
 
                     if (avatar) {
                         // Use innerHTML for entities that have an avatar to render the image
-                        console.log(`RenderSystem: Rendering avatar for entity at (${x}, ${y})`, avatar);
+                       // console.log(`RenderSystem: Rendering avatar for entity at (${x}, ${y})`, avatar);
                         tile.element.innerHTML = char;
-                        console.log(`RenderSystem: Avatar for entity at (${x}, ${y})`, tile);
+                       // console.log(`RenderSystem: Avatar for entity at (${x}, ${y})`, tile);
                         avatar = '';
                     } else {
                         // Use textContent for other tiles
