@@ -6,7 +6,7 @@
     "classes": "skeleton",
     "family": "undead",
     "minDungeonTier": 1,
-    "avatar": "s",
+    "avatar": "img/avatars/monsters/skeleton.png",
     "baseHp": 20,
     "maxHp": 20,
     "hp": 20,

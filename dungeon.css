@@ -1538,27 +1538,27 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
 
 /*//////////////////////////////// START MONSTERS ||||||||||||||||||||||||||||||||||*/
 
-span.discovered.monster {
-    color: #0f0; /* Green, matching your map style */
-    font-family: monospace; /* Ensure consistent rendering */
-    z-index: 10; /* Lift above other spans */
-    background-image: url('img/1x1_red.png');
-    background-size: 16px 1px;
-    background-repeat: no-repeat;
-    background-position: top left;
-    padding-top:1px;
+.detected.monster {
+    z-index: 5;
+    background: url('img/map/floor.png') left bottom no-repeat;
+    background-size: 32px 32px;
 }
 
+    .detected.monster img {
+        z-index: 20;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        padding-top: 2px;
+        margin: 0;
+        background: none; /* Default to no background */
+        filter: drop-shadow(0 0 0.1rem #cccccc90);
+    }
 
-.discovered {
-    color: #0f0;
-    /*background-color: #161616;*/
-}
+    .detected.monster.has-hp-bar img {
+        background: url('img/1x1_red.png') left top no-repeat;
+    }
 
-.detected {
-    color: #0f0;
-    /*background-color: #161616;*/
-} 
 
 .skeleton {
 }
@@ -1570,29 +1570,7 @@ span.discovered.monster {
 }
 /* Orc */
 
-/* Future expansions (placeholders) */
-span.discovered.monster.elite { /* Uppercase for elites */
-text-transform: uppercase;
-}
 
-span.discovered.monster.boss { /* Bold red uppercase for bosses */
-text-transform: uppercase;
-font-weight: bold;
-color: red;
-}
-
-/* Monster Affix styling */
-span.discovered.monster.fast:after {
-content: '*';
-color: #0f0;
-font-size: 0.8em;
-}
-
-span.discovered.monster.armored:after {
-content: '+';
-color: #0f0;
-font-size: 0.8em;
-}
 /*//////////////////////////////// END MONSTERS ||||||||||||||||||||||||||||||||||*/
 
 
@@ -1606,9 +1584,22 @@ font-size: 0.8em;
     background-image: url('img/map/wall.png') !important;
     background-size: 32px;
 }
-.stairs{
-
+.stair {
+    position: relative;
+    height: 32px;
+    width: 32px;
 }
+.stair img {
+    position: absolute;
+    bottom: 0;
+    left: 0px;
+    padding: 0;
+    margin: 0;
+    height: 32px;
+    width: 32px;
+    filter: drop-shadow(0 0 0.15rem #0b1ef499); /* Creates an evenly distributed outline */
+}
+
 .stairs.up{
 
 }

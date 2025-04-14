@@ -131,6 +131,7 @@ export class RenderSystem extends System {
         }
         let avatar = '';
 
+
         if (!Object.keys(this.tileMap).length) {
             let mapDisplay = '';
             let playerSpawnLocations = '';
@@ -139,7 +140,6 @@ export class RenderSystem extends System {
                     const tileKey = `${x},${y}`;
                     let char = ' ';
                     let className = 'undiscovered';
-                    
 
                     if (exploration.discoveredWalls.has(tileKey)) {
                         className = 'discovered floor';
@@ -200,9 +200,21 @@ export class RenderSystem extends System {
                             });
                             if (stair) {
                                 const stairComp = stair.getComponent('Stair');
-                                char = stairComp.direction === 'down' ? '⇓' : '⇑';
+                                const a = stair.getComponent('Visuals').avatar;
+
+                                switch (stairComp.direction) {
+                                    case 'up':
+                                        avatar = a || 'img/avatars/stairsup.png';
+                                        char = `<img src="${avatar}" height="32px;" width="32px;"/>` || '⇓';
+                                        break;
+                                    case 'down':
+                                        avatar = a || 'img/avatars/stairsdown.png';
+                                        char = `<img src="${avatar}"  height="32px;" width="32px;" />` || '⇑';
+                                        break;
+                                }
+                                
                                 className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
-                                className += stairComp.direction === 'down' ? ' stair down' : ' stair down';
+                                className += stairComp.direction === 'down' ? ' stair down floor' : ' stair down floor';
                             } else {
                                 const portal = portals.find(p => {
                                     const pos = p.getComponent('Position');
@@ -227,7 +239,7 @@ export class RenderSystem extends System {
                                         return pos.x === x && pos.y === y;
                                     });
                                     if (treasure) {
-                                        console.log('RenderSystem: Found treasure at', x, y,treasure);
+                                        console.log('RenderSystem: Found treasure at', x, y, treasure);
                                         const a = treasure.getComponent('Visuals').avatar;
                                         console.log('RenderSystem: Found treasure avatar', a);
                                         if (a) {
@@ -236,6 +248,35 @@ export class RenderSystem extends System {
                                             char = '$';
                                         }
                                         className += ' treasure';
+                                    } else {
+                                        const monster = monsters.find(m => {
+                                            const pos = m.getComponent('Position');
+                                            return pos.x === x && pos.y === y && m.getComponent('Health').hp > 0;
+                                        });
+
+                                        if (monster && (renderState.activeRenderZone.has(tileKey) || monster.getComponent('MonsterData').isAggro)) {
+                                            const a = monster?.getComponent('Visuals').avatar;
+                                            avatar = a.avatar || 'img/avatars/monsters/skeleton.png';
+                                            const monsterData = monster.getComponent('MonsterData');
+                                            monsterData.isDetected = true;
+
+                                            const health = monster.getComponent('Health');
+                                            const hpBarWidth = Math.floor((health.hp / health.maxHp) * this.TILE_SIZE);
+
+                                            char = avatar ? `<img src="${avatar}" height="30px" width="32px" style ="backgorund-size:${hpBarWidth}px, 2px;" />` : monsterData.avatar;
+                                           
+
+                                            className = `monster detected has-hp-bar ${monsterData.classes}`;
+                                            if (monsterData.isElite) className += ' elite';
+                                            if (monsterData.isBoss) className += ' boss';
+                                            monsterData.affixes.forEach(affix => className += ` ${affix}`);
+                                        }
+                                        if (monster) {
+                                            const monsterData = monster.getComponent('MonsterData');
+                                            char = ' ';
+                                            avatar = '';
+                                            //tile.element.style.backgroundSize = `${monsterData.hpBarWidth}px 1px`;
+                                        }
                                     }
                                 }
                             }
@@ -362,7 +403,22 @@ export class RenderSystem extends System {
                         });
                         if (stair) {
                             const stairComp = stair.getComponent('Stair');
-                            char = stairComp.direction === 'down' ? '⇓' : '⇑';
+                            const a = stair.getComponent('Visuals').avatar;
+
+                            switch (stairComp.direction) {
+                                case 'up':
+                                    avatar = a || 'img/avatars/stairsup.png';
+                                    char = `<img src="${avatar}"  height="32px;" width="32px;" />` || '⇓';
+                                    break;
+                                case 'down':
+                                    avatar = a || 'img/avatars/stairsdown.png';
+                                    char = `<img src="${avatar}"  height="32px;" width="32px;" />` || '⇑';
+                                    break;
+                            }
+
+                            className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+                            className += stairComp.direction === 'down' ? ' stair down floor' : ' stair down floor';
+                            
                         } else {
                             const portal = portals.find(p => {
                                 const pos = p.getComponent('Position');
@@ -377,19 +433,33 @@ export class RenderSystem extends System {
                                     const pos = m.getComponent('Position');
                                     return pos.x === x && pos.y === y && m.getComponent('Health').hp > 0;
                                 });
+                                const visuals = monster?.getComponent('Visuals');
+                                avatar = visuals?.avatar || 'img/avatars/monsters/skeleton.png';
+
                                 if (monster && (renderState.activeRenderZone.has(tileKey) || monster.getComponent('MonsterData').isAggro)) {
                                     const monsterData = monster.getComponent('MonsterData');
                                     monsterData.isDetected = true;
-                                    char = monsterData.avatar;
-                                    className = `discovered monster detected ${monsterData.classes}`;
+                                    const health = monster.getComponent('Health');
+                                    const hpBarWidth = Math.floor((health.hp / health.maxHp) * this.TILE_SIZE);
+                                    const charAvatar = avatar ? avatar : monsterData.avatar;
+                                    char = `<img src="${charAvatar}" height="32px" width="32px" style="background-size:${hpBarWidth}px 2px;" />`;
+                                    
+                                    className = `monster detected has-hp-bar ${monsterData.classes}`;
                                     if (monsterData.isElite) className += ' elite';
                                     if (monsterData.isBoss) className += ' boss';
                                     monsterData.affixes.forEach(affix => className += ` ${affix}`);
+
+                                    tile.element.innerHTML = char;
+                                    tile.element.className = className;
+                                    tile.char = char;
+                                    tile.class = className;
+                                    avatar = '';
                                 }
+                              
                                 if (monster) {
                                     const monsterData = monster.getComponent('MonsterData');
-                                    tile.element.style.backgroundSize = `${monsterData.hpBarWidth}px 1px`;
                                 }
+                                
                             }
                         }
                     }
@@ -401,7 +471,8 @@ export class RenderSystem extends System {
                         // Use innerHTML for entities that have an avatar to render the image
                        // console.log(`RenderSystem: Rendering avatar for entity at (${x}, ${y})`, avatar);
                         tile.element.innerHTML = char;
-                       // console.log(`RenderSystem: Avatar for entity at (${x}, ${y})`, tile);
+                        // console.log(`RenderSystem: Avatar for entity at (${x}, ${y})`, tile);
+                      
                         avatar = '';
                     } else {
                         // Use textContent for other tiles
@@ -411,6 +482,8 @@ export class RenderSystem extends System {
                     tile.char = char;
                     tile.class = className;
                 }
+
+               
             }
 
             // *** CHANGED: Clean up removed projectiles ***

@@ -1,6 +1,6 @@
 ﻿// systems/MonsterSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent, HealthComponent, LootSourceData, AttackSpeedComponent, MovementSpeedComponent, AffixComponent } from '../core/Components.js';
+import { PositionComponent, HealthComponent, LootSourceData, AttackSpeedComponent, MovementSpeedComponent, AffixComponent, VisualsComponent } from '../core/Components.js';
 
 export class MonsterSystem extends System {
     constructor(entityManager, eventBus, dataSystem) {
@@ -311,6 +311,7 @@ export class MonsterSystem extends System {
         this.entityManager.addComponentToEntity(entity.id, new HealthComponent(maxHp, maxHp));
         this.entityManager.addComponentToEntity(entity.id, new AttackSpeedComponent(1000));
         this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(500));
+       
         this.entityManager.addComponentToEntity(entity.id, {
             type: 'MonsterData',
             hpBarWidth: this.TILE_SIZE,
@@ -327,6 +328,10 @@ export class MonsterSystem extends System {
             affixes: template.affixes || [],
             uniqueItemsDropped: template.uniqueItemsDropped || []
         });
+
+        this.entityManager.addComponentToEntity(entity.id, new VisualsComponent(32, 32));
+        const visuals = entity.getComponent('Visuals');
+        visuals.avatar = template.avatar.length > 1 ? template.avatar : 'img/avatars/monsters/skeleton.png';
 
         // Add AffixComponent for each affix in template.affixes
         const affixDefinitions = (template.affixes || []).map(affixName => {

@@ -1006,6 +1006,8 @@ export class LevelSystem extends System {
             const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
             this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX, stairDownY));
             this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
+            const visuals = this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 32));
+            visuals.avatar = 'img/avatars/stairsdown.png';
             entityList.stairs.push(stairDownEntity.id);
 
             map[stairDownY][stairDownX] = '⇓';
@@ -1023,6 +1025,8 @@ export class LevelSystem extends System {
                     const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
                     this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX, stairDownY));
                     this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
+                    const visuals = this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 32));
+                    visuals.avatar = 'img/avatars/stairsdown.png';
                     entityList.stairs.push(stairDownEntity.id);
 
                     map[stairDownY][stairDownX] = '⇓';
@@ -1040,6 +1044,8 @@ export class LevelSystem extends System {
                 const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
                 this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX, stairDownY));
                 this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
+                const visuals = this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 32));
+                visuals.avatar = 'img/avatars/stairsdown.png';
                 entityList.stairs.push(stairDownEntity.id);
 
                 map[stairDownY][stairDownX] = '⇓';
@@ -1058,6 +1064,8 @@ export class LevelSystem extends System {
                 const stairUpEntity = this.entityManager.createEntity(`stair_${tier}_stair_up_${stairUpX}_${stairUpY}`);
                 this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(stairUpX, stairUpY));
                 this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
+                const visuals = this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(32, 32));
+                visuals.avatar = 'img/avatars/stairsup.png';
                 entityList.stairs.push(stairUpEntity.id);
 
                 map[stairUpY][stairUpX] = '⇑';
@@ -1075,6 +1083,8 @@ export class LevelSystem extends System {
             const stairUpEntity = this.entityManager.createEntity(`stair_${tier}_stair_up_${stairUpX}_${stairUpY}`);
             this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(stairUpX, stairUpY));
             this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
+            const visuals = this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(32, 32));
+            visuals.avatar = 'img/avatars/stairsup.png';
             entityList.stairs.push(stairUpEntity.id);
 
             map[stairUpY][stairUpX] = '⇑';
