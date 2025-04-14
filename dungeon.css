@@ -1186,7 +1186,7 @@ padding: 0.625rem; /* ~10px */
     position: relative;
     transition: transform 0.016s linear; /* Smooth at ~60 FPS */
     display: inline-block;
-    background: url('img/map/floor.png') left bottom no-repeat;
+    background: url('img/map/floor.png') left bottom no-repeat ;
     background-size: 32px 32px;
     transform-origin: center;
     z-index: 100 !important; /* Lift above other spans */
@@ -1208,19 +1208,36 @@ padding: 0.625rem; /* ~10px */
         transform: rotateY(180deg);
     }
 
+
 .player.has-hp-bar img {
     background: url('img/1x1_red.png') left top no-repeat;
 }
-    
-.player.torch {
-/*background: rgba(139, 106, 75, 0.40);*/
-border-radius: 50%;
-box-shadow: 0 0 4em 2em #8b6a4b74;
-        
+
+#torch {
+    z-index: 299;
+    transform-origin: center;
+    display: inline-block;
+    position: absolute;
+    transition: transform 0.016s linear; /* Smooth at ~60 FPS */
+    top: 0;
+    right: 0;
+    width: 4px !important;
+    height: 4px !important;
+    background: red;
+    filter: drop-shadow(0 0 0.05rem #ff8700a5); /* Creates an evenly distributed outline */
+    /*background: url('img/torch.png') center center no-repeat;
+    background-size: cover;*/
+    opacity: .3; /* Adjust opacity as needed */
+    border-radius: 50%;
+    box-shadow: 0 0 4em 2em #8b6a4b74;
 }
 
+    #torch.torch-left {
+        right: 28px !important;
+    }
 
-.player.torch.flicker {
+
+#torch.flicker {
     animation: torchFlicker 0.5s infinite, torchShadow 0.5s infinite;
 }
 
@@ -1655,6 +1672,8 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
         position: absolute;
         bottom: 0;
         left: 0px;
+        width:32px;
+        height:40px;
         padding: 0;
         margin: 0;
         filter: drop-shadow(0 0 0.15rem #0b1ef499); /* Creates an evenly distributed outline */

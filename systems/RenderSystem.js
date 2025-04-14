@@ -12,7 +12,7 @@ export class RenderSystem extends System {
         this.SCALE_FACTOR = 2
         this.TILE_SIZE = 32;
         this.SCROLL_SPEED = 1;
-        this.VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25;
+        this.VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.35;
         this.SCROLL_THRESHOLD = 4;
         this.SCROLL_DURATION = 250;
         this.previousProjectilePositions = new Map();
@@ -293,7 +293,6 @@ export class RenderSystem extends System {
                                             const monsterData = monster.getComponent('MonsterData');
                                             char = ' ';
                                             avatar = '';
-                                            //tile.element.style.backgroundSize = `${monsterData.hpBarWidth}px 1px`;
                                         }
                                     }
                                 }
@@ -301,7 +300,6 @@ export class RenderSystem extends System {
                         }
                     }
                     if (avatar) {
-
                         mapDisplay += `<span class="${className}" data-x="${x}" data-y="${y}"><img src="${avatar}" /></span>`;
                         avatar = '';
                     } else {
@@ -412,12 +410,18 @@ export class RenderSystem extends System {
                         className = 'player has-hp-bar floor';
                     }
 
-                    if (faceLeft) { className += ' face-left'; }
+                    let torchAlignClass = '';
+                    if (faceLeft) { className += ' face-left'; torchAlignClass = 'torch-left'; }
 
                     const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
-                    if (lightingState?.isLit) { className += ' torch flicker'; }
+                    let torch = '';
 
-                    tile.element.innerHTML = char;
+                    if (lightingState?.isLit) {
+                        torch = `<span id="torch" class="flicker ${torchAlignClass}" > </span>`;
+                        console.log('RenderSystem: player tiel.element', tile); 
+                    }
+
+                    tile.element.innerHTML = char + torch;
                     tile.element.className = className;
                     tile.char = char;
                     tile.class = className;
