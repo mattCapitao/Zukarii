@@ -1,6 +1,6 @@
 ﻿// PlayerControllerSystem.js (Pre-deltaTime)
 
-import { AttackSpeedComponent, MovementSpeedComponent, NeedsRenderComponent } from '../core/Components.js';
+import { AttackSpeedComponent, MovementSpeedComponent, NeedsRenderComponent, VisualsComponent } from '../core/Components.js';
 export class PlayerControllerSystem {
     constructor(entityManager, eventBus) {
         this.entityManager = entityManager;
@@ -12,6 +12,7 @@ export class PlayerControllerSystem {
             ArrowLeft: false,
             ArrowRight: false
         };
+        
     }
 
     async init() {
@@ -22,6 +23,7 @@ export class PlayerControllerSystem {
             // *** NEW: Ensure position is set correctly ***
             this.lastInputState = {};
             //console.log('PlayerControllerSystem: Initial player position:', position.x, position.y);
+            this.VisualsComponent = player.getComponent('Visuals');
         }
         this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
     }
@@ -68,6 +70,12 @@ export class PlayerControllerSystem {
                     attackSpeed.elapsedSinceLastAttack = 0;
                     this.endTurn('rangedAttack');
                     this.previousKeyStates[direction] = true;
+                    if (direction === 'ArrowLeft') {
+                        this.VisualsComponent.faceLeft = true;
+                    }
+                    if (direction === 'ArrowRight') {
+                        this.VisualsComponent.faceLeft = false;
+                    }
                 }
                 return;
             } else if (!isPressed && wasPressed) {
@@ -90,10 +98,12 @@ export class PlayerControllerSystem {
         if (inputState.keys['ArrowLeft']) {
             newX--;
             moved = true;
+            this.VisualsComponent.faceLeft = true;
         }
         if (inputState.keys['ArrowRight']) {
             newX++;
             moved = true;
+            this.VisualsComponent.faceLeft = false;
         }
 
         if (!moved) return;

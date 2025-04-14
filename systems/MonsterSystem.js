@@ -50,7 +50,7 @@ export class MonsterSystem extends System {
         monsters.forEach(monster => {
 
             const health = monster.getComponent('Health');
-            const hpBarWidth = Math.floor((health.hp / health.maxHp) * this.TILE_SIZE);
+            const hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE/2));
             const monsterData = monster.getComponent('MonsterData');
             monsterData.hpBarWidth = hpBarWidth;
 
@@ -108,6 +108,10 @@ export class MonsterSystem extends System {
                             m.getComponent('Position').x === newX &&
                             m.getComponent('Position').y === newY
                         );
+
+                        if (dir.x < 0) { monster.getComponent('Visuals').faceLeft = true; }
+                        if (dir.x > 0) { monster.getComponent('Visuals').faceLeft = false; }
+
                         const isPlayerPosition = (newX === playerPos.x && newY === playerPos.y);
                         if (!this.isWalkable(newX, newY) || isOccupied || isPlayerPosition) {
                             continue;

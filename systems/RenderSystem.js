@@ -176,10 +176,24 @@ export class RenderSystem extends System {
                     if (x === playerPos.x && y === playerPos.y) {
                         playerSpawnLocations += `Rendering player at${x},${y}`;
                         avatar = player.getComponent('Visuals').avatar;
-                        className = 'player';
-                        char = ' ';
+                        const playerHealth = player.getComponent('Health');
+
+                        char = `<img src="${avatar}" height="28px" width="32px" style="" />`;
+                        className = 'player floor';
+
+                        
+                        if (player.hasComponent('InCombat')) {
+                            const hpBarWidth = Math.floor((playerHealth.hp / playerHealth.maxHp) * (this.TILE_SIZE/2));
+                            char = `<img src="${avatar}" height="28px" width="32px" style="background-size:${hpBarWidth}px 2px;  background-position:8px 0;"" />`;
+                            className = 'player has-hp-bar floor';
+                        }
+
                         const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
                         if (lightingState?.isLit) { className += ' torch flicker'; }
+                        mapDisplay += `<span class="${className}" data-x="${x}" data-y="${y}">${char}</span>`;
+                        avatar = '';
+                        continue; // Skip the default append logic
+
                     } else if (projectile) {
                         char = '*';
                         className = 'discovered floor projectile';
@@ -261,12 +275,16 @@ export class RenderSystem extends System {
                                             monsterData.isDetected = true;
 
                                             const health = monster.getComponent('Health');
-                                            const hpBarWidth = Math.floor((health.hp / health.maxHp) * this.TILE_SIZE);
+                                            const hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE/2));
 
-                                            char = avatar ? `<img src="${avatar}" height="30px" width="32px" style ="backgorund-size:${hpBarWidth}px, 2px;" />` : monsterData.avatar;
+                                            char = avatar ? `<img src="${avatar}" height="30px" width="32px" style ="background-size:${hpBarWidth}px, 2px;  background-position:8px 0;" />` : monsterData.avatar;
                                            
 
                                             className = `monster detected has-hp-bar ${monsterData.classes}`;
+
+                                            const faceLeft = monster.getComponent('Visuals').faceLeft;
+                                            if (faceLeft) { className += ' face-left'; }
+
                                             if (monsterData.isElite) className += ' elite';
                                             if (monsterData.isBoss) className += ' boss';
                                             monsterData.affixes.forEach(affix => className += ` ${affix}`);
@@ -380,11 +398,31 @@ export class RenderSystem extends System {
                     char = `<img src="${avatar}" height="16px" width="24px;"/>`;
                     className = 'discovered treasure floor';
                 } else if (x === playerPos.x && y === playerPos.y) {
+
                     avatar = player.getComponent('Visuals').avatar;
-                    char = `<img src="${avatar}" />`; 
-                    className = 'player discovered floor';
+                    const faceLeft = player.getComponent('Visuals').faceLeft;
+                    const playerHealth = player.getComponent('Health');
+
+                    char = `<img src="${avatar}" height="28px" width="32px" style="" />`;
+                    className = 'player floor';
+
+                    if (player.hasComponent('InCombat')) {
+                        const hpBarWidth = Math.floor((playerHealth.hp / playerHealth.maxHp) * (this.TILE_SIZE/2));
+                        char = `<img src="${avatar}" height="28px" width="32px" style="background-size:${hpBarWidth}px 2px;  background-position:8px 0;"" />`;
+                        className = 'player has-hp-bar floor';
+                    }
+
+                    if (faceLeft) { className += ' face-left'; }
+
                     const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
                     if (lightingState?.isLit) { className += ' torch flicker'; }
+
+                    tile.element.innerHTML = char;
+                    tile.element.className = className;
+                    tile.char = char;
+                    tile.class = className;
+                    avatar = '';
+
                 } else if (projectile) {
                     char = '*';
                     className = 'discovered floor projectile';
@@ -440,14 +478,17 @@ export class RenderSystem extends System {
                                     const monsterData = monster.getComponent('MonsterData');
                                     monsterData.isDetected = true;
                                     const health = monster.getComponent('Health');
-                                    const hpBarWidth = Math.floor((health.hp / health.maxHp) * this.TILE_SIZE);
+                                    const hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE/2));
                                     const charAvatar = avatar ? avatar : monsterData.avatar;
-                                    char = `<img src="${charAvatar}" height="32px" width="32px" style="background-size:${hpBarWidth}px 2px;" />`;
+                                    char = `<img src="${charAvatar}" height="32px" width="32px" style="background-size:${hpBarWidth}px 2px; background-position:8px 0;" />`;
                                     
                                     className = `monster detected has-hp-bar ${monsterData.classes}`;
                                     if (monsterData.isElite) className += ' elite';
                                     if (monsterData.isBoss) className += ' boss';
                                     monsterData.affixes.forEach(affix => className += ` ${affix}`);
+
+                                    const faceLeft = monster.getComponent('Visuals').faceLeft;
+                                    if (faceLeft) { className += ' face-left'; }
 
                                     tile.element.innerHTML = char;
                                     tile.element.className = className;

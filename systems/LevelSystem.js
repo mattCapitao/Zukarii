@@ -546,6 +546,10 @@ export class LevelSystem extends System {
             this.carveCorridor(newRoomId, nearestRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity);
             newRoom.connections.push(nearestRoomId);
             const nearestRoom = this.entityManager.getEntity(nearestRoomId).getComponent('Room');
+            if (!nearestRoomId) {
+                console.warn(`connectRooms: No nearest room found for room ${newRoomId}`);
+                continue;
+            }
             nearestRoom.connections.push(newRoomId);
             connectedRooms.push(newRoomId);
         }
@@ -790,8 +794,18 @@ export class LevelSystem extends System {
 
     carveTCorridor(startRoomId, endRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity) {
         const tier = levelEntity.getComponent('Tier').value;
+        if (!startRoomId || !endRoomId) {
+            console.error(`carveTCorridor: Invalid room IDs - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
+            return;
+        }
         const startRoom = this.entityManager.getEntity(startRoomId).getComponent('Room');
         const endRoom = this.entityManager.getEntity(endRoomId).getComponent('Room');
+
+        if (!startRoom || !endRoom) {
+            console.error(`carveTCorridor: Failed to retrieve Room components - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
+            return;
+        }
+
         const startX = startRoom.centerX;
         const startY = startRoom.centerY;
         const endX = endRoom.centerX;
@@ -1323,10 +1337,26 @@ export class LevelSystem extends System {
         console.log(`LevelSystem.js: Ensuring room connections for tier ${tier}, rooms: ${JSON.stringify(rooms)}`);
 
         // Log room types and initial connection counts
-        console.log(`LevelSystem.js: Room types and connections before ensuring connections:`);
+        console.log(`LevelSystem.ensureRoomConnections: Room types and connections before ensuring connections:`);
         for (const roomId of rooms) {
             const room = this.entityManager.getEntity(roomId).getComponent('Room');
             console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length}`);
+        }
+
+        for (const roomId of rooms) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            if (room.connections.length === 0) {
+                console.warn(`LevelSystem.ensureRoomConnections: Room ${roomId} has no connections, attempting to connect`);
+                const nearestRoomId = this.findNearestRoom(roomId, rooms, [roomId]);
+                if (nearestRoomId) {
+                    this.carveCorridor(roomId, nearestRoomId, mapComp.map, rooms, entityList.floors, entityList.walls, new Set(), levelEntity);
+                    const nearestRoom = this.entityManager.getEntity(nearestRoomId).getComponent('Room');
+                    room.connections.push(nearestRoomId);
+                    nearestRoom.connections.push(roomId);
+                } else {
+                    console.error(`LevelSystem.ensureRoomConnections: No nearest room found for isolated non-special room ${roomId}`);
+                }
+            }
         }
 
         for (const roomId of rooms) {
@@ -1344,6 +1374,7 @@ export class LevelSystem extends System {
                 }
             }
         }
+
     }
 
     calculateDistance(x1, y1, x2, y2) {

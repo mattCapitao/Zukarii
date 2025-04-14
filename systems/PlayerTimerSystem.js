@@ -24,6 +24,7 @@ export class PlayerTimerSystem extends System {
             if (combat.elapsed >= combat.duration) {
                 entity.removeComponent('InCombat');
                 this.eventBus.emit('LogMessage', { message: 'You are no longer in combat.' });
+                this.eventBus.emit('RenderNeeded');
             }
         }
     }

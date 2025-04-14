@@ -15,6 +15,7 @@ export class VisualsComponent {
         this.avatar = null; // Placeholder for avatar image
         this.h = h;
         this.w = w;
+        this.faceLeft = false; // Indicates if the entity is facing left
         this.animations = []
     }
 }
