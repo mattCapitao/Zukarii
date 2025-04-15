@@ -204,8 +204,11 @@ export class RenderSystem extends System {
                             return pos.x === x && pos.y === y && !fountainData.used;
                         });
                         if (fountain) {
-                            char = '≅';
-                            className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+                            const a = fountain.getComponent('Visuals').avatar;
+                            avatar = a || 'img/avatars/fountain.png'
+                            char = `<img src="${avatar}" height="32px;" width="32px;"/>` || '≅';
+
+                            className = exploration.discoveredFloors.has(tileKey) ? 'floor discovered' : 'undiscovered';
                             className += ' fountain';
                         } else {
                             const stair = stairs.find(s => {
@@ -227,8 +230,8 @@ export class RenderSystem extends System {
                                         break;
                                 }
                                 
-                                className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
-                                className += stairComp.direction === 'down' ? ' stair down floor' : ' stair down floor';
+                                className = exploration.discoveredFloors.has(tileKey) ? 'discovered floor' : 'undiscovered';
+                                className += stairComp.direction === 'down' ? ' stair down ' : ' stair down';
                             } else {
                                 const portal = portals.find(p => {
                                     const pos = p.getComponent('Position');
@@ -437,7 +440,12 @@ export class RenderSystem extends System {
                         return pos.x === x && pos.y === y && !fountainData.used;
                     });
                     if (fountain) {
-                        char = '≅';
+                        const a = fountain.getComponent('Visuals').avatar;
+                        avatar = a || 'img/avatars/fountain.png'
+                        char = `<img src="${avatar}" height="32px;" width="32px;"/>` || '≅';
+
+                        className = exploration.discoveredFloors.has(tileKey) ? 'floor discovered' : 'undiscovered';
+                        className += ' fountain';
                     } else {
                         const stair = stairs.find(s => {
                             const pos = s.getComponent('Position');

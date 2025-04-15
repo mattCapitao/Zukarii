@@ -1197,6 +1197,7 @@ export class LevelSystem extends System {
                 const fountainEntity = this.entityManager.createEntity(`fountain_${tier}_fountain_${i}`);
                 this.entityManager.addComponentToEntity(fountainEntity.id, new PositionComponent(x, y));
                 this.entityManager.addComponentToEntity(fountainEntity.id, new FountainComponent(false, false));
+                this.entityManager.addComponentToEntity(fountainEntity.id, new VisualsComponent(32, 32));
                 fountains.push(fountainEntity.id);
                 map[y][x] = '≅';
             }
