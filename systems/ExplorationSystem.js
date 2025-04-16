@@ -8,15 +8,8 @@ export class ExplorationSystem extends System {
     }
 
     init() {
-        this.eventBus.on('PositionChanged', (data) => {
-            if (data.entityId === 'player') {
-                this.updateExploration();
-            }
-        });
-        this.eventBus.on('InitializePlayer', () => {
-            //console.log('ExplorationSystem: InitializePlayer event received, setting initial visible radius');
-            this.updateExploration();
-        });
+
+
         this.eventBus.on('LightingStateChanged', (data) => {
             //console.log('ExplorationSystem: LightingStateChanged event received, visibleRadius:', data.visibleRadius);
             const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
@@ -24,6 +17,11 @@ export class ExplorationSystem extends System {
             //console.log('ExplorationSystem: Updated renderState:', renderState);
             this.updateExploration();
         });
+    }
+
+    update(deltaTime) {
+
+        this.updateExploration();
     }
 
     isTileVisible(playerX, playerY, targetX, targetY, walls, renderState) {

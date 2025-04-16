@@ -25,7 +25,10 @@ export class ActionSystem extends System {
         if (!player || !fountainEntity || !tierEntity) return;
 
         const fountainData = fountainEntity.getComponent('Fountain') || { used: false };
-        if (fountainData.used) return;
+        if (fountainData.used) {
+            this.eventBus.emit('LogMessage', { message: `The fountain water is cool and refreshing, but it seems the healing magic that was here is now spent.` });
+            return;
+        }
 
         const playerStats = player.getComponent('Stats');
         const playerHealth = player.getComponent('Health');

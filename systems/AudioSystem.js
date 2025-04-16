@@ -4,10 +4,14 @@ import { System } from '../core/Systems.js';
 export class AudioSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
-        this.sounds = {};
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.soundBuffers = {};
         this.musicVolume = 0.05;
         this.torchVolume = 0.04;
         this.dingVolume = 0.1;
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('SfxQueue').Sounds || [];
+        this.backgroundMusicSource = null;
+        this.torchBurningSource = null;
         this.preloadSounds();
     }
 
@@ -16,24 +20,32 @@ export class AudioSystem extends System {
         this.eventBus.on('PlaySfx', (data) => {
             console.log('PlaySfx event received', data);
             this.playSfx(data);
-
         });
         this.eventBus.on('ToggleBackgroundMusic', (data) => this.playBackgroundMusic(data));
     }
 
-    preloadSounds() {
+    update(deltaTime) {
+        if (this.sfxQueue.length > 0) {
+            this.sfxQueue.forEach(({ sfx, volume }) => {
+                console.log(`AudioSystem: Processing SfxQueue - Playing sfx: ${sfx} at Volume: ${volume}`);
+                this.playSfx({ sfx, volume });
+            });
+            this.sfxQueue.length = 0;
+            console.log('AudioSystem: Processed and cleared SfxQueue');
+        }
+    }
+
+    async preloadSounds() {
         const soundFiles = {
             torchBurning: 'audio/torch-burning.mp3',
             backgroundMusic: 'audio/haunted.wav',
             ding: 'audio/ding.mp3',
             loot0: 'audio/loot/loot_0.wav',
             portal0: 'audio/portal/portal_0.wav',
-            bossLevel0: 'audio/boss/level/boss-level_0.wav', 
+            bossLevel0: 'audio/boss/level/boss-level_0.wav',
             fountain0: 'audio/fountain/fountain_0.wav',
-            //spellcasting sfx
             firecast0: 'audio/spell/cast/firecast_0.wav',
             firehit0: 'audio/spell/hit/firehit_0.wav',
-            //Miss Sfx
             miss0: 'audio/miss/miss_0.wav',
             miss1: 'audio/miss/miss_1.wav',
             miss2: 'audio/miss/miss_2.wav',
@@ -43,7 +55,6 @@ export class AudioSystem extends System {
             miss6: 'audio/miss/miss_6.wav',
             miss7: 'audio/miss/miss_7.wav',
             miss8: 'audio/miss/miss_8.wav',
-            //Block Sfx
             block0: 'audio/block/block_0.wav',
             block1: 'audio/block/block_1.wav',
             block2: 'audio/block/block_2.wav',
@@ -53,7 +64,6 @@ export class AudioSystem extends System {
             block6: 'audio/block/block_6.wav',
             block7: 'audio/block/block_7.wav',
             block8: 'audio/block/block_8.wav',
-            //Hit Sfx
             hit0: 'audio/hit/hit_0.wav',
             hit1: 'audio/hit/hit_1.wav',
             hit2: 'audio/hit/hit_2.wav',
@@ -80,50 +90,122 @@ export class AudioSystem extends System {
             hit23: 'audio/hit/hit_23.wav',
             hit24: 'audio/hit/hit_24.wav',
             hit25: 'audio/hit/hit_25.wav',
-            hit26: 'audio/hit/hit_26.wav',
-
-
+            hit26: 'audio/hit/hit_26.wav'
         };
 
         for (const [key, path] of Object.entries(soundFiles)) {
-            this.sounds[key] = new Audio(path);
-            this.sounds[key].preload = 'auto';
-            this.sounds[key].addEventListener('canplaythrough', () => { });
+            try {
+                const response = await fetch(path);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                this.soundBuffers[key] = await this.audioContext.decodeAudioData(arrayBuffer);
+                console.log(`AudioSystem: Preloaded ${key}`);
+            } catch (error) {
+                console.error(`AudioSystem: Failed to preload ${key} from ${path}:`, error);
+            }
         }
-        console.log('AudioSystem: Preloaded sounds', soundFiles);
+    }
+
+    playSfx({ sfx, volume }) {
+        console.log(`AudioSystem: Playing sfx: ${sfx} at Volume: ${volume}`);
+        if (!this.soundBuffers[sfx]) {
+            console.warn(`AudioSystem: Sound buffer ${sfx} not found`);
+            return;
+        }
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume().then(() => {
+                console.log(`AudioSystem: AudioContext resumed for ${sfx}`);
+                this.scheduleSfx(sfx, volume);
+            }).catch(error => {
+                console.error(`AudioSystem: Failed to resume AudioContext for ${sfx}:`, error);
+            });
+        } else {
+            this.scheduleSfx(sfx, volume);
+        }
+    }
+
+    scheduleSfx(sfx, volume) {
+        const source = this.audioContext.createBufferSource();
+        source.buffer = this.soundBuffers[sfx];
+        const gainNode = this.audioContext.createGain();
+        gainNode.gain.value = volume;
+        source.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        source.start(0);
+        console.log(`AudioSystem: Playback scheduled for ${sfx}`);
     }
 
     playAudio({ sound, play = true }) {
-        if (!this.sounds[sound]) return;
-
         if (sound === 'torchBurning') {
-            this.sounds.torchBurning.loop = true;
-            this.sounds.torchBurning.volume = this.torchVolume;
-            play ? this.sounds.torchBurning.play() : this.sounds.torchBurning.pause();
-            console.log('AudioSystem: Playing torchBurning');
+            if (play) {
+                if (this.torchBurningSource) {
+                    this.torchBurningSource.stop();
+                }
+                if (this.soundBuffers.torchBurning) {
+                    this.torchBurningSource = this.audioContext.createBufferSource();
+                    this.torchBurningSource.buffer = this.soundBuffers.torchBurning;
+                    this.torchBurningSource.loop = true;
+                    const gainNode = this.audioContext.createGain();
+                    gainNode.gain.value = this.torchVolume;
+                    this.torchBurningSource.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    if (this.audioContext.state === 'suspended') {
+                        this.audioContext.resume().then(() => {
+                            this.torchBurningSource.start(0);
+                            console.log('AudioSystem: Playing torchBurning');
+                        }).catch(error => {
+                            console.error('AudioSystem: Failed to resume AudioContext for torchBurning:', error);
+                        });
+                    } else {
+                        this.torchBurningSource.start(0);
+                        console.log('AudioSystem: Playing torchBurning');
+                    }
+                } else {
+                    console.warn('AudioSystem: Sound buffer torchBurning not found');
+                }
+            } else if (this.torchBurningSource) {
+                this.torchBurningSource.stop();
+                this.torchBurningSource = null;
+                console.log('AudioSystem: Stopped torchBurning');
+            }
+        } else if (sound === 'ding') {
+            this.playSfx({ sfx: 'ding', volume: this.dingVolume });
         }
-        if (sound === 'ding') {
-            this.sounds.ding.volume = this.dingVolume;
-            this.sounds.ding.play();
-        }
-
-
-    }
-
-    playSfx({sfx, volume}) {
-        console.log(`AudioSystem: Playing sfx: ${sfx} at Volume: ${volume}`, );
-
-        if (!this.sounds[sfx]) {
-            console.warn(`AudioSystem: Sound effect ${sfx} not found`);
-            return;
-        }
-        this.sounds[sfx].volume = volume;
-        this.sounds[sfx].play();
     }
 
     playBackgroundMusic({ play = true } = {}) {
-        this.sounds.backgroundMusic.loop = true;
-        this.sounds.backgroundMusic.volume = this.musicVolume;
-        play ? this.sounds.backgroundMusic.play() : this.sounds.backgroundMusic.pause();
+        if (play) {
+            if (this.backgroundMusicSource) {
+                this.backgroundMusicSource.stop();
+            }
+            if (this.soundBuffers.backgroundMusic) {
+                this.backgroundMusicSource = this.audioContext.createBufferSource();
+                this.backgroundMusicSource.buffer = this.soundBuffers.backgroundMusic;
+                this.backgroundMusicSource.loop = true;
+                const gainNode = this.audioContext.createGain();
+                gainNode.gain.value = this.musicVolume;
+                this.backgroundMusicSource.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume().then(() => {
+                        this.backgroundMusicSource.start(0);
+                        console.log('AudioSystem: Playing backgroundMusic');
+                    }).catch(error => {
+                        console.error('AudioSystem: Failed to resume AudioContext for backgroundMusic:', error);
+                    });
+                } else {
+                    this.backgroundMusicSource.start(0);
+                    console.log('AudioSystem: Playing backgroundMusic');
+                }
+            } else {
+                console.warn('AudioSystem: Sound buffer backgroundMusic not found');
+            }
+        } else if (this.backgroundMusicSource) {
+            this.backgroundMusicSource.stop();
+            this.backgroundMusicSource = null;
+            console.log('AudioSystem: Stopped backgroundMusic');
+        }
     }
 }

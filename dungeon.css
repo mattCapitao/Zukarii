@@ -1660,9 +1660,25 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
 }
     .stairs.down {
     }
-    .fountain{
-
+.fountain {
+    position: relative;
+    height: 32px;
+    width: 32px;
+}
+        .fountain img {
+            position: absolute;
+            bottom: 0;
+            left: 0px;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            margin: 0;
+            filter: drop-shadow(0 0 0.65rem #351fb9bc); /* Creates an evenly distributed outline */
+        }
+    .fountain.used img {
+        filter: drop-shadow(0 0 0.05rem #fefefe00) !important; /* Creates an evenly distributed outline */
     }
+
 .portal {
     position: relative;
     height: 32px;

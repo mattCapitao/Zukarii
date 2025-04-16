@@ -29,7 +29,7 @@ import { ProjectileSystem } from './systems/ProjectileSystem.js';
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
-    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent
+    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, SFXQueueComponent
 } from './core/Components.js';
 
 export class Game {
@@ -84,6 +84,7 @@ export class Game {
         this.entityManager.addComponentToEntity('lightingState', new LightSourceDefinitions());
        
         this.entityManager.addComponentToEntity('gameState', new DataProcessQueues());
+        this.entityManager.addComponentToEntity('gameState', new SFXQueueComponent());
 
         this.initializeSystems().then(() => {
             this.state.eventBus.emit('InitializePlayer');
@@ -175,13 +176,14 @@ export class Game {
                 'playerController',
                 'combat',
                 'playerTimer',
-                'render',
                 'player',
+                'exploration',
                 'monster',
                 'ui',
-                'exploration',
                 'affix',
-                'effects'
+                'effects',
+                'render',
+                'audio',
             ], deltaTime);
 
             const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');

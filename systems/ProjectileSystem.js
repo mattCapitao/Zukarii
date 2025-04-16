@@ -4,7 +4,8 @@ import { PositionComponent, ProjectileComponent, MovementSpeedComponent, NeedsRe
 export class ProjectileSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
-        this.requiredComponents = ['Position', 'Projectile', 'MovementSpeed'];
+        this.requiredComponents = ['Projectile', 'Position', 'LastPosition', 'MovementSpeed'];
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('SfxQueue').Sounds || []
     }
 
     update(deltaTime) {
@@ -13,9 +14,13 @@ export class ProjectileSystem extends System {
 
         const projectiles = this.entityManager.getEntitiesWith(this.requiredComponents);
         for (const proj of projectiles) {
-            const pos = proj.getComponent('Position');
+
             const projData = proj.getComponent('Projectile');
-            const moveSpeedComp = proj.getComponent('MovementSpeed');
+            if (projData.removeAfterRender && projData.finalRenderApplied) {
+                this.entityManager.removeEntity(proj.id);
+                continue;
+            }
+            
             const tier = gameState.tier;
             const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
             if (!levelEntity) {
@@ -23,6 +28,13 @@ export class ProjectileSystem extends System {
                 continue;
             }
 
+            const moveSpeedComp = proj.getComponent('MovementSpeed');
+            moveSpeedComp.elapsedSinceLastMove += deltaTime * 1000;
+            if (moveSpeedComp.elapsedSinceLastMove < moveSpeedComp.movementSpeed) {
+                continue;
+            }
+
+            const pos = proj.getComponent('Position');
             const map = levelEntity.getComponent('Map').map;
             const source = this.entityManager.getEntity(projData.sourceEntityId);
             const targetFilter = source?.hasComponent('PlayerState')
@@ -30,8 +42,7 @@ export class ProjectileSystem extends System {
                 : ['Position', 'Health', 'PlayerState'];
             const targets = this.entityManager.getEntitiesWith(targetFilter);
 
-            moveSpeedComp.elapsedSinceLastMove += deltaTime * 1000;
-            if (moveSpeedComp.elapsedSinceLastMove < moveSpeedComp.movementSpeed) continue;
+            
 
             if (projData.rangeLeft > 0) {
                 let dx = 0, dy = 0;
@@ -50,13 +61,12 @@ export class ProjectileSystem extends System {
                     const ePos = e.getComponent('Position');
                     return ePos.x === newX && ePos.y === newY;
                 });
+
                 const hitsWall = entitiesAtTarget.some(e => e.hasComponent('Wall'));
                 if (isOutOfBounds || hitsWall) {
-                    this.entityManager.removeEntity(proj.id);
-                    this.eventBus.emit('PlaySfx', { sfx: 'firehit0', volume: .1 });
+                    projData.removeAfterRender = true;
+                    this.sfxQueue.push({ sfx: 'firehit0', volume: .1 });
                     this.eventBus.emit('LogMessage', { message: 'Your shot hit a wall.' });
-                    this.eventBus.emit('RenderNeeded');
-
                     continue;
                 }
 
@@ -78,27 +88,27 @@ export class ProjectileSystem extends System {
                     });
                     // NEW: SFX on hit—no callback needed
                     if (source?.hasComponent('PlayerState')) {
-                        this.eventBus.emit('PlaySfx', { sfx: 'firehit0', volume: .1 });
+                       
+                        this.sfxQueue.push({ sfx: 'firehit0', volume: .1 });
                     }
 
                     if (!projData.isPiercing) {
-                        this.entityManager.removeEntity(proj.id);
-
-                        this.eventBus.emit('RenderNeeded');
+                        projData.removeAfterRender = true;
                         continue;
                     }
                 }
+
+                const lastPos = proj.getComponent('LastPosition');
+                lastPos.x = pos.x;
+                lastPos.y = pos.y;
 
                 pos.x = newX;
                 pos.y = newY;
                 projData.rangeLeft--;
                 moveSpeedComp.elapsedSinceLastMove -= moveSpeedComp.movementSpeed;
 
-                this.eventBus.emit('PositionChanged', { entityId: proj.id, x: newX, y: newY });
-                this.eventBus.emit('RenderNeeded');
             } else {
-                this.entityManager.removeEntity(proj.id);
-                this.eventBus.emit('RenderNeeded');
+                projData.removeAfterRender = true;
             }
         }
     }

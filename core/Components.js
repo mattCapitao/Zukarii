@@ -34,11 +34,13 @@ import {
     LightingState,
     LightSourceDefinitions,
     OverlayStateComponent,
-    DataProcessQueues
+    DataProcessQueues,
+    SFXQueueComponent
 } from './components/GameComponents.js';
 
 import {
     PositionComponent,
+    LastPositionComponent,
     VisualsComponent,
     HealthComponent,
     AttackSpeedComponent,
@@ -82,9 +84,11 @@ export {
     LightSourceDefinitions,
     OverlayStateComponent,
     DataProcessQueues,
+    SFXQueueComponent,
 
     // Common components
     PositionComponent,
+    LastPositionComponent,
     VisualsComponent,
     HealthComponent,
     AttackSpeedComponent,
@@ -92,7 +96,7 @@ export {
     AffixComponent,
     InCombatComponent,
     DeadComponent,
-    NeedsRenderComponent
+    NeedsRenderComponent,
 };
 
 // Utility functions

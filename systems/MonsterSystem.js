@@ -1,6 +1,6 @@
 ﻿// systems/MonsterSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent, HealthComponent, LootSourceData, AttackSpeedComponent, MovementSpeedComponent, AffixComponent, VisualsComponent } from '../core/Components.js';
+import { PositionComponent, LastPositionComponent, HealthComponent, LootSourceData, AttackSpeedComponent, MovementSpeedComponent, AffixComponent, VisualsComponent } from '../core/Components.js';
 
 export class MonsterSystem extends System {
     constructor(entityManager, eventBus, dataSystem) {
@@ -29,7 +29,6 @@ export class MonsterSystem extends System {
             this.handleMonsterDeath(data.entityId);
         });
         this.eventBus.on('SpawnMonsters', (data) => this.handleSpawnMonsters(data));
-        this.redrawTiles = this.entityManager.getEntity('renderState').getComponent('RenderState').redrawTiles || new Set();
     }
 
     update(deltaTime) {
@@ -116,11 +115,13 @@ export class MonsterSystem extends System {
                         if (!this.isWalkable(newX, newY) || isOccupied || isPlayerPosition) {
                             continue;
                         }
-                        const oldTileKey = `${pos.x},${pos.y}`; // Store old tile key for rendering
-                        this.redrawTiles.add(oldTileKey);
+                        const lastPos = monster.getComponent('LastPosition');
+                        lastPos.x = pos.x;
+                        lastPos.y = pos.y;
+
                         pos.x = newX;
                         pos.y = newY;
-                        this.eventBus.emit('PositionChanged', { entityId: monster.id, x: newX, y: newY });
+                        
                         movementSpeed.elapsedSinceLastMove = 0; // Reset move timer
                         break;
                     }
@@ -312,6 +313,7 @@ export class MonsterSystem extends System {
 
         const maxHp = this.calculateMonsterMaxHp(template.baseHp, tier);
         this.entityManager.addComponentToEntity(entity.id, new PositionComponent(x, y));
+        this.entityManager.addComponentToEntity(entity.id, new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity(entity.id, new HealthComponent(maxHp, maxHp));
         this.entityManager.addComponentToEntity(entity.id, new AttackSpeedComponent(1000));
         this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(500));

@@ -81,6 +81,8 @@ export class ProjectileComponent {
         this.sourceEntityId = sourceEntityId;
         this.weapon = weapon;
         this.isPiercing = isPiercing;
+        this.removeAfterRender = false; // Flag to indicate if the projectile should be removed after rendering
+        this.finalRenderApplied = false; // Flag to indicate if the final render has been applied
     }
 }
 
@@ -158,5 +160,13 @@ export class DataProcessQueues {
         this.type = 'DataProcessQueues';
         this.HealthUpdates = [];
         this.ManaUpdates = [];
+        
+    }
+}
+
+export class SFXQueueComponent {
+    constructor() {
+        this.type = 'SfxQueue';
+        this.Sounds = []; // {sfx:'SfxName', volume: .1}
     }
 }

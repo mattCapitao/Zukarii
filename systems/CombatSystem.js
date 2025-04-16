@@ -1,6 +1,6 @@
 ﻿// systems/CombatSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent, HealthComponent, ProjectileComponent, MovementSpeedComponent, InCombatComponent, NeedsRenderComponent } from '../core/Components.js';
+import { PositionComponent, LastPositionComponent, ProjectileComponent, MovementSpeedComponent, InCombatComponent, NeedsRenderComponent } from '../core/Components.js';
 
 export class CombatSystem extends System {
     constructor(entityManager, eventBus) {
@@ -8,6 +8,7 @@ export class CombatSystem extends System {
         this.requiredComponents = ['Position', 'Health'];
         this.queues = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues') || {};
         this.healthUpdates = this.queues.HealthUpdates || [];
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('SfxQueue').Sounds || []
     }
 
     init() {
@@ -33,7 +34,7 @@ export class CombatSystem extends System {
             case 'block': sfx = `${type}${Math.floor(Math.random() * blockFileCount)}`; break;
             default: return;
         }
-        this.eventBus.emit('PlaySfx', { sfx, volume: .1 });
+        this.sfxQueue.push({ sfx, volume: .1 }); 
     }
 
     getBestRangedWeapon() {
@@ -181,12 +182,14 @@ export class CombatSystem extends System {
         if (weapon.piercing) { //placeholder for piercing logic
             isPiercing = true;
         }
-
+        const sfx = 'firecast0';
+        this.sfxQueue.push({ sfx, volume: .1 }); 
         const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
         this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
+        this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, 'player', weapon, isPiercing));
         this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(100)); // 50ms = current 20 tiles/s
-        this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
-        //this.eventBus.emit('RenderNeeded');
+        //this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
+        
     }
 }

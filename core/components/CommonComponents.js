@@ -9,6 +9,14 @@ export class PositionComponent {
     }
 }
 
+export class LastPositionComponent {
+    constructor(x = 0, y = 0) {
+        this.type = 'LastPosition';
+        this.x = x;
+        this.y = y;
+    }
+}
+
 export class VisualsComponent {
     constructor(h = 32, w = 32) {
         this.type = 'Visuals';

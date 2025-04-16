@@ -52,6 +52,7 @@ export class LevelSystem extends System {
     }
 
     init() {
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('SfxQueue').Sounds || []
         this.eventBus.on('AddLevel', (data) => this.addLevel(data));
         this.eventBus.on('CheckLevelAfterTransitions', (data) => this.checkLevelAfterTransitions(data));
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
@@ -76,6 +77,7 @@ export class LevelSystem extends System {
                 console.log(`LevelSystem.js: init - Preserved loaded tier ${gameState.tier}, generated levels 0 to ${gameState.tier}`);
             }
         }
+        
     }
 
     removeWallAtPosition(x, y, walls, levelEntity) {
@@ -158,7 +160,7 @@ export class LevelSystem extends System {
                 this.adjustPlayerPosition(levelEntity, levelData.stairsUp || levelData.stairsDown);
             } else {
                 const hasBossRoom = (tier - this.lastBossTier >= this.BOSS_ROOM_EVERY_X_LEVELS) || Math.random() < 0.05;
-                this.eventBus.emit('PlaySfx', { sfx: 'bossLevel0', volume: 0.5 }); 
+                this.sfxQueue.push({ sfx: 'bossLevel0', volume: 0.5 });
                 console.log(`Has boss room = ${hasBossRoom} for tier ${tier}, last boss tier: ${this.lastBossTier}`);
                 levelData = this.generateLevel(hasBossRoom, tier, levelEntity.id);
                 console.log(`LevelSystem.js: Generated level data for tier ${tier}, roomEntityIds: ${JSON.stringify(levelData.roomEntityIds)}`);

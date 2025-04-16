@@ -11,16 +11,16 @@ export class RenderSystem extends System {
         this.lastTier = null;
         this.SCALE_FACTOR = 2
         this.TILE_SIZE = 32;
-        this.SCROLL_SPEED = 1;
+        //this.SCROLL_SPEED = .250;
         this.VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.35;
         this.SCROLL_THRESHOLD = 4;
         this.SCROLL_DURATION = 250;
-        this.previousProjectilePositions = new Map();
     }
 
     init() {
         this.eventBus.on('RenderNeeded', () => this.render(true));
         this.eventBus.on('PositionChanged', (data) => {
+            /*
             if (data.entityId.startsWith('projectile_')) {
                 const projectile = this.entityManager.getEntity(data.entityId);
                 if (projectile) {
@@ -34,7 +34,21 @@ export class RenderSystem extends System {
                     this.previousProjectilePositions.set(data.entityId, { x: data.x, y: data.y });
                 }
             }
-            this.render(true);
+            */
+
+            if (data.entityId === 'player') {
+                // Handle player repositioning (e.g., level start)
+                const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
+                const pos = this.entityManager.getEntity(data.entityId)?.getComponent('Position');
+                if (pos) {
+                    renderState.activeRenderZone.add(`${pos.x},${pos.y}`);
+                    renderState.activeRenderZone.add(`${data.x},${data.y}`);
+                    pos.x = data.x;
+                    pos.y = data.y;
+                }
+            }
+            
+            //this.render(true);
             this.viewportEdgeScroll();
         });
         this.eventBus.on('DiscoveredStateUpdated', () => this.render(true));
@@ -42,6 +56,9 @@ export class RenderSystem extends System {
     }
 
     update() {
+        
+
+
         this.render(false);
     }
 
@@ -198,18 +215,23 @@ export class RenderSystem extends System {
                         char = '*';
                         className = 'discovered floor projectile';
                     } else {
+                        let fountainData = null;
                         const fountain = fountains.find(f => {
                             const pos = f.getComponent('Position');
-                            const fountainData = f.getComponent('Fountain');
-                            return pos.x === x && pos.y === y && !fountainData.used;
+                            fountainData = f.getComponent('Fountain');
+                            return pos.x === x && pos.y === y;
                         });
                         if (fountain) {
+
                             const a = fountain.getComponent('Visuals').avatar;
                             avatar = a || 'img/avatars/fountain.png'
-                            char = `<img src="${avatar}" height="32px;" width="32px;"/>` || '≅';
+                            char = `<img src="${avatar}" height="32px" width="32px"/>` || '≅';
 
                             className = exploration.discoveredFloors.has(tileKey) ? 'floor discovered' : 'undiscovered';
                             className += ' fountain';
+                            if (fountainData.used) {
+                                className += ' used';
+                            }
                         } else {
                             const stair = stairs.find(s => {
                                 const pos = s.getComponent('Position');
@@ -333,39 +355,31 @@ export class RenderSystem extends System {
 
             this.setInitialScroll();
         } else {
-            // *** CHANGED: Force re-render of all old projectile positions ***
             const playerTileKey = `${playerPos.x},${playerPos.y}`;
-            const tilesToClear = new Set();
-            projectiles.forEach(proj => {
-                const projId = proj.id;
-                const currentPos = proj.getComponent('Position');
-                const oldPos = this.previousProjectilePositions.get(projId);
-                if (oldPos && (oldPos.x !== currentPos.x || oldPos.y !== currentPos.y)) {
-                    const oldTileKey = `${oldPos.x},${oldPos.y}`;
-                    // Only add to tilesToClear if it's not the player's current position
-                    if (oldTileKey !== playerTileKey) {
+            
+            const exploration = tierEntity.getComponent('Exploration');
+            const movables = this.entityManager.getEntitiesWith(['Position', 'LastPosition']);
+            const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
 
-                        redrawTiles.add(oldTileKey);
-                        //tilesToClear.add(oldTileKey);
+
+            for (const entity of movables) {
+                const pos = entity.getComponent('Position');
+                const lastPos = entity.getComponent('LastPosition');
+                if (pos.x !== lastPos.x || pos.y !== lastPos.y) {
+      
+                    renderState.activeRenderZone.add(`${pos.x},${pos.y}`);
+                    renderState.activeRenderZone.add(`${lastPos.x},${lastPos.y}`);
+                    if (!exploration.discoveredFloors.has(`${pos.x},${pos.y}`)) {
+                        exploration.discoveredFloors.add(`${pos.x},${pos.y}`);
                     }
                 }
-            });
+            }
 
-            
-            redrawTiles.forEach(tileKey => {
-                renderState.activeRenderZone.add(tileKey);
-            });
-            redrawTiles.clear();
-
-            const aggroMonsters = monsters.filter(m => m.getComponent('MonsterData').isAggro);
-            aggroMonsters.forEach(monster => {
-                const pos = monster.getComponent('Position');
-                const tileKey = `${pos.x},${pos.y}`;
-                renderState.activeRenderZone.add(tileKey);
-            });
 
             for (const tileKey of renderState.activeRenderZone) {
+
                 const [x, y] = tileKey.split(',').map(Number);
+                
                 const tile = this.tileMap[tileKey];
                 let char = ' ';
                 let className = 'undiscovered';
@@ -382,6 +396,7 @@ export class RenderSystem extends System {
                     const pos = w.getComponent('Position');
                     return pos.x === x && pos.y === y;
                 });
+
                 if (wall) {
                     className = 'discovered wall';
                 }
@@ -398,6 +413,7 @@ export class RenderSystem extends System {
                     avatar = 'img/avatars/chest.png'; 
                     char = `<img src="${avatar}" height="16px" width="24px;"/>`;
                     className = 'discovered treasure floor';
+
                 } else if (x === playerPos.x && y === playerPos.y) {
 
                     avatar = player.getComponent('Visuals').avatar;
@@ -421,7 +437,7 @@ export class RenderSystem extends System {
 
                     if (lightingState?.isLit) {
                         torch = `<span id="torch" class="flicker ${torchAlignClass}" > </span>`;
-                        console.log('RenderSystem: player tiel.element', tile); 
+                        //console.log('RenderSystem: player tile.element', tile); 
                     }
 
                     tile.element.innerHTML = char + torch;
@@ -431,21 +447,34 @@ export class RenderSystem extends System {
                     avatar = '';
 
                 } else if (projectile) {
-                    char = '*';
-                    className = 'discovered floor projectile';
+                    const projData = projectile.getComponent('Projectile');
+                    if (projData.removeAfterRender) {
+                        // Render floor or hit effect
+                        char = ' ';
+                        className = 'discovered floor';
+                        projData.finalRenderApplied = true;
+                    } else {
+                        char = '*';
+                        className = 'discovered floor projectile';
+                        
+                    }
                 } else {
+                    let fountainData = null;
                     const fountain = fountains.find(f => {
                         const pos = f.getComponent('Position');
-                        const fountainData = f.getComponent('Fountain');
-                        return pos.x === x && pos.y === y && !fountainData.used;
+                        fountainData = f.getComponent('Fountain');
+                        return pos.x === x && pos.y === y;
                     });
                     if (fountain) {
                         const a = fountain.getComponent('Visuals').avatar;
                         avatar = a || 'img/avatars/fountain.png'
-                        char = `<img src="${avatar}" height="32px;" width="32px;"/>` || '≅';
+                        char = `<img src="${avatar}" height="32px" width="32px"/>` || '≅';
 
-                        className = exploration.discoveredFloors.has(tileKey) ? 'floor discovered' : 'undiscovered';
+                        className =  'floor discovered';
                         className += ' fountain';
+                        if (fountainData.used) {
+                            className += ' used';
+                        }
                     } else {
                         const stair = stairs.find(s => {
                             const pos = s.getComponent('Position');
@@ -534,21 +563,6 @@ export class RenderSystem extends System {
                     tile.element.className = className;
                     tile.char = char;
                     tile.class = className;
-                }
-
-               
-            }
-
-            // *** CHANGED: Clean up removed projectiles ***
-            const currentProjectileIds = new Set(projectiles.map(p => p.id));
-            for (const [projId] of this.previousProjectilePositions) {
-                if (!currentProjectileIds.has(projId)) {
-                    const oldPos = this.previousProjectilePositions.get(projId);
-                    const oldTileKey = `${oldPos.x},${oldPos.y}`;
-                    if (oldTileKey !== playerTileKey) {
-                        renderState.activeRenderZone.add(oldTileKey);
-                    }
-                    this.previousProjectilePositions.delete(projId);
                 }
             }
         }

@@ -26,6 +26,8 @@ export class PlayerControllerSystem {
             this.VisualsComponent = player.getComponent('Visuals');
         }
         this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
+
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('SfxQueue').Sounds || []
     }
 
     update(deltaTime) {
@@ -61,11 +63,11 @@ export class PlayerControllerSystem {
             const wasPressed = this.previousKeyStates[direction];
 
             if (isPressed && gameState.isRangedMode) {
+                
                 // Key was just pressed, emit RangedAttack
                 if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
                     //console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: ${direction}`);
-                    const sfx = 'firecast0';
-                    this.eventBus.emit('PlaySfx', {sfx, volume:.1  }); 
+                   
                     this.eventBus.emit('RangedAttack', { direction });
                     attackSpeed.elapsedSinceLastAttack = 0;
                     this.endTurn('rangedAttack');
@@ -128,12 +130,14 @@ export class PlayerControllerSystem {
             return;
         }
 
-        const fountain = entitiesAtTarget.find(e => e.hasComponent('Fountain') && !e.getComponent('Fountain').used);
-        if (fountain) {
 
+        const fountain = entitiesAtTarget.find(e => e.hasComponent('Fountain'));
+        if (fountain) {
+            
             this.eventBus.emit('UseFountain', { fountainEntityId: fountain.id, tierEntityId: levelEntity.id });
             movementSpeed.elapsedSinceLastMove = 0;
-            this.eventBus.emit('PlaySfx', { sfx: 'fountain0', volume: .5 });
+            if (fountain.getComponent('Fountain').used) return;
+            this.sfxQueue.push({ sfx: 'fountain0', volume: .5 }); 
             this.endTurn('useFountain');
             return;
         }
@@ -164,7 +168,8 @@ export class PlayerControllerSystem {
 
         const portal = entitiesAtTarget.find(e => e.hasComponent('Portal'));
         if (portal) {
-            this.eventBus.emit('PlaySfx', { sfx: 'portal0', volume: .5 });
+            this.sfxQueue.push(  );
+            this.sfxQueue.push({ sfx: 'portal0', volume: .5 });
             this.eventBus.emit('RenderLock');
             this.eventBus.emit('TransitionViaPortal', { x: newX, y: newY });
             this.endTurn('transitionPortal', newX, newY);
