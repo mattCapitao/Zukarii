@@ -84,7 +84,6 @@ export class RenderSystem extends System {
 
         if (!gameState.needsRender) return;
 
-       
 
         this.titleScreenContainer.style.display = 'none';
         this.mapDiv.style.display = 'block';
@@ -270,20 +269,25 @@ export class RenderSystem extends System {
                                             const pos = m.getComponent('Position');
                                             return pos.x === x && pos.y === y && m.getComponent('Health').hp > 0;
                                         });
+                                        let monsterData = null;
+                                       
+                                        if (monster) { 
+                                            monsterData = monster.getComponent('MonsterData');
+                                            char = ' ';
+                                            avatar = '';
+                                            className = `monster ${monsterData.classes}`;
 
-                                        if (monster && (renderState.activeRenderZone.has(tileKey) || monster.getComponent('MonsterData').isAggro)) {
-                                            const a = monster?.getComponent('Visuals').avatar;
-                                            avatar = a.avatar || 'img/avatars/monsters/skeleton.png';
-                                            const monsterData = monster.getComponent('MonsterData');
-                                            monsterData.isDetected = true;
+                                            if (renderState.activeRenderZone.has(tileKey) || monsterData.isAggro) {
+                                                monsterData.isDetected = true;
+                                                className += ' detected';
+                                            }
 
                                             const health = monster.getComponent('Health');
-                                            const hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE/2));
-
-                                            char = avatar ? `<img src="${avatar}" height="30px" width="32px" style ="background-size:${hpBarWidth}px, 2px;  background-position:8px 0;" />` : monsterData.avatar;
-                                           
-
-                                            className = `monster detected has-hp-bar ${monsterData.classes}`;
+                                            let hpBarWidth = 0;
+                                            if (health.hp !== health.maxHp) {
+                                                hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE / 2));
+                                                className += ' has-hp-bar';
+                                            }
 
                                             const faceLeft = monster.getComponent('Visuals').faceLeft;
                                             if (faceLeft) { className += ' face-left'; }
@@ -291,11 +295,12 @@ export class RenderSystem extends System {
                                             if (monsterData.isElite) className += ' elite';
                                             if (monsterData.isBoss) className += ' boss';
                                             monsterData.affixes.forEach(affix => className += ` ${affix}`);
-                                        }
-                                        if (monster) {
-                                            const monsterData = monster.getComponent('MonsterData');
-                                            char = ' ';
-                                            avatar = '';
+
+                                            const a = monster?.getComponent('Visuals').avatar;
+                                            avatar = a.avatar || 'img/avatars/monsters/skeleton.png';
+
+                                            char = avatar ? `<img src="${avatar}" height="30px" width="32px" style ="background-size:${hpBarWidth}px, 2px;  background-position:8px 0;" />` : monsterData.avatar;
+                                            
                                         }
                                     }
                                 }
@@ -490,18 +495,29 @@ export class RenderSystem extends System {
                                     const pos = m.getComponent('Position');
                                     return pos.x === x && pos.y === y && m.getComponent('Health').hp > 0;
                                 });
-                                const visuals = monster?.getComponent('Visuals');
-                                avatar = visuals?.avatar || 'img/avatars/monsters/skeleton.png';
+                                
+                                let monsterData = null;
+                                if (monster) { 
+                                    const visuals = monster?.getComponent('Visuals');
+                                    avatar = visuals?.avatar || 'img/avatars/monsters/skeleton.png';
+                                    monsterData = monster.getComponent('MonsterData');
+                                    className = `monster has-hp-bar ${monsterData.classes}`;
 
-                                if (monster && (renderState.activeRenderZone.has(tileKey) || monster.getComponent('MonsterData').isAggro)) {
-                                    const monsterData = monster.getComponent('MonsterData');
-                                    monsterData.isDetected = true;
+                                    if (renderState.activeRenderZone.has(tileKey) || monster.getComponent('MonsterData').isAggro) {
+                                        monsterData.isDetected = true;
+                                        className += ' detected';
+                                    } else {
+                                        monsterData.isDetected = false;
+                                        className += ' undiscovered';
+                                    }
+
                                     const health = monster.getComponent('Health');
-                                    const hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE/2));
-                                    const charAvatar = avatar ? avatar : monsterData.avatar;
-                                    char = `<img src="${charAvatar}" height="32px" width="32px" style="background-size:${hpBarWidth}px 2px; background-position:8px 0;" />`;
-                                    
-                                    className = `monster detected has-hp-bar ${monsterData.classes}`;
+                                    let hpBarWidth = 0;
+                                    if (health.hp !== health.maxHp) {
+                                        hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE / 2));
+                                        className += ' has-hp-bar';
+                                    }
+
                                     if (monsterData.isElite) className += ' elite';
                                     if (monsterData.isBoss) className += ' boss';
                                     monsterData.affixes.forEach(affix => className += ` ${affix}`);
@@ -509,17 +525,15 @@ export class RenderSystem extends System {
                                     const faceLeft = monster.getComponent('Visuals').faceLeft;
                                     if (faceLeft) { className += ' face-left'; }
 
+                                    const charAvatar = avatar ? avatar : monsterData.avatar;
+                                    char = `<img src="${charAvatar}" height="32px" width="32px" style="background-size:${hpBarWidth}px 2px; background-position:8px 0;" />`;
+                                    
                                     tile.element.innerHTML = char;
                                     tile.element.className = className;
                                     tile.char = char;
                                     tile.class = className;
                                     avatar = '';
-                                }
-                              
-                                if (monster) {
-                                    const monsterData = monster.getComponent('MonsterData');
-                                }
-                                
+                                } 
                             }
                         }
                     }
