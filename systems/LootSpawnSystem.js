@@ -52,9 +52,10 @@ export class LootSpawnSystem extends System {
         lootVisuals.avatar = 'img/avatars/chest.png';
  
         this.eventBus.emit('LootEntityCreated', { entityId: lootEntity.id, tier });
-
-        if (!lootData.suppressRender) {
-            this.eventBus.emit('RenderNeeded');
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        if (!lootData.suppressRender && gameState) {
+            gameState.needsRender = true;
+            //this.eventBus.emit('RenderNeeded');
         }
     }
 }

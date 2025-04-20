@@ -35,7 +35,8 @@ import {
     LightSourceDefinitions,
     OverlayStateComponent,
     DataProcessQueues,
-    SFXQueueComponent
+    AudioQueueComponent,
+    LevelTransitionComponent,
 } from './components/GameComponents.js';
 
 import {
@@ -48,7 +49,11 @@ import {
     AffixComponent,
     InCombatComponent,
     DeadComponent,
-    NeedsRenderComponent
+    NeedsRenderComponent,
+    HitboxComponent,
+    MovementIntentComponent,
+    CollisionComponent,
+    RemoveEntityComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -84,7 +89,8 @@ export {
     LightSourceDefinitions,
     OverlayStateComponent,
     DataProcessQueues,
-    SFXQueueComponent,
+    AudioQueueComponent,
+    LevelTransitionComponent,
 
     // Common components
     PositionComponent,
@@ -97,6 +103,10 @@ export {
     InCombatComponent,
     DeadComponent,
     NeedsRenderComponent,
+    HitboxComponent,
+    MovementIntentComponent,
+    CollisionComponent,
+    RemoveEntityComponent,
 };
 
 // Utility functions

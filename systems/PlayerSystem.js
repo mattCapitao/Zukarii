@@ -8,6 +8,7 @@ export class PlayerSystem extends System {
     }
 
     init() {
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || []
         this.eventBus.on('InitializePlayer', () => this.initializePlayer());
         this.eventBus.on('GearChanged', (data) => this.updateGearStats(data.entityId));
         this.eventBus.on('AwardXp', (data) => this.awardXp(data));
@@ -260,7 +261,7 @@ export class PlayerSystem extends System {
 
             playerState.xp = newXp;
             playerState.nextLevelXp = Math.round(playerState.nextLevelXp * 1.55);
-            this.eventBus.emit('PlayAudio', { sound: 'ding', play: true });
+            this.sfxQueue.push({ sfx: 'ding', volume: .5 });
             this.eventBus.emit('LogMessage', { message: `Level up! Now level ${playerState.level}, ${statAllocationMessage}` });
         }
         if (levelUp) { 

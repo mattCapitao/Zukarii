@@ -9,7 +9,7 @@ export class LootCollectionSystem extends System {
 
     init() {
         this.eventBus.on('PickupTreasure', (data) => this.collectLoot(data));
-        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('SfxQueue').Sounds || []
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || []
     }
 
     // systems/LootCollectionSystem.js - Updated collectLoot method
@@ -79,7 +79,8 @@ export class LootCollectionSystem extends System {
 
         entityList.treasures.splice(lootIndex, 1);
         this.entityManager.removeEntity(lootEntity.id);
-        this.eventBus.emit('RenderNeeded');
+        gameState.needsRender = true;
+        //this.eventBus.emit('RenderNeeded');
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
         this.sfxQueue.push({ sfx: 'loot0' , volume: .7 });
 

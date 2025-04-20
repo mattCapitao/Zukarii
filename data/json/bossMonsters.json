@@ -6,7 +6,7 @@
     "classes": "plinklefart",
     "family": "demon",
     "minDungeonTier": 3,
-    "avatar": "P",
+    "avatar": "img/avatars/monsters/plinklefart.png",
     "baseHp": 60,
     "maxHp": 60,
     "hp": 60,
@@ -20,18 +20,26 @@
     "uniqueItemsDropped": [
       {
         "type": "customUnique",
-        "dropChance": 1,
+        "dropChance": 0.02,
         "data": { "name": "Golden Khepresh" }
       },
       {
         "type": "randomUnique",
         "dropChance": 0.05,
-        "data": { }
+        "data": {}
       },
-     
-      {"type": "rog", "dropChance": 0.2, "data": { "tierIndex": 3}},
-      {"type": "rog","dropChance": 1, "data": {}}
-       
+
+      {
+        "type": "rog",
+        "dropChance": 0.1,
+        "data": { "itemTierIndexBonus": 2 }
+      },
+      {
+        "type": "rog",
+        "dropChance": 1,
+        "data": {}
+      }
+
     ]
   },
   {
@@ -41,7 +49,7 @@
     "classes": "t-kore-tickrob",
     "family": "demon",
     "minDungeonTier": 3,
-    "avatar": "K",
+    "avatar": "img/avatars/monsters/tkore-tickrob.png",
     "baseHp": 200,
     "maxHp": 200,
     "hp": 200,
@@ -55,7 +63,7 @@
     "uniqueItemsDropped": [
       {
         "type": "customUnique",
-        "dropChance": 0.01,
+        "dropChance": 0.05,
         "data": { "name": "Golden Skin of Avarice" }
       },
       {
@@ -65,8 +73,8 @@
       },
       {
         "type": "rog",
-        "dropChance": 0.2,
-        "data": { "tierIndex": 3 }
+        "dropChance": 0.1,
+        "data": { "itemTierIndexBonus": 2 }
       },
       {
         "type": "rog",

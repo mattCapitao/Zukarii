@@ -16,6 +16,35 @@ export class LastPositionComponent {
         this.y = y;
     }
 }
+/////////////////////////////////////////////////////////////////////////
+export class HitboxComponent {
+    constructor(width = 1, height = 1, offsetX = 0, offsetY = 0) {
+        this.type = 'Hitbox';
+        this.width = width;
+        this.height = height;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
+    }
+}
+
+export class MovementIntentComponent {
+    constructor(targetX, targetY) {
+        this.type = 'MovementIntent';
+        this.targetX = targetX;
+        this.targetY = targetY;
+    }
+}
+
+export class CollisionComponent {
+    constructor() {
+        this.type = 'Collision';
+        this.collisions = []; // Array to store collision details
+    }
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////
 
 export class VisualsComponent {
     constructor(h = 32, w = 32) {
@@ -82,5 +111,12 @@ export class NeedsRenderComponent {
         this.type = 'NeedsRender';
         this.x = x;
         this.y = y;
+    }
+}
+
+export class RemoveEntityComponent {
+    constructor() {
+        this.type = 'RemoveEntity';
+        this.remove = true;
     }
 }

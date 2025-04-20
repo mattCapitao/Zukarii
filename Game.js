@@ -4,7 +4,8 @@ import { ActionSystem } from './systems/ActionSystem.js';
 import { CombatSystem } from './systems/CombatSystem.js';
 import { RenderSystem } from './systems/RenderSystem.js';
 import { PlayerSystem } from './systems/PlayerSystem.js';
-import { MonsterSystem } from './systems/MonsterSystem.js';
+import { MonsterControllerSystem } from './systems/MonsterControllerSystem.js';
+import { MonsterSpawnSystem } from './systems/MonsterSpawnSystem.js';
 import { DamageCalculationSystem } from './systems/DamageCalculationSystem.js';
 import { LevelSystem } from './systems/LevelSystem.js';
 import { LootSpawnSystem } from './systems/LootSpawnSystem.js';
@@ -23,13 +24,18 @@ import { PlayerInputSystem } from './systems/PlayerInputSystem.js';
 import { PlayerControllerSystem } from './systems/PlayerControllerSystem.js'; 
 import { PlayerTimerSystem } from './systems/PlayerTimerSystem.js'; 
 import { AffixSystem } from './systems/AffixSystem.js'; 
-import { EffectsSystem } from './systems/EffectsSystem.js'; // NEW: Added
-import { ComponentManagerSystem } from './systems/ComponentManagerSystem.js'; 
+import { EffectsSystem } from './systems/EffectsSystem.js'; 
+import { HealthSystem } from './systems/HealthSystem.js'; 
 import { ProjectileSystem } from './systems/ProjectileSystem.js'; 
+import { CollisionSystem } from './systems/CollisionSystem.js';
+import { MovementResolutionSystem } from './systems/MovementResolutionSystem.js'; 
+import { ProjectileCollisionSystem } from './systems/ProjectileCollisionSystem.js';  
+import { EntityRemovalSystem } from './systems/EntityRemovalSystem.js'; 
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
-    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, SFXQueueComponent
+    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
+    LevelTransitionComponent, HitboxComponent, 
 } from './core/Components.js';
 
 export class Game {
@@ -63,6 +69,7 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(250));
         this.entityManager.addComponentToEntity('player', new AffixComponent()); // New component added
         this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(1, 1));
+        this.entityManager.addComponentToEntity('player', new HitboxComponent(1,1)); 
 
         let overlayState = this.entityManager.getEntity('overlayState');
         if (!overlayState) {
@@ -84,7 +91,8 @@ export class Game {
         this.entityManager.addComponentToEntity('lightingState', new LightSourceDefinitions());
        
         this.entityManager.addComponentToEntity('gameState', new DataProcessQueues());
-        this.entityManager.addComponentToEntity('gameState', new SFXQueueComponent());
+        this.entityManager.addComponentToEntity('gameState', new AudioQueueComponent());
+        this.entityManager.addComponentToEntity('gameState', new LevelTransitionComponent());
 
         this.initializeSystems().then(() => {
             this.state.eventBus.emit('InitializePlayer');
@@ -92,6 +100,8 @@ export class Game {
             
         });
         this.setupEventListeners();
+
+        this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
 
     }
 
@@ -107,7 +117,8 @@ export class Game {
         this.systems.itemROG = new ItemROGSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.lootManager = new LootManagerSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.player = new PlayerSystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.monster = new MonsterSystem(this.entityManager, this.state.eventBus, this.systems.data);
+        this.systems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
+        this.systems.monsterSpawn = new MonsterSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data);
         this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state);
         this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.ui = new UISystem(this.entityManager, this.state.eventBus, this.utilities);
@@ -121,7 +132,11 @@ export class Game {
         this.systems.playerTimer = new PlayerTimerSystem(this.entityManager, this.state.eventBus); 
         this.systems.affix = new AffixSystem(this.entityManager, this.state.eventBus);
         this.systems.effects = new EffectsSystem(this.entityManager, this.state.eventBus); // New system added
-        this.systems.componentManager = new ComponentManagerSystem(this.entityManager, this.state.eventBus);
+        this.systems.health = new HealthSystem(this.entityManager, this.state.eventBus);
+        this.systems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
+        this.systems.movementResolution = new MovementResolutionSystem(this.entityManager, );
+        this.systems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
+        this.systems.entityRemoval = new EntityRemovalSystem(this.entityManager);
 
         await Promise.all(Object.values(this.systems).map(system => system.init()));
         console.log('Game.js: Systems initialized');
@@ -170,20 +185,25 @@ export class Game {
 
             // *** CHANGED: Pass deltaTime to updateSystems ***
             this.updateSystems([
-                'componentManager',
-                'projectile',
                 'playerInput',
                 'playerController',
-                'combat',
                 'playerTimer',
                 'player',
                 'exploration',
-                'monster',
+                'projectile',
+                'monsterController',
+                'collisions',
+                'movementResolution',
+                'projectileCollisions',
+                'combat',
+                'damageCalculation',
+                'health',
                 'ui',
-                'affix',
-                'effects',
-                'render',
+                'levelTransition',
                 'audio',
+                'render',
+                'entityRemoval',
+                
             ], deltaTime);
 
             const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
@@ -195,19 +215,26 @@ export class Game {
     }
 
     start() {
-        const gameState = this.entityManager.getEntity('gameState');
+        let gameState = this.entityManager.getEntity('gameState');
+
         if (!gameState) {
-            const newGameState = this.entityManager.createEntity('gameState', true);
+          
             this.entityManager.addComponentToEntity('gameState', new GameStateComponent({
                 gameStarted: true, // Set to true when starting
                 gameOver: false,
                 tier: 1, // Assuming initial tier
                 // Add other GameState properties as needed
             }));
+            gameState = this.entityManager.getEntity('gameState');
         } else {
             const gameStateComp = gameState.getComponent('GameState');
             gameStateComp.gameStarted = true;
         }
+
+        gameState.needsRender = true;
+        this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume:.05 });
+        
+        
         this.startGameLoop();
         console.log('Game.js: Game started');
     }

@@ -31,6 +31,7 @@ export class PlayerInputSystem {
     }
 
     async init() {
+        this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
         const player = this.entityManager.getEntity('player');
         if (!player.hasComponent('InputState')) {
             this.entityManager.addComponentToEntity('player', new InputStateComponent());
@@ -39,32 +40,41 @@ export class PlayerInputSystem {
     }
 
     handleKeyDown(event) {
-        event.preventDefault(); // Prevent default action for all keys
+        
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (!gameState.gameStarted) {
+
+            this.eventBus.emit('ToggleOverlay', {});
             this.eventBus.emit('StartGame');
-            gameState.needsRender = true;
-            this.eventBus.emit('ToggleBackgroundMusic', { play: true });
-            this.eventBus.emit('RenderNeeded');
             return;
         }
          
-        //console.log('PlayerInputSystem: handleKeyDown - raw key:', event.key);
+        //console.log('PlayerInputSystem: handleKeyDown - raw key:', event.key);ssssssss
         const mappedKey = this.keyMap[event.key];
         //console.log('PlayerInputSystem: handleKeyDown - mappedKey:', mappedKey);
 
         if (document.activeElement.id === 'save-name-input' && mappedKey != 'escape') {
             return; // Ignore keypresses when the save-name-input field is focused
+        } else if (mappedKey) {
+            event.preventDefault();  // Prevent default action for mapped keys
+        } 
+
+        if (event.repeat) {
+            console.log('PlayerInputSystem: Ignoring repeated key press:', event.key);
+            return;
         }
-        if (event.repeat) return;
+
         console.log('PlayerInputSystem: handleKeyDown - raw key pressed:', event.key);
         if (mappedKey) {
+            event.preventDefault();  // Prevent default action for mapped keys
             this.keysPressed[mappedKey] = true;
             const now = Date.now();
             if (now - this.lastInputUpdate >= this.inputUpdateCooldown) {
                 this.updateInputState();
                 this.lastInputUpdate = now;
             }
+
+
             this.handleNonMovementKeys(event, mappedKey, true);
         }
     }
@@ -114,7 +124,8 @@ export class PlayerInputSystem {
                     break;
                 case 't':
                     this.eventBus.emit('LightTorch');
-                    this.eventBus.emit('RenderNeeded');
+                    gameState.needsRender = true;
+                    //this.eventBus.emit('RenderNeeded');
                     break;
                 case 'h':
                     this.eventBus.emit('DrinkHealPotion');

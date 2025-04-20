@@ -5,36 +5,21 @@ import { titleScreen } from '../titlescreen.js';
 export class RenderSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
-        this.requiredComponents = [];
+        this.requiredComponents = ['Position', 'Visuals'];
         this.mapDiv = document.getElementById('map');
         this.tileMap = {};
         this.lastTier = null;
         this.SCALE_FACTOR = 2
         this.TILE_SIZE = 32;
-        //this.SCROLL_SPEED = .250;
-        this.VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.35;
-        this.SCROLL_THRESHOLD = 4;
-        this.SCROLL_DURATION = 250;
+        this.SCROLL_SPEED = .250;
+        this.VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25;
+        this.SCROLL_THRESHOLD = 64;
+        this.SCROLL_DURATION = 375;
     }
 
     init() {
-        this.eventBus.on('RenderNeeded', () => this.render(true));
+       // this.eventBus.on('RenderNeeded', () => this.render(true));
         this.eventBus.on('PositionChanged', (data) => {
-            /*
-            if (data.entityId.startsWith('projectile_')) {
-                const projectile = this.entityManager.getEntity(data.entityId);
-                if (projectile) {
-                    const oldPos = this.previousProjectilePositions.get(data.entityId);
-                    if (oldPos) {
-                        const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
-                        if (renderState && renderState.activeRenderZone) {
-                            renderState.activeRenderZone.add(`${oldPos.x},${oldPos.y}`);
-                        }
-                    }
-                    this.previousProjectilePositions.set(data.entityId, { x: data.x, y: data.y });
-                }
-            }
-            */
 
             if (data.entityId === 'player') {
                 // Handle player repositioning (e.g., level start)
@@ -48,66 +33,60 @@ export class RenderSystem extends System {
                 }
             }
             
-            //this.render(true);
             this.viewportEdgeScroll();
         });
         this.eventBus.on('DiscoveredStateUpdated', () => this.render(true));
         this.eventBus.on('LightingStateChanged', () => { this.render(true); });
+
+        this.titleScreenContainer = document.getElementById('splash');
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        if (!gameState.gameStarted) {
+            this.displayTitleScreen();
+        }
     }
 
-    update() {
-        
-
-
-        this.render(false);
+    update() {  
+        this.render();
     }
 
-    render(force = false) {
+    displayTitleScreen() {
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        this.titleScreenContainer.style.display = 'flex';
+        this.titleScreenContainer.innerHTML = titleScreen;
+        this.mapDiv.style.display = 'none';
+        gameState.needsRender = false;
+    }
+
+    render() {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
-        const redrawTiles = renderState.redrawTiles || new Set();
         const renderControl = this.entityManager.getEntity('renderState')?.getComponent('RenderControl');
         const player = this.entityManager.getEntity('player');
-        const titleScreenContainer = document.getElementById('splash');
+        
         const state = this.entityManager.getEntity('state');
 
-        if (force) {
-            //console.log(`RenderSystem: Accessing gameState - tier: ${gameState?.tier}, gameStarted: ${gameState?.gameStarted}, needsRender: ${gameState?.needsRender}, needsInitialRender: ${gameState?.needsInitialRender}`);
-            //console.log(`RenderSystem: Accessing renderState - renderRadius: ${renderState?.renderRadius}, activeRenderZone: ${renderState?.activeRenderZone?.size}`);
-            //console.log(`RenderSystem: Accessing renderControl - locked: ${renderControl?.locked}`);
-            //console.log(`RenderSystem: Accessing player - position: (${player?.getComponent('Position')?.x}, ${player?.getComponent('Position')?.y})`);
+        if (!gameState || !gameState?.gameStarted) {
+            return;
         }
-
-        if (!gameState) return;
         if (renderControl.locked) {
             console.warn('RenderSystem: Render is locked, skipping render');
             return;
         }
-
-
         // Check for entities with the NeedsRender component
         const renderEntities = this.entityManager.getEntitiesWith('NeedsRender');
         if (renderEntities.length > 0) {
            gameState.needsRender = true;
-            force = true;
             // Remove the NeedsRender component from all entities
             renderEntities.forEach(entity => {
                 this.entityManager.removeComponentFromEntity(entity.id, 'NeedsRender');
             });
         }
 
+        if (!gameState.needsRender) return;
 
-        if (!force && !gameState.needsRender) return;
+       
 
-        if (!gameState.gameStarted) {
-            titleScreenContainer.style.display = 'flex';
-            titleScreenContainer.innerHTML = titleScreen;
-            this.mapDiv.style.display = 'none';
-            gameState.needsRender = false;
-            return;
-        }
-
-        titleScreenContainer.style.display = 'none';
+        this.titleScreenContainer.style.display = 'none';
         this.mapDiv.style.display = 'block';
 
         const currentTier = gameState.tier;
@@ -127,12 +106,6 @@ export class RenderSystem extends System {
         const WIDTH = state.getComponent('LevelDimensions').WIDTH;
         const HEIGHT = state.getComponent('LevelDimensions').HEIGHT;
         const playerPos = player.getComponent('Position');
-        const playerState = player.getComponent('PlayerState');
-        const renderRadius = renderState.renderRadius;
-
-        if (force) {
-            ////console.log(`RenderSystem: Accessing exploration state - discoveredWalls: ${exploration.discoveredWalls.size}, discoveredFloors: ${exploration.discoveredFloors.size}`);
-        }
 
         const walls = this.entityManager.getEntitiesWith(['Position', 'Wall']);
         const floors = this.entityManager.getEntitiesWith(['Position', 'Floor']);
@@ -143,9 +116,6 @@ export class RenderSystem extends System {
         const stairs = this.entityManager.getEntitiesWith(['Position', 'Stair']);
         const portals = this.entityManager.getEntitiesWith(['Position', 'Portal']);
 
-        if (force) {
-            ////console.log(`RenderSystem: Entity query - walls: ${walls.length}, floors: ${floors.length}, monsters: ${monsters.length}, projectiles: ${projectiles.length}, treasures: ${treasures.length}, fountains: ${fountains.length}, stairs: ${stairs.length}, portals: ${portals.length}`);
-        }
         let avatar = '';
 
 
@@ -159,7 +129,7 @@ export class RenderSystem extends System {
                     let className = 'undiscovered';
 
                     if (exploration.discoveredWalls.has(tileKey)) {
-                        className = 'discovered floor';
+                        className = 'discovered wall';
                     }
                     if(exploration.discoveredFloors.has(tileKey)) {
                         className = 'discovered floor';
@@ -212,8 +182,16 @@ export class RenderSystem extends System {
                         continue; // Skip the default append logic
 
                     } else if (projectile) {
-                        char = '*';
-                        className = 'discovered floor projectile';
+
+                        if (projectile.hasComponent('RemoveEntityComponent')) {
+                            // Render floor or hit effect
+                            char = ' ';
+                            className = 'discovered floor';
+                        } else {
+                            char = '*';
+                            className = 'discovered floor projectile';
+
+                        }
                     } else {
                         let fountainData = null;
                         const fountain = fountains.find(f => {
@@ -410,11 +388,12 @@ export class RenderSystem extends System {
                     return pos.x === x && pos.y === y;
                 });
                 if (treasure) {
-                    avatar = 'img/avatars/chest.png'; 
+                    avatar = 'img/avatars/chest.png';
                     char = `<img src="${avatar}" height="16px" width="24px;"/>`;
                     className = 'discovered treasure floor';
 
-                } else if (x === playerPos.x && y === playerPos.y) {
+                } 
+                 if (x === playerPos.x && y === playerPos.y) {
 
                     avatar = player.getComponent('Visuals').avatar;
                     const faceLeft = player.getComponent('Visuals').faceLeft;
@@ -447,12 +426,11 @@ export class RenderSystem extends System {
                     avatar = '';
 
                 } else if (projectile) {
-                    const projData = projectile.getComponent('Projectile');
-                    if (projData.removeAfterRender) {
+                   
+                     if (projectile.hasComponent('RemoveEntityComponent')) {
                         // Render floor or hit effect
                         char = ' ';
                         className = 'discovered floor';
-                        projData.finalRenderApplied = true;
                     } else {
                         char = '*';
                         className = 'discovered floor projectile';
@@ -567,7 +545,7 @@ export class RenderSystem extends System {
             }
         }
 
-        if (force) gameState.needsRender = false;
+        gameState.needsRender = false;
         gameState.needsInitialRender = false;
     }
 
@@ -586,7 +564,7 @@ export class RenderSystem extends System {
         const mapHeight = state.getComponent('LevelDimensions').HEIGHT * this.TILE_SIZE;
 
         const thresholdX = viewportWidth * this.VIEWPORT_EDGE_THRESHOLD_PERCENT;
-        const thresholdY = viewportHeight * this.VIEWPORT_EDGE_THRESHOLD_PERCENT;
+        const thresholdY = viewportHeight * this.VIEWPORT_EDGE_THRESHOLD_PERCENT * 1.5;
 
         const playerPos = player.getComponent('Position');
         const playerX = playerPos.x * this.TILE_SIZE;

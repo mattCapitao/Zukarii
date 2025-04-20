@@ -9,11 +9,40 @@ export class LevelTransitionSystem extends System {
     }
 
     init() {
-        this.eventBus.on('TransitionDown', () => { this.pendingTransition = 'down'; this.transitionDown(); });
-        this.eventBus.on('TransitionUp', () => { this.pendingTransition = 'up'; this.transitionUp(); });
-        this.eventBus.on('TransitionViaPortal', (data) => { this.pendingTransition = 'portal'; this.transitionViaPortal(data); });
+        this.levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+       //this.eventBus.on('TransitionDown', () => { this.pendingTransition = 'down'; this.transitionDown(); });
+        //this.eventBus.on('TransitionUp', () => { this.pendingTransition = 'up'; this.transitionUp(); });
+        //this.eventBus.on('TransitionViaPortal', (data) => { this.pendingTransition = 'portal'; this.transitionViaPortal(data); });
         this.eventBus.on('LevelAdded', (data) => this.handleLevelAdded(data));
         this.eventBus.on('TransitionLoad', ({ tier, data }) => this.transitionViaLoad(tier, data));
+    }
+
+    update(deltaTime) {
+
+
+        if (this.levelTransition.pendingTransition) {
+            this.pendingTransition = this.levelTransition.pendingTransition;
+            this.levelTransition.pendingTransition = null;
+
+            switch (this.pendingTransition) {
+                case 'portal':
+                    this.transitionViaPortal();
+                    break;
+                case 'down':
+                    this.transitionDown();
+                    break;
+                case 'up':
+                    this.transitionUp();
+                    break;
+
+                default:
+                    console.error('LevelTransitionSystem: No method found for Unknown pending transition:', this.pendingTransition);
+                    break;
+                break;
+            }
+            
+        }
+            
     }
 
     findAdjacentTile(map, stairX, stairY) {
@@ -27,6 +56,21 @@ export class LevelTransitionSystem extends System {
             }
         }
         throw new Error(`No adjacent walkable tile found near (${stairX}, ${stairY})`);
+    }
+
+    clearLevelEntities(tier) {
+        const entities = this.entityManager.getEntitiesWith(['Tier']).filter(e => e.getComponent('Tier').value === tier);
+        entities.forEach(entity => this.entityManager.removeEntity(entity.id));
+        const tierEntities = this.entityManager.entitiesByTier.get(tier) || new Map();
+        tierEntities.forEach((_, id) => this.entityManager.removeEntity(id));
+    }
+
+    clearPlayerPosition() {
+        const player = this.entityManager.getEntity('player');
+        const playerPos = player.getComponent('Position');
+        const oldPlayerPos = { x: playerPos.x, y: playerPos.y };
+
+        this.eventBus.emit('ClearOldPlayerPosition', oldPlayerPos);
     }
 
     transitionDown() {
@@ -65,13 +109,13 @@ export class LevelTransitionSystem extends System {
         this.eventBus.emit('AddLevel', { tier: newTier });
     }
 
-    transitionViaPortal({ x, y }) {
+    transitionViaPortal() {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
         const currentLevel = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
         if (!currentLevel) return;
 
-        currentLevel.getComponent('Map').map[y][x] = ' ';
+        //currentLevel.getComponent('Map').map[y][x] = ' ';
         const currentTier = gameState.tier;
         let minTier = currentTier - 1; 
         let maxTier = currentTier + 5;
@@ -98,18 +142,45 @@ export class LevelTransitionSystem extends System {
         renderControl.locked = true;
         console.log('LevelTransitionSystem: Render locked for TransitionViaPortal');
 
-        this.eventBus.emit('RenderNeeded');
+        //this.eventBus.emit('RenderNeeded');
+        gameState.needsRender = true;
         this.eventBus.emit('AddLevel', { tier: destinationTier });
-
-        
+        const sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
+        sfxQueue.push({ sfx: 'portal1', volume: .5 });
     }
 
-    clearPlayerPosition() {
-        const player = this.entityManager.getEntity('player');
-        const playerPos = player.getComponent('Position');
-        const oldPlayerPos = { x: playerPos.x, y: playerPos.y };
+    transitionViaLoad(tier, data) {
+        console.log('LevelTransitionSystem: Starting transitionViaLoad for tier:', tier);
 
-        this.eventBus.emit('ClearOldPlayerPosition', oldPlayerPos);
+        // Update gameState
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        Object.assign(gameState, data.gameState.GameState);
+        gameState.tier = tier;
+
+        // Update player (exclude Position)
+        const player = this.entityManager.getEntity('player');
+        console.log('Player Data: ', data.player);
+        Object.entries(data.player).forEach(([compName, compData]) => {
+            if (compName !== 'Position') {
+                const comp = player.getComponent(compName);
+                if (comp) Object.assign(comp, compData);
+            }
+        });
+
+        // Update overlay
+        const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
+        Object.assign(overlayState, data.overlayState.OverlayState);
+
+        // Clear and regenerate level
+        let levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
+        if (levelEntity) {
+            this.clearLevelEntities(tier);
+        }
+
+        // Set pendingTransition to 'load' to indicate a load operation
+        this.pendingTransition = 'load';
+        this.eventBus.emit('AddLevel', { tier });
+
     }
 
     handleLevelAdded({ tier, entityId }) {
@@ -121,7 +192,6 @@ export class LevelTransitionSystem extends System {
         const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
 
         console.log("LevelTransitionSystem: Initial transitionLock:", gameState.transitionLock);
-
 
         if (!levelEntity) {
             console.error(`Level entity for tier ${tier} not found after LevelAdded event`);
@@ -199,12 +269,12 @@ export class LevelTransitionSystem extends System {
 
         this.eventBus.emit('DiscoveredStateUpdated', { tier, entityId });
 
-        this.eventBus.emit('RenderNeeded');
+       // this.eventBus.emit('RenderNeeded');
 
-        if (this.pendingTransition === 'load') {
+        //if (this.pendingTransition === 'load' || this.pendingTransition === 'portal') {
             gameState.transitionLock = false;
-            console.log("LevelTransitionSystem: transitionLock reset to false after load");
-        }
+            //console.log("LevelTransitionSystem: transitionLock reset to false after load");
+       // }
 
         console.log('Pending transition after switch:', this.pendingTransition, 'Tier:', tier);
         console.log('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
@@ -212,46 +282,5 @@ export class LevelTransitionSystem extends System {
 
         // Trigger UI update after loading
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
-    }
-
-    transitionViaLoad(tier, data) {
-        console.log('LevelTransitionSystem: Starting transitionViaLoad for tier:', tier);
-
-        // Update gameState
-        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
-        Object.assign(gameState, data.gameState.GameState);
-        gameState.tier = tier;
-
-        // Update player (exclude Position)
-        const player = this.entityManager.getEntity('player');
-        console.log('Player Data: ', data.player);
-        Object.entries(data.player).forEach(([compName, compData]) => {
-            if (compName !== 'Position') {
-                const comp = player.getComponent(compName);
-                if (comp) Object.assign(comp, compData);
-            }
-        });
-
-        // Update overlay
-        const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
-        Object.assign(overlayState, data.overlayState.OverlayState);
-
-        // Clear and regenerate level
-        let levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
-        if (levelEntity) {
-            this.clearLevelEntities(tier);
-        }
-
-        // Set pendingTransition to 'load' to indicate a load operation
-        this.pendingTransition = 'load';
-        this.eventBus.emit('AddLevel', { tier });
-
-    }
-
-    clearLevelEntities(tier) {
-        const entities = this.entityManager.getEntitiesWith(['Tier']).filter(e => e.getComponent('Tier').value === tier);
-        entities.forEach(entity => this.entityManager.removeEntity(entity.id));
-        const tierEntities = this.entityManager.entitiesByTier.get(tier) || new Map();
-        tierEntities.forEach((_, id) => this.entityManager.removeEntity(id));
     }
 }  

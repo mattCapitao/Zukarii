@@ -107,8 +107,8 @@ export class LootManagerSystem extends System {
         this.BASE_GOLD_MAX = 50;
 
         //ITEMS
-        this.BASE_ITEM_CHANCE = .65;
-        this.BASE_UNIQUE_CHANCE = 0.05;
+        this.BASE_ITEM_CHANCE = .45;
+        this.BASE_UNIQUE_CHANCE = 0.02;
 
         //POTIONS
         this.BASE_POTION_CHANCE = 0.02;
@@ -150,7 +150,7 @@ export class LootManagerSystem extends System {
         console.log(`LootManagerSystem: handleLootDrop() called with lootSource:`, sourceData);
         console.log(`LootManagerSystem: Handling loot drop for ${sourceData.name}, items:`, sourceData.items);
 
-        if (false) { // (Math.random() >= this.BASE_DROP_CHANCE) {
+        if (Math.random() >= this.BASE_DROP_CHANCE) {
             this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped nothing.` });
             return;
         }
@@ -187,7 +187,9 @@ export class LootManagerSystem extends System {
             healPotions ? `${healPotions} heal potion${healPotions > 1 ? 's' : ''}` : '',
             items.length ? items.map(i => i.name).join(', ') : ''
         ].filter(Boolean).join(', ');
-        if (sourceData.name !== 'Treasure Chest') {
+        if (sourceData.name === 'Treasure Chest') {
+            this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} contained ${dropMessage}!` });
+        } else {
             this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped ${dropMessage}!` });
         }
 
@@ -221,10 +223,16 @@ export class LootManagerSystem extends System {
             for (const stub of sourceData.items) {
 
                 const itemDropChance = stub.dropChance || 1;
+                const itemTierIndexBonus = stub.itemTierIndexBonus || 0;
+
                 if (Math.random() < itemDropChance) {
                     if (stub.type === "rog") {
                         // Partial ROG item
-                        const tierIndex = (stub.data.tierIndex !== undefined && stub.data.tierIndex > sourceData.tier/5)? stub.data.tierIndex : this.getItemTier(sourceData.tier, player);
+                        const tierIndex = Math.min(
+                            (stub.data.tierIndex !== undefined && stub.data.tierIndex > sourceData.tier / 5) ? stub.data.tierIndex : this.getItemTier(sourceData.tier, player)
+                                + itemTierIndexBonus,
+                            this.itemTiers.length - 1);
+
                         this.eventBus.emit('GenerateROGItem', {
                             partialItem: { tierIndex, ...stub.data },
                             dungeonTier: sourceData.tier,

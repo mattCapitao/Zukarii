@@ -12,7 +12,8 @@ import {
     StairComponent,
     PortalComponent,
     FountainComponent,
-    RoomComponent
+    RoomComponent,
+    HitboxComponent,
 } from '../core/Components.js';
 
 /*
@@ -52,7 +53,7 @@ export class LevelSystem extends System {
     }
 
     init() {
-        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('SfxQueue').Sounds || []
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || []
         this.eventBus.on('AddLevel', (data) => this.addLevel(data));
         this.eventBus.on('CheckLevelAfterTransitions', (data) => this.checkLevelAfterTransitions(data));
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
@@ -256,6 +257,7 @@ export class LevelSystem extends System {
                 console.error(`LevelSystem: No MapComponent found for existing tier ${tier}`);
             }
         }
+
     }
 
     checkLevelAfterTransitions({ tier, levelEntity = null }) {
@@ -321,6 +323,8 @@ export class LevelSystem extends System {
                 const wallEntity = this.entityManager.createEntity(`wall_${tier}_wall_${y}_${x}`);
                 this.entityManager.addComponentToEntity(wallEntity.id, new PositionComponent(x, y));
                 this.entityManager.addComponentToEntity(wallEntity.id, new WallComponent());
+                this.entityManager.addComponentToEntity(wallEntity.id, new VisualsComponent(32, 32));
+                this.entityManager.addComponentToEntity(wallEntity.id, new HitboxComponent());
                 walls.push(wallEntity.id);
             }
         }
@@ -538,13 +542,33 @@ export class LevelSystem extends System {
             const newRoomId = roomEntityIds[i];
             const newRoom = this.entityManager.getEntity(newRoomId).getComponent('Room');
             // Prefer non-special rooms for special room connections
-            let nearestRoomId = this.findNearestRoom(newRoomId, connectedRooms,
-                newRoom.roomType === 'AlcoveSpecial' || newRoom.roomType === 'BossChamberSpecial'
-                    ? connectedRooms.map(id => this.entityManager.getEntity(id).getComponent('Room').roomType)
-                        .filter(type => type === 'AlcoveSpecial' || type === 'BossChamberSpecial')
-                        .map((_, idx) => connectedRooms[idx])
-                    : []
-            );
+            let nearestRoomId = null;
+            let attempts = 0;
+            const maxAttempts = 5; // Limit the number of retries to avoid infinite loops
+
+            do {
+                nearestRoomId = this.findNearestRoom(newRoomId, connectedRooms,
+                    newRoom.roomType === 'AlcoveSpecial' || newRoom.roomType === 'BossChamberSpecial'
+                        ? connectedRooms.map(id => this.entityManager.getEntity(id).getComponent('Room').roomType)
+                            .filter(type => type === 'AlcoveSpecial' || type === 'BossChamberSpecial')
+                            .map((_, idx) => connectedRooms[idx])
+                        : []
+                );
+                if (!nearestRoomId) {
+                    console.warn(`findNearestRoom: Unable to find a valid room for ${newRoomId} after ${attempts} attempts. Connected rooms: ${JSON.stringify(connectedRooms)}`);
+                }
+                attempts++;
+            } while (!nearestRoomId && attempts < maxAttempts);
+
+            if (!nearestRoomId) {
+                nearestRoomId = this.findNearestRoom(newRoomId, connectedRooms);
+                console.log(`connectRooms: No valid nearest room found for room ${newRoomId} after ${maxAttempts} attempts, using fallback`);
+            }
+            if (!nearestRoomId) {
+                console.warn(`connectRooms: Failed to find a valid nearest room for room ${newRoomId} after ${maxAttempts} attempts AND fallback failed`);
+                continue; // Skip this room if no valid connection is found
+            }
+
             this.carveCorridor(newRoomId, nearestRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity);
             newRoom.connections.push(nearestRoomId);
             const nearestRoom = this.entityManager.getEntity(nearestRoomId).getComponent('Room');
@@ -689,8 +713,20 @@ export class LevelSystem extends System {
 
     carveLCorridor(startRoomId, endRoomId, map, floors, walls, floorPositions, levelEntity) {
         const tier = levelEntity.getComponent('Tier').value;
+
+
+        if (!startRoomId || !endRoomId) {
+            console.error(`carveTCorridor: Invalid room IDs - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
+            return;
+        }
         const startRoom = this.entityManager.getEntity(startRoomId).getComponent('Room');
         const endRoom = this.entityManager.getEntity(endRoomId).getComponent('Room');
+
+        if (!startRoom || !endRoom) {
+            console.error(`carveTCorridor: Failed to retrieve Room components - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
+            return;
+        }
+
         const startX = startRoom.centerX;
         const startY = startRoom.centerY;
         const endX = endRoom.centerX;
@@ -956,6 +992,9 @@ export class LevelSystem extends System {
     }
 
     carveCorridor(startRoomId, endRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity) {
+        if (!startRoomId || !endRoomId) {
+            console.error(`carveCorridor: Invalid room ID - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
+        }
         const rand = Math.random();
         if (rand < 0.2) {
             this.carveStraightCorridor(startRoomId, endRoomId, map, floors, walls, floorPositions, levelEntity);
@@ -1159,7 +1198,7 @@ export class LevelSystem extends System {
                         torches: 1,
                         healPotions: 1,
                         gold: 1.5,
-                        item: 0.5,
+                        item: 0.25,
                         uniqueItem: 0.8
                     },
                     maxItems: 1,

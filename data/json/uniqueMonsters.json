@@ -6,7 +6,7 @@
     "classes": "orc",
     "family": "orc",
     "minDungeonTier": 2,
-    "avatar": "O",
+    "avatar": "img/avatars/monsters/orc-chief.png",
     "baseHp": 30,
     "maxHp": 30,
     "hp": 30,
@@ -21,7 +21,7 @@
         "type": "rog",
         "dropChance": 0.1,
         "data": {
-          "tierIndex": 2,
+          "itemTierIndexBonus": 1,
           "type": "weapon",
           "attackType": "melee",
           "name": "Orc Boss Chopper"
@@ -29,7 +29,8 @@
       },
       {
         "type": "rog",
-        "data": { }
+        "dropChance": 0.6,
+        "data": {}
       }
     ]
   },
@@ -40,7 +41,7 @@
     "classes": "ghoul",
     "family": "undead",
     "minDungeonTier": 5,
-    "avatar": "G",
+    "avatar": "img/avatars/monsters/ghoul.png",
     "baseHp": 27,
     "maxHp": 27,
     "hp": 27,
@@ -55,19 +56,59 @@
         "type": "rog",
         "dropChance": 0.05,
         "data": {
-          "tierIndex": 3,
+          "itemTierIndexBonus": 2,
           "type": "amulet",
           "name": "Holy Trinket"
         }
       },
       {
         "type": "rog",
+        "dropChance": 0.6,
         "data": {}
       },
       {
         "type": "customUnique",
-        "dropChance": 1,
+        "dropChance": 0.02,
         "data": { "name": "Mbphu Greater iLvl Annihilation Staff" }
+      }
+    ]
+  },
+  {
+    "x": 0,
+    "y": 0,
+    "name": "Beholder",
+    "classes": "beholder",
+    "family": "demon",
+    "minDungeonTier": 1,
+    "avatar": "img/avatars/monsters/beholder.png",
+    "baseHp": 35,
+    "maxHp": 35,
+    "hp": 35,
+    "minBaseDamage": 3.75,
+    "maxBaseDamage": 5.2,
+    "isAggro": false,
+    "isElite": true,
+    "isBoss": false,
+    "affixes": [],
+    "uniqueItemsDropped": [
+      {
+        "type": "rog",
+        "dropChance": 0.05,
+        "data": {
+          "itemTierIndexBonus": 2,
+          "type": "ring",
+          "name": "Eyestalk Ring"
+        }
+      },
+      {
+        "type": "rog",
+        "dropChance": 0.6,
+        "data": {}
+      },
+      {
+        "data": { "name": "Mbphu Greater iLvl Annihilation Staff" },
+        "dropChance": 0.02,
+        "type": "customUnique"
       }
     ]
   },
@@ -78,7 +119,7 @@
     "classes": "wyrmling",
     "family": "dragon",
     "minDungeonTier": 15,
-    "avatar": "W",
+    "avatar": "img/avatars/monsters/wyrmling.png",
     "baseHp": 33,
     "maxHp": 33,
     "hp": 33,
@@ -91,7 +132,7 @@
     "uniqueItemsDropped": [
       {
         "type": "rog",
-        "dropChance": 0.05, 
+        "dropChance": 0.05,
         "data": {
           "tierIndex": 5,
           "type": "weapon",
@@ -111,12 +152,13 @@
               "description": "Chance to heal for a portion of damage dealt when hitting an enemy."
 
             }
-           
+
           ]
         }
       },
       {
         "type": "rog",
+        "dropChance": 0.6,
         "data": {}
       }
     ]

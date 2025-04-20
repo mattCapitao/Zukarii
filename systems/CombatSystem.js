@@ -1,6 +1,6 @@
 ﻿// systems/CombatSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent, LastPositionComponent, ProjectileComponent, MovementSpeedComponent, InCombatComponent, NeedsRenderComponent } from '../core/Components.js';
+import { PositionComponent, LastPositionComponent, ProjectileComponent, MovementSpeedComponent, InCombatComponent, NeedsRenderComponent, HitboxComponent } from '../core/Components.js';
 
 export class CombatSystem extends System {
     constructor(entityManager, eventBus) {
@@ -8,7 +8,7 @@ export class CombatSystem extends System {
         this.requiredComponents = ['Position', 'Health'];
         this.queues = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues') || {};
         this.healthUpdates = this.queues.HealthUpdates || [];
-        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('SfxQueue').Sounds || []
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || []
     }
 
     init() {
@@ -189,6 +189,7 @@ export class CombatSystem extends System {
         this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, 'player', weapon, isPiercing));
         this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(100)); // 50ms = current 20 tiles/s
+        this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(1, 1));
         //this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
         
     }

@@ -9,6 +9,7 @@ export class ActionSystem extends System {
     }
 
     init() {
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
         this.eventBus.on('UseFountain', (data) => this.useFountain(data));
         this.eventBus.on('LightTorch', () => this.lightTorch());
         this.eventBus.on('DrinkHealPotion', () => this.drinkHealPotion());
@@ -23,13 +24,13 @@ export class ActionSystem extends System {
     
 
         if (!player || !fountainEntity || !tierEntity) return;
-
+        this.sfxQueue.push({ sfx: 'fountain0', volume: .5 }); 
         const fountainData = fountainEntity.getComponent('Fountain') || { used: false };
         if (fountainData.used) {
             this.eventBus.emit('LogMessage', { message: `The fountain water is cool and refreshing, but it seems the healing magic that was here is now spent.` });
             return;
         }
-
+       
         const playerStats = player.getComponent('Stats');
         const playerHealth = player.getComponent('Health');
         const critChance = playerStats.critChance || (playerStats.agility * 0.02);
@@ -58,7 +59,8 @@ export class ActionSystem extends System {
 
         fountainData.used = true;
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
-        this.eventBus.emit('RenderNeeded');
+        gameState.needsRender = true;
+        //this.eventBus.emit('RenderNeeded');
     }
 
     drinkHealPotion() {

@@ -8,6 +8,7 @@ export class LightingSystem extends System {
     }
 
     init() {
+        this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
         this.eventBus.on('LightSourceActivated', (data) => this.activateLightSource(data));
         this.eventBus.on('TurnEnded', () => this.checkExpiration());
         console.log('LightingSystem: Initialized with EventBus:', this.eventBus);
@@ -28,8 +29,9 @@ export class LightingSystem extends System {
                 console.log(`LightingSystem: Torch expired, visibleRadius reset to ${lightingState.visibleRadius}`);
                 this.eventBus.emit('LightingStateChanged', { visibleRadius: lightingState.visibleRadius });
                 this.eventBus.emit('LogMessage', { message: 'The torch has burned out!' });
-                this.eventBus.emit('PlayAudio', { sound: 'torchBurning', play: false });
-                this.eventBus.emit('RenderNeeded');
+                this.trackControlQueue.push({ track: 'torchBurning', play: false, volume: 0 });
+                gameState.needsRender = true;
+                //this.eventBus.emit('RenderNeeded');
             }
         }
     }
@@ -56,7 +58,8 @@ export class LightingSystem extends System {
 
         console.log(`LightingSystem: Activated ${type} - visibleRadius: ${lightingState.visibleRadius}, expires on turn: ${lightingState.expiresOnTurn}`);
         this.eventBus.emit('LightingStateChanged', { visibleRadius: lightingState.visibleRadius });
-        this.eventBus.emit('PlayAudio', { sound: 'torchBurning', play: true });
-        this.eventBus.emit('RenderNeeded');
+        this.trackControlQueue.push({ track: 'torchBurning', play: true, volume: .05 });
+        gameState.needsRender = true;
+        //this.eventBus.emit('RenderNeeded');
     }
 }

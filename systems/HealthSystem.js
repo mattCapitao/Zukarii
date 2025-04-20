@@ -1,8 +1,8 @@
-﻿// systems/ComponentManagerSystem.js
+﻿// systems/HealthSystem.js
 import { System } from '../core/Systems.js';
 import { DeadComponent } from '../core/Components.js';
 
-export class ComponentManagerSystem extends System {
+export class HealthSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.requiredComponents = [];
@@ -19,7 +19,7 @@ export class ComponentManagerSystem extends System {
                 this.modifyHealth(entityId, amount, attackerId);
             });
             this.healthUpdates.length = 0; // Clear queue
-            console.log('ComponentManagerSystem: Processed and cleared HealthUpdates');
+            console.log('HealthSystem: Processed and cleared HealthUpdates');
         }
         // Future: this.manaUpdates.forEach(...), etc.
     } 
@@ -34,7 +34,7 @@ export class ComponentManagerSystem extends System {
         health.hp = Math.min(Math.max(health.hp + amount, 0), health.maxHp);
         health.updated = true;
         if (health.hp === 0 && oldHp > 0) {
-            const expiresAt = Date.now() + 5000;
+            const expiresAt = Date.now() + 1000;
             entity.addComponent(new DeadComponent(expiresAt));
             if (entity.id === 'player') {
                 const source = this.entityManager.getEntity(attackerId)?.getComponent('MonsterData')?.name || 'unknown';

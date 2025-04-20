@@ -349,32 +349,30 @@ font-size: 0.75rem; /* ~12px */
 /*////////////////////////////////////////////////////   MAP DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #map {
-font-family: monospace;
-font-size: 2rem; /* ~16px */
-line-height: 2rem; /* ~16px */
-white-space: pre;
-color: #0f0;
-border: 0;
-padding: 0;
-margin: 0;
-transform: scale(2);
-
-/*////////////////////////////////////////////// BEGIN WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-/* DO NOT SET HEIGHT, WIDTH, OR MARGIN HERE - THESE CREATE DEAD ZONES IN MAP SCROLLING BY LIMITING SCROLLABLE AREA 
+    font-family: monospace;
+    font-size: 2rem; /* ~16px */
+    line-height: 2rem; /* ~16px */
+    white-space: pre;
+    color: #0f0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background-image: url("img/map/floor.png");
+    transform: scale(2);
+    /*////////////////////////////////////////////// BEGIN WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+    /* DO NOT SET HEIGHT, WIDTH, OR MARGIN HERE - THESE CREATE DEAD ZONES IN MAP SCROLLING BY LIMITING SCROLLABLE AREA 
 OR OFFSETTING #MAP POSITION. 
 USE OVERFLOW: AUTO AND RELY ON RENDER.JS FOR DYNAMIC SCROLLING. */
-/* margin: 3rem;*/
-/*width: calc(100vw - 0.25rem);  Account for game and map borders */
-/* height: calc(100vh - 0.25rem); /* Account for game and map borders */
+    /* margin: 3rem;*/
+    /*width: calc(100vw - 0.25rem);  Account for game and map borders */
+    /* height: calc(100vh - 0.25rem); /* Account for game and map borders */
+    /*////////////////////////////////////////////////END WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-/*////////////////////////////////////////////////END WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/ 
-        
-overflow: auto;
-box-sizing: border-box;
--ms-overflow-style: none;
-scrollbar-width: none;
-position: relative;
+    overflow: auto;
+    box-sizing: border-box;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    position: relative;
 }
 
 #map::-webkit-scrollbar {
@@ -397,11 +395,6 @@ background-color: #000;
 }
 
 
-
-.discovered.wall {
-color: #0f0;
-background-color: #161616;
-}
 
 /*////////////////////////////////////////////////////   MAP DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
@@ -1155,30 +1148,7 @@ padding: 0.625rem; /* ~10px */
 
 
 
-.detected.monster {
-    z-index: 5;
-    background: url('img/map/floor.png') left bottom no-repeat;
-    background-size: 32px 32px;
-}
 
-    .detected.monster img {
-        z-index: 50;
-        width: 32px;
-        height: 32px;
-        padding: 0;
-        padding-top: 2px;
-        margin: 0;
-        background: none; /* Default to no background */
-        filter: drop-shadow(0 0 0.1rem #cccccc90);
-    }
-
-    .detected.monster.has-hp-bar img {
-        background: url('img/1x1_red.png') left top no-repeat;
-    }
-
-.detected.monster.face-left img {
-    transform: rotateY(180deg);
-}
 
 /*////////////////////////////////////////////////////  PLAYER - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
@@ -1186,8 +1156,7 @@ padding: 0.625rem; /* ~10px */
     position: relative;
     transition: transform 0.016s linear; /* Smooth at ~60 FPS */
     display: inline-block;
-    background: url('img/map/floor.png') left bottom no-repeat ;
-    background-size: 32px 32px;
+
     transform-origin: center;
     z-index: 100 !important; /* Lift above other spans */
 }
@@ -1245,7 +1214,6 @@ padding: 0.625rem; /* ~10px */
     color: orange;
     z-index: 5 !important;
     font-size:.5rem;
-    
 }
 
 @keyframes torchFlicker {
@@ -1595,17 +1563,20 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
 
 .detected.monster {
     z-index: 5;
-    background: url('img/map/floor.png') left bottom no-repeat;
-    background-size: 32px 32px;
+    position: relative;
+    z-index: 75 !important; /* Lift above other spans */
 }
 
     .detected.monster img {
         z-index: 20;
         width: 32px;
         height: 32px;
+        margin: 0; 
         padding: 0;
         padding-top: 2px;
-        margin: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
         background: none; /* Default to no background */
         filter: drop-shadow(0 0 0.1rem #cccccc90);
     }
@@ -1614,16 +1585,17 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
         background: url('img/1x1_red.png') left top no-repeat;
     }
 
+    .detected.monster.face-left img {
+        transform: rotateY(180deg);
+    }
 
-.skeleton {
-}
-/* Skeleton */
-.goblin {
-}
-/* Goblin */
-.orc {
-}
-/* Orc */
+    .detected.monster.elite img {
+        filter: drop-shadow(0 0 0.125rem #a80505cc);
+    }
+    
+    .detected.monster.boss img {
+        filter: drop-shadow(0 0 0.125rem #670c9ccc);
+    }
 
 
 /*//////////////////////////////// END MONSTERS ||||||||||||||||||||||||||||||||||*/
@@ -1631,10 +1603,6 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
 
 /*//////////////////////////////// START MAP ELEMENTS ||||||||||||||||||||||||||||||||||*/
 
-.discovered.floor {
-    background-image: url('img/map/floor.png') !important;
-    background-size: 32px;
-}
 .discovered.wall {
     background-image: url('img/map/wall.png') !important;
     background-size: 32px;
@@ -1655,11 +1623,6 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
     filter: drop-shadow(0 0 0.15rem #0b1ef499); /* Creates an evenly distributed outline */
 }
 
-.stairs.up{
-
-}
-    .stairs.down {
-    }
 .fountain {
     position: relative;
     height: 32px;

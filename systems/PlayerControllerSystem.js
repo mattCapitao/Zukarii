@@ -1,6 +1,6 @@
 ﻿// PlayerControllerSystem.js (Pre-deltaTime)
 
-import { AttackSpeedComponent, MovementSpeedComponent, NeedsRenderComponent, VisualsComponent } from '../core/Components.js';
+import { AttackSpeedComponent, MovementSpeedComponent, NeedsRenderComponent, VisualsComponent, MovementIntentComponent } from '../core/Components.js';
 export class PlayerControllerSystem {
     constructor(entityManager, eventBus) {
         this.entityManager = entityManager;
@@ -26,8 +26,9 @@ export class PlayerControllerSystem {
             this.VisualsComponent = player.getComponent('Visuals');
         }
         this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
 
-        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('SfxQueue').Sounds || []
+        
     }
 
     update(deltaTime) {
@@ -59,19 +60,24 @@ export class PlayerControllerSystem {
 
         const directions = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
         for (const direction of directions) {
+
             const isPressed = !!inputState.keys[direction];
             const wasPressed = this.previousKeyStates[direction];
 
+            // Log key state and cooldown for debugging
+            //console.log(`Direction: ${direction}, isPressed: ${isPressed}, wasPressed: ${wasPressed}`);
+           // console.log(`Cooldown: ${attackSpeed.elapsedSinceLastAttack}, Required: ${attackSpeed.attackSpeed}`);
+
             if (isPressed && gameState.isRangedMode) {
                 
-                // Key was just pressed, emit RangedAttack
                 if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
-                    //console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: ${direction}`);
+                    console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: ${direction}`);
                    
                     this.eventBus.emit('RangedAttack', { direction });
                     attackSpeed.elapsedSinceLastAttack = 0;
                     this.endTurn('rangedAttack');
                     this.previousKeyStates[direction] = true;
+
                     if (direction === 'ArrowLeft') {
                         this.VisualsComponent.faceLeft = true;
                     }
@@ -136,8 +142,7 @@ export class PlayerControllerSystem {
             
             this.eventBus.emit('UseFountain', { fountainEntityId: fountain.id, tierEntityId: levelEntity.id });
             movementSpeed.elapsedSinceLastMove = 0;
-            if (fountain.getComponent('Fountain').used) return;
-            this.sfxQueue.push({ sfx: 'fountain0', volume: .5 }); 
+          
             this.endTurn('useFountain');
             return;
         }
@@ -152,26 +157,32 @@ export class PlayerControllerSystem {
 
         const stair = entitiesAtTarget.find(e => e.hasComponent('Stair'));
         if (stair) {
-            const stairComp = stair.getComponent('Stair');
-            if (stairComp.direction === 'down') {
-                this.eventBus.emit('RenderLock');
-                this.eventBus.emit('TransitionDown');
-                this.endTurn('transitionDown');
-                return;
-            } else if (stairComp.direction === 'up') {
-                this.eventBus.emit('RenderLock');
-                this.eventBus.emit('TransitionUp');
-                this.endTurn('transitionUp');
-                return;
+            const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+
+            if (levelTransition && levelTransition.pendingTransition === null) {
+                const stairComp = stair.getComponent('Stair');
+
+                if (stairComp.direction === 'down') {
+                    levelTransition.pendingTransition = 'down';
+                    this.endTurn('transitionDown');
+                    return;
+                } else if (stairComp.direction === 'up') {
+                    levelTransition.pendingTransition = 'up';
+                    this.endTurn('transitionUp');
+                    return;
+                }
             }
         }
 
         const portal = entitiesAtTarget.find(e => e.hasComponent('Portal'));
         if (portal) {
-            this.sfxQueue.push(  );
             this.sfxQueue.push({ sfx: 'portal0', volume: .5 });
-            this.eventBus.emit('RenderLock');
-            this.eventBus.emit('TransitionViaPortal', { x: newX, y: newY });
+
+            const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+            if (levelTransition && levelTransition.pendingTransition === null) {
+                levelTransition.pendingTransition = 'portal';
+            }
+            //this.eventBus.emit('TransitionViaPortal', { x: newX, y: newY });
             this.endTurn('transitionPortal', newX, newY);
             return;
         }
@@ -181,8 +192,9 @@ export class PlayerControllerSystem {
 
         const floor = entitiesAtTarget.find(e => e.hasComponent('Floor'));
         if (floor) {
-            position.x = newX;
-            position.y = newY;
+           //position.x = newX;
+            //position.y = newY;
+            this.entityManager.addComponentToEntity('player', new MovementIntentComponent(newX, newY));
             movementSpeed.elapsedSinceLastMove = 0;
             this.eventBus.emit('PositionChanged', { entityId: 'player', x: newX, y: newY });
             this.endTurn('movement', newX, newY);

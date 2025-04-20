@@ -164,9 +164,17 @@ export class DataProcessQueues {
     }
 }
 
-export class SFXQueueComponent {
+export class AudioQueueComponent {
     constructor() {
-        this.type = 'SfxQueue';
-        this.Sounds = []; // {sfx:'SfxName', volume: .1}
+        this.type = 'AudioQueue';
+        this.SFX = []; // {sfx:'SfxName', volume: .1}
+        this.TrackControl = []; // {track:'TrackName', play: true, volume: .1}
+    }
+}
+
+export class LevelTransitionComponent {
+    constructor(pendingTransition = null) {
+        this.type = 'LevelTransition';
+        this.pendingTransition = pendingTransition; // Indicates if a level transition is pending
     }
 }

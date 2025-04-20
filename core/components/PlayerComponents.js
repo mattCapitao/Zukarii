@@ -1,5 +1,5 @@
 ﻿// core/components/PlayerComponents.js
-// Defines player-related components for entities in the Component-Based Architecture
+// Defines player-related components
 
 
 
@@ -10,7 +10,6 @@ export class ManaComponent {
         this.maxMana = maxMana;
     }
 }
-
 export class StatsComponent {
     constructor({
         unallocated = 0, intellect = 0, prowess = 0, agility = 0, maxHp = 0, maxMana = 0,
@@ -60,7 +59,6 @@ export class StatsComponent {
         };
     }
 }
-
 export class InventoryComponent {
     constructor({
         equipped = {},
@@ -72,7 +70,6 @@ export class InventoryComponent {
     }
 }
 
-// Update ResourceComponent to remove torchExpires
 export class ResourceComponent {
     constructor(torches = 0, healPotions = 0, gold = 0, potionDropFail = 0, torchDropFail = 0) {
         this.type = 'Resource';
@@ -83,7 +80,6 @@ export class ResourceComponent {
         this.torchDropFail = torchDropFail;
     }
 }
-
 export class PlayerStateComponent {
     constructor({
         name = "",
@@ -106,7 +102,6 @@ export class PlayerStateComponent {
         this.isInCombat = isInCombat;
     }
 }
-
 export class InputStateComponent {
     constructor({
         keys = {} // e.g., { ArrowUp: true, ArrowLeft: true }
