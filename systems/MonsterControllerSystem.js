@@ -101,10 +101,11 @@ export class MonsterControllerSystem extends System {
                         if (!this.isWalkable(newX, newY) || isOccupied || isPlayerPosition) {
                             continue;
                         }
+                        /* Moved to movement resolution system so last pos is not changed unless a move can happen
                         const lastPos = monster.getComponent('LastPosition');
                         lastPos.x = pos.x;
                         lastPos.y = pos.y;
-
+                        */
                         this.entityManager.addComponentToEntity(monster.id, new MovementIntentComponent(newX, newY));
                         
                         movementSpeed.elapsedSinceLastMove = 0; // Reset move timer

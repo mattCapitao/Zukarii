@@ -196,7 +196,7 @@ export class PlayerControllerSystem {
             //position.y = newY;
             this.entityManager.addComponentToEntity('player', new MovementIntentComponent(newX, newY));
             movementSpeed.elapsedSinceLastMove = 0;
-            this.eventBus.emit('PositionChanged', { entityId: 'player', x: newX, y: newY });
+            
             this.endTurn('movement', newX, newY);
         }
     }

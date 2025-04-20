@@ -36,7 +36,7 @@ export class RenderSystem extends System {
             this.viewportEdgeScroll();
         });
         this.eventBus.on('DiscoveredStateUpdated', () => this.render(true));
-        this.eventBus.on('LightingStateChanged', () => { this.render(true); });
+        this.eventBus.on('LightingStateChanged', () => this.render(true));
 
         this.titleScreenContainer = document.getElementById('splash');
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
@@ -66,6 +66,7 @@ export class RenderSystem extends System {
         const state = this.entityManager.getEntity('state');
 
         if (!gameState || !gameState?.gameStarted) {
+            console.warn('RenderSystem: Game not started or gameState missing');
             return;
         }
         if (renderControl.locked) {
@@ -74,7 +75,8 @@ export class RenderSystem extends System {
         }
         // Check for entities with the NeedsRender component
         const renderEntities = this.entityManager.getEntitiesWith('NeedsRender');
-        if (renderEntities.length > 0) {
+        const removeEntities = this.entityManager.getEntitiesWith('RemoveEntityComponent');
+        if (renderEntities.length > 0 || removeEntities > 0) {
            gameState.needsRender = true;
             // Remove the NeedsRender component from all entities
             renderEntities.forEach(entity => {
@@ -338,7 +340,6 @@ export class RenderSystem extends System {
 
             this.setInitialScroll();
         } else {
-            const playerTileKey = `${playerPos.x},${playerPos.y}`;
             
             const exploration = tierEntity.getComponent('Exploration');
             const movables = this.entityManager.getEntitiesWith(['Position', 'LastPosition']);
@@ -429,6 +430,7 @@ export class RenderSystem extends System {
                     tile.char = char;
                     tile.class = className;
                     avatar = '';
+                     
 
                 } else if (projectile) {
                    

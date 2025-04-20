@@ -35,7 +35,7 @@ import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
-    LevelTransitionComponent, HitboxComponent, 
+    LevelTransitionComponent, HitboxComponent, LastPositionComponent,
 } from './core/Components.js';
 
 export class Game {
@@ -54,6 +54,7 @@ export class Game {
         }
         player = this.entityManager.createEntity('player', true);
         this.entityManager.addComponentToEntity('player', new PositionComponent(1, 1));
+        this.entityManager.addComponentToEntity('player', new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new VisualsComponent(32, 32));
         this.entityManager.addComponentToEntity('player', new HealthComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new ManaComponent(0, 0));
@@ -134,7 +135,7 @@ export class Game {
         this.systems.effects = new EffectsSystem(this.entityManager, this.state.eventBus); // New system added
         this.systems.health = new HealthSystem(this.entityManager, this.state.eventBus);
         this.systems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
-        this.systems.movementResolution = new MovementResolutionSystem(this.entityManager, );
+        this.systems.movementResolution = new MovementResolutionSystem(this.entityManager,this.state.eventBus );
         this.systems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
         this.systems.entityRemoval = new EntityRemovalSystem(this.entityManager);
 

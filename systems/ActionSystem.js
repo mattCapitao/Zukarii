@@ -1,6 +1,6 @@
 ﻿// ActionSystem.js
 import { System } from '../core/Systems.js';
-
+import { NeedsRenderComponent, } from '../core/Components.js';
 export class ActionSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
@@ -59,8 +59,10 @@ export class ActionSystem extends System {
 
         fountainData.used = true;
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
-        gameState.needsRender = true;
-        //this.eventBus.emit('RenderNeeded');
+
+        if (!fountainEntityId.hasComponent('NeedsRender')) {
+            this.entityManager.addComponentToEntity(fountainEntityId, new NeedsRenderComponent(pos.x, pos.y));
+        }
     }
 
     drinkHealPotion() {

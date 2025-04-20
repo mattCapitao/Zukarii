@@ -1,8 +1,9 @@
 ﻿import { System } from '../core/Systems.js';
+import {NeedsRenderComponent, } from '../core/Components.js';
 
 export class MovementResolutionSystem extends System {
-    constructor(entityManager) {
-        super(entityManager);
+    constructor(entityManager, eventBus) {
+        super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'MovementIntent'];
     }
 
@@ -50,14 +51,31 @@ export class MovementResolutionSystem extends System {
             if (entityCanMove) {
                 // No collisions, move to intended position
                 console.log(`MovementResolutionSystem: Moving ${entity.id} to (${intent.targetX}, ${intent.targetY})`);
+
                 const pos = entity.getComponent('Position');
+                const lastPos = entity.getComponent('LastPosition');
+
+                lastPos.x = pos.x;
+                lastPos.y = pos.y;
+
                 pos.x = intent.targetX;
                 pos.y = intent.targetY;
+
+                if (!entity.hasComponent('NeedsRender')) {
+                    this.entityManager.addComponentToEntity(entity.id, new NeedsRenderComponent(pos.x, pos.y));
+                }
+
+
+                if (entity.id === 'player') {
+                    this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y});
+                    console.log(`MovementResolutionSystem: Player moved to (${pos.x}, ${pos.y})`);
+                }
+
             } else {
                 console.log(`MovementRsolutionSystem: Entity ${entity.id} blocked by ${blockedBy}`);
             }
 
-            // Remove MovementIntent after processing
+            // Remove MovementIntent after processing 
             entity.removeComponent('MovementIntent');
         }
         

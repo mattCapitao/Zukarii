@@ -47,12 +47,14 @@ export class ProjectileSystem extends System {
                 const isOutOfBounds = newX < 0 || newX >= map[0].length || newY < 0 || newY >= map.length;
 
                 
-
+                /* moved to MovementResolutionSystem to prevent lastpos update when movement is blocked
                 const lastPos = projectile.getComponent('LastPosition');
                 lastPos.x = pos.x;
                 lastPos.y = pos.y;
+                */
+                projData.rangeLeft--;
 
-                if (isOutOfBounds || projData.rangeLeft < 1) {
+                if (isOutOfBounds || projData.rangeLeft <= 0) {
                     if (!projectile.hasComponent('RemoveEntity')) {
                         projectile.addComponent(new RemoveEntityComponent());
                     }
@@ -64,7 +66,7 @@ export class ProjectileSystem extends System {
 
                 //pos.x = newX;
                 //pos.y = newY;
-                projData.rangeLeft--;
+                
                 moveSpeedComp.elapsedSinceLastMove -= moveSpeedComp.movementSpeed;
 
             } else {
