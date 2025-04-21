@@ -176,10 +176,11 @@ export class AudioSystem extends System {
                 }
                 const arrayBuffer = await response.arrayBuffer();
                 this.soundBuffers[key] = await this.audioContext.decodeAudioData(arrayBuffer);
-                console.log(`AudioSystem: Preloaded ${key}`);
+                //console.log(`AudioSystem: Preloaded ${key}`);
             } catch (error) {
                 console.error(`AudioSystem: Failed to preload ${key} from ${path}:`, error);
             }
         }
+        console.log('AudioSystem: sounds preloaded');
     }
 }

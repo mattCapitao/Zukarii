@@ -358,7 +358,7 @@ font-size: 0.75rem; /* ~12px */
     padding: 0;
     margin: 0;
     background-image: url("img/map/floor.png");
-    transform: scale(2);
+     transform: scale(2);
     /*////////////////////////////////////////////// BEGIN WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
     /* DO NOT SET HEIGHT, WIDTH, OR MARGIN HERE - THESE CREATE DEAD ZONES IN MAP SCROLLING BY LIMITING SCROLLABLE AREA 
 OR OFFSETTING #MAP POSITION. 
@@ -368,31 +368,42 @@ USE OVERFLOW: AUTO AND RELY ON RENDER.JS FOR DYNAMIC SCROLLING. */
     /* height: calc(100vh - 0.25rem); /* Account for game and map borders */
     /*////////////////////////////////////////////////END WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-    overflow: auto;
+    overflow: auto; /* Ensure no scrollbars */
     box-sizing: border-box;
     -ms-overflow-style: none;
     scrollbar-width: none;
     position: relative;
+    will-change: transform; /* Hint GPU optimization */
+
+}
+
+#map2 {
+    font-family: monospace;
+    font-size: 2rem; /* ~16px */
+    line-height: 2rem; /* ~16px */
+    white-space: pre;
+    color: #0f0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background-image: url("img/map/floor.png");
+    overflow: hidden; /* Ensure no scrollbars */
+    box-sizing: border-box;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    position: relative;
+    will-change: transform; /* Hint GPU optimization */
+    transform-origin: 0 0; /* Ensure scaling from top-left */
+    transform: scale(2); /* Reapply scaling here */
 }
 
 #map::-webkit-scrollbar {
 display: none;
 }
 
-    #map span {
-        display: inline-block;
-        width: 2rem; /* ~16px */
-        height: 2rem; /* ~16px */
-        text-align: center;
-        line-height: 2rem; /* ~16px */
-        vertical-align: top;
-        transition: transform 0.016s linear; /* Smooth at ~60 FPS */
-    }
+ 
 
-.undiscovered {
-color: #000;
-background-color: #000;
-}
+
 
 
 
@@ -1210,7 +1221,7 @@ padding: 0.625rem; /* ~10px */
     animation: torchFlicker 0.5s infinite, torchShadow 0.5s infinite;
 }
 
-.discovered.projectile {
+.projectile {
     color: orange;
     z-index: 5 !important;
     font-size:.5rem;
@@ -1561,25 +1572,40 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
 
 /*//////////////////////////////// START MONSTERS ||||||||||||||||||||||||||||||||||*/
 
-.detected.monster {
-    z-index: 5;
-    position: relative;
+
+.monster {
     z-index: 75 !important; /* Lift above other spans */
+    position: relative;
+    display: inline-block;
+    transform-origin: center;
+    transition: transform 0.016s linear; /* Smooth at ~60 FPS */
+    opacity: .5;
+
+}
+    .monster.detected {
+        opacity: 1; /* Fully visible */
+        transition: opacity 3s ease; /* Smooth fade-in for avatar images */
+    }
+
+.monster img{
+    opacity:0.05;
 }
 
-    .detected.monster img {
-        z-index: 20;
-        width: 32px;
-        height: 32px;
-        margin: 0; 
-        padding: 0;
-        padding-top: 2px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        background: none; /* Default to no background */
-        filter: drop-shadow(0 0 0.1rem #cccccc90);
-    }
+.detected.monster img {
+    z-index: 20;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    padding-top: 2px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: none; /* Default to no background */
+    filter: drop-shadow(0 0 0.1rem #cccccc90);
+    opacity: 1; /* Fully visible */
+    transition: opacity 3s ease; /* Smooth fade-in for avatar images */
+}
 
     .detected.monster.has-hp-bar img {
         background: url('img/1x1_red.png') left top no-repeat;
@@ -1603,10 +1629,44 @@ box-shadow: 0 0 5em 2.5em #efe8ac92;
 
 /*//////////////////////////////// START MAP ELEMENTS ||||||||||||||||||||||||||||||||||*/
 
-.discovered.wall {
-    background-image: url('img/map/wall.png') !important;
-    background-size: 32px;
+#map span {
+    display: inline-block;
+    width: 2rem; /* ~16px */
+    height: 2rem; /* ~16px */
+    text-align: center;
+    line-height: 2rem; /* ~16px */
+    vertical-align: top;
+    /*transition: transform 0.016s linear; /* Smooth at ~60 FPS */
+    transition: opacity 3s ease;
 }
+
+.undiscovered {
+    background: black;
+    opacity: 0.5; /* Dimmed appearance for undiscovered tiles */
+}
+
+.discovered {
+    background: none; /* For floors or other non-wall tiles */
+    opacity: 1;
+    transition: opacity 1.5s ease; /* Smooth fade for discovery */
+}
+
+.undiscovered img {
+    opacity: .05 ;
+}
+discovered img {
+    opacity: 1;
+    transition: opacity 1.5s ease; /* Smooth fade-in for avatar images */
+}
+
+.wall.discovered {
+    background: url('img/map/wall.png'); /* Wall texture */
+    background-size: 32px;
+    opacity: 1; /* Fully visible */
+    transition: opacity 1s ease; /* Smooth fade-in for wall texture */
+}
+
+
 .stair {
     position: relative;
     height: 32px;

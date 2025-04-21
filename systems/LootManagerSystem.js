@@ -152,6 +152,12 @@ export class LootManagerSystem extends System {
 
         if (Math.random() >= this.BASE_DROP_CHANCE) {
             this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped nothing.` });
+            const sourceEntityId = sourceData.sourceDetails?.id;
+            if (sourceEntityId) {
+                this.processDeadLootSource(sourceEntityId)
+            } else {
+                console.warn(`LootManagerSystem: No sourceDetails.id found in lootSource for ${sourceData.name}`);
+            }
             return;
         }
 
@@ -195,17 +201,7 @@ export class LootManagerSystem extends System {
 
         const sourceEntityId = sourceData.sourceDetails?.id;
         if (sourceEntityId) {
-            const sourceEntity = this.entityManager.getEntity(sourceEntityId);
-            if (sourceEntity) {
-                const dead = sourceEntity.getComponent('Dead');
-                if (dead && dead.state === 'handling') {
-                    dead.state = 'processed';
-                } else if (!dead) {
-                    console.warn(`LootManagerSystem: No DeadComponent found on source entity ${sourceEntityId}`);
-                }
-            } else {
-                console.warn(`LootManagerSystem: Source entity ${sourceEntityId} not found for processed flag`);
-            }
+            this.processDeadLootSource(sourceEntityId)
         } else {
             console.warn(`LootManagerSystem: No sourceDetails.id found in lootSource for ${sourceData.name}`);
         }
@@ -214,6 +210,26 @@ export class LootManagerSystem extends System {
             treasure: lootEntity,
             tier: sourceData.tier
         });
+    }
+
+    processDeadLootSource(sourceEntityId) {
+       
+
+            const sourceEntity = this.entityManager.getEntity(sourceEntityId);
+
+            if (sourceEntity && sourceEntity.hasComponent('MonsterData')) {
+                const dead = sourceEntity.getComponent('Dead');
+                if (dead && dead.state === 'handling') {
+                    dead.state = 'processed';
+                } else if (!dead) {
+                    console.warn(`LootManagerSystem: No DeadComponent found on source entity ${sourceEntityId}`);
+                }
+            } else if (sourceEntity && sourceEntity.hasComponent('Room')) {
+                console.log(`LootManagerSystem: Source entity ${sourceEntityId} is a Room.`);
+            } else {
+                console.warn(`LootManagerSystem: Source entity ${sourceEntityId} not found for processed flag`);
+            }
+
     }
 
   async buildItemsDropped(sourceData, player, modifiers) {

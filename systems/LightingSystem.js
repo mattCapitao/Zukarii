@@ -30,8 +30,6 @@ export class LightingSystem extends System {
                 this.eventBus.emit('LightingStateChanged', { visibleRadius: lightingState.visibleRadius });
                 this.eventBus.emit('LogMessage', { message: 'The torch has burned out!' });
                 this.trackControlQueue.push({ track: 'torchBurning', play: false, volume: 0 });
-                gameState.needsRender = true;
-                //this.eventBus.emit('RenderNeeded');
             }
         }
     }
@@ -59,7 +57,5 @@ export class LightingSystem extends System {
         console.log(`LightingSystem: Activated ${type} - visibleRadius: ${lightingState.visibleRadius}, expires on turn: ${lightingState.expiresOnTurn}`);
         this.eventBus.emit('LightingStateChanged', { visibleRadius: lightingState.visibleRadius });
         this.trackControlQueue.push({ track: 'torchBurning', play: true, volume: .05 });
-        gameState.needsRender = true;
-        //this.eventBus.emit('RenderNeeded');
     }
 }

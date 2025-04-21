@@ -1,5 +1,5 @@
 ﻿import { System } from '../core/Systems.js';
-import { PositionComponent, VisualsComponent, LootData } from '../core/Components.js';
+import { PositionComponent, VisualsComponent, NeedsRenderComponent } from '../core/Components.js';
 
 export class LootSpawnSystem extends System {
     constructor(entityManager, eventBus) {
@@ -48,14 +48,14 @@ export class LootSpawnSystem extends System {
         entityList.treasures.push(lootEntity.id);
 
         lootEntity.addComponent(new PositionComponent(position.x, position.y));
-        const lootVisuals = lootEntity.addComponent(new VisualsComponent(16, 24));
+        lootEntity.addComponent(new VisualsComponent(16, 24));
+        const lootVisuals = lootEntity.getComponent('Visuals');
         lootVisuals.avatar = 'img/avatars/chest.png';
- 
+
         this.eventBus.emit('LootEntityCreated', { entityId: lootEntity.id, tier });
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (!lootData.suppressRender && gameState) {
-            gameState.needsRender = true;
-            //this.eventBus.emit('RenderNeeded');
+            lootEntity.addComponent(new NeedsRenderComponent());
         }
     }
 }

@@ -33,6 +33,7 @@ export class ActionSystem extends System {
        
         const playerStats = player.getComponent('Stats');
         const playerHealth = player.getComponent('Health');
+        const pos = player.getComponent('Position');
         const critChance = playerStats.critChance || (playerStats.agility * 0.02);
         let healAmount = 0;
         
@@ -60,7 +61,7 @@ export class ActionSystem extends System {
         fountainData.used = true;
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
 
-        if (!fountainEntityId.hasComponent('NeedsRender')) {
+        if (!fountainEntity.hasComponent('NeedsRender')) {
             this.entityManager.addComponentToEntity(fountainEntityId, new NeedsRenderComponent(pos.x, pos.y));
         }
     }

@@ -254,7 +254,7 @@ export class MonsterSpawnSystem extends System {
             console.log(`MonsterSpawnSystem: Added affixes to ${template.name}:`, affixDefinitions);
         }
 
-        console.log(`MonsterSpawnSystem: Entity ${entity.id} components:`, Array.from(entity.components.keys()));
+        console.log(`MonsterSpawnSystem: Entity ${entity.id} classes" ${template.classes} components:`, Array.from(entity.components.keys()));
 
 
         console.log(`MonsterSpawnSystem.js: Spawned monster ${entity.id} at (${x}, ${y}) on tier ${tier}`, entity);

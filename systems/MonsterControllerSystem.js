@@ -42,7 +42,7 @@ export class MonsterControllerSystem extends System {
                     this.handleMonsterDeath(monster.id);
                     dead.state = 'handling';
                 }
-                if (dead.expiresAt < now && dead.state === 'processed') { 
+                if ((dead.expiresAt < now && dead.state === 'processed') || dead.expiresAt+2000 < now ) { 
                    // this.entityManager.removeEntity(monster.id);
                     if (!monster.hasComponent('RemoveEntity')) {
                         monster.addComponent(new RemoveEntityComponent());
@@ -101,11 +101,7 @@ export class MonsterControllerSystem extends System {
                         if (!this.isWalkable(newX, newY) || isOccupied || isPlayerPosition) {
                             continue;
                         }
-                        /* Moved to movement resolution system so last pos is not changed unless a move can happen
-                        const lastPos = monster.getComponent('LastPosition');
-                        lastPos.x = pos.x;
-                        lastPos.y = pos.y;
-                        */
+
                         this.entityManager.addComponentToEntity(monster.id, new MovementIntentComponent(newX, newY));
                         
                         movementSpeed.elapsedSinceLastMove = 0; // Reset move timer

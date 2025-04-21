@@ -11,12 +11,11 @@ export class RenderSystem extends System {
         this.lastTier = null;
         this.SCALE_FACTOR = 2
         this.TILE_SIZE = 32;
-        this.SCROLL_SPEED = .250;
-        this.VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.25;
-        this.SCROLL_THRESHOLD = 64;
-        this.SCROLL_DURATION = 375;
+        this.VIEWPORT_EDGE_THRESHOLD_PERCENT = 0.33;
+        this.SCROLL_THRESHOLD = 4;
+        this.SCROLL_DURATION = 250;
     }
-
+    
     init() {
        // this.eventBus.on('RenderNeeded', () => this.render(true));
         this.eventBus.on('PositionChanged', (data) => {
@@ -44,6 +43,9 @@ export class RenderSystem extends System {
             this.displayTitleScreen();
         }
     }
+   
+
+ 
 
     update() {  
         this.render();
@@ -57,12 +59,12 @@ export class RenderSystem extends System {
         gameState.needsRender = false;
     }
 
+
     render() {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
         const renderControl = this.entityManager.getEntity('renderState')?.getComponent('RenderControl');
         const player = this.entityManager.getEntity('player');
-        
         const state = this.entityManager.getEntity('state');
 
         if (!gameState || !gameState?.gameStarted) {
@@ -73,11 +75,12 @@ export class RenderSystem extends System {
             console.warn('RenderSystem: Render is locked, skipping render');
             return;
         }
+
         // Check for entities with the NeedsRender component
         const renderEntities = this.entityManager.getEntitiesWith('NeedsRender');
         const removeEntities = this.entityManager.getEntitiesWith('RemoveEntityComponent');
-        if (renderEntities.length > 0 || removeEntities > 0) {
-           gameState.needsRender = true;
+        if (renderEntities.length > 0 || removeEntities.length > 0) {
+            gameState.needsRender = true;
             // Remove the NeedsRender component from all entities
             renderEntities.forEach(entity => {
                 this.entityManager.removeComponentFromEntity(entity.id, 'NeedsRender');
@@ -85,7 +88,6 @@ export class RenderSystem extends System {
         }
 
         if (!gameState.needsRender) return;
-
 
         this.titleScreenContainer.style.display = 'none';
         this.mapDiv.style.display = 'block';
@@ -118,7 +120,10 @@ export class RenderSystem extends System {
         const portals = this.entityManager.getEntitiesWith(['Position', 'Portal']);
 
         let avatar = '';
+        let imgElement = '';
 
+        // Collect all DOM updates for batching
+        const updates = [];
 
         if (!Object.keys(this.tileMap).length) {
             let mapDisplay = '';
@@ -132,8 +137,8 @@ export class RenderSystem extends System {
                     if (exploration.discoveredWalls.has(tileKey)) {
                         className = 'discovered wall';
                     }
-                    if(exploration.discoveredFloors.has(tileKey)) {
-                        className = 'discovered floor';
+                    if (exploration.discoveredFloors.has(tileKey)) {
+                        className = 'discovered';
                     }
 
                     const wall = walls.find(w => {
@@ -141,9 +146,7 @@ export class RenderSystem extends System {
                         return pos.x === x && pos.y === y;
                     });
                     if (wall) {
-                       // char = '#';
-                        className = exploration.discoveredWalls.has(tileKey) ? 'discovered' : 'undiscovered';
-                        className += ' wall';
+                        className = exploration.discoveredWalls.has(tileKey) ? 'discovered wall' : 'undiscovered wall';
                         char = ' ';
                     }
 
@@ -153,8 +156,7 @@ export class RenderSystem extends System {
                     });
                     if (floor && !wall) {
                         char = ' ';
-                        className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
-                        className += ' floor';
+                        className = exploration.discoveredFloors.has(tileKey) ? 'discovered floor' : 'undiscovered floor';
                     }
 
                     const projectile = projectiles.find(p => {
@@ -164,34 +166,38 @@ export class RenderSystem extends System {
                     if (x === playerPos.x && y === playerPos.y) {
                         playerSpawnLocations += `Rendering player at${x},${y}`;
                         avatar = player.getComponent('Visuals').avatar;
+                        const faceLeft = player.getComponent('Visuals').faceLeft;
                         const playerHealth = player.getComponent('Health');
 
-                        char = `<img src="${avatar}" height="28px" width="32px" style="" />`;
-                        className = 'player floor';
+                        imgElement = `<img src="${avatar}" height="28px" width="32px" style="" />`;
+                        className = 'player';
 
-                        
                         if (player.hasComponent('InCombat')) {
-                            const hpBarWidth = Math.floor((playerHealth.hp / playerHealth.maxHp) * (this.TILE_SIZE/2));
-                            char = `<img src="${avatar}" height="28px" width="32px" style="background-size:${hpBarWidth}px 2px;  background-position:8px 0;"" />`;
-                            className = 'player has-hp-bar floor';
+                            const hpBarWidth = Math.floor((playerHealth.hp / playerHealth.maxHp) * (this.TILE_SIZE / 2));
+                            imgElement = `<img src="${avatar}" height="28px" width="32px" style="background-size:${hpBarWidth}px 2px; background-position:8px 0;" />`;
+                            className += ' has-hp-bar';
+                        }
+
+                        let torchAlignClass = '';
+                        if (faceLeft) {
+                            className += ' face-left';
+                            torchAlignClass = 'torch-left';
                         }
 
                         const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
-                        if (lightingState?.isLit) { className += ' torch flicker'; }
-                        mapDisplay += `<span class="${className}" data-x="${x}" data-y="${y}">${char}</span>`;
-                        avatar = '';
-                        continue; // Skip the default append logic
+                        let torch = '';
+                        if (lightingState?.isLit) {
+                            torch = `<span id="torch" class="flicker ${torchAlignClass}"></span>`;
+                        }
 
+                        imgElement += torch;
                     } else if (projectile) {
-
                         if (projectile.hasComponent('RemoveEntityComponent')) {
-                            // Render floor or hit effect
                             char = ' ';
-                            className = 'discovered floor';
+                            className = 'discovered';
                         } else {
                             char = '*';
-                            className = 'discovered floor projectile';
-
+                            className = 'discovered projectile';
                         }
                     } else {
                         let fountainData = null;
@@ -201,12 +207,15 @@ export class RenderSystem extends System {
                             return pos.x === x && pos.y === y;
                         });
                         if (fountain) {
-
                             const a = fountain.getComponent('Visuals').avatar;
-                            avatar = a || 'img/avatars/fountain.png'
-                            char = `<img src="${avatar}" height="32px" width="32px"/>` || '≅';
-
-                            className = exploration.discoveredFloors.has(tileKey) ? 'floor discovered' : 'undiscovered';
+                            if (a) {
+                                avatar = a;
+                            } else {
+                                console.warn('RenderSystem: No avatar found for fountain. Rendering Fallback');
+                                avatar = 'img/avatars/fountain.png';
+                            }
+                            imgElement = `<img src="${avatar}" height="32px" width="32px"/>`;
+                            className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
                             className += ' fountain';
                             if (fountainData.used) {
                                 className += ' used';
@@ -219,20 +228,18 @@ export class RenderSystem extends System {
                             if (stair) {
                                 const stairComp = stair.getComponent('Stair');
                                 const a = stair.getComponent('Visuals').avatar;
-
                                 switch (stairComp.direction) {
                                     case 'up':
                                         avatar = a || 'img/avatars/stairsup.png';
-                                        char = `<img src="${avatar}" height="32px;" width="32px;"/>` || '⇓';
+                                        imgElement = `<img src="${avatar}" height="32px;" width="32px;"/>`;
                                         break;
                                     case 'down':
                                         avatar = a || 'img/avatars/stairsdown.png';
-                                        char = `<img src="${avatar}"  height="32px;" width="32px;" />` || '⇑';
+                                        imgElement = `<img src="${avatar}" height="32px;" width="32px;"/>`;
                                         break;
                                 }
-                                
-                                className = exploration.discoveredFloors.has(tileKey) ? 'discovered floor' : 'undiscovered';
-                                className += stairComp.direction === 'down' ? ' stair down ' : ' stair down';
+                                className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+                                className += stairComp.direction === 'down' ? ' stair down' : ' stair down';
                             } else {
                                 const portal = portals.find(p => {
                                     const pos = p.getComponent('Position');
@@ -241,30 +248,32 @@ export class RenderSystem extends System {
                                 if (portal) {
                                     console.log('RenderSystem: Found portal at', x, y, portal);
                                     const a = portal.getComponent('Visuals').avatar;
-                                    console.log('RenderSystem: Found portal avatar', a);
                                     if (a) {
-                                        char = `<img src="${avatar}" height="326px" width="32px;"/>`;
+                                        avatar = a;
                                     } else {
-                                        char = '?';
+                                        console.warn('RenderSystem: No avatar found for portal. Rendering Fallback');
+                                        avatar = 'img/avatars/portal.png';
                                     }
-                                   
+                                    imgElement = `<img src="${avatar}" height="40" width="32"/>`;
                                     className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
-                                    className += ' portal floor';
+                                    className += ' portal';
                                 } else {
                                     const treasure = treasures.find(t => {
                                         const pos = t.getComponent('Position');
-                                        const source = t.getComponent('LootData');
                                         return pos.x === x && pos.y === y;
                                     });
                                     if (treasure) {
                                         console.log('RenderSystem: Found treasure at', x, y, treasure);
-                                        const a = treasure.getComponent('Visuals').avatar;
-                                        console.log('RenderSystem: Found treasure avatar', a);
+                                        const lootVisuals = treasure.getComponent('Visuals');
+                                        console.log('RenderSystem: Found treasure visuals', lootVisuals);
+                                        const a = lootVisuals.avatar;
                                         if (a) {
-                                            char = `<img src="${avatar}" height="16px" width="24px;"/>`;
+                                            avatar = a;
                                         } else {
-                                            char = '$';
+                                            console.warn('RenderSystem: No avatar found for treasure. Rendering Fallback');
+                                            avatar = `img/avatars/chest.png`;
                                         }
+                                        imgElement = `<img src="${avatar}" height="16px" width="24px;"/>`;
                                         className += ' treasure';
                                     } else {
                                         const monster = monsters.find(m => {
@@ -272,55 +281,61 @@ export class RenderSystem extends System {
                                             return pos.x === x && pos.y === y && m.getComponent('Health').hp > 0;
                                         });
                                         let monsterData = null;
-                                       
-                                        if (monster) { 
+                                        className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
+                                        if (monster) {
                                             monsterData = monster.getComponent('MonsterData');
                                             char = ' ';
                                             avatar = '';
-                                            className = `monster ${monsterData.classes}`;
-
-                                            if (renderState.activeRenderZone.has(tileKey) || monsterData.isAggro) {
-                                                monsterData.isDetected = true;
-                                                className += ' detected';
-                                            }
-
+                                            className += ` monster ${monsterData.classes}`;
+                                           
                                             const health = monster.getComponent('Health');
                                             let hpBarWidth = 0;
                                             if (health.hp !== health.maxHp) {
                                                 hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE / 2));
                                                 className += ' has-hp-bar';
                                             }
-
                                             const faceLeft = monster.getComponent('Visuals').faceLeft;
-                                            if (faceLeft) { className += ' face-left'; }
-
+                                            if (faceLeft) {
+                                                className += ' face-left';
+                                            }
                                             if (monsterData.isElite) className += ' elite';
                                             if (monsterData.isBoss) className += ' boss';
                                             monsterData.affixes.forEach(affix => className += ` ${affix}`);
-
                                             const a = monster?.getComponent('Visuals').avatar;
-                                            avatar = a.avatar || 'img/avatars/monsters/skeleton.png';
-
-                                            char = avatar ? `<img src="${avatar}" height="30px" width="32px" style ="background-size:${hpBarWidth}px, 2px;  background-position:8px 0;" />` : monsterData.avatar;
-                                            
+                                            if (a) {
+                                                avatar = a;
+                                            } else if (monsterData.avatar) {
+                                                console.log('RenderSystem: No monster avatar found is Visuals. Rendering MonsterData Fallback: ', monsterData.avatar);
+                                                avatar = monsterData.avatar;
+                                            } else {
+                                                console.warn('RenderSystem: No avatar found for monster in MonsterData. Rendering static Fallback');
+                                                avatar = 'img/avatars/monsters/skeleton.png';
+                                            }
+                                            imgElement = `<img src="${avatar}" height="30px" width="32px" style="background-size:${hpBarWidth}px 2px; background-position:8px 0;" />`;
+                                            avatar = '';
+                                            console.log(`Initial render - Monster with Classes: ${className} at ${x},${y}`); 
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    if (avatar) {
+                    if (imgElement) {
+                        mapDisplay += `<span class="${className}" data-x="${x}" data-y="${y}">${imgElement}</span>`;
+                        imgElement = '';
+                        avatar = '';
+                        char = '';
+                    } else if (avatar) {
                         mapDisplay += `<span class="${className}" data-x="${x}" data-y="${y}"><img src="${avatar}" /></span>`;
                         avatar = '';
+                        char = '';
                     } else {
                         mapDisplay += `<span class="${className}" data-x="${x}" data-y="${y}">${char}</span>`;
+                        char = '';
                     }
-
-                    
                 }
                 mapDisplay += '\n';
             }
-            ////console.log("Player Avatar Locations", playerSpawnLocations);
             this.mapDiv.innerHTML = mapDisplay;
 
             for (let y = 0; y < HEIGHT; y++) {
@@ -329,10 +344,9 @@ export class RenderSystem extends System {
                     const tileKey = `${x},${y}`;
                     let char = ' ';
                     if (walls.some(w => w.getComponent('Position').x === x && w.getComponent('Position').y === y)) {
-                        //char = '#';
-
-                        if (!element.classList.contains('wall')){ element.className += 'wall'; }
-                       
+                        if (!element.classList.contains('wall')) {
+                            element.className += ' wall';
+                        }
                     }
                     this.tileMap[tileKey] = { char, class: element.className, element };
                 }
@@ -340,17 +354,14 @@ export class RenderSystem extends System {
 
             this.setInitialScroll();
         } else {
-            
             const exploration = tierEntity.getComponent('Exploration');
             const movables = this.entityManager.getEntitiesWith(['Position', 'LastPosition']);
-            const renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
 
-
+            // Update active render zone for movables
             for (const entity of movables) {
                 const pos = entity.getComponent('Position');
                 const lastPos = entity.getComponent('LastPosition');
                 if (pos.x !== lastPos.x || pos.y !== lastPos.y) {
-      
                     renderState.activeRenderZone.add(`${pos.x},${pos.y}`);
                     renderState.activeRenderZone.add(`${lastPos.x},${lastPos.y}`);
                     if (!exploration.discoveredFloors.has(`${pos.x},${pos.y}`)) {
@@ -359,212 +370,178 @@ export class RenderSystem extends System {
                 }
             }
 
-
+            // Phase 1: Update static objects (walls, floors, fountains, stairs, portals, treasures)
             for (const tileKey of renderState.activeRenderZone) {
-
                 const [x, y] = tileKey.split(',').map(Number);
-                
                 const tile = this.tileMap[tileKey];
-                let char = ' ';
                 let className = 'undiscovered';
+                let char = tile.char;
 
-                if (exploration.discoveredWalls.has(tileKey)) {
-                    className = 'discovered wall';
-                }
-
-                if (exploration.discoveredFloors.has(tileKey)){
-                    className = 'discovered floor';
-                }
-
-                const wall = walls.find(w => {
-                    const pos = w.getComponent('Position');
-                    return pos.x === x && pos.y === y;
-                });
+                // Static object checks
+                const wall = walls.find(w => w.getComponent('Position').x === x && w.getComponent('Position').y === y);
+                const fountain = fountains.find(f => f.getComponent('Position').x === x && f.getComponent('Position').y === y);
+                const stair = stairs.find(s => s.getComponent('Position').x === x && s.getComponent('Position').y === y);
+                const portal = portals.find(p => p.getComponent('Position').x === x && p.getComponent('Position').y === y);
+                const treasure = treasures.find(t => t.getComponent('Position').x === x && t.getComponent('Position').y === y);
 
                 if (wall) {
-                    className = 'discovered wall';
+                    className = exploration.discoveredWalls.has(tileKey) ? 'discovered wall' : 'undiscovered wall';
+                } else if (exploration.discoveredFloors.has(tileKey)) {
+                    className = 'discovered';
+                    if (fountain) {
+                        const fountainData = fountain.getComponent('Fountain');
+                        className += ' fountain';
+                        if (fountainData.used) className += ' used';
+                    } else if (stair) {
+                        const stairComp = stair.getComponent('Stair');
+                        className += stairComp.direction === 'down' ? ' stair down' : ' stair up';
+                    } else if (portal) {
+                        className += ' portal';
+                    } else if (treasure) {
+                        const a = treasure.getComponent('Visuals').avatar;
+                        if (a) {
+                            avatar = a;
+                        } else {
+                            console.warn('RenderSystem: No avatar found for treasure. Rendering Fallback');
+                            avatar = 'img/avatars/chest.png';
+                        }
+                        const treasureImg = `<img src="${avatar}" height="16px" width="24px;"/>`;
+                        className += ' treasure';
+                        if (tile.char !== treasureImg && exploration.discoveredFloors.has(tileKey)) {
+                            char = treasureImg;
+                            updates.push({ element: tile.element, innerHTML: char, updateInnerHTML: true, className });
+                            tile.char = char;
+                            tile.class = className;
+                        } else if (tile.class !== className) {
+                            updates.push({ element: tile.element, innerHTML: false, className });
+                            tile.class = className;
+                        }
+                        continue; // Skip moving phase for this tile
+                    }
                 }
 
-                const treasure = treasures.find(t => {
-                    const pos = t.getComponent('Position');
-                    return pos.x === x && pos.y === y;
-                });
-                const projectile = projectiles.find(p => {
-                    const pos = p.getComponent('Position');
-                    return pos.x === x && pos.y === y;
-                });
-                if (treasure) {
-                    avatar = 'img/avatars/chest.png';
-                    char = `<img src="${avatar}" height="16px" width="24px;"/>`;
-                    className = 'discovered treasure floor';
+                // Collect static tile update if class has changed
+                if (tile.class !== className) {
+                    updates.push({ element: tile.element, innerHTML: false, className });
+                    tile.class = className;
+                }
+            }
 
-                } 
-                 if (x === playerPos.x && y === playerPos.y) {
+            // Phase 2: Update moving objects (player, monsters, projectiles)
+            // Build entity position index
+            const entitiesByPosition = new Map();
+            [player, ...monsters, ...projectiles].forEach(entity => {
+                const pos = entity.getComponent('Position');
+                const key = `${pos.x},${pos.y}`;
+                if (!entitiesByPosition.has(key)) entitiesByPosition.set(key, []);
+                entitiesByPosition.get(key).push(entity);
+            });
 
+            for (const tileKey of renderState.activeRenderZone) {
+                const [x, y] = tileKey.split(',').map(Number);
+                const tile = this.tileMap[tileKey];
+                let char = ' ';
+                let className = tile.class; // Start with static class
+                let avatar = '';
+
+                // Skip tiles handled by treasures in static phase
+                if (className.includes('treasure')) continue;
+
+                // Get entities at this tile using the index
+                const entitiesAtTile = entitiesByPosition.get(tileKey) || [];
+                const projectile = entitiesAtTile.find(e => e.hasComponent('Projectile'));
+                const monster = entitiesAtTile.find(e => e.hasComponent('MonsterData') && e.getComponent('Health').hp > 0);
+                const isPlayer = playerPos.x === x && playerPos.y === y;
+
+                if (isPlayer) {
                     avatar = player.getComponent('Visuals').avatar;
                     const faceLeft = player.getComponent('Visuals').faceLeft;
                     const playerHealth = player.getComponent('Health');
 
                     char = `<img src="${avatar}" height="28px" width="32px" style="" />`;
-                    className = 'player floor';
+                    className = 'player';
 
                     if (player.hasComponent('InCombat')) {
-                        const hpBarWidth = Math.floor((playerHealth.hp / playerHealth.maxHp) * (this.TILE_SIZE/2));
-                        char = `<img src="${avatar}" height="28px" width="32px" style="background-size:${hpBarWidth}px 2px;  background-position:8px 0;"" />`;
-                        className = 'player has-hp-bar floor';
+                        const hpBarWidth = Math.floor((playerHealth.hp / playerHealth.maxHp) * (this.TILE_SIZE / 2));
+                        char = `<img src="${avatar}" height="28px" width="32px" style="background-size:${hpBarWidth}px 2px; background-position:8px 0;" />`;
+                        className += ' has-hp-bar';
                     }
 
                     let torchAlignClass = '';
-                    if (faceLeft) { className += ' face-left'; torchAlignClass = 'torch-left'; }
+                    if (faceLeft) {
+                        className += ' face-left';
+                        torchAlignClass = 'torch-left';
+                    }
 
                     const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
-                    let torch = '';
-
                     if (lightingState?.isLit) {
-                        torch = `<span id="torch" class="flicker ${torchAlignClass}" > </span>`;
-                        //console.log('RenderSystem: player tile.element', tile); 
+                        char += `<span id="torch" class="flicker ${torchAlignClass}"></span>`;
                     }
-
-                    tile.element.innerHTML = char + torch;
-                    tile.element.className = className;
-                    tile.char = char;
-                    tile.class = className;
-                    avatar = '';
-                     
-
                 } else if (projectile) {
-                   
-                     if (projectile.hasComponent('RemoveEntityComponent')) {
-                        // Render floor or hit effect
+                    if (projectile.hasComponent('RemoveEntityComponent')) {
                         char = ' ';
-                        className = 'discovered floor';
+                        className = 'discovered';
                     } else {
                         char = '*';
-                        className = 'discovered floor projectile';
-                        
+                        className = 'discovered projectile';
                     }
-                } else {
-                    let fountainData = null;
-                    const fountain = fountains.find(f => {
-                        const pos = f.getComponent('Position');
-                        fountainData = f.getComponent('Fountain');
-                        return pos.x === x && pos.y === y;
-                    });
-                    if (fountain) {
-                        const a = fountain.getComponent('Visuals').avatar;
-                        avatar = a || 'img/avatars/fountain.png'
-                        char = `<img src="${avatar}" height="32px" width="32px"/>` || '≅';
+                } else if (monster) {
+                    const visuals = monster.getComponent('Visuals');
+                    avatar = visuals?.avatar || 'img/avatars/monsters/skeleton.png';
+                    const monsterData = monster.getComponent('MonsterData');
+                    className = `monster ${monsterData.classes}`;
 
-                        className =  'floor discovered';
-                        className += ' fountain';
-                        if (fountainData.used) {
-                            className += ' used';
-                        }
+                    if (monsterData.isDetected || monsterData.isAggro) {
+                        monsterData.isDetected = true;
+                        className += ' detected';
                     } else {
-                        const stair = stairs.find(s => {
-                            const pos = s.getComponent('Position');
-                            return pos.x === x && pos.y === y;
-                        });
-                        if (stair) {
-                            const stairComp = stair.getComponent('Stair');
-                            const a = stair.getComponent('Visuals').avatar;
-
-                            switch (stairComp.direction) {
-                                case 'up':
-                                    avatar = a || 'img/avatars/stairsup.png';
-                                    char = `<img src="${avatar}"  height="32px;" width="32px;" />` || '⇓';
-                                    break;
-                                case 'down':
-                                    avatar = a || 'img/avatars/stairsdown.png';
-                                    char = `<img src="${avatar}"  height="32px;" width="32px;" />` || '⇑';
-                                    break;
-                            }
-
-                            className = exploration.discoveredFloors.has(tileKey) ? 'discovered' : 'undiscovered';
-                            className += stairComp.direction === 'down' ? ' stair down floor' : ' stair down floor';
-                            
-                        } else {
-                            const portal = portals.find(p => {
-                                const pos = p.getComponent('Position');
-                                return pos.x === x && pos.y === y;
-                            });
-                            if (portal) {
-                                avatar = portal.getComponent('Visuals').avatar || 'img/avatars/portal.png';;
-                                char = `<img src="${avatar}" />`;
-                                className = 'portal discovered floor';
-                            } else {
-                                const monster = monsters.find(m => {
-                                    const pos = m.getComponent('Position');
-                                    return pos.x === x && pos.y === y && m.getComponent('Health').hp > 0;
-                                });
-                                
-                                let monsterData = null;
-                                if (monster) { 
-                                    const visuals = monster?.getComponent('Visuals');
-                                    avatar = visuals?.avatar || 'img/avatars/monsters/skeleton.png';
-                                    monsterData = monster.getComponent('MonsterData');
-                                    className = `monster has-hp-bar ${monsterData.classes}`;
-
-                                    if (renderState.activeRenderZone.has(tileKey) || monster.getComponent('MonsterData').isAggro) {
-                                        monsterData.isDetected = true;
-                                        className += ' detected';
-                                    } else {
-                                        monsterData.isDetected = false;
-                                        className += ' undiscovered';
-                                    }
-
-                                    const health = monster.getComponent('Health');
-                                    let hpBarWidth = 0;
-                                    if (health.hp !== health.maxHp) {
-                                        hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE / 2));
-                                        className += ' has-hp-bar';
-                                    }
-
-                                    if (monsterData.isElite) className += ' elite';
-                                    if (monsterData.isBoss) className += ' boss';
-                                    monsterData.affixes.forEach(affix => className += ` ${affix}`);
-
-                                    const faceLeft = monster.getComponent('Visuals').faceLeft;
-                                    if (faceLeft) { className += ' face-left'; }
-
-                                    const charAvatar = avatar ? avatar : monsterData.avatar;
-                                    char = `<img src="${charAvatar}" height="32px" width="32px" style="background-size:${hpBarWidth}px 2px; background-position:8px 0;" />`;
-                                    
-                                    tile.element.innerHTML = char;
-                                    tile.element.className = className;
-                                    tile.char = char;
-                                    tile.class = className;
-                                    avatar = '';
-                                } 
-                            }
-                        }
+                        monsterData.isDetected = false;
+                        className += ' undiscovered';
                     }
+
+                    const health = monster.getComponent('Health');
+                    let hpBarWidth = 0;
+                    if (health.hp !== health.maxHp) {
+                        hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE / 2));
+                        className += ' has-hp-bar';
+                    }
+
+                    if (monsterData.isElite) className += ' elite';
+                    if (monsterData.isBoss) className += ' boss';
+                    monsterData.affixes.forEach(affix => className += ` ${affix}`);
+
+                    const faceLeft = visuals.faceLeft;
+                    if (faceLeft) className += ' face-left';
+
+                    char = `<img src="${avatar}" height="32px" width="32px" style="background-size:${hpBarWidth}px 2px; background-position:8px 0;" />`;
                 }
 
+                // Collect moving tile update if content or class has changed
                 if (tile.char !== char || tile.class !== className) {
-
-                    if (avatar) {
-                        // Use innerHTML for entities that have an avatar to render the image
-                       // console.log(`RenderSystem: Rendering avatar for entity at (${x}, ${y})`, avatar);
-                        tile.element.innerHTML = char;
-                        // console.log(`RenderSystem: Avatar for entity at (${x}, ${y})`, tile);
-                      
-                        avatar = '';
-                    } else {
-                        // Use textContent for other tiles
-                        tile.element.textContent = char;
-                    }
-                    tile.element.className = className;
+                    updates.push({ element: tile.element, innerHTML: char, updateInnerHTML: true, className });
                     tile.char = char;
                     tile.class = className;
                 }
             }
+
+            // Apply all DOM updates in a single requestAnimationFrame
+            requestAnimationFrame(() => {
+                updates.forEach(({ element, innerHTML, updateInnerHTML, className }) => {
+                    if (updateInnerHTML) {
+                        element.innerHTML = innerHTML;
+                    }
+                    element.className = className;
+                });
+            });
         }
 
         gameState.needsRender = false;
         gameState.needsInitialRender = false;
     }
 
+
+
+    
     viewportEdgeScroll() {
         const mapElement = document.getElementById('map');
         const player = this.entityManager.getEntity('player');
@@ -580,7 +557,7 @@ export class RenderSystem extends System {
         const mapHeight = state.getComponent('LevelDimensions').HEIGHT * this.TILE_SIZE;
 
         const thresholdX = viewportWidth * this.VIEWPORT_EDGE_THRESHOLD_PERCENT;
-        const thresholdY = viewportHeight * this.VIEWPORT_EDGE_THRESHOLD_PERCENT * 1.5;
+        const thresholdY = viewportHeight * this.VIEWPORT_EDGE_THRESHOLD_PERCENT * 1.2;
 
         const playerPos = player.getComponent('Position');
         const playerX = playerPos.x * this.TILE_SIZE;
@@ -664,4 +641,5 @@ export class RenderSystem extends System {
         mapElement.scrollLeft = scrollX;
         mapElement.scrollTop = scrollY;
     }
+
 }
