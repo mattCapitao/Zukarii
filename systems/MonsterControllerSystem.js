@@ -42,7 +42,7 @@ export class MonsterControllerSystem extends System {
                     this.handleMonsterDeath(monster.id);
                     dead.state = 'handling';
                 }
-                if ((dead.expiresAt < now && dead.state === 'processed') || dead.expiresAt + 2000 < now) {
+                if ((dead.expiresAt < now && dead.state === 'processed') || dead.expiresAt + 200 < now) {
                     if (!monster.hasComponent('RemoveEntity')) {
                         monster.addComponent(new RemoveEntityComponent());
                     }

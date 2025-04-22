@@ -115,6 +115,8 @@
   {
     "x": 0,
     "y": 0,
+    "h": 48,
+    "w": 48,
     "name": "Wyrmling",
     "classes": "wyrmling",
     "family": "dragon",

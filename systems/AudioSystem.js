@@ -16,7 +16,8 @@ export class AudioSystem extends System {
     }
 
     update(deltaTime) {
-        if (this.sfxQueue.length > 0) {
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        if (!gameState?.transitionLock && this.sfxQueue.length > 0) {
             this.sfxQueue.forEach(({ sfx, volume }) => {
                 console.log(`AudioSystem: Processing AudioQueue - Playing sfx: ${sfx} at Volume: ${volume}`);
                 this.playSfx({ sfx, volume });
@@ -113,6 +114,7 @@ export class AudioSystem extends System {
         const soundFiles = {
             torchBurning: 'audio/torch-burning.mp3',
             backgroundMusic: 'audio/haunted.wav',
+            intro: 'audio/narration/intro.mp3',
             ding: 'audio/ding.mp3',
             loot0: 'audio/loot/loot_0.wav',
             portal0: 'audio/portal/portal_0.wav',

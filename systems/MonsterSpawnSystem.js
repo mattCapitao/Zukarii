@@ -225,7 +225,7 @@ export class MonsterSpawnSystem extends System {
         this.entityManager.addComponentToEntity(entity.id, new HealthComponent(maxHp, maxHp));
         this.entityManager.addComponentToEntity(entity.id, new AttackSpeedComponent(1000));
         this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(80));
-        this.entityManager.addComponentToEntity(entity.id, new HitboxComponent(28, 28));
+        
 
         this.entityManager.addComponentToEntity(entity.id, {
             type: 'MonsterData',
@@ -248,6 +248,11 @@ export class MonsterSpawnSystem extends System {
         this.entityManager.addComponentToEntity(entity.id, new VisualsComponent(vHeight, vWidth));
         const visuals = entity.getComponent('Visuals');
         visuals.avatar = template.avatar.length > 1 ? template.avatar : 'img/avatars/monsters/skeleton.png';
+
+        const hbHeight = template.hbHeight || vHeight || this.TILE_SIZE;
+        const hbWidth = template.hbWidth || vWidth || this.TILE_SIZE;
+        const hbPadding = 4;
+        this.entityManager.addComponentToEntity(entity.id, new HitboxComponent(hbWidth - hbPadding, hbHeight - hbPadding));
 
         // Add AffixComponent for each affix in template.affixes
         const affixDefinitions = (template.affixes || []).map(affixName => {

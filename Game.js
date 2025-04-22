@@ -73,7 +73,7 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
         this.entityManager.addComponentToEntity('player', new InputStateComponent());
         this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
-        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(124));
+        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(256));
         this.entityManager.addComponentToEntity('player', new AffixComponent()); // New component added
         this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32,32));
         this.entityManager.addComponentToEntity('player', new HitboxComponent(28,28)); 
@@ -109,6 +109,7 @@ export class Game {
         this.setupEventListeners();
 
         this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
+        this.sfxQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.SFX || [];
         this.splashScreen = document.getElementById('splash');
         this.splashScreen.style.display = 'flex';
         this.splashScreen.innerHTML = titleScreen;
@@ -205,7 +206,6 @@ export class Game {
                 'projectile',
                 'monsterController',
                 'collisions',
-             
                 'playerCollision',
                 'projectileCollisions',
                 'movementResolution',
@@ -213,8 +213,8 @@ export class Game {
                 'damageCalculation',
                 'health',
                 'ui',
-                'levelTransition',
                 'audio',
+                'levelTransition',
                 'spatialBuckets',
                 'mapRender',
                 'entityRemoval',
@@ -247,7 +247,8 @@ export class Game {
         }
         this.splashScreen.style.display = 'none';
         gameState.needsRender = true;
-        this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume:.05 });
+        this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume: .05 });
+        setTimeout(() => { this.sfxQueue.push({ sfx: 'intro', volume: .5 }); }, 2750);
         
         
         this.startGameLoop();

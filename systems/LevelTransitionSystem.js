@@ -107,6 +107,7 @@ export class LevelTransitionSystem extends System {
         this.eventBus.emit('AddLevel', { tier: newTier });
     }
 
+
     transitionViaPortal() {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
@@ -115,7 +116,7 @@ export class LevelTransitionSystem extends System {
 
         //currentLevel.getComponent('Map').map[y][x] = ' ';
         const currentTier = gameState.tier;
-        let minTier = currentTier - 1; 
+        let minTier = currentTier - 1;
         let maxTier = currentTier + 5;
         let destinationTier;
 
@@ -144,7 +145,9 @@ export class LevelTransitionSystem extends System {
         gameState.needsRender = true;
         this.eventBus.emit('AddLevel', { tier: destinationTier });
         const sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
-        sfxQueue.push({ sfx: 'portal1', volume: .5 });
+
+
+        setTimeout(() => { sfxQueue.push({ sfx: 'portal1', volume: .5 }); }, 1000);
     }
 
     transitionViaLoad(tier, data) {
