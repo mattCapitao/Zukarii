@@ -27,7 +27,7 @@ export class MonsterSpawnSystem extends System {
     update(deltaTime) { }
 
     // systems/MonsterSpawnSystem.js - Updated handleSpawnMonsters method // remove map from signature when updating LevelSsytem.
-    async handleSpawnMonsters({ tier, map, rooms, hasBossRoom, spawnPool }) {
+    async handleSpawnMonsters({ tier, rooms, hasBossRoom, spawnPool }) {
         const baseMonsterCount = 15;
         const densityFactor = 1 + tier * 0.1;
         const monsterCount = Math.floor(baseMonsterCount * densityFactor);
@@ -144,6 +144,12 @@ export class MonsterSpawnSystem extends System {
                         console.warn('MonsterSpawnSystem: No unique monsters available, falling back to random monster');
                     }
                 }
+
+                if (!playerX || !playerY) {
+                    console.error(`MonsterSpawnSystem.js: Player position {x:${playerX},  y:${playerY} could not be resolved for calling createMonsterEntity`);
+                    return null;
+                }
+
                 const monster = this.createMonsterEntity(template, tier, normalRoomIds, playerX, playerY);
                 if (monster) {
                     const entityList = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier).getComponent('EntityList');
@@ -155,7 +161,6 @@ export class MonsterSpawnSystem extends System {
         });
     }
 
-    // systems/MonsterSpawnSystem.js - Updated createMonsterEntity method
     createMonsterEntity(template, tier, roomIds, playerX, playerY) {
         if (!roomIds || roomIds.length === 0) {
             console.error(`MonsterSpawnSystem.js: No rooms provided for spawning monsters on tier ${tier}`);
@@ -173,12 +178,16 @@ export class MonsterSpawnSystem extends System {
             console.error(`MonsterSpawnSystem.js: RoomComponent not found for room ${roomId}`);
             return null;
         }
-        let x, y;
+        let tileX, tileY;
         let attempts = 0;
-        const maxAttempts = 50; // Prevent infinite loop
-        let isOccupied = false; // Declare outside the do block
+        const maxAttempts = 50;
+        let isOccupied = false;
 
-        const MIN_SPAWN_DISTANCE = this.MIN_SPAWN_DISTANCE; // Aggro range (4) + 2 buffer
+        const MIN_SPAWN_DISTANCE = this.MIN_SPAWN_DISTANCE; // 6 tiles
+
+        // Define player tile coordinates outside the loop
+        const playerTileX = Math.floor(playerX / this.TILE_SIZE);
+        const playerTileY = Math.floor(playerY / this.TILE_SIZE);
 
         let distance;
         do {
@@ -186,32 +195,37 @@ export class MonsterSpawnSystem extends System {
                 console.warn(`MonsterSpawnSystem.js: Failed to find valid spawn position for ${template.name} in room ${roomId} after ${maxAttempts} attempts`);
                 return null;
             }
-            x = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
-            y = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
+            tileX = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
+            tileY = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
             const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
                 const ePos = e.getComponent('Position');
-                return ePos.x === x && ePos.y === y;
+                const pixelX = tileX * this.TILE_SIZE;
+                const pixelY = tileY * this.TILE_SIZE;
+                return ePos.x === pixelX && ePos.y === pixelY;
             });
             isOccupied = entitiesAtTarget.some(e => e.hasComponent('MonsterData'));
 
-            const dx = playerX - x;
-            const dy = playerY - y;
+            const dx = playerTileX - tileX;
+            const dy = playerTileY - tileY;
             distance = Math.sqrt(dx * dx + dy * dy);
             attempts++;
         } while (
-            !this.isWalkable(x, y) ||
+            !this.isWalkable(tileX, tileY) ||
             isOccupied ||
-            (x === playerX && y === playerY) || // Keep exact position check
-            distance < MIN_SPAWN_DISTANCE// NEW: Enforce min distance
+            (tileX === playerTileX && tileY === playerTileY) ||
+            distance < MIN_SPAWN_DISTANCE
         );
 
         const maxHp = this.calculateMonsterMaxHp(template.baseHp, tier);
-        this.entityManager.addComponentToEntity(entity.id, new PositionComponent(x, y));
+        // Convert tile coordinates to pixel coordinates
+        const pixelX = tileX * this.TILE_SIZE;
+        const pixelY = tileY * this.TILE_SIZE;
+        this.entityManager.addComponentToEntity(entity.id, new PositionComponent(pixelX, pixelY));
         this.entityManager.addComponentToEntity(entity.id, new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity(entity.id, new HealthComponent(maxHp, maxHp));
         this.entityManager.addComponentToEntity(entity.id, new AttackSpeedComponent(1000));
-        this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(500));
-        this.entityManager.addComponentToEntity(entity.id, new HitboxComponent(1, 1));
+        this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(80));
+        this.entityManager.addComponentToEntity(entity.id, new HitboxComponent(28, 28));
 
         this.entityManager.addComponentToEntity(entity.id, {
             type: 'MonsterData',
@@ -230,7 +244,7 @@ export class MonsterSpawnSystem extends System {
             uniqueItemsDropped: template.uniqueItemsDropped || []
         });
 
-        this.entityManager.addComponentToEntity(entity.id, new VisualsComponent(32, 32));
+        this.entityManager.addComponentToEntity(entity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
         const visuals = entity.getComponent('Visuals');
         visuals.avatar = template.avatar.length > 1 ? template.avatar : 'img/avatars/monsters/skeleton.png';
 
@@ -239,7 +253,7 @@ export class MonsterSpawnSystem extends System {
             const affixData = this.AFFIX_MAP[affixName];
             if (affixData) {
                 return {
-                    type: affixData.type, // e.g., 'combat'
+                    type: affixData.type,
                     trigger: affixData.trigger,
                     effect: affixData.effect,
                     params: affixData.params
@@ -254,10 +268,8 @@ export class MonsterSpawnSystem extends System {
             console.log(`MonsterSpawnSystem: Added affixes to ${template.name}:`, affixDefinitions);
         }
 
-        console.log(`MonsterSpawnSystem: Entity ${entity.id} classes" ${template.classes} components:`, Array.from(entity.components.keys()));
-
-
-        console.log(`MonsterSpawnSystem.js: Spawned monster ${entity.id} at (${x}, ${y}) on tier ${tier}`, entity);
+        console.log(`MonsterSpawnSystem: Entity ${entity.id} classes: ${template.classes}, components:`, Array.from(entity.components.keys()));
+        console.log(`MonsterSpawnSystem.js: Spawned monster ${entity.id} at pixel (${pixelX}, ${pixelY}) for tile (${tileX}, ${tileY}) on tier ${tier}`, entity);
         return entity;
     }
 
@@ -272,10 +284,12 @@ export class MonsterSpawnSystem extends System {
     }
 
     // systems/MonsterSpawnSystem.js - New isWalkable method
-    isWalkable(x, y) {
+    isWalkable(tileX, tileY) {
+        const pixelX = tileX * this.TILE_SIZE;
+        const pixelY = tileY * this.TILE_SIZE;
         const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
             const ePos = e.getComponent('Position');
-            return ePos.x === x && ePos.y === y;
+            return ePos.x === pixelX && ePos.y === pixelY;
         });
         const isBlocked = entitiesAtTarget.some(e =>
             e.hasComponent('Wall') ||

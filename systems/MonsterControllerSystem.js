@@ -11,7 +11,6 @@ export class MonsterControllerSystem extends System {
     init() {
 
     }
-
     update(deltaTime) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (gameState?.gameOver) return;
@@ -23,16 +22,17 @@ export class MonsterControllerSystem extends System {
         const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
         if (!levelEntity) return;
 
-        const AGGRO_RANGE = 4;
+        const AGGRO_RANGE = 4 * 32; // 4 tiles in pixels (32 pixels per tile)
+        const MELEE_RANGE = 40; // Pixel distance to trigger melee attack
+        const TILE_SIZE = 32;
 
         const monsters = this.entityManager.getEntitiesWith(this.requiredComponents);
-        
-        const now = Date.now();
-       
-        monsters.forEach(monster => {
 
+        const now = Date.now();
+
+        monsters.forEach(monster => {
             const health = monster.getComponent('Health');
-            const hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE/2));
+            const hpBarWidth = Math.floor((health.hp / health.maxHp) * (TILE_SIZE / 2));
             const monsterData = monster.getComponent('MonsterData');
             monsterData.hpBarWidth = hpBarWidth;
 
@@ -42,8 +42,7 @@ export class MonsterControllerSystem extends System {
                     this.handleMonsterDeath(monster.id);
                     dead.state = 'handling';
                 }
-                if ((dead.expiresAt < now && dead.state === 'processed') || dead.expiresAt+2000 < now ) { 
-                   // this.entityManager.removeEntity(monster.id);
+                if ((dead.expiresAt < now && dead.state === 'processed') || dead.expiresAt + 2000 < now) {
                     if (!monster.hasComponent('RemoveEntity')) {
                         monster.addComponent(new RemoveEntityComponent());
                     }
@@ -59,58 +58,48 @@ export class MonsterControllerSystem extends System {
             const dy = playerPos.y - pos.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Accumulate time (deltaTime in seconds, convert to ms)
+            // Accumulate time for attacks (deltaTime in seconds, convert to ms)
             attackSpeed.elapsedSinceLastAttack += deltaTime * 1000;
-            movementSpeed.elapsedSinceLastMove += deltaTime * 1000;
 
-            if (distance <= AGGRO_RANGE + 2) {monsterData.isDetected = true;}
+            if (distance <= AGGRO_RANGE + 2 * TILE_SIZE) { monsterData.isDetected = true; }
 
-            if (distance <= AGGRO_RANGE) {monsterData.isAggro = true;}
+            if (distance <= AGGRO_RANGE) { monsterData.isAggro = true; }
 
             if (monsterData.isAggro) {
-                const isAdjacentCardinal = (dx === 0 && Math.abs(dy) === 1) || (dy === 0 && Math.abs(dx) === 1);
-                if (isAdjacentCardinal) {
+                if (distance <= MELEE_RANGE) {
                     if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
                         this.eventBus.emit('MonsterAttack', { entityId: monster.id });
                         attackSpeed.elapsedSinceLastAttack = 0;
+                        console.log(`MonsterControllerSystem: ${monsterData.name} attacked player at distance ${distance.toFixed(2)} pixels`);
                     }
-                    return;
+                    return; // Stop moving if in melee range
                 }
 
-                if (movementSpeed.elapsedSinceLastMove >= movementSpeed.movementSpeed) {
+                // Smooth movement toward the player using MovementIntent (allow diagonal movement)
+                const speed = movementSpeed.movementSpeed; // Pixels per second (e.g., 100)
+                const moveDistance = speed * deltaTime; // Distance to move this frame
 
-                    const directions = [
-                        { x: Math.sign(dx), y: 0, dist: Math.abs(dx) },
-                        { x: 0, y: Math.sign(dy), dist: Math.abs(dy) }
-                    ].sort((a, b) => b.dist - a.dist);
+                // Move directly toward the player (diagonal movement allowed)
+                const magnitude = Math.sqrt(dx * dx + dy * dy);
+                if (magnitude > 0) {
+                    const moveX = (dx / magnitude) * moveDistance;
+                    const moveY = (dy / magnitude) * moveDistance;
 
-                    for (const dir of directions) {
-                        const newX = pos.x + dir.x;
-                        const newY = pos.y + dir.y;
-                        const isOccupied = monsters.some(m =>
-                            m.id !== monster.id &&
-                            m.getComponent('Health').hp > 0 &&
-                            m.getComponent('Position').x === newX &&
-                            m.getComponent('Position').y === newY
-                        );
+                    const newX = pos.x + moveX;
+                    const newY = pos.y + moveY;
 
-                        if (dir.x < 0) { monster.getComponent('Visuals').faceLeft = true; }
-                        if (dir.x > 0) { monster.getComponent('Visuals').faceLeft = false; }
+                    const lastX = monster.getComponent('LastPosition').x;
 
-                        const isPlayerPosition = (newX === playerPos.x && newY === playerPos.y);
-                        if (!this.isWalkable(newX, newY) || isOccupied || isPlayerPosition) {
-                            continue;
-                        }
+                    // Set facing direction
+                    if ( dx <= 0) { monster.getComponent('Visuals').faceLeft = true; }
+                    if ( dx > 0) { monster.getComponent('Visuals').faceLeft = false; }
 
-                        this.entityManager.addComponentToEntity(monster.id, new MovementIntentComponent(newX, newY));
-                        
-                        movementSpeed.elapsedSinceLastMove = 0; // Reset move timer
-                        break;
-                    }
+                    // Set MovementIntent for collision detection and resolution
+                    this.entityManager.addComponentToEntity(monster.id, new MovementIntentComponent(newX, newY));
+                    console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to (${newX.toFixed(2)}, ${newY.toFixed(2)}), distance to player: ${distance.toFixed(2)} pixels`);
                 }
             }
         });
-        
     }
 
     handleMonsterDeath(entityId) {

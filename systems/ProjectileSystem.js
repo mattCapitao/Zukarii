@@ -1,10 +1,11 @@
 ﻿import { System } from '../core/Systems.js';
-import { MovementIntentComponent,RemoveEntityComponent} from '../core/Components.js';
+import { MovementIntentComponent, RemoveEntityComponent } from '../core/Components.js';
 
 export class ProjectileSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.requiredComponents = ['Projectile', 'Position', 'LastPosition', 'MovementSpeed'];
+        this.TILE_SIZE = 32; // For range calculation compatibility
     }
 
     update(deltaTime) {
@@ -13,8 +14,7 @@ export class ProjectileSystem extends System {
 
         const projectiles = this.entityManager.getEntitiesWith(this.requiredComponents);
         for (const projectile of projectiles) {
-
-            const projData = projectile.getComponent('Projectile')
+            const projData = projectile.getComponent('Projectile');
 
             const tier = gameState.tier;
             const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
@@ -23,16 +23,12 @@ export class ProjectileSystem extends System {
                 continue;
             }
 
-            const moveSpeedComp = projectile.getComponent('MovementSpeed');
-            moveSpeedComp.elapsedSinceLastMove += deltaTime * 1000;
-            if (moveSpeedComp.elapsedSinceLastMove < moveSpeedComp.movementSpeed) {
-                continue;
-            }
-
             const pos = projectile.getComponent('Position');
+            const moveSpeedComp = projectile.getComponent('MovementSpeed');
             const map = levelEntity.getComponent('Map').map;
 
             if (projData.rangeLeft >= 0) {
+                // Calculate movement direction
                 let dx = 0, dy = 0;
                 switch (projData.direction) {
                     case 'ArrowUp': dy = -1; break;
@@ -41,34 +37,41 @@ export class ProjectileSystem extends System {
                     case 'ArrowRight': dx = 1; break;
                 }
 
-                const newX = pos.x + dx;
-                const newY = pos.y + dy;
+                // Normalize direction vector (dx, dy)
+                const magnitude = Math.sqrt(dx * dx + dy * dy);
+                if (magnitude === 0) {
+                    console.warn(`ProjectileSystem: Invalid direction for projectile ${projectile.id}, skipping movement`);
+                    continue;
+                }
 
-                const isOutOfBounds = newX < 0 || newX >= map[0].length || newY < 0 || newY >= map.length;
+                // Calculate movement delta using pixel-per-second speed
+                const speed = moveSpeedComp.movementSpeed; // Pixels per second (e.g., 320)
+                const moveDistance = speed * deltaTime; // Distance to move this frame
 
-                
-                /* moved to MovementResolutionSystem to prevent lastpos update when movement is blocked
-                const lastPos = projectile.getComponent('LastPosition');
-                lastPos.x = pos.x;
-                lastPos.y = pos.y;
-                */
-                projData.rangeLeft--;
+                const moveX = (dx / magnitude) * moveDistance;
+                const moveY = (dy / magnitude) * moveDistance;
+
+                const newX = pos.x + moveX;
+                const newY = pos.y + moveY;
+
+                // Check bounds
+                const mapWidth = map[0].length * this.TILE_SIZE;
+                const mapHeight = map.length * this.TILE_SIZE;
+                const isOutOfBounds = newX < 0 || newX >= mapWidth || newY < 0 || newY >= mapHeight;
+
+                // Update range based on distance traveled (in pixels)
+                projData.rangeLeft -= moveDistance / this.TILE_SIZE; // Convert pixels to tiles for range
 
                 if (isOutOfBounds || projData.rangeLeft <= 0) {
                     if (!projectile.hasComponent('RemoveEntity')) {
                         projectile.addComponent(new RemoveEntityComponent());
                     }
-                    console.log(`ProjectileSystem: ${projectile.id} is out of bounds (${newX}, ${newY})`);
+                    console.log(`ProjectileSystem: ${projectile.id} is out of bounds (${newX}, ${newY}) or range depleted (rangeLeft: ${projData.rangeLeft})`);
                     continue;
                 }
 
                 this.entityManager.addComponentToEntity(projectile.id, new MovementIntentComponent(newX, newY));
-
-                //pos.x = newX;
-                //pos.y = newY;
-                
-                moveSpeedComp.elapsedSinceLastMove -= moveSpeedComp.movementSpeed;
-
+                console.log(`ProjectileSystem: ${projectile.id} intends to move to (${newX.toFixed(2)}, ${newY.toFixed(2)}), rangeLeft: ${projData.rangeLeft.toFixed(2)}`);
             } else {
                 console.log(`ProjectileSystem: ${projectile.id} has reached its range limit`);
                 if (!projectile.hasComponent('RemoveEntity')) {

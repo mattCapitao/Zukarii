@@ -4,6 +4,7 @@
 // Import components from their respective files
 import {
     MapComponent,
+    SpatialBucketsComponent,
     RoomComponent,
     EntityListComponent,
     ExplorationComponent,
@@ -60,6 +61,7 @@ import {
 export {
     // Map-related components
     MapComponent,
+    SpatialBucketsComponent,
     RoomComponent,
     EntityListComponent,
     ExplorationComponent,
