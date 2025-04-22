@@ -807,7 +807,7 @@ export class LevelSystem extends System {
                 const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
                 this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
                 this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
-                this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
+                this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 42));
                 this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
                 const visuals = stairDownEntity.getComponent('Visuals');
                 visuals.avatar = 'img/avatars/stairsdown.png';
@@ -828,7 +828,7 @@ export class LevelSystem extends System {
                         const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
                         this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
                         this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
-                        this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
+                        this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 42));
                         this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
                         const visuals = stairDownEntity.getComponent('Visuals');
                         visuals.avatar = 'img/avatars/stairsdown.png';
@@ -849,7 +849,7 @@ export class LevelSystem extends System {
                     const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
                     this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
                     this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
-                    this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
+                    this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 42));
                     this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
                     const visuals = stairDownEntity.getComponent('Visuals');
                     visuals.avatar = 'img/avatars/stairsdown.png';
@@ -871,7 +871,7 @@ export class LevelSystem extends System {
                     const stairUpEntity = this.entityManager.createEntity(`stair_${tier}_stair_up_${stairUpX}_${stairUpY}`);
                     this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(stairUpX * this.TILE_SIZE, stairUpY * this.TILE_SIZE));
                     this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
-                    this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
+                    this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(32, 42));
                     this.entityManager.addComponentToEntity(stairUpEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
                     const visuals = stairUpEntity.getComponent('Visuals');
                     visuals.avatar = 'img/avatars/stairsup.png';
@@ -892,7 +892,7 @@ export class LevelSystem extends System {
                 const stairUpEntity = this.entityManager.createEntity(`stair_${tier}_stair_up_${stairUpX}_${stairUpY}`);
                 this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(stairUpX * this.TILE_SIZE, stairUpY * this.TILE_SIZE));
                 this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
-                this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
+                this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(32, 42));
                 this.entityManager.addComponentToEntity(stairUpEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
                 const visuals = stairUpEntity.getComponent('Visuals');
                 visuals.avatar = 'img/avatars/stairsup.png';

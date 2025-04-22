@@ -79,6 +79,8 @@ export class FountainComponent {
         this.type = 'Fountain';
         this.used = used;
         this.discovered = discovered;
+        this.useCdExpiresAt = 0;
+        this.healCdExpiresAt = 0;
     }
 }
 

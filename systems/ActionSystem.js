@@ -24,20 +24,35 @@ export class ActionSystem extends System {
     
 
         if (!player || !fountainEntity || !tierEntity) return;
-        this.sfxQueue.push({ sfx: 'fountain0', volume: .5 }); 
+        
         const fountainData = fountainEntity.getComponent('Fountain') || { used: false };
-        if (fountainData.used) {
+
+        const fUseTime = Date.now(); 
+
+        if (!fountainData) { console.log('ActionSystem: - useFountain: No fountain data found.'); return; }
+
+        const canUseFountain = fUseTime - fountainData.useCdExpiresAt || 0; // Default to 0 if not set
+        if (canUseFountain < 1) { return; }
+        //console.log(`ActionSystem: -USE ALLOWED- useTime: ${fUseTime}, useFountain: Fountain data:`, fountainData);
+
+        this.sfxQueue.push({ sfx: 'fountain0', volume: .5 }); 
+        fountainData.useCdExpiresAt = fUseTime + 2500; // 2.5 seconds cooldown
+        
+        const fountainCanHeal = fUseTime - fountainData.healCdExpiresAt || 0; // Default to 0 if not set
+        if (fountainCanHeal < 1) {
             this.eventBus.emit('LogMessage', { message: `The fountain water is cool and refreshing, but it seems the healing magic that was here is now spent.` });
             return;
         }
-       
+
+        fountainData.healCdExpiresAt = fUseTime + 90000; // 90 seconds cooldown
+
         const playerStats = player.getComponent('Stats');
         const playerHealth = player.getComponent('Health');
         const pos = player.getComponent('Position');
         const critChance = playerStats.critChance || (playerStats.agility * 0.02);
         let healAmount = 0;
-        
-        if (Math.random() < critChance) {
+
+        if (Math.random() < critChance && fountainData.used === false) {
             const maxHpBoost = Math.round(1 + (2 * (tierEntity.getComponent('Tier').value / 10)));
 
             this.eventBus.emit('LogMessage', { message: `The fountain surges with power! Fully healed and Max HP increased!` });

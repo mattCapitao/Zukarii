@@ -243,8 +243,9 @@ export class MonsterSpawnSystem extends System {
             affixes: template.affixes || [],
             uniqueItemsDropped: template.uniqueItemsDropped || []
         });
-
-        this.entityManager.addComponentToEntity(entity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
+        const vHeight = template.h || this.TILE_SIZE;
+        const vWidth = template.w || this.TILE_SIZE;
+        this.entityManager.addComponentToEntity(entity.id, new VisualsComponent(vHeight, vWidth));
         const visuals = entity.getComponent('Visuals');
         visuals.avatar = template.avatar.length > 1 ? template.avatar : 'img/avatars/monsters/skeleton.png';
 

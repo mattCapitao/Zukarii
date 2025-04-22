@@ -61,9 +61,11 @@ export class MonsterControllerSystem extends System {
             // Accumulate time for attacks (deltaTime in seconds, convert to ms)
             attackSpeed.elapsedSinceLastAttack += deltaTime * 1000;
 
-            if (distance <= AGGRO_RANGE + 2 * TILE_SIZE) { monsterData.isDetected = true; }
+            if (distance <= AGGRO_RANGE + (2 * TILE_SIZE)) { monsterData.isDetected = true; }
 
             if (distance <= AGGRO_RANGE) { monsterData.isAggro = true; }
+
+            if (distance > AGGRO_RANGE * 2 ) { monsterData.isAggro = false; }
 
             if (monsterData.isAggro) {
                 if (distance <= MELEE_RANGE) {

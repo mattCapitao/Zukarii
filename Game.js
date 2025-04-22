@@ -34,6 +34,7 @@ import { MovementResolutionSystem } from './systems/MovementResolutionSystem.js'
 import { PlayerCollisionSystem } from './systems/PlayerCollisionSystem.js';
 import { ProjectileCollisionSystem } from './systems/ProjectileCollisionSystem.js';  
 import { EntityRemovalSystem } from './systems/EntityRemovalSystem.js'; 
+import { titleScreen } from './titlescreen.js'; 
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
@@ -108,6 +109,9 @@ export class Game {
         this.setupEventListeners();
 
         this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
+        this.splashScreen = document.getElementById('splash');
+        this.splashScreen.style.display = 'flex';
+        this.splashScreen.innerHTML = titleScreen;
 
     }
 
@@ -201,9 +205,10 @@ export class Game {
                 'projectile',
                 'monsterController',
                 'collisions',
-                'movementResolution',
+             
                 'playerCollision',
                 'projectileCollisions',
+                'movementResolution',
                 'combat',
                 'damageCalculation',
                 'health',
@@ -240,7 +245,7 @@ export class Game {
             const gameStateComp = gameState.getComponent('GameState');
             gameStateComp.gameStarted = true;
         }
-
+        this.splashScreen.style.display = 'none';
         gameState.needsRender = true;
         this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume:.05 });
         
@@ -249,3 +254,9 @@ export class Game {
         console.log('Game.js: Game started');
     }
 }
+
+
+
+
+
+

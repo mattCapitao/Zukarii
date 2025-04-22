@@ -15,17 +15,17 @@ export class MovementResolutionSystem extends System {
             let blockedBy = '';
 
             const intent = entity.getComponent('MovementIntent');
-            console.log(`MovementResolutionSystem: Processing entity ${entity.id} with intent:`, intent);
+            //console.log(`MovementResolutionSystem: Processing entity ${entity.id} with intent:`, intent);
 
             const pos = entity.getComponent('Position');
             let newX = intent.targetX;
             let newY = intent.targetY;
 
             if (entity.hasComponent('Collision')) {
-                console.log(`MovementResolutionSystem: Entity ${entity.id} has Collision component`, entity.getComponent('Collision'));
+                //console.log(`MovementResolutionSystem: Entity ${entity.id} has Collision component`, entity.getComponent('Collision'));
                 const collisionComponent = entity?.getComponent('Collision');
                 const collisions = collisionComponent?.collisions;
-                console.log(`MovementResolutionSystem: Entity ${entity.id} has collisions:`, collisions);
+                //console.log(`MovementResolutionSystem: Entity ${entity.id} has collisions:`, collisions);
 
                 if (collisions?.length > 0) {
                     // Calculate movement components
@@ -59,7 +59,7 @@ export class MovementResolutionSystem extends System {
                             // Moving closer in X direction, block it
                             canMoveX = false;
                             blockedByX = collision.targetId;
-                            console.log(`MovementResolutionSystem: Blocking X movement for ${entity.id} as it would increase overlap with ${collision.targetId}`);
+                            //console.log(`MovementResolutionSystem: Blocking X movement for ${entity.id} as it would increase overlap with ${collision.targetId}`);
                         }
 
                         // Check Y component
@@ -72,7 +72,7 @@ export class MovementResolutionSystem extends System {
                             // Moving closer in Y direction, block it
                             canMoveY = false;
                             blockedByY = collision.targetId;
-                            console.log(`MovementResolutionSystem: Blocking Y movement for ${entity.id} as it would increase overlap with ${collision.targetId}`);
+                            //console.log(`MovementResolutionSystem: Blocking Y movement for ${entity.id} as it would increase overlap with ${collision.targetId}`);
                         }
                     }
 
@@ -84,16 +84,16 @@ export class MovementResolutionSystem extends System {
                         entityCanMove = true;
                         newX = canMoveX ? intent.targetX : pos.x;
                         newY = canMoveY ? intent.targetY : pos.y;
-                        console.log(`MovementResolutionSystem: Allowing partial movement for ${entity.id} - X: ${canMoveX}, Y: ${canMoveY}`);
+                        //console.log(`MovementResolutionSystem: Allowing partial movement for ${entity.id} - X: ${canMoveX}, Y: ${canMoveY}`);
                     }
                 } else {
-                    console.log(`MovementResolutionSystem: No collisions found for Entity ${entity.id} having collision component`, collisionComponent);
+                    //console.log(`MovementResolutionSystem: No collisions found for Entity ${entity.id} having collision component`, collisionComponent);
                     entity.removeComponent('Collision');
                 }
             }
 
             if (entityCanMove) {
-                console.log(`MovementResolutionSystem: Moving ${entity.id} to (${newX}, ${newY})`);
+                //console.log(`MovementResolutionSystem: Moving ${entity.id} to (${newX}, ${newY})`);
 
                 const lastPos = entity.getComponent('LastPosition');
 
@@ -108,9 +108,9 @@ export class MovementResolutionSystem extends System {
                 }
 
                 this.eventBus.emit('PositionChanged', { entityId: entity.id, x: pos.x, y: pos.y });
-                console.log(`MovementResolutionSystem: Entity ${entity.id} moved to (${pos.x}, ${pos.y})`);
+                //console.log(`MovementResolutionSystem: Entity ${entity.id} moved to (${pos.x}, ${pos.y})`);
             } else {
-                console.log(`MovementResolutionSystem: Entity ${entity.id} blocked by ${blockedBy}`);
+                //console.log(`MovementResolutionSystem: Entity ${entity.id} blocked by ${blockedBy}`);
             }
 
             entity.removeComponent('MovementIntent');

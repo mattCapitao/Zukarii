@@ -38,6 +38,8 @@
   {
     "x": 0,
     "y": 0,
+    "h": 40,
+    "w": 32,
     "name": "Orc",
     "classes": "orc",
     "family": "orc",

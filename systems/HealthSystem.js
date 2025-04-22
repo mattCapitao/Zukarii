@@ -34,7 +34,7 @@ export class HealthSystem extends System {
         health.hp = Math.min(Math.max(health.hp + amount, 0), health.maxHp);
         health.updated = true;
         if (health.hp === 0 && oldHp > 0) {
-            const expiresAt = Date.now() + 1000;
+            const expiresAt = Date.now() + 69;
             entity.addComponent(new DeadComponent(expiresAt));
             if (entity.id === 'player') {
                 const source = this.entityManager.getEntity(attackerId)?.getComponent('MonsterData')?.name || 'unknown';
