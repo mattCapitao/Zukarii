@@ -16,6 +16,13 @@ export class MapComponent {
     }
 }
 
+export class SpatialBucketsComponent {
+    constructor() {
+        this.type = 'SpatialBuckets';
+        this.buckets = new Map(); // Map of bucketKey (`${x},${y}`) to array of entity IDs
+    }
+}
+
 export class EntityListComponent {
     constructor({ walls = [], floors = [], stairs = [], portals = [], monsters = [], treasures = [], fountains = [], rooms = [] } = {}) {
         this.type = 'EntityList';

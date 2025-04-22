@@ -1,6 +1,6 @@
-﻿// PlayerControllerSystem.js (Pre-deltaTime)
-
+﻿// PlayerControllerSystem.js
 import { AttackSpeedComponent, MovementSpeedComponent, NeedsRenderComponent, VisualsComponent, MovementIntentComponent } from '../core/Components.js';
+
 export class PlayerControllerSystem {
     constructor(entityManager, eventBus) {
         this.entityManager = entityManager;
@@ -12,23 +12,16 @@ export class PlayerControllerSystem {
             ArrowLeft: false,
             ArrowRight: false
         };
-        
     }
 
     async init() {
-        //console.log('PlayerControllerSystem initialized');
         const player = this.entityManager.getEntity('player');
         if (player) {
             this.position = player.getComponent('Position');
-            // *** NEW: Ensure position is set correctly ***
-            this.lastInputState = {};
-            //console.log('PlayerControllerSystem: Initial player position:', position.x, position.y);
             this.VisualsComponent = player.getComponent('Visuals');
         }
         this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
         this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
-
-        
     }
 
     update(deltaTime) {
@@ -39,183 +32,79 @@ export class PlayerControllerSystem {
         const position = player.getComponent('Position');
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         const attackSpeed = player.getComponent('AttackSpeed');
-        const movementSpeed = player.getComponent('MovementSpeed');
 
         attackSpeed.elapsedSinceLastAttack += deltaTime * 1000;
-        movementSpeed.elapsedSinceLastMove += deltaTime * 1000;
-        
 
         if (!gameState || gameState.gameOver || gameState.transitionLock) return;
 
         const currentKeys = JSON.stringify(inputState.keys);
         const lastKeys = JSON.stringify(this.lastInputState);
         if (currentKeys !== lastKeys) {
-            //console.log('PlayerControllerSystem: InputState changed - current:', inputState.keys, 'last:', this.lastInputState);
             this.lastInputState = { ...inputState.keys };
         }
 
-        let newX = position.x;
-        let newY = position.y;
-        let moved = false;
-
-        const directions = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-        for (const direction of directions) {
-
-            const isPressed = !!inputState.keys[direction];
-            const wasPressed = this.previousKeyStates[direction];
-
-            // Log key state and cooldown for debugging
-            //console.log(`Direction: ${direction}, isPressed: ${isPressed}, wasPressed: ${wasPressed}`);
-           // console.log(`Cooldown: ${attackSpeed.elapsedSinceLastAttack}, Required: ${attackSpeed.attackSpeed}`);
-
-            if (isPressed && gameState.isRangedMode) {
-                
-                if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
+        // Ranged mode
+        if (gameState.isRangedMode) {
+            const directions = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+            for (const direction of directions) {
+                const isPressed = !!inputState.keys[direction];
+                const wasPressed = this.previousKeyStates[direction];
+                if (isPressed && attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
                     console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: ${direction}`);
-                   
                     this.eventBus.emit('RangedAttack', { direction });
                     attackSpeed.elapsedSinceLastAttack = 0;
                     this.endTurn('rangedAttack');
                     this.previousKeyStates[direction] = true;
-
-                    if (direction === 'ArrowLeft') {
-                        this.VisualsComponent.faceLeft = true;
-                    }
-                    if (direction === 'ArrowRight') {
-                        this.VisualsComponent.faceLeft = false;
-                    }
+                    if (direction === 'ArrowLeft') this.VisualsComponent.faceLeft = true;
+                    if (direction === 'ArrowRight') this.VisualsComponent.faceLeft = false;
+                } else if (!isPressed && wasPressed) {
+                    this.previousKeyStates[direction] = false;
                 }
-                return;
-            } else if (!isPressed && wasPressed) {
-                // Key was released, update state
-                this.previousKeyStates[direction] = false;
             }
+            return;
         }
-        if (gameState.isRangedMode) { return; }
 
-        if (movementSpeed.elapsedSinceLastMove < movementSpeed.movementSpeed) return;
-
-        if (inputState.keys['ArrowUp']) {
-            newY--;
-            moved = true;
-        }
-        if (inputState.keys['ArrowDown']) {
-            newY++;
-            moved = true;
-        }
-        if (inputState.keys['ArrowLeft']) {
-            newX--;
-            moved = true;
+        // Calculate velocity
+        const speed = 96; // pixels/sec
+        let vx = 0, vy = 0;
+        if (inputState.keys['ArrowUp'] || inputState.keys['w']) vy -= speed;
+        if (inputState.keys['ArrowDown'] || inputState.keys['s']) vy += speed;
+        if (inputState.keys['ArrowLeft'] || inputState.keys['a']) {
+            vx -= speed;
             this.VisualsComponent.faceLeft = true;
         }
-        if (inputState.keys['ArrowRight']) {
-            newX++;
-            moved = true;
+        if (inputState.keys['ArrowRight'] || inputState.keys['d']) {
+            vx += speed;
             this.VisualsComponent.faceLeft = false;
         }
 
-        if (!moved) return;
-        //console.log('PlayerControllerSystem: Attempting move to:', newX, newY);
-
-        const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
-        if (!levelEntity) return;
-
-        const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
-            const pos = e.getComponent('Position');
-            return pos.x === newX && pos.y === newY;
-        });
-
-        const monster = entitiesAtTarget.find(e => e.hasComponent('Health') && e.hasComponent('MonsterData') && e.getComponent('Health').hp > 0);
-        if (monster) {
-            if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
-                this.eventBus.emit('MeleeAttack', { targetEntityId: monster.id });
-                attackSpeed.elapsedSinceLastAttack = 0;
-                this.endTurn('meleeAttack');
-            }
-            movementSpeed.elapsedSinceLastMove = 0;
-            return;
+        // Normalize diagonal movement
+        if (vx !== 0 && vy !== 0) {
+            const magnitude = Math.sqrt(vx * vx + vy * vy);
+            vx = (vx / magnitude) * speed;
+            vy = (vy / magnitude) * speed;
         }
 
-
-        const fountain = entitiesAtTarget.find(e => e.hasComponent('Fountain'));
-        if (fountain) {
-            
-            this.eventBus.emit('UseFountain', { fountainEntityId: fountain.id, tierEntityId: levelEntity.id });
-            movementSpeed.elapsedSinceLastMove = 0;
-          
-            this.endTurn('useFountain');
-            return;
-        }
-
-        const loot = entitiesAtTarget.find(e => e.hasComponent('LootData'));
-        if (loot) {
-            this.eventBus.emit('PickupTreasure', { x: newX, y: newY });
-            movementSpeed.elapsedSinceLastMove = 0;
-            this.endTurn('pickupLoot', newX, newY);
-            return;
-        }
-
-        const stair = entitiesAtTarget.find(e => e.hasComponent('Stair'));
-        if (stair) {
-            const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
-
-            if (levelTransition && levelTransition.pendingTransition === null) {
-                const stairComp = stair.getComponent('Stair');
-
-                if (stairComp.direction === 'down') {
-                    levelTransition.pendingTransition = 'down';
-                    this.endTurn('transitionDown');
-                    return;
-                } else if (stairComp.direction === 'up') {
-                    levelTransition.pendingTransition = 'up';
-                    this.endTurn('transitionUp');
-                    return;
-                }
-            }
-        }
-
-        const portal = entitiesAtTarget.find(e => e.hasComponent('Portal'));
-        if (portal) {
-            this.sfxQueue.push({ sfx: 'portal0', volume: .5 });
-
-            const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
-            if (levelTransition && levelTransition.pendingTransition === null) {
-                levelTransition.pendingTransition = 'portal';
-            }
-            //this.eventBus.emit('TransitionViaPortal', { x: newX, y: newY });
-            this.endTurn('transitionPortal', newX, newY);
-            return;
-        }
-
-        const wall = entitiesAtTarget.find(e => e.hasComponent('Wall'));
-        if (wall) return;
-
-        const floor = entitiesAtTarget.find(e => e.hasComponent('Floor'));
-        if (floor) {
-           //position.x = newX;
-            //position.y = newY;
+        // Set movement intent
+        if (vx !== 0 || vy !== 0) {
+            const newX = position.x + vx * deltaTime;
+            const newY = position.y + vy * deltaTime;
             this.entityManager.addComponentToEntity('player', new MovementIntentComponent(newX, newY));
-            movementSpeed.elapsedSinceLastMove = 0;
-            
-            this.endTurn('movement', newX, newY);
+            this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(newX, newY));
+            gameState.needsRender = true;
         }
     }
-     
-    endTurn(source,x = this.position.x ,y = this.position.y) {
+
+    endTurn(source) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (!gameState || gameState.gameOver) return;
 
         this.eventBus.emit('TurnEnded');
         gameState.transitionLock = false;
         gameState.needsRender = true;
-       // this.eventBus.emit('RenderNeeded');
-        this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(x, y));
     }
 
-
     toggleRangedMode({ event }) {
-        //console.log('PlayerControllerSystem: toggleRangedMode - event:', event.type, 'key:', event.key, 'repeat:', event.repeat);
-
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const playerInventory = this.entityManager.getEntity('player').getComponent('Inventory');
         const offWeapon = playerInventory.equipped.offhand;
@@ -223,14 +112,10 @@ export class PlayerControllerSystem {
 
         if (event.type === 'keyup' && event.key === ' ') {
             gameState.isRangedMode = false;
-            //console.log('Ranged mode off');
-
         } else if (event.type === 'keydown' && event.key === ' ' && !event.repeat) {
             if ((offWeapon?.attackType === 'ranged' && offWeapon?.baseRange > 0) ||
                 (mainWeapon?.attackType === 'ranged' && mainWeapon?.baseRange > 0)) {
                 gameState.isRangedMode = true;
-                //console.log('Ranged mode on', 'gameState:', gameState);
-
             } else {
                 this.eventBus.emit('LogMessage', { message: 'You need a valid ranged weapon equipped to use ranged mode!' });
             }

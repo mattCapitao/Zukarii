@@ -6,22 +6,23 @@
     <title>Zukarnii - The Descent!</title>
     <link rel="stylesheet" href="4.css">
     <link rel="stylesheet" href="dungeon.css">
-    <link rel="stylesheet" href="32.css">
-    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="shortcut icon" href="favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-    <link rel="manifest" href="site.webmanifest" />
-</head>
-<body>w
-    <div id="splash"></div>
-    
-    <div id="game">
-        <pre id="map"></pre>
+    <!--<link rel="stylesheet" href="32.css">-->
+        <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+        <link rel="shortcut icon" href="favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+        <link rel="manifest" href="site.webmanifest" />
+    </head>
+    <body>
+        <div id="splash" style="display:none !important;"></div>
+
+        <div id="game">
+            <canvas id="viewport-canvas" style="width:100%;height:100%;position:absolute;z-index:1;" ></canvas>
+            <!--<pre id="map"></pre>-->
     </div>
     <div id="ui-layer">
 
-        
+
 
         <div id="player-info">
             <div class="player-info-child">Player: <span id="playerName"></span></div>
@@ -39,9 +40,9 @@
         <div id="tabs" class="hidden">
             <div id="tab-wrapper">
                 <div id="tab-menu"></div>
-                
+
                 <div id="menu-content" class="ui-tab">
-                    
+
                     <div id="game-menu">
                         <h2>Game Menu</h2>
                         <div id="menu-buttons">
@@ -54,7 +55,7 @@
                             <button id="about-button"> About </button>
                         </div>
                     </div>
-                    
+
                     <div id="menu-panel">
                         <h2>Menu Option Details</h2>
                         <div id="menu-data-wrapper">
@@ -88,7 +89,7 @@
                             <div id="new-game-data" style="display:none;"><h3>New Game: - Create Character</h3></div>
                             <div id="about-data" style="display:none;">
                                 <h3>About:</h3>
-                                <h4>Developers:</h4>                 
+                                <h4>Developers:</h4>
                                 <ul>
                                     <li>Creator / Game Director / Lead Engineer: Matt Capitao</li>
                                 </ul>
@@ -193,5 +194,5 @@
     </div>
 
     <script type="module" src="init.js"></script>
-</body>
+    </body>
 </html>

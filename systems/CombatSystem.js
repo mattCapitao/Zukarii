@@ -1,6 +1,6 @@
 ﻿// systems/CombatSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent, LastPositionComponent, ProjectileComponent, MovementSpeedComponent, InCombatComponent, NeedsRenderComponent, HitboxComponent } from '../core/Components.js';
+import { PositionComponent, LastPositionComponent, ProjectileComponent, MovementSpeedComponent, InCombatComponent, NeedsRenderComponent, HitboxComponent, VisualsComponent } from '../core/Components.js';
 
 export class CombatSystem extends System {
     constructor(entityManager, eventBus) {
@@ -179,18 +179,22 @@ export class CombatSystem extends System {
         const range = stats.range || weapon?.baseRange || 3;
 
         let isPiercing = false;
-        if (weapon.piercing) { //placeholder for piercing logic
+        if (weapon?.piercing) { // Placeholder for piercing logic
             isPiercing = true;
         }
         const sfx = 'firecast0';
-        this.sfxQueue.push({ sfx, volume: .1 }); 
+        this.sfxQueue.push({ sfx, volume: .1 });
         const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
         this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
         this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, 'player', weapon, isPiercing));
-        this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(100)); // 50ms = current 20 tiles/s
-        this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(1, 1));
-        //this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
-        
+        this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(280)); // 320 pixels/second (was 32 pixels every 100 ms)
+        this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(20, 20));
+        this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(16, 16));
+        const visuals = this.entityManager.getEntity(projectile.id).getComponent('Visuals');
+        visuals.avatar = 'img/avatars/projectile.png'; 
+        visuals.offsetX = 16; visuals.offsetY = 0;
+
+        this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
     }
 }

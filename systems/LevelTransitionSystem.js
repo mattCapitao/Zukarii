@@ -10,9 +10,6 @@ export class LevelTransitionSystem extends System {
 
     init() {
         this.levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
-       //this.eventBus.on('TransitionDown', () => { this.pendingTransition = 'down'; this.transitionDown(); });
-        //this.eventBus.on('TransitionUp', () => { this.pendingTransition = 'up'; this.transitionUp(); });
-        //this.eventBus.on('TransitionViaPortal', (data) => { this.pendingTransition = 'portal'; this.transitionViaPortal(data); });
         this.eventBus.on('LevelAdded', (data) => this.handleLevelAdded(data));
         this.eventBus.on('TransitionLoad', ({ tier, data }) => this.transitionViaLoad(tier, data));
     }
@@ -22,6 +19,7 @@ export class LevelTransitionSystem extends System {
 
         if (this.levelTransition.pendingTransition) {
             this.pendingTransition = this.levelTransition.pendingTransition;
+            console.log('LevelTransitionSystem: Processing pending transition:', this.pendingTransition);
             this.levelTransition.pendingTransition = null;
 
             switch (this.pendingTransition) {
@@ -206,18 +204,24 @@ export class LevelTransitionSystem extends System {
 
         const isNewTier = tier > gameState.highestTier;
 
+        const TILE_SIZE = 32; // Match LevelSystem's TILE_SIZE
+
         if (this.pendingTransition === 'down') {
             const upStair = mapComp.stairsUp;
+            console.log(`LevelTransitionSystem: Transition down to tier ${tier}, positioning near stairsUp at (${upStair.x}, ${upStair.y})`);
             pos = this.findAdjacentTile(mapComp.map, upStair.x, upStair.y);
         } else if (this.pendingTransition === 'up') {
             const downStair = mapComp.stairsDown;
+            console.log(`LevelTransitionSystem: Transition up to tier ${tier}, positioning near stairsDown at (${downStair.x}, ${downStair.y})`);
             pos = this.findAdjacentTile(mapComp.map, downStair.x, downStair.y);
         } else if (this.pendingTransition === 'portal' || this.pendingTransition === 'load') {
             const upStair = mapComp.stairsUp;
+            console.log(`LevelTransitionSystem: Transition via portal/load to tier ${tier}, positioning near stairsUp at (${upStair.x}, ${upStair.y})`);
             pos = this.findAdjacentTile(mapComp.map, upStair.x, upStair.y);
         } else {
             // Fallback case (shouldn't typically happen, but preserved for safety)
             const stairsDown = entityList.stairsDown || { x: 5, y: 5 };
+            console.log(`LevelTransitionSystem: Fallback positioning near stairsDown at (${stairsDown.x}, ${stairsDown.y})`);
             pos = this.findAdjacentTile(mapComp.map, stairsDown.x, stairsDown.y);
         }
 
@@ -225,11 +229,23 @@ export class LevelTransitionSystem extends System {
             this.eventBus.emit('ClearOldPlayerPosition', { x: playerPos.x, y: playerPos.y });
         }
 
-        playerPos.x = pos.x;
-        playerPos.y = pos.y;
+        // Convert tile coordinates to pixel coordinates
+        const pixelX = pos.x * TILE_SIZE;
+        const pixelY = pos.y * TILE_SIZE;
+        playerPos.x = pixelX;
+        playerPos.y = pixelY;
 
-        console.log(`LevelTransitionSystem: Player position updated to: (${playerPos.x}, ${playerPos.y})`);
-        console.log("LevelTransitionSystem: Tile at player position:", mapComp.map[playerPos.y][playerPos.x]);
+        console.log(`LevelTransitionSystem: Player position updated to pixel (${playerPos.x}, ${playerPos.y}) for tile (${pos.x}, ${pos.y})`);
+        console.log("LevelTransitionSystem: Tile at player position:", mapComp.map[pos.y][pos.x]);
+
+        // Verify no wall entity exists at the player's position
+        const wallEntities = this.entityManager.getEntitiesWith(['Position', 'Wall']).filter(e => {
+            const pos = e.getComponent('Position');
+            return pos.x === playerPos.x && pos.y === playerPos.y && e.id.startsWith(`wall_${tier}_`);
+        });
+        if (wallEntities.length > 0) {
+            console.error(`LevelTransitionSystem: Player landed in a wall at (${playerPos.x}, ${playerPos.y})! Walls present:`, wallEntities.map(e => e.id));
+        }
 
         if (isNewTier) {
             explorationComp.discoveredWalls.clear();
@@ -264,20 +280,15 @@ export class LevelTransitionSystem extends System {
         renderControl.locked = false;
         console.log('LevelTransitionSystem: Render unlocked');
 
-        this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
-        console.log('LevelTransitionSystem emitting PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+        this.eventBus.emit('PositionChanged', { entityId: 'player', x: playerPos.x, y: playerPos.y });
+        console.log('LevelTransitionSystem emitting PositionChanged', { entityId: 'player', x: playerPos.x, y: playerPos.y });
 
         this.eventBus.emit('DiscoveredStateUpdated', { tier, entityId });
 
-       // this.eventBus.emit('RenderNeeded');
-
-        //if (this.pendingTransition === 'load' || this.pendingTransition === 'portal') {
-            gameState.transitionLock = false;
-            //console.log("LevelTransitionSystem: transitionLock reset to false after load");
-       // }
+        gameState.transitionLock = false;
 
         console.log('Pending transition after switch:', this.pendingTransition, 'Tier:', tier);
-        console.log('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+        console.log('PositionChanged', { entityId: 'player', x: playerPos.x, y: playerPos.y });
         this.pendingTransition = null;
 
         // Trigger UI update after loading

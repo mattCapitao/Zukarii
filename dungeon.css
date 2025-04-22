@@ -57,17 +57,19 @@ display: flex;
 flex-direction: row;
 background-color: #000;
 margin: 0;
-padding: 128px 288px 128px 288px;
-width: calc(100vw - 4rem); /* Account for border (1px each side) */
-height: calc(100vh - 4rem); /* Account for border (1px each side) */
+position:relative;
+width: calc(100vw - .15rem) ;
+height: calc(100vh - .15rem);
+z-index:1;
+
 }
 
 #ui-layer {
 position: absolute;
 top: 0;
 left: 0;
-width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
-height: calc(100vh - 0.125rem); /* Account for border (1px each side) */
+width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
+height: calc(100vh - 0.15rem); /* Account for border (1px each side) */
 background: transparent;
 pointer-events: none; /* Non-clickable, children can override */
 z-index: 100; /* Above game but below splash */
@@ -80,7 +82,7 @@ display: flex;
 justify-content: space-evenly;
 top: 0;
 left: 0;
-width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
+width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
 margin: 0.0625rem;
     
 
@@ -347,59 +349,6 @@ font-size: 0.75rem; /* ~12px */
 /*////////////////////////////////////////////////////   SPLASH DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 /*////////////////////////////////////////////////////   MAP DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-#map {
-    font-family: monospace;
-    font-size: 2rem; /* ~16px */
-    line-height: 2rem; /* ~16px */
-    white-space: pre;
-    color: #0f0;
-    border: 0;
-    padding: 0;
-    margin: 0;
-    background-image: url("img/map/floor.png");
-     transform: scale(2);
-    /*////////////////////////////////////////////// BEGIN WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-    /* DO NOT SET HEIGHT, WIDTH, OR MARGIN HERE - THESE CREATE DEAD ZONES IN MAP SCROLLING BY LIMITING SCROLLABLE AREA 
-OR OFFSETTING #MAP POSITION. 
-USE OVERFLOW: AUTO AND RELY ON RENDER.JS FOR DYNAMIC SCROLLING. */
-    /* margin: 3rem;*/
-    /*width: calc(100vw - 0.25rem);  Account for game and map borders */
-    /* height: calc(100vh - 0.25rem); /* Account for game and map borders */
-    /*////////////////////////////////////////////////END WARNING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-    overflow: auto; /* Ensure no scrollbars */
-    box-sizing: border-box;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    position: relative;
-    will-change: transform; /* Hint GPU optimization */
-
-}
-
-#map2 {
-    font-family: monospace;
-    font-size: 2rem; /* ~16px */
-    line-height: 2rem; /* ~16px */
-    white-space: pre;
-    color: #0f0;
-    border: 0;
-    padding: 0;
-    margin: 0;
-    background-image: url("img/map/floor.png");
-    overflow: hidden; /* Ensure no scrollbars */
-    box-sizing: border-box;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    position: relative;
-    will-change: transform; /* Hint GPU optimization */
-    transform-origin: 0 0; /* Ensure scaling from top-left */
-    transform: scale(2); /* Reapply scaling here */
-}
-
-#map::-webkit-scrollbar {
-display: none;
-}
 
  
 

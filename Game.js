@@ -2,7 +2,9 @@
 import { State } from './State.js';
 import { ActionSystem } from './systems/ActionSystem.js';
 import { CombatSystem } from './systems/CombatSystem.js';
-import { RenderSystem } from './systems/RenderSystem.js';
+//import { RenderSystem } from './systems/RenderSystem.js';
+import { SpatialBucketsSystem } from './systems/SpatialBucketsSystem.js'; 
+import { MapRenderSystem } from './systems/MapRenderSystem.js';
 import { PlayerSystem } from './systems/PlayerSystem.js';
 import { MonsterControllerSystem } from './systems/MonsterControllerSystem.js';
 import { MonsterSpawnSystem } from './systems/MonsterSpawnSystem.js';
@@ -29,6 +31,7 @@ import { HealthSystem } from './systems/HealthSystem.js';
 import { ProjectileSystem } from './systems/ProjectileSystem.js'; 
 import { CollisionSystem } from './systems/CollisionSystem.js';
 import { MovementResolutionSystem } from './systems/MovementResolutionSystem.js'; 
+import { PlayerCollisionSystem } from './systems/PlayerCollisionSystem.js';
 import { ProjectileCollisionSystem } from './systems/ProjectileCollisionSystem.js';  
 import { EntityRemovalSystem } from './systems/EntityRemovalSystem.js'; 
 import {
@@ -53,9 +56,11 @@ export class Game {
             this.entityManager.removeEntity('player');
         }
         player = this.entityManager.createEntity('player', true);
-        this.entityManager.addComponentToEntity('player', new PositionComponent(1, 1));
+        this.entityManager.addComponentToEntity('player', new PositionComponent(32, 32));
         this.entityManager.addComponentToEntity('player', new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new VisualsComponent(32, 32));
+        const visuals = this.entityManager.getEntity('player').getComponent('Visuals');
+        visuals.avatar = 'img/avatars/player.png'; 
         this.entityManager.addComponentToEntity('player', new HealthComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new ManaComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new StatsComponent());
@@ -67,10 +72,10 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
         this.entityManager.addComponentToEntity('player', new InputStateComponent());
         this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
-        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(250));
+        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(124));
         this.entityManager.addComponentToEntity('player', new AffixComponent()); // New component added
-        this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(1, 1));
-        this.entityManager.addComponentToEntity('player', new HitboxComponent(1,1)); 
+        this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32,32));
+        this.entityManager.addComponentToEntity('player', new HitboxComponent(28,28)); 
 
         let overlayState = this.entityManager.getEntity('overlayState');
         if (!overlayState) {
@@ -112,7 +117,7 @@ export class Game {
         this.systems.damageCalculation = new DamageCalculationSystem(this.entityManager, this.state.eventBus);
         this.systems.combat = new CombatSystem(this.entityManager, this.state.eventBus);
         this.systems.projectile = new ProjectileSystem(this.entityManager, this.state.eventBus);
-        this.systems.render = new RenderSystem(this.entityManager, this.state.eventBus);
+        this.systems.mapRender = new MapRenderSystem(this.entityManager, this.state.eventBus, this.state);
         this.systems.lootSpawn = new LootSpawnSystem(this.entityManager, this.state.eventBus);
         this.systems.lootCollection = new LootCollectionSystem(this.entityManager, this.state.eventBus);
         this.systems.itemROG = new ItemROGSystem(this.entityManager, this.state.eventBus, this.utilities);
@@ -137,7 +142,9 @@ export class Game {
         this.systems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
         this.systems.movementResolution = new MovementResolutionSystem(this.entityManager,this.state.eventBus );
         this.systems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
+        this.systems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus);
         this.systems.entityRemoval = new EntityRemovalSystem(this.entityManager);
+        this.systems.spatialBuckets = new SpatialBucketsSystem(this.entityManager, this.state.eventBus, this.state);
 
         await Promise.all(Object.values(this.systems).map(system => system.init()));
         console.log('Game.js: Systems initialized');
@@ -195,6 +202,7 @@ export class Game {
                 'monsterController',
                 'collisions',
                 'movementResolution',
+                'playerCollision',
                 'projectileCollisions',
                 'combat',
                 'damageCalculation',
@@ -202,7 +210,8 @@ export class Game {
                 'ui',
                 'levelTransition',
                 'audio',
-                'render',
+                'spatialBuckets',
+                'mapRender',
                 'entityRemoval',
                 
             ], deltaTime);

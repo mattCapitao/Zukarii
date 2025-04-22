@@ -71,7 +71,10 @@ export class UISystem extends System {
         this.eventBus.off('SaveCompleted');
         this.eventBus.off('PlayerStateUpdated');
 
-        this.eventBus.on('ToggleOverlay', (data) => this.toggleOverlay(data));
+        this.eventBus.on('ToggleOverlay', (data) => {
+            console.log('UISystem: ToggleOverlay event received:', data);
+            this.toggleOverlay(data)
+    });
         this.eventBus.on('LogMessage', (data) => {
             console.log('UISystem: LogMessage event received:', data);
             this.addLogMessage(data);
@@ -108,9 +111,11 @@ export class UISystem extends System {
         this.eventBus.emit('GearChanged', { entityId: 'player' });
 
         this.setupEventListeners();
+        console.log('UISystem: Event listeners set up');
     }
 
     update() {
+
         const player = this.entityManager.getEntity('player');
         if (!player) {
             console.error('UISystem: Player entity not found');
@@ -400,6 +405,7 @@ export class UISystem extends System {
     }
 
     toggleOverlay({ tab = null }) {
+        console.log('UISystem: ToggleOverlay called with tab:', tab);
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         const currentTab = overlayState.activeTab;
 
@@ -415,6 +421,7 @@ export class UISystem extends System {
         this.tabs.className = overlayState.isOpen ? '' : 'hidden';
         if (overlayState.isOpen) {
             this.renderOverlay(overlayState.activeTab);
+            console.log('UISystem: renderOverlay called  with tab:', overlayState.activeTab);
         }
     }
 

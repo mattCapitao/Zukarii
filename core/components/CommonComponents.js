@@ -85,7 +85,7 @@ export class InCombatComponent {
 export class MovementSpeedComponent {
     constructor(movementSpeed = 0) {
         this.type = 'MovementSpeed';
-        this.movementSpeed = movementSpeed; // Cooldown in milliseconds
+        this.movementSpeed = movementSpeed; // px per second
         this.elapsedSinceLastMove = 0; // Time since last move in ms
     }
 }
