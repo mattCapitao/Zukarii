@@ -55,7 +55,7 @@ hr {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(to bottom right, #d4af37 15%, #3c2f2f 100%);
+    background: linear-gradient(to bottom right, #d4af3730 15%, #3c2f2f30 100%);
     color: #0f0;
     font-family: 'Verdana', Roboto, sans-serif;
     z-index: 1000;
@@ -80,12 +80,14 @@ hr {
 
 .splash-title {
     position: absolute;
-    top: 15%;
+    top: 11%;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 4rem;
-    color: #333;
-    text-shadow: 0 0 10px #00ff00b4;
+    font-family: 'Zukarii', 'Verdana', Roboto, sans-serif;
+    font-size: 4.5rem;
+    font-weight: 999;
+    color: #121c12;
+    text-shadow: 0 0 4px #00ff0099;
     z-index: 10;
 }
 
@@ -135,13 +137,15 @@ hr {
     bottom: 15%;
     left: 50%;
     transform: translateX(-50%);
-    color: #333;
-    text-shadow: 0 0 10px #00ff00b4;
-    font-size: 1rem;
+    color: #121c12;
+    text-shadow: 0 0 5px #00ff00aa;
+    font-size: 1.75rem;
+    font-weight:bold;
+    font-family: 'Zukarii', 'Verdana', Roboto, sans-serif;
     text-align: center;
-    opacity: 0.8;
+    opacity: 0.95;
     max-width: 600px;
-    animation: fadeIn 5s ease-in;
+    animation: fadeIn 10s ease-in;
 }
 
 .splash-credits {
@@ -210,7 +214,7 @@ margin: 0.0625rem;
     
 
 height: 3rem; /* ~48px */
-background-color: #000;
+background-color: #000000cc;
 pointer-events: none; /* Non-clickable, children can override */
 z-index: 500; /* Above game but below splash */
 overflow: hidden; /* Prevent child overflow */
@@ -233,7 +237,7 @@ left: 0;
 width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
 margin: 0.0625rem;
 height: 3rem; /* ~48px */
-background-color: #000;
+background-color: #000000cc;
 pointer-events: none; /* Non-clickable, children can override */
 z-index: 500; /* Above game but below splash */
 overflow: hidden; /* Prevent child overflow */

@@ -248,6 +248,7 @@ export class Game {
             if (!gameStateComp.gameStarted)  gameStateComp.gameStarted = true;
         }
         this.splashScreen.style.display = 'none';
+        document.getElementById('hud-layer').style.visibility = 'visible';
         gameState.needsRender = true;
         this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume: .05 });
         

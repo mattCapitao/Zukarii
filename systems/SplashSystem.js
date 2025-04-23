@@ -41,8 +41,8 @@ export class SplashSystem extends System {
         }
 
         // Load images with error handling
-        this.zuImg.src = 'img/avatars/player.png';
-        this.karnImg.src = 'img/avatars/player.png';
+        this.zuImg.src = 'img/splash/zu-mage.png';
+        this.karnImg.src = 'img/splash/zu-mage.png';
         this.zukarathImg.src = 'img/splash/zukarath.png';
         this.caerVorythImg.src = 'img/splash/caer-voryth.png';
         this.vortexImg.src = 'img/splash/vortex.png';
@@ -137,7 +137,7 @@ export class SplashSystem extends System {
             const angle = (Date.now() * 0.001) % (2 * Math.PI); // Slightly faster rotation
             this.ctx.rotate(angle);
             // Draw the image centered on the pivot point
-            this.ctx.globalAlpha = 0.3;
+            this.ctx.globalAlpha = 0.35;
             this.ctx.drawImage(this.vortexImg, -180, -180, 360, 360);
             this.ctx.restore();
             this.ctx.globalAlpha = 1;
@@ -149,14 +149,14 @@ export class SplashSystem extends System {
 
         // Draw Zukarath image in top-left corner
         if (this.zukarathImg.complete) {
-            this.ctx.globalAlpha = 0.9;
+            this.ctx.globalAlpha = 1;
             this.ctx.drawImage(this.zukarathImg, 0, 0, 1024, 680);
             this.ctx.globalAlpha = 1;
         }
 
         // Draw Caer-Voryth image in lower-right corner
         if (this.caerVorythImg.complete) {
-            this.ctx.globalAlpha = 0.7;
+            this.ctx.globalAlpha = 0.9;
             this.ctx.drawImage(this.caerVorythImg, this.width - 1024, this.height - 680, 1024, 680);
             this.ctx.globalAlpha = 1;
         }
@@ -193,16 +193,16 @@ export class SplashSystem extends System {
 
         // Draw Zu/Karn silhouettes with transparency
         if (this.zuImg.complete) {
-            this.ctx.globalAlpha = 0.09;
-            this.ctx.drawImage(this.zuImg, this.width * 0.5 - 272, this.height * 0.5, 144, 144);
+            this.ctx.globalAlpha = 0.35;
+            this.ctx.drawImage(this.zuImg, this.width * 0.5 - 388, this.height * 0.5 -100, 288, 288);
             this.ctx.globalAlpha = 1;
         }
         if (this.karnImg.complete) {
-            this.ctx.globalAlpha = 0.09;
+            this.ctx.globalAlpha = 0.35;
             this.ctx.save();
-            this.ctx.translate(this.width * 0.5 + 200, this.height * 0.5);
+            this.ctx.translate(this.width * 0.5 + 248, this.height * 0.5);
             this.ctx.scale(-1, 1);
-            this.ctx.drawImage(this.karnImg, -72, 0, 144, 144);
+            this.ctx.drawImage(this.karnImg, -144, -100, 288, 288);
             this.ctx.restore();
             this.ctx.globalAlpha = 1;
         }
