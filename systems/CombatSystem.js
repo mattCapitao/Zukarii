@@ -13,7 +13,10 @@ export class CombatSystem extends System {
 
     init() {
         this.eventBus.on('MeleeAttack', (data) => this.handleMeleeAttack(data));
-        this.eventBus.on('RangedAttack', (data) => this.handleRangedAttack(data));
+        this.eventBus.on('RangedAttack', (data) => {
+            console.log('CombatSystem: RangedAttack event received with data:', data);
+            this.handleRangedAttack( data );
+        });
         this.eventBus.on('MonsterAttack', (data) => this.handleMonsterMeleeAttack(data));
     }
 
@@ -160,7 +163,9 @@ export class CombatSystem extends System {
         });
     }
 
-    handleRangedAttack({ direction }) {
+    handleRangedAttack(direction ) {
+
+        console.log('CombatSystem: handleRangedAttack called with direction:', direction);
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const player = this.entityManager.getEntity('player');
         if (!player) return;
@@ -187,7 +192,7 @@ export class CombatSystem extends System {
         const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
         this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
         this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
-        this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, 'player', weapon, isPiercing));
+        this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent( direction , range, 'player', weapon, isPiercing));
         this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(280)); // 320 pixels/second (was 32 pixels every 100 ms)
         this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(20, 20));
         this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(16, 16));

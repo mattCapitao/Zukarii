@@ -147,7 +147,7 @@ export class LevelTransitionSystem extends System {
         const sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
 
 
-        setTimeout(() => { sfxQueue.push({ sfx: 'portal1', volume: .5 }); }, 1000);
+        setTimeout(() => { sfxQueue.push({ sfx: 'portal1', volume: .5 }); }, 1000 * deltaTime);
     }
 
     transitionViaLoad(tier, data) {

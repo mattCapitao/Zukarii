@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zukarnii - The Descent!</title>
+    <title>Zukarii: The Descent</title>
     <link rel="stylesheet" href="4.css">
     <link rel="stylesheet" href="dungeon.css">
     <!--<link rel="stylesheet" href="32.css">-->
@@ -14,184 +14,204 @@
         <link rel="manifest" href="site.webmanifest" />
     </head>
     <body>
-        <div id="splash" style="display:none !important;"></div>
+        <div id="splash">
+            <canvas id="splash-canvas"></canvas>
+            <h1 class="splash-title">Zukarii: The Descent</h1>
+            <div class="splash-menu">
+                <ul>
+                    <li class="selected">New Game</li>
+                    <li>Load Game</li>
+                    <li>Options</li>
+                    <li>Credits</li>
+                </ul>
+            </div>
+            <div class="splash-lore">
+                Whispers yet echo!
+            </div>
+        </div>
 
         <div id="game">
             <canvas id="viewport-canvas" style="width:100%;height:100%;position:absolute;z-index:1;" ></canvas>
             <!--<pre id="map"></pre>-->
-    </div>
-    <div id="ui-layer">
-
-
-
-        <div id="player-info">
-            <div class="player-info-child">Player: <span id="playerName"></span></div>
-            <div class="player-info-child">Level: <span id="playerLevel"></span></div>
-            <div class="player-info-child">Dungeon Tier: <span id="dungeonTier"></span></div>
-            <div class="player-info-child">Gold: <span id="playerGold"></span></div>
         </div>
 
-        <div id="game-over" class="death">
-            <h1>GAME OVER</h1>
-            <p id="game-over-message"></p>
-            <button id="view-log"> View Log </button><button id="restart-button"> Play Again </button><button id="menu"> Menu </button>
+        <div id="hud-layer">
+            <div id="player-info">
+                <div class="player-info-child">Player: <span id="playerName"></span></div>
+                <div class="player-info-child">Level: <span id="playerLevel"></span></div>
+                <div class="player-info-child">Dungeon Tier: <span id="dungeonTier"></span></div>
+                <div class="player-info-child">Gold: <span id="playerGold"></span></div>
+            </div>
+
+            <div id="player-status">
+                <div class="player-status-child">Heal Potions: <span id="healPotionCount"></span></div><!-- set innerHTML on #healPotionCount -->
+                <div class="player-status-child bar">
+                    <div class="progress-bar">
+                        <div id="hpBar" class="progress-fill hp-fill" style="width: 0;"></div> <!-- update CSS Property width on #hpBar-->
+                    </div>
+                    HP: <span id="hpText"></span> <!-- set innerHTML on #hpText -->
+                </div>
+                <div class="player-status-child bar">
+                    <div class="progress-bar">
+                        <div id="manaBar" class="progress-fill mana-fill" style="width: 0;"></div><!-- update CSS Property width on #manaBar-->
+                    </div>
+                    Mana: <span id="manaText"></span><!-- set innerHTML on #manaText -->
+                </div>
+                <div class="player-status-child bar">
+                    <div class="progress-bar">
+                        <div id="xpBar" class="progress-fill xp-fill" style="width:0;"></div><!-- update CSS Property width on #hpBar-->
+                    </div>
+                    XP: <span id="xpText"></span><!-- set innerHTML on #xpText -->
+                </div>
+                <div class="player-status-child">Torches: <span id="torchCount"></span></div><!-- set innerHTML on #torchCount -->
+            </div>
+
+
         </div>
+        <div id="ui-layer">
 
-        <div id="tabs" class="hidden">
-            <div id="tab-wrapper">
-                <div id="tab-menu"></div>
+           
 
-                <div id="menu-content" class="ui-tab">
+            <div id="game-over" class="death">
+                <h1>GAME OVER</h1>
+                <p id="game-over-message"></p>
+                <button id="view-log"> View Log </button><button id="restart-button"> Play Again </button><button id="menu"> Menu </button>
+            </div>
 
-                    <div id="game-menu">
-                        <h2>Game Menu</h2>
-                        <div id="menu-buttons">
-                            <button id="controls-button"> Controls </button>
-                            <button id="map-key-button"> Map Key </button>
-                            <button id="options-button"> Options </button>
-                            <button id="save-games-button"> Save Game </button>
-                            <button id="load-games-button"> Load Game </button>
-                            <button id="new-game-button"> New Game </button>
-                            <button id="about-button"> About </button>
-                        </div>
-                    </div>
+            <div id="tabs" class="hidden">
+                <div id="tab-wrapper">
+                    <div id="tab-menu"></div>
 
-                    <div id="menu-panel">
-                        <h2>Menu Option Details</h2>
-                        <div id="menu-data-wrapper">
-                            <div id="controls-data">
-                                <h3>Controls:</h3>
-                                <ul>
-                                    <li>Arrow keys: Move / Mele Attack</li>
-                                    <li>wasd: Move / Mele Attack</li>
-                                    <li>Hold Space: + WASD / Arrows: Ranged attack (*)</li>
-                                    <li>T key: Light Torch</li>
-                                    <li>C key: Character</li>
-                                    <li>L key: Adventure Log</li>
-                                    <li>Esc key: Menu</li>
-                                </ul>
-                            </div>
-                            <div id="map-key-data" style="display:none;">
-                                <h3>Map Key:</h3>
-                                <ul>
-                                    <li>𓀠: The Battle Mage - (You) </li>
-                                    <li> $: Treasure (aka Da Lootz!)</li>
-                                    <li> a-z, A-Z: Monster (Kill or Be Killed)</li>
-                                    <li>≅: Magic Fountain (Heal, Boost, ???)</li>
-                                    <li>#: Wall (You Can't Go Here)</li>
-                                    <li> ⇓: Stairs Down ∞ (Infinite) </li>
-                                    <li>⇑: Stairs Up (Tier 1 Exit Game)</li>
-                                </ul>
-                            </div>
-                            <div id="options-data" style="display:none;"><h3>Options:</h3></div>
-                            <div id="save-games-data" style="display:none;"><h3>Saved Games:</h3></div>
-                            <div id="load-games-data" style="display:none;"><h3>Load Games:</h3></div>
-                            <div id="new-game-data" style="display:none;"><h3>New Game: - Create Character</h3></div>
-                            <div id="about-data" style="display:none;">
-                                <h3>About:</h3>
-                                <h4>Developers:</h4>
-                                <ul>
-                                    <li>Creator / Game Director / Lead Engineer: Matt Capitao</li>
-                                </ul>
-                                <h4>AI Devs</h4>
-                                <ul>
-                                    <li>Supporting AI - Architect / Engineer: Grok3</li>
-                                    <li>Supporting AI - QA / Debug Engineer : GitHub Copilot</li>
-                                </ul>
+                    <div id="menu-content" class="ui-tab">
+
+                        <div id="game-menu">
+                            <h2>Game Menu</h2>
+                            <div id="menu-buttons">
+                                <button id="controls-button"> Controls </button>
+                                <button id="map-key-button"> Map Key </button>
+                                <button id="options-button"> Options </button>
+                                <button id="save-games-button"> Save Game </button>
+                                <button id="load-games-button"> Load Game </button>
+                                <button id="new-game-button"> New Game </button>
+                                <button id="about-button"> About </button>
                             </div>
                         </div>
-                    </div>
 
-                </div>
-
-                <div id="log-content" class="ui-tab">
-                    <h2>Adventure Log</h2>
-                    <div id="log"></div>
-                </div>
-                <div id="character-content" class="ui-tab">
-                    <div id="character">
-                        <h2>Equipped Items</h2>
-                        <div id="equipped-items">
-                            <div class="col">
-                                <div class="equipped-item">
-                                    <p class="equip-slot mainhand empty" data-equip_slot='{"slotId": 0, "slot": "mainhand"}'></p>
-                                    <span class="item-label">Mainhand</span>
+                        <div id="menu-panel">
+                            <h2>Menu Option Details</h2>
+                            <div id="menu-data-wrapper">
+                                <div id="controls-data">
+                                    <h3>Controls:</h3>
+                                    <ul>
+                                        <li>Arrow keys: Move / Mele Attack</li>
+                                        <li>wasd: Move / Mele Attack</li>
+                                        <li>Hold Space: + WASD / Arrows: Ranged attack (*)</li>
+                                        <li>T key: Light Torch</li>
+                                        <li>C key: Character</li>
+                                        <li>L key: Adventure Log</li>
+                                        <li>Esc key: Menu</li>
+                                    </ul>
                                 </div>
-                                <div class="equipped-item">
-                                    <p class="equip-slot rightring empty" data-equip_slot='{"slotId": 1, "slot": "rightring"}'></p>
-                                    <span class="item-label">Right Ring</span>
+                                <div id="map-key-data" style="display:none;">
+                                    <h3>Map Key:</h3>
+                                    <ul>
+                                        <li>𓀠: The Battle Mage - (You) </li>
+                                        <li> $: Treasure (aka Da Lootz!)</li>
+                                        <li> a-z, A-Z: Monster (Kill or Be Killed)</li>
+                                        <li>≅: Magic Fountain (Heal, Boost, ???)</li>
+                                        <li>#: Wall (You Can't Go Here)</li>
+                                        <li> ⇓: Stairs Down ∞ (Infinite) </li>
+                                        <li>⇑: Stairs Up (Tier 1 Exit Game)</li>
+                                    </ul>
                                 </div>
-                            </div>
-                            <div class="col">
-                                <div class="equipped-item">
-                                    <p class="equip-slot amulet empty" data-equip_slot='{"slotId": 2, "slot": "amulet"}'></p>
-                                    <span class="item-label">Amulet</span>
-                                </div>
-                                <div class="equipped-item">
-                                    <p class="equip-slot armor empty" data-equip_slot='{"slotId": 3, "slot": "armor"}'></p>
-                                    <span class="item-label">Armor</span>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="equipped-item">
-                                    <p class="equip-slot offhand empty" data-equip_slot='{"slotId": 4, "slot": "offhand"}'></p>
-                                    <span class="item-label">Offhand</span>
-                                </div>
-                                <div class="equipped-item">
-                                    <p class="equip-slot leftring empty" data-equip_slot='{"slotId": 5, "slot": "leftring"}'></p>
-                                    <span class="item-label">Left Ring</span>
+                                <div id="options-data" style="display:none;"><h3>Options:</h3></div>
+                                <div id="save-games-data" style="display:none;"><h3>Saved Games:</h3></div>
+                                <div id="load-games-data" style="display:none;"><h3>Load Games:</h3></div>
+                                <div id="new-game-data" style="display:none;"><h3>New Game: - Create Character</h3></div>
+                                <div id="about-data" style="display:none;">
+                                    <h3>About:</h3>
+                                    <h4>Developers:</h4>
+                                    <ul>
+                                        <li>Creator / Game Director / Lead Engineer: Matt Capitao</li>
+                                    </ul>
+                                    <h4>AI Devs</h4>
+                                    <ul>
+                                        <li>Supporting AI - Architect / Engineer: Grok3</li>
+                                        <li>Supporting AI - QA / Debug Engineer : GitHub Copilot</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
-                        <h2>Character Stats</h2>
-                        <div id="character-stat-wrapper"></div>
+
                     </div>
 
-                    <div id="inventory">
-                        <h2>Inventory Items</h2>
-                        <div id=inventory-window-wrapper>
-                            <div id="inventory-tabs">
-                                <button id="inventory-tab-all" class="inventory-tab-button tab" style="background: #0f0;">All</button>
-                                <button id="inventory-tab-armor" class="inventory-tab-button tab">Armor</button>
-                                <button id="inventory-tab-weapon-melee" class="inventory-tab-button tab">Melee</button>
-                                <button id="inventory-tab-weapon-ranged" class="inventory-tab-button tab">Ranged</button>
-                                <button id="inventory-tab-amulet" class="inventory-tab-button tab">Amulet</button>
-                                <button id="inventory-tab-ring" class="inventory-tab-button tab">Ring</button>
-                                <button id="sort-inventory-tab" class="inventory-tab-button sort">Sort</button>
+                    <div id="log-content" class="ui-tab">
+                        <h2>Adventure Log</h2>
+                        <div id="log"></div>
+                    </div>
+                    <div id="character-content" class="ui-tab">
+                        <div id="character">
+                            <h2>Equipped Items</h2>
+                            <div id="equipped-items">
+                                <div class="col">
+                                    <div class="equipped-item">
+                                        <p class="equip-slot mainhand empty" data-equip_slot='{"slotId": 0, "slot": "mainhand"}'></p>
+                                        <span class="item-label">Mainhand</span>
+                                    </div>
+                                    <div class="equipped-item">
+                                        <p class="equip-slot rightring empty" data-equip_slot='{"slotId": 1, "slot": "rightring"}'></p>
+                                        <span class="item-label">Right Ring</span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="equipped-item">
+                                        <p class="equip-slot amulet empty" data-equip_slot='{"slotId": 2, "slot": "amulet"}'></p>
+                                        <span class="item-label">Amulet</span>
+                                    </div>
+                                    <div class="equipped-item">
+                                        <p class="equip-slot armor empty" data-equip_slot='{"slotId": 3, "slot": "armor"}'></p>
+                                        <span class="item-label">Armor</span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="equipped-item">
+                                        <p class="equip-slot offhand empty" data-equip_slot='{"slotId": 4, "slot": "offhand"}'></p>
+                                        <span class="item-label">Offhand</span>
+                                    </div>
+                                    <div class="equipped-item">
+                                        <p class="equip-slot leftring empty" data-equip_slot='{"slotId": 5, "slot": "leftring"}'></p>
+                                        <span class="item-label">Left Ring</span>
+                                    </div>
+                                </div>
                             </div>
+                            <h2>Character Stats</h2>
+                            <div id="character-stat-wrapper"></div>
+                        </div>
 
-                            <div id="inventory-item-wrapper">
+                        <div id="inventory">
+                            <h2>Inventory Items</h2>
+                            <div id=inventory-window-wrapper>
+                                <div id="inventory-tabs">
+                                    <button id="inventory-tab-all" class="inventory-tab-button tab" style="background: #0f0;">All</button>
+                                    <button id="inventory-tab-armor" class="inventory-tab-button tab">Armor</button>
+                                    <button id="inventory-tab-weapon-melee" class="inventory-tab-button tab">Melee</button>
+                                    <button id="inventory-tab-weapon-ranged" class="inventory-tab-button tab">Ranged</button>
+                                    <button id="inventory-tab-amulet" class="inventory-tab-button tab">Amulet</button>
+                                    <button id="inventory-tab-ring" class="inventory-tab-button tab">Ring</button>
+                                    <button id="sort-inventory-tab" class="inventory-tab-button sort">Sort</button>
+                                </div>
+
+                                <div id="inventory-item-wrapper">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div id="player-status">
-            <div class="player-status-child">Heal Potions: <span id="healPotionCount"></span></div><!-- set innerHTML on #healPotionCount -->
-            <div class="player-status-child bar">
-                <div class="progress-bar">
-                    <div id="hpBar" class="progress-fill hp-fill" style="width: 0;"></div> <!-- update CSS Property width on #hpBar-->
-                </div>
-                HP: <span id="hpText"></span> <!-- set innerHTML on #hpText -->
-            </div>
-            <div class="player-status-child bar">
-                <div class="progress-bar">
-                    <div id="manaBar" class="progress-fill mana-fill" style="width: 0;"></div><!-- update CSS Property width on #manaBar-->
-                </div>
-                Mana: <span id="manaText"></span><!-- set innerHTML on #manaText -->
-            </div>
-            <div class="player-status-child bar">
-                <div class="progress-bar">
-                    <div id="xpBar" class="progress-fill xp-fill" style="width:0;"></div><!-- update CSS Property width on #hpBar-->
-                </div>
-                XP: <span id="xpText"></span><!-- set innerHTML on #xpText -->
-            </div>
-            <div class="player-status-child">Torches: <span id="torchCount"></span></div><!-- set innerHTML on #torchCount -->
-        </div>
+            
 
-    </div>
+        </div>
 
     <script type="module" src="init.js"></script>
     </body>

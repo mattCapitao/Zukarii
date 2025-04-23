@@ -13,6 +13,13 @@ export class AudioSystem extends System {
     init() {
         this.sfxQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.SFX || [];
         this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
+        this.eventBus.on('PlaySfxImmediate', ({ sfx, volume }) => {
+            console.log(`AudioSystem: Immediate playback requested for sfx: ${sfx} at volume: ${volume}`);
+            this.playSfx({ sfx, volume });
+        });
+        this.eventBus.on('PlayTrackControl', ({ track, play, volume }) => {
+            this.playTrackControl({ track, play, volume });
+        });
     }
 
     update(deltaTime) {
@@ -184,5 +191,6 @@ export class AudioSystem extends System {
             }
         }
         console.log('AudioSystem: sounds preloaded');
+        this.eventBus.emit('AudioLoaded');
     }
 }

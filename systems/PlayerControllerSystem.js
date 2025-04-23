@@ -45,6 +45,30 @@ export class PlayerControllerSystem {
 
         // Ranged mode
         if (gameState.isRangedMode) {
+
+            let dx = 0, dy = 0;
+            console.log(`PlayerControllerSystem: Ranged mode active - inputState: `, inputState.keys);
+            if (inputState.keys['ArrowUp'] || inputState.keys['w']) dy -= 1;
+            if (inputState.keys['ArrowDown'] || inputState.keys['s']) dy += 1;
+            if (inputState.keys['ArrowLeft'] || inputState.keys['a']) dx -= 1;
+            if (inputState.keys['ArrowRight'] || inputState.keys['d']) dx += 1;
+
+            const direction = { dx, dy };
+            console.log(`PlayerControllerSystem: Ranged mode - direction: `, direction);
+            if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed && (direction.dx!==0 || direction.dy!==0)) {
+            
+                console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: `,direction);
+                this.eventBus.emit('RangedAttack',  direction );
+                attackSpeed.elapsedSinceLastAttack = 0;
+                this.endTurn('rangedAttack');
+                this.previousKeyStates[direction] = true;
+                if (dx < 0 ) this.VisualsComponent.faceLeft = true;
+                if (dx > 0) this.VisualsComponent.faceLeft = false;
+            } else  {
+                this.previousKeyStates[direction] = false;
+            }
+
+            /*
             const directions = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
             for (const direction of directions) {
                 const isPressed = !!inputState.keys[direction];
@@ -61,6 +85,7 @@ export class PlayerControllerSystem {
                     this.previousKeyStates[direction] = false;
                 }
             }
+            */
             return;
         }
 

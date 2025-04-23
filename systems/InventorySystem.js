@@ -189,7 +189,13 @@ export class InventorySystem extends System {
 
         const uniqueIdLoot = this.utilities.generateUniqueId();
         const lootEntity = this.entityManager.createEntity(`loot_${tier}_${uniqueIdLoot}`);
-        const lootPosition = new PositionComponent(position.x, position.y);
+
+        let lootDropOffset = 48;
+        if (player.getComponent('Visuals')?.faceLeft) {
+            lootDropOffset = -lootDropOffset;
+        }
+
+        const lootPosition = new PositionComponent(position.x + lootDropOffset, position.y);
         const lootData = new LootData(loot);
         this.entityManager.addComponentToEntity(lootEntity.id, lootPosition);
         this.entityManager.addComponentToEntity(lootEntity.id, lootData);

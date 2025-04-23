@@ -15,6 +15,7 @@ export class ProjectileSystem extends System {
         const projectiles = this.entityManager.getEntitiesWith(this.requiredComponents);
         for (const projectile of projectiles) {
             const projData = projectile.getComponent('Projectile');
+            console.log(`ProjectileSystem: Processing projectile ${projectile.id} with data:`, projData);
 
             const tier = gameState.tier;
             const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
@@ -29,13 +30,16 @@ export class ProjectileSystem extends System {
 
             if (projData.rangeLeft >= 0) {
                 // Calculate movement direction
-                let dx = 0, dy = 0;
+               /* let dx = 0, dy = 0;
                 switch (projData.direction) {
                     case 'ArrowUp': dy = -1; break;
                     case 'ArrowDown': dy = 1; break;
                     case 'ArrowLeft': dx = -1; break;
                     case 'ArrowRight': dx = 1; break;
                 }
+                */
+                console.log(`ProjectileSystem: ${projectile.id} has direction:`, projData.direction);
+                const { dx, dy } = projData.direction; 
 
                 // Normalize direction vector (dx, dy)
                 const magnitude = Math.sqrt(dx * dx + dy * dy);

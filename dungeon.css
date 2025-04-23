@@ -1,57 +1,168 @@
 ﻿/* dungeon.css */
 
-/*////////////////////////////////////////////////////  CUSTOM BASELINE - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
+/* CUSTOM BASELINE - START */
 body {
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
-width: 100vw;
-margin: 0;
-padding: 0;
-background-color: #0f0;
-font-size: 1rem; /* ~16px */
-overflow: hidden; /* Prevent scrollbars */
-font-family: 'Verdana', Roboto, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    background-color: #0f0;
+    font-size: 1rem;
+    overflow: hidden;
+    font-family: 'Verdana', Roboto, sans-serif;
 }
 
 div {
-margin: 0;
-padding: 0;
-border: none;
+    margin: 0;
+    padding: 0;
+    border: none;
 }
 
 table {
-border-spacing: 0.625rem; /* ~10px */
-border-collapse: separate;
+    border-spacing: 0.625rem;
+    border-collapse: separate;
 }
 
 th {
-text-align: center;
-font-weight: bold;
-font-size: 1.6rem; /* ~26px */
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.6rem;
 }
+
 td, li {
-text-align: justify;
-vertical-align: top;
-padding-left: 3.125rem; /* ~50px */
-line-height: 160%;
-font-size: 1.5rem;
+    text-align: justify;
+    vertical-align: top;
+    padding-left: 3.125rem;
+    line-height: 160%;
+    font-size: 1.5rem;
 }
 
 hr {
-border: 0;
-border-top: .0625rem solid #0f0; /* ~1px */
-height: 0.0625rem; /* ~1px */
-margin: 0.625rem 0; /* ~10px */
+    border: 0;
+    border-top: .0625rem solid #0f0;
+    height: 0.0625rem;
+    margin: 0.625rem 0;
+}
+/* CUSTOM BASELINE - END */
+
+
+/* SPLASH - START */
+#splash {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom right, #d4af37 15%, #3c2f2f 100%);
+    color: #0f0;
+    font-family: 'Verdana', Roboto, sans-serif;
+    z-index: 1000;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: auto;
 }
 
+#splash-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
 
-/*////////////////////////////////////////////////////  CUSTOM BASELINE - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+.splash-title {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 4rem;
+    color: #333;
+    text-shadow: 0 0 10px #00ff00b4;
+    z-index: 10;
+}
 
-/*////////////////////////////////////////////////////  GENERAL UI - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+.splash-menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+    background: rgba(20, 30, 20, 0.4);
+    border: 0.125rem solid #0f0;
+    border-radius: 0.625rem;
+    padding: 0.25rem .75rem;
+    width: 15rem;
+}
 
+    .splash-menu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .splash-menu li {
+        font-size: 1.5rem;
+        color: #288628e1;
+        background: rgba(20, 30, 20, 0.3);
+        border: 0.125rem solid #0f0;
+        border-radius: 0.3125rem;
+        padding: 0.5rem;
+        margin: 0.5rem 0;
+        cursor: pointer;
+        transition: color 0.3s, background 0.3s;
+        pointer-events: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .splash-menu li:hover, .splash-menu li.selected {
+            color: #0f0;
+            background: #2c672c;
+        }
+
+.splash-lore {
+    position: absolute;
+    bottom: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #333;
+    text-shadow: 0 0 10px #00ff00b4;
+    font-size: 1rem;
+    text-align: center;
+    opacity: 0.8;
+    max-width: 600px;
+    animation: fadeIn 5s ease-in;
+}
+
+.splash-credits {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #0f0;
+    font-size: 1.5rem;
+    background: rgba(20, 30, 20, 0.7);
+    padding: 2rem;
+    border: 0.125rem solid #0f0;
+    border-radius: 0.625rem;
+    animation: fadeIn 0.5s ease-in;
+}
+/* SPlASH - END */
+
+
+
+/*  GENERAL UI - START  */
 #game {
 display: flex;
 flex-direction: row;
@@ -72,8 +183,20 @@ width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
 height: calc(100vh - 0.15rem); /* Account for border (1px each side) */
 background: transparent;
 pointer-events: none; /* Non-clickable, children can override */
-z-index: 100; /* Above game but below splash */
+z-index: 1100; /* Above game and splash */
 overflow: hidden; /* Prevent child overflow */
+}
+
+#hud-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
+    height: calc(100vh - 0.15rem); /* Account for border (1px each side) */
+    background: transparent;
+    pointer-events: none; /* Non-clickable, children can override */
+    z-index: 100; /* Above game but below splash */
+    overflow: hidden; /* Prevent child overflow */
 }
 
 #player-info {
@@ -100,7 +223,6 @@ color: #0f0;
 z-index: 1000;
 padding: 0.625rem; /* ~10px */
 }
-
 
 #player-status {
 position: absolute;
@@ -158,7 +280,6 @@ background-color: #1d4ed8; /* Blue for Mana */
     transition: width 0.5s ease; /* Slower xp fill animation */
 }
 
-
 #tabs {
 position: absolute;
 top: 50%;
@@ -181,7 +302,6 @@ z-index: 2000; /* Increased to appear above #splash */
 #tabs.hidden {
 display: none;
 }
-
 
 .tabs-button {
 flex: 0 0 auto;
@@ -255,8 +375,6 @@ text-shadow: 0 0 0.625rem #0f0; /* ~10px */
 animation: victoryPulse 1.5s infinite ease-in-out;
 }
 
-
-
 @keyframes fadeIn {
 from {
 opacity: 0;
@@ -284,8 +402,6 @@ opacity: 1;
     }
 }
 
-
-
 #stats-overlay {
 position: absolute;
 bottom: 0.625rem; /* ~10px */
@@ -305,63 +421,10 @@ z-index: 500; /* Above map but below tooltips */
 transition: width 0.3s; /* Smooth bar animations */
 }
 
-/*////////////////////////////////////////////////////  GENERAL UI - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-/*////////////////////////////////////////////////////   SPLASH DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-#splash {
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-background-color: #000;
-color: #0f0;
-padding: 0;
-margin: 0;
-font-family: 'Verdana', Roboto, sans-serif;
-z-index: 1000;
-width: 100vw;
-height: 100vh;
-position: absolute;
-}
-
-#splash pre {
-font-family: "courier new", courier, monospace;
-font-size: 0.75rem; /* ~12px */
-}
-
-#splash h1 {
-font-size: 3rem; /* ~48px */
-}
-
-#splash h2 {
-font-size: 1.5rem; /* ~24px */
-}
-
-#splash table tr th {
-font-size: 1rem; /* ~16px */
-}
-
-#splash table tr td ul li {
-font-size: 0.75rem; /* ~12px */
-}
-
-/*////////////////////////////////////////////////////   SPLASH DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-/*////////////////////////////////////////////////////   MAP DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
- 
+/*  GENERAL UI - END  */
 
 
-
-
-
-/*////////////////////////////////////////////////////   MAP DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-/*////////////////////////////////////////////////////   TABS DIV - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
+/*   TABS DIV - START  */
 
 #tabs div.col-50-wrapper {
 display: flex;
@@ -426,8 +489,6 @@ display: flex;
 margin-bottom: 0.3125rem; /* ~5px */
 line-height: 1.2;
 }
-
-
 
 #character-content {
 height: 30rem; /* ~400px */
@@ -643,7 +704,6 @@ background-image: url('img/icons/item-slots/legs.svg');
 background-image: url('img/icons/item-slots/boots.svg');
 }
 
-
 #menu-content {
     height: 30rem; /* ~400px, matches #character-content */
     width: 100%;
@@ -677,7 +737,6 @@ background-image: url('img/icons/item-slots/boots.svg');
     box-sizing: border-box;
 }
 
-
     #menu-buttons button {
         width: 90%; /* Full width of the container */
         margin: 0.3125rem 0; /* ~5px vertical margin */
@@ -689,8 +748,6 @@ background-image: url('img/icons/item-slots/boots.svg');
         font-family: 'Verdana', Roboto, sans-serif;
         text-align: center;
     }
-
-
 
     #menu-buttons button:hover {
         background: #0f0;
@@ -870,20 +927,19 @@ margin: 0;
 border-radius: .3125rem;
 }
 
-#tabs p.inventory-slot span.item-label {
-display: block;
-color: #0f0;
-font-size: .75rem;
-width: 4rem; /* ~64px */
-text-align: center;
-}
-   
+    #tabs p.inventory-slot span.item-label {
+        display: block;
+        color: #0f0;
+        font-size: .75rem;
+        width: 4rem; /* ~64px */
+        text-align: center;
+    } 
 
 .item-tooltip-class {
 padding: 0.625rem; /* ~5px */
 font-size: 0.875rem; /* ~14px */
 color: #0f0;
-z-index: 1000;
+z-index: 3000;
 max-width: 15rem; /* ~200px */
 background: rgba(20, 30, 20, 1);
 border: 0.125rem solid #060; /* ~1px */
@@ -904,7 +960,6 @@ border-radius: .625rem;
         box-shadow: 0 0 15px gold;
     }
 }
-
 
 .artifact,
 .artifact hr,
@@ -1098,588 +1153,4 @@ margin: 0;
 padding: 0.625rem; /* ~10px */
 }
 
-
-
-
-
-/*////////////////////////////////////////////////////   TABS DIV - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-
-
-
-
-/*////////////////////////////////////////////////////  PLAYER - START  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-.player {
-    position: relative;
-    transition: transform 0.016s linear; /* Smooth at ~60 FPS */
-    display: inline-block;
-
-    transform-origin: center;
-    z-index: 100 !important; /* Lift above other spans */
-}
-
-    .player img {
-        z-index: 300;
-        width: 32px;
-        height: 28px;
-        padding: 0;
-        padding-top: 4px;
-        margin: 0;
-        margin-top: -4px;
-        background: none; /* Default to no background */
-        filter: drop-shadow(0 0 0.1rem #cccccc90); /* Creates an evenly distributed outline */
-    }
-
-    .player.face-left img {
-        transform: rotateY(180deg);
-    }
-
-
-.player.has-hp-bar img {
-    background: url('img/1x1_red.png') left top no-repeat;
-}
-
-#torch {
-    z-index: 299;
-    transform-origin: center;
-    display: inline-block;
-    position: absolute;
-    transition: transform 0.016s linear; /* Smooth at ~60 FPS */
-    top: 0;
-    right: 0;
-    width: 4px !important;
-    height: 4px !important;
-    background: red;
-    filter: drop-shadow(0 0 0.05rem #ff8700a5); /* Creates an evenly distributed outline */
-    /*background: url('img/torch.png') center center no-repeat;
-    background-size: cover;*/
-    opacity: .3; /* Adjust opacity as needed */
-    border-radius: 50%;
-    box-shadow: 0 0 4em 2em #8b6a4b74;
-}
-
-    #torch.torch-left {
-        right: 28px !important;
-    }
-
-
-#torch.flicker {
-    animation: torchFlicker 0.5s infinite, torchShadow 0.5s infinite;
-}
-
-.projectile {
-    color: orange;
-    z-index: 5 !important;
-    font-size:.5rem;
-}
-
-@keyframes torchFlicker {
-0.0% {
-background: rgba(139, 106, 75, 0.40);
-}
-/* Base */
-2.5% {
-background: rgba(139, 106, 75, 0.42);
-}
-
-5.0% {
-background: rgba(139, 106, 75, 0.42);
-}
-/* Stable */
-7.5% {
-background: rgba(139, 106, 75, 0.38);
-}
-
-10.0% {
-background: rgba(139, 106, 75, 0.30);
-}
-/* Dip */
-12.5% {
-background: rgba(139, 106, 75, 0.45);
-}
-
-15.0% {
-background: rgba(139, 106, 75, 0.48);
-}
-
-17.5% {
-background: rgba(139, 106, 75, 0.50);
-}
-/* Spike up */
-20.0% {
-background: rgba(139, 106, 75, 0.47);
-}
-
-22.5% {
-background: rgba(139, 106, 75, 0.47);
-}
-/* Stable */
-25.0% {
-background: rgba(139, 106, 75, 0.44);
-}
-
-27.5% {
-background: rgba(139, 106, 75, 0.35);
-}
-/* Dip */
-30.0% {
-background: rgba(139, 106, 75, 0.38);
-}
-
-32.5% {
-background: rgba(139, 106, 75, 0.40);
-}
-
-35.0% {
-background: rgba(139, 106, 75, 0.40);
-}
-/* Stable */
-37.5% {
-background: rgba(139, 106, 75, 0.42);
-}
-
-40.0% {
-background: rgba(139, 106, 75, 0.46);
-}
-
-42.5% {
-background: rgba(139, 106, 75, 0.46);
-}
-/* Stable */
-45.0% {
-background: rgba(139, 106, 75, 0.32);
-}
-/* Dip */
-47.5% {
-background: rgba(139, 106, 75, 0.25);
-}
-/* Big spike down */
-50.0% {
-background: rgba(139, 106, 75, 0.36);
-}
-
-52.5% {
-background: rgba(139, 106, 75, 0.40);
-}
-
-55.0% {
-background: rgba(139, 106, 75, 0.43);
-}
-
-57.5% {
-background: rgba(139, 106, 75, 0.43);
-}
-/* Stable */
-60.0% {
-background: rgba(139, 106, 75, 0.48);
-}
-
-62.5% {
-background: rgba(139, 106, 75, 0.55);
-}
-/* Big spike up */
-65.0% {
-background: rgba(139, 106, 75, 0.50);
-}
-
-67.5% {
-background: rgba(139, 106, 75, 0.47);
-}
-
-70.0% {
-background: rgba(139, 106, 75, 0.47);
-}
-/* Stable */
-72.5% {
-background: rgba(139, 106, 75, 0.44);
-}
-
-75.0% {
-background: rgba(139, 106, 75, 0.38);
-}
-
-77.5% {
-background: rgba(139, 106, 75, 0.35);
-}
-/* Dip */
-80.0% {
-background: rgba(139, 106, 75, 0.40);
-}
-
-82.5% {
-background: rgba(139, 106, 75, 0.45);
-}
-
-85.0% {
-background: rgba(139, 106, 75, 0.48);
-}
-
-87.5% {
-background: rgba(139, 106, 75, 0.48);
-}
-/* Stable */
-90.0% {
-background: rgba(139, 106, 75, 0.42);
-}
-
-92.5% {
-background: rgba(139, 106, 75, 0.30);
-}
-/* Dip */
-95.0% {
-background: rgba(139, 106, 75, 0.36);
-}
-
-97.5% {
-background: rgba(139, 106, 75, 0.38);
-}
-
-100% {
-background: rgba(139, 106, 75, 0.40);
-}
-/* Back to base */
-}
-
-@keyframes torchShadow {
-0.0% {
-box-shadow: 0 0 4em 2em #8b6a4b74;
-}
-/* Base */
-2.5% {
-box-shadow: 0 0 4em 2em #8b6a4b78;
-}
-
-5.0% {
-box-shadow: 0 0 4em 2em #8b6a4b78;
-}
-/* Stable */
-7.5% {
-box-shadow: 0 0 3.9em 1.9em #8b6a4b68;
-}
-
-10.0% {
-box-shadow: 0 0 3.7em 1.8em #8b6a4b50;
-}
-/* Dip */
-12.5% {
-box-shadow: 0 0 4.1em 2em #8b6a4b7a;
-}
-
-15.0% {
-box-shadow: 0 0 4.2em 2.1em #8b6a4b7e;
-}
-
-17.5% {
-box-shadow: 0 0 4.3em 2.2em #8b6a4b80;
-}
-/* Spike up */
-20.0% {
-box-shadow: 0 0 4.1em 2.1em #8b6a4b7a;
-}
-
-22.5% {
-box-shadow: 0 0 4.1em 2.1em #8b6a4b7a;
-}
-/* Stable */
-25.0% {
-box-shadow: 0 0 4em 2em #8b6a4b74;
-}
-
-27.5% {
-box-shadow: 0 0 3.8em 1.9em #8b6a4b60;
-}
-/* Dip */
-30.0% {
-box-shadow: 0 0 3.9em 1.9em #8b6a4b68;
-}
-
-32.5% {
-box-shadow: 0 0 4em 2em #8b6a4b74;
-}
-
-35.0% {
-box-shadow: 0 0 4em 2em #8b6a4b74;
-}
-/* Stable */
-37.5% {
-box-shadow: 0 0 4.1em 2em #8b6a4b76;
-}
-
-40.0% {
-box-shadow: 0 0 4.2em 2.1em #8b6a4b7c;
-}
-
-42.5% {
-box-shadow: 0 0 4.2em 2.1em #8b6a4b7c;
-}
-/* Stable */
-45.0% {
-box-shadow: 0 0 3.8em 1.9em #8b6a4b58;
-}
-/* Dip */
-47.5% {
-box-shadow: 0 0 3.6em 1.7em #8b6a4b40;
-}
-/* Big spike down */
-50.0% {
-box-shadow: 0 0 3.9em 1.9em #8b6a4b66;
-}
-
-52.5% {
-box-shadow: 0 0 4em 2em #8b6a4b74;
-}
-
-55.0% {
-box-shadow: 0 0 4.1em 2em #8b6a4b78;
-}
-
-57.5% {
-box-shadow: 0 0 4.1em 2em #8b6a4b78;
-}
-/* Stable */
-60.0% {
-box-shadow: 0 0 4.2em 2.1em #8b6a4b7e;
-}
-
-62.5% {
-box-shadow: 0 0 4.5em 2.3em #8b6a4b88;
-}
-/* Big spike up */
-65.0% {
-box-shadow: 0 0 4.3em 2.2em #8b6a4b80;
-}
-
-67.5% {
-box-shadow: 0 0 4.2em 2.1em #8b6a4b7c;
-}
-
-70.0% {
-box-shadow: 0 0 4.2em 2.1em #8b6a4b7c;
-}
-/* Stable */
-72.5% {
-box-shadow: 0 0 4em 2em #8b6a4b74;
-}
-
-75.0% {
-box-shadow: 0 0 3.9em 1.9em #8b6a4b68;
-}
-
-77.5% {
-box-shadow: 0 0 3.8em 1.8em #8b6a4b60;
-}
-/* Dip */
-80.0% {
-box-shadow: 0 0 4em 2em #8b6a4b74;
-}
-
-82.5% {
-box-shadow: 0 0 4.1em 2.1em #8b6a4b7a;
-}
-
-85.0% {
-box-shadow: 0 0 4.2em 2.1em #8b6a4b7e;
-}
-
-87.5% {
-box-shadow: 0 0 4.2em 2.1em #8b6a4b7e;
-}
-/* Stable */
-90.0% {
-box-shadow: 0 0 4em 2em #8b6a4b74;
-}
-
-92.5% {
-box-shadow: 0 0 3.7em 1.8em #8b6a4b50;
-}
-/* Dip */
-95.0% {
-box-shadow: 0 0 3.9em 1.9em #8b6a4b68;
-}
-
-97.5% {
-box-shadow: 0 0 4em 2em #8b6a4b72;
-}
-
-100% {
-box-shadow: 0 0 4em 2em #8b6a4b74;
-}
-/* Back to base */
-}
-
-
-.player.lamp {
-background-color: #161616;
-border-radius: 50%;
-box-shadow: 0 0 5em 2.5em #efe8ac92;
-}
-
-/*////////////////////////////////////////////////////  PLAYER - END  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-/*//////////////////////////////// START MONSTERS ||||||||||||||||||||||||||||||||||*/
-
-
-.monster {
-    z-index: 75 !important; /* Lift above other spans */
-    position: relative;
-    display: inline-block;
-    transform-origin: center;
-    transition: transform 0.016s linear; /* Smooth at ~60 FPS */
-    opacity: .5;
-
-}
-    .monster.detected {
-        opacity: 1; /* Fully visible */
-        transition: opacity 3s ease; /* Smooth fade-in for avatar images */
-    }
-
-.monster img{
-    opacity:0.05;
-}
-
-.detected.monster img {
-    z-index: 20;
-    width: 32px;
-    height: 32px;
-    margin: 0;
-    padding: 0;
-    padding-top: 2px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: none; /* Default to no background */
-    filter: drop-shadow(0 0 0.1rem #cccccc90);
-    opacity: 1; /* Fully visible */
-    transition: opacity 3s ease; /* Smooth fade-in for avatar images */
-}
-
-    .detected.monster.has-hp-bar img {
-        background: url('img/1x1_red.png') left top no-repeat;
-    }
-
-    .detected.monster.face-left img {
-        transform: rotateY(180deg);
-    }
-
-    .detected.monster.elite img {
-        filter: drop-shadow(0 0 0.125rem #a80505cc);
-    }
-    
-    .detected.monster.boss img {
-        filter: drop-shadow(0 0 0.125rem #670c9ccc);
-    }
-
-
-/*//////////////////////////////// END MONSTERS ||||||||||||||||||||||||||||||||||*/
-
-
-/*//////////////////////////////// START MAP ELEMENTS ||||||||||||||||||||||||||||||||||*/
-
-#map span {
-    display: inline-block;
-    width: 2rem; /* ~16px */
-    height: 2rem; /* ~16px */
-    text-align: center;
-    line-height: 2rem; /* ~16px */
-    vertical-align: top;
-    /*transition: transform 0.016s linear; /* Smooth at ~60 FPS */
-    transition: opacity 3s ease;
-}
-
-.undiscovered {
-    background: black;
-    opacity: 0.5; /* Dimmed appearance for undiscovered tiles */
-}
-
-.discovered {
-    background: none; /* For floors or other non-wall tiles */
-    opacity: 1;
-    transition: opacity 1.5s ease; /* Smooth fade for discovery */
-}
-
-.undiscovered img {
-    opacity: .05 ;
-}
-discovered img {
-    opacity: 1;
-    transition: opacity 1.5s ease; /* Smooth fade-in for avatar images */
-}
-
-.wall.discovered {
-    background: url('img/map/wall.png'); /* Wall texture */
-    background-size: 32px;
-    opacity: 1; /* Fully visible */
-    transition: opacity 1s ease; /* Smooth fade-in for wall texture */
-}
-
-
-.stair {
-    position: relative;
-    height: 32px;
-    width: 32px;
-}
-.stair img {
-    position: absolute;
-    bottom: 0;
-    left: 0px;
-    padding: 0;
-    margin: 0;
-    height: 32px;
-    width: 32px;
-    filter: drop-shadow(0 0 0.15rem #0b1ef499); /* Creates an evenly distributed outline */
-}
-
-.fountain {
-    position: relative;
-    height: 32px;
-    width: 32px;
-}
-        .fountain img {
-            position: absolute;
-            bottom: 0;
-            left: 0px;
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            margin: 0;
-            filter: drop-shadow(0 0 0.65rem #351fb9bc); /* Creates an evenly distributed outline */
-        }
-    .fountain.used img {
-        filter: drop-shadow(0 0 0.05rem #fefefe00) !important; /* Creates an evenly distributed outline */
-    }
-
-.portal {
-    position: relative;
-    height: 32px;
-    width: 32px;
-}
-    .portal img {
-        position: absolute;
-        bottom: 0;
-        left: 0px;
-        width:32px;
-        height:40px;
-        padding: 0;
-        margin: 0;
-        filter: drop-shadow(0 0 0.15rem #0b1ef499); /* Creates an evenly distributed outline */
-    }
-
-.treasure {
-    position: relative;
-    height: 32px;
-    width: 32px;
-    
-}
-.treasure img {
-    z-index: 10;
-    position: absolute;
-    bottom: 0;
-    left: 4px;
-    padding: 0;
-    margin: 0 auto;
-    filter: drop-shadow(0 0 0.1rem gold); /* Creates an evenly distributed outline */
-}
-/*//////////////////////////////// END MAP ELEMENTS ||||||||||||||||||||||||||||||||||*/
+/*   TABS DIV - END  */

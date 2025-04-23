@@ -92,6 +92,8 @@ export class GameDataIOSystem extends System {
         await loadPromise;
         this.isProcessing = false;
         console.log('GameDataIOSystem: Reset isProcessing to false after successful load');
+        this.eventBus.emit('StartGame');
+
     }
 
     bundleGameData() {

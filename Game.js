@@ -1,8 +1,8 @@
 ﻿// Game.js - Updated
 import { State } from './State.js';
+ 
 import { ActionSystem } from './systems/ActionSystem.js';
 import { CombatSystem } from './systems/CombatSystem.js';
-//import { RenderSystem } from './systems/RenderSystem.js';
 import { SpatialBucketsSystem } from './systems/SpatialBucketsSystem.js'; 
 import { MapRenderSystem } from './systems/MapRenderSystem.js';
 import { PlayerSystem } from './systems/PlayerSystem.js';
@@ -32,9 +32,9 @@ import { ProjectileSystem } from './systems/ProjectileSystem.js';
 import { CollisionSystem } from './systems/CollisionSystem.js';
 import { MovementResolutionSystem } from './systems/MovementResolutionSystem.js'; 
 import { PlayerCollisionSystem } from './systems/PlayerCollisionSystem.js';
-import { ProjectileCollisionSystem } from './systems/ProjectileCollisionSystem.js';  
+import { ProjectileCollisionSystem } from './systems/ProjectileCollisionSystem.js'; 
+import { SplashSystem } from './systems/SplashSystem.js';
 import { EntityRemovalSystem } from './systems/EntityRemovalSystem.js'; 
-import { titleScreen } from './titlescreen.js'; 
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
@@ -112,12 +112,13 @@ export class Game {
         this.sfxQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.SFX || [];
         this.splashScreen = document.getElementById('splash');
         this.splashScreen.style.display = 'flex';
-        this.splashScreen.innerHTML = titleScreen;
+ 
 
     }
 
     async initializeSystems() {
         this.systems.data = new DataSystem(this.entityManager, this.state.eventBus);
+        this.systems.splash = new SplashSystem(this.entityManager, this.state.eventBus);
         this.systems.action = new ActionSystem(this.entityManager, this.state.eventBus);
         this.systems.damageCalculation = new DamageCalculationSystem(this.entityManager, this.state.eventBus);
         this.systems.combat = new CombatSystem(this.entityManager, this.state.eventBus);
@@ -198,6 +199,7 @@ export class Game {
 
             // *** CHANGED: Pass deltaTime to updateSystems ***
             this.updateSystems([
+                
                 'playerInput',
                 'playerController',
                 'playerTimer',
@@ -243,13 +245,11 @@ export class Game {
             gameState = this.entityManager.getEntity('gameState');
         } else {
             const gameStateComp = gameState.getComponent('GameState');
-            gameStateComp.gameStarted = true;
+            if (!gameStateComp.gameStarted)  gameStateComp.gameStarted = true;
         }
         this.splashScreen.style.display = 'none';
         gameState.needsRender = true;
         this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume: .05 });
-        setTimeout(() => { this.sfxQueue.push({ sfx: 'intro', volume: .5 }); }, 2750);
-        
         
         this.startGameLoop();
         console.log('Game.js: Game started');
