@@ -5,21 +5,21 @@ import { Utilities } from './Utilities.js';
 import { EntityManager } from './core/EntityManager.js';
 import { EventBus } from './core/EventBus.js';
 import {
-    PositionComponent,
-    HealthComponent,
-    ManaComponent,
-    StatsComponent,
-    InventoryComponent,
-    ResourceComponent,
-    PlayerStateComponent,
-    MapComponent,
-    EntityListComponent,
+    //PositionComponent,
+    //HealthComponent,
+    //ManaComponent,
+    //StatsComponent,
+    //InventoryComponent,
+    //ResourceComponent,
+    //PlayerStateComponent,
+    //MapComponent,
+    //EntityListComponent,
     UIComponent,
     RenderStateComponent,
     GameStateComponent,
     RenderControlComponent, // Added
-    createDefaultPlayerComponents,
-    createDefaultLevelComponents
+    //createDefaultPlayerComponents,
+    //createDefaultLevelComponents
 } from './core/Components.js';
 
 export class State {
@@ -35,7 +35,6 @@ export class State {
         this.HEIGHT = 67;
         this.MIN_STAIR_DISTANCE = Math.floor(Math.random() * 31) + 30;
         this.AGGRO_RANGE = 4;
-        this.discoveryRadiusDefault = 2;
 
         // DOM references (preserved for now, to be handled by RenderSystem)
         this.mapDiv = null;
@@ -74,22 +73,12 @@ export class State {
             new UIComponent()
         );
 
-        // Render state entity (global)
-        const renderState = this.entityManager.createEntity('renderState', true);
-        this.entityManager.addComponentToEntity('renderState',
-            new RenderStateComponent()
-        );
-        this.entityManager.addComponentToEntity('renderState',
-            new RenderControlComponent()
-        );
+       
 
         // Add LevelDimensions to state entity
 
         const state = this.entityManager.createEntity('state', true);
-        this.entityManager.addComponentToEntity('state', {
-            type: 'DiscoveryRadius',
-            discoveryRadiusDefault: 2
-        });
+       
         this.entityManager.addComponentToEntity('state', {
             type: 'LevelDimensions',
             WIDTH: this.WIDTH,

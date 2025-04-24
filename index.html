@@ -23,10 +23,9 @@
                     <li class="selected">New Game</li>
                     <li>Load Game</li>
                     <li>Options</li>
-                    <li>Credits</li>
                 </ul>
             </div>
-            <div class="splash-lore">
+            <div id="playWhispers" class="splash-lore">
                 Whispers yet echo!
             </div>
         </div>
@@ -43,6 +42,8 @@
                 <div class="player-info-child">Dungeon Tier: <span id="dungeonTier"></span></div>
                 <div class="player-info-child">Gold: <span id="playerGold"></span></div>
             </div>
+
+            <canvas id="minimap-canvas" width="248" height="138"></canvas>
 
             <div id="player-status">
                 <div class="player-status-child">Heal Potions: <span id="healPotionCount"></span></div><!-- set innerHTML on #healPotionCount -->
@@ -94,6 +95,7 @@
                                 <button id="save-games-button"> Save Game </button>
                                 <button id="load-games-button"> Load Game </button>
                                 <button id="new-game-button"> New Game </button>
+                                <button id="exit-button"> Exit Game </button>
                                 <button id="about-button"> About </button>
                             </div>
                         </div>
@@ -128,7 +130,17 @@
                                 <div id="options-data" style="display:none;"><h3>Options:</h3></div>
                                 <div id="save-games-data" style="display:none;"><h3>Saved Games:</h3></div>
                                 <div id="load-games-data" style="display:none;"><h3>Load Games:</h3></div>
-                                <div id="new-game-data" style="display:none;"><h3>New Game: - Create Character</h3></div>
+                                <div id="new-game-data" style="display:none;">
+                                    <h3>New Game: - Create Character</h3>
+                                    <ul>
+                                        <li>Give your new champion their Zukarii name and press "Start New Game" to play now!</li>
+                                        <li><label>New Charater Name: </label> <input type="text" id="player-name-input" class="save-game-input" size="42" placeholder="Enter New Charater Name"></li>
+                                        <li><button id="start-new-game-button" class="new-game" data-save-id="new" style="background-color:#0f0;">Start New Game</button></li>
+
+
+                                    </ul>
+                                       
+                                </div>
                                 <div id="about-data" style="display:none;">
                                     <h3>About:</h3>
                                     <h4>Developers:</h4>

@@ -5,15 +5,16 @@ export class LightingSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.requiredComponents = ['LightingState', 'LightSourceDefinitions'];
+       
     }
 
     init() {
+        this.RENDER_RADIUS_MODIFIER = 2;
+        this.DEFAULT_VISIBLE_RADIUS = 3
         this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
         this.eventBus.on('LightSourceActivated', (data) => this.activateLightSource(data));
         this.eventBus.on('TurnEnded', () => this.checkExpiration());
-        console.log('LightingSystem: Initialized with EventBus:', this.eventBus);
-        console.log('LightingSystem: Required components:', this.requiredComponents);
-        console.log('LightingSystem: Event listeners initialized');
+        this.renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
     }
 
     checkExpiration() {
@@ -22,12 +23,13 @@ export class LightingSystem extends System {
 
         if (lightingState.isLit && lightingState.remainingDuration > 0) {
             lightingState.remainingDuration--;
+
             if (lightingState.remainingDuration <= 0) {
                 lightingState.isLit = false;
                 lightingState.expiresOnTurn = 0;
-                lightingState.visibleRadius = 2; // Default radius
+                lightingState.visibleRadius = this.DEFAULT_VISIBLE_RADIUS; // Default radius
+                this.renderState.renderRadius = this.DEFAULT_VISIBLE_RADIUS + this.RENDER_RADIUS_MODIFIER;
                 console.log(`LightingSystem: Torch expired, visibleRadius reset to ${lightingState.visibleRadius}`);
-                this.eventBus.emit('LightingStateChanged', { visibleRadius: lightingState.visibleRadius });
                 this.eventBus.emit('LogMessage', { message: 'The torch has burned out!' });
                 this.trackControlQueue.push({ track: 'torchBurning', play: false, volume: 0 });
             }
@@ -51,11 +53,11 @@ export class LightingSystem extends System {
 
         lightingState.isLit = true;
         lightingState.expiresOnTurn = currentTurn + duration;
-        lightingState.visibleRadius = visibleRadius; // Use fixed value from definitions (e.g., 4)
+        lightingState.visibleRadius = visibleRadius; 
+        this.renderState.renderRadius = visibleRadius + this.RENDER_RADIUS_MODIFIER;
         lightingState.remainingDuration = duration;
 
         console.log(`LightingSystem: Activated ${type} - visibleRadius: ${lightingState.visibleRadius}, expires on turn: ${lightingState.expiresOnTurn}`);
-        this.eventBus.emit('LightingStateChanged', { visibleRadius: lightingState.visibleRadius });
         this.trackControlQueue.push({ track: 'torchBurning', play: true, volume: .05 });
     }
 }

@@ -20,6 +20,8 @@ export class AudioSystem extends System {
         this.eventBus.on('PlayTrackControl', ({ track, play, volume }) => {
             this.playTrackControl({ track, play, volume });
         });
+
+        console.warn('AudioSystem initialized', this.audioContext);
     }
 
     update(deltaTime) {
@@ -191,6 +193,7 @@ export class AudioSystem extends System {
             }
         }
         console.log('AudioSystem: sounds preloaded');
-        this.eventBus.emit('AudioLoaded');
+            this.eventBus.emit('AudioLoaded');
+        
     }
 }

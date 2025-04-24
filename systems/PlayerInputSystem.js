@@ -16,7 +16,8 @@ export class PlayerInputSystem {
             'escape': 'escape', 'Escape': 'escape',
             't': 't', 'T': 't',
             'h': 'h', 'H': 'h',
-            ' ': ' ', 'Space': ' '
+            ' ': ' ', 'Space': ' ',
+            'm': 'm', 'M': 'm'
         };
 
         this.lastInputUpdate = 0;
@@ -43,17 +44,23 @@ export class PlayerInputSystem {
         
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (!gameState.gameStarted) {
-
-            this.eventBus.emit('ToggleOverlay', {});
-            this.eventBus.emit('StartGame');
-            return;
+            if (!document.activeElement.id === 'player-name-input' && mappedKey) {
+                event.preventDefault();  // Prevent default action for mapped keys
+            } else {
+                //moving start game to only be called on laod game or new game from UI
+                //this.eventBus.emit('StartGame');
+                return;
+            }
+           
+            
+           
         }
          
         //console.log('PlayerInputSystem: handleKeyDown - raw key:', event.key);ssssssss
         const mappedKey = this.keyMap[event.key];
         //console.log('PlayerInputSystem: handleKeyDown - mappedKey:', mappedKey);
 
-        if (document.activeElement.id === 'save-name-input' && mappedKey != 'escape') {
+        if ((document.activeElement.id === 'save-name-input' ) && mappedKey != 'escape') {
             return; // Ignore keypresses when the save-name-input field is focused
         } else if (mappedKey) {
             event.preventDefault();  // Prevent default action for mapped keys
@@ -135,7 +142,11 @@ export class PlayerInputSystem {
                     this.eventBus.emit('ToggleRangedMode', { event });
                     console.log('PlayerInputSystem: Emitting ToggleRangedMode - event:', event.type, 'key:', event.key);
                     break;
-            
+                case 'm':
+                    event.preventDefault();
+                    this.eventBus.emit('ToggleMinimap');
+                    console.log('PlayerInputSystem: Emitting ToggleMinimap');
+                    break;
         }
     }
 

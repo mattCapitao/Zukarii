@@ -31,15 +31,13 @@ export class OverlayStateComponent {
 
 export class RenderStateComponent {
     constructor({
-        visibleRadius = 2, 
         activeRenderZone = new Set(),
         redrawTiles = new Set(), // set of tiles to be added to activeRenderZone at next render (old moster positions)
         projectile = null,
         torchLitOnTurn = false,
-        renderRadius = 7
+        renderRadius = 6
     } = {}) {
         this.type = 'RenderState';
-        this.visibleRadius = visibleRadius;
         this.activeRenderZone = activeRenderZone;
         this.redrawTiles = redrawTiles; 
         this.projectile = projectile;
@@ -136,7 +134,7 @@ export class RenderControlComponent {
 
 // Add to GameComponents.js
 export class LightingState {
-    constructor({ isLit = false, expiresOnTurn = 0, visibleRadius = 2 } = {}) {
+    constructor({ isLit = false, expiresOnTurn = 0, visibleRadius = 4 } = {}) {
         this.type = 'LightingState';
         this.isLit = isLit;
         this.expiresOnTurn = expiresOnTurn;
@@ -149,6 +147,7 @@ export class LightSourceDefinitions {
     constructor() {
         this.type = 'LightSourceDefinitions';
         this.definitions = {
+            unlit: { duration: 0, visibleRadius: 0 }, // No light source
             torch: { duration: 300, visibleRadius: 4 }, // Adjusted for testing
             lamp: { duration: 500, visibleRadius: 5 } // For future extensibility
         };
@@ -178,3 +177,4 @@ export class LevelTransitionComponent {
         this.pendingTransition = pendingTransition; // Indicates if a level transition is pending
     }
 }
+

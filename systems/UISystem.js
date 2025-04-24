@@ -137,6 +137,11 @@ export class UISystem extends System {
                 if (button) {
                     this.activeMenuSection = button.id;
                     this.updateMenu();
+
+                    if (button.id === 'exit-button') {
+                        console.log(`Button clicked: ${button.id}, activeMenuSection set to: ${this.activeMenuSection}`, button);
+                         location.reload(true);
+                    }
                 }
             });
         }
@@ -508,10 +513,17 @@ export class UISystem extends System {
         const tabMenuDiv = document.getElementById('tab-menu');
         if (!tabMenuDiv) return;
 
+        
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        let tabIsDisabled = '';
+        if (!gameState.gameStarted) {
+            tabIsDisabled = 'disabled';
+        }
+        
         tabMenuDiv.innerHTML = `
-            <button id="menu-tab" class="tabs-button" style="background: ${activeTab === 'menu' ? '#0f0' : '#2c672c'};">Menu</button>
-            <button id="character-tab" class="tabs-button" style="background: ${activeTab === 'character' ? '#0f0' : '#2c672c'}; ">Character</button>
-            <button id="log-tab" class="tabs-button" style="background: ${activeTab === 'log' ? '#0f0' : '#2c672c'};">Log</button>
+            <button id="menu-tab"  class="tabs-button" style="background: ${activeTab === 'menu' ? '#0f0' : '#2c672c'};">Menu</button>
+            <button id="character-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'character' ? '#0f0' : '#2c672c'}; ">Character</button>
+            <button id="log-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'log' ? '#0f0' : '#2c672c'};">Log</button>
             <button id="close-tabs">X</button>
         `;
     }
@@ -566,6 +578,7 @@ export class UISystem extends System {
                     });
                 }
             }
+          
         }
 
         const menuButtons = document.getElementById('menu-buttons');

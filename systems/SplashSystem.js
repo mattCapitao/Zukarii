@@ -1,4 +1,7 @@
 ﻿import { System } from '../core/Systems.js';
+import {
+    NewCharacterComponent,
+} from '../core/Components.js';
 
 export class SplashSystem extends System {
     constructor(entityManager, eventBus) {
@@ -67,8 +70,8 @@ export class SplashSystem extends System {
         this.eventBus.on('AudioLoaded', () => {
             console.log('SplashSystem: Audio loaded, playing sounds');
             this.eventBus.emit('PlayTrackControl', { track: 'backgroundMusic', play: true, volume: 0.05 });
-            setTimeout(() => this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.05 }), 100);
-            setTimeout(() => this.eventBus.emit('PlaySfxImmediate', { sfx: 'intro', volume: 0.25 }), 2500);
+            setTimeout(() => this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 }), 5);
+            
         });
 
         // Start animation loop
@@ -76,6 +79,7 @@ export class SplashSystem extends System {
 
         console.log('SplashSystem: Initialized');
     }
+
 
     createParticle() {
         return {
@@ -214,27 +218,48 @@ export class SplashSystem extends System {
         this.menuItems.forEach((item, index) => {
             item.addEventListener('click', () => {
                 this.selectedIndex = index;
-                this.eventBus.emit('PlaySfxImmediate', { sfx: 'ding', volume: 0.06 });
+                //this.eventBus.emit('PlaySfxImmediate', { sfx: 'ding', volume: 0.06 });
                 this.updateSelection();
                 this.handleSelection(index);
             });
         });
 
+        this.startGameButton = document.getElementById('start-new-game-button');
+        this.startGameButton.addEventListener('click', () => {
+
+            const playerNameInput = document.getElementById('player-name-input');
+            const playerName = playerNameInput.value.trim();
+            const player = this.entityManager.getEntity('player');
+            if (playerName) {
+                player.getComponent('PlayerState').name = playerName;
+            } else {
+                player.getComponent('PlayerState').name = 'Zukarii';
+            }
+            this.entityManager.addComponentToEntity('player', new NewCharacterComponent({name: playerName}));
+            
+           // const newCharComp = this.player.getComponent('NewCharacter');
+           // newCharComp.name = playerName;
+
+
+            this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
+            this.createNewGame();
+        });
+
         this.handleKeydown = (e) => {
-            if (!this.isActive) return;
+            if (!this.isActive || document.activeElement.id === 'player-name-input') return;
             if (e.key === 'ArrowUp') {
                 this.selectedIndex = (this.selectedIndex - 1 + this.menuItems.length) % this.menuItems.length;
-                this.eventBus.emit('PlaySfxImmediate', { sfx: 'ding', volume: 0.06 });
+               // this.eventBus.emit('PlaySfxImmediate', { sfx: 'ding', volume: 0.06 });
                 this.updateSelection();
             } else if (e.key === 'ArrowDown') {
                 this.selectedIndex = (this.selectedIndex + 1) % this.menuItems.length;
-                this.eventBus.emit('PlaySfxImmediate', { sfx: 'ding', volume: 0.06 });
+               // this.eventBus.emit('PlaySfxImmediate', { sfx: 'ding', volume: 0.06 });
                 this.updateSelection();
             } else if (e.key === 'Enter') {
                 this.handleSelection(this.selectedIndex);
             }
         };
-        document.addEventListener('keydown', this.handleKeydown);
+       // document.addEventListener('keydown', this.handleKeydown);
     }
 
     updateSelection() {
@@ -244,11 +269,16 @@ export class SplashSystem extends System {
     }
 
     handleSelection(index) {
-        this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.075 });
+        //this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.075 });
         if (index === 0) {
-            this.isActive = false;
-            this.splash.style.display = 'none';
-            this.eventBus.emit('StartGame');
+            this.eventBus.emit('ToggleOverlay', { tab: 'menu' });
+            setTimeout(() => {
+                this.eventBus.emit('PlaySfxImmediate', { sfx: 'intro', volume: 0.25 });
+                const newGameButton = document.getElementById('new-game-button');
+                if (newGameButton) {
+                    newGameButton.click();
+                }
+            }, 0);
         } else if (index === 1) {
             this.eventBus.emit('ToggleOverlay', { tab: 'menu' });
             setTimeout(() => {
@@ -261,44 +291,25 @@ export class SplashSystem extends System {
             this.eventBus.emit('ToggleOverlay', { tab: 'menu' });
             setTimeout(() => {
                 const optionsButton = document.getElementById('options-button');
-                if (loadButton) {
+                if (optionsButton) {
                     optionsButton.click();
                 }
             }, 0);
         } else if (index === 3) {
-            this.splash.innerHTML = `
-                <div class="splash-credits" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #0f0; font-size: 1.5rem; background: rgba(20, 30, 20, 0.7); padding: 2rem; border: 0.125rem solid #0f0; border-radius: 0.625rem; animation: fadeIn 0.5s ease-in;">
-                    <h2 style="font-size: 2rem; margin-bottom: 1rem;">Credits</h2>
-                    <p>Creator / Game Director / Lead Engineer: Matt Capitao</p>
-                    <p>Supporting AI - Architect / Engineer: Grok 3 (xAI)</p>
-                    <p>Supporting AI - QA / Debug Engineer: GitHub Copilot</p>
-                    <button id="back-to-menu" style="margin-top: 1rem; padding: 0.625rem; background: #2c672c; color: #0f0; border: 0.125rem solid #0f0; border-radius: 0.3125rem; cursor: pointer;">Back to Menu</button>
-                </div>
-            `;
-            document.getElementById('back-to-menu').addEventListener('click', () => {
-                this.splash.innerHTML = `
-                    <canvas id="splash-canvas"></canvas>
-                    <h1 class="splash-title">Zukarii: The Descent</h1>
-                    <div class="splash-menu">
-                        <ul>
-                            <li class="selected">New Game</li>
-                            <li>Load Game</li>
-                            <li>Options</li>
-                            <li>Credits</li>
-                        </ul>
-                    </div>
-                    <div class="splash-lore">
-                        Whispers yet echo
-                    </div>
-                `;
-                this.canvas = document.getElementById('splash-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.resizeCanvas();
-                this.isActive = true;
-                this.setupEventListeners();
-                this.animate();
-            });
+            this.eventBus.emit('ToggleOverlay', { tab: 'menu' });
+            setTimeout(() => {
+                const aboutButton = document.getElementById('about-button');
+                if (aboutButton) {
+                    aboutButton.click();
+                }
+            }, 0);
         }
+    }
+
+    createNewGame() {
+        this.isActive = false;
+        this.splash.style.display = 'none';
+        this.eventBus.emit('StartGame');
     }
 
     destroy() {
@@ -311,4 +322,5 @@ export class SplashSystem extends System {
         this.splash.style.display = 'none';
         console.log('SplashSystem: Destroyed');
     }
+
 }

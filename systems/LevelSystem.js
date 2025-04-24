@@ -119,8 +119,8 @@ export class LevelSystem extends System {
             console.error(`LevelSystem.js: Failed to update map at (${x}, ${y}) on tier ${tier} - mapComp or map position invalid`);
         }
 
-        const exploration = levelEntity.getComponent('Exploration');
-        exploration.discoveredFloors.add(`${x},${y}`);
+        //const exploration = levelEntity.getComponent('Exploration');
+        //exploration.discoveredFloors.add(`${x},${y}`);
     }
 
     addLevel({ tier, customLevel = null }) {

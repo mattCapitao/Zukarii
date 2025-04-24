@@ -1,4 +1,5 @@
 ﻿// systems/LevelTransitionSystem.js - Updated
+import { LightingState } from '../core/Components.js';
 import { System } from '../core/Systems.js';
 
 export class LevelTransitionSystem extends System {
@@ -12,6 +13,7 @@ export class LevelTransitionSystem extends System {
         this.levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
         this.eventBus.on('LevelAdded', (data) => this.handleLevelAdded(data));
         this.eventBus.on('TransitionLoad', ({ tier, data }) => this.transitionViaLoad(tier, data));
+        this.lightingState = this.entityManager.getEntity('lightingState').getComponent('LightingState');
     }
 
     update(deltaTime) {
@@ -253,27 +255,6 @@ export class LevelTransitionSystem extends System {
         if (isNewTier) {
             explorationComp.discoveredWalls.clear();
             explorationComp.discoveredFloors.clear();
-            const discoveryRadius = renderState.discoveryRadius;
-            const height = mapComp.map.length;
-            const width = mapComp.map[0].length;
-            const minX = Math.max(0, pos.x - discoveryRadius);
-            const maxX = Math.min(width - 1, pos.x + discoveryRadius);
-            const minY = Math.max(0, pos.y - discoveryRadius);
-            const maxY = Math.min(height - 1, pos.y + discoveryRadius);
-
-            for (let y = minY; y <= maxY; y++) {
-                for (let x = minX; x <= maxX; x++) {
-                    const distance = Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
-                    if (distance <= discoveryRadius) {
-                        const tileKey = `${x},${y}`;
-                        if (mapComp.map[y][x] === '#') {
-                            explorationComp.discoveredWalls.add(tileKey);
-                        } else {
-                            explorationComp.discoveredFloors.add(tileKey);
-                        }
-                    }
-                }
-            }
         }
 
         gameState.needsInitialRender = true;

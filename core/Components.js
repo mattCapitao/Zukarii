@@ -21,7 +21,8 @@ import {
     InventoryComponent,
     ResourceComponent,
     PlayerStateComponent,
-    InputStateComponent
+    InputStateComponent,
+    NewCharacterComponent,
 } from './components/PlayerComponents.js';
 
 import {
@@ -78,6 +79,7 @@ export {
     ResourceComponent,
     PlayerStateComponent,
     InputStateComponent,
+    NewCharacterComponent,
 
     // Game-related components
     UIComponent,

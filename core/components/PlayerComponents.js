@@ -110,3 +110,26 @@ export class InputStateComponent {
         this.keys = keys;
     }
 }
+
+export class NewCharacterComponent {
+    constructor({
+        name = "",
+        level = 1,
+        xp = 0,
+        nextLevelXp = 0,
+        dead = false,
+        lampLit = false,
+        discoveredTileCount = 0,
+        isInCombat = false
+    } = {}) {
+        this.type = 'NewCharacter';
+        this.name = name;
+        this.level = level;
+        this.xp = xp;
+        this.nextLevelXp = nextLevelXp;
+        this.dead = dead;
+        this.lampLit = lampLit;
+        this.discoveredTileCount = discoveredTileCount;
+        this.isInCombat = isInCombat;
+    }
+}

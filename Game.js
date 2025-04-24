@@ -39,7 +39,7 @@ import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
-    LevelTransitionComponent, HitboxComponent, LastPositionComponent,
+    LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
 } from './core/Components.js';
 
 export class Game {
@@ -51,7 +51,7 @@ export class Game {
         this.lastUpdateTime = 0;
         this.lastMouseEventTime = 0;
         this.gameLoopId = null;
-
+        this.RENDER_RADIUS_MODIFIER = 2;
         let player = this.entityManager.getEntity('player');
         if (player) {
             this.entityManager.removeEntity('player');
@@ -96,6 +96,19 @@ export class Game {
         lightingState = this.entityManager.createEntity('lightingState', true);
         this.entityManager.addComponentToEntity('lightingState', new LightingState());
         this.entityManager.addComponentToEntity('lightingState', new LightSourceDefinitions());
+        const visibilityRadius = lightingState.getComponent('LightingState').visibilityRadius;
+
+
+        // Render state entity (global)
+        const renderState = this.entityManager.createEntity('renderState', true);
+        this.entityManager.addComponentToEntity('renderState',
+            new RenderStateComponent()
+        );
+        renderState.getComponent('RenderState').renderRadius = visibilityRadius +  this.RENDER_RADIUS_MODIFIER ;
+        
+        this.entityManager.addComponentToEntity('renderState',
+            new RenderControlComponent()
+        );
        
         this.entityManager.addComponentToEntity('gameState', new DataProcessQueues());
         this.entityManager.addComponentToEntity('gameState', new AudioQueueComponent());
@@ -251,6 +264,14 @@ export class Game {
         document.getElementById('hud-layer').style.visibility = 'visible';
         gameState.needsRender = true;
         this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume: .05 });
+
+        const player = this.entityManager.getEntity('player');
+        const newPlayerComp = player.getComponent('NewCharacter');
+        if (newPlayerComp) {
+            const saveId = null;
+            this.state.eventBus.emit('RequestSaveGame', { saveId });
+            player.removeComponent('NewCharacter');
+        }
         
         this.startGameLoop();
         console.log('Game.js: Game started');

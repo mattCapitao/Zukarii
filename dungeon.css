@@ -193,6 +193,7 @@ overflow: hidden; /* Prevent child overflow */
 
 #hud-layer {
     position: absolute;
+    opacity: 0.85;
     top: 0;
     left: 0;
     width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
@@ -202,6 +203,8 @@ overflow: hidden; /* Prevent child overflow */
     z-index: 100; /* Above game but below splash */
     overflow: hidden; /* Prevent child overflow */
 }
+
+
 
 #player-info {
 position: absolute;
@@ -227,6 +230,24 @@ color: #0f0;
 z-index: 1000;
 padding: 0.625rem; /* ~10px */
 }
+
+#minimap-canvas {
+    position: absolute;
+    top: 3.5rem;
+    right: 0;
+    width: 248px;
+    height: 138px;
+    padding: 2px;
+    border: 1px solid #0f0;
+    border-radius: 0.625rem;
+    background: #222;
+    z-index: 600;
+    pointer-events: none;
+}
+
+    #minimap-canvas.hidden {
+        display: none;
+    }
 
 #player-status {
 position: absolute;
