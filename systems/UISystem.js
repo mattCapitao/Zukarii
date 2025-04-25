@@ -139,8 +139,10 @@ export class UISystem extends System {
                     this.updateMenu();
 
                     if (button.id === 'exit-button') {
-                        console.log(`Button clicked: ${button.id}, activeMenuSection set to: ${this.activeMenuSection}`, button);
-                         location.reload(true);
+                        this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.05 });
+                        setTimeout(() => {
+                            location.reload(true);
+                        }, 2000);
                     }
                 }
             });
@@ -172,11 +174,14 @@ export class UISystem extends System {
                 if (loadButton && !loadButton.disabled) {
                     console.log('UISystem: Load button clicked, emitting RequestLoadGame');
                     const saveId = loadButton.dataset.saveId;
+                    this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.05 });
+                    setTimeout(() => {  
                     this.eventBus.emit('RequestLoadGame', { saveId }, (result) => {
                         if (result.success) {
                             console.log('UISystem: Load successful, waiting for TransitionLoad');
+                            this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
                         }
-                    });
+                    });}, 2000);
                 }
 
                 if (deleteButton) {
@@ -412,6 +417,7 @@ export class UISystem extends System {
     toggleOverlay({ tab = null }) {
         console.log('UISystem: ToggleOverlay called with tab:', tab);
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
+        
         const currentTab = overlayState.activeTab;
 
         if (tab === currentTab || !tab) {
@@ -421,6 +427,7 @@ export class UISystem extends System {
             overlayState.isOpen = true;
             overlayState.activeTab = tab;
         }
+        document.getElementById('splash-menu').toggleAttribute('hidden', overlayState.isOpen);
 
         this.tabs.style.display = overlayState.isOpen ? 'block' : 'none';
         this.tabs.className = overlayState.isOpen ? '' : 'hidden';
@@ -528,6 +535,8 @@ export class UISystem extends System {
         `;
     }
 
+    
+
     updateMenu() {
         const menuSections = {
             'controls-button': 'controls-data',
@@ -538,6 +547,13 @@ export class UISystem extends System {
             'new-game-button': 'new-game-data',
             'about-button': 'about-data'
         };
+
+        const gameStarted = this.entityManager.getEntity('gameState').getComponent('GameState').gameStarted;
+
+        document.getElementById('new-game-button').toggleAttribute("hidden", gameStarted);
+        document.getElementById('load-games-button').toggleAttribute("hidden", gameStarted);
+        document.getElementById('exit-button').toggleAttribute("hidden", !gameStarted);;
+        document.getElementById('save-games-button').toggleAttribute("hidden", !gameStarted);
 
         const menuDataWrapper = document.getElementById('menu-data-wrapper');
         if (menuDataWrapper) {
@@ -557,24 +573,54 @@ export class UISystem extends System {
                         let html = `<h3>${isSaveMode ? 'Save Game' : 'Load Game'}</h3>`;
                         html += '<ul>';
 
+                        let uniqueCharacterNames = [];
+                        uniqueCharacterNames = [...new Set(metadata.map(save => save.characterName))];
+                        const selectOptions = uniqueCharacterNames
+                            .map(name => `<option value="${name}">${name}</option>`)
+                            .join('');
+
                         if (isSaveMode) {
-                            html += `<li class="new-save-game"><button class="save-game" data-save-id="new" style="background-color:#0f0;">New Save</button> | <input type="text" id="save-name-input" class="save-game-name" size="42" value="PLAYERNAME, Tier TIER - Saved NOW" ></span></li><li>&nbsp;</li>`;
+                            html += `<li class="new-save-game"><button class="save-game" data-save-id="new" style="background-color:#0f0;">New Save</button> | <select id="character-select" >${selectOptions}<option value="all">All Characters</option></select></li>`;
+                        } else {
+                            html += `<li class="new-save-game"><select id="character-select" >${selectOptions}<option value="all">All Characters</option></select></li>`;
                         }
 
                         metadata.forEach(save => {
                             if (isSaveMode) {
-                                html += `<li><button class="overwrite-game" data-save-id="${save.saveId}">Overwrite</button> | <span class="save-game-name">${save.characterName}, Tier ${save.tier} - Saved on ${save.timestamp}</span> | <button class="delete-game" data-save-id="${save.saveId}" style="background: red;">Delete</button></li>`;
+                                html += `<li class="save-game-item" data-character="${save.characterName}"><button class="overwrite-game" data-save-id="${save.saveId}">Overwrite</button> | <span class="save-game-name">${save.characterName}, Tier ${save.tier} - Saved on ${save.timestamp}</span> | <button class="delete-game" data-save-id="${save.saveId}" style="background: red;">Delete</button></li>`;
                             } else {
                                 if (save.isDead) {
                                     html += `<li><button class="load-game" data-save-id="${save.saveId}" disabled>Dead</button> | <span class="save-game-name">${save.characterName}, Tier ${save.tier} - Saved on ${save.timestamp}</span>  | <button class="delete-game" data-save-id="${save.saveId}" style="background: red;">Delete</button></li>`;
                                 } else {
-                                    html += `<li><button class="load-game" data-save-id="${save.saveId}">Load</button> | <span class="save-game-name">${save.characterName}, Tier ${save.tier} - Saved on ${save.timestamp}</span> | <button class="delete-game" data-save-id="${save.saveId}" style="background: red;">Delete</button></li>`;
+                                    html += `<li class="save-game-item" data-character="${save.characterName}"><button class="load-game"  data-save-id="${save.saveId}">Load</button> | <span class="save-game-name">${save.characterName}, Tier ${save.tier} - Saved on ${save.timestamp}</span> | <button class="delete-game" data-save-id="${save.saveId}" style="background: red;">Delete</button></li>`;
                                 }
                             }
                         });
 
                         html += '</ul>';
                         targetDiv.innerHTML = html;
+
+                        const characterSelect = document.getElementById('character-select');
+                        characterSelect.addEventListener('change', (event) => {
+                            const selectedCharacter = event.target.value; // Get the selected character name
+                            const saveGameItems = document.querySelectorAll('.save-game-item'); // Select all save game list items
+                            saveGameItems.forEach(item => {
+                                const characterName = item.getAttribute('data-character'); // Get the character name from the data attribute
+                                if (selectedCharacter === 'all' || characterName === selectedCharacter) {
+                                    item.removeAttribute('hidden'); // Show the item
+                                } else {
+                                    item.setAttribute('hidden', ''); // Hide the item
+                                }
+                            });
+                        });
+
+                        if (isSaveMode) {
+                            const currentCharacter = this.entityManager.getEntity('player').getComponent('PlayerState').name;
+                            characterSelect.value = currentCharacter; // Default to "All Characters"
+                        } else {
+                            characterSelect.value = uniqueCharacterNames[0]; // Default to the first character in the list;
+                        }
+                        characterSelect.dispatchEvent(new Event('change'));
                     });
                 }
             }

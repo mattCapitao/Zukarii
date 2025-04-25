@@ -70,8 +70,7 @@ export class SplashSystem extends System {
         this.eventBus.on('AudioLoaded', () => {
             console.log('SplashSystem: Audio loaded, playing sounds');
             this.eventBus.emit('PlayTrackControl', { track: 'backgroundMusic', play: true, volume: 0.05 });
-            setTimeout(() => this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 }), 5);
-            
+            this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
         });
 
         // Start animation loop
@@ -226,7 +225,6 @@ export class SplashSystem extends System {
 
         this.startGameButton = document.getElementById('start-new-game-button');
         this.startGameButton.addEventListener('click', () => {
-
             const playerNameInput = document.getElementById('player-name-input');
             const playerName = playerNameInput.value.trim();
             const player = this.entityManager.getEntity('player');
@@ -235,14 +233,11 @@ export class SplashSystem extends System {
             } else {
                 player.getComponent('PlayerState').name = 'Zukarii';
             }
-            this.entityManager.addComponentToEntity('player', new NewCharacterComponent({name: playerName}));
-            
-           // const newCharComp = this.player.getComponent('NewCharacter');
-           // newCharComp.name = playerName;
-
-
+            this.entityManager.addComponentToEntity('player', new NewCharacterComponent({ name: playerName }));
             this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
-            this.createNewGame();
+            setTimeout(() => { this.createNewGame() }, 2000);
+            this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.05 });
+            
         });
 
         this.handleKeydown = (e) => {

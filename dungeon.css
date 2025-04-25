@@ -831,7 +831,7 @@ li.new-save-game {
     border-bottom: 0.125rem solid #2c672c; /* ~1px */
 }
 
-#save-name-input {
+#save-name-input, #character-select{
     border: 0.125rem solid #ccc;
     background-color: #2c672c80;
     color: #080;
@@ -839,6 +839,11 @@ li.new-save-game {
 .save-game-name {
     display: inline-block;
     width: 30rem;
+}
+
+#character-select {
+    padding: 0.3125rem; /* ~5px */
+    margin-bottom: 0.625rem; /* ~10px */
 }
 
 

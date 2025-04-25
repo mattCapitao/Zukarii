@@ -25,6 +25,7 @@ export class PlayerControllerSystem {
     }
 
     update(deltaTime) {
+
         const player = this.entityManager.getEntity('player');
         if (!player) return;
 
@@ -68,29 +69,12 @@ export class PlayerControllerSystem {
                 this.previousKeyStates[direction] = false;
             }
 
-            /*
-            const directions = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-            for (const direction of directions) {
-                const isPressed = !!inputState.keys[direction];
-                const wasPressed = this.previousKeyStates[direction];
-                if (isPressed && attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
-                    console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: ${direction}`);
-                    this.eventBus.emit('RangedAttack', { direction });
-                    attackSpeed.elapsedSinceLastAttack = 0;
-                    this.endTurn('rangedAttack');
-                    this.previousKeyStates[direction] = true;
-                    if (direction === 'ArrowLeft') this.VisualsComponent.faceLeft = true;
-                    if (direction === 'ArrowRight') this.VisualsComponent.faceLeft = false;
-                } else if (!isPressed && wasPressed) {
-                    this.previousKeyStates[direction] = false;
-                }
-            }
-            */
             return;
         }
 
         // Calculate velocity
-        const speed = 96; // pixels/sec
+        const speed = player.getComponent('MovementSpeed').movementSpeed;
+        console.log(`PlayerControllerSystem: Player speed: ${speed}`);
         let vx = 0, vy = 0;
         if (inputState.keys['ArrowUp'] || inputState.keys['w']) vy -= speed;
         if (inputState.keys['ArrowDown'] || inputState.keys['s']) vy += speed;

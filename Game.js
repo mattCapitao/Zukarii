@@ -44,6 +44,7 @@ import {
 
 export class Game {
     constructor() {
+        this.PLAYER_DEFAULT_MOVE_SPEED = 100; // Default player movement speed
         this.state = new State();
         this.entityManager = this.state.entityManager;
         this.utilities = this.state.utilities;
@@ -52,6 +53,7 @@ export class Game {
         this.lastMouseEventTime = 0;
         this.gameLoopId = null;
         this.RENDER_RADIUS_MODIFIER = 2;
+
         let player = this.entityManager.getEntity('player');
         if (player) {
             this.entityManager.removeEntity('player');
@@ -73,11 +75,11 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
         this.entityManager.addComponentToEntity('player', new InputStateComponent());
         this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
-        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(256));
+        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(124));
         this.entityManager.addComponentToEntity('player', new AffixComponent()); // New component added
         this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32,32));
         this.entityManager.addComponentToEntity('player', new HitboxComponent(28,28)); 
-
+        
         let overlayState = this.entityManager.getEntity('overlayState');
         if (!overlayState) {
             overlayState = this.entityManager.createEntity('overlayState', true);
@@ -142,7 +144,7 @@ export class Game {
         this.systems.itemROG = new ItemROGSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.lootManager = new LootManagerSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.player = new PlayerSystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
+        //this.systems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
         this.systems.monsterSpawn = new MonsterSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data);
         this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state);
         this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
@@ -158,15 +160,32 @@ export class Game {
         this.systems.affix = new AffixSystem(this.entityManager, this.state.eventBus);
         this.systems.effects = new EffectsSystem(this.entityManager, this.state.eventBus); // New system added
         this.systems.health = new HealthSystem(this.entityManager, this.state.eventBus);
-        this.systems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
-        this.systems.movementResolution = new MovementResolutionSystem(this.entityManager,this.state.eventBus );
-        this.systems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
-        this.systems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus);
-        this.systems.entityRemoval = new EntityRemovalSystem(this.entityManager);
+        //this.systems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
+        //this.systems.movementResolution = new MovementResolutionSystem(this.entityManager,this.state.eventBus );
+        //this.systems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
+        //this.systems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus);
+        //this.systems.entityRemoval = new EntityRemovalSystem(this.entityManager);
         this.systems.spatialBuckets = new SpatialBucketsSystem(this.entityManager, this.state.eventBus, this.state);
 
         await Promise.all(Object.values(this.systems).map(system => system.init()));
-        console.log('Game.js: Systems initialized');
+        
+    }
+
+    iniitalizeActiveGameSystems() {
+        let activeGameSystems = {}
+
+        activeGameSystems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
+
+        activeGameSystems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
+        activeGameSystems.movementResolution = new MovementResolutionSystem(this.entityManager, this.state.eventBus);
+        activeGameSystems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
+        activeGameSystems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus);
+        activeGameSystems.entityRemoval = new EntityRemovalSystem(this.entityManager);
+        
+        Object.values(activeGameSystems).forEach(system => system.init());
+        this.systems = { ...this.systems, ...activeGameSystems };
+
+        console.log('Game: Active game systems initialized.');
     }
 
     setupEventListeners() {
@@ -260,19 +279,28 @@ export class Game {
             const gameStateComp = gameState.getComponent('GameState');
             if (!gameStateComp.gameStarted)  gameStateComp.gameStarted = true;
         }
+
+        this.iniitalizeActiveGameSystems();
+
         this.splashScreen.style.display = 'none';
         document.getElementById('hud-layer').style.visibility = 'visible';
         gameState.needsRender = true;
         this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume: .05 });
 
         const player = this.entityManager.getEntity('player');
+        // START TEMPORARY CODE TO RESET MOVE SPEED FOR SAVED GAMES WITH MS COMPONENT
+        const movementSpeed = player.getComponent('MovementSpeed');
+        if (movementSpeed) {
+            movementSpeed.movementSpeed = 124; // Set default value
+        }
+        // START TEMPORARY CODE TO RESET MOVE SPEED FOR SAVED GAMES WITH MS COMPONENT
         const newPlayerComp = player.getComponent('NewCharacter');
         if (newPlayerComp) {
             const saveId = null;
             this.state.eventBus.emit('RequestSaveGame', { saveId });
             player.removeComponent('NewCharacter');
         }
-        
+        this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
         this.startGameLoop();
         console.log('Game.js: Game started');
     }
