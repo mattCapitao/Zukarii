@@ -16,7 +16,6 @@ import {
 } from './components/MapComponents.js';
 
 import {
-    ManaComponent,
     StatsComponent,
     InventoryComponent,
     ResourceComponent,
@@ -46,6 +45,7 @@ import {
     LastPositionComponent,
     VisualsComponent,
     HealthComponent,
+    ManaComponent,
     AttackSpeedComponent,
     MovementSpeedComponent,
     AffixComponent,
@@ -73,7 +73,6 @@ export {
     FountainComponent,
 
     // Player-related components
-    ManaComponent,
     StatsComponent,
     InventoryComponent,
     ResourceComponent,
@@ -101,6 +100,7 @@ export {
     LastPositionComponent,
     VisualsComponent,
     HealthComponent,
+    ManaComponent,
     AttackSpeedComponent,
     MovementSpeedComponent,
     AffixComponent,

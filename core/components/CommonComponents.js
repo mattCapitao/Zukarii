@@ -58,13 +58,24 @@ export class VisualsComponent {
 }
 
 export class HealthComponent {
-    constructor(hp = 0, maxHp = 0, updated=false) {
+    constructor(hp = 0, maxHp = 0 ) {
         this.type = 'Health';
         this.hp = hp;
         this.maxHp = maxHp;
-        this.updated = updated; // Indicates if the health has been updated
+        this.healthRegen = 0;
+        this.updated = false; // Indicates if the health has been updated
     }
 } 
+
+export class ManaComponent {
+    constructor(mana = 0, maxMana = 0, manaRegen = 0.25) {
+        this.type = 'Mana';
+        this.mana = mana;
+        this.maxMana = maxMana;
+        this.manaRegen = manaRegen;
+        this.updated = false;
+    }
+}
 
 export class AttackSpeedComponent {
     constructor(attackSpeed = 0) {

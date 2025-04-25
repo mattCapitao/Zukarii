@@ -3,13 +3,7 @@
 
 
 
-export class ManaComponent {
-    constructor(mana = 0, maxMana = 0) {
-        this.type = 'Mana';
-        this.mana = mana;
-        this.maxMana = maxMana;
-    }
-}
+
 export class StatsComponent {
     constructor({
         unallocated = 0, intellect = 0, prowess = 0, agility = 0, maxHp = 0, maxMana = 0,

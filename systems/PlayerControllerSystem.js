@@ -22,6 +22,8 @@ export class PlayerControllerSystem {
         }
         this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
         this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
+        this.healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
+        
     }
 
     update(deltaTime) {
@@ -46,6 +48,12 @@ export class PlayerControllerSystem {
 
         // Ranged mode
         if (gameState.isRangedMode) {
+
+            if (this.entityManager.getEntity('player').getComponent('Mana').mana <= 0) {
+                this.eventBus.emit('LogMessage', { message: `you cannot cast ranged attacks without mana!` });
+                this.eventBus.emit(); 
+                return;
+            }
 
             let dx = 0, dy = 0;
             console.log(`PlayerControllerSystem: Ranged mode active - inputState: `, inputState.keys);
@@ -74,7 +82,7 @@ export class PlayerControllerSystem {
 
         // Calculate velocity
         const speed = player.getComponent('MovementSpeed').movementSpeed;
-        console.log(`PlayerControllerSystem: Player speed: ${speed}`);
+       // console.log(`PlayerControllerSystem: Player speed: ${speed}`);
         let vx = 0, vy = 0;
         if (inputState.keys['ArrowUp'] || inputState.keys['w']) vy -= speed;
         if (inputState.keys['ArrowDown'] || inputState.keys['s']) vy += speed;
@@ -103,6 +111,8 @@ export class PlayerControllerSystem {
             gameState.needsRender = true;
         }
     }
+
+   
 
     endTurn(source) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');

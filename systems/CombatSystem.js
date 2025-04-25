@@ -8,6 +8,8 @@ export class CombatSystem extends System {
         this.requiredComponents = ['Position', 'Health'];
         this.queues = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues') || {};
         this.healthUpdates = this.queues.HealthUpdates || [];
+        this.manaUpdates = this.queues.ManaUpdates;
+       
         this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || []
     }
 
@@ -170,6 +172,13 @@ export class CombatSystem extends System {
         const player = this.entityManager.getEntity('player');
         if (!player) return;
 
+        const manaCost = 3;
+
+        if (this.entityManager.getEntity('player').getComponent('Mana').mana <= manaCost) {
+            console.log(`you do not have enough mana to cast FlamingBolt`);
+            return;
+        }
+
         const combat = player.getComponent('InCombat');
         if (!combat) {
             player.addComponent(new InCombatComponent(3000));
@@ -188,7 +197,9 @@ export class CombatSystem extends System {
             isPiercing = true;
         }
         const sfx = 'firecast0';
+        
         this.sfxQueue.push({ sfx, volume: .1 });
+        this.manaUpdates.push({ entityId: 'player', amount: -manaCost });
         const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
         this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
         this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
@@ -199,6 +210,8 @@ export class CombatSystem extends System {
         const visuals = this.entityManager.getEntity(projectile.id).getComponent('Visuals');
         visuals.avatar = 'img/avatars/projectile.png'; 
         visuals.offsetX = 16; visuals.offsetY = 0;
+
+        console.log(`manaComponent:`, this.entityManager.getEntity('player').getComponent('Mana')); 
 
         this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
     }

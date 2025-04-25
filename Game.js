@@ -28,6 +28,7 @@ import { PlayerTimerSystem } from './systems/PlayerTimerSystem.js';
 import { AffixSystem } from './systems/AffixSystem.js'; 
 import { EffectsSystem } from './systems/EffectsSystem.js'; 
 import { HealthSystem } from './systems/HealthSystem.js'; 
+import { ManaSystem } from './systems/ManaSystem.js';
 import { ProjectileSystem } from './systems/ProjectileSystem.js'; 
 import { CollisionSystem } from './systems/CollisionSystem.js';
 import { MovementResolutionSystem } from './systems/MovementResolutionSystem.js'; 
@@ -160,6 +161,7 @@ export class Game {
         this.systems.affix = new AffixSystem(this.entityManager, this.state.eventBus);
         this.systems.effects = new EffectsSystem(this.entityManager, this.state.eventBus); // New system added
         this.systems.health = new HealthSystem(this.entityManager, this.state.eventBus);
+        this.systems.mana = new ManaSystem(this.entityManager, this.state.eventBus);
         //this.systems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
         //this.systems.movementResolution = new MovementResolutionSystem(this.entityManager,this.state.eventBus );
         //this.systems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
@@ -246,6 +248,7 @@ export class Game {
                 'combat',
                 'damageCalculation',
                 'health',
+                'mana',
                 'ui',
                 'audio',
                 'levelTransition',

@@ -127,6 +127,12 @@ export class UISystem extends System {
             this.playerEntity.getComponent('Health').updated = false;
             console.log(`UISystem: update called Player health updated = ${this.playerEntity.getComponent('Health').updated}`)
         }
+        if (this.playerEntity.getComponent('Mana').updated) {
+            this.updateUI({ entityId: 'player' })
+            console.log(`UISystem: update called Player mana updated = ${this.playerEntity.getComponent('Mana').updated}`);
+            this.playerEntity.getComponent('Mana').updated = false;
+            console.log(`UISystem: update called Player health updated = ${this.playerEntity.getComponent('Mana').updated}`)
+        }
     }
 
     setupEventListeners() {

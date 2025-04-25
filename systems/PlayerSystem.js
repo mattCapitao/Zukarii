@@ -216,6 +216,7 @@ export class PlayerSystem extends System {
         if (oldMaxMana !== 0 && mana.maxMana !== oldMaxMana) {
             mana.mana = Math.round(mana.mana * (mana.maxMana / oldMaxMana));
             mana.mana = Math.max(1, Math.min(mana.mana, mana.maxMana));
+            mana.manaRegen = combinedIntellect * .2;
         }
 
         stats.armor = (stats._internal.gear.armor || 0) + (stats._internal.temp.armor || 0);
@@ -245,6 +246,7 @@ export class PlayerSystem extends System {
     checkLevelUp(player) {
         const playerState = player.getComponent('PlayerState');
         const playerHealth = player.getComponent('Health');
+        const playerMana = player.getComponent('Mana');
         const stats = player.getComponent('Stats');
         let statAllocationMessage = '';;
         let levelUp = false;
@@ -267,6 +269,7 @@ export class PlayerSystem extends System {
         if (levelUp) { 
             this.calculateStats(player);
             playerHealth.hp = stats.maxHp; // Reset health to full on level up
+            playerMana.mana = stats.maxMana; // Reset mana to full on level up
         }
     }
 
