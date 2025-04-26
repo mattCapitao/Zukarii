@@ -46,6 +46,12 @@ export class ProjectileCollisionSystem extends System {
                         target: target,
                         weapon: weapon
                     });
+
+                    this.eventBus.emit('RangedAttackHit', {
+                        attacker: source,
+                        target: target,
+                    }); 
+
                     // NEW: SFX on hit—no callback needed
                     if (source?.hasComponent('PlayerState')) {
                        
@@ -66,5 +72,6 @@ export class ProjectileCollisionSystem extends System {
             projectile.removeComponent('Collision');
         }
     }
+
 }
 

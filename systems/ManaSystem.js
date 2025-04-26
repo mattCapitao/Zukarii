@@ -17,7 +17,7 @@ export class ManaSystem extends System {
                 this.modifyMana(entityId, amount, attackerId);
             });
             this.manaUpdates.length = 0; // Clear queue
-            console.log('ManaSystem: Processed and cleared ManaUpdates');
+           // console.log('ManaSystem: Processed and cleared ManaUpdates');
         }
 
         // Handle mana regeneration
@@ -25,10 +25,16 @@ export class ManaSystem extends System {
         entities.forEach(entity => {
             const mana = entity.getComponent('Mana');
             if (!mana.manaRegen || mana.manaRegen <= 0) return;
+            if (!this.manaRegenAccumulator[entity.id]) { this.manaRegenAccumulator[entity.id] = 0; }
+            if (mana.mana >= mana.maxMana) { 
+                this.manaRegenAccumulator[entity.id] = 0;
+                mana.updated = false; // Reset updated flag if already at max mana
+                return; // No need to regenerate if already at max mana
+            }
 
             const timePerMana = 1 / mana.manaRegen; 
 
-            if (!this.manaRegenAccumulator[entity.id]) { this.manaRegenAccumulator[entity.id] = 0;}
+            
             this.manaRegenAccumulator[entity.id] += deltaTime;
 
             if (this.manaRegenAccumulator[entity.id] >= timePerMana) {
@@ -38,7 +44,7 @@ export class ManaSystem extends System {
                 mana.mana = Math.min(mana.mana + manaToRegen, mana.maxMana);
                 mana.updated = true;
 
-                console.log(`ManaSystem: Regenerated ${manaToRegen} mana for entity ${entity.id}. Current mana: ${mana.mana}/${mana.maxMana}`);
+               // console.log(`ManaSystem: Regenerated ${manaToRegen} mana for entity ${entity.id}. Current mana: ${mana.mana}/${mana.maxMana}`);
 
                 this.manaRegenAccumulator[entity.id] -= regenTicks * timePerMana;
             }

@@ -81,7 +81,12 @@ export class PlayerControllerSystem {
         }
 
         // Calculate velocity
-        const speed = player.getComponent('MovementSpeed').movementSpeed;
+        let speed = player.getComponent('MovementSpeed').movementSpeed;
+        if (player.hasComponent('InCombat')) {
+            speed = Math.round(speed * 0.66);
+            console.log(`PlayerControllerSystem: Player speed reduced to ${speed} due to combat!`);
+        }
+
        // console.log(`PlayerControllerSystem: Player speed: ${speed}`);
         let vx = 0, vy = 0;
         if (inputState.keys['ArrowUp'] || inputState.keys['w']) vy -= speed;

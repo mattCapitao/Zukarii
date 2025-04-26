@@ -67,11 +67,11 @@ export class PlayerInputSystem {
         } 
 
         if (event.repeat) {
-            console.log('PlayerInputSystem: Ignoring repeated key press:', event.key);
+            //console.log('PlayerInputSystem: Ignoring repeated key press:', event.key);
             return;
         }
 
-        console.log('PlayerInputSystem: handleKeyDown - raw key pressed:', event.key);
+        //console.log('PlayerInputSystem: handleKeyDown - raw key pressed:', event.key);
         if (mappedKey) {
             event.preventDefault();  // Prevent default action for mapped keys
             this.keysPressed[mappedKey] = true;
@@ -87,7 +87,7 @@ export class PlayerInputSystem {
     }
 
     handleKeyUp(event) {
-        console.log('PlayerInputSystem: handleKeyUp - raw key:', event.key);
+       // console.log('PlayerInputSystem: handleKeyUp - raw key:', event.key);
         const mappedKey = this.keyMap[event.key];
        // console.log('KeyUp Event Fired:', event.key, 'Mapped:', mappedKey);
         
@@ -98,7 +98,7 @@ export class PlayerInputSystem {
 
             delete this.keysPressed[mappedKey];
             this.updateInputState();
-            console.log('Key Up:', mappedKey, 'keysPressed:', JSON.stringify(this.keysPressed));
+           // console.log('Key Up:', mappedKey, 'keysPressed:', JSON.stringify(this.keysPressed));
             if (mappedKey === ' ') {
                 this.handleNonMovementKeys(event, mappedKey, false);
             }
@@ -110,7 +110,7 @@ export class PlayerInputSystem {
         if (player) {
             const inputState = player.getComponent('InputState');
             inputState.keys = { ...this.keysPressed };
-            console.log('PlayerInputSystem: InputState updated with keys:', JSON.stringify(inputState.keys));
+           // console.log('PlayerInputSystem: InputState updated with keys:', JSON.stringify(inputState.keys));
         }
     }
 
@@ -140,12 +140,12 @@ export class PlayerInputSystem {
                 case ' ':
                     event.preventDefault();
                     this.eventBus.emit('ToggleRangedMode', { event });
-                    console.log('PlayerInputSystem: Emitting ToggleRangedMode - event:', event.type, 'key:', event.key);
+                    //console.log('PlayerInputSystem: Emitting ToggleRangedMode - event:', event.type, 'key:', event.key);
                     break;
                 case 'm':
                     event.preventDefault();
                     this.eventBus.emit('ToggleMinimap');
-                    console.log('PlayerInputSystem: Emitting ToggleMinimap');
+                   // console.log('PlayerInputSystem: Emitting ToggleMinimap');
                     break;
         }
     }

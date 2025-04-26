@@ -17,9 +17,14 @@ export class CombatSystem extends System {
         this.eventBus.on('MeleeAttack', (data) => this.handleMeleeAttack(data));
         this.eventBus.on('RangedAttack', (data) => {
             console.log('CombatSystem: RangedAttack event received with data:', data);
-            this.handleRangedAttack( data );
+            this.handleRangedAttack(data);
         });
         this.eventBus.on('MonsterAttack', (data) => this.handleMonsterMeleeAttack(data));
+        this.eventBus.on('RangedAttackHit', (data) => {
+            console.log('CombatSystem: RangedAttackHit event received with data:', data);
+            this.combatFlagging(data);
+         });
+           
     }
 
     update() {
@@ -66,18 +71,12 @@ export class CombatSystem extends System {
 
         const monster = this.entityManager.getEntity(entityId);
         const player = this.entityManager.getEntity('player');
-        if (!monster || !player || !monster.getComponent('MonsterData')?.isAggro) return;    
+        if (!monster || !player || !monster.getComponent('MonsterData')?.isAggro) return;  
 
         const playerStats = player.getComponent('Stats');
         const monsterData = monster.getComponent('MonsterData');
 
-        const combat = player.getComponent('InCombat');
-        if (!combat) {
-            player.addComponent(new InCombatComponent(3000));
-            this.eventBus.emit('LogMessage', { message: `You enter combat after being attacked by ${monsterData.name}!` });
-        } else {
-            combat.elapsed = 0; // Reset to extend 3s from now
-        }
+        this.combatFlagging({ attacker:monster, target:player })
 
         const dodgeRoll = Math.round((Math.random() * 100) + (playerStats.agility / 2) );
         if (dodgeRoll >= 85) {
@@ -115,13 +114,7 @@ export class CombatSystem extends System {
         const targetHealth = target.getComponent('Health');
         const targetMonsterData = target.getComponent('MonsterData');
 
-        const combat = player.getComponent('InCombat');
-        if (!combat) {
-            player.addComponent(new InCombatComponent(3000));
-            this.eventBus.emit('LogMessage', { message: `You enter combat by attacking ${targetMonsterData.name}!` });
-        } else {
-            combat.elapsed = 0; // Reset to extend 3s
-        }
+        this.combatFlagging({ attacker:player, target })
 
         const meleeWeapons = [];
         const mainhand = playerInventory.equipped.mainhand;
@@ -214,5 +207,36 @@ export class CombatSystem extends System {
         console.log(`manaComponent:`, this.entityManager.getEntity('player').getComponent('Mana')); 
 
         this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
+    }
+
+    combatFlagging({attacker, target }) {
+
+        const attackerInCombat = attacker.getComponent('InCombat');
+        if (!attackerInCombat) {
+            attacker.addComponent(new InCombatComponent(3000));
+        } else {
+            attackerInCombat.elapsed = 0; // Reset to extend 3s from now
+        }
+
+        const targetInCombat = target.getComponent('InCombat');
+        if (!targetInCombat) {
+            target.addComponent(new InCombatComponent(3000));
+        } else {
+            targetInCombat.elapsed = 0; // Reset to extend 3s from now
+        }
+
+        switch ('player') {
+            case attacker:
+                this.eventBus.emit('LogMessage', { message: `You enter combat with ${target.getComponent('MonsterData').name}!` });
+                console.log(`${ target.getComponent('MonsterData').name } enters combat after being hit by player`)
+                break;
+            case target:
+                this.eventBus.emit('LogMessage', { message: `${attacker.getComponent('MonsterData').name} enters combat with you!` });
+                console.log(`${attacker.getComponent('MonsterData').name } Initiates combat by attacking player}`)
+                break;
+            default:
+                break;
+        }
+
     }
 }

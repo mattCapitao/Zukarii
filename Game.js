@@ -25,6 +25,7 @@ import { GameDataIOSystem } from './systems/GameDataIOSystem.js';
 import { PlayerInputSystem } from './systems/PlayerInputSystem.js'; 
 import { PlayerControllerSystem } from './systems/PlayerControllerSystem.js'; 
 import { PlayerTimerSystem } from './systems/PlayerTimerSystem.js'; 
+import { MonsterTimerSystem } from './systems/MonsterTimerSystem.js';
 import { AffixSystem } from './systems/AffixSystem.js'; 
 import { EffectsSystem } from './systems/EffectsSystem.js'; 
 import { HealthSystem } from './systems/HealthSystem.js'; 
@@ -76,7 +77,7 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
         this.entityManager.addComponentToEntity('player', new InputStateComponent());
         this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
-        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(124));
+        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(192));
         this.entityManager.addComponentToEntity('player', new AffixComponent()); // New component added
         this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32,32));
         this.entityManager.addComponentToEntity('player', new HitboxComponent(28,28)); 
@@ -157,7 +158,7 @@ export class Game {
         this.systems.gameDataIO = new GameDataIOSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.playerInput = new PlayerInputSystem(this.entityManager, this.state.eventBus); 
         this.systems.playerController = new PlayerControllerSystem(this.entityManager, this.state.eventBus); 
-        this.systems.playerTimer = new PlayerTimerSystem(this.entityManager, this.state.eventBus); 
+        //this.systems.playerTimer = new PlayerTimerSystem(this.entityManager, this.state.eventBus); 
         this.systems.affix = new AffixSystem(this.entityManager, this.state.eventBus);
         this.systems.effects = new EffectsSystem(this.entityManager, this.state.eventBus); // New system added
         this.systems.health = new HealthSystem(this.entityManager, this.state.eventBus);
@@ -175,9 +176,9 @@ export class Game {
 
     iniitalizeActiveGameSystems() {
         let activeGameSystems = {}
-
+        activeGameSystems.playerTimer= new PlayerTimerSystem(this.entityManager, this.state.eventBus); 
         activeGameSystems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
-
+        activeGameSystems.monsterTimer = new MonsterTimerSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.movementResolution = new MovementResolutionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
@@ -241,6 +242,7 @@ export class Game {
                 'exploration',
                 'projectile',
                 'monsterController',
+                'monsterTimer',
                 'collisions',
                 'playerCollision',
                 'projectileCollisions',
@@ -294,7 +296,7 @@ export class Game {
         // START TEMPORARY CODE TO RESET MOVE SPEED FOR SAVED GAMES WITH MS COMPONENT
         const movementSpeed = player.getComponent('MovementSpeed');
         if (movementSpeed) {
-            movementSpeed.movementSpeed = 124; // Set default value
+            movementSpeed.movementSpeed = 192; // Set default value
         }
         // START TEMPORARY CODE TO RESET MOVE SPEED FOR SAVED GAMES WITH MS COMPONENT
         const newPlayerComp = player.getComponent('NewCharacter');

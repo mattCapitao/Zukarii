@@ -50,6 +50,8 @@ export class MonsterControllerSystem extends System {
                 return;
             }
 
+            const isInCombat = monster.getComponent('InCombat');
+
             const pos = monster.getComponent('Position');
             const attackSpeed = monster.getComponent('AttackSpeed');
             const movementSpeed = monster.getComponent('MovementSpeed');
@@ -65,7 +67,7 @@ export class MonsterControllerSystem extends System {
 
             if (distance <= AGGRO_RANGE) { monsterData.isAggro = true; }
 
-            if (distance > AGGRO_RANGE * 2 ) { monsterData.isAggro = false; }
+            if (distance > AGGRO_RANGE * 2 && !isInCombat) { monsterData.isAggro = false; }
 
             if (monsterData.isAggro) {
                 if (distance <= MELEE_RANGE) {
