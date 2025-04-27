@@ -15,10 +15,10 @@ export class MapRenderSystem extends System {
         window.addEventListener('resize', () => this.resizeCanvas());
     }
 
-
     init() {
         console.log('MapRenderSystem: Loaded sprites:', Array.from(this.sprites.entries()));
     }
+
     initializeCanvas() {
         this.canvas = document.getElementById('viewport-canvas');
         if (!this.canvas) {
@@ -36,7 +36,6 @@ export class MapRenderSystem extends System {
     }
 
     loadSprites() {
-        // Preload only floor and wall sprites as fallback
         const spritePaths = {
             floor: 'img/map/floor.png',
             wall: 'img/map/wall.png',
@@ -52,7 +51,7 @@ export class MapRenderSystem extends System {
             img.src = path;
             img.onload = () => console.log(`${key} sprite preloaded at ${path}`);
             img.onerror = () => console.error(`Failed to preload sprite: ${path}`);
-            this.sprites.set(path, img); // Use path as key for preloaded sprites
+            this.sprites.set(path, img);
         }
     }
 
@@ -68,7 +67,6 @@ export class MapRenderSystem extends System {
             for (let bx = startBucketX; bx <= endBucketX; bx++) {
                 const bucketKey = `${bx},${by}`;
                 const bucket = bucketsComp.buckets.get(bucketKey) || [];
-               // console.log(`MapRenderSystem: Bucket (${bx},${by}) contains ${bucket.length} entities: ${bucket.join(', ')}`);
                 for (const entityId of bucket) {
                     const entity = this.entityManager.getEntity(entityId);
                     if (!entity || !entity.hasComponent('Position') || !entity.hasComponent('Visuals')) continue;
@@ -79,18 +77,26 @@ export class MapRenderSystem extends System {
                 }
             }
         }
-        /*
-        console.log(`MapRenderSystem: Entities in viewport:`, entities.map(e => ({
-            id: e.id,
-            pos: e.getComponent('Position'),
-            components: Array.from(e.components.keys())
-        })));
-        */
         return entities;
-
     }
 
-    update() {
+    // Helper function to interpolate between two colors
+    interpolateColor(startColor, endColor, t) {
+        const colors = {
+            green: [0, 128, 0],
+            yellow: [255, 255, 0],
+            orange: [255, 165, 0],
+            red: [255, 0, 0]
+        };
+        const startRGB = colors[startColor] || [0, 128, 0]; // Default to green
+        const endRGB = colors[endColor] || [0, 128, 0];
+        const r = Math.round(startRGB[0] + (endRGB[0] - startRGB[0]) * t);
+        const g = Math.round(startRGB[1] + (endRGB[1] - startRGB[1]) * t);
+        const b = Math.round(startRGB[2] + (endRGB[2] - startRGB[2]) * t);
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    update(deltaTime) {
         if (!this.canvas || !this.ctx) {
             console.warn('MapRenderSystem: Canvas or context not initialized');
             return;
@@ -120,10 +126,6 @@ export class MapRenderSystem extends System {
         const endX = startX + viewportWidth;
         const endY = startY + viewportHeight;
 
-        //console.log(`MapRenderSystem: Canvas dimensions: ${this.canvas.width}x${this.canvas.height}`);
-        //console.log(`MapRenderSystem: Player position: (${playerPos.x}, ${playerPos.y})`);
-       // console.log(`MapRenderSystem: Viewport bounds: startX=${startX}, startY=${startY}, endX=${endX}, endY=${endY}`);
-
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Render floor
@@ -134,12 +136,10 @@ export class MapRenderSystem extends System {
             this.ctx.translate(-(startX % this.TILE_SIZE), -(startY % this.TILE_SIZE));
             const pattern = this.ctx.createPattern(floorSprite, 'repeat');
             this.ctx.fillStyle = pattern || 'black';
-            // Add a buffer of 1 tile (TILE_SIZE) to ensure coverage during movement
             const buffer = this.TILE_SIZE;
             this.ctx.fillRect(0, 0, viewportWidth + buffer, viewportHeight + buffer);
             this.ctx.restore();
         } else {
-           // console.warn('MapRenderSystem: Floor sprite not loaded, using fallback');
             this.ctx.fillStyle = 'black';
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
@@ -151,34 +151,32 @@ export class MapRenderSystem extends System {
         const bucketsComp = levelEntity.getComponent('SpatialBuckets');
         if (!bucketsComp) return;
 
-        // Add a buffer of 1 tile to the viewport bounds to fetch entities just outside the visible area
-        const buffer = this.TILE_SIZE; // 32 pixels
+        const buffer = this.TILE_SIZE;
         const bufferedStartX = startX - buffer;
         const bufferedStartY = startY - buffer;
         const bufferedEndX = endX + buffer;
         const bufferedEndY = endY + buffer;
 
         const entities = this.getEntitiesInViewport(bufferedStartX, bufferedStartY, bufferedEndX, bufferedEndY, bucketsComp);
-       // console.log(`MapRenderSystem: Rendering ${entities.length} entities in viewport`);
 
         const mapComp = levelEntity.getComponent('Map');
         if (mapComp) {
             const tileX = Math.floor(playerPos.x / this.TILE_SIZE);
             const tileY = Math.floor(playerPos.y / this.TILE_SIZE);
-            //console.log(`MapRenderSystem: Player at tile (${tileX}, ${tileY}), pixel (${playerPos.x}, ${playerPos.y})`);
             for (let dy = -1; dy <= 1; dy++) {
                 for (let dx = -1; dx <= 1; dx++) {
                     if (dx === 0 && dy === 0) continue;
                     const checkX = tileX + dx;
                     const checkY = tileY + dy;
                     if (checkX >= 0 && checkX < mapComp.map[0].length && checkY >= 0 && checkY < mapComp.map.length) {
-                       // console.log(`MapRenderSystem: Tile (${checkX}, ${checkY}) is ${mapComp.map[checkY][checkX] === ' ' ? 'walkable' : 'not walkable'}`);
+                        // Tile check logic remains unchanged
                     }
                 }
             }
         }
 
         let wallCount = 0;
+        // First pass: Render all entity sprites
         for (const entity of entities) {
             const pos = entity.getComponent('Position');
             const tileX = Math.floor(pos.x / this.TILE_SIZE);
@@ -235,18 +233,15 @@ export class MapRenderSystem extends System {
             const renderY = (pos.y - startY) * this.SCALE_FACTOR;
             if (spritePath === 'img/map/wall.png') {
                 wallCount++;
-            } else {
-                //console.log(`MapRenderSystem: Rendering ${entity.id} at (${renderX}, ${renderY}) with sprite ${spritePath}`);
             }
-            // Handle facing direction for the player
+
+            // Render the entity sprite
             this.ctx.save();
             if (visuals.faceLeft === true) {
-                // Flip horizontally by scaling x-axis by -1
                 this.ctx.scale(-1, 1);
-                // Adjust renderX to account for the flip (move the origin to the right edge of the sprite)
                 this.ctx.drawImage(
                     sprite,
-                    -(renderX + visuals.w * this.SCALE_FACTOR), // Shift left by the scaled width
+                    -(renderX + visuals.w * this.SCALE_FACTOR),
                     renderY,
                     visuals.w * this.SCALE_FACTOR,
                     visuals.h * this.SCALE_FACTOR
@@ -262,7 +257,69 @@ export class MapRenderSystem extends System {
             }
             this.ctx.restore();
         }
-        //console.log(`MapRenderSystem: Rendered ${wallCount} wall entities in viewport`);
-    }
 
+        // Second pass: Render health bars
+        for (const entity of entities) {
+            if (!entity.hasComponent('HpBar')) continue;
+
+            const pos = entity.getComponent('Position');
+            const visuals = entity.getComponent('Visuals');
+            if (!pos || !visuals) continue;
+
+            const renderX = (pos.x - startX) * this.SCALE_FACTOR;
+            const renderY = (pos.y - startY) * this.SCALE_FACTOR;
+
+            const hpBar = entity.getComponent('HpBar');
+            let currentFillPercent = hpBar.fillPercent;
+            let currentFillColor = hpBar.fillColor;
+
+            // Calculate animation progress
+            if (hpBar.animationStartTime !== null) {
+                const elapsed = Date.now() - hpBar.animationStartTime;
+                const t = Math.min(elapsed / hpBar.animationDuration, 1); // Progress (0 to 1)
+
+                // Interpolate fillPercent
+                currentFillPercent = hpBar.lastFillPercent + (hpBar.fillPercent - hpBar.lastFillPercent) * t;
+
+                // Interpolate color
+                currentFillColor = this.interpolateColor(hpBar.lastFillColor, hpBar.fillColor, t);
+
+                // End animation if complete
+                if (t >= 1) {
+                    hpBar.animationStartTime = null;
+                }
+            }
+
+            console.log(`MapRenderSystem: Rendering HpBar for ${entity.id} - fillPercent: ${currentFillPercent}, fillColor: ${currentFillColor}`);
+
+            // Health bar dimensions
+            const barWidth = visuals.w * this.SCALE_FACTOR * 0.8; // 80% of entity width
+            const barHeight = 4 * this.SCALE_FACTOR; // Fixed height, scaled
+            const barX = renderX + (visuals.w * this.SCALE_FACTOR - barWidth) / 2; // Centered
+            const barY = renderY - barHeight - 4 * this.SCALE_FACTOR; // Above entity
+
+            this.ctx.save();
+            // Background (gray)
+            this.ctx.fillStyle = 'gray';
+            this.ctx.fillRect(barX, barY, barWidth, barHeight);
+
+            // Health fill
+            this.ctx.fillStyle = currentFillColor;
+            const fillWidth = barWidth * Math.max(0, Math.min(1, currentFillPercent)); // Clamp fillPercent
+            this.ctx.fillRect(barX, barY, fillWidth, barHeight);
+
+            // Border
+            this.ctx.strokeStyle = 'white';
+            this.ctx.lineWidth = 1; // Increased for visibility
+            this.ctx.strokeRect(barX, barY, barWidth, barHeight);
+
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            this.ctx.shadowBlur = 4;
+
+            this.ctx.restore();
+
+            // Reset updated flag
+            hpBar.updated = false;
+        }
+    }
 }

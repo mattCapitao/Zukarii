@@ -101,14 +101,14 @@ export class ActionSystem extends System {
             critHealText = 'is of exceptional quality and ';
         }
 
-       healAmount = Math.min(health.hp + healAmount, health.maxHp);
+       healAmount = Math.min(healAmount, health.maxHp);
         this.healthUpdates.push({ entityId, amount: healAmount });
 
         resource.healPotions--;
 
-        const message = health.hp >= health.maxHp
+        const message = health.hp + healAmount >= health.maxHp
             ? `The Heal Potion ${critHealText}fully heals you!`
-            : `The Heal Potion restores ${healAmount} HP. Current HP: ${health.hp}/${health.maxHp}`;
+            : `The Heal Potion restores ${healAmount} HP. Current HP: ${health.hp + healAmount}/${health.maxHp}`;
         this.eventBus.emit('LogMessage', { message });
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
     }

@@ -1,5 +1,5 @@
 ﻿// systems/LevelTransitionSystem.js - Updated
-import { LightingState } from '../core/Components.js';
+import { HpBarComponent, LightingState } from '../core/Components.js';
 import { System } from '../core/Systems.js';
 
 export class LevelTransitionSystem extends System {
@@ -166,10 +166,11 @@ export class LevelTransitionSystem extends System {
         Object.entries(data.player).forEach(([compName, compData]) => {
             if (compName !== 'Position') {
                 const comp = player.getComponent(compName);
+                console.log(`Updating ${compName} component for player:`, comp);
                 if (comp) Object.assign(comp, compData);
             }
         });
-
+        
         // Update overlay
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         Object.assign(overlayState, data.overlayState.OverlayState);
@@ -277,5 +278,8 @@ export class LevelTransitionSystem extends System {
 
         // Trigger UI update after loading
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
+
+        const healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
+        healthUpdates.push({ entityId: 'player', amount: 0 });
     }
 }  

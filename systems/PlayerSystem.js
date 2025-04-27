@@ -52,6 +52,8 @@ export class PlayerSystem extends System {
         health.hp = stats.maxHp;
         health.maxHp = stats.maxHp;
 
+       
+
         const mana = player.getComponent('Mana');
         mana.mana = stats.maxMana;
         mana.maxMana = stats.maxMana;

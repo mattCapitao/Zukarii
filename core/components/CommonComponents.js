@@ -68,10 +68,14 @@ export class HealthComponent {
 } 
 
 export class HpBarComponent {
-    constructor(hp = 0, maxHp = 0) {
+    constructor(fillPercent = 1, fillColor = 'green', lastFillPercent = 1, lastFillColor = 'green') {
         this.type = 'HpBar';
-        this.fillColor = 'green'; // Color of the health bar
-        this.fillPercent = 1; // Percentage of health remaining (0 to 1)
+        this.fillColor = fillColor; // Color of the health bar
+        this.fillPercent = fillPercent; // Percentage of health remaining (0 to 1)
+        this.lastFillColor = lastFillColor; // Last color of the health bar
+        this.lastFillPercent = lastFillPercent; // Last percentage of health remaining
+        this.animationStartTime = null; // Timestamp when animation starts (ms)
+        this.animationDuration = 500; // Duration of animation (ms)
         this.updated = false; // Indicates if the health bar has been updated
     }
 }
