@@ -61,7 +61,7 @@ export class PlayerSystem extends System {
         const playerState = player.getComponent('PlayerState');
         playerState.xp = 0;
         playerState.level = 1;
-        playerState.nextLevelXp = 155;
+        playerState.nextLevelXp = 150;
         playerState.dead = false;
         playerState.lampLit = false;
         playerState.name = "Zukarii";
@@ -281,15 +281,15 @@ export class PlayerSystem extends System {
     getXpMultiplier(x) {
         let value = 0;
         if (x <= 4) {
-            value = 2.16 - (x * 0.16275)
+            value = 2.16 - (x * 0.16275);
         }else if (x <= 9) {
-           value = 1.509 - (x * .0333)
+            value = 1.509 - (x * .0333);
         } else if (x <= 19) {
-            value = 1.2093 - (x * .0042)
+            value = 1.2093 - (x * .0042);
         } else if (x <= 29) {
-            value = 1.1295 + (x * .005))
+            value = 1.1295 + (x * .005);
          } else if (x <= 40) {
-            value = 1.2745 + (x * .0046105)
+            value = 1.2745 + (x * .0046105);
         } 
 
         if ( x > 19 && value > 1.5) { value = 1.5; }
