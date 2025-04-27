@@ -9,6 +9,9 @@ export class PlayerSystem extends System {
 
     init() {
         this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || []
+        this.queues = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues') || {};
+        this.healthUpdates = this.queues.HealthUpdates || [];
+        this.manaUpdates = this.queues.ManaUpdates || [];
         this.eventBus.on('InitializePlayer', () => this.initializePlayer());
         this.eventBus.on('GearChanged', (data) => this.updateGearStats(data.entityId));
         this.eventBus.on('AwardXp', (data) => this.awardXp(data));
@@ -17,6 +20,7 @@ export class PlayerSystem extends System {
         this.eventBus.on('TilesDiscovered', (data) => this.handleTilesDiscovered(data));
         this.eventBus.on('AllocateStat', (data) => this.handleStatAllocation(data));
         this.eventBus.on('ModifyBaseStat', (data) => this.modifyBaseStat(data));
+        
     }
 
     exitCombat(entityId) {
@@ -61,7 +65,7 @@ export class PlayerSystem extends System {
         const playerState = player.getComponent('PlayerState');
         playerState.xp = 0;
         playerState.level = 1;
-        playerState.nextLevelXp = 150;
+        playerState.nextLevelXp = 135;
         playerState.dead = false;
         playerState.lampLit = false;
         playerState.name = "Zukarii";
@@ -198,14 +202,14 @@ export class PlayerSystem extends System {
 
         const levelCount = Math.max(0, playerState.level - 1); // Number of increases (e.g., level 10 -> 9 increases)
         const levelHpIncrease = levelCount > 0 ? (levelCount / 2) * ((6 + 2) + (6 + playerState.level)) : 0; // Sum of 8 to (6 + level)
-        const levelMpIncrease = levelCount > 0 ? (levelCount / 2) * ((2 + 2) + (2 + playerState.level)) : 0; // Sum of 4 to (2 + level)
+        const levelMpIncrease = levelCount > 0 ? (levelCount / 3) * ((2 + 2) + (3 + playerState.level)) : 0; // Sum of 4 to (2 + level)
 
         const baseMaxHp = stats._internal.base.maxHp + Math.round(levelHpIncrease);
         const baseMaxMana = stats._internal.base.maxMana + Math.round(levelMpIncrease);
 
         // Apply Prowess/Intellect multipliers to the whole number (baseMaxHp, baseMaxMana)
         const oldMaxHp = health.maxHp || baseMaxHp;
-        stats.maxHp = Math.round(baseMaxHp * (1 + combinedProwess * 0.01)) + (stats._internal.gear.maxHp || 0) + (stats._internal.temp.maxHp || 0);
+        stats.maxHp = Math.round(baseMaxHp * (1 + combinedProwess * 0.015)) + (stats._internal.gear.maxHp || 0) + (stats._internal.temp.maxHp || 0);
         health.maxHp = stats.maxHp;
         if (oldMaxHp !== 0 && health.maxHp !== oldMaxHp) {
             health.hp = Math.round(health.hp * (health.maxHp / oldMaxHp));
@@ -257,7 +261,7 @@ export class PlayerSystem extends System {
             playerState.level++;
             levelUp = true
 
-            if (playerState.level % 3 === 0) {
+            if (playerState.level % 2 === 0) {
                 stats.unallocated++;
                 stats.isLocked = false; // Unlock allocation
                 statAllocationMessage =  ', Gained 1 stat point to allocate!';
@@ -273,8 +277,9 @@ export class PlayerSystem extends System {
         }
         if (levelUp) { 
             this.calculateStats(player);
-            playerHealth.hp = stats.maxHp; // Reset health to full on level up
-            playerMana.mana = stats.maxMana; // Reset mana to full on level up
+            this.healthUpdates.push({ entityId: 'player', amount: stats.maxHp - playerHealth.hp, attackerId: 'player' });
+            this.manaUpdates.push({ entityId: 'player', amount: stats.maxMana - playerMana.mana, attackerId: 'player' });
+           
         }
     }
 
