@@ -61,7 +61,7 @@ export class PlayerSystem extends System {
         const playerState = player.getComponent('PlayerState');
         playerState.xp = 0;
         playerState.level = 1;
-        playerState.nextLevelXp = 100;
+        playerState.nextLevelXp = 150;
         playerState.dead = false;
         playerState.lampLit = false;
         playerState.name = "Zukarii";
