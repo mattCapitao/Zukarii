@@ -61,7 +61,7 @@ export class PlayerSystem extends System {
         const playerState = player.getComponent('PlayerState');
         playerState.xp = 0;
         playerState.level = 1;
-        playerState.nextLevelXp = 125;
+        playerState.nextLevelXp = 100;
         playerState.dead = false;
         playerState.lampLit = false;
         playerState.name = "Zukarii";
@@ -264,7 +264,10 @@ export class PlayerSystem extends System {
             }
 
             playerState.xp = newXp;
-            playerState.nextLevelXp = Math.round(playerState.nextLevelXp * 1.55);
+            const x = playerState.level - 1;
+
+            playerState.nextLevelXp = Math.round(playerState.nextLevelXp * getXpMultiplier(x));
+
             this.sfxQueue.push({ sfx: 'ding', volume: .5 });
             this.eventBus.emit('LogMessage', { message: `Level up! Now level ${playerState.level}, ${statAllocationMessage}` });
         }
@@ -273,6 +276,25 @@ export class PlayerSystem extends System {
             playerHealth.hp = stats.maxHp; // Reset health to full on level up
             playerMana.mana = stats.maxMana; // Reset mana to full on level up
         }
+    }
+
+    getXpMultiplier(x) {
+        let value = 0;
+        if (x <= 4) {
+            value = 2.16 - (x * 0.16275)
+        }else if (x <= 9) {
+           value = 1.509 - (x * .0333)
+        } else if (x <= 19) {
+            value = 1.2093 - (x * .0042)
+        } else if (x <= 29) {
+            value = 1.1295 + (x * .005))
+         } else if (x <= 40) {
+            value = 1.2745 + (x * .0046105)
+        } 
+
+        if ( x > 19 && value > 1.5) { value = 1.5; }
+  
+        return value;
     }
 
     death({ source }) {

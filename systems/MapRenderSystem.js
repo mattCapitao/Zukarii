@@ -294,13 +294,13 @@ export class MapRenderSystem extends System {
 
             // Health bar dimensions
             const barWidth = visuals.w * this.SCALE_FACTOR * 0.8; // 80% of entity width
-            const barHeight = 4 * this.SCALE_FACTOR; // Fixed height, scaled
+            const barHeight = 3 * this.SCALE_FACTOR; // Fixed height, scaled
             const barX = renderX + (visuals.w * this.SCALE_FACTOR - barWidth) / 2; // Centered
             const barY = renderY - barHeight - 4 * this.SCALE_FACTOR; // Above entity
 
             this.ctx.save();
             // Background (gray)
-            this.ctx.fillStyle = 'gray';
+            this.ctx.fillStyle = 'rgba(128, 128, 128, .7)';
             this.ctx.fillRect(barX, barY, barWidth, barHeight);
 
             // Health fill
@@ -309,7 +309,7 @@ export class MapRenderSystem extends System {
             this.ctx.fillRect(barX, barY, fillWidth, barHeight);
 
             // Border
-            this.ctx.strokeStyle = 'white';
+            this.ctx.strokeStyle = 'rgba(226,226,226,.8)';
             this.ctx.lineWidth = 1; // Increased for visibility
             this.ctx.strokeRect(barX, barY, barWidth, barHeight);
 
