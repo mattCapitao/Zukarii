@@ -41,5 +41,37 @@ export class HealthSystem extends System {
                 this.eventBus.emit('PlayerDeath', { source });
             }
         }
+        if (health.updated && !entity.hasComponent('Dead')) {
+            hpBar(entityId, health.hp, health.maxHp);
+        }
+    }
+
+    hpBar(entityId, hp, maxHp) {
+        if (!entityId) return;
+        const hasHpBar = this.entityManager.getEntity(entityId).hasComponent('HealthBar');
+        const fillPercent = Math.floor((hp / maxHp));
+        let fillColor = 'green';
+        if (fillPercent < 0.25) fillColor = 'red';
+        else if (fillPercent < 0.5) fillColor = 'orange';
+        else if (fillPercent < 0.75) fillColor = 'yellow'; 
+
+        switch (hasHpBar) {
+            case true:
+                if (hp > 0 && hp !== maxHp) {
+                    hpBar = this.entityManager.getEntity(entityId).getComponent('HealthBar');
+                    hpBar.fillPercent = fillPercent;
+                    hpBar.fillColor = fillColor;
+                    hpBar.updated = true;
+                } else {
+                    this.entityManager.getEntity(entityId).removeComponent('HealthBar');
+                }
+                break;
+            case false:
+                // Add new hp bar
+                if (hp > 0 && hp !== maxHp) {
+                    this.entityManager.getEntity(entityId).addComponent(new HealthBarComponent(fillPercent, fillColor));
+                } 
+                break;
+        }
     }
 }

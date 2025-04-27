@@ -67,6 +67,15 @@ export class HealthComponent {
     }
 } 
 
+export class HpBarComponent {
+    constructor(hp = 0, maxHp = 0) {
+        this.type = 'HpBar';
+        this.fillColor = 'green'; // Color of the health bar
+        this.fillPercent = 1; // Percentage of health remaining (0 to 1)
+        this.updated = false; // Indicates if the health bar has been updated
+    }
+}
+
 export class ManaComponent {
     constructor(mana = 0, maxMana = 0, manaRegen = 0.25) {
         this.type = 'Mana';

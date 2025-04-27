@@ -18,6 +18,17 @@ export class MonsterSpawnSystem extends System {
                 params: { stealPercentage: 0.1, minSteal: 1 }
             }
         };
+
+
+
+        this.primaryFamilies = [ 'goblinoid','undead','demon' ]
+        this.secondaryFamilies = ['beast', 'fey', 'mythical', 'draco']
+
+        this.primaryFalilyTable = (roll) => { // Tier 0: Levels 1-4
+            if (roll < 0.40) return 1;  
+            if (roll < 0.80) return 2; 
+            if (roll >= 0.81) return 3; 
+        };
     }
 
     init() {
@@ -71,6 +82,8 @@ export class MonsterSpawnSystem extends System {
             console.log('MonsterSpawnSystem: Monster spawn pool:', spawnPool);
             console.log(`MonsterSpawnSystem: Spawning ${monsterCount} monsters for tier ${tier}`);
 
+
+
             this.entityManager.setActiveTier(tier); // NEW: Ensure tier sync
             console.log(`MonsterSpawnSystem: Active tier set to ${tier}, rooms: ${rooms}`);
 
@@ -118,7 +131,13 @@ export class MonsterSpawnSystem extends System {
             }) : rooms;
             let eliteMonsterCount = 0;
 
+            const primaryFamily = this.primaryFamilies[Math.floor(Math.random() * this.primaryFamilies.length)];
+            console.log(`MonsterSpawnSystem: Primary family selected: ${primaryFamily}`);
             const tierMonsters = (randomMonsters || []).filter(m => m.minDungeonTier <= tier);
+
+            const tierPrimaryFamilyMonsters = tierMonsters.filter(m => m.family === primaryFamily);
+            const tierSecondaryFamilyMonsters = tierMonsters.filter(m => this.secondaryFamilies.includes(m.family));
+
             const tierUniqueMonsters = (uniqueMonsters || []).filter(m => m.minDungeonTier <= tier);
 
             if (tierMonsters.length === 0 && tierUniqueMonsters.length === 0) {
@@ -132,8 +151,9 @@ export class MonsterSpawnSystem extends System {
                     break;
                 }
 
-                let template = tierMonsters[Math.floor(Math.random() * tierMonsters.length)];
-                //let template = randomMonsters[Math.floor(Math.random() * randomMonsters.length)];
+                const monsterArray = Math.random() < 0.90 ? tierPrimaryFamilyMonsters : tierSecondaryFamilyMonsters;
+
+                let template = monsterArray[Math.floor(Math.random() * monsterArray.length)];
 
                 if (spawnPool.uniqueMonsters && Math.random() < .05 * tier && eliteMonsterCount <= monsterCount * .2) {
 
