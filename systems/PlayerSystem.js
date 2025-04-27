@@ -209,7 +209,7 @@ export class PlayerSystem extends System {
 
         // Apply Prowess/Intellect multipliers to the whole number (baseMaxHp, baseMaxMana)
         const oldMaxHp = health.maxHp || baseMaxHp;
-        stats.maxHp = Math.round(baseMaxHp * (1 + combinedProwess * 0.015)) + (stats._internal.gear.maxHp || 0) + (stats._internal.temp.maxHp || 0);
+        stats.maxHp = Math.round(baseMaxHp * (1 + combinedProwess * 0.025)) + (stats._internal.gear.maxHp || 0) + (stats._internal.temp.maxHp || 0);
         health.maxHp = stats.maxHp;
         if (oldMaxHp !== 0 && health.maxHp !== oldMaxHp) {
             health.hp = Math.round(health.hp * (health.maxHp / oldMaxHp));
