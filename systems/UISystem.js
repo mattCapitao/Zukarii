@@ -1,5 +1,4 @@
-﻿// systems/UISystem.js - Updated with PlayerStateUpdated Listener
-import { System } from '../core/Systems.js';
+﻿import { System } from '../core/Systems.js';
 
 export class UISystem extends System {
     constructor(entityManager, eventBus, utilities) {
@@ -15,7 +14,6 @@ export class UISystem extends System {
         this.tooltipCache = new Map();
         this.activeInventoryTab = 'all';
         this.playerEntity = this.entityManager.getEntity('player');
-
         this.statusDOM = {
             hpBar: null,
             hpText: null,
@@ -26,10 +24,14 @@ export class UISystem extends System {
             healPotionCount: null,
             torchCount: null
         };
-
         this.statusUpdates = {};
         this.needsUpdate = false;
         this.rafPending = null;
+        this.lastInventoryHash = '';
+        this.lastHealth = null;
+        this.lastMana = null;
+        this.lastPlayerState = null;
+        this.lastResource = null;
     }
 
     init() {
@@ -73,15 +75,15 @@ export class UISystem extends System {
 
         this.eventBus.on('ToggleOverlay', (data) => {
             console.log('UISystem: ToggleOverlay event received:', data);
-            this.toggleOverlay(data)
-    });
+            this.toggleOverlay(data);
+        });
         this.eventBus.on('LogMessage', (data) => {
             console.log('UISystem: LogMessage event received:', data);
             this.addLogMessage(data);
         });
-        this.eventBus.on('StatsUpdated', (data) => this.updateUI(data));
+        this.eventBus.on('StatsUpdated', (data) => this.updateCharacterUI(data));
         this.eventBus.on('GameOver', (data) => this.gameOver(data));
-        this.eventBus.on('GearChanged', (data) => this.updateUI(data));
+        this.eventBus.on('GearChanged', (data) => this.updateCharacterUI(data));
         this.eventBus.on('GameSaved', ({ key, success, message }) => {
             console.log('UISystem: GameSaved event received:', { key, success, message });
             this.eventBus.emit('LogMessage', { message });
@@ -105,9 +107,9 @@ export class UISystem extends System {
                 this.updateMenu();
             }
         });
-        this.eventBus.on('PlayerStateUpdated', (data) => this.updateUI(data));
+        this.eventBus.on('PlayerStateUpdated', (data) => this.updateStatusUI(data));
 
-        this.updateUI({ entityId: 'player' });
+        this.updateStatusUI({ entityId: 'player' });
         this.eventBus.emit('GearChanged', { entityId: 'player' });
 
         this.setupEventListeners();
@@ -115,24 +117,25 @@ export class UISystem extends System {
     }
 
     update() {
-
         const player = this.entityManager.getEntity('player');
         if (!player) {
             console.error('UISystem: Player entity not found');
             return;
-          }
-        if (this.playerEntity.getComponent('Health').updated) {
-            this.updateUI({ entityId: 'player' })
-            //console.log(`UISystem: update called Player health updated = ${this.playerEntity.getComponent('Health').updated}`);
-            this.playerEntity.getComponent('Health').updated = false;
-           // console.log(`UISystem: update called Player health updated = ${this.playerEntity.getComponent('Health').updated}`)
         }
-        if (this.playerEntity.getComponent('Mana').updated) {
-            this.updateUI({ entityId: 'player' })
-           // console.log(`UISystem: update called Player mana updated = ${this.playerEntity.getComponent('Mana').updated}`);
-            this.playerEntity.getComponent('Mana').updated = false;
-           // console.log(`UISystem: update called Player mana updated = ${this.playerEntity.getComponent('Mana').updated}`, )
+        const health = player.getComponent('Health');
+        const mana = player.getComponent('Mana');
+
+        if (health.updated && health.hp !== this.lastHealth) {
+            this.updateStatusUI({ entityId: 'player' });
+            this.lastHealth = health.hp;
+            health.updated = false;
         }
+        if (mana.updated && mana.mana !== this.lastMana) {
+            this.updateStatusUI({ entityId: 'player' });
+            this.lastMana = mana.mana;
+            mana.updated = false;
+        }
+
     }
 
     setupEventListeners() {
@@ -181,13 +184,14 @@ export class UISystem extends System {
                     console.log('UISystem: Load button clicked, emitting RequestLoadGame');
                     const saveId = loadButton.dataset.saveId;
                     this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.05 });
-                    setTimeout(() => {  
-                    this.eventBus.emit('RequestLoadGame', { saveId }, (result) => {
-                        if (result.success) {
-                            console.log('UISystem: Load successful, waiting for TransitionLoad');
-                            this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
-                        }
-                    });}, 2000);
+                    setTimeout(() => {
+                        this.eventBus.emit('RequestLoadGame', { saveId }, (result) => {
+                            if (result.success) {
+                                console.log('UISystem: Load successful, waiting for TransitionLoad');
+                                this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
+                            }
+                        });
+                    }, 2000);
                 }
 
                 if (deleteButton) {
@@ -242,7 +246,7 @@ export class UISystem extends System {
                 }
                 if (data.source === 'equip') {
                     this.eventBus.emit('UnequipItem', { entityId: 'player', slot: data.slot });
-                    this.updateUI({ entityId: 'player' });
+                    this.updateCharacterUI({ entityId: 'player' });
                 }
             });
 
@@ -260,6 +264,7 @@ export class UISystem extends System {
                 }
                 this.hideItemTooltip(itemData);
                 this.eventBus.emit('DropItem', { uniqueId: itemData.uniqueId });
+                this.updateCharacterUI({ entityId: 'player' });
             });
         }
 
@@ -274,10 +279,8 @@ export class UISystem extends System {
                 const inventory = player.getComponent('Inventory');
 
                 if (target.id === 'sort-inventory-tab') {
-                    // Sort button: re-apply filter and sort
-                    this.updateCharacter(stats, inventory);
+                    this.updateCharacterUI({ entityId: 'player' });
                 } else if (target.classList.contains('tab')) {
-                    // Filter tab: update active tab, filter, sort, and render
                     const tabMap = {
                         'inventory-tab-all': 'all',
                         'inventory-tab-armor': 'armor',
@@ -289,11 +292,10 @@ export class UISystem extends System {
                     const newTab = tabMap[target.id];
                     if (newTab && newTab !== this.activeInventoryTab) {
                         this.activeInventoryTab = newTab;
-                        // Update active class
                         inventoryTabs.querySelectorAll('.tab').forEach(tab => {
                             tab.classList.toggle('active', tab.id === target.id);
                         });
-                        this.updateCharacter(stats, inventory);
+                        this.updateCharacterUI({ entityId: 'player' });
                     }
                 }
             });
@@ -329,7 +331,7 @@ export class UISystem extends System {
                 const slotName = JSON.parse(slot.getAttribute('data-equip_slot') || '{}').slot;
                 if (data.source === 'inventory' && this.isSlotCompatible(data.item, slotName)) {
                     this.eventBus.emit('EquipItem', { entityId: 'player', item: data.item, slot: slotName });
-                    this.updateUI({ entityId: 'player' });
+                    this.updateCharacterUI({ entityId: 'player' });
                 }
             });
         }
@@ -358,6 +360,7 @@ export class UISystem extends System {
             }, { capture: true });
 
             characterContent.addEventListener('contextmenu', (event) => {
+                event.preventDefault();
                 const target = event.target.closest('.item-icon');
                 if (!target) return;
                 const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
@@ -380,6 +383,7 @@ export class UISystem extends System {
                 if (!statId) return;
                 const stat = statId.replace('increment-', '');
                 this.eventBus.emit('AllocateStat', { stat });
+                this.updateCharacterUI({ entityId: 'player' });
             });
         }
 
@@ -420,10 +424,61 @@ export class UISystem extends System {
         this.statusUpdates = {};
     }
 
+    updateStatusUI({ entityId }) {
+        if (entityId !== 'player') return;
+
+        const player = this.entityManager.getEntity('player');
+        const health = player.getComponent('Health');
+        const mana = player.getComponent('Mana');
+        const playerState = player.getComponent('PlayerState');
+        const resource = player.getComponent('Resource');
+
+        this.statusUpdates.hp = { value: health.hp, max: health.maxHp };
+        this.statusUpdates.mana = { value: mana.mana, max: mana.maxMana };
+        this.statusUpdates.xp = { value: playerState.xp, next: playerState.nextLevelXp };
+        this.statusUpdates.healPotions = resource.healPotions;
+        this.statusUpdates.torches = resource.torches;
+
+        if (this.playerInfo) {
+            const playerNameSpan = this.playerInfo.querySelector('#playerName');
+            const playerLevelSpan = this.playerInfo.querySelector('#playerLevel');
+            const dungeonTierSpan = this.playerInfo.querySelector('#dungeonTier');
+            const playerGoldSpan = this.playerInfo.querySelector('#playerGold');
+            const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+            if (playerNameSpan) playerNameSpan.textContent = playerState.name;
+            if (playerLevelSpan) playerLevelSpan.textContent = playerState.level;
+            if (dungeonTierSpan) dungeonTierSpan.textContent = gameState.tier;
+            if (playerGoldSpan) playerGoldSpan.textContent = resource.gold !== undefined ? resource.gold : 'N/A';
+        }
+
+        if (!this.needsUpdate) {
+            this.needsUpdate = true;
+            if (this.rafPending) cancelAnimationFrame(this.rafPending);
+            this.rafPending = requestAnimationFrame(() => {
+                this.applyStatusUpdates();
+                this.needsUpdate = false;
+                this.rafPending = null;
+            });
+        }
+    }
+
+    updateCharacterUI({ entityId }) {
+        if (entityId !== 'player') return;
+
+        const player = this.entityManager.getEntity('player');
+        const stats = player.getComponent('Stats');
+        const inventory = player.getComponent('Inventory');
+        const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
+
+        if (overlayState.isOpen && overlayState.activeTab === 'character') {
+            this.renderOverlay('character');
+        }
+    }
+
     toggleOverlay({ tab = null }) {
         console.log('UISystem: ToggleOverlay called with tab:', tab);
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
-        
+
         const currentTab = overlayState.activeTab;
 
         if (tab === currentTab || !tab) {
@@ -439,27 +494,22 @@ export class UISystem extends System {
         this.tabs.className = overlayState.isOpen ? '' : 'hidden';
         if (overlayState.isOpen) {
             this.renderOverlay(overlayState.activeTab);
-            console.log('UISystem: renderOverlay called  with tab:', overlayState.activeTab);
+            console.log('UISystem: renderOverlay called with tab:', overlayState.activeTab);
         }
     }
 
     sortItemsByTypeAttackTier(items) {
         return items.sort((a, b) => {
-            // 1. Sort by type (alphabetical: "armor" before "weapon")
             if (a.type !== b.type) {
                 return a.type.localeCompare(b.type);
             }
-
-            // 2. If types are equal, sort by attackType (melee before ranged, undefined last)
             if (a.type === "weapon" && b.type === "weapon") {
-                const attackTypeA = a.attackType || "z"; // Undefined attackType goes last
+                const attackTypeA = a.attackType || "z";
                 const attackTypeB = b.attackType || "z";
                 if (attackTypeA !== attackTypeB) {
                     return attackTypeA.localeCompare(attackTypeB);
                 }
             }
-
-            // 3. If type and attackType are equal, sort by tierIndex (highest to lowest)
             return b.tierIndex - a.tierIndex;
         });
     }
@@ -487,7 +537,7 @@ export class UISystem extends System {
                 break;
             default:
                 console.warn(`UISystem: Unknown inventory tab "${tab}", defaulting to all items`);
-                filteredItems = items; // Edge case: return all items
+                filteredItems = items;
                 break;
         }
         return filteredItems;
@@ -498,14 +548,6 @@ export class UISystem extends System {
         const player = this.entityManager.getEntity('player');
         const stats = player.getComponent('Stats');
         const inventory = player.getComponent('Inventory');
-        console.log('Inventory:', inventory);
-
-        /*
-        const health = player.getComponent('Health');
-        const mana = player.getComponent('Mana');
-        const playerState = player.getComponent('PlayerState');
-        const resource = player.getComponent('Resource');
-        */
 
         this.overlayTabButtons(tab);
         this.menuContent.style.display = tab === 'menu' ? 'flex' : 'none';
@@ -526,22 +568,19 @@ export class UISystem extends System {
         const tabMenuDiv = document.getElementById('tab-menu');
         if (!tabMenuDiv) return;
 
-        
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         let tabIsDisabled = '';
         if (!gameState.gameStarted) {
             tabIsDisabled = 'disabled';
         }
-        
+
         tabMenuDiv.innerHTML = `
-            <button id="menu-tab"  class="tabs-button" style="background: ${activeTab === 'menu' ? '#0f0' : '#2c672c'};">Menu</button>
+            <button id="menu-tab" class="tabs-button" style="background: ${activeTab === 'menu' ? '#0f0' : '#2c672c'};">Menu</button>
             <button id="character-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'character' ? '#0f0' : '#2c672c'}; ">Character</button>
             <button id="log-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'log' ? '#0f0' : '#2c672c'};">Log</button>
             <button id="close-tabs">X</button>
         `;
     }
-
-    
 
     updateMenu() {
         const menuSections = {
@@ -558,7 +597,7 @@ export class UISystem extends System {
 
         document.getElementById('new-game-button').toggleAttribute("hidden", gameStarted);
         document.getElementById('load-games-button').toggleAttribute("hidden", gameStarted);
-        document.getElementById('exit-button').toggleAttribute("hidden", !gameStarted);;
+        document.getElementById('exit-button').toggleAttribute("hidden", !gameStarted);
         document.getElementById('save-games-button').toggleAttribute("hidden", !gameStarted);
 
         const menuDataWrapper = document.getElementById('menu-data-wrapper');
@@ -598,7 +637,7 @@ export class UISystem extends System {
                                 if (save.isDead) {
                                     html += `<li><button class="load-game" data-save-id="${save.saveId}" disabled>Dead</button> | <span class="save-game-name">${save.characterName}, Tier ${save.tier} - Saved on ${save.timestamp}</span>  | <button class="delete-game" data-save-id="${save.saveId}" style="background: red;">Delete</button></li>`;
                                 } else {
-                                    html += `<li class="save-game-item" data-character="${save.characterName}"><button class="load-game"  data-save-id="${save.saveId}">Load</button> | <span class="save-game-name">${save.characterName}, Tier ${save.tier} - Saved on ${save.timestamp}</span> | <button class="delete-game" data-save-id="${save.saveId}" style="background: red;">Delete</button></li>`;
+                                    html += `<li class="save-game-item" data-character="${save.characterName}"><button class="load-game" data-save-id="${save.saveId}">Load</button> | <span class="save-game-name">${save.characterName}, Tier ${save.tier} - Saved on ${save.timestamp}</span> | <button class="delete-game" data-save-id="${save.saveId}" style="background: red;">Delete</button></li>`;
                                 }
                             }
                         });
@@ -608,29 +647,28 @@ export class UISystem extends System {
 
                         const characterSelect = document.getElementById('character-select');
                         characterSelect.addEventListener('change', (event) => {
-                            const selectedCharacter = event.target.value; // Get the selected character name
-                            const saveGameItems = document.querySelectorAll('.save-game-item'); // Select all save game list items
+                            const selectedCharacter = event.target.value;
+                            const saveGameItems = document.querySelectorAll('.save-game-item');
                             saveGameItems.forEach(item => {
-                                const characterName = item.getAttribute('data-character'); // Get the character name from the data attribute
+                                const characterName = item.getAttribute('data-character');
                                 if (selectedCharacter === 'all' || characterName === selectedCharacter) {
-                                    item.removeAttribute('hidden'); // Show the item
+                                    item.removeAttribute('hidden');
                                 } else {
-                                    item.setAttribute('hidden', ''); // Hide the item
+                                    item.setAttribute('hidden', '');
                                 }
                             });
                         });
 
                         if (isSaveMode) {
                             const currentCharacter = this.entityManager.getEntity('player').getComponent('PlayerState').name;
-                            characterSelect.value = currentCharacter; // Default to "All Characters"
+                            characterSelect.value = currentCharacter;
                         } else {
-                            characterSelect.value = uniqueCharacterNames[0]; // Default to the first character in the list;
+                            characterSelect.value = uniqueCharacterNames[0];
                         }
                         characterSelect.dispatchEvent(new Event('change'));
                     });
                 }
             }
-          
         }
 
         const menuButtons = document.getElementById('menu-buttons');
@@ -718,7 +756,14 @@ export class UISystem extends System {
         });
 
         const inventoryDiv = document.getElementById('inventory-item-wrapper');
-        // CHANGED: Filter and sort items
+        const inventoryHash = JSON.stringify(inventory.items.map(item => item.uniqueId)) +
+            JSON.stringify(Object.values(inventory.equipped).map(item => item?.uniqueId)) +
+            this.activeInventoryTab;
+        if (inventoryHash === this.lastInventoryHash) {
+            return;
+        }
+        this.lastInventoryHash = inventoryHash;
+
         let filteredItems = this.filterItems(inventory.items, this.activeInventoryTab);
         const sortedItems = this.sortItemsByTypeAttackTier(filteredItems);
         inventoryDiv.innerHTML = `
@@ -730,58 +775,15 @@ export class UISystem extends System {
                 </p>
             </div>
         `).join('') : '<p>Inventory empty.</p>'}
-    `;
+        `;
     }
 
     addLogMessage({ message }) {
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         overlayState.logMessages.unshift(message);
-       // console.log('UISystem: Added message to log:', message, 'Current log messages:', overlayState.logMessages);
         if (overlayState.logMessages.length > 200) overlayState.logMessages.pop();
         if (overlayState.isOpen && overlayState.activeTab === 'log') {
             this.renderOverlay('log');
-        }
-    }
-
-    updateUI({ entityId }) {
-        if (entityId !== 'player') return;
-
-        const player = this.entityManager.getEntity('player');
-        const health = player.getComponent('Health');
-        const mana = player.getComponent('Mana');
-        const playerState = player.getComponent('PlayerState');
-        const resource = player.getComponent('Resource');
-        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
-
-        this.statusUpdates.hp = { value: health.hp, max: health.maxHp };
-        this.statusUpdates.mana = { value: mana.mana, max: mana.maxMana };
-        this.statusUpdates.xp = { value: playerState.xp, next: playerState.nextLevelXp };
-        this.statusUpdates.healPotions = resource.healPotions;
-        this.statusUpdates.torches = resource.torches;
-
-        if (!this.needsUpdate) {
-            this.needsUpdate = true;
-            this.rafPending = requestAnimationFrame(() => {
-                this.applyStatusUpdates();
-                this.needsUpdate = false;
-                this.rafPending = null;
-            });
-        }
-
-        if (this.playerInfo) {
-            const playerNameSpan = this.playerInfo.querySelector('#playerName');
-            const playerLevelSpan = this.playerInfo.querySelector('#playerLevel');
-            const dungeonTierSpan = this.playerInfo.querySelector('#dungeonTier');
-            const playerGoldSpan = this.playerInfo.querySelector('#playerGold');
-            if (playerNameSpan) playerNameSpan.textContent = playerState.name;
-            if (playerLevelSpan) playerLevelSpan.textContent = playerState.level;
-            if (dungeonTierSpan) dungeonTierSpan.textContent = gameState.tier;
-            if (playerGoldSpan) playerGoldSpan.textContent = resource.gold !== undefined ? resource.gold : 'N/A';
-        }
-
-        const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
-        if (overlayState.isOpen && overlayState.activeTab === 'character') {
-            this.renderOverlay('character');
         }
     }
 
@@ -892,14 +894,13 @@ export class UISystem extends System {
                 }
             }
 
-            if (itemData.affixes && itemData.affixes.length > 0) { // CHANGED: Fixed typo .length() to .length
+            if (itemData.affixes && itemData.affixes.length > 0) {
                 const affixDivider = document.createElement('hr');
                 affixDivider.className = 'tooltip-divider';
                 content.appendChild(affixDivider);
                 itemData.affixes.forEach(affix => {
                     const affixElement = document.createElement('div');
                     affixElement.className = 'tooltip-affix';
-                    // Use affix.name (capitalized) and description, with fallbacks
                     const affixName = affix.name ? affix.name.charAt(0).toUpperCase() + affix.name.slice(1) : 'Unnamed';
                     affixElement.textContent = `${affixName}: ${affix.description || 'No description'}`;
                     content.appendChild(affixElement);

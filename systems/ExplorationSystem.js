@@ -15,8 +15,6 @@ export class ExplorationSystem extends System {
     }
 
     init() {
-
-
         this.eventBus.on('ToggleMinimap', () => {
             this.isMinimapVisible = !this.isMinimapVisible;
             this.minimapCanvas.style.display = this.isMinimapVisible ? 'block' : 'none';
@@ -37,6 +35,7 @@ export class ExplorationSystem extends System {
     }
 
     renderMinimap() {
+        console.log('ExplorationSystem: renderMinimap called');
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
         if (!levelEntity) {
@@ -74,6 +73,7 @@ export class ExplorationSystem extends System {
             const playerPos = player.getComponent('Position');
             const playerX = Math.floor(playerPos.x / this.TILE_SIZE);
             const playerY = Math.floor(playerPos.y / this.TILE_SIZE);
+            console.log(`ExplorationSystem: Rendering player at minimap x=${playerX}, y=${playerY}`);
             this.minimapCtx.fillStyle = '#0f0';
             this.minimapCtx.fillRect(playerX * this.PIXELS_PER_TILE, playerY * this.PIXELS_PER_TILE, this.PIXELS_PER_TILE, this.PIXELS_PER_TILE);
         }
@@ -121,11 +121,11 @@ export class ExplorationSystem extends System {
     }
 
     updateExploration() {
+        console.log('ExplorationSystem: updateExploration called');
         const player = this.entityManager.getEntity('player');
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
         const lightingState = this.entityManager.getEntity('lightingState').getComponent('LightingState');
-        const visibleRadius = lightingState.visibleRadius;
         const state = this.entityManager.getEntity('state');
         if (!player || !gameState || !renderState || !state) {
             console.warn('ExplorationSystem: Missing required entities or components');
@@ -136,10 +136,9 @@ export class ExplorationSystem extends System {
         const playerPos = player.getComponent('Position');
         const playerX = Math.floor(playerPos.x / this.TILE_SIZE);
         const playerY = Math.floor(playerPos.y / this.TILE_SIZE);
-   
-       
-        const renderRadius = renderState.renderRadius;
 
+        const renderRadius = renderState.renderRadius;
+        const visibleRadius = lightingState.visibleRadius;
         const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
         if (!levelEntity) return;
 
@@ -187,14 +186,37 @@ export class ExplorationSystem extends System {
                 }
             }
         }
-
+        
         if (newDiscoveryCount > 0) {
+            console.log(`ExplorationSystem: New tiles discovered, count=${newDiscoveryCount}`);
             playerState.discoveredTileCount += newDiscoveryCount;
             this.eventBus.emit('TilesDiscovered', { count: newDiscoveryCount, total: playerState.discoveredTileCount });
-            if (this.isMinimapVisible) this.renderMinimap();
+            if (this.isMinimapVisible) {
+                
+                this.renderMinimap();
+                return;
+            }
+        } else {
+            console.log('ExplorationSystem: No new tiles discovered, skipping discovery-based renderMinimap');
         }
-        if (!player.hasComponent('NeedsRender')) {
-            this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(playerPos.x, playerPos.y));
+
+        const lastPos = player.getComponent('LastPosition');
+        const lastTileX = Math.floor(lastPos.x / this.TILE_SIZE);
+        const lastTileY = Math.floor(lastPos.y / this.TILE_SIZE);
+
+        if (!lastPos || (lastPos.x === 0 && lastPos.y === 0)) {
+            console.log('ExplorationSystem: Skipping position check, LastPosition is null or default (x:0, y:0)');
+
+        } else {
+            const shouldRenderMinimap = this.isMinimapVisible && (
+                playerX !== lastTileX || playerY !== lastTileY
+            );
+
+            console.log(`ExplorationSystem: shouldRenderMinimap=${shouldRenderMinimap}`);
+            if (shouldRenderMinimap) {
+                console.log(`ExplorationSystem: Tile changed from x=${lastTileX}, y=${lastTileY} to x=${playerX}, y=${playerY}, rendering minimap`);
+                this.renderMinimap();
+            }
         }
     }
 }

@@ -290,7 +290,7 @@ export class MapRenderSystem extends System {
                 }
             }
 
-            console.log(`MapRenderSystem: Rendering HpBar for ${entity.id} - fillPercent: ${currentFillPercent}, fillColor: ${currentFillColor}`);
+            //console.log(`MapRenderSystem: Rendering HpBar for ${entity.id} - fillPercent: ${currentFillPercent}, fillColor: ${currentFillColor}`);
 
             // Health bar dimensions
             const barWidth = visuals.w * this.SCALE_FACTOR * 0.8; // 80% of entity width

@@ -82,6 +82,8 @@ export class LootCollectionSystem extends System {
         gameState.needsRender = true;
         //this.eventBus.emit('RenderNeeded');
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
+        this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
+
         this.sfxQueue.push({ sfx: 'loot0' , volume: .7 });
 
         if (playerResource.gold >= 1e12) {

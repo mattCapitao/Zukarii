@@ -247,6 +247,7 @@ export class PlayerSystem extends System {
         playerState.xp += amount;
         this.eventBus.emit('LogMessage', { message: `Gained ${amount} XP (${playerState.xp}/${playerState.nextLevelXp})` });
         this.checkLevelUp(player);
+        this.eventBus.emit('PlayerStateUpdated', { entityId: player.id });
     }
 
     checkLevelUp(player) {
@@ -279,6 +280,7 @@ export class PlayerSystem extends System {
             this.calculateStats(player);
             this.healthUpdates.push({ entityId: 'player', amount: stats.maxHp - playerHealth.hp, attackerId: 'player' });
             this.manaUpdates.push({ entityId: 'player', amount: stats.maxMana - playerMana.mana, attackerId: 'player' });
+            this.eventBus.emit('StatsUpdated', { entityId: player.id });
            
         }
     }
