@@ -13,7 +13,9 @@ export class LightingSystem extends System {
         this.DEFAULT_VISIBLE_RADIUS = 3
         this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
         this.eventBus.on('LightSourceActivated', (data) => this.activateLightSource(data));
-        this.eventBus.on('TurnEnded', () => this.checkExpiration());
+        // this.eventBus.on('TurnEnded', () => this.checkExpiration());
+        // turn ended has been removed from the game when reactivsating lighting system we will need to change expiration handling
+
         this.renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
     }
 

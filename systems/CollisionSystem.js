@@ -18,65 +18,167 @@ export class CollisionSystem extends System {
             }
         }
 
-        // Detect collisions at intended positions
+        // Detect collisions for moving entities
         for (const mover of movingEntities) {
             const moverPos = mover.getComponent('Position');
-            const moverHitbox = mover.getComponent('Hitbox');
-            const intent = mover.getComponent('MovementIntent');
+           // //console.log(`CollisionSystem: mover ${mover.id} has PositionComponent: ${!!moverPos}`);
 
-            for (const target of entities) {
+            const moverHitbox = mover.getComponent('Hitbox');
+          //  //console.log(`CollisionSystem: mover ${mover.id} has HitboxComponent: ${!!moverHitbox}`);
+
+            const intent = mover.getComponent('MovementIntent');
+            //console.log(`CollisionSystem: mover ${mover.id} has MovementIntentComponent: ${!!intent}`);
+
+            const deltaX = intent.targetX - moverPos.x;
+            const deltaY = intent.targetY - moverPos.y;
+            //console.log(`CollisionSystem: mover ${mover.id} moving to (${intent.targetX}, ${intent.targetY})`);
+
+            //console.log(`CollisionSystem: mover ${mover.id} deltaX: ${deltaX}, deltaY: ${deltaY}`);
+
+            // Calculate the range based on movement distance
+            const range = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            //console.log(`CollisionSystem: mover ${mover.id} calculated range: ${range}`);
+
+            // Filter entities based on proximity and projected path
+            const nearbyEntities = entities.filter(target => this.isWithinProjectedPath(
+                { x: moverPos.x, y: moverPos.y, width: moverHitbox.width, height: moverHitbox.height },
+                { x: target.getComponent('Position').x, y: target.getComponent('Position').y, width: target.getComponent('Hitbox').width, height: target.getComponent('Hitbox').height },
+                deltaX,
+                deltaY
+            ));
+
+            for (const target of nearbyEntities) {
                 if (mover === target) continue;
 
                 const targetPos = target.getComponent('Position');
                 const targetHitbox = target.getComponent('Hitbox');
 
-                // Check collision at intended position
-                if (this.isColliding(
-                    { x: intent.targetX, y: intent.targetY },
-                    moverHitbox,
-                    targetPos,
-                    targetHitbox
-                )) {
-                    console.log(`CollisionSystem: Collision detected: ${mover.id} (collider) -> ${target.id} (collided)`);
+                const collision = this.sweptAABB(
+                    { x: moverPos.x, y: moverPos.y, width: moverHitbox.width, height: moverHitbox.height },
+                    { x: targetPos.x, y: targetPos.y, width: targetHitbox.width, height: targetHitbox.height },
+                    deltaX,
+                    deltaY
+                );
 
-                    // Add collision results
+                if (collision) {
                     if (!mover.hasComponent('Collision')) {
                         mover.addComponent(new CollisionComponent());
                     }
-                    if (!target.hasComponent('Collision') ){
+                    /*
+                    if (!target.hasComponent('Collision')) {
                         target.addComponent(new CollisionComponent());
                     }
-
+                    */
                     mover.getComponent('Collision').collisions.push({
                         moverId: mover.id,
                         targetId: target.id,
-                        collisionType: "dynamic"
+                        collisionType: collision.entryTime === 0 ? "current" : "dynamic",
+                        normalX: collision.normalX,
+                        normalY: collision.normalY,
+                        distance: collision.entryTime * range,
                     });
-
+                    /*
                     target.getComponent('Collision').collisions.push({
                         moverId: mover.id,
                         targetId: target.id,
-                        collisionType: "dynamic"
+                        collisionType: collision.entryTime === 0 ? "current" : "dynamic",
+                        normalX: -collision.normalX,
+                        normalY: -collision.normalY,
+                        distance: collision.entryTime * range,
                     });
-
+                    */
                 }
             }
-            const moverCollision = mover?.getComponent('Collision');
-            if (moverCollision) {
-                console.log(`CollisionSystem: ${mover.id} collisions:`, moverCollision.collisions);
-            }
-           
         }
     }
 
+    // Helper function to check if a target is within range
+    isWithinRange(moverPos, targetPos, range) {
+        //console.log(`Checking range: moverPos(${moverPos.x}, ${moverPos.y}), targetPos(${targetPos.x}, ${targetPos.y}), range: ${range}`);
+        const dx = moverPos.x - targetPos.x;
+        const dy = moverPos.y - targetPos.y;
+        return dx * dx + dy * dy <= range * range;
+    }
 
+    // Helper function to check if a target is within the mover's projected path
+    isWithinProjectedPath(mover, target, deltaX, deltaY) {
+        const moverLeft = mover.x;
+        const moverRight = mover.x + mover.width;
+        const moverTop = mover.y;
+        const moverBottom = mover.y + mover.height;
 
-    isColliding(posA, hitboxA, posB, hitboxB) {
+        const targetLeft = target.x;
+        const targetRight = target.x + target.width;
+        const targetTop = target.y;
+        const targetBottom = target.y + target.height;
+
+        // Expand the mover's bounding box to include its projected path
+        const pathLeft = Math.min(moverLeft, moverLeft + deltaX);
+        const pathRight = Math.max(moverRight, moverRight + deltaX);
+        const pathTop = Math.min(moverTop, moverTop + deltaY);
+        const pathBottom = Math.max(moverBottom, moverBottom + deltaY);
+
+        // Check if the target's bounding box overlaps with the projected path
         return (
-            posA.x + hitboxA.offsetX < posB.x + hitboxB.offsetX + hitboxB.width &&
-            posA.x + hitboxA.offsetX + hitboxA.width > posB.x + hitboxB.offsetX &&
-            posA.y + hitboxA.offsetY < posB.y + hitboxB.offsetY + hitboxB.height &&
-            posA.y + hitboxA.offsetY + hitboxA.height > posB.y + hitboxB.offsetY
+            pathLeft < targetRight &&
+            pathRight > targetLeft &&
+            pathTop < targetBottom &&
+            pathBottom > targetTop
         );
     }
+
+    // Swept AABB collision detection
+    sweptAABB(mover, target, deltaX, deltaY) {
+        //console.log(`Swept AABB called with : mover(${mover.x}, ${mover.y}), target(${target.x}, ${target.y}), deltaX: ${deltaX}, deltaY: ${deltaY}`);
+        const moverLeft = mover.x;
+        const moverRight = mover.x + mover.width;
+        const moverTop = mover.y;
+        const moverBottom = mover.y + mover.height;
+
+        const targetLeft = target.x;
+        const targetRight = target.x + target.width;
+        const targetTop = target.y;
+        const targetBottom = target.y + target.height;
+
+        let xEntry, xExit, yEntry, yExit;
+
+        // Handle X-axis movement
+        if (deltaX === 0) {
+            xEntry = -Infinity;
+            xExit = Infinity;
+        } else {
+            xEntry = deltaX > 0
+                ? (targetLeft - moverRight) / deltaX
+                : (targetRight - moverLeft) / deltaX;
+            xExit = deltaX > 0
+                ? (targetRight - moverLeft) / deltaX
+                : (targetLeft - moverRight) / deltaX;
+        }
+
+        // Handle Y-axis movement
+        if (deltaY === 0) {
+            yEntry = -Infinity;
+            yExit = Infinity;
+        } else {
+            yEntry = deltaY > 0
+                ? (targetTop - moverBottom) / deltaY
+                : (targetBottom - moverTop) / deltaY;
+            yExit = deltaY > 0
+                ? (targetBottom - moverTop) / deltaY
+                : (targetTop - moverBottom) / deltaY;
+        }
+
+        const entryTime = Math.max(xEntry, yEntry);
+        const exitTime = Math.min(xExit, yExit);
+
+        if (entryTime > exitTime || (xEntry < 0 && yEntry < 0) || xEntry > 1 || yEntry > 1) {
+            return null; // No collision
+        }
+
+        const normalX = xEntry > yEntry ? (deltaX > 0 ? -1 : 1) : 0;
+        const normalY = xEntry <= yEntry ? (deltaY > 0 ? -1 : 1) : 0;
+
+        return { entryTime, normalX, normalY };
+    }
+
 }

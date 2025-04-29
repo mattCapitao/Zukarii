@@ -244,8 +244,8 @@ export class Game {
                 'monsterController',
                 'monsterTimer',
                 'collisions',
-                'playerCollision',
-                'projectileCollisions',
+                'playerCollision', // must be after movementResolution
+                'projectileCollisions',// must be before movementResolution
                 'movementResolution',
                 'combat',
                 'damageCalculation',

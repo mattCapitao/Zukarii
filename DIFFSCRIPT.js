@@ -1,98 +1,96 @@
 ﻿import { System } from '../core/Systems.js';
-import { CollisionComponent } from '../core/Components.js';
+import { NeedsRenderComponent } from '../core/Components.js';
 
-export class CollisionSystem extends System {
-    constructor(entityManager) {
-        super(entityManager);
-        this.requiredComponents = ['Position', 'Hitbox'];
+export class MovementResolutionSystem extends System {
+    constructor(entityManager, eventBus) {
+        super(entityManager, eventBus);
+        this.requiredComponents = ['Position', 'MovementIntent'];
     }
 
     update(deltaTime) {
-        const entities = this.entityManager.getEntitiesWith(['Position', 'Hitbox']);
-        const movingEntities = this.entityManager.getEntitiesWith(['Position', 'Hitbox', 'MovementIntent']);
+        const entities = this.entityManager.getEntitiesWith(this.requiredComponents);
 
-        // Clear previous collision results
         for (const entity of entities) {
+            let entityCanMove = entity.hasComponent('MovementIntent') && entity.hasComponent('Position');
+            let blockedBy = '';
+
+            const intent = entity.getComponent('MovementIntent');
+            const pos = entity.getComponent('Position');
+            let newX = intent.targetX;
+            let newY = intent.targetY;
+
             if (entity.hasComponent('Collision')) {
-                entity.getComponent('Collision').collisions = [];
-            }
-        }
+                const collisionComponent = entity.getComponent('Collision');
+                const collisions = collisionComponent.collisions;
+                if (collisions?.length > 0) {
+                    const moveX = intent.targetX - pos.x;
+                    const moveY = intent.targetY - pos.y;
+                    let canMoveX = true;
+                    let canMoveY = true;
+                    let blockedByX = '';
+                    let blockedByY = '';
 
-        // Detect collisions at current and intended positions for all moving entities
-        for (const mover of movingEntities) {
-            const moverPos = mover.getComponent('Position');
-            const moverHitbox = mover.getComponent('Hitbox');
-            const intent = mover.getComponent('MovementIntent');
+                    for (const collision of collisions) {
+                        const targetEntity = this.entityManager.getEntity(collision.targetId);
+                        if (!targetEntity) {
+                            console.warn(`MovementResolutionSystem: Target entity ${collision.targetId} not found for ${entity.id}`);
+                            continue;
+                        }
+                        // Skip if projectile-target collision is already handled
+                        if (!entity.hasComponent('Projectile') && targetEntity.hasComponent('Projectile')) {
+                            continue;
+                        }
+                        const targetPos = targetEntity.getComponent('Position');
+                        const isCurrentCollision = collision.collisionType === "current";
+                        let currentDx = isCurrentCollision ? pos.x - targetPos.x : targetPos.x - pos.x;
+                        let intendedDx = isCurrentCollision ? (pos.x + moveX) - targetPos.x : targetPos.x - (pos.x + moveX);
+                        let currentDistX = Math.abs(currentDx);
+                        let intendedDistX = Math.abs(intendedDx);
+                        if (intendedDistX < currentDistX) {
+                            canMoveX = false;
+                            blockedByX = collision.targetId;
+                        }
+                        let currentDy = isCurrentCollision ? pos.y - targetPos.y : targetPos.y - pos.y;
+                        let intendedDy = isCurrentCollision ? (pos.y + moveY) - targetPos.y : targetPos.y - (pos.y + moveY);
+                        let currentDistY = Math.abs(currentDy);
+                        let intendedDistY = Math.abs(intendedDy);
+                        if (intendedDistY < currentDistY) {
+                            canMoveY = false;
+                            blockedByY = collision.targetId;
+                        }
+                    }
 
-            // Check collisions at current position
-            for (const target of entities) {
-                if (mover === target) continue;
-                const targetPos = target.getComponent('Position');
-                const targetHitbox = target.getComponent('Hitbox');
-                if (this.isColliding(moverPos, moverHitbox, targetPos, targetHitbox)) {
-                    if (!mover.hasComponent('Collision')) {
-                        mover.addComponent(new CollisionComponent());
-                    }
-                    if (!target.hasComponent('Collision')) {
-                        target.addComponent(new CollisionComponent());
-                    }
-                    mover.getComponent('Collision').collisions.push({
-                        moverId: mover.id,
-                        targetId: target.id,
-                        collisionType: "current"
-                    });
-                    target.getComponent('Collision').collisions.push({
-                        moverId: mover.id,
-                        targetId: target.id,
-                        collisionType: "current"
-                    });
+                    // Allow sliding: move in any unblocked axis
+                    entityCanMove = canMoveX || canMoveY;
+                    newX = canMoveX ? intent.targetX : pos.x;
+                    newY = canMoveY ? intent.targetY : pos.y;
+                    blockedBy = canMoveX && canMoveY ? '' : `${blockedByX} (X), ${blockedByY} (Y)`;
+                } else {
+                    entity.removeComponent('Collision');
                 }
             }
 
-            // Check collisions at intended position
-            for (const target of entities) {
-                if (mover === target) continue;
-                const targetPos = target.getComponent('Position');
-                const targetHitbox = target.getComponent('Hitbox');
-                if (this.isColliding(
-                    { x: intent.targetX, y: intent.targetY },
-                    moverHitbox,
-                    targetPos,
-                    targetHitbox
-                )) {
-                    console.log(`CollisionSystem: Collision detected: ${mover.id} (collider) -> ${target.id} (collided)`);
-                    if (!mover.hasComponent('Collision')) {
-                        mover.addComponent(new CollisionComponent());
-                    }
-                    if (!target.hasComponent('Collision')) {
-                        target.addComponent(new CollisionComponent());
-                    }
-                    mover.getComponent('Collision').collisions.push({
-                        moverId: mover.id,
-                        targetId: target.id,
-                        collisionType: "dynamic"
-                    });
-                    target.getComponent('Collision').collisions.push({
-                        moverId: mover.id,
-                        targetId: target.id,
-                        collisionType: "dynamic"
-                    });
+            if (entityCanMove) {
+                console.log(`MovementResolutionSystem: Moving ${entity.id} to (${newX}, ${newY})`);
+
+                const lastPos = entity.getComponent('LastPosition');
+                lastPos.x = pos.x;
+                lastPos.y = pos.y;
+
+                pos.x = newX;
+                pos.y = newY;
+
+                if (!entity.hasComponent('NeedsRender')) {
+                    this.entityManager.addComponentToEntity(entity.id, new NeedsRenderComponent(pos.x, pos.y));
                 }
+
+                this.eventBus.emit('PositionChanged', { entityId: entity.id, x: pos.x, y: pos.y });
+                console.log(`MovementResolutionSystem: Entity ${entity.id} moved to (${pos.x}, ${pos.y})`);
+            } else {
+                console.log(`MovementResolutionSystem: Entity ${entity.id} blocked by ${blockedBy}`);
             }
 
-            const moverCollision = mover?.getComponent('Collision');
-            if (moverCollision) {
-                console.log(`CollisionSystem: ${mover.id} collisions:`, moverCollision.collisions);
-            }
+            entity.removeComponent('MovementIntent');
         }
-    }
-
-    isColliding(posA, hitboxA, posB, hitboxB) {
-        return (
-            posA.x + hitboxA.offsetX < posB.x + hitboxB.offsetX + hitboxB.width &&
-            posA.x + hitboxA.offsetX + hitboxA.width > posB.x + hitboxB.offsetX &&
-            posA.y + hitboxA.offsetY < posB.y + hitboxB.offsetY + hitboxB.height &&
-            posA.y + hitboxA.offsetY + hitboxA.height > posB.y + hitboxB.offsetY
-        );
     }
 }

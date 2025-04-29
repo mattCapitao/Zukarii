@@ -1,5 +1,4 @@
 ﻿import { System } from '../core/Systems.js';
-import {NeedsRenderComponent, } from '../core/Components.js';
 
 export class MovementResolutionSystem extends System {
     constructor(entityManager, eventBus) {
@@ -11,110 +10,92 @@ export class MovementResolutionSystem extends System {
         const entities = this.entityManager.getEntitiesWith(this.requiredComponents);
 
         for (const entity of entities) {
-            let entityCanMove = entity.hasComponent('MovementIntent') && entity.hasComponent('Position');
-            let blockedBy = '';
-
+            // Skip entities without MovementIntent
             const intent = entity.getComponent('MovementIntent');
-            //console.log(`MovementResolutionSystem: Processing entity ${entity.id} with intent:`, intent);
-
             const pos = entity.getComponent('Position');
-            let newX = intent.targetX;
-            let newY = intent.targetY;
+            let deltaX = intent.targetX - pos.x;
+            let deltaY = intent.targetY - pos.y;
 
-            if (entity.hasComponent('Collision')) {
-                //console.log(`MovementResolutionSystem: Entity ${entity.id} has Collision component`, entity.getComponent('Collision'));
-                const collisionComponent = entity?.getComponent('Collision');
-                const collisions = collisionComponent?.collisions;
-                //console.log(`MovementResolutionSystem: Entity ${entity.id} has collisions:`, collisions);
+            if (entity.hasComponent('Projectile')) {
+                pos.x += deltaX;
+                pos.y += deltaY;
 
-                if (collisions?.length > 0) {
-                    // Calculate movement components
-                    const moveX = intent.targetX - pos.x;
-                    const moveY = intent.targetY - pos.y;
-
-                    let canMoveX = true;
-                    let canMoveY = true;
-                    let blockedByX = '';
-                    let blockedByY = '';
-
-                    for (const collision of collisions) {
-                        const targetEntity = this.entityManager.getEntity(collision.targetId);
-                        if (!targetEntity) {
-                            console.warn(`MovementResolutionSystem: Target entity ${collision.targetId} not found for ${entity.id}`);
-                            continue;
-                        }
-                        if (!entity.hasComponent('Projectile') && targetEntity.hasComponent('Projectile')) {
-                            continue;
-                        }
-
-                        const targetPos = targetEntity.getComponent('Position');
-
-                        // Check X component
-                        const currentDx = targetPos.x - pos.x;
-                        const intendedDx = targetPos.x - (pos.x + moveX);
-                        const currentDistX = Math.abs(currentDx);
-                        const intendedDistX = Math.abs(intendedDx);
-
-                        if (intendedDistX < currentDistX) {
-                            // Moving closer in X direction, block it
-                            canMoveX = false;
-                            blockedByX = collision.targetId;
-                            //console.log(`MovementResolutionSystem: Blocking X movement for ${entity.id} as it would increase overlap with ${collision.targetId}`);
-                        }
-
-                        // Check Y component
-                        const currentDy = targetPos.y - pos.y;
-                        const intendedDy = targetPos.y - (pos.y + moveY);
-                        const currentDistY = Math.abs(currentDy);
-                        const intendedDistY = Math.abs(intendedDy);
-
-                        if (intendedDistY < currentDistY) {
-                            // Moving closer in Y direction, block it
-                            canMoveY = false;
-                            blockedByY = collision.targetId;
-                            //console.log(`MovementResolutionSystem: Blocking Y movement for ${entity.id} as it would increase overlap with ${collision.targetId}`);
-                        }
-                    }
-
-                    // Apply allowed movement components
-                    if (!canMoveX && !canMoveY) {
-                        entityCanMove = false;
-                        blockedBy = `${blockedByX} (X), ${blockedByY} (Y)`;
-                    } else {
-                        entityCanMove = true;
-                        newX = canMoveX ? intent.targetX : pos.x;
-                        newY = canMoveY ? intent.targetY : pos.y;
-                        //console.log(`MovementResolutionSystem: Allowing partial movement for ${entity.id} - X: ${canMoveX}, Y: ${canMoveY}`);
-                    }
-                } else {
-                    //console.log(`MovementResolutionSystem: No collisions found for Entity ${entity.id} having collision component`, collisionComponent);
-                    entity.removeComponent('Collision');
-                }
-            }
-
-            if (entityCanMove) {
-                //console.log(`MovementResolutionSystem: Moving ${entity.id} to (${newX}, ${newY})`);
-
-                const lastPos = entity.getComponent('LastPosition');
-
-                lastPos.x = pos.x;
-                lastPos.y = pos.y;
-
-                pos.x = newX;
-                pos.y = newY;
-
-                if (!entity.hasComponent('NeedsRender')) {
-                    this.entityManager.addComponentToEntity(entity.id, new NeedsRenderComponent(pos.x, pos.y));
-                }
-
+                // Emit position change event
                 this.eventBus.emit('PositionChanged', { entityId: entity.id, x: pos.x, y: pos.y });
-                //console.log(`MovementResolutionSystem: Entity ${entity.id} moved to (${pos.x}, ${pos.y})`);
-            } else {
-                //console.log(`MovementResolutionSystem: Entity ${entity.id} blocked by ${blockedBy}`);
+                continue;
             }
 
-            entity.removeComponent('MovementIntent');
+            if (entity.hasComponent('Collision').collisions) {
+                const collisions = entity.getComponent('Collision').collisions;
+                if (!collisions || collisions.length < 1) return;
+                
+                console.log(`MovementResolutionSystem: Checking entity ${entity.id} collisions:`, collisions);
+
+                for (const collision of collisions) {
+                    console.log('MovementResolutionSystem: Collision detected:', collision);
+
+                    // Block movement along the colliding axis
+                    if (collision.normalX !== 0) {
+                        deltaX = 0; // Stop X movement
+                        intent.targetX = pos.x; // Adjust intent to stop X movement
+                    }
+                    if (collision.normalY !== 0) {
+                        deltaY = 0; // Stop Y movement
+                        intent.targetY = pos.y; // Adjust intent to stop Y movement
+                    }
+                }
+            }
+
+            // Check for potential overlap along the X-axis
+            const newX = pos.x + deltaX;
+            if (this.wouldOverlap(entity, newX, pos.y)) {
+                console.log('MovementResolutionSystem: Overlap detected along X-axis, stopping X movement.', deltaX);
+                deltaX = 0;
+                intent.targetX = pos.x; // Stop X movement
+            }
+
+            // Check for potential overlap along the Y-axis
+            const newY = pos.y + deltaY;
+            if (this.wouldOverlap(entity, pos.x, newY)) {
+                console.log('MovementResolutionSystem: Overlap detected along Y-axis, stopping Y movement.', deltaY);
+                deltaY = 0;
+                intent.targetY = pos.y; // Stop Y movement
+            }
+
+            // Apply remaining movement
+            pos.x += deltaX;
+            pos.y += deltaY;
+
+            // Emit position change event
+            this.eventBus.emit('PositionChanged', { entityId: entity.id, x: pos.x, y: pos.y });
         }
     }
-}
 
+
+    /**
+     * Check if moving the entity to (newX, newY) would cause overlap with other entities.
+     */
+    wouldOverlap(entity, newX, newY) {
+        if (entity.hasComponent('Projectile')) { return false; }
+        const hitbox = entity.getComponent('Hitbox');
+        const entities = this.entityManager.getEntitiesWith(['Position', 'Hitbox']);
+
+        for (const other of entities) {
+            if (other === entity || other.hasComponent('Projectile')) continue; // Skip self
+
+            const otherPos = other.getComponent('Position');
+            const otherHitbox = other.getComponent('Hitbox');
+
+            if (
+                newX < otherPos.x + otherHitbox.width &&
+                newX + hitbox.width > otherPos.x &&
+                newY < otherPos.y + otherHitbox.height &&
+                newY + hitbox.height > otherPos.y
+            ) {
+                return true; // Overlap detected
+            }
+        }
+
+        return false; // No overlap
+    }
+}
