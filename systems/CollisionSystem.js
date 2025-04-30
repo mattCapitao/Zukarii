@@ -21,25 +21,14 @@ export class CollisionSystem extends System {
         // Detect collisions for moving entities
         for (const mover of movingEntities) {
             const moverPos = mover.getComponent('Position');
-           // //console.log(`CollisionSystem: mover ${mover.id} has PositionComponent: ${!!moverPos}`);
-
             const moverHitbox = mover.getComponent('Hitbox');
-          //  //console.log(`CollisionSystem: mover ${mover.id} has HitboxComponent: ${!!moverHitbox}`);
-
             const intent = mover.getComponent('MovementIntent');
-            //console.log(`CollisionSystem: mover ${mover.id} has MovementIntentComponent: ${!!intent}`);
 
             const deltaX = intent.targetX - moverPos.x;
             const deltaY = intent.targetY - moverPos.y;
-            //console.log(`CollisionSystem: mover ${mover.id} moving to (${intent.targetX}, ${intent.targetY})`);
 
-            //console.log(`CollisionSystem: mover ${mover.id} deltaX: ${deltaX}, deltaY: ${deltaY}`);
-
-            // Calculate the range based on movement distance
             const range = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-            //console.log(`CollisionSystem: mover ${mover.id} calculated range: ${range}`);
 
-            // Filter entities based on proximity and projected path
             const nearbyEntities = entities.filter(target => this.isWithinProjectedPath(
                 { x: moverPos.x, y: moverPos.y, width: moverHitbox.width, height: moverHitbox.height },
                 { x: target.getComponent('Position').x, y: target.getComponent('Position').y, width: target.getComponent('Hitbox').width, height: target.getComponent('Hitbox').height },
@@ -94,7 +83,6 @@ export class CollisionSystem extends System {
 
     // Helper function to check if a target is within range
     isWithinRange(moverPos, targetPos, range) {
-        //console.log(`Checking range: moverPos(${moverPos.x}, ${moverPos.y}), targetPos(${targetPos.x}, ${targetPos.y}), range: ${range}`);
         const dx = moverPos.x - targetPos.x;
         const dy = moverPos.y - targetPos.y;
         return dx * dx + dy * dy <= range * range;

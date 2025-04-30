@@ -7,21 +7,40 @@ export class MovementResolutionSystem extends System {
     }
 
     update(deltaTime) {
+
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        if (gameState.transitionLock) {
+            console.log('MovementResolutionSystem: Skipped update due to transitionLock');
+            // Clear any existing movement intents
+            this.entityManager.getEntitiesWith(['MovementIntent']).forEach(entity => {
+                this.entityManager.removeComponentFromEntity(entity.id, 'MovementIntent');
+            });
+            return;
+        }
         const entities = this.entityManager.getEntitiesWith(this.requiredComponents);
 
         for (const entity of entities) {
             // Skip entities without MovementIntent
             const intent = entity.getComponent('MovementIntent');
             const pos = entity.getComponent('Position');
+            let lastPos = null;
+            if (entity.hasComponent('LastPosition')) {
+                lastPos = entity.getComponent('LastPosition');
+            }
             let deltaX = intent.targetX - pos.x;
             let deltaY = intent.targetY - pos.y;
 
             if (entity.hasComponent('Projectile')) {
+
+                if (lastPos) {
+                    lastPos.x = pos.x;
+                    lastPos.y = pos.y;
+                }
                 pos.x += deltaX;
                 pos.y += deltaY;
 
                 // Emit position change event
-                this.eventBus.emit('PositionChanged', { entityId: entity.id, x: pos.x, y: pos.y });
+                
                 continue;
             }
 
@@ -29,10 +48,10 @@ export class MovementResolutionSystem extends System {
                 const collisions = entity.getComponent('Collision').collisions;
                 if (!collisions || collisions.length < 1) return;
                 
-                console.log(`MovementResolutionSystem: Checking entity ${entity.id} collisions:`, collisions);
+                //console.log(`MovementResolutionSystem: Checking entity ${entity.id} collisions:`, collisions);
 
                 for (const collision of collisions) {
-                    console.log('MovementResolutionSystem: Collision detected:', collision);
+                    //console.log('MovementResolutionSystem: Collision detected:', collision);
 
                     // Block movement along the colliding axis
                     if (collision.normalX !== 0) {
@@ -49,7 +68,7 @@ export class MovementResolutionSystem extends System {
             // Check for potential overlap along the X-axis
             const newX = pos.x + deltaX;
             if (this.wouldOverlap(entity, newX, pos.y)) {
-                console.log('MovementResolutionSystem: Overlap detected along X-axis, stopping X movement.', deltaX);
+                //console.log('MovementResolutionSystem: Overlap detected along X-axis, stopping X movement.', deltaX);
                 deltaX = 0;
                 intent.targetX = pos.x; // Stop X movement
             }
@@ -57,17 +76,21 @@ export class MovementResolutionSystem extends System {
             // Check for potential overlap along the Y-axis
             const newY = pos.y + deltaY;
             if (this.wouldOverlap(entity, pos.x, newY)) {
-                console.log('MovementResolutionSystem: Overlap detected along Y-axis, stopping Y movement.', deltaY);
+                //console.log('MovementResolutionSystem: Overlap detected along Y-axis, stopping Y movement.', deltaY);
                 deltaY = 0;
                 intent.targetY = pos.y; // Stop Y movement
             }
 
+            if (lastPos) {
+                lastPos.x = pos.x;
+                lastPos.y = pos.y;
+            }
             // Apply remaining movement
             pos.x += deltaX;
             pos.y += deltaY;
 
             // Emit position change event
-            this.eventBus.emit('PositionChanged', { entityId: entity.id, x: pos.x, y: pos.y });
+            
         }
     }
 

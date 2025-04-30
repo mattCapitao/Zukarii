@@ -159,22 +159,6 @@ export class MapRenderSystem extends System {
 
         const entities = this.getEntitiesInViewport(bufferedStartX, bufferedStartY, bufferedEndX, bufferedEndY, bucketsComp);
 
-        const mapComp = levelEntity.getComponent('Map');
-        if (mapComp) {
-            const tileX = Math.floor(playerPos.x / this.TILE_SIZE);
-            const tileY = Math.floor(playerPos.y / this.TILE_SIZE);
-            for (let dy = -1; dy <= 1; dy++) {
-                for (let dx = -1; dx <= 1; dx++) {
-                    if (dx === 0 && dy === 0) continue;
-                    const checkX = tileX + dx;
-                    const checkY = tileY + dy;
-                    if (checkX >= 0 && checkX < mapComp.map[0].length && checkY >= 0 && checkY < mapComp.map.length) {
-                        // Tile check logic remains unchanged
-                    }
-                }
-            }
-        }
-
         let wallCount = 0;
         // First pass: Render all entity sprites
         for (const entity of entities) {
@@ -321,5 +305,7 @@ export class MapRenderSystem extends System {
             // Reset updated flag
             hpBar.updated = false;
         }
+        gameState.needsInitialRender = false;
+        
     }
 }

@@ -5,21 +5,10 @@ import { Utilities } from './Utilities.js';
 import { EntityManager } from './core/EntityManager.js';
 import { EventBus } from './core/EventBus.js';
 import {
-    //PositionComponent,
-    //HealthComponent,
-    //ManaComponent,
-    //StatsComponent,
-    //InventoryComponent,
-    //ResourceComponent,
-    //PlayerStateComponent,
-    //MapComponent,
-    //EntityListComponent,
+
     UIComponent,
-    RenderStateComponent,
     GameStateComponent,
-    RenderControlComponent, // Added
-    //createDefaultPlayerComponents,
-    //createDefaultLevelComponents
+
 } from './core/Components.js';
 
 export class State {

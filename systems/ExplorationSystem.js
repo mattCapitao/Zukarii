@@ -1,5 +1,5 @@
 ﻿import { System } from '../core/Systems.js';
-import { PositionComponent, PlayerStateComponent, NeedsRenderComponent } from '../core/Components.js';
+//import { PositionComponent, PlayerStateComponent, NeedsRenderComponent } from '../core/Components.js';
 
 export class ExplorationSystem extends System {
     constructor(entityManager, eventBus) {
@@ -126,6 +126,7 @@ export class ExplorationSystem extends System {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
         const lightingState = this.entityManager.getEntity('lightingState').getComponent('LightingState');
+        const pendingTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
         const state = this.entityManager.getEntity('state');
         if (!player || !gameState || !renderState || !state) {
             console.warn('ExplorationSystem: Missing required entities or components');
@@ -136,6 +137,12 @@ export class ExplorationSystem extends System {
         const playerPos = player.getComponent('Position');
         const playerX = Math.floor(playerPos.x / this.TILE_SIZE);
         const playerY = Math.floor(playerPos.y / this.TILE_SIZE);
+        const lastPos = player.getComponent('LastPosition');
+
+
+        if (((playerPos.x === lastPos.x && playerPos.y === lastPos.y) || (lastPos.x === 0  && lastPos.y === 0))
+            && (gameState.needsInitialRender !== true)
+        ) {return;}
 
         const renderRadius = renderState.renderRadius;
         const visibleRadius = lightingState.visibleRadius;
@@ -200,12 +207,11 @@ export class ExplorationSystem extends System {
            // console.log('ExplorationSystem: No new tiles discovered, skipping discovery-based renderMinimap');
         }
 
-        const lastPos = player.getComponent('LastPosition');
+        
         const lastTileX = Math.floor(lastPos.x / this.TILE_SIZE);
         const lastTileY = Math.floor(lastPos.y / this.TILE_SIZE);
 
         if (!lastPos || (lastPos.x === 0 && lastPos.y === 0)) {
-           // console.log('ExplorationSystem: Skipping position check, LastPosition is null or default (x:0, y:0)');
 
         } else {
             const shouldRenderMinimap = this.isMinimapVisible && (

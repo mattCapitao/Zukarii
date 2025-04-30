@@ -106,6 +106,15 @@ export class InCombatComponent {
     }
 }
 
+export class StairLockComponent { 
+    constructor(duration = 1500) { // ms
+        this.type = 'StairLock';
+        this.duration = duration;
+        this.elapsed = 0;
+    }
+}
+
+
 export class MovementSpeedComponent {
     constructor(movementSpeed = 0) {
         this.type = 'MovementSpeed';

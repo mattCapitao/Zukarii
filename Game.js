@@ -244,8 +244,8 @@ export class Game {
                 'monsterController',
                 'monsterTimer',
                 'collisions',
-                'playerCollision', // must be after movementResolution
-                'projectileCollisions',// must be before movementResolution
+                'playerCollision', 
+                'projectileCollisions',
                 'movementResolution',
                 'combat',
                 'damageCalculation',
@@ -264,6 +264,7 @@ export class Game {
             if (!gameState?.gameOver) {
                 // Continue the loop
             }
+            gameState.transitionLock = false;
         };
         this.gameLoopId = requestAnimationFrame(gameLoop);
     }

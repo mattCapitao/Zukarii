@@ -57,6 +57,7 @@ import {
     MovementIntentComponent,
     CollisionComponent,
     RemoveEntityComponent,
+    StairLockComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -113,6 +114,7 @@ export {
     MovementIntentComponent,
     CollisionComponent,
     RemoveEntityComponent,
+    StairLockComponent,
 };
 
 // Utility functions

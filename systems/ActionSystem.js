@@ -16,14 +16,14 @@ export class ActionSystem extends System {
     }
 
     // ActionSystem.js - Updated useFountain method
-    useFountain({ fountainEntityId, tierEntityId }) {
+    useFountain({ fountainEntityId }) {
         const entityId = 'player'; 
         const player = this.entityManager.getEntity(entityId);
         const fountainEntity = this.entityManager.getEntity(fountainEntityId);
-        const tierEntity = this.entityManager.getEntity(tierEntityId); 
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState'); 
     
 
-        if (!player || !fountainEntity || !tierEntity) return;
+        if (!player || !fountainEntity) return;
         
         const fountainData = fountainEntity.getComponent('Fountain') || { used: false };
 
@@ -33,8 +33,7 @@ export class ActionSystem extends System {
 
         const canUseFountain = fUseTime - fountainData.useCdExpiresAt || 0; // Default to 0 if not set
         if (canUseFountain < 1) { return; }
-        //console.log(`ActionSystem: -USE ALLOWED- useTime: ${fUseTime}, useFountain: Fountain data:`, fountainData);
-
+       
         this.sfxQueue.push({ sfx: 'fountain0', volume: .5 }); 
         fountainData.useCdExpiresAt = fUseTime + 2500; // 2.5 seconds cooldown
         
@@ -53,7 +52,7 @@ export class ActionSystem extends System {
         let healAmount = 0;
 
         if (Math.random() < critChance && fountainData.used === false) {
-            const maxHpBoost = Math.round(1 + (2 * (tierEntity.getComponent('Tier').value / 10)));
+            const maxHpBoost = Math.round(1 + (2 * (gameState.tier / 10)));
 
             this.eventBus.emit('LogMessage', { message: `The fountain surges with power! Fully healed and Max HP increased!` });
 

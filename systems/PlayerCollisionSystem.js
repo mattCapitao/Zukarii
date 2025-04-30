@@ -1,4 +1,5 @@
 ﻿import { System } from '../core/Systems.js';
+import { StairLockComponent } from '../core/Components.js';
 
 export class PlayerCollisionSystem extends System {
     constructor(entityManager, eventBus) {
@@ -12,7 +13,6 @@ export class PlayerCollisionSystem extends System {
         if (!player) return;
 
         const collision = player.getComponent('Collision');
-       
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
 
         if (!collision ||  !gameState || gameState.gameOver || gameState.transitionLock) {
@@ -23,6 +23,11 @@ export class PlayerCollisionSystem extends System {
         }
         const attackSpeed = player.getComponent('AttackSpeed');
 
+        const movementIntent = player.getComponent('MovementIntent');
+        const movementDirection = movementIntent
+            ? { dx: movementIntent.targetX - player.getComponent('Position').x, dy: movementIntent.targetY - player.getComponent('Position').y }
+            : { dx: 0, dy: 0 };
+
         // Iterate over the collisions array
         for (let i = collision.collisions.length - 1; i >= 0; i--) {
             const collisionData = collision.collisions[i];
@@ -31,7 +36,7 @@ export class PlayerCollisionSystem extends System {
                 console.warn(`PlayerCollisionSystem: Target entity ${collisionData.targetId} not found for player ${player.id}`);
                 continue; // Skip if target entity is not found
             }
-            console.log(`PlayerCollisionSystem: Player collided with ${target.id}`);
+            //console.log(`PlayerCollisionSystem: Player collided with ${target.id}`);
 
             if (target.hasComponent('MonsterData') && target.getComponent('Health').hp > 0) {
                 if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
@@ -44,8 +49,7 @@ export class PlayerCollisionSystem extends System {
                 //break;
             }
             if (target.hasComponent('Fountain')) {
-                const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
-                this.eventBus.emit('UseFountain', { fountainEntityId: target.id, tierEntityId: levelEntity.id });
+                this.eventBus.emit('UseFountain', { fountainEntityId: target.id });
                 this.endTurn('useFountain');
                 // Remove the processed collision entry
                 collision.collisions.splice(i, 1);
@@ -58,10 +62,12 @@ export class PlayerCollisionSystem extends System {
                 collision.collisions.splice(i, 1);
 
             }
-            if (target.hasComponent('Stair')) {
+            if (target.hasComponent('Stair') && !player.hasComponent('StairLock')) {
                 const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+                player.addComponent(new StairLockComponent());
                 if (levelTransition && levelTransition.pendingTransition === null) {
                     const stairComp = target.getComponent('Stair');
+                    levelTransition.lastMovementDirection = movementDirection;
                     if (stairComp.direction === 'down') {
                         levelTransition.pendingTransition = 'down';
                         this.endTurn('transitionDown');
@@ -69,6 +75,7 @@ export class PlayerCollisionSystem extends System {
                         levelTransition.pendingTransition = 'up';
                         this.endTurn('transitionUp');
                     }
+                    
                     // Remove the processed collision entry
                     collision.collisions.splice(i, 1);
                     break;
@@ -77,7 +84,10 @@ export class PlayerCollisionSystem extends System {
             if (target.hasComponent('Portal')) {
                 this.sfxQueue.push({ sfx: 'portal0', volume: 0.5 });
                 const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+                this.entityManager.getEntity('gameState').getComponent('GameState').transitionLock = true;
+                
                 if (levelTransition && levelTransition.pendingTransition === null) {
+                    levelTransition.lastMovementDirection = movementDirection;
                     levelTransition.pendingTransition = 'portal';
                     this.endTurn('transitionPortal');
                 }

@@ -1119,7 +1119,7 @@ export class LevelSystem extends System {
             pos.x = this.TILE_SIZE; // Fallback to (32, 32)
             pos.y = this.TILE_SIZE;
             console.warn(`LevelSystem: Set player position to fallback (${pos.x}, ${pos.y}) due to invalid TILE_SIZE`);
-            this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+            
             return;
         }
 
@@ -1150,7 +1150,7 @@ export class LevelSystem extends System {
                     }
                 }
 
-                this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+               
                 return;
             }
         }
@@ -1159,7 +1159,7 @@ export class LevelSystem extends System {
         pos.y = this.TILE_SIZE;
         console.warn(`LevelSystem: No adjacent walkable tile found near (${stair.x}, ${stair.y}), using fallback position (${pos.x}, ${pos.y})`);
         exploration.discoveredFloors.add(`${Math.floor(pos.x / this.TILE_SIZE)},${Math.floor(pos.y / this.TILE_SIZE)}`);
-        this.eventBus.emit('PositionChanged', { entityId: 'player', x: pos.x, y: pos.y });
+       
     }
 
         ensureRoomConnections(levelEntity) {

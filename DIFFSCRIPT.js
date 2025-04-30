@@ -84,7 +84,7 @@ export class MovementResolutionSystem extends System {
                     this.entityManager.addComponentToEntity(entity.id, new NeedsRenderComponent(pos.x, pos.y));
                 }
 
-                this.eventBus.emit('PositionChanged', { entityId: entity.id, x: pos.x, y: pos.y });
+                
                 console.log(`MovementResolutionSystem: Entity ${entity.id} moved to (${pos.x}, ${pos.y})`);
             } else {
                 console.log(`MovementResolutionSystem: Entity ${entity.id} blocked by ${blockedBy}`);
