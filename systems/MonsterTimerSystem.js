@@ -12,7 +12,7 @@ export class MonsterTimerSystem extends System {
 
     update(deltaTime) {
 
-        const entities = this.getEntities();
+        const entities = this.entityManager.getEntitiesWith(this.requiredComponents);
         const deltaMs = deltaTime * 1000;
 
         for (const entity of entities) {
@@ -23,7 +23,6 @@ export class MonsterTimerSystem extends System {
             if (combat.elapsed >= combat.duration && gameState) {
                 entity.removeComponent('InCombat');
                 gameState.needsRender = true;
-                //this.eventBus.emit('RenderNeeded');
             }
         }
     }

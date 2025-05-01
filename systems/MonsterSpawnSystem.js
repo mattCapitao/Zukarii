@@ -19,8 +19,6 @@ export class MonsterSpawnSystem extends System {
             }
         };
 
-
-
         this.primaryFamilies = [ 'goblinoid','undead','demon' ]
         this.secondaryFamilies = ['beast', 'fey', 'mythical', 'draco']
 
@@ -82,8 +80,6 @@ export class MonsterSpawnSystem extends System {
             console.log('MonsterSpawnSystem: Monster spawn pool:', spawnPool);
             console.log(`MonsterSpawnSystem: Spawning ${monsterCount} monsters for tier ${tier}`);
 
-
-
             this.entityManager.setActiveTier(tier); // NEW: Ensure tier sync
             console.log(`MonsterSpawnSystem: Active tier set to ${tier}, rooms: ${rooms}`);
 
@@ -95,7 +91,7 @@ export class MonsterSpawnSystem extends System {
                         console.error(`MonsterSpawnSystem: Entity ${roomId} not found in tier ${tier}`);
                         return false;
                     }
-
+                     
                     const roomComp = roomEntity.getComponent('Room');
                     if (!roomComp) {
                         console.error(`MonsterSpawnSystem: No Room component for ${roomId}`);
@@ -106,8 +102,8 @@ export class MonsterSpawnSystem extends System {
                 });
                 console.log(`MonsterSpawnSystem: Boss room ID: ${bossRoomId}`);
                 if (bossRoomId && bossMonsters) {
-                    const bossTemplate = bossMonsters[0]; // hard code specific boss for testing
-                    //const bossTemplate = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
+                    //const bossTemplate = bossMonsters[0]; // hard code specific boss for testing
+                    const bossTemplate = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
                     const boss = this.createMonsterEntity(bossTemplate, tier, [bossRoomId], playerX, playerY);
                     console.log(`MonsterSpawnSystem: Selected Boss ${bossTemplate.name} to spawn at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`, boss);
 
@@ -271,7 +267,7 @@ export class MonsterSpawnSystem extends System {
 
         const hbHeight = template.hbHeight || vHeight || this.TILE_SIZE;
         const hbWidth = template.hbWidth || vWidth || this.TILE_SIZE;
-        const hbPadding = 4;
+        const hbPadding = 2;
         this.entityManager.addComponentToEntity(entity.id, new HitboxComponent(hbWidth - hbPadding, hbHeight - hbPadding));
 
         // Add AffixComponent for each affix in template.affixes

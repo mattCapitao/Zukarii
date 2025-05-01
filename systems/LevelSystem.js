@@ -1104,7 +1104,7 @@ export class LevelSystem extends System {
         if (!mapComponent || !mapComponent.map) {
             console.error(`LevelSystem: No valid MapComponent or map for entity ${levelEntity.id}`);
             return;
-        }
+        } 
         const map = mapComponent.map;
         const directions = [
             { x: stair.x - 1, y: stair.y }, { x: stair.x + 1, y: stair.y },

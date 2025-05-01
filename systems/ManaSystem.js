@@ -13,11 +13,11 @@ export class ManaSystem extends System {
     update(deltaTime) {
         if (this.manaUpdates.length > 0) {
             this.manaUpdates.forEach(({ entityId, amount, attackerId }) => {
-                console.log(`ManaSystem: Processing ManaUpdate - entityId: ${entityId}, amount: ${amount}, attackerId: ${attackerId}`);
+               // console.log(`ManaSystem: Processing ManaUpdate - entityId: ${entityId}, amount: ${amount}, attackerId: ${attackerId}`);
                 this.modifyMana(entityId, amount, attackerId);
             });
             this.manaUpdates.length = 0;
-            console.log('ManaSystem: Processed and cleared ManaUpdates');
+           // console.log('ManaSystem: Processed and cleared ManaUpdates');
         }
 
         // Handle mana regeneration
@@ -48,7 +48,7 @@ export class ManaSystem extends System {
                 if (this.manaRegenBuffer[entity.id] >= 1) {
                     this.modifyMana(entity.id, this.manaRegenBuffer[entity.id], null);
                     this.manaRegenBuffer[entity.id] = 0;
-                    console.log(`ManaSystem: Applied buffered regen for entity ${entity.id}, amount: ${manaToRegen}`);
+                   // console.log(`ManaSystem: Applied buffered regen for entity ${entity.id}, amount: ${manaToRegen}`);
                 }
 
                 this.manaRegenAccumulator[entity.id] -= regenTicks * timePerMana;
@@ -67,7 +67,7 @@ export class ManaSystem extends System {
         // Only set updated if mana changes by at least 1
         mana.updated = Math.abs(mana.mana - oldMana) >= 1;
         if (mana.updated) {
-            console.log(`ManaSystem: Modified mana for entity ${entityId} by ${amount}. New mana: ${mana.mana}/${mana.maxMana}`);
+           // console.log(`ManaSystem: Modified mana for entity ${entityId} by ${amount}. New mana: ${mana.mana}/${mana.maxMana}`);
         }
     }
 }

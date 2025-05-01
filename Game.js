@@ -8,6 +8,7 @@ import { MapRenderSystem } from './systems/MapRenderSystem.js';
 import { PlayerSystem } from './systems/PlayerSystem.js';
 import { MonsterControllerSystem } from './systems/MonsterControllerSystem.js';
 import { MonsterSpawnSystem } from './systems/MonsterSpawnSystem.js';
+import { MonsterCollisionSystem } from './systems/MonsterCollisionSystem.js';
 import { DamageCalculationSystem } from './systems/DamageCalculationSystem.js';
 import { LevelSystem } from './systems/LevelSystem.js';
 import { LootSpawnSystem } from './systems/LootSpawnSystem.js';
@@ -179,6 +180,7 @@ export class Game {
         activeGameSystems.playerTimer= new PlayerTimerSystem(this.entityManager, this.state.eventBus); 
         activeGameSystems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.monsterTimer = new MonsterTimerSystem(this.entityManager, this.state.eventBus);
+        activeGameSystems.monsterCollision = new MonsterCollisionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.movementResolution = new MovementResolutionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
@@ -245,6 +247,7 @@ export class Game {
                 'monsterTimer',
                 'collisions',
                 'playerCollision', 
+                'monsterCollision',
                 'projectileCollisions',
                 'movementResolution',
                 'combat',

@@ -31,7 +31,7 @@
 
       {
         "type": "rog",
-        "dropChance": 0.1,
+        "dropChance": 0.15,
         "data": { "itemTierIndexBonus": 2 }
       },
       {
@@ -62,6 +62,11 @@
     "gold": 0,
     "uniqueItemsDropped": [
       {
+        "data": { "name": "Mbphu Greater iLvl Annihilation Staff" },
+        "dropChance": 0.02,
+        "type": "customUnique"
+      },
+      {
         "type": "customUnique",
         "dropChance": 0.05,
         "data": { "name": "Golden Skin of Avarice" }
@@ -73,7 +78,7 @@
       },
       {
         "type": "rog",
-        "dropChance": 0.1,
+        "dropChance": 0.15,
         "data": { "itemTierIndexBonus": 2 }
       },
       {
