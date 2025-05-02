@@ -5,10 +5,8 @@ import { Utilities } from './Utilities.js';
 import { EntityManager } from './core/EntityManager.js';
 import { EventBus } from './core/EventBus.js';
 import {
-
     UIComponent,
     GameStateComponent,
-
 } from './core/Components.js';
 
 export class State {
@@ -62,47 +60,13 @@ export class State {
             new UIComponent()
         );
 
-       
-
         // Add LevelDimensions to state entity
-
         const state = this.entityManager.createEntity('state', true);
-       
         this.entityManager.addComponentToEntity('state', {
             type: 'LevelDimensions',
             WIDTH: this.WIDTH,
             HEIGHT: this.HEIGHT
         });
-
-        // Levels will be added dynamically by LevelSystem
-        // Placeholder for tier 0 (surface level) will be handled in LevelSystem
-    }
-
-    // Temporary method to generate surface level (to be moved to LevelSystem)
-    generateSurfaceLevel() {
-        let map = [];
-        for (let y = 0; y < 10; y++) {
-            map[y] = [];
-            for (let x = 0; x < 10; x++) {
-                if (y === 0 || y === 9 || x === 0 || x === 9) {
-                    map[y][x] = '#';
-                } else {
-                    map[y][x] = ' ';
-                }
-            }
-        }
-        map[5][5] = '⇓';
-        const rooms = [{
-            left: 1,
-            top: 1,
-            w: 8,
-            h: 8,
-            x: 5,
-            y: 5,
-            type: 'SurfaceRoom',
-            connections: []
-        }];
-        return { map, rooms };
     }
 
     // Helper to get the player entity (convenience for now)

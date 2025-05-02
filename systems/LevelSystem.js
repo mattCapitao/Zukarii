@@ -1015,8 +1015,9 @@ export class LevelSystem extends System {
         const floors = [];
         const stairs = [];
 
-        for (let y = 1; y <= 8; y++) {
-            for (let x = 1; x <= 8; x++) {
+
+        for (let y = 1; y <= 9; y++) {
+            for (let x = 1; x <= 13; x++) {
                 map[y][x] = ' ';
                 const floorId = `floor_0_floor_${y}_${x}`;
                 const floorEntity = this.entityManager.createEntity(floorId);
@@ -1025,10 +1026,11 @@ export class LevelSystem extends System {
                 floors.push(floorEntity.id);
             }
         }
+   
 
-        for (let y = 0; y <= 9; y++) {
-            for (let x = 0; x <= 9; x++) {
-                if (y === 0 || y === 9 || x === 0 || x === 9) {
+        for (let y = 0; y <= 10; y++) {
+            for (let x = 0; x <= 14; x++) {
+                if (y === 0 || y === 10 || x === 0 || x === 14) {
                     const wallId = `wall_0_wall_${y}_${x}`;
                     const wallEntity = this.entityManager.createEntity(wallId);
                     const pixelX = x * this.TILE_SIZE;
@@ -1044,23 +1046,40 @@ export class LevelSystem extends System {
             }
         }
 
-        const stairId = `stair_0_stair_down_9_6`;
-        const stairEntity = this.entityManager.createEntity(stairId);
-        this.entityManager.addComponentToEntity(stairEntity.id, new PositionComponent(9 * this.TILE_SIZE, 6 * this.TILE_SIZE));
-        this.entityManager.addComponentToEntity(stairEntity.id, new StairComponent('down'));
-        this.entityManager.addComponentToEntity(stairEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
-        const visuals = stairEntity.getComponent('Visuals');
-        visuals.avatar = 'img/avatars/stairsdown.png';
-        this.entityManager.addComponentToEntity(stairEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-        stairs.push(stairId);
-        map[6][9] = '⇓';
+
+
+        const stairUpId = `stair_0_stair_up_2_2`;
+        const stairUpEntity = this.entityManager.createEntity(stairUpId);
+        this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(2 * this.TILE_SIZE, 2 * this.TILE_SIZE));
+        this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
+        this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
+        const upVisuals = stairUpEntity.getComponent('Visuals');
+        upVisuals.avatar = 'img/avatars/stairsup.png';
+        this.entityManager.addComponentToEntity(stairUpEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
+        stairs.push(stairUpId);
+        map[2][2] = '⇑';
+
+
+        const stairDownId = `stair_0_stair_down_12_8`;
+        const stairDownEntity = this.entityManager.createEntity(stairDownId);
+        this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(12 * this.TILE_SIZE, 8 * this.TILE_SIZE));
+        this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
+        this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
+        const downVisuals = stairDownEntity.getComponent('Visuals');
+        downVisuals.avatar = 'img/avatars/stairsdown.png';
+        this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
+        stairs.push(stairDownId);
+        map[8][12] = '⇓';
+
+        
 
         const levelData = {
             map: map,
             walls: walls,
             floors: floors,
             stairs: stairs,
-            stairsDown: { x: 9, y: 6 },
+            stairsDown: { x: 11, y: 7 },
+            stsirsUp: { x: 2, y: 2 },
             roomEntityIds: []
         };
 
@@ -1234,7 +1253,7 @@ export class LevelSystem extends System {
         }
 
         const hasPortal = entityList.portals.length > 0;
-        const minPortalPlacementTier = 1;
+        const minPortalPlacementTier = 3;
         if (tier >= minPortalPlacementTier && !hasPortal) {
             const rooms = entityList.rooms.map(id => this.entityManager.getEntity(id).getComponent('Room'));
             const validRooms = rooms.filter(r => r.roomType !== 'BossChamberSpecial');

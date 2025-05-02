@@ -166,7 +166,8 @@ export class LevelTransitionSystem extends System {
     transitionUp() {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
-        if (gameState.tier === 0 || gameState.tier === 1) {
+        if (gameState.tier === 0 ) {
+        //if (gameState.tier === 0 || gameState.tier === 1) {
             this.eventBus.emit('PlayerExit', {});
             return;
         }
