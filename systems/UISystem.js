@@ -885,9 +885,15 @@ export class UISystem extends System {
                     const statsContainer = document.createElement('div');
                     statsContainer.className = 'tooltip-stats';
                     Object.entries(itemData.stats).forEach(([stat, value]) => {
+                        let critChar = '';
                         const statLine = document.createElement('div');
                         statLine.className = 'tooltip-stat';
-                        statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.utilities.encodeHTMLEntities(stat)}`;
+                        const critStats = itemData.critStats || [];
+                        if (critStats.includes(stat)) {
+                            statLine.className += ' crit-stat';
+                            critChar = '!';
+                        }
+                        statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.utilities.encodeHTMLEntities(stat)} ${this.utilities.encodeHTMLEntities(critChar)}`;
                         statsContainer.appendChild(statLine);
                     });
                     content.appendChild(statsContainer);

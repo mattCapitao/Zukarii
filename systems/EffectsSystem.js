@@ -170,4 +170,36 @@ export class EffectsSystem extends System {
         });
         console.log(`EffectsSystem: ${entity.id} stole ${healAmount} HP from ${targetId}. Now: ${health.hp}/${health.maxHp}`);
     }
+
+
+    reflectDamage(entityId, params, context) {
+        console.log('EffectsSystem.reflectDamage: this.entityManager:', this.entityManager);
+        const entity = this.entityManager.getEntity(entityId);
+        if (!entity) {
+            console.warn(`EffectsSystem: Entity ${entityId} not found for reflectDamage`);
+            return;
+        }
+
+        console.log(`EffectsSystem: Attempting reflectDamage on ${entity.id}`);
+        const CHANCE_TO_REFLECT = params?.chanceToReflect || 0.10;
+        const MIN_REFLECT_PERCENTAGE = params?.minReflectPercentage || 0.50;
+        const MAX_REFLECT_PERCENTAGE = params?.maxReflectPercentage || 1;
+        const DAMAGE = context.damageDealt || 0;
+        const TARGET_ID = context.attackerId || null;
+
+        if (Math.random() >= CHANCE_TO_REFLECT) {
+            console.log(`EffectsSystem: Reflect chance failed for ${entity.id}`);
+            return;
+        }
+        const reflectAmount = Math.round(DAMAGE * (Math.random() * (MAX_REFLECT_PERCENTAGE - MIN_REFLECT_PERCENTAGE) + MIN_REFLECT_PERCENTAGE));
+
+        //health.hp = Math.min(health.hp + healAmount, health.maxHp);
+        this.healthUpdates.push({ entityId, amount: DAMAGE });
+        this.healthUpdates.push({ TARGET_ID, amount: -reflectAmount });
+
+        this.eventBus.emit('LogMessage', {
+            message: `Reflect Damage hits your attacker for ${reflectAmount} HP! `
+        });
+        console.log(`EffectsSystem: Reflect Damage hits your attacker for ${entity.id} for ${reflectAmount} HP. `);
+    }
 }
