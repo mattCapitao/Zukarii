@@ -10,7 +10,9 @@ export class UISystem extends System {
         this.logContent = null;
         this.characterContent = null;
         this.menuContent = null;
+        this.journeyContent = null;
         this.activeMenuSection = 'controls-button';
+        this.activeJourneyTab = 'whispers'; // Default to Path of Whispers tab
         this.tooltipCache = new Map();
         this.activeInventoryTab = 'all';
         this.playerEntity = this.entityManager.getEntity('player');
@@ -41,9 +43,11 @@ export class UISystem extends System {
         this.logContent = document.getElementById('log-content');
         this.characterContent = document.getElementById('character-content');
         this.menuContent = document.getElementById('menu-content');
+        this.journeyContent = document.getElementById('journey-content');
 
-        if (!this.playerInfo || !this.playerStatus || !this.tabs || !this.logContent || !this.characterContent || !this.menuContent) {
+        if (!this.playerInfo || !this.playerStatus || !this.tabs || !this.logContent || !this.characterContent || !this.menuContent || !this.journeyContent) {
             console.log("Menu", this.menuContent);
+            console.log("Journey", this.journeyContent);
             throw new Error('UI elements not found');
         }
 
@@ -135,7 +139,6 @@ export class UISystem extends System {
             this.lastMana = mana.mana;
             mana.updated = false;
         }
-
     }
 
     setupEventListeners() {
@@ -216,6 +219,8 @@ export class UISystem extends System {
                     this.toggleOverlay({ tab: 'character' });
                 } else if (target.id === 'log-tab') {
                     this.toggleOverlay({ tab: 'log' });
+                } else if (target.id === 'journey-tab') {
+                    this.toggleOverlay({ tab: 'journey' });
                 } else if (target.id === 'close-tabs') {
                     this.toggleOverlay({});
                 }
@@ -387,6 +392,59 @@ export class UISystem extends System {
             });
         }
 
+        const journeyTabs = document.getElementById('journey-tabs');
+        if (journeyTabs) {
+            // Get the player's JourneyPathComponent to find Master Paths
+            const player = this.entityManager.getEntity('player');
+            const journeyPath = player?.getComponent('JourneyPath');
+            if (!journeyPath) {
+                console.error('UISystem: JourneyPath component not found on player');
+                return;
+            }
+
+            // Find Master Paths (where id === parentId)
+            const masterPaths = journeyPath.paths.filter(path => path.id === path.parentId);
+
+            // Map Master Paths to tab identifiers
+            const tabMap = {};
+            masterPaths.forEach((path, index) => {
+                const tabId = `journey-tab-${path.id.replace(/_/g, '-')}`;
+                const tabName = path.id.replace('master_', '');
+                tabMap[tabId] = tabName;
+                // Set the first Master Path as the default active tab
+                if (index === 0) {
+                    this.activeJourneyTab = tabName;
+                }
+            });
+
+            // Always include the "Paths Walked" tab
+            tabMap['journey-tab-paths-walked'] = 'paths-walked';
+
+            // Dynamically generate tab buttons
+            journeyTabs.innerHTML = Object.entries(tabMap)
+                .map(([tabId, tabName]) => {
+                    const isActive = tabName === this.activeJourneyTab;
+                    return `<button id="${tabId}" class="journey-tab-button tab" style="background: ${isActive ? '#0f0' : '#2c672c'};">${this.utilities.camelToTitleCase(tabName)}</button>`;
+                })
+                .join('');
+
+            // Add event listener for tab switching
+            journeyTabs.addEventListener('click', (event) => {
+                const target = event.target.closest('.journey-tab-button');
+                if (!target) return;
+
+                const newTab = tabMap[target.id];
+                if (newTab && newTab !== this.activeJourneyTab) {
+                    this.activeJourneyTab = newTab;
+                    journeyTabs.querySelectorAll('.tab').forEach(tab => {
+                        tab.classList.toggle('active', tab.id === target.id);
+                        tab.style.background = tab.id === target.id ? '#0f0' : '#2c672c';
+                    });
+                    this.updateJourney();
+                }
+            });
+        }
+
         const gameOver = document.getElementById('game-over');
         if (gameOver) {
             gameOver.addEventListener('click', (event) => {
@@ -553,6 +611,7 @@ export class UISystem extends System {
         this.menuContent.style.display = tab === 'menu' ? 'flex' : 'none';
         this.logContent.style.display = tab === 'log' ? 'block' : 'none';
         this.characterContent.style.display = tab === 'character' ? 'flex' : 'none';
+        this.journeyContent.style.display = tab === 'journey' ? 'block' : 'none';
 
         if (tab === 'log') {
             this.updateLog(overlayState.logMessages);
@@ -561,6 +620,8 @@ export class UISystem extends System {
         } else if (tab === 'menu') {
             this.activeMenuSection = 'controls-button';
             this.updateMenu();
+        } else if (tab === 'journey') {
+            this.updateJourney();
         }
     }
 
@@ -578,6 +639,7 @@ export class UISystem extends System {
             <button id="menu-tab" class="tabs-button" style="background: ${activeTab === 'menu' ? '#0f0' : '#2c672c'};">Menu</button>
             <button id="character-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'character' ? '#0f0' : '#2c672c'}; ">Character</button>
             <button id="log-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'log' ? '#0f0' : '#2c672c'};">Log</button>
+            <button id="journey-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'journey' ? '#0f0' : '#2c672c'};">Journey</button>
             <button id="close-tabs">X</button>
         `;
     }
@@ -687,6 +749,104 @@ export class UISystem extends System {
         logDiv.innerHTML = logMessages.length
             ? logMessages.slice(0, 200).map(line => `<p>${line}</p>`).join('')
             : '<p>Nothing to log yet.</p>';
+    }
+
+    updateJourney() {
+        const player = this.entityManager.getEntity('player');
+        if (!player) {
+            console.error('UISystem: Player entity not found in updateJourney');
+            return;
+        }
+
+        const journeyState = player.getComponent('JourneyState');
+        const journeyPath = player.getComponent('JourneyPath');
+        if (!journeyState || !journeyPath) {
+            console.error('UISystem: JourneyState or JourneyPath component not found on player');
+            return;
+        }
+
+        // *** CHANGE START: Use paths array and JourneyStateComponent ***
+        // Get active paths from JourneyPathComponent
+        const activePaths = journeyPath.paths;
+        // Get completed paths from JourneyStateComponent
+        const completedPaths = journeyState.completedPaths;
+
+        // Filter Master Paths (for tab validation)
+        const masterPaths = activePaths.filter(path => path.id === path.parentId);
+        const masterPathNames = masterPaths.map(path => path.id.replace('master_', ''));
+
+        // Validate activeJourneyTab
+        if (!masterPathNames.includes(this.activeJourneyTab) && this.activeJourneyTab !== 'paths-walked') {
+            this.activeJourneyTab = masterPathNames[0] || 'paths-walked';
+        }
+
+        const journeyDiv = document.getElementById('journey-items-wrapper');
+
+        // Handle Master Path tabs (e.g., 'whispers', 'echoes', 'lore')
+        if (masterPathNames.includes(this.activeJourneyTab)) {
+            const masterPathId = `master_${this.activeJourneyTab}`;
+            const masterPath = activePaths.find(path => path.id === masterPathId);
+            if (!masterPath) {
+                journeyDiv.innerHTML = `<p>No data available for ${this.utilities.camelToTitleCase(this.activeJourneyTab)}.</p>`;
+                return;
+            }
+
+            // Get all paths under this Master Path (excluding the Master Path itself)
+            const relatedPaths = activePaths.filter(path => path.parentId === masterPathId && path.id !== masterPathId);
+
+            // Separate parent paths (e.g., "The First Descent") and their children (e.g., "Reach Tier 1")
+            const parentPaths = relatedPaths.filter(path => !path.completionCondition);
+            const childPaths = relatedPaths.filter(path => path.completionCondition);
+
+            // Group children by their parent
+            const groupedPaths = parentPaths.map(parent => ({
+                parent,
+                children: childPaths.filter(child => child.parentId === parent.id)
+            }));
+
+            // Display the Master Path and its associated paths
+            journeyDiv.innerHTML = `
+                <h3>${masterPath.title}</h3>
+                <p>${masterPath.description}</p>
+                ${groupedPaths.length > 0 ? groupedPaths.map(group => `
+                    <div class="journey-path">
+                        <p><strong>${group.parent.title}</strong></p>
+                        <p>${group.parent.description}</p>
+                        ${group.children.map(child => {
+                let progressText = '';
+                if (child.completionCondition.type === 'reachTier') {
+                    const currentTier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
+                    progressText = `Current Tier: ${currentTier}/${child.completionCondition.tier}`;
+                } else if (child.completionCondition.type === 'findArtifact') {
+                    const inventory = this.entityManager.getEntity('player').getComponent('Inventory');
+                    const hasArtifact = inventory.items.some(item => item.itemId === child.completionCondition.artifactId) ||
+                        Object.values(inventory.equipped).some(item => item && item.itemId === child.completionCondition.artifactId);
+                    progressText = `Artifact Found: ${hasArtifact ? 'Yes' : 'No'}`;
+                }
+                return `
+                                <div class="journey-task">
+                                    <p>${child.title} (${child.completed ? 'Completed' : 'In Progress'})</p>
+                                    <p>${child.description}</p>
+                                    ${progressText ? `<p>${progressText}</p>` : ''}
+                                </div>
+                            `;
+            }).join('')}
+                    </div>
+                `).join('') : '<p>No active paths under this journey.</p>'}
+            `;
+        } else if (this.activeJourneyTab === 'paths-walked') {
+            journeyDiv.innerHTML = `
+                ${completedPaths.length > 0 ? `
+                    <h3>Paths Walked</h3>
+                    ${completedPaths.map(path => `
+                        <p>${path.title} (Completed on ${new Date(path.completedAt).toLocaleDateString()})</p>
+                    `).join('')}
+                ` : '<p>You have not yet completed any paths.</p>'}
+            `;
+        } else {
+            journeyDiv.innerHTML = '<p>Invalid journey tab selected.</p>';
+        }
+        // *** CHANGE END ***
     }
 
     updateCharacter(stats, inventory) {

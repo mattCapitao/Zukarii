@@ -245,16 +245,28 @@ export class LevelTransitionSystem extends System {
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         Object.assign(overlayState, data.overlayState.OverlayState);
 
+
+       
         // Clear and regenerate level
         let levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
-        if (levelEntity) {
+        if (tier !== 0 && levelEntity) {
             this.clearLevelEntities(tier);
         }
-
+      
         // Set pendingTransition to 'load' to indicate a load operation
-        this.pendingTransition = 'load';
-        this.eventBus.emit('AddLevel', { tier });
-
+        if (tier !== 0) {
+            this.pendingTransition = 'load';
+            this.eventBus.emit('AddLevel', { tier });
+        } else {
+            console.log('LevelTransitionSystem: Tier 0 load, preserving existing setup');
+            gameState.needsInitialRender = true;
+            gameState.needsRender = true;
+            this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
+            const healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
+            healthUpdates.push({ entityId: 'player', amount: 0 });
+        }
+     
+        
     }
 
     handleLevelAdded({ tier, entityId }) {

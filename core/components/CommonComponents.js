@@ -153,3 +153,10 @@ export class RemoveEntityComponent {
         this.remove = true;
     }
 }
+
+export class JourneyPathComponent {
+    constructor() {
+        this.type = 'JourneyPath';
+        this.paths = []; // Array of path objects, each mirroring the previous JourneyPathComponent structure
+    }
+} 

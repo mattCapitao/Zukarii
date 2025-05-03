@@ -56,4 +56,30 @@ export class Utilities {
         rollText += `Total: ${total}`;
         return total;
     }
+
+    // Add a path to a JourneyPathComponent's paths array
+    addPath(journeyPathComponent, path) {
+        journeyPathComponent.paths.push({
+            id: path.id || '',
+            parentId: path.parentId || '',
+            nextPathId: path.nextPathId || '',
+            completed: path.completed || false,
+            title: path.title || '',
+            description: path.description || '',
+            completionCondition: path.completionCondition || null,
+            rewards: path.rewards || [],
+            completionText: path.completionText || '',
+            logCompletion: path.logCompletion !== undefined ? path.logCompletion : true
+        });
+    }
+
+    // Remove a path from a JourneyPathComponent's paths array by ID
+    removePath(journeyPathComponent, pathId) {
+        journeyPathComponent.paths = journeyPathComponent.paths.filter(path => path.id !== pathId);
+    }
+
+    // Find a path in a JourneyPathComponent's paths array by ID
+    findPath(journeyPathComponent, pathId) {
+        return journeyPathComponent.paths.find(path => path.id === pathId) || null;
+    }
 }

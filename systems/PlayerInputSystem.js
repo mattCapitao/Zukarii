@@ -13,6 +13,7 @@ export class PlayerInputSystem {
             'd': 'ArrowRight', 'D': 'ArrowRight', 'ArrowRight': 'ArrowRight',
             'i': 'c', 'I': 'c', 'c': 'c', 'C': 'c',
             'l': 'l', 'L': 'l',
+            'j': 'j', 'J': 'j',
             'escape': 'escape', 'Escape': 'escape',
             't': 't', 'T': 't',
             'h': 'h', 'H': 'h',
@@ -125,6 +126,9 @@ export class PlayerInputSystem {
                     break;
                 case 'l':
                     this.eventBus.emit('ToggleOverlay', { tab: 'log' });
+                    break;
+                case 'j':
+                    this.eventBus.emit('ToggleOverlay', { tab: 'journey' });
                     break;
                 case 'escape':
                     this.eventBus.emit('ToggleOverlay', {});

@@ -268,7 +268,7 @@ export class SplashSystem extends System {
         if (index === 0) {
             this.eventBus.emit('ToggleOverlay', { tab: 'menu' });
             setTimeout(() => {
-                this.eventBus.emit('PlaySfxImmediate', { sfx: 'intro', volume: 0.25 });
+                
                 const newGameButton = document.getElementById('new-game-button');
                 if (newGameButton) {
                     newGameButton.click();

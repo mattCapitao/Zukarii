@@ -50,6 +50,7 @@ export class LevelSystem extends System {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const isNewGame = gameState.tier === 0;
 
+        // Always create Tier 0 with the custom surface level if it doesn't exist
         if (!this.entityManager.getEntitiesWith(['Tier']).some(e => e.getComponent('Tier').value === 0)) {
             this.entityManager.setActiveTier(0);
             const levelEntity = this.entityManager.createEntity(`level_0`);
@@ -59,18 +60,23 @@ export class LevelSystem extends System {
             this.entityManager.addComponentToEntity(levelEntity.id, new SpatialBucketsComponent());
             console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier 0 in init`);
             this.addLevel({ tier: 0, customLevel: this.generateSurfaceLevel(levelEntity) });
+        }
 
             if (isNewGame) {
-                gameState.tier = 1;
-                this.addLevel({ tier: 1 });
-                console.log(`LevelSystem.js: init - gameState.tier set to ${gameState.tier} after creating levels 0 and 1 (new game)`);
+                gameState.tier = 0;
+                this.entityManager.setActiveTier(0);
+                console.log(`LevelSystem.js: init - gameState.tier set to ${gameState.tier} after creating Tier 0 for a new game or a game saved on Tier 0 `);
             } else {
+                // For loaded games, generate levels from 1 up to the current tier (if not already generated)
                 for (let tier = 1; tier <= gameState.tier; tier++) {
-                    this.addLevel({ tier });
+                    if (!this.entityManager.getEntitiesWith(['Tier']).some(e => e.getComponent('Tier').value === tier)) {
+                        this.addLevel({ tier });
+                    }
                 }
-                console.log(`LevelSystem.js: init - Preserved loaded tier ${gameState.tier}, generated levels 0 to ${gameState.tier}`);
+                this.entityManager.setActiveTier(gameState.tier);
+                console.log(`LevelSystem.js: init - Preserved loaded tier ${gameState.tier}, ensured levels 0 to ${gameState.tier} are generated`);
             }
-        }
+        
     }
 
     removeWallAtPosition(x, y, walls, levelEntity) {
@@ -124,6 +130,7 @@ export class LevelSystem extends System {
     }
 
     addLevel({ tier, customLevel = null }) {
+        
         this.entityManager.setActiveTier(tier);
         console.log(`LevelSystem.js: Starting level generation for tier ${tier}, active tier: ${this.entityManager.getActiveTier()}`);
         let levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
@@ -133,7 +140,14 @@ export class LevelSystem extends System {
             this.entityManager.addComponentToEntity(levelEntity.id, { type: 'Tier', value: tier });
 
             let levelData;
-            if (customLevel) {
+            if (customLevel || tier === 0) {
+                // If tier is 0 and no customLevel is provided, generate the surface level
+                if (!customLevel && tier === 0) {
+                    console.log(`LevelSystem.js: Generating Tier 0 with generateSurfaceLevel`);
+                    customLevel = this.generateSurfaceLevel(levelEntity);
+                } else {
+                    console.log(`LevelSystem.js: Using provided customLevel for tier ${tier}`);
+                }
                 levelData = customLevel;
                 const mapComp = new MapComponent(levelData);
                 mapComp.map = this.padMap(levelData.map, levelData.walls, levelData.floors, tier);

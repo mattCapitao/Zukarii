@@ -127,3 +127,13 @@ export class NewCharacterComponent {
         this.isInCombat = isInCombat;
     }
 }
+
+export class JourneyStateComponent {
+    constructor() {
+        this.type = 'JourneyState';
+        this.completedPaths = []; // Array of completed path data (e.g., [{ id: 'whisper_1', parentId: 'master_whispers', title: 'The First Descent', completedAt: '2025-05-03', completionText: '...' }])
+        this.pathTree = new Map(); // Map<parentId, JourneyPathComponent[]> (parentId to child path components)
+    }
+}
+
+

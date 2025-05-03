@@ -38,11 +38,14 @@ import { PlayerCollisionSystem } from './systems/PlayerCollisionSystem.js';
 import { ProjectileCollisionSystem } from './systems/ProjectileCollisionSystem.js'; 
 import { SplashSystem } from './systems/SplashSystem.js';
 import { EntityRemovalSystem } from './systems/EntityRemovalSystem.js'; 
+import { JourneySystem } from './systems/JourneySystem.js';
+import { PathSystem } from './systems/PathSystem.js';
+import { InteractionSystem } from './systems/InteractionSystem.js';
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
-    LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
+    LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent, JourneyStateComponent, JourneyPathComponent,
 } from './core/Components.js';
 
 export class Game {
@@ -62,7 +65,7 @@ export class Game {
             this.entityManager.removeEntity('player');
         }
         player = this.entityManager.createEntity('player', true);
-        this.entityManager.addComponentToEntity('player', new PositionComponent(32, 32));
+        this.entityManager.addComponentToEntity('player', new PositionComponent(64, 112));
         this.entityManager.addComponentToEntity('player', new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new VisualsComponent(32, 32));
         const visuals = this.entityManager.getEntity('player').getComponent('Visuals');
@@ -76,12 +79,91 @@ export class Game {
         }));
         this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0));
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
+        this.entityManager.addComponentToEntity('player', new JourneyStateComponent());
         this.entityManager.addComponentToEntity('player', new InputStateComponent());
         this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
         this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(192));
-        this.entityManager.addComponentToEntity('player', new AffixComponent()); // New component added
-        this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32,32));
-        this.entityManager.addComponentToEntity('player', new HitboxComponent(28,28)); 
+        this.entityManager.addComponentToEntity('player', new AffixComponent());
+        this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32, 32));
+        this.entityManager.addComponentToEntity('player', new HitboxComponent(28, 28)); 
+
+        // Initialize a single JourneyPathComponent and populate its paths array
+        const journeyPaths = new JourneyPathComponent();
+        journeyPaths.paths = [
+            {
+                id: 'master_whispers',
+                parentId: 'master_whispers',
+                nextPathId: '',
+                completed: false,
+                title: 'Path of Whispers',
+                description: 'Follow the guidance of the Zukran Masters to prove your worth.',
+                completionCondition: null,
+                rewards: [],
+                completionText: '',
+                logCompletion: false
+            },
+            {
+                id: 'master_echoes',
+                parentId: 'master_echoes',
+                nextPathId: '',
+                completed: false,
+                title: 'Echoes',
+                description: 'Discover the echoes of the past hidden within the fortress.',
+                completionCondition: null,
+                rewards: [],
+                completionText: '',
+                logCompletion: false
+            },
+            {
+                id: 'master_lore',
+                parentId: 'master_lore',
+                nextPathId: '',
+                completed: false,
+                title: 'Arcane Legends',
+                description: 'Uncover the ancient knowledge of the Zukran.',
+                completionCondition: null,
+                rewards: [],
+                completionText: '',
+                logCompletion: false
+            },
+            {
+                id: 'whisper_parent_1',
+                parentId: 'master_whispers',
+                nextPathId: 'whisper_parent_2',
+                completed: false,
+                title: 'The First Descent',
+                description: 'The Zukran Masters have spoken: Prove your resolve.',
+                completionCondition: null,
+                rewards: [{ type: 'item', itemId: 'torch', quantity: 2, rewarded: false }],
+                completionText: 'You have proven your resolve.',
+                logCompletion: true
+            },
+            {
+                id: 'whisper_child_1_1',
+                parentId: 'whisper_parent_1',
+                nextPathId: '',
+                completed: false,
+                title: 'Reach Tier 1',
+                description: 'Descend to Tier 1 of the Bottomless Fortress.',
+                completionCondition: { type: 'reachTier', tier: 1 },
+                rewards: [],
+                completionText: 'You have reached Tier 1.',
+                logCompletion: true
+            },
+            {
+                id: 'whisper_child_1_2',
+                parentId: 'whisper_parent_1',
+                nextPathId: '',
+                completed: false,
+                title: 'Find the Key',
+                description: 'Locate the Key of Zukarath on Tier 1.',
+                completionCondition: { type: 'findArtifact', artifactId: 'keyOfZukarath', tier: 1 },
+                rewards: [],
+                completionText: 'You have found the Key of Zukarath.',
+                logCompletion: true
+            }
+        ];
+        this.entityManager.addComponentToEntity('player', journeyPaths);
         
         let overlayState = this.entityManager.getEntity('overlayState');
         if (!overlayState) {
@@ -103,19 +185,21 @@ export class Game {
         this.entityManager.addComponentToEntity('lightingState', new LightSourceDefinitions());
         const visibilityRadius = lightingState.getComponent('LightingState').visibilityRadius;
 
-
         // Render state entity (global)
         const renderState = this.entityManager.createEntity('renderState', true);
         this.entityManager.addComponentToEntity('renderState',
             new RenderStateComponent()
         );
-        renderState.getComponent('RenderState').renderRadius = visibilityRadius +  this.RENDER_RADIUS_MODIFIER ;
+        renderState.getComponent('RenderState').renderRadius = visibilityRadius + this.RENDER_RADIUS_MODIFIER;
         
         this.entityManager.addComponentToEntity('renderState',
             new RenderControlComponent()
         );
        
         this.entityManager.addComponentToEntity('gameState', new DataProcessQueues());
+        // Initialize pathTransfers queue in DataProcessQueues
+        const dataProcessQueues = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues');
+        dataProcessQueues.pathTransfers = [];
         this.entityManager.addComponentToEntity('gameState', new AudioQueueComponent());
         this.entityManager.addComponentToEntity('gameState', new LevelTransitionComponent());
 
@@ -130,8 +214,6 @@ export class Game {
         this.sfxQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.SFX || [];
         this.splashScreen = document.getElementById('splash');
         this.splashScreen.style.display = 'flex';
- 
-
     }
 
     async initializeSystems() {
@@ -151,6 +233,9 @@ export class Game {
         this.systems.monsterSpawn = new MonsterSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data);
         this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state);
         this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.path = new PathSystem(this.entityManager, this.state.eventBus, this.utilities); // Add PathSystem before JourneySystem
+        this.systems.journey = new JourneySystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.interaction = new InteractionSystem(this.entityManager, this.state.eventBus, this.utilities); // Add InteractionSystem
         this.systems.ui = new UISystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.levelTransition = new LevelTransitionSystem(this.entityManager, this.state.eventBus);
         this.systems.audio = new AudioSystem(this.entityManager, this.state.eventBus);
@@ -159,25 +244,18 @@ export class Game {
         this.systems.gameDataIO = new GameDataIOSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.playerInput = new PlayerInputSystem(this.entityManager, this.state.eventBus); 
         this.systems.playerController = new PlayerControllerSystem(this.entityManager, this.state.eventBus); 
-        //this.systems.playerTimer = new PlayerTimerSystem(this.entityManager, this.state.eventBus); 
         this.systems.affix = new AffixSystem(this.entityManager, this.state.eventBus);
         this.systems.effects = new EffectsSystem(this.entityManager, this.state.eventBus); // New system added
         this.systems.health = new HealthSystem(this.entityManager, this.state.eventBus);
         this.systems.mana = new ManaSystem(this.entityManager, this.state.eventBus);
-        //this.systems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
-        //this.systems.movementResolution = new MovementResolutionSystem(this.entityManager,this.state.eventBus );
-        //this.systems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
-        //this.systems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus);
-        //this.systems.entityRemoval = new EntityRemovalSystem(this.entityManager);
         this.systems.spatialBuckets = new SpatialBucketsSystem(this.entityManager, this.state.eventBus, this.state);
-
-        await Promise.all(Object.values(this.systems).map(system => system.init()));
         
+        await Promise.all(Object.values(this.systems).map(system => system.init()));
     }
 
     iniitalizeActiveGameSystems() {
         let activeGameSystems = {}
-        activeGameSystems.playerTimer= new PlayerTimerSystem(this.entityManager, this.state.eventBus); 
+        activeGameSystems.playerTimer = new PlayerTimerSystem(this.entityManager, this.state.eventBus); 
         activeGameSystems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.monsterTimer = new MonsterTimerSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.monsterCollision = new MonsterCollisionSystem(this.entityManager, this.state.eventBus);
@@ -254,6 +332,9 @@ export class Game {
                 'damageCalculation',
                 'health',
                 'mana',
+                'path', // Add PathSystem to the update loop
+                'journey',
+                'interaction',
                 'ui',
                 'audio',
                 'levelTransition',
@@ -286,7 +367,7 @@ export class Game {
             gameState = this.entityManager.getEntity('gameState');
         } else {
             const gameStateComp = gameState.getComponent('GameState');
-            if (!gameStateComp.gameStarted)  gameStateComp.gameStarted = true;
+            if (!gameStateComp.gameStarted) gameStateComp.gameStarted = true;
         }
 
         this.iniitalizeActiveGameSystems();
@@ -308,15 +389,11 @@ export class Game {
             const saveId = null;
             this.state.eventBus.emit('RequestSaveGame', { saveId });
             player.removeComponent('NewCharacter');
+            setTimeout(() => { this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'intro', volume: 0.25 }); }, 2000);
+            
         }
         this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
         this.startGameLoop();
         console.log('Game.js: Game started');
     }
 }
-
-
-
-
-
-

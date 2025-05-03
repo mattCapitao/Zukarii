@@ -22,6 +22,7 @@ import {
     PlayerStateComponent,
     InputStateComponent,
     NewCharacterComponent,
+    JourneyStateComponent,
 } from './components/PlayerComponents.js';
 
 import {
@@ -58,6 +59,7 @@ import {
     CollisionComponent,
     RemoveEntityComponent,
     StairLockComponent,
+    JourneyPathComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -81,6 +83,7 @@ export {
     PlayerStateComponent,
     InputStateComponent,
     NewCharacterComponent,
+    JourneyStateComponent,
 
     // Game-related components
     UIComponent,
@@ -115,6 +118,7 @@ export {
     CollisionComponent,
     RemoveEntityComponent,
     StairLockComponent,
+    JourneyPathComponent,
 };
 
 // Utility functions
