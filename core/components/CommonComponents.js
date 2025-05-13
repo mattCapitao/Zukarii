@@ -160,3 +160,24 @@ export class JourneyPathComponent {
         this.paths = []; // Array of path objects, each mirroring the previous JourneyPathComponent structure
     }
 } 
+
+
+export class AnimationStateComponent {
+    constructor() {
+        this.type = 'AnimationState';
+        this.isIdle = true;
+        this.isWalking = false;
+        this.isAttacking = false;
+    }
+}
+
+export class AnimationComponent {
+    constructor() {
+        this.type = 'Animation';
+        this.animations = {};
+        this.currentAnimation = 'idle';
+        this.currentFrame = 0;
+        this.frameTimer = 0;
+        this.spriteSheets = {};
+    }
+}

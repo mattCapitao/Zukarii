@@ -325,6 +325,22 @@ export class LevelTransitionSystem extends System {
         this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
         console.log('LevelTransitionSystem: Cleared player MovementIntent after positioning');
 
+        // Reset player animation to idle
+        const playerAnimation = player.getComponent('AnimationState');
+        if (playerAnimation) {
+            playerAnimation.isIdle = true;
+            playerAnimation.isWalking = false;
+            console.log('LevelTransitionSystem: Reset player animation to idle');
+        }
+
+        const animation = player.getComponent('Animation');
+        if (animation) {
+            animation.currentAnimation = 'idle';
+            animation.currentFrame = 0;
+            animation.frameTimer = 0;
+        }
+
+
         console.log(`LevelTransitionSystem: Player position updated to pixel (${playerPos.x}, ${playerPos.y}) for tile (${pos.x}, ${pos.y})`);
         console.log("LevelTransitionSystem: Tile at player position:", mapComp.map[pos.y][pos.x]);
 

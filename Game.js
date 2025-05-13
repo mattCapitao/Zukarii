@@ -42,11 +42,13 @@ import { JourneySystem } from './systems/JourneySystem.js';
 import { PathSystem } from './systems/PathSystem.js';
 import { InteractionSystem } from './systems/InteractionSystem.js';
 import { MouseInputSystem } from './systems/MouseInputSystem.js'; 
+import { AnimationSystem } from './systems/AnimationSystem.js'; 
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
-    LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent, JourneyStateComponent, JourneyPathComponent,
+    LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
+    AnimationComponent, AnimationStateComponent, JourneyStateComponent, JourneyPathComponent,
 } from './core/Components.js';
 
 export class Game {
@@ -87,6 +89,48 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new AffixComponent());
         this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32, 32));
         this.entityManager.addComponentToEntity('player', new HitboxComponent(28, 28)); 
+
+        this.entityManager.addComponentToEntity('player', new AnimationStateComponent());
+        this.entityManager.addComponentToEntity('player', new AnimationComponent());
+        const animation = player.getComponent('Animation');
+        animation.spriteSheets = {
+            'idle': new Image(),
+            'walk': new Image(),
+            'attack': new Image() // Add attack sprite sheet
+        };
+        animation.spriteSheets['idle'].src = 'img/anim/Player/Idle.png';
+        animation.spriteSheets['walk'].src = 'img/anim/Player/Walk.png';
+        animation.spriteSheets['attack'].src = 'img/anim/Player/Attack_Fire_2.png';
+        animation.animations = {
+            'idle': {
+                frames: [
+                    { x: 0 }, { x: 128 }, { x: 256 }, { x: 384 },
+                    { x: 512 }, { x: 640 }, { x: 768 }, { x: 896 }
+                ],
+                frameWidth: 128,
+                frameHeight: 128,
+                frameTime: 100
+            },
+            'walk': {
+                frames: [
+                    { x: 0 }, { x: 128 }, { x: 256 }, { x: 384 },
+                    { x: 512 }, { x: 640 }, { x: 768 }
+                ],
+                frameWidth: 128,
+                frameHeight: 128,
+                frameTime: 100
+            },
+            'attack': { // Add attack animation
+                frames: [
+                    { x: 0 }, { x: 128 }, { x: 256 }, { x: 384 },
+                    { x: 512 }, { x: 640 }, { x: 768 }, { x: 896 },
+                    { x: 1024 }
+                ],
+                frameWidth: 128,
+                frameHeight: 128,
+                frameTime: 56 // 9 frames at 75ms = 0.675s per loop
+            }
+        };
 
         // Initialize a single JourneyPathComponent and populate its paths array
         const journeyPaths = new JourneyPathComponent();
@@ -251,6 +295,7 @@ export class Game {
         this.systems.mana = new ManaSystem(this.entityManager, this.state.eventBus);
         this.systems.spatialBuckets = new SpatialBucketsSystem(this.entityManager, this.state.eventBus, this.state);
         this.systems.mouseInput = new MouseInputSystem(this.entityManager, this.state.eventBus, this.state);
+        this.systems.animation = new AnimationSystem(this.entityManager, this.state.eventBus);
         
         await Promise.all(Object.values(this.systems).map(system => system.init()));
     }
@@ -342,6 +387,7 @@ export class Game {
                 'audio',
                 'levelTransition',
                 'spatialBuckets',
+                'animation',
                 'mapRender',
                 'entityRemoval',
                 

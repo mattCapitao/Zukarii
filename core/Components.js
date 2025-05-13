@@ -61,6 +61,8 @@ import {
     RemoveEntityComponent,
     StairLockComponent,
     JourneyPathComponent,
+    AnimationStateComponent,
+    AnimationComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -121,6 +123,8 @@ export {
     RemoveEntityComponent,
     StairLockComponent,
     JourneyPathComponent,
+    AnimationStateComponent,
+    AnimationComponent,
 };
 
 // Utility functions

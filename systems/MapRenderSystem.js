@@ -44,7 +44,10 @@ export class MapRenderSystem extends System {
             stairsdown: 'img/avatars/stairsdown.png',
             portal: 'img/avatars/portal.png',
             chest: 'img/avatars/chest.png',
-            fountain: 'img/avatars/fountain.png'
+            fountain: 'img/avatars/fountain.png',
+            player_idle: 'img/anim/Player/Idle.png',
+            player_walk: 'img/anim/Player/Walk.png',
+            player_attack: 'img/anim/Player/Attack_Fire_2.png' // Add attack sprite
         };
         for (const [key, path] of Object.entries(spritePaths)) {
             const img = new Image();
@@ -80,7 +83,6 @@ export class MapRenderSystem extends System {
         return entities;
     }
 
-    // Helper function to interpolate between two colors
     interpolateColor(startColor, endColor, t) {
         const colors = {
             green: [0, 128, 0],
@@ -88,7 +90,7 @@ export class MapRenderSystem extends System {
             orange: [255, 165, 0],
             red: [255, 0, 0]
         };
-        const startRGB = colors[startColor] || [0, 128, 0]; // Default to green
+        const startRGB = colors[startColor] || [0, 128, 0];
         const endRGB = colors[endColor] || [0, 128, 0];
         const r = Math.round(startRGB[0] + (endRGB[0] - startRGB[0]) * t);
         const g = Math.round(startRGB[1] + (endRGB[1] - startRGB[1]) * t);
@@ -175,13 +177,96 @@ export class MapRenderSystem extends System {
                 console.warn(`MapRenderSystem: Entity ${entity.id} missing Visuals component`);
                 continue;
             }
+
+            const animation = entity.hasComponent('Animation') ? entity.getComponent('Animation') : null;
+            const animState = entity.hasComponent('AnimationState') ? entity.getComponent('AnimationState') : null;
+
             let spritePath = visuals.avatar;
+            let sprite = null;
+
+            if (entity.id === 'player') {
+                if (animation && animState) {
+                    const animData = animation.animations[animation.currentAnimation];
+                    if (!animData) {
+                        console.warn(`MapRenderSystem: No animation data for ${animation.currentAnimation} in ${entity.id}`);
+                        continue;
+                    }
+                    // Use attack animation if isAttacking
+                    spritePath = animState.isAttacking ? 'img/anim/Player/Attack_Fire_2.png' :
+                        animation.currentAnimation === 'idle' ? 'img/anim/Player/Idle.png' :
+                            'img/anim/Player/Walk.png';
+                    sprite = this.sprites.get(spritePath);
+                    if (!sprite || !sprite.complete) {
+                        console.warn(`MapRenderSystem: Sprite ${spritePath} not loaded for ${entity.id}`);
+                        sprite = this.sprites.get('img/avatars/player.png'); // Fallback
+                    } else {
+                        const frame = animData.frames[animation.currentFrame];
+                        const renderX = (pos.x - startX) * this.SCALE_FACTOR;
+                        const renderY = (pos.y - startY) * this.SCALE_FACTOR;
+                        this.ctx.save();
+                        if (visuals.faceLeft) {
+                            this.ctx.scale(-1, 1);
+                            this.ctx.drawImage(
+                                sprite,
+                                frame.x + 32, // Center horizontally: (128 - 64) / 2
+                                64, // Bottom half: 128 - 64
+                                64, 64, // Source 64x64 area
+                                -(renderX + visuals.w * this.SCALE_FACTOR), renderY,
+                                visuals.w * this.SCALE_FACTOR, visuals.h * this.SCALE_FACTOR
+                            );
+                        } else {
+                            this.ctx.drawImage(
+                                sprite,
+                                frame.x + 32,
+                                64,
+                                64, 64,
+                                renderX, renderY,
+                                visuals.w * this.SCALE_FACTOR, visuals.h * this.SCALE_FACTOR
+                            );
+                        }
+                        this.ctx.restore();
+                        continue; // Skip default rendering for player
+                    }
+                } else {
+                    sprite = this.sprites.get(visuals.avatar);
+                    if (!sprite) {
+                        console.warn(`MapRenderSystem: Sprite ${visuals.avatar} not found for entity ${entity.id}`);
+                        continue;
+                    }
+                    if (!sprite.complete) {
+                        console.warn(`MapRenderSystem: Sprite ${visuals.avatar} not loaded for entity ${entity.id}`);
+                        continue;
+                    }
+                    const renderX = (pos.x - startX) * this.SCALE_FACTOR;
+                    const renderY = (pos.y - startY) * this.SCALE_FACTOR;
+                    this.ctx.save();
+                    if (visuals.faceLeft === true) {
+                        this.ctx.scale(-1, 1);
+                        this.ctx.drawImage(
+                            sprite,
+                            -(renderX + visuals.w * this.SCALE_FACTOR),
+                            renderY,
+                            visuals.w * this.SCALE_FACTOR,
+                            visuals.h * this.SCALE_FACTOR
+                        );
+                    } else {
+                        this.ctx.drawImage(
+                            sprite,
+                            renderX,
+                            renderY,
+                            visuals.w * this.SCALE_FACTOR,
+                            visuals.h * this.SCALE_FACTOR
+                        );
+                    }
+                    this.ctx.restore();
+                    continue;
+                }
+            }
+
             if (!spritePath) {
                 console.log(`MapRenderSystem: No spritePath in Visuals.avatar for entity ${entity.id}, components: ${Array.from(entity.components.keys())}`);
                 if (entity.hasComponent('Wall')) {
                     spritePath = 'img/map/wall.png';
-                } else if (entity.id === 'player') {
-                    spritePath = 'img/avatars/player.png';
                 } else if (entity.hasComponent('Stair')) {
                     const stairComp = entity.getComponent('Stair');
                     spritePath = stairComp.direction === 'up' ? 'img/avatars/stairsup.png' : 'img/avatars/stairsdown.png';
@@ -204,7 +289,7 @@ export class MapRenderSystem extends System {
                 img.onerror = () => console.error(`Failed to load sprite dynamically: ${spritePath}`);
                 this.sprites.set(spritePath, img);
             }
-            const sprite = this.sprites.get(spritePath);
+            sprite = this.sprites.get(spritePath);
             if (!sprite) {
                 console.warn(`MapRenderSystem: Sprite ${spritePath} not found for entity ${entity.id}`);
                 continue;
@@ -260,41 +345,32 @@ export class MapRenderSystem extends System {
             // Calculate animation progress
             if (hpBar.animationStartTime !== null) {
                 const elapsed = Date.now() - hpBar.animationStartTime;
-                const t = Math.min(elapsed / hpBar.animationDuration, 1); // Progress (0 to 1)
+                const t = Math.min(elapsed / hpBar.animationDuration, 1);
 
-                // Interpolate fillPercent
                 currentFillPercent = hpBar.lastFillPercent + (hpBar.fillPercent - hpBar.lastFillPercent) * t;
-
-                // Interpolate color
                 currentFillColor = this.interpolateColor(hpBar.lastFillColor, hpBar.fillColor, t);
 
-                // End animation if complete
                 if (t >= 1) {
                     hpBar.animationStartTime = null;
                 }
             }
 
-            //console.log(`MapRenderSystem: Rendering HpBar for ${entity.id} - fillPercent: ${currentFillPercent}, fillColor: ${currentFillColor}`);
-
             // Health bar dimensions
-            const barWidth = visuals.w * this.SCALE_FACTOR * 0.8; // 80% of entity width
-            const barHeight = 3 * this.SCALE_FACTOR; // Fixed height, scaled
-            const barX = renderX + (visuals.w * this.SCALE_FACTOR - barWidth) / 2; // Centered
-            const barY = renderY - barHeight - 4 * this.SCALE_FACTOR; // Above entity
+            const barWidth = visuals.w * this.SCALE_FACTOR * 0.8;
+            const barHeight = 3 * this.SCALE_FACTOR;
+            const barX = renderX + (visuals.w * this.SCALE_FACTOR - barWidth) / 2;
+            const barY = renderY - barHeight - 4 * this.SCALE_FACTOR;
 
             this.ctx.save();
-            // Background (gray)
             this.ctx.fillStyle = 'rgba(128, 128, 128, .7)';
             this.ctx.fillRect(barX, barY, barWidth, barHeight);
 
-            // Health fill
             this.ctx.fillStyle = currentFillColor;
-            const fillWidth = barWidth * Math.max(0, Math.min(1, currentFillPercent)); // Clamp fillPercent
+            const fillWidth = barWidth * Math.max(0, Math.min(1, currentFillPercent));
             this.ctx.fillRect(barX, barY, fillWidth, barHeight);
 
-            // Border
             this.ctx.strokeStyle = 'rgba(226,226,226,.8)';
-            this.ctx.lineWidth = 1; // Increased for visibility
+            this.ctx.lineWidth = 1;
             this.ctx.strokeRect(barX, barY, barWidth, barHeight);
 
             this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
@@ -302,10 +378,8 @@ export class MapRenderSystem extends System {
 
             this.ctx.restore();
 
-            // Reset updated flag
             hpBar.updated = false;
         }
         gameState.needsInitialRender = false;
-        
     }
 }

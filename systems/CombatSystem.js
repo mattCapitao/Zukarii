@@ -193,20 +193,21 @@ export class CombatSystem extends System {
         
         this.sfxQueue.push({ sfx, volume: .1 });
         this.manaUpdates.push({ entityId: 'player', amount: -manaCost });
-        const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
-        this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
-        this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
-        this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent( direction , range, 'player', weapon, isPiercing));
-        this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(280)); // 320 pixels/second (was 32 pixels every 100 ms)
-        this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(20, 20));
-        this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(16, 16));
-        const visuals = this.entityManager.getEntity(projectile.id).getComponent('Visuals');
-        visuals.avatar = 'img/avatars/projectile.png'; 
-        visuals.offsetX = 16; visuals.offsetY = 0;
+        const CAST_TIME = 100;
 
-        console.log(`manaComponent:`, this.entityManager.getEntity('player').getComponent('Mana')); 
-
-        this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
+        setTimeout(() => {
+            const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
+            this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y + 4));
+            this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
+            this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, 'player', weapon, isPiercing));
+            this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(280)); // 320 pixels/second (was 32 pixels every 100 ms)
+            this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(20, 20));
+            this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(16, 16));
+            const visuals = this.entityManager.getEntity(projectile.id).getComponent('Visuals');
+            visuals.avatar = 'img/avatars/projectile.png';
+            visuals.offsetX = 16; visuals.offsetY = 0;
+            this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
+        }, CAST_TIME);
     }
 
     combatFlagging({attacker, target }) {
