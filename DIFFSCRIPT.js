@@ -1,395 +1,231 @@
-﻿// Game.js - Updated
-import { State } from './State.js';
+﻿import { System } from '../core/Systems.js';
+import { PositionComponent, LastPositionComponent, ProjectileComponent, MovementSpeedComponent, InCombatComponent, NeedsRenderComponent, HitboxComponent, VisualsComponent } from '../core/Components.js';
 
-import { ActionSystem } from './systems/ActionSystem.js';
-import { CombatSystem } from './systems/CombatSystem.js';
-import { SpatialBucketsSystem } from './systems/SpatialBucketsSystem.js';
-import { MapRenderSystem } from './systems/MapRenderSystem.js';
-import { PlayerSystem } from './systems/PlayerSystem.js';
-import { MonsterControllerSystem } from './systems/MonsterControllerSystem.js';
-import { MonsterSpawnSystem } from './systems/MonsterSpawnSystem.js';
-import { MonsterCollisionSystem } from './systems/MonsterCollisionSystem.js';
-import { DamageCalculationSystem } from './systems/DamageCalculationSystem.js';
-import { LevelSystem } from './systems/LevelSystem.js';
-import { LootSpawnSystem } from './systems/LootSpawnSystem.js';
-import { LootCollectionSystem } from './systems/LootCollectionSystem.js';
-import { ItemROGSystem } from './systems/ItemROGSystem.js';
-import { LootManagerSystem } from './systems/LootManagerSystem.js';
-import { InventorySystem } from './systems/InventorySystem.js';
-import { UISystem } from './systems/UISystem.js';
-import { LevelTransitionSystem } from './systems/LevelTransitionSystem.js';
-import { AudioSystem } from './systems/AudioSystem.js';
-import { DataSystem } from './systems/DataSystem.js';
-import { ExplorationSystem } from './systems/ExplorationSystem.js';
-import { LightingSystem } from './systems/LightingSystem.js';
-import { GameDataIOSystem } from './systems/GameDataIOSystem.js';
-import { PlayerInputSystem } from './systems/PlayerInputSystem.js';
-import { PlayerControllerSystem } from './systems/PlayerControllerSystem.js';
-import { PlayerTimerSystem } from './systems/PlayerTimerSystem.js';
-import { MonsterTimerSystem } from './systems/MonsterTimerSystem.js';
-import { AffixSystem } from './systems/AffixSystem.js';
-import { EffectsSystem } from './systems/EffectsSystem.js';
-import { HealthSystem } from './systems/HealthSystem.js';
-import { ManaSystem } from './systems/ManaSystem.js';
-import { ProjectileSystem } from './systems/ProjectileSystem.js';
-import { CollisionSystem } from './systems/CollisionSystem.js';
-import { MovementResolutionSystem } from './systems/MovementResolutionSystem.js';
-import { PlayerCollisionSystem } from './systems/PlayerCollisionSystem.js';
-import { ProjectileCollisionSystem } from './systems/ProjectileCollisionSystem.js';
-import { SplashSystem } from './systems/SplashSystem.js';
-import { EntityRemovalSystem } from './systems/EntityRemovalSystem.js';
-import { JourneySystem } from './systems/JourneySystem.js';
-import { PathSystem } from './systems/PathSystem.js';
+export class CombatSystem extends System {
+    constructor(entityManager, eventBus) {
+        super(entityManager, eventBus);
+        this.requiredComponents = ['Position', 'Health'];
+        this.queues = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues') || {};
+        this.healthUpdates = this.queues.HealthUpdates || [];
+        this.manaUpdates = this.queues.ManaUpdates || [];
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
+    }
 
-import {
-    PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
-    PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
-    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
-    LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent, JourneyStateComponent, JourneyPathComponent,
-} from './core/Components.js';
-
-export class Game {
-    constructor() {
-        this.PLAYER_DEFAULT_MOVE_SPEED = 100; // Default player movement speed
-        this.state = new State();
-        this.entityManager = this.state.entityManager;
-        this.utilities = this.state.utilities;
-        this.systems = {};
-        this.lastUpdateTime = 0;
-        this.lastMouseEventTime = 0;
-        this.gameLoopId = null;
-        this.RENDER_RADIUS_MODIFIER = 2;
-
-        let player = this.entityManager.getEntity('player');
-        if (player) {
-            this.entityManager.removeEntity('player');
-        }
-        player = this.entityManager.createEntity('player', true);
-        this.entityManager.addComponentToEntity('player', new PositionComponent(64, 112));
-        this.entityManager.addComponentToEntity('player', new LastPositionComponent(0, 0));
-        this.entityManager.addComponentToEntity('player', new VisualsComponent(32, 32));
-        const visuals = this.entityManager.getEntity('player').getComponent('Visuals');
-        visuals.avatar = 'img/avatars/player.png';
-        this.entityManager.addComponentToEntity('player', new HealthComponent(0, 0));
-        this.entityManager.addComponentToEntity('player', new ManaComponent(0, 0));
-        this.entityManager.addComponentToEntity('player', new StatsComponent());
-        this.entityManager.addComponentToEntity('player', new InventoryComponent({
-            equipped: { mainhand: null, offhand: null, armor: null, amulet: null, leftring: null, rightring: null },
-            items: []
-        }));
-        this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0));
-        this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
-        this.entityManager.addComponentToEntity('player', new JourneyStateComponent());
-        this.entityManager.addComponentToEntity('player', new InputStateComponent());
-        this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
-        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(192));
-        this.entityManager.addComponentToEntity('player', new AffixComponent()); // New component added
-        this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32, 32));
-        this.entityManager.addComponentToEntity('player', new HitboxComponent(28, 28));
-
-        // Initialize Master Paths as JourneyPathComponents on the player
-        this.entityManager.addComponentToEntity('player', new JourneyPathComponent({
-            id: 'master_whispers',
-            parentId: 'master_whispers',
-            nextPathId: '',
-            completed: false,
-            title: 'Path of Whispers',
-            description: 'Follow the guidance of the Zukran Masters to prove your worth.',
-            completionCondition: null,
-            rewards: [],
-            completionText: '',
-            logCompletion: false
-        }));
-        this.entityManager.addComponentToEntity('player', new JourneyPathComponent({
-            id: 'master_echoes',
-            parentId: 'master_echoes',
-            nextPathId: '',
-            completed: false,
-            title: 'Echoes',
-            description: 'Discover the echoes of the past hidden within the fortress.',
-            completionCondition: null,
-            rewards: [],
-            completionText: '',
-            logCompletion: false
-        }));
-        this.entityManager.addComponentToEntity('player', new JourneyPathComponent({
-            id: 'master_lore',
-            parentId: 'master_lore',
-            nextPathId: '',
-            completed: false,
-            title: 'Arcane Legends',
-            description: 'Uncover the ancient knowledge of the Zukran.',
-            completionCondition: null,
-            rewards: [],
-            completionText: '',
-            logCompletion: false
-        }));
-
-        // Initialize the first Whisper under "Whispers of Zukarath"
-        this.entityManager.addComponentToEntity('player', new JourneyPathComponent({
-            id: 'whisper_parent_1',
-            parentId: 'master_whispers',
-            nextPathId: 'whisper_parent_2',
-            completed: false,
-            title: 'The First Descent',
-            description: 'The Zukran Masters have spoken: Prove your resolve.',
-            completionCondition: null,
-            rewards: [{ type: 'item', itemId: 'torch', quantity: 2, rewarded: false }],
-            completionText: 'You have proven your resolve.',
-            logCompletion: true
-        }));
-        this.entityManager.addComponentToEntity('player', new JourneyPathComponent({
-            id: 'whisper_child_1_1',
-            parentId: 'whisper_parent_1',
-            nextPathId: '',
-            completed: false,
-            title: 'Reach Tier 1',
-            description: 'Descend to Tier 1 of the Bottomless Fortress.',
-            completionCondition: { type: 'reachTier', tier: 1 },
-            rewards: [],
-            completionText: 'You have reached Tier 1.',
-            logCompletion: true
-        }));
-        this.entityManager.addComponentToEntity('player', new JourneyPathComponent({
-            id: 'whisper_child_1_2',
-            parentId: 'whisper_parent_1',
-            nextPathId: '',
-            completed: false,
-            title: 'Find the Key',
-            description: 'Locate the Key of Zukarath on Tier 1.',
-            completionCondition: { type: 'findArtifact', artifactId: 'keyOfZukarath', tier: 1 },
-            rewards: [],
-            completionText: 'You have found the Key of Zukarath.',
-            logCompletion: true
-        }));
-
-        let overlayState = this.entityManager.getEntity('overlayState');
-        if (!overlayState) {
-            overlayState = this.entityManager.createEntity('overlayState', true);
-            this.entityManager.addComponentToEntity('overlayState', new OverlayStateComponent({
-                isOpen: false,
-                activeTab: null,
-                logMessages: [],
-                activeMenuSection: 'controls-button'
-            }));
-        }
-
-        let lightingState = this.entityManager.getEntity('lightingState');
-        if (lightingState) {
-            this.entityManager.removeEntity('lightingState');
-        }
-        lightingState = this.entityManager.createEntity('lightingState', true);
-        this.entityManager.addComponentToEntity('lightingState', new LightingState());
-        this.entityManager.addComponentToEntity('lightingState', new LightSourceDefinitions());
-        const visibilityRadius = lightingState.getComponent('LightingState').visibilityRadius;
-
-        // Render state entity (global)
-        const renderState = this.entityManager.createEntity('renderState', true);
-        this.entityManager.addComponentToEntity('renderState',
-            new RenderStateComponent()
-        );
-        renderState.getComponent('RenderState').renderRadius = visibilityRadius + this.RENDER_RADIUS_MODIFIER;
-
-        this.entityManager.addComponentToEntity('renderState',
-            new RenderControlComponent()
-        );
-
-        this.entityManager.addComponentToEntity('gameState', new DataProcessQueues());
-        // Initialize pathTransfers queue in DataProcessQueues
-        const dataProcessQueues = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues');
-        dataProcessQueues.pathTransfers = [];
-        this.entityManager.addComponentToEntity('gameState', new AudioQueueComponent());
-        this.entityManager.addComponentToEntity('gameState', new LevelTransitionComponent());
-
-        this.initializeSystems().then(() => {
-            this.state.eventBus.emit('InitializePlayer');
-            console.log('Systems initialized and player initialized');
-
+    init() {
+        this.eventBus.on('MeleeAttack', (data) => this.handleMeleeAttack(data));
+        this.eventBus.on('RangedAttack', (data) => {
+            console.log('CombatSystem: RangedAttack event received with data:', data);
+            this.handleRangedAttack(data);
         });
-        this.setupEventListeners();
-
-        this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
-        this.sfxQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.SFX || [];
-        this.splashScreen = document.getElementById('splash');
-        this.splashScreen.style.display = 'flex';
-    }
-
-    async initializeSystems() {
-        this.systems.data = new DataSystem(this.entityManager, this.state.eventBus);
-        this.systems.splash = new SplashSystem(this.entityManager, this.state.eventBus);
-        this.systems.action = new ActionSystem(this.entityManager, this.state.eventBus);
-        this.systems.damageCalculation = new DamageCalculationSystem(this.entityManager, this.state.eventBus);
-        this.systems.combat = new CombatSystem(this.entityManager, this.state.eventBus);
-        this.systems.projectile = new ProjectileSystem(this.entityManager, this.state.eventBus);
-        this.systems.mapRender = new MapRenderSystem(this.entityManager, this.state.eventBus, this.state);
-        this.systems.lootSpawn = new LootSpawnSystem(this.entityManager, this.state.eventBus);
-        this.systems.lootCollection = new LootCollectionSystem(this.entityManager, this.state.eventBus);
-        this.systems.itemROG = new ItemROGSystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.lootManager = new LootManagerSystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.player = new PlayerSystem(this.entityManager, this.state.eventBus, this.utilities);
-        //this.systems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
-        this.systems.monsterSpawn = new MonsterSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data);
-        this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state);
-        this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.path = new PathSystem(this.entityManager, this.state.eventBus); // Add PathSystem before JourneySystem
-        this.systems.journey = new JourneySystem(this.entityManager, this.state.eventBus);
-        this.systems.ui = new UISystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.levelTransition = new LevelTransitionSystem(this.entityManager, this.state.eventBus);
-        this.systems.audio = new AudioSystem(this.entityManager, this.state.eventBus);
-        this.systems.exploration = new ExplorationSystem(this.entityManager, this.state.eventBus);
-        this.systems.lighting = new LightingSystem(this.entityManager, this.state.eventBus);
-        this.systems.gameDataIO = new GameDataIOSystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.playerInput = new PlayerInputSystem(this.entityManager, this.state.eventBus);
-        this.systems.playerController = new PlayerControllerSystem(this.entityManager, this.state.eventBus);
-        this.systems.affix = new AffixSystem(this.entityManager, this.state.eventBus);
-        this.systems.effects = new EffectsSystem(this.entityManager, this.state.eventBus); // New system added
-        this.systems.health = new HealthSystem(this.entityManager, this.state.eventBus);
-        this.systems.mana = new ManaSystem(this.entityManager, this.state.eventBus);
-        this.systems.spatialBuckets = new SpatialBucketsSystem(this.entityManager, this.state.eventBus, this.state);
-
-        await Promise.all(Object.values(this.systems).map(system => system.init()));
-    }
-
-    iniitalizeActiveGameSystems() {
-        let activeGameSystems = {}
-        activeGameSystems.playerTimer = new PlayerTimerSystem(this.entityManager, this.state.eventBus);
-        activeGameSystems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
-        activeGameSystems.monsterTimer = new MonsterTimerSystem(this.entityManager, this.state.eventBus);
-        activeGameSystems.monsterCollision = new MonsterCollisionSystem(this.entityManager, this.state.eventBus);
-        activeGameSystems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
-        activeGameSystems.movementResolution = new MovementResolutionSystem(this.entityManager, this.state.eventBus);
-        activeGameSystems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
-        activeGameSystems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus);
-        activeGameSystems.entityRemoval = new EntityRemovalSystem(this.entityManager);
-
-        Object.values(activeGameSystems).forEach(system => system.init());
-        this.systems = { ...this.systems, ...activeGameSystems };
-
-        console.log('Game: Active game systems initialized.');
-    }
-
-    setupEventListeners() {
-        this.mousedownHandler = () => this.updateLastMouseEvent();
-        this.mousemoveHandler = () => this.updateLastMouseEvent();
-        document.addEventListener('mousedown', this.mousedownHandler);
-        document.addEventListener('mousemove', this.mousemoveHandler);
-        this.state.eventBus.on('StartGame', () => this.start());
-    }
-
-    destroy() {
-        document.removeEventListener('mousedown', this.mousedownHandler);
-        document.removeEventListener('mousemove', this.mousemoveHandler);
-        Object.values(this.systems).forEach(system => system.destroy?.());
-        if (this.gameLoopId) {
-            cancelAnimationFrame(this.gameLoopId);
-            console.log('Game.js: Game loop stopped');
-        }
-        console.log('Game.js: Instance destroyed');
-    }
-
-    updateLastMouseEvent() {
-        this.lastMouseEventTime = Date.now();
-    }
-
-    updateSystems(systemsToUpdate, deltaTime) { // *** CHANGED: Added deltaTime parameter ***
-        systemsToUpdate.forEach(systemName => {
-            // *** CHANGED: Pass deltaTime to system update ***
-            this.systems[systemName].update(deltaTime);
+        this.eventBus.on('MonsterAttack', (data) => this.handleMonsterMeleeAttack(data));
+        this.eventBus.on('RangedAttackHit', (data) => {
+            console.log('CombatSystem: RangedAttackHit event received with data:', data);
+            this.combatFlagging(data);
         });
-        this.lastUpdateTime = Date.now();
     }
 
-    startGameLoop() {
-        let lastTime = performance.now();
-        const gameLoop = (currentTime) => {
-            this.gameLoopId = requestAnimationFrame(gameLoop);
-            const deltaTime = (currentTime - lastTime) / 1000; // Time in seconds
-            lastTime = currentTime;
-
-            // *** NEW: Log deltaTime ***
-            // console.log('Game.js: Game loop - deltaTime:', deltaTime);
-
-            // *** CHANGED: Pass deltaTime to updateSystems ***
-            this.updateSystems([
-
-                'playerInput',
-                'playerController',
-                'playerTimer',
-                'player',
-                'exploration',
-                'projectile',
-                'monsterController',
-                'monsterTimer',
-                'collisions',
-                'playerCollision',
-                'monsterCollision',
-                'projectileCollisions',
-                'movementResolution',
-                'combat',
-                'damageCalculation',
-                'health',
-                'mana',
-                'path', // Add PathSystem to the update loop
-                'journey',
-                'ui',
-                'audio',
-                'levelTransition',
-                'spatialBuckets',
-                'mapRender',
-                'entityRemoval',
-
-            ], deltaTime);
-
-            const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
-            if (!gameState?.gameOver) {
-                // Continue the loop
-            }
-            gameState.transitionLock = false;
-        };
-        this.gameLoopId = requestAnimationFrame(gameLoop);
+    update() {
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        if (gameState?.gameOver) return;
     }
 
-    start() {
-        let gameState = this.entityManager.getEntity('gameState');
+    combatSfx(type) {
+        const hitFileCount = 27;
+        const missFileCount = 9;
+        const blockFileCount = 9;
 
-        if (!gameState) {
-
-            this.entityManager.addComponentToEntity('gameState', new GameStateComponent({
-                gameStarted: true, // Set to true when starting
-                gameOver: false,
-                tier: 1, // Assuming initial tier
-                // Add other GameState properties as needed
-            }));
-            gameState = this.entityManager.getEntity('gameState');
-        } else {
-            const gameStateComp = gameState.getComponent('GameState');
-            if (!gameStateComp.gameStarted) gameStateComp.gameStarted = true;
+        let sfx = '';
+        switch (type) {
+            case 'hit': sfx = `${type}${Math.floor(Math.random() * hitFileCount)}`; break;
+            case 'miss': sfx = `${type}${Math.floor(Math.random() * missFileCount)}`; break;
+            case 'block': sfx = `${type}${Math.floor(Math.random() * blockFileCount)}`; break;
+            default: return;
         }
+        this.sfxQueue.push({ sfx, volume: .1 });
+    }
 
-        this.iniitalizeActiveGameSystems();
-
-        this.splashScreen.style.display = 'none';
-        document.getElementById('hud-layer').style.visibility = 'visible';
-        gameState.needsRender = true;
-        this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume: .05 });
-
+    getBestRangedWeapon() {
         const player = this.entityManager.getEntity('player');
-        // START TEMPORARY CODE TO RESET MOVE SPEED FOR SAVED GAMES WITH MS COMPONENT
-        const movementSpeed = player.getComponent('MovementSpeed');
-        if (movementSpeed) {
-            movementSpeed.movementSpeed = 192; // Set default value
-        }
-        // START TEMPORARY CODE TO RESET MOVE SPEED FOR SAVED GAMES WITH MS COMPONENT
-        const newPlayerComp = player.getComponent('NewCharacter');
-        if (newPlayerComp) {
-            const saveId = null;
-            this.state.eventBus.emit('RequestSaveGame', { saveId });
-            player.removeComponent('NewCharacter');
-            setTimeout(() => { this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'intro', volume: 0.25 }); }, 2000);
+        const playerInventory = player.getComponent('Inventory');
+        const mainWeapon = playerInventory.equipped.mainhand;
+        const offWeapon = playerInventory.equipped.offhand;
+        const rangedWeapons = [];
 
+        if (mainWeapon?.attackType === 'ranged') rangedWeapons.push(mainWeapon);
+        if (offWeapon?.attackType === 'ranged') rangedWeapons.push(offWeapon);
+        if (rangedWeapons.length === 0) return null;
+
+        return rangedWeapons.reduce((best, current) => {
+            const bestMean = (best.baseDamageMin + best.baseDamageMax) * 0.5;
+            const currentMean = (current.baseDamageMin + current.baseDamageMax) * 0.5;
+            return currentMean > bestMean ? current : best;
+        }, rangedWeapons[0]);
+    }
+
+    handleMonsterMeleeAttack({ entityId }) {
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        if (gameState?.gameOver) return;
+
+        const monster = this.entityManager.getEntity(entityId);
+        const player = this.entityManager.getEntity('player');
+        if (!monster || !player || !monster.getComponent('MonsterData')?.isAggro) return;
+
+        const playerStats = player.getComponent('Stats');
+        const monsterData = monster.getComponent('MonsterData');
+
+        this.combatFlagging({ attacker: monster, target: player });
+
+        const dodgeRoll = Math.round((Math.random() * 100) + (playerStats.agility / 2));
+        if (dodgeRoll >= 85) {
+            this.eventBus.emit('LogMessage', { message: `You dodged the ${monsterData.name}'s attack!` });
+            this.combatSfx('miss');
+            return;
         }
-        this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
-        this.startGameLoop();
-        console.log('Game.js: Game started');
+
+        const blockRoll = Math.round((Math.random() * 100) + (playerStats.block / 2));
+        if (blockRoll >= 85) {
+            this.eventBus.emit('LogMessage', { message: `You blocked the ${monsterData.name}'s attack!` });
+            this.combatSfx('block');
+            return;
+        }
+
+        this.combatSfx('hit');
+        this.eventBus.emit('PlayerWasHit', { entityId: 'player', attackerId: entityId });
+        this.eventBus.emit('CalculateDamage', {
+            attacker: monster,
+            target: player
+        });
+    }
+
+    handleMeleeAttack({ targetEntityId }) {
+        const player = this.entityManager.getEntity('player');
+        const target = this.entityManager.getEntity(targetEntityId);
+        if (!player || !target) return;
+
+        const playerStats = player.getComponent('Stats');
+        const playerInventory = player.getComponent('Inventory');
+        const targetHealth = target.getComponent('Health');
+        const targetMonsterData = target.getComponent('MonsterData');
+
+        this.combatFlagging({ attacker: player, target });
+
+        const meleeWeapons = [];
+        const mainhand = playerInventory.equipped.mainhand;
+        const offhand = playerInventory.equipped.offhand;
+        if (mainhand?.attackType === 'melee') meleeWeapons.push(mainhand);
+        if (offhand?.attackType === 'melee') meleeWeapons.push(offhand);
+        if (meleeWeapons.length === 0) meleeWeapons.push({ baseDamageMin: 0.5, baseDamageMax: 1, name: 'Fists', attackType: 'melee' });
+
+        const isDualWield = meleeWeapons.length === 2;
+
+        meleeWeapons.forEach((weapon, index) => {
+            if (target.hasComponent('Dead')) return;
+
+            const missChance = isDualWield ? (index === 0 ? 15 : 25) : 0;
+            if (Math.random() * 100 < missChance) {
+                this.eventBus.emit('LogMessage', { message: `Your ${weapon.name} missed the ${targetMonsterData.name}!` });
+                this.combatSfx('miss');
+                return;
+            }
+
+            const dodgeRoll = Math.random() * 100;
+            if (dodgeRoll >= 99) {
+                this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} dodged your ${weapon.name} attack!` });
+                this.combatSfx('miss');
+                return;
+            }
+
+            const blockRoll = Math.random() * 100;
+            if (blockRoll >= 99) {
+                this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} blocked your ${weapon.name} attack!` });
+                this.combatSfx('block');
+                return;
+            }
+
+            this.combatSfx('hit');
+            this.eventBus.emit('CalculateDamage', {
+                attacker: player,
+                target: target,
+                weapon: weapon
+            });
+        });
+    }
+
+    handleRangedAttack(direction) {
+        console.log('CombatSystem: handleRangedAttack called with direction:', direction);
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        const player = this.entityManager.getEntity('player');
+        if (!player || gameState?.gameOver || !gameState.isRangedMode) return;
+
+        const manaCost = 3;
+        const mana = player.getComponent('Mana');
+        if (mana.mana < manaCost) {
+            console.log(`CombatSystem: Insufficient mana for FlamingBolt (${mana.mana}/${manaCost})`);
+            this.eventBus.emit('LogMessage', { message: `you cannot cast ranged attacks without mana!` });
+            return;
+        }
+
+        const combat = player.getComponent('InCombat');
+        if (!combat) {
+            player.addComponent(new InCombatComponent(3000));
+            this.eventBus.emit('LogMessage', { message: 'You enter combat by casting FlamingBolt!' });
+        } else {
+            combat.elapsed = 0; // Reset to extend 3s
+        }
+
+        const playerPos = player.getComponent('Position');
+        const stats = player.getComponent('Stats');
+        const weapon = this.getBestRangedWeapon();
+        const range = stats.range || weapon?.baseRange || 3;
+
+        let isPiercing = false;
+        if (weapon?.piercing) {
+            isPiercing = true;
+        }
+        const sfx = 'firecast0';
+
+        this.sfxQueue.push({ sfx, volume: .1 });
+        this.manaUpdates.push({ entityId: 'player', amount: -manaCost });
+
+        // Generate unique projectile ID
+        const uniqueId = `projectile_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const projectile = this.entityManager.createEntity(uniqueId);
+        this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
+        this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
+        this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, 'player', weapon, isPiercing));
+        this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(280));
+        this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(20, 20));
+        this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(16, 16));
+        const visuals = this.entityManager.getEntity(projectile.id).getComponent('Visuals');
+        visuals.avatar = 'img/avatars/projectile.png';
+        visuals.offsetX = 16;
+        visuals.offsetY = 0;
+
+        console.log(`CombatSystem: Created projectile ${projectile.id}, mana: ${mana.mana} -> ${mana.mana - manaCost}`);
+        this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
+    }
+
+    combatFlagging({ attacker, target }) {
+        const attackerInCombat = attacker.getComponent('InCombat');
+        if (!attackerInCombat) {
+            attacker.addComponent(new InCombatComponent(3000));
+        } else {
+            attackerInCombat.elapsed = 0;
+        }
+
+        const targetInCombat = target.getComponent('InCombat');
+        if (!targetInCombat) {
+            target.addComponent(new InCombatComponent(3000));
+        } else {
+            targetInCombat.elapsed = 0;
+        }
+
+        if (attacker.id === 'player') {
+            this.eventBus.emit('LogMessage', { message: `You enter combat with ${target.getComponent('MonsterData').name}!` });
+            console.log(`${target.getComponent('MonsterData').name} enters combat after being hit by player`);
+        } else if (target.id === 'player') {
+            this.eventBus.emit('LogMessage', { message: `${attacker.getComponent('MonsterData').name} enters combat with you!` });
+            console.log(`${attacker.getComponent('MonsterData').name} Initiates combat by attacking player`);
+        }
     }
 }

@@ -17,7 +17,7 @@ export class JourneySystem extends System {
         const player = this.entityManager.getEntity('player');
         if (!player) {
             console.error('JourneySystem: Player entity not found');
-            return;
+            return; 
         }
 
         const journeyState = player.getComponent('JourneyState');
@@ -74,6 +74,16 @@ export class JourneySystem extends System {
         // Get all paths from the JourneyPathComponent
         const activePaths = journeyPath.paths;
 
+        // *** CHANGE START: Add detailed logging ***
+        /*console.log('JourneySystem: Active Paths before building pathTree:', activePaths.map(p => ({
+            id: p.id,
+            parentId: p.parentId,
+            completionCondition: p.completionCondition,
+            completed: p.completed
+        })));
+        */
+        // *** CHANGE END ***
+
         // Rebuild the pathTree
         journeyState.pathTree.clear();
         activePaths.forEach(path => {
@@ -84,7 +94,7 @@ export class JourneySystem extends System {
             journeyState.pathTree.get(parentId).push(path);
         });
 
-        console.log('JourneySystem: Updated pathTree with', activePaths.length, 'paths');
+      //  console.log('JourneySystem: Updated pathTree with', activePaths.length, 'paths');
     }
 
     evaluateCompletionCondition(path, journeyState) {

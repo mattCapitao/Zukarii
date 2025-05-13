@@ -41,6 +41,7 @@ import { EntityRemovalSystem } from './systems/EntityRemovalSystem.js';
 import { JourneySystem } from './systems/JourneySystem.js';
 import { PathSystem } from './systems/PathSystem.js';
 import { InteractionSystem } from './systems/InteractionSystem.js';
+import { MouseInputSystem } from './systems/MouseInputSystem.js'; 
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
@@ -95,7 +96,7 @@ export class Game {
                 parentId: 'master_whispers',
                 nextPathId: '',
                 completed: false,
-                title: 'Path of Whispers',
+                title: 'Whispers of Zukarath',
                 description: 'Follow the guidance of the Zukran Masters to prove your worth.',
                 completionCondition: null,
                 rewards: [],
@@ -107,7 +108,7 @@ export class Game {
                 parentId: 'master_echoes',
                 nextPathId: '',
                 completed: false,
-                title: 'Echoes',
+                title: 'Forgotten Echoes',
                 description: 'Discover the echoes of the past hidden within the fortress.',
                 completionCondition: null,
                 rewards: [],
@@ -249,6 +250,7 @@ export class Game {
         this.systems.health = new HealthSystem(this.entityManager, this.state.eventBus);
         this.systems.mana = new ManaSystem(this.entityManager, this.state.eventBus);
         this.systems.spatialBuckets = new SpatialBucketsSystem(this.entityManager, this.state.eventBus, this.state);
+        this.systems.mouseInput = new MouseInputSystem(this.entityManager, this.state.eventBus, this.state);
         
         await Promise.all(Object.values(this.systems).map(system => system.init()));
     }
@@ -316,6 +318,7 @@ export class Game {
             this.updateSystems([
                 
                 'playerInput',
+                'mouseInput',
                 'playerController',
                 'playerTimer',
                 'player',

@@ -39,6 +39,7 @@ import {
     DataProcessQueues,
     AudioQueueComponent,
     LevelTransitionComponent,
+    MouseTargetComponent,
 } from './components/GameComponents.js';
 
 import {
@@ -99,6 +100,7 @@ export {
     DataProcessQueues,
     AudioQueueComponent,
     LevelTransitionComponent,
+    MouseTargetComponent,
 
     // Common components
     PositionComponent,

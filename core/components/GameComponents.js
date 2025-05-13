@@ -14,6 +14,14 @@ export class UIComponent {
     }
 }
 
+export class MouseTargetComponent {
+    constructor(targetX, targetY) {
+        this.type = 'MouseTarget';
+        this.targetX = targetX;
+        this.targetY = targetY;
+    }
+}
+
 export class OverlayStateComponent {
     constructor({
         isOpen = false,
