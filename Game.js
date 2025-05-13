@@ -132,6 +132,8 @@ export class Game {
             }
         };
 
+
+
         // Initialize a single JourneyPathComponent and populate its paths array
         const journeyPaths = new JourneyPathComponent();
         journeyPaths.paths = [
