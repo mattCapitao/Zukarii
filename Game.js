@@ -62,6 +62,7 @@ export class Game {
         this.lastMouseEventTime = 0;
         this.gameLoopId = null;
         this.RENDER_RADIUS_MODIFIER = 2;
+        this.GameLoopRunning = false;
 
         let player = this.entityManager.getEntity('player');
         if (player) {
@@ -352,6 +353,7 @@ export class Game {
     }
 
     startGameLoop() {
+        this.GameLoopRunning = true;
         let lastTime = performance.now();
         const gameLoop = (currentTime) => {
             this.gameLoopId = requestAnimationFrame(gameLoop);
@@ -405,6 +407,7 @@ export class Game {
     }
 
     start() {
+        
         let gameState = this.entityManager.getEntity('gameState');
 
         if (!gameState) {
@@ -444,7 +447,10 @@ export class Game {
             
         }
         this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
-        this.startGameLoop();
+
+        if (!this.GameLoopRunning) {
+            this.startGameLoop();
+        }
         console.log('Game.js: Game started');
     }
 }

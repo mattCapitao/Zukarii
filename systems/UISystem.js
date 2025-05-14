@@ -142,6 +142,17 @@ export class UISystem extends System {
     }
 
     setupEventListeners() {
+
+
+        const buttons = document.querySelectorAll('button');
+        // prevent right -click on all buttons
+        buttons.forEach(button => {
+            button.addEventListener('contextmenu', (event) => {
+                event.preventDefault(); // Disable right-click
+            });
+        });
+
+        
         const menuButtons = document.getElementById('menu-buttons');
         if (menuButtons) {
             menuButtons.addEventListener('click', (event) => {
@@ -158,6 +169,7 @@ export class UISystem extends System {
                     }
                 }
             });
+             
         }
 
         const menuDataWrapper = document.getElementById('menu-data-wrapper');
@@ -187,6 +199,10 @@ export class UISystem extends System {
                     console.log('UISystem: Load button clicked, emitting RequestLoadGame');
                     const saveId = loadButton.dataset.saveId;
                     this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.05 });
+                    this.eventBus.emit('ToggleOverlay', { tab: 'menu' });
+                    this.splashMenu = document.getElementById('splash-menu');
+                    this.splashMenu.style.transition = 'opacity 0.5s ease-in-out';
+                    this.splashMenu.style.opacity = '0';
                     setTimeout(() => {
                         this.eventBus.emit('RequestLoadGame', { saveId }, (result) => {
                             if (result.success) {
@@ -194,6 +210,7 @@ export class UISystem extends System {
                                 this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
                             }
                         });
+                        this.eventBus.emit('ToggleOverlay', { tab: 'journey' });
                     }, 2000);
                 }
 
@@ -207,6 +224,9 @@ export class UISystem extends System {
 
             menuDataWrapper.removeEventListener('click', handleMenuClick);
             menuDataWrapper.addEventListener('click', handleMenuClick);
+            menuDataWrapper.addEventListener('contextmenu', (event) => {
+                event.preventDefault(); // Disable right-click
+            });
         }
 
         const tabMenu = document.getElementById('tab-menu');
@@ -224,6 +244,9 @@ export class UISystem extends System {
                 } else if (target.id === 'close-tabs') {
                     this.toggleOverlay({});
                 }
+            });
+            tabMenu.addEventListener('contextmenu', (event) => {
+                event.preventDefault(); // Disable right-click
             });
         }
 

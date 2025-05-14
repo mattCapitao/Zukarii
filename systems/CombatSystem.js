@@ -167,7 +167,7 @@ export class CombatSystem extends System {
 
         const manaCost = 3;
 
-        if (this.entityManager.getEntity('player').getComponent('Mana').mana <= manaCost) {
+        if (this.entityManager.getEntity('player').getComponent('Mana').mana < manaCost) {
             console.log(`you do not have enough mana to cast FlamingBolt`);
             return;
         }
@@ -194,6 +194,7 @@ export class CombatSystem extends System {
         this.sfxQueue.push({ sfx, volume: .1 });
         this.manaUpdates.push({ entityId: 'player', amount: -manaCost });
         const CAST_TIME = 100;
+        this.eventBus.emit('AnimateRangedAttack');
 
         setTimeout(() => {
             const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);

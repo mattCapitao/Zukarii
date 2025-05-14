@@ -159,8 +159,8 @@ export class MouseInputSystem {
             if (hasRangedWeapon && attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed && mana.mana >= 3) {
                 const now = performance.now();
                 if (now - this.lastAttackTime >= attackSpeed.attackSpeed) {
-                    const targetX = monster ? (monster.getComponent('Position').x + monster.getComponent('Visuals').w / 2) : worldX;
-                    const targetY = monster ? (monster.getComponent('Position').y + monster.getComponent('Visuals').h / 2) : worldY;
+                    const targetX = monster ? (monster.getComponent('Position').x /*+ monster.getComponent('Visuals').w / 2*/) : worldX;
+                    const targetY = monster ? (monster.getComponent('Position').y /*+ monster.getComponent('Visuals').h / 2*/) : worldY;
                     let dx = targetX - player.getComponent('Position').x;
                     let dy = targetY - player.getComponent('Position').y;
                     const magnitude = Math.sqrt(dx * dx + dy * dy);
@@ -188,8 +188,8 @@ export class MouseInputSystem {
             const monsterPos = monster.getComponent('Position');
             const tileX = Math.floor(monsterPos.x / this.TILE_SIZE);
             const tileY = Math.floor(monsterPos.y / this.TILE_SIZE);
-            const targetX = tileX * this.TILE_SIZE + this.TILE_SIZE / 2;
-            const targetY = tileY * this.TILE_SIZE + this.TILE_SIZE / 2;
+            const targetX = tileX * this.TILE_SIZE /*+ this.TILE_SIZE / 2*/;
+            const targetY = tileY * this.TILE_SIZE /*+ this.TILE_SIZE / 2*/;
             this.setMovementTarget(targetX, targetY);
             return;
         }
@@ -220,8 +220,8 @@ export class MouseInputSystem {
             return;
         }
 
-        const targetX = tileX * this.TILE_SIZE + this.TILE_SIZE / 2;
-        const targetY = tileY * this.TILE_SIZE + this.TILE_SIZE / 2;
+        const targetX = tileX * this.TILE_SIZE /*+ this.TILE_SIZE / 2*/;
+        const targetY = tileY * this.TILE_SIZE /*+ this.TILE_SIZE / 2*/;
         const player = this.entityManager.getEntity('player');
         const moveDx = targetX - player.getComponent('Position').x;
         const moveDy = targetY - player.getComponent('Position').y;

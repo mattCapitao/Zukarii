@@ -58,6 +58,11 @@ export class SplashSystem extends System {
             console.error('Failed to load vortex image:', this.vortexImg.src);
         };
 
+        this.splashMenu = document.getElementById('splash-menu');
+        this.splashMenu.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+
         // Setup menu interactions
         this.menuItems = document.querySelectorAll('.splash-menu li');
         if (this.menuItems.length === 0) {
@@ -225,6 +230,13 @@ export class SplashSystem extends System {
 
         this.startGameButton = document.getElementById('start-new-game-button');
         this.startGameButton.addEventListener('click', () => {
+            this.startGameButton.disabled = 'disabled';
+            this.startGameButton.style.pointerEvents = 'none';
+            this.startGameButton.style.opacity = '0.5';
+            this.eventBus.emit('ToggleOverlay', { tab: 'menu' });
+            
+            this.splashMenu.style.transition = 'opacity 0.5s ease-in-out';
+            this.splashMenu.style.opacity = '0';
             const playerNameInput = document.getElementById('player-name-input');
             const playerName = playerNameInput.value.trim();
             const player = this.entityManager.getEntity('player');
@@ -235,8 +247,9 @@ export class SplashSystem extends System {
             }
             this.entityManager.addComponentToEntity('player', new NewCharacterComponent({ name: playerName }));
             this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
-            setTimeout(() => { this.createNewGame() }, 2000);
+            setTimeout(() => { this.createNewGame(); this.eventBus.emit('ToggleOverlay', { tab: 'character' }); }, 2000);
             this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.05 });
+            
             
         });
 
