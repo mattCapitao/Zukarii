@@ -201,7 +201,7 @@ export class CombatSystem extends System {
             this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y + 4));
             this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
             this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, 'player', weapon, isPiercing));
-            this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(280)); // 320 pixels/second (was 32 pixels every 100 ms)
+            this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(250)); // 320 pixels/second (was 32 pixels every 100 ms)
             this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(20, 20));
             this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(16, 16));
             const visuals = this.entityManager.getEntity(projectile.id).getComponent('Visuals');

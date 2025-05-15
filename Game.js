@@ -53,7 +53,7 @@ import {
 
 export class Game {
     constructor() {
-        this.PLAYER_DEFAULT_MOVE_SPEED = 100; // Default player movement speed
+        this.PLAYER_DEFAULT_MOVE_SPEED = 155; // Default player movement speed
         this.state = new State();
         this.entityManager = this.state.entityManager;
         this.utilities = this.state.utilities;
@@ -86,7 +86,7 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new JourneyStateComponent());
         this.entityManager.addComponentToEntity('player', new InputStateComponent());
         this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
-        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(192));
+        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(155));
         this.entityManager.addComponentToEntity('player', new AffixComponent());
         this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32, 32));
         this.entityManager.addComponentToEntity('player', new HitboxComponent(28, 28)); 
@@ -435,7 +435,7 @@ export class Game {
         // START TEMPORARY CODE TO RESET MOVE SPEED FOR SAVED GAMES WITH MS COMPONENT
         const movementSpeed = player.getComponent('MovementSpeed');
         if (movementSpeed) {
-            movementSpeed.movementSpeed = 192; // Set default value
+            movementSpeed.movementSpeed = 155; // Set default value
         }
         // START TEMPORARY CODE TO RESET MOVE SPEED FOR SAVED GAMES WITH MS COMPONENT
         const newPlayerComp = player.getComponent('NewCharacter');

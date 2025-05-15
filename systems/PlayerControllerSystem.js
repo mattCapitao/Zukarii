@@ -73,7 +73,7 @@ export class PlayerControllerSystem {
         // Movement (keyboard or mouse)
         let speed = player.getComponent('MovementSpeed').movementSpeed;
         if (player.hasComponent('InCombat')) {
-            speed = Math.round(speed * 0.66);
+            speed = Math.round(speed * 0.8);
             console.log(`PlayerControllerSystem: Player speed reduced to ${speed} due to combat!`);
         }
 
