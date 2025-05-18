@@ -1,5 +1,4 @@
 ﻿import { System } from '../core/Systems.js';
-//import { PositionComponent, PlayerStateComponent, NeedsRenderComponent } from '../core/Components.js';
 
 export class ExplorationSystem extends System {
     constructor(entityManager, eventBus) {
@@ -23,7 +22,6 @@ export class ExplorationSystem extends System {
 
         this.minimapCanvas = document.getElementById('minimap-canvas');
         if (!this.minimapCanvas) {
-           // console.error('ExplorationSystem: Minimap canvas not found');
             return;
         }
         this.minimapCtx = this.minimapCanvas.getContext('2d');
@@ -35,17 +33,14 @@ export class ExplorationSystem extends System {
     }
 
     renderMinimap() {
-       // console.log('ExplorationSystem: renderMinimap called');
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
         if (!levelEntity) {
-           // console.warn('ExplorationSystem: No level entity found for rendering minimap');
             return;
         }
 
         const exploration = levelEntity.getComponent('Exploration');
         if (!exploration) {
-           // console.warn('ExplorationSystem: Exploration component missing for minimap');
             return;
         }
 
@@ -68,12 +63,43 @@ export class ExplorationSystem extends System {
             }
         }
 
+        // Render markers for stairs, fountains, and portals
+        const markerEntities = [
+            ...this.entityManager.getEntitiesWith(['Position', 'Stair']),
+            ...this.entityManager.getEntitiesWith(['Position', 'Fountain']),
+            ...this.entityManager.getEntitiesWith(['Position', 'Portal'])
+        ];
+
+        for (const entity of markerEntities) {
+            const pos = entity.getComponent('Position');
+            const tileX = Math.floor(pos.x / this.TILE_SIZE);
+            const tileY = Math.floor(pos.y / this.TILE_SIZE);
+            const tileKey = `${tileX},${tileY}`;
+
+            // Only render if the tile is discovered
+            if (exploration.discoveredFloors.has(tileKey) || exploration.discoveredWalls.has(tileKey)) {
+                if (entity.hasComponent('Stair')) {
+                    const stairComp = entity.getComponent('Stair');
+                    this.minimapCtx.fillStyle = stairComp.direction === 'up' ? '#fff' : '#ff2'; // white for up, Dark Gray for down
+                } else if (entity.hasComponent('Fountain')) {
+                    this.minimapCtx.fillStyle = '#F00'; // Red for fountains
+                } else if (entity.hasComponent('Portal')) {
+                    this.minimapCtx.fillStyle = '#00f'; // Blue for portals
+                }
+                this.minimapCtx.fillRect(
+                    tileX * this.PIXELS_PER_TILE,
+                    tileY * this.PIXELS_PER_TILE,
+                    this.PIXELS_PER_TILE,
+                    this.PIXELS_PER_TILE
+                );
+            }
+        }
+
         const player = this.entityManager.getEntity('player');
         if (player) {
             const playerPos = player.getComponent('Position');
             const playerX = Math.floor(playerPos.x / this.TILE_SIZE);
             const playerY = Math.floor(playerPos.y / this.TILE_SIZE);
-          //  console.log(`ExplorationSystem: Rendering player at minimap x=${playerX}, y=${playerY}`);
             this.minimapCtx.fillStyle = '#0f0';
             this.minimapCtx.fillRect(playerX * this.PIXELS_PER_TILE, playerY * this.PIXELS_PER_TILE, this.PIXELS_PER_TILE, this.PIXELS_PER_TILE);
         }
@@ -121,7 +147,6 @@ export class ExplorationSystem extends System {
     }
 
     updateExploration() {
-       // console.log('ExplorationSystem: updateExploration called');
         const player = this.entityManager.getEntity('player');
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
@@ -139,10 +164,9 @@ export class ExplorationSystem extends System {
         const playerY = Math.floor(playerPos.y / this.TILE_SIZE);
         const lastPos = player.getComponent('LastPosition');
 
-
-        if (((playerPos.x === lastPos.x && playerPos.y === lastPos.y) || (lastPos.x === 0  && lastPos.y === 0))
+        if (((playerPos.x === lastPos.x && playerPos.y === lastPos.y) || (lastPos.x === 0 && lastPos.y === 0))
             && (gameState.needsInitialRender !== true)
-        ) {return;}
+        ) { return; }
 
         const renderRadius = renderState.renderRadius;
         const visibleRadius = lightingState.visibleRadius;
@@ -193,21 +217,16 @@ export class ExplorationSystem extends System {
                 }
             }
         }
-        
+
         if (newDiscoveryCount > 0) {
-           // console.log(`ExplorationSystem: New tiles discovered, count=${newDiscoveryCount}`);
             playerState.discoveredTileCount += newDiscoveryCount;
             this.eventBus.emit('TilesDiscovered', { count: newDiscoveryCount, total: playerState.discoveredTileCount });
             if (this.isMinimapVisible) {
-                
                 this.renderMinimap();
                 return;
             }
-        } else {
-           // console.log('ExplorationSystem: No new tiles discovered, skipping discovery-based renderMinimap');
         }
 
-        
         const lastTileX = Math.floor(lastPos.x / this.TILE_SIZE);
         const lastTileY = Math.floor(lastPos.y / this.TILE_SIZE);
 
@@ -218,9 +237,7 @@ export class ExplorationSystem extends System {
                 playerX !== lastTileX || playerY !== lastTileY
             );
 
-           // console.log(`ExplorationSystem: shouldRenderMinimap=${shouldRenderMinimap}`);
             if (shouldRenderMinimap) {
-              //  console.log(`ExplorationSystem: Tile changed from x=${lastTileX}, y=${lastTileY} to x=${playerX}, y=${playerY}, rendering minimap`);
                 this.renderMinimap();
             }
         }
