@@ -333,6 +333,20 @@ export class UISystem extends System {
                 this.eventBus.emit('DropItem', { uniqueId: itemData.uniqueId });
                 this.updateCharacterUI({ entityId: 'player' });
             });
+
+            inventory.addEventListener('mouseover', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                this.showItemTooltip(itemData, event);
+            }, { capture: true });
+
+            inventory.addEventListener('mouseout', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                this.hideItemTooltip(itemData);
+            }, { capture: true });
         }
 
         this.setupInventoryTabs('inventory-tabs', 'inventory-item-wrapper');
@@ -372,33 +386,15 @@ export class UISystem extends System {
                     this.updateCharacterUI({ entityId: 'player' });
                 }
             });
-        }
 
-        const characterContent = document.getElementById('character-content');
-        if (characterContent) {
-            characterContent.addEventListener('mouseover', (event) => {
+            equippedItems.addEventListener('mouseover', (event) => {
                 const target = event.target.closest('.item-icon');
                 if (!target) return;
                 const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
                 this.showItemTooltip(itemData, event);
             }, { capture: true });
 
-            characterContent.addEventListener('mouseout', (event) => {
-                const target = event.target.closest('.item-icon');
-                if (!target) return;
-                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
-                this.hideItemTooltip(itemData);
-            }, { capture: true });
-
-            characterContent.addEventListener('dragstart', (event) => {
-                const target = event.target.closest('.item-icon');
-                if (!target) return;
-                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
-                this.hideItemTooltip(itemData);
-            }, { capture: true });
-
-            characterContent.addEventListener('contextmenu', (event) => {
-                event.preventDefault();
+            equippedItems.addEventListener('mouseout', (event) => {
                 const target = event.target.closest('.item-icon');
                 if (!target) return;
                 const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
@@ -408,29 +404,13 @@ export class UISystem extends System {
 
         const shopContent = document.getElementById('shop-content');
         if (shopContent) {
-            // Prevent default context menu in the entire shop tab
             shopContent.addEventListener('contextmenu', (event) => {
                 event.preventDefault();
             });
-
-            shopContent.addEventListener('mouseover', (event) => {
-                const target = event.target.closest('.item-icon');
-                if (!target) return;
-                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
-                this.showItemTooltip(itemData, event);
-            }, { capture: true });
-
-            shopContent.addEventListener('mouseout', (event) => {
-                const target = event.target.closest('.item-icon');
-                if (!target) return;
-                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
-                this.hideItemTooltip(itemData);
-            }, { capture: true });
         }
 
         const shopItems = document.getElementById('shop-items');
         if (shopItems) {
-            // Drag start for buying items from shop
             shopItems.addEventListener('dragstart', (event) => {
                 const target = event.target.closest('.item-icon');
                 if (!target) return;
@@ -439,11 +419,9 @@ export class UISystem extends System {
                 const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
                 const index = parseInt(parent.dataset.index, 10);
                 event.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, index, source: 'shop' }));
-                this.hideItemTooltip(itemData);
                 console.log('UISystem: Dragstart from shop-items:', { itemData, index });
             }, { capture: true });
 
-            // Drop listener for selling items
             shopItems.addEventListener('dragover', (event) => {
                 event.preventDefault();
                 shopItems.classList.add('drag-over');
@@ -475,9 +453,22 @@ export class UISystem extends System {
                     this.updateCharacterUI({ entityId: 'player' });
                 }
             });
+
+            shopItems.addEventListener('click', (event) => {
+                const target = event.target.closest('.buy-item');
+                if (!target) return;
+                const uniqueId = target.dataset.uniqueId;
+                const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
+                const npcId = overlayState.activeShopNpcId;
+                if (!npcId) {
+                    console.error('UISystem: No active shop NPC ID found for buy');
+                    return;
+                }
+                this.eventBus.emit('BuyItem', { entityId: 'player', npcId, uniqueId });
+                console.log('UISystem: BuyItem emitted for uniqueId:', uniqueId);
+            });
         }
 
-        // Drop listener for buying items (drag from shop to inventory)
         const shopInventoryWrapper = document.getElementById('shop-inventory-wrapper');
         if (shopInventoryWrapper) {
             shopInventoryWrapper.addEventListener('dragover', (e) => e.preventDefault());
@@ -494,41 +485,18 @@ export class UISystem extends System {
                 }
 
                 if (data.source === 'shop' && data.item) {
-                    const player = this.entityManager.getEntity('player');
-                    const resource = player.getComponent('Resource');
-                    const purchasePrice = data.item.purchasePrice || data.item.goldValue;
-                    if (resource.gold >= purchasePrice) {
-                        resource.gold -= purchasePrice;
-                        const inventory = player.getComponent('Inventory');
-                        const newItem = { ...data.item, uniqueId: `purchased_${Date.now()}_${Math.random().toString(36).substring(2)}` };
-                        inventory.items.push(newItem);
-                        this.eventBus.emit('LogMessage', { message: `Bought ${data.item.name} for ${purchasePrice} gold` });
-                        this.eventBus.emit('PlaySfxImmediate', { sfx: 'coin', volume: 0.25 });
-
-                        const npcEntities = this.entityManager.getEntitiesWith(['ShopComponent']);
-                        let activeNpc = null;
-                        for (const npc of npcEntities) {
-                            const npcData = npc.getComponent('NPCData');
-                            if (npcData.name === 'Shop Keeper') {
-                                activeNpc = npc;
-                                break;
-                            }
-                        }
-                        if (activeNpc) {
-                            const shopInventory = activeNpc.getComponent('ShopInventory');
-                            shopInventory.items.splice(data.index, 1);
-                        }
-
-                        this.updateCharacterUI({ entityId: 'player' });
-                        this.updateShop(player.getComponent('Stats'), inventory);
-                    } else {
-                        this.eventBus.emit('LogMessage', { message: 'Not enough gold to buy this item!' });
+                    const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
+                    const npcId = overlayState.activeShopNpcId;
+                    if (!npcId) {
+                        console.error('UISystem: No active shop NPC ID found for buy');
+                        return;
                     }
+                    this.eventBus.emit('BuyItem', { entityId: 'player', npcId, uniqueId: data.item.uniqueId });
+                    console.log('UISystem: BuyItem emitted for uniqueId:', data.item.uniqueId);
                 }
             });
         }
 
-        // Right-click to sell in shop inventory
         const shopInventoryWrapperInner = document.getElementById('shop-inventory-wrapper-inner');
         if (shopInventoryWrapperInner) {
             shopInventoryWrapperInner.addEventListener('contextmenu', (event) => {
@@ -552,6 +520,20 @@ export class UISystem extends System {
                 this.eventBus.emit('SellItem', { item: itemData, uniqueId: itemData.uniqueId });
                 this.updateCharacterUI({ entityId: 'player' });
             });
+
+            shopInventoryWrapperInner.addEventListener('mouseover', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                this.showItemTooltip(itemData, event);
+            }, { capture: true });
+
+            shopInventoryWrapperInner.addEventListener('mouseout', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                this.hideItemTooltip(itemData);
+            }, { capture: true });
         }
 
         this.setupInventoryTabs('shop-inventory-tabs', 'shop-inventory-wrapper-inner');
@@ -616,20 +598,6 @@ export class UISystem extends System {
                         tab.style.background = tab.id === target.id ? '#0f0' : '#2c672c';
                     });
                     this.updateJourney();
-                }
-            });
-        }
-
-        const gameOver = document.getElementById('game-over');
-        if (gameOver) {
-            gameOver.addEventListener('click', (event) => {
-                const target = event.target;
-                if (target.id === 'view-log') {
-                    this.toggleOverlay({ tab: 'log' });
-                } else if (target.id === 'restart-button') {
-                    location.reload(true);
-                } else if (target.id === 'menu') {
-                    // Menu hook
                 }
             });
         }
@@ -708,8 +676,8 @@ export class UISystem extends System {
         }
     }
 
-    toggleOverlay({ tab = null, fromShop = false }) {
-        console.log('UISystem: ToggleOverlay called with:', { tab, fromShop });
+    toggleOverlay({ tab = null, fromShop = false, npcId = null }) {
+        console.log('UISystem: ToggleOverlay called with:', { tab, fromShop, npcId });
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         const player = this.entityManager.getEntity('player');
 
@@ -723,15 +691,14 @@ export class UISystem extends System {
             overlayState.activeTab = tab;
         }
 
-        // Attach or remove ShopInteractionComponent
-        if (overlayState.isOpen && fromShop && tab === 'shop') {
-            // Add ShopInteractionComponent to player if opening via shop
+        if (overlayState.isOpen && fromShop && tab === 'shop' && npcId) {
+            overlayState.activeShopNpcId = npcId;
             if (!player.hasComponent('ShopInteraction')) {
                 player.addComponent(new ShopInteractionComponent());
                 console.log('UISystem: Added ShopInteractionComponent to player');
             }
         } else if (!overlayState.isOpen) {
-            // Remove ShopInteractionComponent when closing the overlay
+            overlayState.activeShopNpcId = null;
             if (player.hasComponent('ShopInteraction')) {
                 player.removeComponent('ShopInteraction');
                 console.log('UISystem: Removed ShopInteractionComponent from player');
@@ -1199,44 +1166,58 @@ export class UISystem extends System {
     }
 
     updateShop(stats, inventory) {
-        // Find the active shop NPC (temporary until we pass ShopComponent via ToggleOverlay)
-        const npcEntities = this.entityManager.getEntitiesWith(['ShopComponent']);
-        let activeNpc = null;
-        for (const npc of npcEntities) {
-            const npcData = npc.getComponent('NPCData');
-            if (npcData.name === 'Shop Keeper') {
-                activeNpc = npc;
-                break;
-            }
+        const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
+        const npcId = overlayState.activeShopNpcId;
+        if (!npcId) {
+            console.error('UISystem: No active shop NPC ID found');
+            return;
         }
 
-        const shopComponent = activeNpc ? activeNpc.getComponent('ShopComponent') : null;
-        const shopInventory = activeNpc ? activeNpc.getComponent('ShopInventory') : null;
-        const shopItems = shopInventory ? shopInventory.items : [];
-        const shopType = shopComponent ? this.utilities.camelToTitleCase(shopComponent.shopType) : 'Equipment Shop';
+        const npc = this.entityManager.getEntity(npcId);
+        if (!npc) {
+            console.error('UISystem: NPC not found for ID:', npcId);
+            return;
+        }
 
-        // Update shop type
+        const shopComponent = npc.getComponent('ShopComponent');
+        if (!shopComponent) {
+            console.error('UISystem: ShopComponent not found for NPC:', npcId);
+            return;
+        }
+
+        const shopItems = shopComponent.items || [];
+        const shopType = this.utilities.camelToTitleCase(shopComponent.shopType);
+
         const shopTypeElement = document.getElementById('shop-type');
         if (shopTypeElement) {
             shopTypeElement.textContent = shopType;
         }
 
-        // Update shop items
         const shopItemsDiv = document.getElementById('shop-items');
         if (shopItemsDiv) {
             shopItemsDiv.innerHTML = `
-                ${shopItems.length ? shopItems.map((item, index) => `
-                    <div class="shop-item" data-index="${index}">
-                        <p class="inventory-slot ${item.itemTier} ${item.type}">
-                            <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' draggable="true">
-                            <span class="item-label ${item.itemTier}">${item.name} (${item.purchasePrice || item.goldValue} gold)</span>
-                        </p>
-                    </div>
-                `).join('') : '<p>No items for sale.</p>'}
+                ${shopItems.length ? shopItems.map((item, index) => {
+                const statsHtml = item.stats ? Object.entries(item.stats)
+                    .map(([stat, value]) => `${value > 0 ? '+' : ''}${value} ${this.utilities.camelToTitleCase(stat)}`)
+                    .join(', ') : '';
+                const weaponStats = item.type === 'weapon' ? `Damage: ${item.baseDamageMin}-${item.baseDamageMax}${item.attackType === 'melee' ? `, Block: ${item.baseBlock || 0}` : item.attackType === 'ranged' ? `, Range: ${item.baseRange || 0}` : ''}` : item.type === 'armor' ? `Armor: ${item.armor || 0}` : '';
+                const affixes = item.affixes ? item.affixes.map(affix => affix.name.charAt(0).toUpperCase() + affix.name.slice(1)).join(', ') : 'None';
+                return `
+                        <div class="shop-item" data-index="${index}">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-type">Type: ${item.type}</div>
+                            <div class="item-tier">Tier: ${item.itemTier}</div>
+                            <div class="item-stats">Stats: ${statsHtml}${statsHtml && weaponStats ? ', ' : ''}${weaponStats}</div>
+                            <div class="item-affixes">Affixes: ${affixes}</div>
+                            <div class="item-price">${item.purchasePrice} gold</div>
+                            <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' draggable="true" onerror="this.src='img/icons/items/default.svg';">
+                            <button class="buy-item" data-unique-id="${item.uniqueId}">Buy</button>
+                        </div>
+                    `;
+            }).join('') : '<p>No items for sale.</p>'}
             `;
         }
 
-        // Update player inventory in shop
         this.renderInventory('shop-inventory-wrapper-inner', inventory.items, this.activeInventoryTab);
     }
 

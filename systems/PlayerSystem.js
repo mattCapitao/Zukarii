@@ -20,7 +20,7 @@ export class PlayerSystem extends System {
         this.eventBus.on('TilesDiscovered', (data) => this.handleTilesDiscovered(data));
         this.eventBus.on('AllocateStat', (data) => this.handleStatAllocation(data));
         this.eventBus.on('ModifyBaseStat', (data) => this.modifyBaseStat(data));
-        
+
     }
 
     exitCombat(entityId) {
@@ -44,19 +44,20 @@ export class PlayerSystem extends System {
         stats._internal.base.luck = 0;
         stats._internal.base.maxHp = 30
         stats._internal.base.maxMana = 10
+        stats._internal.base.movementSpeed = 155;
+
         stats.intellect = stats._internal.base.intellect;
         stats.prowess = stats._internal.base.prowess;
         stats.agility = stats._internal.base.agility;
         stats.luck = stats._internal.base.luck;
         stats.maxHp = stats._internal.base.maxHp;
         stats.maxMana = stats._internal.base.maxMana;
+        stats.movementSpeed = stats._internal.base.movementSpeed;
         stats.unallocated = 3;
 
         const health = player.getComponent('Health');
         health.hp = stats.maxHp;
         health.maxHp = stats.maxHp;
-
-       
 
         const mana = player.getComponent('Mana');
         mana.mana = stats.maxMana;
@@ -82,7 +83,7 @@ export class PlayerSystem extends System {
         this.getRandomStartItems().then(startItems => {
             inventory.items = startItems.map(item => ({ ...item, uniqueId: this.utilities.generateUniqueId() }));
         });
-        
+
         this.calculateStats(player);
     }
 
@@ -113,8 +114,6 @@ export class PlayerSystem extends System {
         })).then(items => items.filter(item => item !== null));
     }
 
-
-    // Add this method to the PlayerSystem class
     handleStatAllocation({ stat }) {
         const player = this.entityManager.getEntity('player');
         const stats = player.getComponent('Stats');
@@ -166,7 +165,7 @@ export class PlayerSystem extends System {
         stats._internal.gear = {
             intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0,
             armor: 0, defense: 0, block: 0, dodge: 0, range: 0, resistMagic: 0, baseRange: 0,
-            damageBonus: 0, meleeBonus: 0, rangedBonus: 0, luck: 0, maxLuck: 0
+            damageBonus: 0, meleeBonus: 0, rangedBonus: 0, luck: 0, maxLuck: 0, movementSpeed: 0
         };
 
         Object.values(inventory.equipped).forEach(item => {
@@ -189,13 +188,15 @@ export class PlayerSystem extends System {
         const stats = player.getComponent('Stats');
         const health = player.getComponent('Health');
         const mana = player.getComponent('Mana');
+        const movementSpeed = player.getComponent('MovementSpeed');
 
-        stats.intellect = stats._internal.base.intellect + (stats._internal.incremented.intellect || 0) 
-           + (stats._internal.gear.intellect || 0) + (stats._internal.temp.intellect || 0) ;
+        stats.intellect = stats._internal.base.intellect + (stats._internal.incremented.intellect || 0)
+            + (stats._internal.gear.intellect || 0) + (stats._internal.temp.intellect || 0);
         stats.prowess = stats._internal.base.prowess + (stats._internal.incremented.prowess || 0)
-           + (stats._internal.gear.prowess || 0) + (stats._internal.temp.prowess || 0);
+            + (stats._internal.gear.prowess || 0) + (stats._internal.temp.prowess || 0);
         stats.agility = stats._internal.base.agility + (stats._internal.incremented.agility || 0)
             + (stats._internal.gear.agility || 0) + (stats._internal.temp.agility || 0);
+        stats.movementSpeed = stats._internal.base.movementSpeed + (stats._internal.gear.movementSpeed || 0) + (stats._internal.temp.movementSpeed || 0);
 
         const combinedProwess = stats._internal.base.prowess + (stats._internal.incremented.prowess || 0);
         const combinedIntellect = stats._internal.base.intellect + (stats._internal.incremented.intellect || 0);
@@ -215,7 +216,7 @@ export class PlayerSystem extends System {
             health.hp = Math.round(health.hp * (health.maxHp / oldMaxHp));
             health.hp = Math.max(1, Math.min(health.hp, health.maxHp));
         }
-         
+
         const oldMaxMana = mana.maxMana || baseMaxMana;
         stats.maxMana = Math.round(baseMaxMana * (1 + combinedIntellect * 0.005)) + (stats._internal.gear.maxMana || 0) + (stats._internal.temp.maxMana || 0);
         mana.maxMana = stats.maxMana;
@@ -238,6 +239,9 @@ export class PlayerSystem extends System {
         stats.luck = stats._internal.base.luck + (stats._internal.gear.luck || 0) + (stats._internal.temp.luck || 0);
         stats.maxLuck = (stats._internal.gear.maxLuck || 0) + (stats._internal.temp.maxLuck || 0);
 
+        // Update MovementSpeedComponent
+        movementSpeed.movementSpeed = stats.movementSpeed;
+
         this.eventBus.emit('StatsUpdated', { entityId: player.id });
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
     }
@@ -256,7 +260,7 @@ export class PlayerSystem extends System {
         const playerHealth = player.getComponent('Health');
         const playerMana = player.getComponent('Mana');
         const stats = player.getComponent('Stats');
-        let statAllocationMessage = '';;
+        let statAllocationMessage = '';
         let levelUp = false;
         while (playerState.xp >= playerState.nextLevelXp) {
             const newXp = playerState.xp - playerState.nextLevelXp;
@@ -266,7 +270,7 @@ export class PlayerSystem extends System {
             if (playerState.level % 2 === 0) {
                 stats.unallocated++;
                 stats.isLocked = false; // Unlock allocation
-                statAllocationMessage =  ', Gained 1 stat point to allocate!';
+                statAllocationMessage = ', Gained 1 stat point to allocate!';
             }
 
             playerState.xp = newXp;
@@ -277,12 +281,12 @@ export class PlayerSystem extends System {
             this.sfxQueue.push({ sfx: 'ding', volume: .5 });
             this.eventBus.emit('LogMessage', { message: `Level up! Now level ${playerState.level}, ${statAllocationMessage}` });
         }
-        if (levelUp) { 
+        if (levelUp) {
             this.calculateStats(player);
             this.healthUpdates.push({ entityId: 'player', amount: stats.maxHp - playerHealth.hp, attackerId: 'player' });
             this.manaUpdates.push({ entityId: 'player', amount: stats.maxMana - playerMana.mana, attackerId: 'player' });
             this.eventBus.emit('StatsUpdated', { entityId: player.id });
-           
+
         }
     }
 
@@ -290,18 +294,18 @@ export class PlayerSystem extends System {
         let value = 0;
         if (x <= 4) {
             value = 2.16 - (x * 0.16275);
-        }else if (x <= 9) {
+        } else if (x <= 9) {
             value = 1.509 - (x * .0333);
         } else if (x <= 19) {
             value = 1.2093 - (x * .0042);
         } else if (x <= 29) {
             value = 1.1295 + (x * .005);
-         } else if (x <= 40) {
+        } else if (x <= 40) {
             value = 1.2745 + (x * .0046105);
-        } 
+        }
 
-        if ( x > 19 && value > 1.5) { value = 1.5; }
-  
+        if (x > 19 && value > 1.5) { value = 1.5; }
+
         return value;
     }
 
@@ -343,6 +347,4 @@ export class PlayerSystem extends System {
             this.eventBus.emit('LogMessage', { message: `Exploration milestone reached! Gained ${xpAward} XP for discovering ${currentMilestones * xpThreshold} tiles.` });
         }
     }
-
-  
 }

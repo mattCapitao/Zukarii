@@ -143,5 +143,39 @@
     "uniqueId": null,
     "icon": "golden-skin.png",
     "affixes": []
+  },
+  {
+    "name": "Golden Buniyar Band",
+    "type": "ring",
+    "slot": "ring",
+    "luck": 78,
+    "tierIndex": 6,
+    "itemTier": "relic",
+    "stats": {
+      "maxHp": 100,
+      "agility": 10,
+      "block": 10,
+      "defense": 10,
+      "armor": 10,
+      "movementSpeed": 45
+    },
+    "description": "All marvel at the Grace and Speed of the Grand Buniyar.",
+    "uniqueId": null,
+    "icon": "golden-bunny.svg",
+    "affixes": [
+      {
+        "name": "resilience",
+        "type": "combat",
+        "trigger": "hitByAttack",
+        "effect": "instantHeal",
+        "params": {
+          "minHealPercentage": 0.05,
+          "maxHealPercentage": 0.10,
+          "chanceToHeal": 0.05
+        },
+        "description": "Chance to recover a percentage of missing health on being hit."
+
+      }
+    ]
   }
 ]

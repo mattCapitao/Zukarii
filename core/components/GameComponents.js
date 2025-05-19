@@ -190,10 +190,14 @@ export class LevelTransitionComponent {
 export class ShopComponent {
     constructor({
         dialogueText = "Browse my wares!",
-        shopType = "EquipmentShop"
+        shopType = "EquipmentShop",
+        items = [],
+        sellMultiplier = 3.0
     } = {}) {
         this.type = 'ShopComponent';
-        this.dialogueText = dialogueText; // Text for "View Wares" button
-        this.shopType = shopType; // Shop type (e.g., "EquipmentShop", for future specialization)
+        this.dialogueText = dialogueText;
+        this.shopType = shopType;
+        this.items = items;
+        this.sellMultiplier = sellMultiplier;
     }
-} 
+}

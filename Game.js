@@ -45,6 +45,7 @@ import { MouseInputSystem } from './systems/MouseInputSystem.js';
 import { AnimationSystem } from './systems/AnimationSystem.js'; 
 import { NPCSpawnSystem } from './systems/NPCSpawnSystem.js';
 import { DialogueUISystem } from './systems/DialogueUISystem.js';
+import { NPCControllerSystem } from './systems/NPCControllerSystem.js';
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
@@ -288,7 +289,7 @@ export class Game {
         this.systems.player = new PlayerSystem(this.entityManager, this.state.eventBus, this.utilities);
         //this.systems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
         this.systems.monsterSpawn = new MonsterSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data);
-        this.systems.npcSpawn = new NPCSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data);
+        this.systems.npcSpawn = new NPCSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data, this.utilities);
         this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state);
         this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.path = new PathSystem(this.entityManager, this.state.eventBus, this.utilities); // Add PathSystem before JourneySystem
@@ -310,6 +311,7 @@ export class Game {
         this.systems.mouseInput = new MouseInputSystem(this.entityManager, this.state.eventBus, this.state);
         this.systems.animation = new AnimationSystem(this.entityManager, this.state.eventBus);
         
+        
         this.systems.dialogueUI = new DialogueUISystem(this.entityManager, this.state.eventBus);
         await Promise.all(Object.values(this.systems).map(system => system.init()));
     }
@@ -325,6 +327,7 @@ export class Game {
         activeGameSystems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.entityRemoval = new EntityRemovalSystem(this.entityManager);
+        activeGameSystems.npcController = new NPCControllerSystem(this.entityManager, this.state.eventBus, this.utilities)
         
         Object.values(activeGameSystems).forEach(system => system.init());
         this.systems = { ...this.systems, ...activeGameSystems };
@@ -398,6 +401,7 @@ export class Game {
                 'path', // Add PathSystem to the update loop
                 'journey',
                 'interaction',
+                'npcController',
                 'ui',
                 'dialogueUI',
                 'audio',

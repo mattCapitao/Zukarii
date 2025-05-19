@@ -23,6 +23,9 @@ export class InventorySystem extends System {
         this.eventBus.on('SellItem', (data) => {
             this.sellItem(data);
         });
+        this.eventBus.on('BuyItem', (data) => {
+            this.buyItem(data);
+        });
     }
 
     addItem({ entityId, item }) {
@@ -79,6 +82,10 @@ export class InventorySystem extends System {
         inventory.equipped[slot] = { ...item, equippedSlot: slot };
         this.eventBus.emit('LogMessage', { message: `Equipped ${item.name} to ${slot}` });
 
+        if (item.stats?.movementSpeed) {
+            this.eventBus.emit('LogMessage', { message: `${item.name} grants +${item.stats.movementSpeed} movement speed!` });
+        }
+
         if (item.affixes && Array.isArray(item.affixes)) {
             const affixComponent = entity.getComponent('Affix') || new AffixComponent([]);
             item.affixes.forEach(affix => {
@@ -96,7 +103,7 @@ export class InventorySystem extends System {
             console.log(`InventorySystem: Applied affixes from ${item.name} to ${entityId}:`, affixComponent.affixes);
         }
 
-        this.eventBus.emit('GearChanged', { entityId });
+        this.eventBus.emit('GearChanged', { entityId, action: 'equip', item, slot });
     }
 
     unequipItem({ entityId, slot, toInventory = true, silent = false }) {
@@ -126,7 +133,7 @@ export class InventorySystem extends System {
             inventory.items.push({ ...item, equippedSlot: undefined });
             if (!silent) this.eventBus.emit('LogMessage', { message: `Unequipped ${item.name} to inventory` });
         }
-        this.eventBus.emit('GearChanged', { entityId });
+        this.eventBus.emit('GearChanged', { entityId, action: 'unequip', slot });
     }
 
     discardItem({ uniqueId }) {
@@ -217,10 +224,55 @@ export class InventorySystem extends System {
 
         this.eventBus.emit('LogMessage', { message: `Sold ${itemToSell.name} for ${goldValue} gold` });
         this.eventBus.emit('PlaySfxImmediate', { sfx: 'coin', volume: 0.25 });
-        this.eventBus.emit('StatsUpdated', { entityId: 'player' }); 
+        this.eventBus.emit('StatsUpdated', { entityId: 'player' });
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
 
         console.log(`InventorySystem: Sold item ${itemToSell.name} (uniqueId: ${uniqueId}) for ${goldValue} gold`);
+    }
+
+    buyItem({ entityId, npcId, uniqueId }) {
+        const player = this.entityManager.getEntity(entityId);
+        if (!player) {
+            console.error('InventorySystem: Player entity not found');
+            return;
+        }
+
+        const npc = this.entityManager.getEntity(npcId);
+        if (!npc) {
+            console.error('InventorySystem: NPC entity not found:', npcId);
+            return;
+        }
+
+        const inventory = player.getComponent('Inventory');
+        const resource = player.getComponent('Resource');
+        const shopComponent = npc.getComponent('ShopComponent');
+        if (!inventory || !resource || !shopComponent) {
+            console.error('InventorySystem: Missing components for buyItem');
+            return;
+        }
+
+        const itemIndex = shopComponent.items.findIndex(item => item.uniqueId === uniqueId);
+        if (itemIndex === -1) {
+            console.error('InventorySystem: Item with uniqueId not found in shop:', uniqueId);
+            return;
+        }
+
+        const item = shopComponent.items[itemIndex];
+        if (resource.gold < item.purchasePrice) {
+            this.eventBus.emit('LogMessage', { message: 'Not enough gold to buy this item!' });
+            return;
+        }
+
+        resource.gold -= item.purchasePrice;
+        inventory.items.push({ ...item, uniqueId: this.utilities.generateUniqueId() });
+        shopComponent.items.splice(itemIndex, 1);
+
+        this.eventBus.emit('LogMessage', { message: `Bought ${item.name} for ${item.purchasePrice} gold` });
+        this.eventBus.emit('PlaySfxImmediate', { sfx: 'coin', volume: 0.25 });
+        this.eventBus.emit('StatsUpdated', { entityId: 'player' });
+        this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
+
+        console.log(`InventorySystem: Bought item ${item.name} (uniqueId: ${uniqueId}) for ${item.purchasePrice} gold`);
     }
 
     isSlotCompatible(item, slot) {

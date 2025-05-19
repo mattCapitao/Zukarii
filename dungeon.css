@@ -1475,3 +1475,61 @@ padding: 0.625rem; /* ~10px */
     scrollbar-gutter: stable;
     background: rgba(20, 30, 20, 0.7);
 }
+
+/* Shop Item Card */
+.shop-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0.625rem;
+    margin-bottom: 0.625rem;
+    background: rgba(20, 30, 20, 0.7);
+    border: 0.125rem solid #0f0;
+    border-radius: 0.625rem;
+    color: #0f0;
+    font-size: 0.875rem;
+}
+
+.item-name {
+    font-size: 1.125rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 0.3125rem;
+}
+
+.item-type, .item-tier, .item-stats, .item-affixes, .item-price {
+    text-align: center;
+    margin-bottom: 0.3125rem;
+}
+
+.item-stats, .item-affixes {
+    font-size: 0.75rem;
+}
+
+.item-price {
+    font-weight: bold;
+}
+
+.shop-item .item-icon {
+    width: 4rem;
+    height: 4rem;
+    border: 0.125rem solid #0f0;
+    border-radius: 0.3125rem;
+    margin: 0.3125rem 0;
+}
+
+.buy-item {
+    padding: 0.3125rem 0.625rem;
+    margin-top: 0.3125rem;
+    background: #2c672c;
+    color: #000;
+    border: 0.125rem solid #0f0;
+    border-radius: 0.3125rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+    .buy-item:hover {
+        background: #0f0;
+    }
