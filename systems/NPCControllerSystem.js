@@ -49,6 +49,42 @@ export class NPCControllerSystem extends System {
                 return;
             }
 
+            // Load unique items
+            let uniqueItems = [];
+            try {
+                await new Promise((resolve) => {
+                    this.eventBus.emit('GetUniqueItems', {
+                        callback: (items) => {
+                            uniqueItems = items;
+                            console.log('NPCControllerSystem: Loaded unique items:', uniqueItems.length);
+                            resolve();
+                        }
+                    });
+                });
+            } catch (err) {
+                console.error('NPCControllerSystem: Error loading unique items:', err);
+                uniqueItems = [];
+            }
+
+            // Find "Golden Buniyar Band"
+            const goldenBuniyarBand = uniqueItems.find(item => item.name === "Golden Buniyar Band");
+            if (!goldenBuniyarBand) {
+                console.warn('NPCControllerSystem: "Golden Buniyar Band" not found in unique items');
+            } else {
+                console.log('NPCControllerSystem: Found "Golden Buniyar Band":', goldenBuniyarBand);
+            }
+
+            // Check player name for "bunny"
+            const player = this.entityManager.getEntity('player');
+            let hasBunnyInName = false;
+            if (player && player.hasComponent('PlayerState')) {
+                const playerName = player.getComponent('PlayerState').name || '';
+                hasBunnyInName = playerName.toLowerCase().includes('bunny');
+                console.log(`NPCControllerSystem: Player name: "${playerName}", has "bunny": ${hasBunnyInName}`);
+            } else {
+                console.warn('NPCControllerSystem: Player or PlayerState not found, cannot check name');
+            }
+
             for (const npc of npcs) {
                 const shopComponent = npc.getComponent('ShopComponent');
                 if (shopComponent.items && shopComponent.items.length > 0) {
@@ -79,16 +115,25 @@ export class NPCControllerSystem extends System {
                 });
 
                 console.log('NPCControllerSystem: Waiting for Promise.all for NPC:', npc.id);
-                const shopItems = await Promise.all(shopItemPromises);
+                let shopItems = await Promise.all(shopItemPromises);
                 console.log('NPCControllerSystem: Promise.all resolved, shopItems for NPC:', npc.id, shopItems);
 
                 const filteredItems = shopItems.filter(item => item !== null && item !== undefined);
                 console.log('NPCControllerSystem: Filtered shop items for NPC:', npc.id, filteredItems);
 
+                // Add "Golden Buniyar Band" if found and player name contains "bunny"
+                if (goldenBuniyarBand && hasBunnyInName) {
+                    const uniqueItemCopy = { ...goldenBuniyarBand, uniqueId: this.utilities.generateUniqueId() };
+                    filteredItems.push(uniqueItemCopy);
+                    console.log('NPCControllerSystem: Added "Golden Buniyar Band" to shop items for NPC:', npc.id);
+                } else if (goldenBuniyarBand && !hasBunnyInName) {
+                    console.log('NPCControllerSystem: Skipped adding "Golden Buniyar Band" to shop items for NPC:', npc.id, 'Reason: Player name does not contain "bunny"');
+                }
+
                 shopComponent.items = filteredItems.map(item => ({
                     ...item,
-                    uniqueId: this.utilities.generateUniqueId(),
-                    purchasePrice: Math.round(item.goldValue * shopComponent.sellMultiplier)
+                    uniqueId: item.uniqueId || this.utilities.generateUniqueId(),
+                    purchasePrice: Math.round((item.goldValue || 0) * shopComponent.sellMultiplier)
                 }));
                 console.log(`NPCControllerSystem: Generated ${shopComponent.items.length} shop items for NPC ${npc.id}`);
             }

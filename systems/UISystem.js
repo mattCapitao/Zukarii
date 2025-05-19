@@ -1205,13 +1205,18 @@ export class UISystem extends System {
                 return `
                         <div class="shop-item" data-index="${index}">
                             <div class="item-name">${item.name}</div>
-                            <div class="item-type">Type: ${item.type}</div>
-                            <div class="item-tier">Tier: ${item.itemTier}</div>
-                            <div class="item-stats">Stats: ${statsHtml}${statsHtml && weaponStats ? ', ' : ''}${weaponStats}</div>
-                            <div class="item-affixes">Affixes: ${affixes}</div>
-                            <div class="item-price">${item.purchasePrice} gold</div>
-                            <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' draggable="true" onerror="this.src='img/icons/items/default.svg';">
-                            <button class="buy-item" data-unique-id="${item.uniqueId}">Buy</button>
+                            <div class="shop-item-details">
+                                <div class="shop-item-left">
+                                    <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' draggable="true" onerror="this.src='img/icons/items/default.svg';">
+                                    <div class="item-price">${item.purchasePrice} gold</div>
+                                    <button class="buy-item" data-unique-id="${item.uniqueId}">Buy</button>
+                                </div>
+                                <div class="shop-item-right">
+                                    <div class="tier-type">${item.itemTier} ${item.type}</div>
+                                    <div class="item-stats">Stats: ${statsHtml}${statsHtml && weaponStats ? ', ' : ''}${weaponStats}</div>
+                                    <div class="item-affixes">Affixes: ${affixes}</div>
+                                </div>
+                            </div>
                         </div>
                     `;
             }).join('') : '<p>No items for sale.</p>'}

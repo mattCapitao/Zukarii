@@ -13,7 +13,7 @@ body {
     font-size: 1rem;
     overflow: hidden;
     font-family: 'Verdana', Roboto, sans-serif;
-    user-select:none;
+    user-select: none;
 }
 
 div {
@@ -48,7 +48,6 @@ hr {
     margin: 0.625rem 0;
 }
 /* CUSTOM BASELINE - END */
-
 
 /* SPLASH - START */
 #splash {
@@ -141,7 +140,7 @@ hr {
     color: #121c12;
     text-shadow: 0 0 5px #00ff00aa;
     font-size: 1.75rem;
-    font-weight:bold;
+    font-weight: bold;
     font-family: 'Zukarii', 'Verdana', Roboto, sans-serif;
     text-align: center;
     opacity: 0.95;
@@ -165,31 +164,28 @@ hr {
 }
 /* SPlASH - END */
 
-
-
 /*  GENERAL UI - START  */
 #game {
-display: flex;
-flex-direction: row;
-background-color: #000;
-margin: 0;
-position:relative;
-width: calc(100vw - .15rem) ;
-height: calc(100vh - .15rem);
-z-index:1;
-
+    display: flex;
+    flex-direction: row;
+    background-color: #000;
+    margin: 0;
+    position: relative;
+    width: calc(100vw - .15rem);
+    height: calc(100vh - .15rem);
+    z-index: 1;
 }
 
 #ui-layer {
-position: absolute;
-top: 0;
-left: 0;
-width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
-height: calc(100vh - 0.15rem); /* Account for border (1px each side) */
-background: transparent;
-pointer-events: none; /* Non-clickable, children can override */
-z-index: 1100; /* Above game and splash */
-overflow: hidden; /* Prevent child overflow */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
+    height: calc(100vh - 0.15rem); /* Account for border (1px each side) */
+    background: transparent;
+    pointer-events: none; /* Non-clickable, children can override */
+    z-index: 1100; /* Above game and splash */
+    overflow: hidden; /* Prevent child overflow */
 }
 
 #hud-layer {
@@ -205,32 +201,28 @@ overflow: hidden; /* Prevent child overflow */
     overflow: hidden; /* Prevent child overflow */
 }
 
-
-
 #player-info {
-position: absolute;
-display: flex;
-justify-content: space-evenly;
-top: 0;
-left: 0;
-width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
-margin: 0.0625rem;
-    
-
-height: 3rem; /* ~48px */
-background-color: #000000cc;
-pointer-events: none; /* Non-clickable, children can override */
-z-index: 500; /* Above game but below splash */
-overflow: hidden; /* Prevent child overflow */
+    position: absolute;
+    display: flex;
+    justify-content: space-evenly;
+    top: 0;
+    left: 0;
+    width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
+    margin: 0.0625rem;
+    height: 3rem; /* ~48px */
+    background-color: #000000cc;
+    pointer-events: none; /* Non-clickable, children can override */
+    z-index: 500; /* Above game but below splash */
+    overflow: hidden; /* Prevent child overflow */
 }
 
-#player-info > * {
-font-weight: bold;
-text-align: center;
-color: #0f0;
-z-index: 1000;
-padding: 0.625rem; /* ~10px */
-}
+    #player-info > * {
+        font-weight: bold;
+        text-align: center;
+        color: #0f0;
+        z-index: 1000;
+        padding: 0.625rem; /* ~10px */
+    }
 
 #minimap-canvas {
     position: absolute;
@@ -251,54 +243,54 @@ padding: 0.625rem; /* ~10px */
     }
 
 #player-status {
-position: absolute;
-display: flex;
-justify-content: space-evenly;
-bottom: 0;
-left: 0;
-width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
-margin: 0.0625rem;
-height: 3rem; /* ~48px */
-background-color: #000000cc;
-pointer-events: none; /* Non-clickable, children can override */
-z-index: 500; /* Above game but below splash */
-overflow: hidden; /* Prevent child overflow */
+    position: absolute;
+    display: flex;
+    justify-content: space-evenly;
+    bottom: 0;
+    left: 0;
+    width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
+    margin: 0.0625rem;
+    height: 3rem; /* ~48px */
+    background-color: #000000cc;
+    pointer-events: none; /* Non-clickable, children can override */
+    z-index: 500; /* Above game but below splash */
+    overflow: hidden; /* Prevent child overflow */
 }
 
-#player-status > * {
-font-weight: bold;
-text-align: center;
-color: #0f0;
-z-index: 1000;
-padding: 0.5rem;
-}
+    #player-status > * {
+        font-weight: bold;
+        text-align: center;
+        color: #0f0;
+        z-index: 1000;
+        padding: 0.5rem;
+    }
 /* Container for the progress bar */
 .progress-bar {
-width: 100%; /* Full width of the parent */
-max-width: 15rem; /* Adjust this to fit your UI */
-height: .5rem; /* Bar height */
-background-color: #333; /* Gray background for empty portion */
-border-radius: .325rem; /* Rounded edges */
-overflow: hidden; /* Keeps fill inside */
+    width: 100%; /* Full width of the parent */
+    max-width: 15rem; /* Adjust this to fit your UI */
+    height: .5rem; /* Bar height */
+    background-color: #333; /* Gray background for empty portion */
+    border-radius: .325rem; /* Rounded edges */
+    overflow: hidden; /* Keeps fill inside */
 }
 
 .bar {
-width: 15rem;
+    width: 15rem;
 }
 
 /* The filled portion of the bar */
 .progress-fill {
-height: 100%;
-transition: width 0.2s ease; /* Smooth fill animation */
+    height: 100%;
+    transition: width 0.2s ease; /* Smooth fill animation */
 }
 
 /* Specific colors for each stat */
 .hp-fill {
-background-color: #e63946; /* Red for HP */
+    background-color: #e63946; /* Red for HP */
 }
 
 .mana-fill {
-background-color: #1d4ed8; /* Blue for Mana */
+    background-color: #1d4ed8; /* Blue for Mana */
 }
 
 .xp-fill {
@@ -307,47 +299,46 @@ background-color: #1d4ed8; /* Blue for Mana */
 }
 
 #tabs {
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-width: 70vw;
-height: 75vh;
-background: rgba(20, 30, 20, 0.7);
-border: 0.125rem solid #060; /* ~1px */
-border-radius: .625rem;
-color: #0f0;
-display: none; /* Hidden by default */
-font-family: 'Verdana', Roboto, sans-serif;
-font-size: 0.875rem; /* ~14px */
-padding: .75rem; /* ~16px */
-pointer-events: auto; /* Clickable children */
-z-index: 2000; /* Increased to appear above #splash */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70vw;
+    height: 75vh;
+    background: rgba(20, 30, 20, 0.7);
+    border: 0.125rem solid #060; /* ~1px */
+    border-radius: .625rem;
+    color: #0f0;
+    display: none; /* Hidden by default */
+    font-family: 'Verdana', Roboto, sans-serif;
+    font-size: 0.875rem; /* ~14px */
+    padding: .75rem; /* ~16px */
+    pointer-events: auto; /* Clickable children */
+    z-index: 2000; /* Increased to appear above #splash */
 }
 
-#tabs.hidden {
-display: none;
-}
+    #tabs.hidden {
+        display: none;
+    }
 
 .tabs-button {
-flex: 0 0 auto;
+    flex: 0 0 auto;
 }
 
 #close-tabs {
-background: #000;
-color: #0f0;
-border: 0.125rem solid #0f0; /* ~1px */
-padding: 0.3125rem 0.625rem; /* ~5px 10px */
-cursor: pointer;
-font-size: 1rem; /* ~16px */
-width:1rem;
-
+    background: #000;
+    color: #0f0;
+    border: 0.125rem solid #0f0; /* ~1px */
+    padding: 0.3125rem 0.625rem; /* ~5px 10px */
+    cursor: pointer;
+    font-size: 1rem; /* ~16px */
+    width: 1rem;
 }
 
-#close-tabs:hover {
-background: #0f0;
-color: #000;
-}
+    #close-tabs:hover {
+        background: #0f0;
+        color: #000;
+    }
 
 #game-over {
     display: none;
@@ -374,6 +365,7 @@ color: #000;
 #game-over-message {
     margin: .625rem; /* ~5px */
 }
+
 #game-over button {
     margin: .625rem; /* ~5px */
     padding: 0.625rem 1.25rem; /* ~10px 20px */
@@ -389,26 +381,26 @@ color: #000;
     }
 
 #game-over.death {
-color: red;
-background: rgba(0, 0, 0, 0.7);
-animation: fadeIn 0.5s ease-in;
+    color: red;
+    background: rgba(0, 0, 0, 0.7);
+    animation: fadeIn 0.5s ease-in;
 }
 
 #game-over.victory {
-color: #0f0;
-background: rgba(0, 0, 0, 0.5);
-text-shadow: 0 0 0.625rem #0f0; /* ~10px */
-animation: victoryPulse 1.5s infinite ease-in-out;
+    color: #0f0;
+    background: rgba(0, 0, 0, 0.5);
+    text-shadow: 0 0 0.625rem #0f0; /* ~10px */
+    animation: victoryPulse 1.5s infinite ease-in-out;
 }
 
 @keyframes fadeIn {
-from {
-opacity: 0;
-}
+    from {
+        opacity: 0;
+    }
 
-to {
-opacity: 1;
-}
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes victoryPulse {
@@ -429,36 +421,35 @@ opacity: 1;
 }
 
 #stats-overlay {
-position: absolute;
-bottom: 0.625rem; /* ~10px */
-left: 50%;
-transform: translateX(-50%);
-width: 90%;
-background: rgba(0, 0, 0, 0.7);
-padding: 0.3125rem; /* ~5px */
-color: #0f0;
-font-size: 0.875rem; /* ~14px */
-display: flex;
-justify-content: space-around;
-z-index: 500; /* Above map but below tooltips */
+    position: absolute;
+    bottom: 0.625rem; /* ~10px */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0.3125rem; /* ~5px */
+    color: #0f0;
+    font-size: 0.875rem; /* ~14px */
+    display: flex;
+    justify-content: space-around;
+    z-index: 500; /* Above map but below tooltips */
 }
 
-#stats-overlay div div {
-transition: width 0.3s; /* Smooth bar animations */
-}
+    #stats-overlay div div {
+        transition: width 0.3s; /* Smooth bar animations */
+    }
 
 /*  GENERAL UI - END  */
-
 
 /*   TABS DIV - START  */
 
 #tabs div.col-50-wrapper {
-display: flex;
-justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
 }
 
 #tabs col-50 {
-width: 50%;
+    width: 50%;
 }
 
 #tab-menu {
@@ -467,15 +458,15 @@ width: 50%;
     gap: 1rem; /* ~10px */
 }
 
+    #tab-menu button.tabs-button {
+        flex: 15;
+        cursor: pointer;
+        width: 20%;
+    }
 
-#tab-menu button.tabs-button {
-    flex: 15;
-    cursor: pointer;
-    width:20%;
-}
 #close-tabs {
-flex: 1;
-cursor: pointer;
+    flex: 1;
+    cursor: pointer;
 }
 
 #tab-wrapper {
@@ -490,52 +481,46 @@ cursor: pointer;
 }
 
 #log-content {
-height: 30rem; /* ~400px */
-width: 100%;
-overflow-y: hidden;
+    height: 30rem; /* ~400px */
+    width: 100%;
+    overflow-y: hidden;
 }
 
 #log {
-display: flex;
-flex-direction:column;
-width: 100%;
-height: 27rem; /* Keep max height but let content dictate rows */
-padding: 0.625rem; /* Outer padding */
-border: 0.125rem solid #0f0;
-border-radius: .625rem;
-overflow-y: auto;
-scrollbar-color: #0f0 #111;
-scrollbar-width: thin;
-scrollbar-gutter: stable;
-background: rgba(20, 30, 20, 0.9);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 27rem; /* Keep max height but let content dictate rows */
+    padding: 0.625rem; /* Outer padding */
+    border: 0.125rem solid #0f0;
+    border-radius: .625rem;
+    overflow-y: auto;
+    scrollbar-color: #0f0 #111;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+    background: rgba(20, 30, 20, 0.9);
 }
 
-#log p {
-display: flex;
-margin-bottom: 0.3125rem; /* ~5px */
-line-height: 1.2;
-}
-
-
-
-
-
+    #log p {
+        display: flex;
+        margin-bottom: 0.3125rem; /* ~5px */
+        line-height: 1.2;
+    }
 
 #character-content {
-height: 30rem; /* ~400px */
-width: 100%;
-display: flex; /* overwritten in line with none when hide is triggered*/
-justify-content: space-between;
-    
-}
-#character {
-display: flex;
-flex-direction: column;
-height: 30rem; /* ~400px */
-width: 29%;
-margin-top: 0.625rem; /* ~10px */
+    height: 30rem; /* ~400px */
+    width: 100%;
+    display: flex; /* overwritten in line with none when hide is triggered*/
+    justify-content: space-between;
 }
 
+#character {
+    display: flex;
+    flex-direction: column;
+    height: 30rem; /* ~400px */
+    width: 29%;
+    margin-top: 0.625rem; /* ~10px */
+}
 
 #tabs h2 {
     font-size: 1.375rem; /* ~22px */
@@ -559,7 +544,6 @@ margin-top: 0.625rem; /* ~10px */
 }
 
 #tabs button {
-    
     margin: 0.3125rem 0; /* ~5px vertical margin */
     padding: 0.625rem; /* ~10px */
     background: #2c672c;
@@ -572,48 +556,49 @@ margin-top: 0.625rem; /* ~10px */
 }
 
 #character-stat-wrapper {
-display: flex;
-flex-wrap: wrap; /* Allows items to wrap into multiple columns */
-width: 100%;
-gap: 0; /* Optional: controls spacing between items */
-justify-content: center;
-align-items: center;
-flex-wrap: wrap;
-font-size: 0.75rem; /* ~12px */
-padding: 0.625rem; /* ~10px */
-background: rgba(20, 30, 20, 0.7);
-border: 0.125rem solid #0f0; /* ~1px */
-border-radius: .625rem;
+    display: flex;
+    flex-wrap: wrap; /* Allows items to wrap into multiple columns */
+    width: 100%;
+    gap: 0; /* Optional: controls spacing between items */
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 0.75rem; /* ~12px */
+    padding: 0.625rem; /* ~10px */
+    background: rgba(20, 30, 20, 0.7);
+    border: 0.125rem solid #0f0; /* ~1px */
+    border-radius: .625rem;
 }
 
-#character-stat-wrapper > div {
-padding: .125rem 0 .125rem 0; /* ~2px */
-width: 50%; /* 50% width minus border width (3px * 2) */
-box-sizing: border-box; /* Ensures padding/border don't increase width */
-margin: 0;
-justify-content: center;
-align-content: center;
-}
-
-    #character-stat-wrapper > div > span {
-        width: 1rem; /* ~24px */
-        text-align: right;
-        font-weight: bold;
-        display: inline-block;
+    #character-stat-wrapper > div {
+        padding: .125rem 0 .125rem 0; /* ~2px */
+        width: 50%; /* 50% width minus border width (3px * 2) */
+        box-sizing: border-box; /* Ensures padding/border don't increase width */
+        margin: 0;
+        justify-content: center;
+        align-content: center;
     }
-        #character-stat-wrapper > div > span.increment {
-            width: .7rem; /* ~24px */
-            text-align: left;
-            cursor: pointer;
-            /*visibility: hidden;*/
+
+        #character-stat-wrapper > div > span {
+            width: 1rem; /* ~24px */
+            text-align: right;
+            font-weight: bold;
+            display: inline-block;
         }
 
-        #character-stat-wrapper > div > span.increment.hidden {
-            width: .7rem; /* ~24px */
-            text-align: left;
-            visibility: hidden;
-        }
-    
+            #character-stat-wrapper > div > span.increment {
+                width: .7rem; /* ~24px */
+                text-align: left;
+                cursor: pointer;
+                /*visibility: hidden;*/
+            }
+
+                #character-stat-wrapper > div > span.increment.hidden {
+                    width: .7rem; /* ~24px */
+                    text-align: left;
+                    visibility: hidden;
+                }
+
 #equipped-items {
     width: 100%;
     display: flex;
@@ -627,15 +612,13 @@ align-content: center;
     margin-bottom: 0.625rem; /* ~10px */
 }
 
-
-#equipped-items div.col {
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-width: 33% !important;
-}
-
+    #equipped-items div.col {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 33% !important;
+    }
 
 #tabs #equipped-items div.equipped-item {
     display: flex;
@@ -655,23 +638,22 @@ width: 33% !important;
     width: 5rem;
 }
 
-#tabs #equipped-items p.equipped {
-    padding: 0;
-    margin: 0;
-    text-align: center;
-    width: 4.25rem; /* ~68px */
-    height: 4.25rem; /* ~68px */
-}
+    #tabs #equipped-items p.equipped {
+        padding: 0;
+        margin: 0;
+        text-align: center;
+        width: 4.25rem; /* ~68px */
+        height: 4.25rem; /* ~68px */
+    }
 
-#tabs #equipped-items p.equip-slot.equipped img.item {
-    width: 4rem; /* ~64px */
-    height: 4rem; /* ~64px */
-    border-radius: .3125rem; /* ~5px */
-    padding: 0;
-    margin: 0;
-    border: 0.125rem solid #ccc; /* ~1px */
-
-}
+    #tabs #equipped-items p.equip-slot.equipped img.item {
+        width: 4rem; /* ~64px */
+        height: 4rem; /* ~64px */
+        border-radius: .3125rem; /* ~5px */
+        padding: 0;
+        margin: 0;
+        border: 0.125rem solid #ccc; /* ~1px */
+    }
 
     #tabs #equipped-items p.empty {
         width: 4.25rem;
@@ -685,13 +667,13 @@ width: 33% !important;
         background-position: center center;
     }
 
-#tabs #equipped-items p.empty img.item {
-    width: 4rem; /* ~64px */
-    height: 4rem; /* ~64px */
-    padding: 0;
-    margin: 0;
-    border-radius: .3125rem; /* ~5px */
-}
+        #tabs #equipped-items p.empty img.item {
+            width: 4rem; /* ~64px */
+            height: 4rem; /* ~64px */
+            padding: 0;
+            margin: 0;
+            border-radius: .3125rem; /* ~5px */
+        }
 
 #tabs #equipped-items span {
     margin: 0;
@@ -704,35 +686,45 @@ width: 33% !important;
 #tabs #equipped-items p.mainhand.empty {
     background-image: url("img/icons/item_slots/mainhand.svg");
 }
+
 #tabs #equipped-items p.offhand.empty {
     background-image: url("img/icons/item_slots/offhand.svg");
 }
+
 #tabs #equipped-items p.amulet.empty {
     background-image: url("img/icons/item_slots/amulet.svg");
 }
+
 #tabs #equipped-items p.leftring.empty {
     background-image: url("img/icons/item_slots/leftring.svg");
 }
+
 #tabs #equipped-items p.rightring.empty {
     background-image: url("img/icons/item_slots/rightring.svg");
 }
+
 #tabs #equipped-items p.armor.empty {
     background-image: url("img/icons/item_slots/armor.svg");
 }
-#tabs  #equipped-items p.equip-slot.head {
-background-image: url('img/icons/item-slots/head.svg');
+
+#tabs #equipped-items p.equip-slot.head {
+    background-image: url('img/icons/item-slots/head.svg');
 }
-#tabs  #equipped-items p.equip-slot.gloves {
-background-image: url('img/icons/item-slots/gloves.svg');
+
+#tabs #equipped-items p.equip-slot.gloves {
+    background-image: url('img/icons/item-slots/gloves.svg');
 }
-#tabs  #equipped-items p.equip-slot.belt {
-background-image: url('img/icons/item-slots/belt.svg');
+
+#tabs #equipped-items p.equip-slot.belt {
+    background-image: url('img/icons/item-slots/belt.svg');
 }
+
 #tabs #equipped-items p.equip-slot.legs {
-background-image: url('img/icons/item-slots/legs.svg');
+    background-image: url('img/icons/item-slots/legs.svg');
 }
-#tabs  #equipped-items p.equip-slot.boots {
-background-image: url('img/icons/item-slots/boots.svg');
+
+#tabs #equipped-items p.equip-slot.boots {
+    background-image: url('img/icons/item-slots/boots.svg');
 }
 
 #menu-content {
@@ -780,12 +772,14 @@ background-image: url('img/icons/item-slots/boots.svg');
         text-align: center;
     }
 
-    #menu-buttons button:hover {
-        background: #0f0;
-    }
+        #menu-buttons button:hover {
+            background: #0f0;
+        }
+
         #menu-buttons button:active {
             background: #0f0;
         }
+
 #menu-panel {
     display: flex;
     flex-direction: column;
@@ -837,11 +831,12 @@ li.new-save-game {
     border-bottom: 0.125rem solid #2c672c; /* ~1px */
 }
 
-#save-name-input, #character-select{
+#save-name-input, #character-select {
     border: 0.125rem solid #ccc;
     background-color: #2c672c80;
     color: #080;
 }
+
 .save-game-name {
     display: inline-block;
     width: 30rem;
@@ -852,17 +847,18 @@ li.new-save-game {
     margin-bottom: 0.625rem; /* ~10px */
 }
 
-
 #menu-data-wrapper button:disabled {
     background: #555;
     color: #999;
     cursor: not-allowed;
 }
+
 #about-data ul li, #about-data h4 {
     width: 100%;
     margin-top: .625rem; /* ~10px */
     text-align: center;
 }
+
 #about-data h4 {
     margin-top: 1.3125rem;
 }
@@ -873,7 +869,6 @@ li.new-save-game {
     display: flex; /* overwritten in line with none when hide is triggered*/
     justify-content: space-between;
 }
-
 
 #journey {
     display: flex;
@@ -888,7 +883,6 @@ li.new-save-game {
         margin-bottom: 0.3125rem; /* ~5px */
         line-height: 1.2;
     }
-
 
 /* Journey Tab Styles */
 #journey-window-wrapper {
@@ -925,16 +919,14 @@ li.new-save-game {
         border-radius: .325rem .325rem 0px 0px;
     }
 
+    #journey-tabs button.tab {
+        flex: 1;
+        margin: 0; /* Equal width for all tabs */
+    }
 
-
-        #journey-tabs button.tab {
-            flex: 1;
-            margin: 0; /* Equal width for all tabs */
-        }
-
-        #journey-tabs button.active {
-            background: #0f0;
-        }
+    #journey-tabs button.active {
+        background: #0f0;
+    }
 
 #tabs #journey-items-wrapper {
     display: flex;
@@ -968,24 +960,23 @@ li.new-save-game {
     margin-top: 10px;
 }
 
-    #inventory {
-        display: flex;
-        flex-direction: column;
-        height: 31.75rem; /* ~400px */
-        width: 68%;
-        margin-top: 0.625rem; /* ~10px */
-    }
+#inventory {
+    display: flex;
+    flex-direction: column;
+    height: 31.75rem; /* ~400px */
+    width: 68%;
+    margin-top: 0.625rem; /* ~10px */
+}
 
 #inventory-window-wrapper {
     padding: 0;
     margin: 0;
     width: 100%;
     height: 30rem; /* Keep max height but let content dictate rows */
-    
+
     border-radius: .625rem;
     background: rgba(20, 30, 20, 0.7);
 }
-
 
 #inventory-tabs, #shop-inventory-tabs {
     padding: 0;
@@ -1011,12 +1002,15 @@ li.new-save-game {
         -webkit-border-radius: .325rem .325rem 0px 0px;
         border-radius: .325rem .325rem 0px 0px;
     }
+
         #inventory-tabs button.tab, #shop-inventory-tabs button.tab {
             flex: 12;
         }
+
         #inventory-tabs button.sort, #shop-inventory-tabs button.sort {
             flex: 2;
         }
+
         #inventory-tabs button.active, #shop-inventory-tabs button.active {
             background: #0f0;
         }
@@ -1044,31 +1038,30 @@ li.new-save-game {
 }
 
 #tabs div.inventory-item {
-padding: 0;
-display: flex;
-flex-direction: column;
-min-height: 4.1rem;
-width: 4.1rem;  
-margin: 0; /* Remove any default margins */
-box-sizing: border-box; /* Include padding/border in height */
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 4.1rem;
+    width: 4.1rem;
+    margin: 0; /* Remove any default margins */
+    box-sizing: border-box; /* Include padding/border in height */
 }
 
 #tabs p.inventory-slot {
-display:block;
-align-items: center;
-margin: 0;
-padding: 0;
- 
+    display: block;
+    align-items: center;
+    margin: 0;
+    padding: 0;
 }
 
-#tabs p.inventory-slot img.item {
-width: 3.85rem; /* Match the 64px design */
-height: 3.85rem; /* Match the 64px design */
-border: 0.125rem solid #0f0;
-padding: 0;
-margin: 0;
-border-radius: .3125rem;
-}
+    #tabs p.inventory-slot img.item {
+        width: 3.85rem; /* Match the 64px design */
+        height: 3.85rem; /* Match the 64px design */
+        border: 0.125rem solid #0f0;
+        padding: 0;
+        margin: 0;
+        border-radius: .3125rem;
+    }
 
     #tabs p.inventory-slot span.item-label {
         display: block;
@@ -1076,17 +1069,17 @@ border-radius: .3125rem;
         font-size: .75rem;
         width: 4rem; /* ~64px */
         text-align: center;
-    } 
+    }
 
 .item-tooltip-class {
-padding: 0.625rem; /* ~5px */
-font-size: 0.875rem; /* ~14px */
-color: #0f0;
-z-index: 3000;
-max-width: 15rem; /* ~200px */
-background: rgba(20, 30, 20, 1);
-border: 0.125rem solid #060; /* ~1px */
-border-radius: .625rem;
+    padding: 0.625rem; /* ~5px */
+    font-size: 0.875rem; /* ~14px */
+    color: #0f0;
+    z-index: 3000;
+    max-width: 15rem; /* ~200px */
+    background: rgba(20, 30, 20, 1);
+    border: 0.125rem solid #060; /* ~1px */
+    border-radius: .625rem;
 }
 
 .tooltip-sellInfo {
@@ -1114,31 +1107,35 @@ border-radius: .625rem;
 .item-tooltip-class p img.item-tooltip-icon.artifact,
 #tabs #equipped-items p.equip-slot.equipped img.item.artifact,
 #tabs p.inventory-slot.artifact img.item,
-#tabs p.inventory-slot span.item-label.artifact {
+#tabs p.inventory-slot span.item-label.artifact,
+.shop-item .artifact {
     color: GoldenRod !important;
     border-color: GoldenRod !important;
 }
 
     .artifact hr, .item-tooltip-icon-wrap.artifact,
     #tabs #equipped-items p.equip-slot.equipped img.artifact.item,
-    #tabs p.inventory-slot.artifact img.item {
+    #tabs p.inventory-slot.artifact img.item,
+    .shop-item img.item-icon.artifact {
         background-color: GoldenRod !important;
     }
 
 .relic,
 .relic hr,
-.item-tooltip-class.relic, 
+.item-tooltip-class.relic,
 .item-tooltip-class p img.item-tooltip-icon.relic,
 #tabs #equipped-items p.equip-slot.equipped img.item.relic,
 #tabs p.inventory-slot.relic img.item,
-#tabs p.inventory-slot span.item-label.relic {
+#tabs p.inventory-slot span.item-label.relic,
+.shop-item .relic {
     color: gold !important;
     border-color: gold !important;
 }
 
     .relic hr, .item-tooltip-icon.relic,
     #tabs #equipped-items p.equip-slot.equipped img.relic.item,
-    #tabs p.inventory-slot.relic img.item {
+    #tabs p.inventory-slot.relic img.item,
+    .shop-item img.item-icon.relic {
         background-color: gold !important;
     }
 
@@ -1148,14 +1145,16 @@ border-radius: .625rem;
 .item-tooltip-class p img.item-tooltip-icon.legendary,
 #tabs #equipped-items p.equip-slot.equipped img.item.legendary,
 #tabs p.inventory-slot.legendary img.item,
-#tabs p.inventory-slot span.item-label.legendary {
+#tabs p.inventory-slot span.item-label.legendary,
+.shop-item .legendary {
     color: darkorange !important;
     border-color: darkorange !important;
 }
 
     .legendary hr, .item-tooltip-icon.legendary,
     #tabs #equipped-items p.equip-slot.equipped img.legendary.item,
-    #tabs p.inventory-slot.legendary img.item {
+    #tabs p.inventory-slot.legendary img.item,
+    .shop-item img.item-icon.legendary {
         background-color: darkorange !important;
     }
 
@@ -1164,13 +1163,16 @@ border-radius: .625rem;
 .item-tooltip-class.mastercraft,
 #tabs #equipped-items p.equip-slot.equipped img.mastercraft.item,
 #tabs p.inventory-slot.mastercraft img.item,
-#tabs p.inventory-slot span.item-label.mastercraft {
+#tabs p.inventory-slot span.item-label.mastercraft,
+.shop-item .mastercraft {
     color: darkmagenta !important;
     border-color: darkmagenta !important;
 }
+
     .mastercraft hr, .item-tooltip-icon.mastercraft,
     #tabs #equipped-items p.equip-slot.equipped img.mastercraft.item,
-    #tabs p.inventory-slot.mastercraft img.item {
+    #tabs p.inventory-slot.mastercraft img.item,
+    .shop-item img.item-icon.mastercraft {
         background-color: darkmagenta !important;
     }
 
@@ -1179,14 +1181,16 @@ border-radius: .625rem;
 .item-tooltip-class.magic,
 #tabs #equipped-items p.equip-slot.equipped img.magic.item,
 #tabs p.inventory-slot.magic img.item,
-#tabs p.inventory-slot span.item-label.magic {
+#tabs p.inventory-slot span.item-label.magic,
+.shop-item .magic {
     color: blueviolet !important;
     border-color: Blueviolet !important;
 }
 
     .magic hr, .item-tooltip-icon.magic,
     #tabs #equipped-items p.equip-slot.equipped img.magic.item,
-    #tabs p.inventory-slot.magic img.item {
+    #tabs p.inventory-slot.magic img.item,
+    .shop-item img.item-icon.magic {
         background-color: BlueViolet !important;
     }
 
@@ -1195,52 +1199,54 @@ border-radius: .625rem;
 .item-tooltip-class.rare,
 #tabs #equipped-items p.equip-slot.equipped img.rare.item,
 #tabs p.inventory-slot.rare img.item,
-#tabs p.inventory-slot span.item-label.rare {
+#tabs p.inventory-slot span.item-label.rare,
+.shop-item .rare {
     color: blue !important;
     border-color: blue !important;
 }
 
     .rare hr, .item-tooltip-icon.rare,
     #tabs #equipped-items p.equip-slot.equipped img.rare.item,
-    #tabs p.inventory-slot.rare img.item {
+    #tabs p.inventory-slot.rare img.item,
+    .shop-item img.item-icon.rare {
         background-color: blue !important;
     }
-
 
 .common,
 .common hr,
 .item-tooltip-class.common,
 #tabs #equipped-items p.equip-slot.equipped img.common.item,
 #tabs p.inventory-slot.common img.item,
-#tabs p.inventory-slot span.item-label.common {
+#tabs p.inventory-slot span.item-label.common,
+.shop-item .common {
     color: #0f0 !important;
     border-color: #0f0 !important;
 }
 
     .common hr, .item-tooltip-icon.common,
     #tabs #equipped-items p.equip-slot.equipped img.common.item,
-    #tabs p.inventory-slot.common img.item {
+    #tabs p.inventory-slot.common img.item,
+    .shop-item img.item-icon.common {
         background-color: #0f0 !important;
     }
-
-
 
 .junk,
 .junk hr,
 .item-tooltip-class.junk,
 #tabs #equipped-items p.equip-slot.equipped img.junk.item,
 #tabs p.inventory-slot.junk img.item,
-#tabs p.inventory-slot span.item-label.junk {
-color: whitesmoke !important;
-border-color: whitesmoke !important;
+#tabs p.inventory-slot span.item-label.junk,
+.shop-item .junk {
+    color: whitesmoke !important;
+    border-color: whitesmoke !important;
 }
 
     .junk hr, .item-tooltip-icon.junk,
     #tabs #equipped-items p.equip-slot.equipped img.junk.item,
-    #tabs p.inventory-slot.junk img.item {
+    #tabs p.inventory-slot.junk img.item,
+    .shop-item img.item-icon.junk {
         background-color: whitesmoke !important;
     }
-
 
 .item-tooltip-name {
     width: 100%;
@@ -1280,28 +1286,24 @@ border-color: whitesmoke !important;
     margin-bottom: 0.3125rem; /* ~5px */
 }
 
-
 tooltip-description {
-width: 100%;
-text-align: left;
-font-size: 0.75rem; /* ~12px */
-font-style: italic;
+    width: 100%;
+    text-align: left;
+    font-size: 0.75rem; /* ~12px */
+    font-style: italic;
 }
-
 
 #player-name {
-text-align: center;
-font-size: 1.5rem; /* ~24px */
+    text-align: center;
+    font-size: 1.5rem; /* ~24px */
 }
 
-
 #stats {
-margin: 0;
-padding: 0.625rem; /* ~10px */
+    margin: 0;
+    padding: 0.625rem; /* ~10px */
 }
 
 /*   TABS DIV - END  */
-
 
 /* Dialogue System Start */
 
@@ -1357,8 +1359,6 @@ padding: 0.625rem; /* ~10px */
         color: #000;
     }
 
-
-
 #dialogue-view-wares {
     background: #000;
     color: #0f0;
@@ -1376,6 +1376,7 @@ padding: 0.625rem; /* ~10px */
 /* Dialogue System END */
 
 /* Shop Tab Styles */
+/* Shop Tab Styles */
 #shop-content {
     height: 30rem;
     width: 100%;
@@ -1390,33 +1391,16 @@ padding: 0.625rem; /* ~10px */
     width: 30%;
     margin-top: 0.625rem;
 }
-/* depricated kept temporarily for reference
-#sell-dropzone {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 90%;
-    width: 100%;
-    padding: 0.625rem;
-    background: rgba(20, 30, 20, 0.7);
-    border: 0.125rem solid #0f0;
-    border-radius: .625rem;
-    margin-bottom: 0.625rem;
-    color: #0f0;
-    font-size: 0.875rem;
-    text-align: center;
-}
-*/
-  
 
-    #shop-info{
-        padding-bottom: 0.625rem;
-    }
-    #shop-info p{
+#shop-info {
+    padding-bottom: 0.625rem;
+}
+
+    #shop-info p {
         font-size: .625rem;
-        width:100%;
-        text-align:center;
+        width: 100%;
+        text-align: center;
+        color: #0f0;
     }
 
 #shop-items {
@@ -1428,9 +1412,9 @@ padding: 0.625rem; /* ~10px */
     overflow-y: auto;
     scrollbar-color: #0f0 #111;
     scrollbar-width: thin;
-    scrollbar-gutter: stable;
     background: rgba(20, 30, 20, 0.7);
 }
+
     #shop-items.drag-over {
         border-color: #0f0;
         border-width: 2px;
@@ -1458,21 +1442,16 @@ padding: 0.625rem; /* ~10px */
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
-    -ms-align-content: flex-start;
-    -webkit-align-content: flex-start;
     align-content: flex-start;
     gap: 0.625rem;
     width: 100%;
     height: 27.25rem;
     padding: 0.625rem;
     border: 0.125rem solid #0f0;
-    -moz-border-radius: 0px;
-    -webkit-border-radius: 0px 0px .625rem .625rem;
     border-radius: 0px 0px .625rem .625rem;
     overflow-y: auto;
     scrollbar-color: #0f0 #111;
     scrollbar-width: thin;
-    scrollbar-gutter: stable;
     background: rgba(20, 30, 20, 0.7);
 }
 
@@ -1480,7 +1459,6 @@ padding: 0.625rem; /* ~10px */
 .shop-item {
     display: flex;
     flex-direction: column;
-    align-items: center;
     width: 100%;
     padding: 0.625rem;
     margin-bottom: 0.625rem;
@@ -1498,16 +1476,40 @@ padding: 0.625rem; /* ~10px */
     margin-bottom: 0.3125rem;
 }
 
-.item-type, .item-tier, .item-stats, .item-affixes, .item-price {
-    text-align: center;
+.shop-item-details {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.625rem;
+}
+
+.shop-item-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40%;
+}
+
+.shop-item-right {
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+}
+
+.tier-type {
+    text-align: left;
     margin-bottom: 0.3125rem;
 }
 
 .item-stats, .item-affixes {
+    text-align: left;
+    margin-bottom: 0.3125rem;
     font-size: 0.75rem;
 }
 
 .item-price {
+    text-align: center;
+    margin: 0.3125rem 0;
     font-weight: bold;
 }
 
@@ -1520,7 +1522,7 @@ padding: 0.625rem; /* ~10px */
 }
 
 .buy-item {
-    padding: 0.3125rem 0.625rem;
+    padding: 0.1625rem 0.625rem !important;
     margin-top: 0.3125rem;
     background: #2c672c;
     color: #000;
@@ -1533,3 +1535,76 @@ padding: 0.625rem; /* ~10px */
     .buy-item:hover {
         background: #0f0;
     }
+
+/* Tier-based coloring for shop items */
+.shop-item .artifact {
+    color: GoldenRod !important;
+    border-color: GoldenRod !important;
+}
+
+.shop-item img.item-icon.artifact {
+    background-color: GoldenRod !important;
+}
+
+.shop-item .relic {
+    color: gold !important;
+    border-color: gold !important;
+}
+
+.shop-item img.item-icon.relic {
+    background-color: gold !important;
+}
+
+.shop-item .legendary {
+    color: darkorange !important;
+    border-color: darkorange !important;
+}
+
+.shop-item img.item-icon.legendary {
+    background-color: darkorange !important;
+}
+
+.shop-item .mastercraft {
+    color: darkmagenta !important;
+    border-color: darkmagenta !important;
+}
+
+.shop-item img.item-icon.mastercraft {
+    background-color: darkmagenta !important;
+}
+
+.shop-item .magic {
+    color: blueviolet !important;
+    border-color: Blueviolet !important;
+}
+
+.shop-item img.item-icon.magic {
+    background-color: BlueViolet !important;
+}
+
+.shop-item .rare {
+    color: blue !important;
+    border-color: blue !important;
+}
+
+.shop-item img.item-icon.rare {
+    background-color: blue !important;
+}
+
+.shop-item .common {
+    color: #0f0 !important;
+    border-color: #0f0 !important;
+}
+
+.shop-item img.item-icon.common {
+    background-color: #0f0 !important;
+}
+
+.shop-item .junk {
+    color: whitesmoke !important;
+    border-color: whitesmoke !important;
+}
+
+.shop-item img.item-icon.junk {
+    background-color: whitesmoke !important;
+}

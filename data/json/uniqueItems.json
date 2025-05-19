@@ -9,6 +9,7 @@
     "baseDamageMax": 15,
     "tierIndex": 6,
     "itemTier": "relic",
+    "goldValue": 500000,
     "stats": {
       "intellect": 5,
       "maxMana": 5,
@@ -45,6 +46,7 @@
     "baseDamageMax": 15,
     "tierIndex": 6,
     "itemTier": "relic",
+    "goldValue": 500000,
     "stats": {
       "prowess": 5,
       "block": 5,
@@ -64,6 +66,7 @@
     "luck": -15,
     "tierIndex": 6,
     "itemTier": "relic",
+    "goldValue": 500000,
     "stats": {
       "maxHp": 60,
       "damageBonus": 10,
@@ -81,6 +84,7 @@
     "luck": 10,
     "tierIndex": 6,
     "itemTier": "relic",
+    "goldValue": 500000,
     "stats": {
       "intellect": 5,
       "agility": 15,
@@ -98,6 +102,7 @@
     "armor": 5,
     "tierIndex": 6,
     "itemTier": "relic",
+    "goldValue": 500000,
     "stats": {
       "prowess": 5,
       "intellect": 5,
@@ -131,6 +136,7 @@
     "armor": -6,
     "tierIndex": 6,
     "itemTier": "relic",
+    "goldValue": 500000,
     "stats": {
       "prowess": 0,
       "agility": 0,
@@ -151,6 +157,7 @@
     "luck": 78,
     "tierIndex": 6,
     "itemTier": "relic",
+    "goldValue": 659.333333,
     "stats": {
       "maxHp": 100,
       "agility": 10,
@@ -161,7 +168,7 @@
     },
     "description": "All marvel at the Grace and Speed of the Grand Buniyar.",
     "uniqueId": null,
-    "icon": "golden-bunny.svg",
+    "icon": "golden-bunny.png",
     "affixes": [
       {
         "name": "resilience",
