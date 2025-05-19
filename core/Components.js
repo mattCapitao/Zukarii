@@ -23,6 +23,7 @@ import {
     InputStateComponent,
     NewCharacterComponent,
     JourneyStateComponent,
+    ShopInteractionComponent,
 } from './components/PlayerComponents.js';
 
 import {
@@ -90,6 +91,7 @@ export {
     InputStateComponent,
     NewCharacterComponent,
     JourneyStateComponent,
+    ShopInteractionComponent,
 
     // Game-related components
     UIComponent,

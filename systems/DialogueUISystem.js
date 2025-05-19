@@ -59,7 +59,7 @@ export class DialogueUISystem extends System {
         if (hasShop) {
             const viewWaresButton = dialogueWindow.querySelector('#dialogue-view-wares');
             viewWaresButton.addEventListener('click', () => {
-                this.eventBus.emit('ToggleOverlay', { tab: 'shop' });
+                this.eventBus.emit('ToggleOverlay', { tab: 'shop', fromShop: true });
                 this.closeDialogue();
             });
         }

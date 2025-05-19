@@ -136,4 +136,13 @@ export class JourneyStateComponent {
     }
 }
 
+export class ShopInteractionComponent {
+    constructor() {
+        this.type = 'ShopInteraction';
+        this.active = true; // Flag to indicate an active shop interaction
+        // Future expansion: Add properties like transactionHistory, activeShopNpc, etc.
+    }
+    
+}
+
 

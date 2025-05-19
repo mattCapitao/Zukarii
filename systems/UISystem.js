@@ -1,4 +1,5 @@
 ﻿import { System } from '../core/Systems.js';
+import { ShopInteractionComponent } from '../core/Components.js'; // Updated import
 
 export class UISystem extends System {
     constructor(entityManager, eventBus, utilities) {
@@ -275,6 +276,8 @@ export class UISystem extends System {
                     this.toggleOverlay({ tab: 'log' });
                 } else if (target.id === 'journey-tab') {
                     this.toggleOverlay({ tab: 'journey' });
+                } else if (target.id === 'shop-tab') {
+                    this.toggleOverlay({ tab: 'shop' });
                 } else if (target.id === 'close-tabs') {
                     this.toggleOverlay({});
                 }
@@ -705,9 +708,10 @@ export class UISystem extends System {
         }
     }
 
-    toggleOverlay({ tab = null }) {
-        console.log('UISystem: ToggleOverlay called with tab:', tab);
+    toggleOverlay({ tab = null, fromShop = false }) {
+        console.log('UISystem: ToggleOverlay called with:', { tab, fromShop });
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
+        const player = this.entityManager.getEntity('player');
 
         const currentTab = overlayState.activeTab;
 
@@ -718,6 +722,22 @@ export class UISystem extends System {
             overlayState.isOpen = true;
             overlayState.activeTab = tab;
         }
+
+        // Attach or remove ShopInteractionComponent
+        if (overlayState.isOpen && fromShop && tab === 'shop') {
+            // Add ShopInteractionComponent to player if opening via shop
+            if (!player.hasComponent('ShopInteraction')) {
+                player.addComponent(new ShopInteractionComponent());
+                console.log('UISystem: Added ShopInteractionComponent to player');
+            }
+        } else if (!overlayState.isOpen) {
+            // Remove ShopInteractionComponent when closing the overlay
+            if (player.hasComponent('ShopInteraction')) {
+                player.removeComponent('ShopInteraction');
+                console.log('UISystem: Removed ShopInteractionComponent from player');
+            }
+        }
+
         document.getElementById('splash-menu').toggleAttribute('hidden', overlayState.isOpen);
 
         this.tabs.style.display = overlayState.isOpen ? 'block' : 'none';
@@ -839,16 +859,21 @@ export class UISystem extends System {
         if (!tabMenuDiv) return;
 
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const player = this.entityManager.getEntity('player');
         let tabIsDisabled = '';
         if (!gameState.gameStarted) {
             tabIsDisabled = 'disabled';
         }
+
+        // Check if player has a ShopInteraction component
+        const showShopButton = player.hasComponent('ShopInteraction');
 
         tabMenuDiv.innerHTML = `
             <button id="menu-tab" class="tabs-button" style="background: ${activeTab === 'menu' ? '#0f0' : '#2c672c'};">Menu</button>
             <button id="character-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'character' ? '#0f0' : '#2c672c'};">Character</button>
             <button id="log-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'log' ? '#0f0' : '#2c672c'};">Log</button>
             <button id="journey-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'journey' ? '#0f0' : '#2c672c'};">Journey</button>
+            ${showShopButton ? `<button id="shop-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'shop' ? '#0f0' : '#2c672c'};">Shop</button>` : ''}
             <button id="close-tabs">X</button>
         `;
     }
