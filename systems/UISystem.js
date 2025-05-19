@@ -11,8 +11,9 @@ export class UISystem extends System {
         this.characterContent = null;
         this.menuContent = null;
         this.journeyContent = null;
+        this.shopContent = null;
         this.activeMenuSection = 'controls-button';
-        this.activeJourneyTab = 'whispers'; // Default to Path of Whispers tab
+        this.activeJourneyTab = 'whispers';
         this.tooltipCache = new Map();
         this.activeInventoryTab = 'all';
         this.playerEntity = this.entityManager.getEntity('player');
@@ -44,10 +45,12 @@ export class UISystem extends System {
         this.characterContent = document.getElementById('character-content');
         this.menuContent = document.getElementById('menu-content');
         this.journeyContent = document.getElementById('journey-content');
+        this.shopContent = document.getElementById('shop-content');
 
-        if (!this.playerInfo || !this.playerStatus || !this.tabs || !this.logContent || !this.characterContent || !this.menuContent || !this.journeyContent) {
+        if (!this.playerInfo || !this.playerStatus || !this.tabs || !this.logContent || !this.characterContent || !this.menuContent || !this.journeyContent || !this.shopContent) {
             console.log("Menu", this.menuContent);
             console.log("Journey", this.journeyContent);
+            console.log("Shop", this.shopContent);
             throw new Error('UI elements not found');
         }
 
@@ -141,18 +144,50 @@ export class UISystem extends System {
         }
     }
 
+    setupInventoryTabs(containerId, inventoryContainerId) {
+        const inventoryTabs = document.getElementById(containerId);
+        if (inventoryTabs) {
+            inventoryTabs.addEventListener('click', (event) => {
+                const target = event.target.closest('.inventory-tab-button');
+                if (!target) return;
+
+                const player = this.entityManager.getEntity('player');
+                const stats = player.getComponent('Stats');
+                const inventory = player.getComponent('Inventory');
+
+                if (target.id === 'sort-inventory-tab') {
+                    this.updateCharacterUI({ entityId: 'player' });
+                } else if (target.classList.contains('tab')) {
+                    const tabMap = {
+                        'inventory-tab-all': 'all',
+                        'inventory-tab-armor': 'armor',
+                        'inventory-tab-weapon-melee': 'weapon-melee',
+                        'inventory-tab-weapon-ranged': 'weapon-ranged',
+                        'inventory-tab-amulet': 'amulet',
+                        'inventory-tab-ring': 'ring'
+                    };
+                    const newTab = tabMap[target.id];
+                    if (newTab && newTab !== this.activeInventoryTab) {
+                        this.activeInventoryTab = newTab;
+                        inventoryTabs.querySelectorAll('.tab').forEach(tab => {
+                            tab.classList.toggle('active', tab.id === target.id);
+                            tab.style.background = tab.id === target.id ? '#0f0' : '#2c672c';
+                        });
+                        this.renderInventory(inventoryContainerId, inventory.items, this.activeInventoryTab);
+                    }
+                }
+            });
+        }
+    }
+
     setupEventListeners() {
-
-
         const buttons = document.querySelectorAll('button');
-        // prevent right -click on all buttons
         buttons.forEach(button => {
             button.addEventListener('contextmenu', (event) => {
-                event.preventDefault(); // Disable right-click
+                event.preventDefault();
             });
         });
 
-        
         const menuButtons = document.getElementById('menu-buttons');
         if (menuButtons) {
             menuButtons.addEventListener('click', (event) => {
@@ -169,7 +204,6 @@ export class UISystem extends System {
                     }
                 }
             });
-             
         }
 
         const menuDataWrapper = document.getElementById('menu-data-wrapper');
@@ -225,7 +259,7 @@ export class UISystem extends System {
             menuDataWrapper.removeEventListener('click', handleMenuClick);
             menuDataWrapper.addEventListener('click', handleMenuClick);
             menuDataWrapper.addEventListener('contextmenu', (event) => {
-                event.preventDefault(); // Disable right-click
+                event.preventDefault();
             });
         }
 
@@ -246,7 +280,7 @@ export class UISystem extends System {
                 }
             });
             tabMenu.addEventListener('contextmenu', (event) => {
-                event.preventDefault(); // Disable right-click
+                event.preventDefault();
             });
         }
 
@@ -296,38 +330,7 @@ export class UISystem extends System {
             });
         }
 
-        const inventoryTabs = document.getElementById('inventory-tabs');
-        if (inventoryTabs) {
-            inventoryTabs.addEventListener('click', (event) => {
-                const target = event.target.closest('.inventory-tab-button');
-                if (!target) return;
-
-                const player = this.entityManager.getEntity('player');
-                const stats = player.getComponent('Stats');
-                const inventory = player.getComponent('Inventory');
-
-                if (target.id === 'sort-inventory-tab') {
-                    this.updateCharacterUI({ entityId: 'player' });
-                } else if (target.classList.contains('tab')) {
-                    const tabMap = {
-                        'inventory-tab-all': 'all',
-                        'inventory-tab-armor': 'armor',
-                        'inventory-tab-weapon-melee': 'weapon-melee',
-                        'inventory-tab-weapon-ranged': 'weapon-ranged',
-                        'inventory-tab-amulet': 'amulet',
-                        'inventory-tab-ring': 'ring'
-                    };
-                    const newTab = tabMap[target.id];
-                    if (newTab && newTab !== this.activeInventoryTab) {
-                        this.activeInventoryTab = newTab;
-                        inventoryTabs.querySelectorAll('.tab').forEach(tab => {
-                            tab.classList.toggle('active', tab.id === target.id);
-                        });
-                        this.updateCharacterUI({ entityId: 'player' });
-                    }
-                }
-            });
-        }
+        this.setupInventoryTabs('inventory-tabs', 'inventory-item-wrapper');
 
         const equippedItems = document.getElementById('equipped-items');
         if (equippedItems) {
@@ -396,6 +399,59 @@ export class UISystem extends System {
             }, { capture: true });
         }
 
+        const shopContent = document.getElementById('shop-content');
+        if (shopContent) {
+            shopContent.addEventListener('mouseover', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                this.showItemTooltip(itemData, event);
+            }, { capture: true });
+
+            shopContent.addEventListener('mouseout', (event) => {
+                const target = event.target.closest('.item-icon');
+                if (!target) return;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                this.hideItemTooltip(itemData);
+            }, { capture: true });
+
+            shopContent.addEventListener('dragover', (event) => {
+                const target = event.target.closest('#sell-dropzone');
+                if (target) {
+                    event.preventDefault();
+                    target.classList.add('drag-over');
+                }
+            });
+
+            shopContent.addEventListener('dragleave', (event) => {
+                const target = event.target.closest('#sell-dropzone');
+                if (target) {
+                    target.classList.remove('drag-over');
+                }
+            });
+
+            shopContent.addEventListener('drop', (event) => {
+                const target = event.target.closest('#sell-dropzone');
+                if (!target) return;
+                event.preventDefault();
+                target.classList.remove('drag-over');
+
+                const rawData = event.dataTransfer.getData('text/plain');
+                let data;
+                try {
+                    data = JSON.parse(rawData);
+                } catch (err) {
+                    console.error('Shop drop failed - invalid data:', rawData, err);
+                    return;
+                }
+
+                if (data.source === 'inventory' && data.item) {
+                    this.eventBus.emit('SellItem', { item: data.item, uniqueId: data.item.uniqueId });
+                    this.updateCharacterUI({ entityId: 'player' });
+                }
+            });
+        }
+
         const statWrapper = document.getElementById('character-stat-wrapper');
         if (statWrapper) {
             statWrapper.addEventListener('click', (event) => {
@@ -415,10 +471,8 @@ export class UISystem extends System {
             });
         }
 
-        // *** CHANGE START: Fix tab mapping and remove "Paths Walked" tab ***
         const journeyTabs = document.getElementById('journey-tabs');
         if (journeyTabs) {
-            // Get the player's JourneyPathComponent to find Master Paths
             const player = this.entityManager.getEntity('player');
             const journeyPath = player?.getComponent('JourneyPath');
             if (!journeyPath) {
@@ -426,23 +480,17 @@ export class UISystem extends System {
                 return;
             }
 
-            // Find Master Paths (where id === parentId)
             const masterPaths = journeyPath.paths.filter(path => path.id === path.parentId);
-
-            // Map Master Paths to tab identifiers
             const tabMap = {};
             masterPaths.forEach((path, index) => {
                 const tabId = `journey-tab-${path.id.replace(/_/g, '-')}`;
-                // Use the normalized path ID (e.g., 'whispers') as the tab identifier
                 const tabName = path.id.replace('master_', '');
                 tabMap[tabId] = tabName;
-                // Set the first Master Path as the default active tab
                 if (index === 0) {
                     this.activeJourneyTab = tabName;
                 }
             });
 
-            // Dynamically generate tab buttons using path.title as the button text
             journeyTabs.innerHTML = Object.entries(tabMap)
                 .map(([tabId, tabName]) => {
                     const path = masterPaths.find(p => p.id === `master_${tabName}`);
@@ -452,7 +500,6 @@ export class UISystem extends System {
                 })
                 .join('');
 
-            // Add event listener for tab switching
             journeyTabs.addEventListener('click', (event) => {
                 const target = event.target.closest('.journey-tab-button');
                 if (!target) return;
@@ -468,7 +515,6 @@ export class UISystem extends System {
                 }
             });
         }
-        // *** CHANGE END ***
 
         const gameOver = document.getElementById('game-over');
         if (gameOver) {
@@ -553,8 +599,8 @@ export class UISystem extends System {
         const inventory = player.getComponent('Inventory');
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
 
-        if (overlayState.isOpen && overlayState.activeTab === 'character') {
-            this.renderOverlay('character');
+        if (overlayState.isOpen && (overlayState.activeTab === 'character' || overlayState.activeTab === 'shop')) {
+            this.renderOverlay(overlayState.activeTab);
         }
     }
 
@@ -626,6 +672,38 @@ export class UISystem extends System {
         return filteredItems;
     }
 
+    renderInventory(containerId, items, tab) {
+        const inventoryDiv = document.getElementById(containerId);
+        if (!inventoryDiv) {
+            console.error(`UISystem: Inventory container ${containerId} not found`);
+            return;
+        }
+
+        let filteredItems = this.filterItems(items, tab);
+        const sortedItems = this.sortItemsByTypeAttackTier(filteredItems);
+        inventoryDiv.innerHTML = `
+            ${sortedItems.length ? sortedItems.map((item, index) => `
+                <div class="inventory-item" data-index="${index}">
+                    <p class="inventory-slot ${item.itemTier} ${item.type}">
+                        <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' data-index='${index}' draggable="true" onerror="this.src='img/icons/items/default.svg';">
+                        <span class="item-label ${item.itemTier}">${item.type}</span>
+                    </p>
+                </div>
+            `).join('') : '<p>Inventory empty.</p>'}
+        `;
+
+        const inventoryItems = inventoryDiv.querySelectorAll('.item-icon');
+        inventoryItems.forEach(item => {
+            item.addEventListener('dragstart', (event) => {
+                const target = event.target;
+                const itemData = JSON.parse(target.getAttribute('data-item') || '{}');
+                const index = parseInt(target.closest('.inventory-item').dataset.index, 10);
+                event.dataTransfer.setData('text/plain', JSON.stringify({ item: itemData, index, source: 'inventory' }));
+                this.hideItemTooltip(itemData);
+            });
+        });
+    }
+
     renderOverlay(tab) {
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         const player = this.entityManager.getEntity('player');
@@ -637,6 +715,7 @@ export class UISystem extends System {
         this.logContent.style.display = tab === 'log' ? 'block' : 'none';
         this.characterContent.style.display = tab === 'character' ? 'flex' : 'none';
         this.journeyContent.style.display = tab === 'journey' ? 'block' : 'none';
+        this.shopContent.style.display = tab === 'shop' ? 'flex' : 'none';
 
         if (tab === 'log') {
             this.updateLog(overlayState.logMessages);
@@ -647,6 +726,8 @@ export class UISystem extends System {
             this.updateMenu();
         } else if (tab === 'journey') {
             this.updateJourney();
+        } else if (tab === 'shop') {
+            this.updateShop(stats, inventory);
         }
     }
 
@@ -662,7 +743,7 @@ export class UISystem extends System {
 
         tabMenuDiv.innerHTML = `
             <button id="menu-tab" class="tabs-button" style="background: ${activeTab === 'menu' ? '#0f0' : '#2c672c'};">Menu</button>
-            <button id="character-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'character' ? '#0f0' : '#2c672c'}; ">Character</button>
+            <button id="character-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'character' ? '#0f0' : '#2c672c'};">Character</button>
             <button id="log-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'log' ? '#0f0' : '#2c672c'};">Log</button>
             <button id="journey-tab" ${tabIsDisabled} class="tabs-button" style="background: ${activeTab === 'journey' ? '#0f0' : '#2c672c'};">Journey</button>
             <button id="close-tabs">X</button>
@@ -681,11 +762,13 @@ export class UISystem extends System {
         };
 
         const gameStarted = this.entityManager.getEntity('gameState').getComponent('GameState').gameStarted;
+        console.log(`UISystem: updateMenu - gameStarted: ${gameStarted}`);
 
         document.getElementById('new-game-button').toggleAttribute("hidden", gameStarted);
         document.getElementById('load-games-button').toggleAttribute("hidden", gameStarted);
         document.getElementById('exit-button').toggleAttribute("hidden", !gameStarted);
         document.getElementById('save-games-button').toggleAttribute("hidden", !gameStarted);
+
 
         const menuDataWrapper = document.getElementById('menu-data-wrapper');
         if (menuDataWrapper) {
@@ -790,12 +873,9 @@ export class UISystem extends System {
             return;
         }
 
-        // Get active paths from JourneyPathComponent
         const activePaths = journeyPath.paths;
-        // Get completed paths from JourneyStateComponent
         const completedPaths = journeyState.completedPaths;
 
-        // Log all paths for debugging
         console.log('UISystem: All Active Paths:', activePaths.map(p => ({
             id: p.id,
             parentId: p.parentId,
@@ -803,18 +883,15 @@ export class UISystem extends System {
             completed: p.completed
         })));
 
-        // Filter Master Paths (for tab validation)
         const masterPaths = activePaths.filter(path => path.id === path.parentId);
         const masterPathNames = masterPaths.map(path => path.id.replace('master_', ''));
 
-        // Validate activeJourneyTab
         if (!masterPathNames.includes(this.activeJourneyTab)) {
             this.activeJourneyTab = masterPathNames[0] || '';
         }
 
         const journeyDiv = document.getElementById('journey-items-wrapper');
 
-        // Handle Master Path tabs (e.g., 'whispers', 'echoes', 'lore')
         if (masterPathNames.includes(this.activeJourneyTab)) {
             const masterPathId = `master_${this.activeJourneyTab}`;
             const masterPath = activePaths.find(path => path.id === masterPathId);
@@ -823,17 +900,11 @@ export class UISystem extends System {
                 return;
             }
 
-            // Find direct children of the Master Path (e.g., whisper_parent_1)
             const directChildren = activePaths.filter(path => path.parentId === masterPathId && path.id !== masterPathId);
-
-            // Find all paths that are children of the direct children (e.g., whisper_child_1_1, whisper_child_1_2)
             const directChildIds = directChildren.map(child => child.id);
             const childPaths = activePaths.filter(path => directChildIds.includes(path.parentId));
-
-            // Combine direct children and their children to get all related paths
             const relatedPaths = [...directChildren, ...childPaths];
 
-            // Log related paths with their completionCondition
             console.log(`UISystem: Master Path ID: ${masterPathId}`);
             console.log(`UISystem: Related Paths:`, relatedPaths.map(p => ({
                 id: p.id,
@@ -842,14 +913,9 @@ export class UISystem extends System {
                 completed: p.completed
             })));
 
-            // Separate active parent paths (e.g., "The First Descent") and their children (e.g., "Reach Tier 1")
             const activeParentPaths = relatedPaths.filter(path => !path.completionCondition);
-            // *** CHANGE START: Remove !path.completed filter to include all child paths ***
-            // Filter child paths (have a completionCondition, show regardless of completed status)
             const activeChildPaths = relatedPaths.filter(path => path.completionCondition);
-            // *** CHANGE END ***
 
-            // Log the separated paths
             console.log(`UISystem: Active Parent Paths:`, activeParentPaths.map(p => ({
                 id: p.id,
                 completionCondition: p.completionCondition,
@@ -861,7 +927,6 @@ export class UISystem extends System {
                 completed: p.completed
             })));
 
-            // Group active children by their parent
             const activeGroupedPaths = activeParentPaths.map(parent => {
                 const children = activeChildPaths.filter(child => child.parentId === parent.id);
                 console.log(`UISystem: Children for parent ${parent.id}:`, children.map(c => ({
@@ -872,10 +937,8 @@ export class UISystem extends System {
                 return { parent, children };
             });
 
-            // Get completed paths under this Master Path
             const completedRelatedPaths = completedPaths.filter(path => path.parentId === masterPathId);
 
-            // Generate Active section
             let activeContent = '';
             if (activeGroupedPaths.length > 0) {
                 activeContent = `
@@ -908,7 +971,6 @@ export class UISystem extends System {
                 `;
             }
 
-            // Generate Completed section
             let completedContent = '';
             if (completedRelatedPaths.length > 0) {
                 completedContent = `
@@ -919,14 +981,12 @@ export class UISystem extends System {
                 `;
             }
 
-            // Combine sections or show placeholder
             if (activeContent || completedContent) {
                 journeyDiv.innerHTML = `
                     ${activeContent}
                     ${completedContent}
                 `;
             } else {
-                // Both sections are empty; show the Master Path's description
                 journeyDiv.innerHTML = `<p>${masterPath.description}</p>`;
             }
         } else {
@@ -1000,7 +1060,6 @@ export class UISystem extends System {
             }
         });
 
-        const inventoryDiv = document.getElementById('inventory-item-wrapper');
         const inventoryHash = JSON.stringify(inventory.items.map(item => item.uniqueId)) +
             JSON.stringify(Object.values(inventory.equipped).map(item => item?.uniqueId)) +
             this.activeInventoryTab;
@@ -1009,18 +1068,34 @@ export class UISystem extends System {
         }
         this.lastInventoryHash = inventoryHash;
 
-        let filteredItems = this.filterItems(inventory.items, this.activeInventoryTab);
-        const sortedItems = this.sortItemsByTypeAttackTier(filteredItems);
-        inventoryDiv.innerHTML = `
-        ${sortedItems.length ? sortedItems.map((item, index) => `
-            <div class="inventory-item" data-index="${index}">
-                <p class="inventory-slot ${item.itemTier} ${item.type}">
-                    <img src="img/icons/items/${item.icon}" alt="${item.name}" class="item item-icon ${item.itemTier} ${item.type}" data-item='${JSON.stringify(item)}' data-index='${index}' draggable="true">
-                    <span class="item-label ${item.itemTier}">${item.type}</span>
-                </p>
+        this.renderInventory('inventory-item-wrapper', inventory.items, this.activeInventoryTab);
+    }
+
+    updateShop(stats, inventory) {
+        this.shopContent.innerHTML = `
+            <div id="shop-left">
+                <div id="sell-dropzone">Drop Item To Sell</div>
+                <div id="shop-items"></div>
             </div>
-        `).join('') : '<p>Inventory empty.</p>'}
+            <div id="shop-inventory-wrapper">
+                <h2>Inventory Items</h2>
+                <div id="inventory-window-wrapper">
+                    <div id="shop-inventory-tabs">
+                        <button id="inventory-tab-all" class="inventory-tab-button tab active">All</button>
+                        <button id="inventory-tab-armor" class="inventory-tab-button tab">Armor</button>
+                        <button id="inventory-tab-weapon-melee" class="inventory-tab-button tab">Melee</button>
+                        <button id="inventory-tab-weapon-ranged" class="inventory-tab-button tab">Ranged</button>
+                        <button id="inventory-tab-amulet" class="inventory-tab-button tab">Amulet</button>
+                        <button id="inventory-tab-ring" class="inventory-tab-button tab">Ring</button>
+                        <button id="sort-inventory-tab" class="inventory-tab-button sort">Sort</button>
+                    </div>
+                    <div id="shop-inventory-wrapper-inner"></div>
+                </div>
+            </div>
         `;
+
+        this.renderInventory('shop-inventory-wrapper-inner', inventory.items, this.activeInventoryTab);
+        this.setupInventoryTabs('shop-inventory-tabs', 'shop-inventory-wrapper-inner');
     }
 
     addLogMessage({ message }) {
@@ -1166,6 +1241,19 @@ export class UISystem extends System {
             description.className = 'tooltip-description';
             description.textContent = `${itemData.description}`;
             content.appendChild(description);
+
+            const sellInfoDivider = document.createElement('hr');
+            sellInfoDivider.className = 'tooltip-divider';
+            content.appendChild(sellInfoDivider);
+
+            const sellInfo = document.createElement('div');
+            sellInfo.className = 'tooltip-sellInfo';
+            sellInfo.textContent = 'Item Cannot Be Sold';
+
+            if (itemData.isSellable) {
+                sellInfo.textContent = `Sellable | Value: ${itemData.goldValue}`;
+            }
+            content.appendChild(sellInfo);
 
             tooltip.appendChild(content);
             document.body.appendChild(tooltip);

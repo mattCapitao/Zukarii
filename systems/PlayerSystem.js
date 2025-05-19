@@ -239,6 +239,7 @@ export class PlayerSystem extends System {
         stats.maxLuck = (stats._internal.gear.maxLuck || 0) + (stats._internal.temp.maxLuck || 0);
 
         this.eventBus.emit('StatsUpdated', { entityId: player.id });
+        this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
     }
 
     awardXp({ amount }) {

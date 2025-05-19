@@ -1083,6 +1083,10 @@ border: 0.125rem solid #060; /* ~1px */
 border-radius: .625rem;
 }
 
+.tooltip-sellInfo {
+    font-size: .6rem !important;
+}
+
 .item-icon[icon="golden-skin.png"] {
     animation: tackySparkle 1.5s infinite;
 }
@@ -1291,3 +1295,166 @@ padding: 0.625rem; /* ~10px */
 }
 
 /*   TABS DIV - END  */
+
+
+/* Dialogue System Start */
+
+/* Dialogue Window */
+#dialogue-window {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 150px;
+    background: rgba(20, 30, 20, 0.7);
+    border: 2px solid #0f0;
+    border-radius: 10px;
+    color: #0f0;
+    font-family: 'Verdana', Roboto, sans-serif;
+    font-size: 14px;
+    padding: 16px;
+    pointer-events: auto;
+    z-index: 2100;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#dialogue-text {
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#dialogue-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.625rem;
+}
+
+#dialogue-close {
+    background: #000;
+    color: #0f0;
+    border: 2px solid #0f0;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    align-self: center;
+}
+
+    #dialogue-close:hover {
+        background: #0f0;
+        color: #000;
+    }
+
+
+
+#dialogue-view-wares {
+    background: #000;
+    color: #0f0;
+    border: 2px solid #0f0;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+    #dialogue-view-wares:hover {
+        background: #0f0;
+        color: #000;
+    }
+/* Dialogue System END */
+
+/* Shop Tab Styles */
+#shop-content {
+    height: 30rem;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+#shop-left {
+    display: flex;
+    flex-direction: column;
+    height: 30rem;
+    width: 29%;
+    margin-top: 0.625rem;
+}
+
+#sell-dropzone {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30%;
+    width: 100%;
+    padding: 0.625rem;
+    background: rgba(20, 30, 20, 0.7);
+    border: 0.125rem solid #0f0;
+    border-radius: .625rem;
+    margin-bottom: 0.625rem;
+    color: #0f0;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+    #sell-dropzone.drag-over {
+        border-color: #0f0;
+        border-width: 2px;
+    }
+
+#shop-items {
+    width: 100%;
+    height: 70%;
+    padding: 0.625rem;
+    border: 0.125rem solid #0f0;
+    border-radius: .625rem;
+    overflow-y: auto;
+    scrollbar-color: #0f0 #111;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+    background: rgba(20, 30, 20, 0.7);
+}
+
+#shop-inventory-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 31.75rem;
+    width: 68%;
+    margin-top: 0.625rem;
+}
+
+    #shop-inventory-wrapper div.inventory-item {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 4.1rem;
+        width: 4.1rem;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+#tabs #shop-inventory-wrapper-inner {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    -ms-align-content: flex-start;
+    -webkit-align-content: flex-start;
+    align-content: flex-start;
+    gap: 0.625rem;
+    width: 100%;
+    height: 27.25rem;
+    padding: 0.625rem;
+    border: 0.125rem solid #0f0;
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px 0px .625rem .625rem;
+    border-radius: 0px 0px .625rem .625rem;
+    overflow-y: auto;
+    scrollbar-color: #0f0 #111;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+    background: rgba(20, 30, 20, 0.7);
+}

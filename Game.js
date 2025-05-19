@@ -43,12 +43,14 @@ import { PathSystem } from './systems/PathSystem.js';
 import { InteractionSystem } from './systems/InteractionSystem.js';
 import { MouseInputSystem } from './systems/MouseInputSystem.js'; 
 import { AnimationSystem } from './systems/AnimationSystem.js'; 
+import { NPCSpawnSystem } from './systems/NPCSpawnSystem.js';
+import { DialogueUISystem } from './systems/DialogueUISystem.js';
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
     LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
-    AnimationComponent, AnimationStateComponent, JourneyStateComponent, JourneyPathComponent,
+    AnimationComponent, AnimationStateComponent, JourneyStateComponent, JourneyPathComponent, DialogueComponent,
 } from './core/Components.js';
 
 export class Game {
@@ -224,6 +226,13 @@ export class Game {
             }));
         }
 
+        // Dialogue state entity (global)
+        let dialogueState = this.entityManager.getEntity('dialogueState');
+        if (!dialogueState) {
+            dialogueState = this.entityManager.createEntity('dialogueState', true);
+            this.entityManager.addComponentToEntity('dialogueState', new DialogueComponent());
+        }
+
         let lightingState = this.entityManager.getEntity('lightingState');
         if (lightingState) {
             this.entityManager.removeEntity('lightingState');
@@ -279,6 +288,7 @@ export class Game {
         this.systems.player = new PlayerSystem(this.entityManager, this.state.eventBus, this.utilities);
         //this.systems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus);
         this.systems.monsterSpawn = new MonsterSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data);
+        this.systems.npcSpawn = new NPCSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data);
         this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state);
         this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.path = new PathSystem(this.entityManager, this.state.eventBus, this.utilities); // Add PathSystem before JourneySystem
@@ -300,6 +310,7 @@ export class Game {
         this.systems.mouseInput = new MouseInputSystem(this.entityManager, this.state.eventBus, this.state);
         this.systems.animation = new AnimationSystem(this.entityManager, this.state.eventBus);
         
+        this.systems.dialogueUI = new DialogueUISystem(this.entityManager, this.state.eventBus);
         await Promise.all(Object.values(this.systems).map(system => system.init()));
     }
 
@@ -388,6 +399,7 @@ export class Game {
                 'journey',
                 'interaction',
                 'ui',
+                'dialogueUI',
                 'audio',
                 'levelTransition',
                 'spatialBuckets',

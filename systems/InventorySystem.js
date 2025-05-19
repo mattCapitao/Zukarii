@@ -1,46 +1,38 @@
-﻿// systems/InventorySystem.js
-import { System } from '../core/Systems.js';
+﻿import { System } from '../core/Systems.js';
 import { PositionComponent, LootData } from '../core/Components.js';
 
 export class InventorySystem extends System {
-    constructor(entityManager, eventBus, utilities) { 
+    constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus, utilities);
         this.requiredComponents = ['Inventory'];
-
-        
     }
 
     init() {
-        //console.log('InventorySystem: Initializing listeners');
         this.eventBus.on('AddItem', (data) => {
-            //console.log('InventorySystem: AddItem event received:', data);
             this.addItem(data);
         });
         this.eventBus.on('EquipItem', (data) => {
-            //console.log('InventorySystem: EquipItem event received:', data);
             this.equipItem(data);
         });
         this.eventBus.on('UnequipItem', (data) => {
-           // console.log('InventorySystem: UnequipItem event received:', data);
             this.unequipItem(data);
         });
         this.eventBus.on('DropItem', (data) => {
-           // console.log('InventorySystem: DropItem event received:', data);
             this.discardItem(data);
+        });
+        this.eventBus.on('SellItem', (data) => {
+            this.sellItem(data);
         });
     }
 
     addItem({ entityId, item }) {
-       // console.log('InventorySystem: addItem called with entityId:', entityId, 'item:', item);
         const entity = this.entityManager.getEntity(entityId);
         if (!entity) {
-            //console.error('InventorySystem: Entity not found for entityId:', entityId);
             return;
         }
 
         const inventory = entity.getComponent('Inventory');
         if (!inventory) {
-           // console.error('InventorySystem: Inventory component not found for entityId:', entityId);
             return;
         }
 
@@ -52,16 +44,13 @@ export class InventorySystem extends System {
     }
 
     equipItem({ entityId, item, slot }) {
-        //console.log('InventorySystem: equipItem called with entityId:', entityId, 'item:', item, 'slot:', slot);
         const entity = this.entityManager.getEntity(entityId);
         if (!entity) {
-           // console.error('InventorySystem: Entity not found for entityId:', entityId);
             return;
         }
 
         const inventory = entity.getComponent('Inventory');
         if (!inventory) {
-           // console.error('InventorySystem: Inventory component not found for entityId:', entityId);
             return;
         }
 
@@ -90,17 +79,16 @@ export class InventorySystem extends System {
         inventory.equipped[slot] = { ...item, equippedSlot: slot };
         this.eventBus.emit('LogMessage', { message: `Equipped ${item.name} to ${slot}` });
 
-        // CHANGED: Apply item affixes to player's AffixComponent
         if (item.affixes && Array.isArray(item.affixes)) {
             const affixComponent = entity.getComponent('Affix') || new AffixComponent([]);
             item.affixes.forEach(affix => {
                 const affixData = {
-                    name: affix.name,         // e.g., "resilience"
-                    type: affix.type,         // e.g., 'combat'
-                    trigger: affix.trigger,   // e.g., 'hitByAttack'
-                    effect: affix.effect,     // e.g., 'instantHeal'
-                    params: affix.params,     // e.g., { chanceToHeal: 0.05, ... }
-                    sourceId: item.uniqueId   // Track origin for removal
+                    name: affix.name,
+                    type: affix.type,
+                    trigger: affix.trigger,
+                    effect: affix.effect,
+                    params: affix.params,
+                    sourceId: item.uniqueId
                 };
                 affixComponent.affixes.push(affixData);
             });
@@ -108,21 +96,17 @@ export class InventorySystem extends System {
             console.log(`InventorySystem: Applied affixes from ${item.name} to ${entityId}:`, affixComponent.affixes);
         }
 
-
         this.eventBus.emit('GearChanged', { entityId });
     }
 
     unequipItem({ entityId, slot, toInventory = true, silent = false }) {
-        //console.log('InventorySystem: unequipItem called with entityId:', entityId, 'slot:', slot, 'toInventory:', toInventory, 'silent:', silent);
         const entity = this.entityManager.getEntity(entityId);
         if (!entity) {
-           // console.error('InventorySystem: Entity not found for entityId:', entityId);
             return;
         }
 
         const inventory = entity.getComponent('Inventory');
         if (!inventory) {
-          //  console.error('InventorySystem: Inventory component not found for entityId:', entityId);
             return;
         }
 
@@ -131,14 +115,12 @@ export class InventorySystem extends System {
 
         inventory.equipped[slot] = null;
 
-        // CHANGED: Remove item affixes from player's AffixComponent
         const affixComponent = entity.getComponent('Affix');
         if (affixComponent && item.affixes) {
             affixComponent.affixes = affixComponent.affixes.filter(affix => affix.sourceId !== item.uniqueId);
             this.entityManager.addComponentToEntity(entityId, affixComponent);
             console.log(`InventorySystem: Removed affixes from ${item.name} for ${entityId}:`, affixComponent.affixes);
         }
-
 
         if (toInventory) {
             inventory.items.push({ ...item, equippedSlot: undefined });
@@ -148,16 +130,13 @@ export class InventorySystem extends System {
     }
 
     discardItem({ uniqueId }) {
-
         const player = this.entityManager.getEntity('player');
         if (!player) { return; }
         const inventory = player.getComponent('Inventory');
-        if (!inventory) {return;}
+        if (!inventory) { return; }
 
         const position = player.getComponent('Position');
-        if (!position) {return;}
-
-
+        if (!position) { return; }
 
         const itemIndex = inventory.items.findIndex(item => item.uniqueId === uniqueId);
         if (itemIndex === -1) {
@@ -165,19 +144,17 @@ export class InventorySystem extends System {
             return;
         }
 
-
-
         const item = inventory.items[itemIndex];
         inventory.items.splice(itemIndex, 1);
 
         const gameStateEntity = this.entityManager.getEntity('gameState');
-        if (!gameStateEntity) {return;}
+        if (!gameStateEntity) { return; }
 
         const gameState = gameStateEntity.getComponent('GameState');
-        if (!gameState) { return;}
+        if (!gameState) { return; }
 
         const tier = gameState.tier;
-        if (tier === undefined) {return;}
+        if (tier === undefined) { return; }
 
         const loot = JSON.parse(JSON.stringify({
             name: `${item.name} (Discarded)`,
@@ -201,6 +178,49 @@ export class InventorySystem extends System {
         this.entityManager.addComponentToEntity(lootEntity.id, lootData);
         this.eventBus.emit('DiscardItem', { treasure: lootEntity, tier });
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
+    }
+
+    sellItem({ item, uniqueId }) {
+        const player = this.entityManager.getEntity('player');
+        if (!player) {
+            console.error('InventorySystem: Player entity not found');
+            return;
+        }
+
+        const inventory = player.getComponent('Inventory');
+        if (!inventory) {
+            console.error('InventorySystem: Inventory component not found for player');
+            return;
+        }
+
+        const resource = player.getComponent('Resource');
+        if (!resource) {
+            console.error('InventorySystem: Resource component not found for player');
+            return;
+        }
+
+        const itemIndex = inventory.items.findIndex(i => i.uniqueId === uniqueId);
+        if (itemIndex === -1) {
+            console.error('InventorySystem: Item with uniqueId not found:', uniqueId);
+            return;
+        }
+
+        const itemToSell = inventory.items[itemIndex];
+        if (!itemToSell.isSellable) {
+            console.log(`InventorySystem: Item ${itemToSell.name} (uniqueId: ${uniqueId}) is not sellable`);
+            return;
+        }
+
+        const goldValue = itemToSell.goldValue || 0;
+        resource.gold = (resource.gold || 0) + goldValue;
+        inventory.items.splice(itemIndex, 1);
+
+        this.eventBus.emit('LogMessage', { message: `Sold ${itemToSell.name} for ${goldValue} gold` });
+        this.eventBus.emit('PlaySfxImmediate', { sfx: 'coin', volume: 0.25 });
+        this.eventBus.emit('StatsUpdated', { entityId: 'player' }); 
+        this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
+
+        console.log(`InventorySystem: Sold item ${itemToSell.name} (uniqueId: ${uniqueId}) for ${goldValue} gold`);
     }
 
     isSlotCompatible(item, slot) {

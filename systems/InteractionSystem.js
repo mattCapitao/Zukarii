@@ -11,18 +11,33 @@ export class InteractionSystem extends System {
     }
 
     init() {
-        // For testing, simulate an interaction that triggers a path transfer
-        // In a real scenario, this would be triggered by player interaction with an NPC or object
+        this.eventBus.on('InteractWithNPC', (data) => this.handleInteractWithNPC(data));
         this.simulateInteraction();
     }
 
     update(deltaTime) {
         // No per-frame updates needed for now; interactions are event-driven
-        // Future implementations can add logic to detect interactions (e.g., player-NPC proximity)
+    }
+
+    handleInteractWithNPC({ npcId }) {
+        const npc = this.entityManager.getEntity(npcId);
+        if (!npc || !npc.hasComponent('NPCData')) {
+            console.error(`InteractionSystem: NPC ${npcId} not found or missing NPCData`);
+            return;
+        }
+        const npcData = npc.getComponent('NPCData');
+        const shopComponent = npc.hasComponent('ShopComponent') ? npc.getComponent('ShopComponent') : null;
+        const shopDialogueText = shopComponent ? shopComponent.dialogueText : null;
+
+        this.eventBus.emit('OpenDialogue', {
+            npcId: npcId,
+            text: npcData.greeting,
+            shopDialogueText: shopDialogueText
+        });
+        console.log(`InteractionSystem: Opened dialogue for NPC ${npcId} (${npcData.name})${shopDialogueText ? ` with shop dialogue "${shopDialogueText}"` : ''}`);
     }
 
     simulateInteraction() {
-        // Simulate an NPC with a JourneyPathComponent containing Echo paths
         const npcEntity = this.entityManager.createEntity('npc_1');
         const npcJourneyPath = new JourneyPathComponent();
         this.utilities.addPath(npcJourneyPath, {
@@ -54,18 +69,15 @@ export class InteractionSystem extends System {
         });
         this.entityManager.addComponentToEntity('npc_1', npcJourneyPath);
 
-        // Simulate the player accepting the Echo from the NPC
-        // In a real scenario, this would be triggered by a player action (e.g., key press near NPC)
         setTimeout(() => {
             this.acceptPathFromNPC('npc_1', 'player', 'echo_parent_1');
             this.acceptPathFromNPC('npc_1', 'player', 'echo_child_1_1');
             this.eventBus.emit('LogMessage', { message: 'You accepted the Echo: Echoes of the Past from an NPC.' });
             console.log('InteractionSystem: Simulated accepting Echo from NPC');
-        }, 5000); // Delay for testing purposes
+        }, 5000);
     }
 
     acceptPathFromNPC(sourceEntityId, targetEntityId, journeyPathCompId) {
-        // Push the transfer request to the pathTransfers queue
         this.pathTransfers.push({
             sourceEntityId,
             targetEntityId,

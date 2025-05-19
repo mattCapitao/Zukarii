@@ -181,3 +181,21 @@ export class AnimationComponent {
         this.spriteSheets = {};
     }
 }
+
+export class NPCDataComponent {
+    constructor(id, name, greeting) {
+        this.type = 'NPCData';
+        this.id = id; // e.g., "zu_master"
+        this.name = name; // e.g., "Zu Master"
+        this.greeting = greeting; // e.g., "Hello Zukarii"
+    }
+}
+
+export class DialogueComponent {
+    constructor(npcId = '', text = '', isOpen = false) {
+        this.type = 'Dialogue';
+        this.npcId = npcId; // NPC entity ID
+        this.text = text; // Dialogue text
+        this.isOpen = isOpen; // Whether dialogue is open
+    }
+}

@@ -1028,6 +1028,7 @@ export class LevelSystem extends System {
         const walls = [];
         const floors = [];
         const stairs = [];
+        const npcs = [];
 
 
         for (let y = 1; y <= 9; y++) {
@@ -1085,15 +1086,14 @@ export class LevelSystem extends System {
         stairs.push(stairDownId);
         map[8][12] = '⇓';
 
-        
-
         const levelData = {
             map: map,
             walls: walls,
             floors: floors,
             stairs: stairs,
+            npcs: npcs,
             stairsDown: { x: 11, y: 7 },
-            stsirsUp: { x: 2, y: 2 },
+            stairsUp: { x: 2, y: 2 },
             roomEntityIds: []
         };
 
@@ -1105,7 +1105,19 @@ export class LevelSystem extends System {
         entityListComp.walls = walls;
         entityListComp.floors = floors;
         entityListComp.stairs = stairs;
+        entityListComp.npcs = npcs;
         console.log(`LevelSystem.js: Updated EntityListComponent for ${levelEntity.id} in generateSurfaceLevel`);
+
+       
+            
+            this.eventBus.emit('SpawnNPCs', {
+                tier: 0,
+                npcs: [
+                    { id: 'zu_master', x: 5, y: 3 },
+                    { id: 'shop_keeper', x: 7, y:7 }
+                ]
+            });
+        
 
         return levelData;
     }
@@ -1265,6 +1277,12 @@ export class LevelSystem extends System {
             console.error(`LevelSystem.js: EntityListComponent missing for level ${entity.id}`);
             return;
         }
+
+
+        
+
+       
+        console.log(`LevelSystem.js: EntityListComponent.npcs after SpawnNPCs:`, entityList.npcs);
 
         const hasPortal = entityList.portals.length > 0;
         const minPortalPlacementTier = 3;

@@ -47,7 +47,9 @@ export class MapRenderSystem extends System {
             fountain: 'img/avatars/fountain.png',
             player_idle: 'img/anim/Player/Idle.png',
             player_walk: 'img/anim/Player/Walk.png',
-            player_attack: 'img/anim/Player/Attack_Fire_2.png' // Add attack sprite
+            player_attack: 'img/anim/Player/Attack_Fire_2.png',
+            npc_zu_master: 'img/avatars/npcs/zu-master.png', // Add NPC sprite
+            npc_merchant: 'img/avatars/npcs/merchant.png'
         };
         for (const [key, path] of Object.entries(spritePaths)) {
             const img = new Image();
@@ -276,6 +278,8 @@ export class MapRenderSystem extends System {
                     spritePath = 'img/avatars/portal.png';
                 } else if (entity.hasComponent('LootData')) {
                     spritePath = 'img/avatars/chest.png';
+                } else if (entity.hasComponent('NPCData')) {
+                    spritePath = visuals.avatar || 'img/avatars/npcs/zu-master.png'; // Fallback
                 }
             }
             if (!spritePath) {

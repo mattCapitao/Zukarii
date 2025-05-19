@@ -88,6 +88,26 @@ export class DataSystem extends System {
                 return [];
             });
 
+        // Load NPCs from JSON file asynchronously
+        console.log('DataSystem: Starting fetch for npcs.json');
+        this.npcsPromise = fetch('data/json/npcs.json')
+            .then(response => {
+                console.log('DataSystem: Fetch response received (npcs):', response);
+                if (!response.ok) {
+                    throw new Error(`Failed to load npcs.json: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('DataSystem: Successfully loaded npcs.json:', data);
+                return data;
+            })
+            .catch(error => {
+                console.error('DataSystem: Failed to load npcs.json:', error);
+                console.log('DataSystem: Returning empty array as fallback for npcs');
+                return [];
+            });
+
         // Custom surface level
         this.customSurfaceLevel = {
             map: this.generateSurfaceMap(),
@@ -121,6 +141,7 @@ export class DataSystem extends System {
                 return {};
             });
 
+
         
     }
 
@@ -140,6 +161,7 @@ export class DataSystem extends System {
         this.eventBus.on('RequestSaveGameToStorage', (data) => this.saveGame(data));
         this.eventBus.on('RequestLoadGameFromStorage', (data, callback) => this.loadGame(data, callback));
         this.eventBus.on('RequestSavedGamesList', (callback) => this.getSavedGamesList(callback));
+        this.eventBus.on('GetNPCs', (data) => this.provideNPCs(data));
 
         // Preload data
         this.loadData();
@@ -167,6 +189,11 @@ export class DataSystem extends System {
             console.log('DataSystem: Starting fetch for itemStatOptions.json');
             this.itemStatOptions = await fetch('data/json/itemStatOptions.json').then(r => r.json());
             console.log('DataSystem: Successfully loaded itemStatOptions.json:', this.itemStatOptions);
+
+            console.log('DataSystem: Starting fetch for npcs.json');
+            this.NPCs = await fetch('data/json/npcs.json').then(r => r.json());
+            console.log('DataSystem: Successfully loaded npcs.json:', this.NPCs);
+
         } catch (error) {
             console.error('DataSystem: Failed to load data:', error);
             this.randomMonsters = [];
@@ -174,6 +201,7 @@ export class DataSystem extends System {
             this.bossMonsters = [];
             this.uniqueItems = [];
             this.itemStatOptions = {};
+            this.NPCs = [];
         }
     }
 
@@ -305,6 +333,17 @@ export class DataSystem extends System {
             callback(JSON.parse(JSON.stringify(uniqueItems)));
         } catch (error) {
             console.error('DataSystem: Error providing unique items:', error);
+            callback([]);
+        }
+    }
+
+    async provideNPCs({ callback }) {
+        try {
+            const npcs = await this.npcsPromise;
+            console.log('DataSystem: Providing NPCs:', npcs);
+            callback(JSON.parse(JSON.stringify(npcs)));
+        } catch (error) {
+            console.error('DataSystem: Error providing NPCs:', error);
             callback([]);
         }
     }

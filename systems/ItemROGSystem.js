@@ -1,5 +1,4 @@
-﻿// systems/ItemROGSystem.js
-import { System } from '../core/Systems.js';
+﻿import { System } from '../core/Systems.js';
 
 export class ItemROGSystem extends System {
     constructor(entityManager, eventBus, utilities) {
@@ -13,7 +12,6 @@ export class ItemROGSystem extends System {
             const item = this.generateRogItem({ partialItem, dungeonTier });
             callback(item);
         });
-        
     }
 
     async requestItemStatOptions() {
@@ -28,10 +26,81 @@ export class ItemROGSystem extends System {
         });
     }
 
+    calculateGoldValue(item, dungeonTier) {
+        // Base gold value from LootManagerSystem: 0.95 * (30 + tier * 10)
+        const baseGoldValue = 0.95 * (30 + dungeonTier * 10);
+
+        // Item tier multiplier
+        const itemTierMultiplier = {
+            junk: 0.5,
+            common: 1,
+            rare: 2,
+            magic: 4,
+            mastercraft: 15,
+            legendary: 20,
+            relic: 35,
+            artifact: 50
+        }[item.itemTier] || 1;
+
+        // Stat weights for all known stats
+        const statWeights = {
+            intellect: 5,
+            prowess: 5,
+            agility: 5,
+            maxHp: 5,
+            maxMana: 5,
+            maxLuck: 5,
+            range: 5,
+            block: 5,
+            armor: 5,
+            defense: 5,
+            baseBlock: 5,
+            baseRange: 5,
+            rangedBonus: 5,
+            meleeBonus: 5,
+            damageBonus: 5,
+            baseDamageMin: 5,
+            baseDamageMax: 5,
+            resistMagic: 5
+        };
+
+        // Calculate sum of weighted stats
+        let sumOfWeightedStats = 0;
+        const stats = item.stats || {};
+        Object.keys(stats).forEach(stat => {
+            const weight = statWeights[stat] !== undefined ? statWeights[stat] : 5;
+            if (statWeights[stat] === undefined) {
+                console.warn(`ItemROGSystem: Unknown stat '${stat}' using fallback weight 5`);
+            }
+            sumOfWeightedStats += stats[stat] * weight;
+        });
+
+        // Include item-level stats
+        const itemStats = ['baseDamageMin', 'baseDamageMax', 'armor', 'baseBlock', 'baseRange', 'maxLuck'];
+        itemStats.forEach(stat => {
+            if (item[stat] !== undefined) {
+                sumOfWeightedStats += item[stat] * (statWeights[stat] || 5);
+            }
+        });
+
+        // Calculate stat multiplier
+        let statMultiplier = 1 + sumOfWeightedStats;
+        if (!isFinite(sumOfWeightedStats) || sumOfWeightedStats <= 0) {
+            console.warn(`ItemROGSystem: Invalid sumOfWeightedStats (${sumOfWeightedStats}) for item ${item.name}, using statMultiplier = 1`);
+            statMultiplier = 1;
+        }
+
+        // Calculate final gold value
+        const goldValue = Math.round(baseGoldValue * itemTierMultiplier * statMultiplier);
+        console.log(`ItemROGSystem: Calculated goldValue for ${item.name}: base=${baseGoldValue}, tierMultiplier=${itemTierMultiplier}, sumOfWeightedStats=${sumOfWeightedStats}, statMultiplier=${statMultiplier}, total=${goldValue}`);
+
+        return goldValue;
+    }
+
     generateRogItem({ partialItem = { tierIndex: 0 }, dungeonTier }) {
         if (!this.itemStatOptions) {
             console.warn('ItemROGSystem: itemStatOptions not loaded, using fallback behavior');
-            return this.generateFallbackItem(partialItem, dungeonTier); // Fallback if data isn’t available
+            return this.generateFallbackItem(partialItem, dungeonTier);
         }
 
         const item = { ...partialItem };
@@ -109,33 +178,37 @@ export class ItemROGSystem extends System {
 
         // Bonus stats
         if (!item.stats || Object.keys(item.stats).length === 0) {
-            if ((item.tierIndex === 1 && Math.random() < .5) || item.tierIndex > 1) { 
+            if ((item.tierIndex === 1 && Math.random() < .5) || item.tierIndex > 1) {
                 const bonusStats = this.getBonusStats(statOptions.bonus, item, dungeonTier);
                 item.stats = bonusStats.slected;
                 item.critStats = bonusStats.crit;
             }
         }
 
-        //Check for affix
+        // Check for affix
         let randomAffix = false;
-        if (item.tierIndex > 4 &&  (!item.affixes || item.affixes.length === 0) ) { // Add affix to Legendary and above if template has no affix
+        if (item.tierIndex > 4 && (!item.affixes || item.affixes.length === 0)) { // Add affix to Legendary and above if template has no affix
             randomAffix = true;
             console.warn('ItemROGSystem: ItemAffix = TRUE');
-
-        } if (randomAffix) {
+        }
+        if (randomAffix) {
             const affix = this.getRandomAffix();
             if (affix) {
                 item.affixes = [affix];
                 console.log('ItemROGSystem: Affix added:', affix);
             } else {
                 console.warn('ItemROGSystem: getRandomAffix returned an empty string');
-            } 
+            }
         }
 
         // Required properties
         item.name = item.name || `${item.itemTier} ${item.type}`;
         item.uniqueId = item.uniqueId || this.utilities.generateUniqueId();
         item.description = item.description || `${item.itemTier} ${item.type}`;
+
+        // Add gold value and isSellable
+        item.goldValue = this.calculateGoldValue(item, dungeonTier);
+        item.isSellable = true;
 
         console.log(`ItemROGSystem: Generated item:`, item);
         return item;
@@ -159,7 +232,7 @@ export class ItemROGSystem extends System {
 
         let critCount = 0;
 
-        if (itemTier === 4 || itemTier === 7){// Chance for bonus stats on Mastercraft and Artifact
+        if (itemTier === 4 || itemTier === 7) { // Chance for bonus stats on Mastercraft and Artifact
             const statCritChance = dungeonTier * .001;
             console.log('ItemROGSystem: Mastercraft stat count roll crit chance:', statCritChance);
             if (Math.random() <= statCritChance) {
@@ -178,20 +251,20 @@ export class ItemROGSystem extends System {
                     }
                 }
             }
-        } 
+        }
 
         const critStats = [];
         console.log(`ItemROGSystem: Crit count: ${critCount}, available stats:`, availableStats);
-        for (let i = 0, c=0; i < count && availableStats.length > 0; i++, c++) {
+        for (let i = 0, c = 0; i < count && availableStats.length > 0; i++, c++) {
             const index = Math.floor(Math.random() * availableStats.length);
             const stat = availableStats.splice(index, 1)[0];
             let isCrit = false;
             if (c < critCount) isCrit = true; // Roll for crit stats
             const statValue = this.statRoll(stat, item, isCrit);
 
-            if (isCrit) {   
-               critStats.push(stat); 
-               console.log('ItemROGSystem: Mastercraft stat roll CRIT - statValue increased to:', statValue);
+            if (isCrit) {
+                critStats.push(stat);
+                console.log('ItemROGSystem: Mastercraft stat roll CRIT - statValue increased to:', statValue);
             }
 
             if (selectedStats.hasOwnProperty(stat)) {
@@ -206,11 +279,6 @@ export class ItemROGSystem extends System {
     }
 
     getRandomAffix() {
-        /*if (!this.itemAffixOptions) {
-            console.warn('ItemROGSystem: itemStatOptions not available, cannot generate random affix');
-            return '';
-        }
-        */
         const itemAffixOptions = [
             {
                 "name": "lifeSteal",
@@ -223,7 +291,6 @@ export class ItemROGSystem extends System {
                     "chanceToStealLife": 0.15
                 },
                 "description": "Chance to heal for a portion of damage dealt when hitting an enemy."
-
             },
             {
                 "name": "resilience",
@@ -236,7 +303,6 @@ export class ItemROGSystem extends System {
                     "chanceToHeal": 0.05
                 },
                 "description": "Chance to recover a percentage of missing health on being hit."
-
             },
             {
                 "name": "arcaneMirror",
@@ -249,9 +315,7 @@ export class ItemROGSystem extends System {
                     "chanceToReflect": .1
                 },
                 "description": "Chance to trigger an arcane mirror reflecting damage to your attacker on being hit."
-
             }
-
         ];
         const index = Math.floor(Math.random() * itemAffixOptions.length);
         console.log('ItemROGSystem: Random affix rolled:', itemAffixOptions[index]);
@@ -286,47 +350,45 @@ export class ItemROGSystem extends System {
             case 'baseBlock': value = Math.floor(item.tierIndex) + 1; break;
             case 'baseRange': value = Math.floor(item.tierIndex) + 4; break;
             case 'armor': value = Math.floor(item.tierIndex) + 1; break;
-            case 'maxHp': if (isCrit) {
-                    value =  item.tierIndex * 10;
+            case 'maxHp':
+                if (isCrit) {
+                    value = item.tierIndex * 10;
                 } else {
-                   value = item.tierIndex * 5 + Math.round(Math.random() * (item.tierIndex * 5));
+                    value = item.tierIndex * 5 + Math.round(Math.random() * (item.tierIndex * 5));
                 }
-              break;
-            case 'maxMana': if (isCrit) {
+                break;
+            case 'maxMana':
+                if (isCrit) {
                     value = item.tierIndex * 4;
                 } else {
                     value = item.tierIndex * 2 + Math.round(Math.random() * (item.tierIndex * 2));
                 }
                 break;
-
             case 'prowess':
-            case 'agility': 
+            case 'agility':
             case 'intellect':
                 value = Math.round(item.tierIndex / 2) || 1;
                 if (isCrit) { value++; }
                 break;
-
             case 'range':
             case 'block':
             case 'defense':
                 if (isCrit) {
-                value = item.tierIndex * .5;
+                    value = item.tierIndex * .5;
                 } else {
                     value = this.randomizeStatRoll(Math.round(item.tierIndex * .5), item);
                 }
                 break;
-
-            case 'damageBonus': 
-            case 'meleeBonus': 
-            case 'rangedBonus': 
+            case 'damageBonus':
+            case 'meleeBonus':
+            case 'rangedBonus':
             case 'resistMagic':
                 if (isCrit) {
-                    value = item.tierIndex + 1
+                    value = item.tierIndex + 1;
                 } else {
                     value = this.randomizeStatRoll((item.tierIndex + 1), item);
                 }
                 break;
-            
             default:
                 console.log(`Stat ${stat} not found while attempting to generate a value for use on ${item}`);
                 return 0;
@@ -354,7 +416,6 @@ export class ItemROGSystem extends System {
         return roll;
     }
 
-    // Fallback method if itemStatOptions is not available
     generateFallbackItem(partialItem, dungeonTier) {
         const item = { ...partialItem };
         item.tierIndex = item.tierIndex || 0;
@@ -363,6 +424,8 @@ export class ItemROGSystem extends System {
         item.name = `${item.itemTier} ${item.type}`;
         item.uniqueId = this.utilities.generateUniqueId();
         item.description = `${item.itemTier} ${item.type}`;
+        item.goldValue = this.calculateGoldValue(item, dungeonTier);
+        item.isSellable = true;
         console.warn('ItemROGSystem: Generated fallback item:', item);
         return item;
     }

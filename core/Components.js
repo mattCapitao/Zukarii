@@ -40,6 +40,7 @@ import {
     AudioQueueComponent,
     LevelTransitionComponent,
     MouseTargetComponent,
+    ShopComponent,
 } from './components/GameComponents.js';
 
 import {
@@ -63,6 +64,8 @@ import {
     JourneyPathComponent,
     AnimationStateComponent,
     AnimationComponent,
+    NPCDataComponent, // Add
+    DialogueComponent, // Add
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -103,6 +106,7 @@ export {
     AudioQueueComponent,
     LevelTransitionComponent,
     MouseTargetComponent,
+    ShopComponent,
 
     // Common components
     PositionComponent,
@@ -125,6 +129,8 @@ export {
     JourneyPathComponent,
     AnimationStateComponent,
     AnimationComponent,
+    NPCDataComponent, // Add
+    DialogueComponent, // Add
 };
 
 // Utility functions

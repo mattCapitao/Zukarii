@@ -141,6 +141,35 @@ export class MouseInputSystem {
         }
     }
 
+    getNPCAtPosition(worldX, worldY) {
+        const npcs = this.entityManager.getEntitiesWith(['NPCData', 'Position', 'Hitbox', 'Visuals']);
+        for (const npc of npcs) {
+            const pos = npc.getComponent('Position');
+            const visuals = npc.getComponent('Visuals');
+            const hitboxWidth = visuals.w + this.HITBOX_BUFFER * 2;
+            const hitboxHeight = visuals.h + this.HITBOX_BUFFER * 2;
+            const hitboxLeft = pos.x - this.HITBOX_BUFFER;
+            const hitboxRight = pos.x + visuals.w + this.HITBOX_BUFFER;
+            const hitboxTop = pos.y - this.HITBOX_BUFFER;
+            const hitboxBottom = pos.y + visuals.h + this.HITBOX_BUFFER;
+
+            if (
+                worldX >= hitboxLeft &&
+                worldX <= hitboxRight &&
+                worldY >= hitboxTop &&
+                worldY <= hitboxBottom
+            ) {
+                const centerX = pos.x + visuals.w / 2;
+                const centerY = pos.y + visuals.h / 2;
+                const dx = worldX - centerX;
+                const dy = worldY - centerY;
+                console.log(`MouseInputSystem: Hit NPC ${npc.id}, distance from center: ${Math.sqrt(dx * dx + dy * dy).toFixed(2)} pixels`);
+                return npc;
+            }
+        }
+        return null;
+    }
+
     processInput(worldX, worldY, isClick = false) {
         const player = this.entityManager.getEntity('player');
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
@@ -148,6 +177,38 @@ export class MouseInputSystem {
         const mana = player.getComponent('Mana');
         const inventory = player.getComponent('Inventory');
         const visuals = player.getComponent('Visuals');
+        const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
+
+
+        // Check for NPCs
+        const npc = this.getNPCAtPosition(worldX, worldY);
+        if (npc) {
+            const npcPos = npc.getComponent('Position');
+            const playerPos = player.getComponent('Position');
+            const dx = npcPos.x - playerPos.x;
+            const dy = npcPos.y - playerPos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy) / this.TILE_SIZE;
+            //const visibilityRadius = lightingState?.visibilityRadius || 5;
+            const interactRange = 2;
+
+            if (distance <= interactRange) {
+                // Within visual radius: trigger interaction
+                this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
+                this.eventBus.emit('StopMovement', { entityId: 'player' });
+                this.eventBus.emit('InteractWithNPC', { npcId: npc.id });
+                console.log(`MouseInputSystem: Interacting with NPC ${npc.id} at (${npcPos.x}, ${npcPos.y})`);
+                return;
+            } else {
+                // Outside visual radius: move to NPC's tile
+                const tileX = Math.floor(npcPos.x / this.TILE_SIZE);
+                const tileY = Math.floor(npcPos.y / this.TILE_SIZE);
+                const targetX = tileX * this.TILE_SIZE;
+                const targetY = tileY * this.TILE_SIZE;
+                this.setMovementTarget(targetX, targetY);
+                console.log(`MouseInputSystem: Moving to NPC ${npc.id} at tile (${tileX}, ${tileY})`);
+                return;
+            }
+        }
 
         // Check for monsters
         const monster = this.getMonsterAtPosition(worldX, worldY);

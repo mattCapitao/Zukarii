@@ -1,0 +1,25 @@
+﻿[
+  {
+    "id": "zu_master",
+    "name": "Zu Master",
+    "avatar": "img/avatars/npcs/zu-master.png",
+    "greeting": "Hello Zukarii",
+    "faceLeft" : true,
+    "width": 42,
+    "height": 42,
+    "hitboxWidth": 42,
+    "hitboxHeight": 42
+  },
+  {
+    "id": "shop_keeper",
+    "name": "Shop Keeper",
+    "avatar": "img/avatars/npcs/merchant.png",
+    "greeting": "Hello Zukarii",
+    "faceLeft": false,
+    "width": 36,
+    "height": 36,
+    "hitboxWidth": 36,
+    "hitboxHeight": 36,
+    "shopType": "EquipmentShop"
+  }
+]
