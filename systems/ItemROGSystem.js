@@ -91,7 +91,7 @@ export class ItemROGSystem extends System {
         }
 
         // Calculate final gold value
-        const goldValue = Math.round(baseGoldValue * itemTierMultiplier * statMultiplier);
+        const goldValue = Math.round((baseGoldValue + statMultiplier) * itemTierMultiplier );
         console.log(`ItemROGSystem: Calculated goldValue for ${item.name}: base=${baseGoldValue}, tierMultiplier=${itemTierMultiplier}, sumOfWeightedStats=${sumOfWeightedStats}, statMultiplier=${statMultiplier}, total=${goldValue}`);
 
         return goldValue;

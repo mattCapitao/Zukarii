@@ -99,7 +99,7 @@ export class LootManagerSystem extends System {
         this.uniqueItemsPromise = null;
 
         // Constants
-        this.BASE_DROP_CHANCE = 0.9;
+        this.BASE_DROP_CHANCE = 0.95;
 
         //GOLD
         this.BASE_GOLD_CHANCE = 0.95;
