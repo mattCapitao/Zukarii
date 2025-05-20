@@ -95,6 +95,7 @@ export class NPCSpawnSystem extends System {
                 console.log(`NPCSpawnSystem: Spawned NPC ${entity.id} (${template.name}) at pixel (${pixelX}, ${pixelY}) for tile (${tileX}, ${tileY}) on tier ${tier}`);
             }
             console.log(`NPCSpawnSystem: EntityListComponent.npcs after spawning:`, entityList.npcs);
+
         } catch (err) {
             console.error('NPCSpawnSystem: Failed to fetch NPC data:', err);
         }

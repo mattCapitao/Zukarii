@@ -14,6 +14,9 @@ export class NPCControllerSystem extends System {
             console.log(`NPCControllerSystem: Received GenerateShopInventories event for tier ${tier}`);
             this.generateShopInventories(tier);
         });
+        const initTier = this.entityManager.getActiveTier();
+        this.generateShopInventories(initTier);
+
     }
 
     update(deltaTime) {
