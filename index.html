@@ -284,17 +284,25 @@
     </div>
 
     <script type="module" src="init.js"></script>
-    <!-- Track New Game Start Event -->
     <script>
         // Only track events on game.zukarii.com (where GA4 is loaded)
         if (window.location.host === 'game.zukarii.com') {
-            document.getElementById('start-new-game').addEventListener('click', function () {
-                const characterName = document.getElementById('save-name-input').value || 'Unknown';
-                gtag('event', 'start_new_game', {
-                    'character_name': characterName
+            // Get the elements
+            const startNewGameButton = document.getElementById('start-new-game');
+            const saveNameInput = document.getElementById('save-name-input');
+
+            // Check if both elements exist before proceeding
+            if (startNewGameButton && saveNameInput) {
+                startNewGameButton.addEventListener('click', function () {
+                    const characterName = saveNameInput.value || 'Unknown';
+                    gtag('event', 'start_new_game', {
+                        'character_name': characterName
+                    });
+                    console.log('GA4 Event: start_new_game tracked with character_name:', characterName);
                 });
-                console.log('GA4 Event: start_new_game tracked with character_name:', characterName);
-            });
+            } else {
+                console.log('GA4 Tracking: Skipped start_new_game event listener - required elements not found');
+            }
         }
     </script>
 </body>

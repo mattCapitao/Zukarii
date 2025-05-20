@@ -40,7 +40,7 @@ export class LevelSystem extends System {
         this.MAX_PLACEMENT_ATTEMPTS = 200;
         this.MIN_STAIR_DISTANCE = 18;
         this.roomsPerLevel = 50;
-        this.TILE_SIZE = this.state.TILE_SIZE || 32; 
+        this.TILE_SIZE = this.state.TILE_SIZE || 32;
     }
 
     init() {
@@ -60,23 +60,29 @@ export class LevelSystem extends System {
             this.entityManager.addComponentToEntity(levelEntity.id, new SpatialBucketsComponent());
             console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier 0 in init`);
             this.addLevel({ tier: 0, customLevel: this.generateSurfaceLevel(levelEntity) });
+            // Explicitly call checkLevelAfterTransitions for tier 0 to ensure shop inventories are generated
+            this.checkLevelAfterTransitions({ tier: 0, levelEntity });
         }
 
-            if (isNewGame) {
-                gameState.tier = 0;
-                this.entityManager.setActiveTier(0);
-                console.log(`LevelSystem.js: init - gameState.tier set to ${gameState.tier} after creating Tier 0 for a new game or a game saved on Tier 0 `);
-            } else {
-                // For loaded games, generate levels from 1 up to the current tier (if not already generated)
-                for (let tier = 1; tier <= gameState.tier; tier++) {
-                    if (!this.entityManager.getEntitiesWith(['Tier']).some(e => e.getComponent('Tier').value === tier)) {
-                        this.addLevel({ tier });
-                    }
+        if (isNewGame) {
+            gameState.tier = 0;
+            this.entityManager.setActiveTier(0);
+            console.log(`LevelSystem.js: init - gameState.tier set to ${gameState.tier} for a new game`);
+        } else {
+            // For loaded games, generate levels from 1 up to the current tier (if not already generated)
+            for (let tier = 1; tier <= gameState.tier; tier++) {
+                if (!this.entityManager.getEntitiesWith(['Tier']).some(e => e.getComponent('Tier').value === tier)) {
+                    this.addLevel({ tier });
                 }
-                this.entityManager.setActiveTier(gameState.tier);
-                console.log(`LevelSystem.js: init - Preserved loaded tier ${gameState.tier}, ensured levels 0 to ${gameState.tier} are generated`);
             }
-        
+            this.entityManager.setActiveTier(gameState.tier);
+            console.log(`LevelSystem.js: init - Preserved loaded tier ${gameState.tier}, ensured levels 0 to ${gameState.tier} are generated`);
+            // Explicitly call checkLevelAfterTransitions for the loaded tier
+            const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
+            if (levelEntity) {
+                this.checkLevelAfterTransitions({ tier: gameState.tier, levelEntity });
+            }
+        }
     }
 
     removeWallAtPosition(x, y, walls, levelEntity) {
@@ -124,16 +130,13 @@ export class LevelSystem extends System {
         } else {
             console.error(`LevelSystem.js: Failed to update map at (${x}, ${y}) on tier ${tier} - mapComp or map position invalid`);
         }
-
-        //const exploration = levelEntity.getComponent('Exploration');
-        //exploration.discoveredFloors.add(`${x},${y}`);
     }
 
     addLevel({ tier, customLevel = null }) {
-        
         this.entityManager.setActiveTier(tier);
         console.log(`LevelSystem.js: Starting level generation for tier ${tier}, active tier: ${this.entityManager.getActiveTier()}`);
         let levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
+
         if (!levelEntity) {
             levelEntity = this.entityManager.createEntity(`level_${tier}`);
             console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier ${tier}`);
@@ -141,7 +144,6 @@ export class LevelSystem extends System {
 
             let levelData;
             if (customLevel || tier === 0) {
-                // If tier is 0 and no customLevel is provided, generate the surface level
                 if (!customLevel && tier === 0) {
                     console.log(`LevelSystem.js: Generating Tier 0 with generateSurfaceLevel`);
                     customLevel = this.generateSurfaceLevel(levelEntity);
@@ -163,7 +165,8 @@ export class LevelSystem extends System {
                     monsters: levelData.monsters || [],
                     treasures: levelData.treasures || [],
                     fountains: levelData.fountains || [],
-                    rooms: levelData.roomEntityIds || []
+                    rooms: levelData.roomEntityIds || [],
+                    npcs: levelData.npcs || []
                 });
                 this.entityManager.addComponentToEntity(levelEntity.id, entityListComp);
                 this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent());
@@ -181,7 +184,8 @@ export class LevelSystem extends System {
                     monsters: [],
                     treasures: [],
                     fountains: [],
-                    rooms: []
+                    rooms: [],
+                    npcs: []
                 });
                 this.entityManager.addComponentToEntity(levelEntity.id, entityList);
                 this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent());
@@ -205,10 +209,8 @@ export class LevelSystem extends System {
                 if (hasBossRoom) this.lastBossTier = tier;
 
                 const hasElites = tier > 1;
-                
                 this.eventBus.emit('SpawnMonsters', {
                     tier,
-                    map: levelData.map,
                     rooms: levelData.roomEntityIds,
                     hasBossRoom,
                     spawnPool: { randomMonsters: true, uniqueMonsters: hasElites }
@@ -472,7 +474,7 @@ export class LevelSystem extends System {
 
         for (const roomId of roomEntityIds) {
             const room = this.entityManager.getEntity(roomId).getComponent('Room');
-            if (room.connections.length < 2 && roomEntityIds.length > 2 && room.roomType !== 'AlcoveSpecial' && room.roomType !== 'BossChamberSpecial') {
+            if (room.connections.length < 2 && roomEntityIds.length > 2 && room.roomType !== 'AlcoveSpecial' && room.roomType === 'BossChamberSpecial') {
                 const farRoomId = this.findFarRoom(roomId, roomEntityIds, [roomId, ...room.connections]);
                 if (farRoomId) {
                     this.carveCorridor(roomId, farRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity);
@@ -765,58 +767,101 @@ export class LevelSystem extends System {
             }
         }
     }
-        findNearestRoom(roomId, existingRoomIds, excludeRoomIds = []) {
-            const room = this.entityManager.getEntity(roomId).getComponent('Room');
-            let nearestRoomId = null;
-            let minDistance = Infinity;
-            for (const existingId of existingRoomIds) {
-                if (excludeRoomIds.includes(existingId)) continue;
-                const existingRoom = this.entityManager.getEntity(existingId).getComponent('Room');
-                const distance = this.calculateDistance(room.centerX, room.centerY, existingRoom.centerX, existingRoom.centerY);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    nearestRoomId = existingId;
-                }
+
+    findNearestRoom(roomId, existingRoomIds, excludeRoomIds = []) {
+        const room = this.entityManager.getEntity(roomId).getComponent('Room');
+        let nearestRoomId = null;
+        let minDistance = Infinity;
+        for (const existingId of existingRoomIds) {
+            if (excludeRoomIds.includes(existingId)) continue;
+            const existingRoom = this.entityManager.getEntity(existingId).getComponent('Room');
+            const distance = this.calculateDistance(room.centerX, room.centerY, existingRoom.centerX, existingRoom.centerY);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestRoomId = existingId;
             }
-            return nearestRoomId;
         }
+        return nearestRoomId;
+    }
 
-        findFarRoom(roomId, existingRoomIds, excludeRoomIds = []) {
-            const room = this.entityManager.getEntity(roomId).getComponent('Room');
-            const availableRooms = existingRoomIds.filter(rId => !excludeRoomIds.includes(rId));
-            if (availableRooms.length === 0) return null;
-            const sortedRooms = availableRooms.map(rId => {
-                const r = this.entityManager.getEntity(rId).getComponent('Room');
-                return {
-                    roomId: rId,
-                    distance: this.calculateDistance(room.centerX, room.centerY, r.centerX, r.centerY)
-                };
-            }).sort((a, b) => b.distance - a.distance);
-            const farHalf = sortedRooms.slice(0, Math.ceil(sortedRooms.length / 2));
-            return farHalf[Math.floor(Math.random() * farHalf.length)]?.roomId || null;
-        }
+    findFarRoom(roomId, existingRoomIds, excludeRoomIds = []) {
+        const room = this.entityManager.getEntity(roomId).getComponent('Room');
+        const availableRooms = existingRoomIds.filter(rId => !excludeRoomIds.includes(rId));
+        if (availableRooms.length === 0) return null;
+        const sortedRooms = availableRooms.map(rId => {
+            const r = this.entityManager.getEntity(rId).getComponent('Room');
+            return {
+                roomId: rId,
+                distance: this.calculateDistance(room.centerX, room.centerY, r.centerX, r.centerY)
+            };
+        }).sort((a, b) => b.distance - a.distance);
+        const farHalf = sortedRooms.slice(0, Math.ceil(sortedRooms.length / 2));
+        return farHalf[Math.floor(Math.random() * farHalf.length)]?.roomId || null;
+    }
 
-        placeStairs(levelEntity, levelData, hasBossRoom) {
-            const map = levelData.map;
-            const entityList = levelEntity.getComponent('EntityList');
-            const tier = levelEntity.getComponent('Tier').value;
-            let stairDownX, stairDownY, stairUpX, stairUpY;
+    placeStairs(levelEntity, levelData, hasBossRoom) {
+        const map = levelData.map;
+        const entityList = levelEntity.getComponent('EntityList');
+        const tier = levelEntity.getComponent('Tier').value;
+        let stairDownX, stairDownY, stairUpX, stairUpY;
 
-            if (hasBossRoom) {
-                const bossRoomId = levelData.roomEntityIds.find(rId => this.entityManager.getEntity(rId).getComponent('Room').roomType === 'BossChamberSpecial');
-                const bossRoom = this.entityManager.getEntity(bossRoomId).getComponent('Room');
-                let attempts = 0;
-                do {
-                    stairDownX = bossRoom.left + 1 + Math.floor(Math.random() * (bossRoom.width - 2));
-                    stairDownY = bossRoom.top + 1 + Math.floor(Math.random() * (bossRoom.height - 2));
-                    attempts++;
-                    if (attempts > 50) {
-                        console.error('Failed to place stairsDown in boss room after 50 attempts');
-                        stairDownX = bossRoom.left + 1;
-                        stairDownY = bossRoom.top + 1;
-                        break;
-                    }
-                } while (map[stairDownY][stairDownX] !== ' ');
+        if (hasBossRoom) {
+            const bossRoomId = levelData.roomEntityIds.find(rId => this.entityManager.getEntity(rId).getComponent('Room').roomType === 'BossChamberSpecial');
+            const bossRoom = this.entityManager.getEntity(bossRoomId).getComponent('Room');
+            let attempts = 0;
+            do {
+                stairDownX = bossRoom.left + 1 + Math.floor(Math.random() * (bossRoom.width - 2));
+                stairDownY = bossRoom.top + 1 + Math.floor(Math.random() * (bossRoom.height - 2));
+                attempts++;
+                if (attempts > 50) {
+                    console.error('Failed to place stairsDown in boss room after 50 attempts');
+                    stairDownX = bossRoom.left + 1;
+                    stairDownY = bossRoom.top + 1;
+                    break;
+                }
+            } while (map[stairDownY][stairDownX] !== ' ');
+
+            const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
+            this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
+            this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
+            this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 42));
+            this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
+            const visuals = stairDownEntity.getComponent('Visuals');
+            visuals.avatar = 'img/avatars/stairsdown.png';
+            entityList.stairs.push(stairDownEntity.id);
+
+            map[stairDownY][stairDownX] = '⇓';
+            levelData.stairsDown = { x: stairDownX, y: stairDownY };
+        } else {
+            let attempts = 0;
+            const mapCenterX = Math.floor(this.state.WIDTH / 2);
+            const mapCenterY = Math.floor(this.state.HEIGHT / 2);
+            while (attempts < 50) {
+                const roomId = levelData.roomEntityIds[Math.floor(Math.random() * levelData.roomEntityIds.length)];
+                const room = this.entityManager.getEntity(roomId).getComponent('Room');
+                stairDownX = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
+                stairDownY = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
+                if (map[stairDownY][stairDownX] === ' ' && this.calculateDistance(stairDownX, stairDownY, mapCenterX, mapCenterY) >= this.MIN_STAIR_DISTANCE) {
+                    const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
+                    this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
+                    this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
+                    this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 42));
+                    this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
+                    const visuals = stairDownEntity.getComponent('Visuals');
+                    visuals.avatar = 'img/avatars/stairsdown.png';
+                    entityList.stairs.push(stairDownEntity.id);
+
+                    map[stairDownY][stairDownX] = '⇓';
+                    levelData.stairsDown = { x: stairDownX, y: stairDownY };
+                    break;
+                }
+                attempts++;
+            }
+            if (!levelData.stairsDown) {
+                console.warn(`Failed to place stairsDown with distance check after 50 attempts`);
+                const fallbackRoom = this.entityManager.getEntity(levelData.roomEntityIds[0]).getComponent('Room');
+                stairDownX = fallbackRoom.left + 1;
+                stairDownY = fallbackRoom.top + 1;
 
                 const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
                 this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
@@ -829,80 +874,17 @@ export class LevelSystem extends System {
 
                 map[stairDownY][stairDownX] = '⇓';
                 levelData.stairsDown = { x: stairDownX, y: stairDownY };
-            } else {
-                let attempts = 0;
-                const mapCenterX = Math.floor(this.state.WIDTH / 2);
-                const mapCenterY = Math.floor(this.state.HEIGHT / 2);
-                while (attempts < 50) {
-                    const roomId = levelData.roomEntityIds[Math.floor(Math.random() * levelData.roomEntityIds.length)];
-                    const room = this.entityManager.getEntity(roomId).getComponent('Room');
-                    stairDownX = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
-                    stairDownY = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
-                    if (map[stairDownY][stairDownX] === ' ' && this.calculateDistance(stairDownX, stairDownY, mapCenterX, mapCenterY) >= this.MIN_STAIR_DISTANCE) {
-                        const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
-                        this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
-                        this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
-                        this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 42));
-                        this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-                        const visuals = stairDownEntity.getComponent('Visuals');
-                        visuals.avatar = 'img/avatars/stairsdown.png';
-                        entityList.stairs.push(stairDownEntity.id);
-
-                        map[stairDownY][stairDownX] = '⇓';
-                        levelData.stairsDown = { x: stairDownX, y: stairDownY };
-                        break;
-                    }
-                    attempts++;
-                }
-                if (!levelData.stairsDown) {
-                    console.warn(`Failed to place stairsDown with distance check after 50 attempts`);
-                    const fallbackRoom = this.entityManager.getEntity(levelData.roomEntityIds[0]).getComponent('Room');
-                    stairDownX = fallbackRoom.left + 1;
-                    stairDownY = fallbackRoom.top + 1;
-
-                    const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
-                    this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
-                    this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
-                    this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 42));
-                    this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-                    const visuals = stairDownEntity.getComponent('Visuals');
-                    visuals.avatar = 'img/avatars/stairsdown.png';
-                    entityList.stairs.push(stairDownEntity.id);
-
-                    map[stairDownY][stairDownX] = '⇓';
-                    levelData.stairsDown = { x: stairDownX, y: stairDownY };
-                }
             }
+        }
 
-            const upRooms = hasBossRoom ? levelData.roomEntityIds.filter(rId => this.entityManager.getEntity(rId).getComponent('Room').roomType !== 'BossChamberSpecial') : levelData.roomEntityIds;
-            let attempts = 0;
-            while (attempts < 50) {
-                const roomId = upRooms[Math.floor(Math.random() * upRooms.length)];
-                const room = this.entityManager.getEntity(roomId).getComponent('Room');
-                stairUpX = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
-                stairUpY = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
-                if (map[stairUpY][stairUpX] === ' ' && this.calculateDistance(stairUpX, stairUpY, levelData.stairsDown.x, levelData.stairsDown.y) >= this.MIN_STAIR_DISTANCE) {
-                    const stairUpEntity = this.entityManager.createEntity(`stair_${tier}_stair_up_${stairUpX}_${stairUpY}`);
-                    this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(stairUpX * this.TILE_SIZE, stairUpY * this.TILE_SIZE));
-                    this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
-                    this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(32, 42));
-                    this.entityManager.addComponentToEntity(stairUpEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-                    const visuals = stairUpEntity.getComponent('Visuals');
-                    visuals.avatar = 'img/avatars/stairsup.png';
-                    entityList.stairs.push(stairUpEntity.id);
-
-                    map[stairUpY][stairUpX] = '⇑';
-                    levelData.stairsUp = { x: stairUpX, y: stairUpY };
-                    break;
-                }
-                attempts++;
-            }
-            if (!levelData.stairsUp) {
-                console.warn(`Failed to place stairsUp with distance check after 50 attempts`);
-                const fallbackRoom = this.entityManager.getEntity(upRooms[0]).getComponent('Room');
-                stairUpX = fallbackRoom.left + 1;
-                stairUpY = fallbackRoom.top + 1;
-
+        const upRooms = hasBossRoom ? levelData.roomEntityIds.filter(rId => this.entityManager.getEntity(rId).getComponent('Room').roomType !== 'BossChamberSpecial') : levelData.roomEntityIds;
+        let attempts = 0;
+        while (attempts < 50) {
+            const roomId = upRooms[Math.floor(Math.random() * upRooms.length)];
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            stairUpX = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
+            stairUpY = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
+            if (map[stairUpY][stairUpX] === ' ' && this.calculateDistance(stairUpX, stairUpY, levelData.stairsDown.x, levelData.stairsDown.y) >= this.MIN_STAIR_DISTANCE) {
                 const stairUpEntity = this.entityManager.createEntity(`stair_${tier}_stair_up_${stairUpX}_${stairUpY}`);
                 this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(stairUpX * this.TILE_SIZE, stairUpY * this.TILE_SIZE));
                 this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
@@ -914,21 +896,42 @@ export class LevelSystem extends System {
 
                 map[stairUpY][stairUpX] = '⇑';
                 levelData.stairsUp = { x: stairUpX, y: stairUpY };
+                break;
             }
-
-            if (hasBossRoom) {
-                console.log(`Has boss room = ${hasBossRoom}, checking stairsDown distance to map center`);
-                const bossRoomId = levelData.roomEntityIds.find(rId => this.entityManager.getEntity(rId).getComponent('Room').roomType === 'BossChamberSpecial');
-                const bossRoom = this.entityManager.getEntity(bossRoomId).getComponent('Room');
-                const paddedDistance = this.MIN_STAIR_DISTANCE + Math.floor((bossRoom.width + bossRoom.height) / 2);
-                if (this.calculateDistance(levelData.stairsDown.x, levelData.stairsDown.y, this.state.WIDTH / 2, this.state.HEIGHT / 2) < paddedDistance) {
-                    console.warn(`StairsDown too close to map center with boss padding`);
-                }
-            }
-
-            levelData.walls = entityList.walls;
-            levelData.floors = entityList.floors;
+            attempts++;
         }
+        if (!levelData.stairsUp) {
+            console.warn(`Failed to place stairsUp with distance check after 50 attempts`);
+            const fallbackRoom = this.entityManager.getEntity(upRooms[0]).getComponent('Room');
+            stairUpX = fallbackRoom.left + 1;
+            stairUpY = fallbackRoom.top + 1;
+
+            const stairUpEntity = this.entityManager.createEntity(`stair_${tier}_stair_up_${stairUpX}_${stairUpY}`);
+            this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(stairUpX * this.TILE_SIZE, stairUpY * this.TILE_SIZE));
+            this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
+            this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(32, 42));
+            this.entityManager.addComponentToEntity(stairUpEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
+            const visuals = stairUpEntity.getComponent('Visuals');
+            visuals.avatar = 'img/avatars/stairsup.png';
+            entityList.stairs.push(stairUpEntity.id);
+
+            map[stairUpY][stairUpX] = '⇑';
+            levelData.stairsUp = { x: stairUpX, y: stairUpY };
+        }
+
+        if (hasBossRoom) {
+            console.log(`Has boss room = ${hasBossRoom}, checking stairsDown distance to map center`);
+            const bossRoomId = levelData.roomEntityIds.find(rId => this.entityManager.getEntity(rId).getComponent('Room').roomType === 'BossChamberSpecial');
+            const bossRoom = this.entityManager.getEntity(bossRoomId).getComponent('Room');
+            const paddedDistance = this.MIN_STAIR_DISTANCE + Math.floor((bossRoom.width + bossRoom.height) / 2);
+            if (this.calculateDistance(levelData.stairsDown.x, levelData.stairsDown.y, this.state.WIDTH / 2, this.state.HEIGHT / 2) < paddedDistance) {
+                console.warn(`StairsDown too close to map center with boss padding`);
+            }
+        }
+
+        levelData.walls = entityList.walls;
+        levelData.floors = entityList.floors;
+    }
 
     generateLootEntities(tier, map, roomEntityIds) {
         const lootPerLevel = 5;
@@ -957,7 +960,6 @@ export class LevelSystem extends System {
             } while (map[tileY][tileX] !== ' ');
 
             if (attempts <= 50) {
-                // Convert tile coordinates to pixel coordinates
                 const pixelX = tileX * this.TILE_SIZE;
                 const pixelY = tileY * this.TILE_SIZE;
                 const lootSource = this.entityManager.createEntity(`loot_source_${tier}_${Date.now()}_${i}`);
@@ -965,7 +967,7 @@ export class LevelSystem extends System {
                     sourceType: "container",
                     name: "Treasure Chest",
                     tier: tier,
-                    position: { x: pixelX, y: pixelY }, // Use pixel coordinates
+                    position: { x: pixelX, y: pixelY },
                     sourceDetails: { id: roomId },
                     chanceModifiers: {
                         torches: 1,
@@ -1030,7 +1032,6 @@ export class LevelSystem extends System {
         const stairs = [];
         const npcs = [];
 
-
         for (let y = 1; y <= 9; y++) {
             for (let x = 1; x <= 13; x++) {
                 map[y][x] = ' ';
@@ -1041,7 +1042,6 @@ export class LevelSystem extends System {
                 floors.push(floorEntity.id);
             }
         }
-   
 
         for (let y = 0; y <= 10; y++) {
             for (let x = 0; x <= 14; x++) {
@@ -1061,8 +1061,6 @@ export class LevelSystem extends System {
             }
         }
 
-
-
         const stairUpId = `stair_0_stair_up_2_2`;
         const stairUpEntity = this.entityManager.createEntity(stairUpId);
         this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(2 * this.TILE_SIZE, 2 * this.TILE_SIZE));
@@ -1073,7 +1071,6 @@ export class LevelSystem extends System {
         this.entityManager.addComponentToEntity(stairUpEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
         stairs.push(stairUpId);
         map[2][2] = '⇑';
-
 
         const stairDownId = `stair_0_stair_down_12_8`;
         const stairDownEntity = this.entityManager.createEntity(stairDownId);
@@ -1108,48 +1105,46 @@ export class LevelSystem extends System {
         entityListComp.npcs = npcs;
         console.log(`LevelSystem.js: Updated EntityListComponent for ${levelEntity.id} in generateSurfaceLevel`);
 
-       
-            
-            this.eventBus.emit('SpawnNPCs', {
-                tier: 0,
-                npcs: [
-                    { id: 'zu_master', x: 5, y: 3 },
-                    { id: 'shop_keeper', x: 7, y:7 }
-                ]
-            });
-        
+        this.eventBus.emit('SpawnNPCs', {
+            tier: 0,
+            npcs: [
+                { id: 'zu_master', x: 5, y: 3 },
+                { id: 'shop_keeper', x: 7, y: 7 }
+            ]
+        });
 
         return levelData;
     }
 
-        padMap(map, walls = [], floors = [], tier = 0) {
-            const padded = Array.from({ length: this.state.HEIGHT }, () => Array(this.state.WIDTH).fill('#'));
+    padMap(map, walls = [], floors = [], tier = 0) {
+        const padded = Array.from({ length: this.state.HEIGHT }, () => Array(this.state.WIDTH).fill('#'));
 
-            for (let y = 0; y < map.length; y++) {
-                for (let x = 0; x < map[y].length; x++) {
-                    padded[y][x] = map[y][x];
-                }
+        for (let y = 0; y < map.length; y++) {
+            for (let x = 0; x < map[y].length; x++) {
+                padded[y][x] = map[y][x];
             }
-
-            for (let y = 0; y < this.state.HEIGHT; y++) {
-                for (let x = 0; x < this.state.WIDTH; x++) {
-                    if (y < map.length && x < map[y].length) continue;
-
-                    const wallEntity = this.entityManager.createEntity(`wall_${tier}_wall_${y}_${x}`);
-                    this.entityManager.addComponentToEntity(wallEntity.id, new PositionComponent(x, y));
-                    this.entityManager.addComponentToEntity(wallEntity.id, new WallComponent());
-                    walls.push(wallEntity.id);
-                }
-            }
-
-            return padded;
         }
+
+        for (let y = 0; y < this.state.HEIGHT; y++) {
+            for (let x = 0; x < this.state.WIDTH; x++) {
+                if (y < map.length && x < map[y].length) continue;
+
+                const wallEntity = this.entityManager.createEntity(`wall_${tier}_wall_${y}_${x}`);
+                this.entityManager.addComponentToEntity(wallEntity.id, new PositionComponent(x, y));
+                this.entityManager.addComponentToEntity(wallEntity.id, new WallComponent());
+                walls.push(wallEntity.id);
+            }
+        }
+
+        return padded;
+    }
+
     adjustPlayerPosition(levelEntity, stair) {
         const mapComponent = levelEntity.getComponent('Map');
         if (!mapComponent || !mapComponent.map) {
             console.error(`LevelSystem: No valid MapComponent or map for entity ${levelEntity.id}`);
             return;
-        } 
+        }
         const map = mapComponent.map;
         const directions = [
             { x: stair.x - 1, y: stair.y }, { x: stair.x + 1, y: stair.y },
@@ -1164,7 +1159,6 @@ export class LevelSystem extends System {
             pos.x = this.TILE_SIZE; // Fallback to (32, 32)
             pos.y = this.TILE_SIZE;
             console.warn(`LevelSystem: Set player position to fallback (${pos.x}, ${pos.y}) due to invalid TILE_SIZE`);
-            
             return;
         }
 
@@ -1194,8 +1188,6 @@ export class LevelSystem extends System {
                         }
                     }
                 }
-
-               
                 return;
             }
         }
@@ -1204,59 +1196,58 @@ export class LevelSystem extends System {
         pos.y = this.TILE_SIZE;
         console.warn(`LevelSystem: No adjacent walkable tile found near (${stair.x}, ${stair.y}), using fallback position (${pos.x}, ${pos.y})`);
         exploration.discoveredFloors.add(`${Math.floor(pos.x / this.TILE_SIZE)},${Math.floor(pos.y / this.TILE_SIZE)}`);
-       
     }
 
-        ensureRoomConnections(levelEntity) {
-            const mapComp = levelEntity.getComponent('Map');
-            const entityList = levelEntity.getComponent('EntityList');
-            const tier = levelEntity.getComponent('Tier').value;
+    ensureRoomConnections(levelEntity) {
+        const mapComp = levelEntity.getComponent('Map');
+        const entityList = levelEntity.getComponent('EntityList');
+        const tier = levelEntity.getComponent('Tier').value;
 
-            const rooms = Array.isArray(entityList.rooms) ? entityList.rooms : [];
-            console.log(`LevelSystem.js: Ensuring room connections for tier ${tier}, rooms: ${JSON.stringify(rooms)}`);
+        const rooms = Array.isArray(entityList.rooms) ? entityList.rooms : [];
+        console.log(`LevelSystem.js: Ensuring room connections for tier ${tier}, rooms: ${JSON.stringify(rooms)}`);
 
-            console.log(`LevelSystem.ensureRoomConnections: Room types and connections before ensuring connections:`);
-            for (const roomId of rooms) {
-                const room = this.entityManager.getEntity(roomId).getComponent('Room');
-                console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length}`);
-            }
+        console.log(`LevelSystem.ensureRoomConnections: Room types and connections before ensuring connections:`);
+        for (const roomId of rooms) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length}`);
+        }
 
-            for (const roomId of rooms) {
-                const room = this.entityManager.getEntity(roomId).getComponent('Room');
-                if (room.connections.length === 0) {
-                    console.warn(`LevelSystem.ensureRoomConnections: Room ${roomId} has no connections, attempting to connect`);
-                    const nearestRoomId = this.findNearestRoom(roomId, rooms, [roomId]);
-                    if (nearestRoomId) {
-                        this.carveCorridor(roomId, nearestRoomId, mapComp.map, rooms, entityList.floors, entityList.walls, new Set(), levelEntity);
-                        const nearestRoom = this.entityManager.getEntity(nearestRoomId).getComponent('Room');
-                        room.connections.push(nearestRoomId);
-                        nearestRoom.connections.push(roomId);
-                    } else {
-                        console.error(`LevelSystem.ensureRoomConnections: No nearest room found for isolated non-special room ${roomId}`);
-                    }
-                }
-            }
-
-            for (const roomId of rooms) {
-                const room = this.entityManager.getEntity(roomId).getComponent('Room');
-                if ((room.roomType === 'AlcoveSpecial' || room.roomType === 'BossChamberSpecial') && room.connections.length === 0) {
-                    console.warn(`Room at (${room.left}, ${room.top}) of type ${room.roomType} has no connections, adding one`);
-                    const nearestRoomId = this.findNearestRoom(roomId, entityList.rooms, [roomId]);
-                    if (nearestRoomId) {
-                        this.carveCorridor(roomId, nearestRoomId, mapComp.map, entityList.rooms, entityList.floors, entityList.walls, new Set(), levelEntity);
-                        const nearestRoom = this.entityManager.getEntity(nearestRoomId).getComponent('Room');
-                        room.connections.push(nearestRoomId);
-                        nearestRoom.connections.push(roomId);
-                    } else {
-                        console.error(`No nearest room found for isolated ${room.roomType} at (${room.left}, ${room.top})`);
-                    }
+        for (const roomId of rooms) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            if (room.connections.length === 0) {
+                console.warn(`LevelSystem.ensureRoomConnections: Room ${roomId} has no connections, attempting to connect`);
+                const nearestRoomId = this.findNearestRoom(roomId, rooms, [roomId]);
+                if (nearestRoomId) {
+                    this.carveCorridor(roomId, nearestRoomId, mapComp.map, rooms, entityList.floors, entityList.walls, new Set(), levelEntity);
+                    const nearestRoom = this.entityManager.getEntity(nearestRoomId).getComponent('Room');
+                    room.connections.push(nearestRoomId);
+                    nearestRoom.connections.push(roomId);
+                } else {
+                    console.error(`LevelSystem.ensureRoomConnections: No nearest room found for isolated non-special room ${roomId}`);
                 }
             }
         }
 
-        calculateDistance(x1, y1, x2, y2) {
-            return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+        for (const roomId of rooms) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            if ((room.roomType === 'AlcoveSpecial' || room.roomType === 'BossChamberSpecial') && room.connections.length === 0) {
+                console.warn(`Room at (${room.left}, ${room.top}) of type ${room.roomType} has no connections, adding one`);
+                const nearestRoomId = this.findNearestRoom(roomId, entityList.rooms, [roomId]);
+                if (nearestRoomId) {
+                    this.carveCorridor(roomId, nearestRoomId, mapComp.map, entityList.rooms, entityList.floors, entityList.walls, new Set(), levelEntity);
+                    const nearestRoom = this.entityManager.getEntity(nearestRoomId).getComponent('Room');
+                    room.connections.push(nearestRoomId);
+                    nearestRoom.connections.push(roomId);
+                } else {
+                    console.error(`No nearest room found for isolated ${room.roomType} at (${room.left}, ${room.top})`);
+                }
+            }
         }
+    }
+
+    calculateDistance(x1, y1, x2, y2) {
+        return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+    }
 
     checkLevelAfterTransitions({ tier, levelEntity = null }) {
         const entity = levelEntity || this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
@@ -1278,12 +1269,9 @@ export class LevelSystem extends System {
             return;
         }
 
-
-        
-
-       
         console.log(`LevelSystem.js: EntityListComponent.npcs after SpawnNPCs:`, entityList.npcs);
 
+        // Add portals if needed (only for tiers >= 3)
         const hasPortal = entityList.portals.length > 0;
         const minPortalPlacementTier = 3;
         if (tier >= minPortalPlacementTier && !hasPortal) {
@@ -1308,6 +1296,9 @@ export class LevelSystem extends System {
                 this.eventBus.emit('PortalAdded');
             }
         }
-    }
 
+        // Trigger shop inventory generation for the current tier
+        console.log(`LevelSystem.js: Emitting GenerateShopInventories for tier ${tier}`);
+        this.eventBus.emit('GenerateShopInventories', { tier });
     }
+}
