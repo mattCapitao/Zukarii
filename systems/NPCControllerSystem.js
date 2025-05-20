@@ -106,12 +106,24 @@ export class NPCControllerSystem extends System {
                     continue;
                 }
 
-                const partialItems = [
-                    { tierIndex: Math.random() < 0.5 ? 0 : 1 },
-                    { tierIndex: 0, type: 'armor' },
-                    { tierIndex: 0, type: 'weapon', attackType: 'ranged' },
-                    { tierIndex: 0, type: 'weapon', attackType: 'melee' },
-                ];
+                let merchantBaseItemTier = Math.round(tier / 10);
+                if (merchantBaseItemTier < 1) merchantBaseItemTier = 0;
+                if (merchantBaseItemTier > 6) merchantBaseItemTier = 6;
+
+                const merchantItemCount = Math.round(Math.random() * 4) + 3;
+                const partialItems = [];
+
+                for (let i = 0; i < merchantItemCount; i++) {
+                    let itemTier = merchantBaseItemTier;
+                    const roll = Math.random();
+                   if(roll > .98) itemTier++;
+                   if(roll < .25) itemTier--;
+
+                    if (itemTier < 1) itemTier = 0;
+                    if (itemTier > 6) itemTier = 6;
+                    partialItems.push({ tierIndex: itemTier })
+                    }
+
 
                 console.log('NPCControllerSystem: partialItems for NPC:', npc.id, partialItems);
                 const shopItemPromises = partialItems.map((partialItem, index) => {

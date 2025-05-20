@@ -1203,7 +1203,7 @@ export class UISystem extends System {
                 const weaponStats = item.type === 'weapon' ? `Damage: ${item.baseDamageMin}-${item.baseDamageMax}${item.attackType === 'melee' ? `, Block: ${item.baseBlock || 0}` : item.attackType === 'ranged' ? `, Range: ${item.baseRange || 0}` : ''}` : item.type === 'armor' ? `Armor: ${item.armor || 0}` : '';
                 const affixes = item.affixes ? item.affixes.map(affix => affix.name.charAt(0).toUpperCase() + affix.name.slice(1)).join(', ') : 'None';
                 return `
-                        <div class="shop-item" data-index="${index}">
+                        <div class="shop-item ${item.itemTier}" data-index="${index}">
                             <div class="item-name">${item.name}</div>
                             <div class="shop-item-details">
                                 <div class="shop-item-left">

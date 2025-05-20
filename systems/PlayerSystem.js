@@ -44,7 +44,27 @@ export class PlayerSystem extends System {
         stats._internal.base.luck = 0;
         stats._internal.base.maxHp = 30
         stats._internal.base.maxMana = 10
-        stats._internal.base.movementSpeed = 155;
+
+        stats._internal.temp = {
+            intellect: 0,
+            prowess: 0,
+            agility: 0,
+            luck: 0,
+            maxHp: 0,
+            maxMana: 0,
+            movementSpeed: 0,
+            armor: 0,
+            defense: 0,
+            block: 0,
+            dodge: 0,
+            range: 0,
+            resistMagic: 0,
+            baseRange: 0,
+            damageBonus: 0,
+            meleeBonus: 0,
+            rangedBonus: 0,
+            maxLuck: 0
+        };
 
         stats.intellect = stats._internal.base.intellect;
         stats.prowess = stats._internal.base.prowess;
@@ -52,7 +72,7 @@ export class PlayerSystem extends System {
         stats.luck = stats._internal.base.luck;
         stats.maxHp = stats._internal.base.maxHp;
         stats.maxMana = stats._internal.base.maxMana;
-        stats.movementSpeed = stats._internal.base.movementSpeed;
+        stats.movementSpeed = 155;
         stats.unallocated = 3;
 
         const health = player.getComponent('Health');
@@ -142,6 +162,9 @@ export class PlayerSystem extends System {
         const player = this.entityManager.getEntity('player');
         const stats = player.getComponent('Stats');
 
+        // Log the modification for debugging
+        console.log(`PlayerSystem.js: modifyBaseStat - Modifying stat ${stat} by ${value}`);
+
         // Update the specified stat in _internal.base
         if (stat in stats._internal.base) {
             stats._internal.base[stat] += value;
@@ -188,7 +211,7 @@ export class PlayerSystem extends System {
         const stats = player.getComponent('Stats');
         const health = player.getComponent('Health');
         const mana = player.getComponent('Mana');
-        const movementSpeed = player.getComponent('MovementSpeed');
+        const movementSpeedComp = player.getComponent('MovementSpeed');
 
         stats.intellect = stats._internal.base.intellect + (stats._internal.incremented.intellect || 0)
             + (stats._internal.gear.intellect || 0) + (stats._internal.temp.intellect || 0);
@@ -196,7 +219,8 @@ export class PlayerSystem extends System {
             + (stats._internal.gear.prowess || 0) + (stats._internal.temp.prowess || 0);
         stats.agility = stats._internal.base.agility + (stats._internal.incremented.agility || 0)
             + (stats._internal.gear.agility || 0) + (stats._internal.temp.agility || 0);
-        stats.movementSpeed = stats._internal.base.movementSpeed + (stats._internal.gear.movementSpeed || 0) + (stats._internal.temp.movementSpeed || 0);
+
+       
 
         const combinedProwess = stats._internal.base.prowess + (stats._internal.incremented.prowess || 0);
         const combinedIntellect = stats._internal.base.intellect + (stats._internal.incremented.intellect || 0);
@@ -239,8 +263,11 @@ export class PlayerSystem extends System {
         stats.luck = stats._internal.base.luck + (stats._internal.gear.luck || 0) + (stats._internal.temp.luck || 0);
         stats.maxLuck = (stats._internal.gear.maxLuck || 0) + (stats._internal.temp.maxLuck || 0);
 
+        const movementSpeed = 155 + (stats._internal.gear.movementSpeed || 0) + (stats._internal.temp.movementSpeed || 0);
+        stats.movementSpeed = isNaN(movementSpeed) ? 155 : movementSpeed;
+        console.log(`PlayerSystem.js: calculateStats - Calculated movementSpeed: ${stats.movementSpeed}`);
         // Update MovementSpeedComponent
-        movementSpeed.movementSpeed = stats.movementSpeed;
+        movementSpeedComp.movementSpeed = stats.movementSpeed;
 
         this.eventBus.emit('StatsUpdated', { entityId: player.id });
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
