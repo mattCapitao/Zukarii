@@ -56,7 +56,7 @@ export class MapRenderSystem extends System {
             fountain: 'img/avatars/fountain.png',
             player_idle: 'img/anim/Player/Idle.png',
             player_walk: 'img/anim/Player/Walk.png',
-            player_attack: 'img/anim/Player/Attack_Fire_2.png',
+            player_attack: 'img/anim/Player/Attack_Fire_3.png',
             npc_zu_master: 'img/avatars/npcs/zu-master.png', // Add NPC sprite
             npc_merchant: 'img/avatars/npcs/merchant.png'
         };
@@ -349,7 +349,7 @@ export class MapRenderSystem extends System {
                     continue;
                 }
                 // Use attack animation if isAttacking
-                spritePath = animState.isAttacking ? 'img/anim/Player/Attack_Fire_2.png' :
+                spritePath = animState.isAttacking ? 'img/anim/Player/Attack_Fire_3.png' :
                     animation.currentAnimation === 'idle' ? 'img/anim/Player/Idle.png' :
                         'img/anim/Player/Walk.png';
                 sprite = this.sprites.get(spritePath);
