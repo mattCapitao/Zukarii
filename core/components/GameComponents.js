@@ -119,6 +119,7 @@ export class LootData {
         torches = 0,
         healPotions = 0,
         items = [],
+        stones = {},
         suppressRender = false
     } = {}) {
         this.type = 'LootData';
@@ -127,6 +128,7 @@ export class LootData {
         this.torches = torches;
         this.healPotions = healPotions;
         this.items = items;
+        this.stones = stones;
         this.suppressRender = suppressRender;
     }
 }

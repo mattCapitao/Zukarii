@@ -69,9 +69,11 @@ export class StairComponent {
 }
 
 export class PortalComponent {
-    constructor() {
+    constructor(active = true) {
         this.type = 'Portal';
+        this.active = active;
     }
+    
 }
 
 export class FountainComponent {
@@ -95,6 +97,7 @@ export class RoomComponent {
         this.centerY = Math.floor(top + height / 2);
         this.roomType = type;
         this.connections = [];
+        this.suppressMonsters = false;
     }
 }
 

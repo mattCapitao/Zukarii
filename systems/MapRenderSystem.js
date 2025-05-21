@@ -13,6 +13,15 @@ export class MapRenderSystem extends System {
         this.initializeCanvas();
         this.loadSprites();
         window.addEventListener('resize', () => this.resizeCanvas());
+        // Portal animation properties
+        this.portalFrameCount = 9;
+        this.portalFrameWidth = 128;
+        this.portalFrameHeight = 128;
+        this.portalRenderWidth = 128;
+        this.portalRenderHeight = 128;
+        this.portalFrameDuration = 200; // 200ms per frame
+        this.portalCurrentFrame = 0;
+        this.lastPortalFrameTime = Date.now();
     }
 
     init() {
@@ -42,7 +51,7 @@ export class MapRenderSystem extends System {
             player: 'img/avatars/player.png',
             stairsup: 'img/avatars/stairsup.png',
             stairsdown: 'img/avatars/stairsdown.png',
-            portal: 'img/avatars/portal.png',
+            portal: 'img/anim/Portal-Animation.png',  // This will be the sprite strip (replacing static portal.png)
             chest: 'img/avatars/chest.png',
             fountain: 'img/avatars/fountain.png',
             player_idle: 'img/anim/Player/Idle.png',
@@ -163,9 +172,18 @@ export class MapRenderSystem extends System {
 
         const entities = this.getEntitiesInViewport(bufferedStartX, bufferedStartY, bufferedEndX, bufferedEndY, bucketsComp);
 
+        // Update portal animation frame
+        const currentTime = Date.now();
+        if (currentTime - this.lastPortalFrameTime >= this.portalFrameDuration) {
+            this.portalCurrentFrame = (this.portalCurrentFrame + 1) % this.portalFrameCount;
+            this.lastPortalFrameTime = currentTime;
+        }
+
         let wallCount = 0;
-        // First pass: Render all entity sprites
+        // First pass: Render all entity sprites except the player
         for (const entity of entities) {
+            if (entity.id === 'player') continue; // Skip player for this pass
+
             const pos = entity.getComponent('Position');
             const tileX = Math.floor(pos.x / this.TILE_SIZE);
             const tileY = Math.floor(pos.y / this.TILE_SIZE);
@@ -186,85 +204,6 @@ export class MapRenderSystem extends System {
             let spritePath = visuals.avatar;
             let sprite = null;
 
-            if (entity.id === 'player') {
-                if (animation && animState) {
-                    const animData = animation.animations[animation.currentAnimation];
-                    if (!animData) {
-                        console.warn(`MapRenderSystem: No animation data for ${animation.currentAnimation} in ${entity.id}`);
-                        continue;
-                    }
-                    // Use attack animation if isAttacking
-                    spritePath = animState.isAttacking ? 'img/anim/Player/Attack_Fire_2.png' :
-                        animation.currentAnimation === 'idle' ? 'img/anim/Player/Idle.png' :
-                            'img/anim/Player/Walk.png';
-                    sprite = this.sprites.get(spritePath);
-                    if (!sprite || !sprite.complete) {
-                        console.warn(`MapRenderSystem: Sprite ${spritePath} not loaded for ${entity.id}`);
-                        sprite = this.sprites.get('img/avatars/player.png'); // Fallback
-                    } else {
-                        const frame = animData.frames[animation.currentFrame];
-                        const renderX = (pos.x - startX) * this.SCALE_FACTOR;
-                        const renderY = (pos.y - startY) * this.SCALE_FACTOR;
-                        this.ctx.save();
-                        if (visuals.faceLeft) {
-                            this.ctx.scale(-1, 1);
-                            this.ctx.drawImage(
-                                sprite,
-                                frame.x + 32, // Center horizontally: (128 - 64) / 2
-                                64, // Bottom half: 128 - 64
-                                64, 64, // Source 64x64 area
-                                -(renderX + visuals.w * this.SCALE_FACTOR), renderY,
-                                visuals.w * this.SCALE_FACTOR, visuals.h * this.SCALE_FACTOR
-                            );
-                        } else {
-                            this.ctx.drawImage(
-                                sprite,
-                                frame.x + 32,
-                                64,
-                                64, 64,
-                                renderX, renderY,
-                                visuals.w * this.SCALE_FACTOR, visuals.h * this.SCALE_FACTOR
-                            );
-                        }
-                        this.ctx.restore();
-                        continue; // Skip default rendering for player
-                    }
-                } else {
-                    sprite = this.sprites.get(visuals.avatar);
-                    if (!sprite) {
-                        console.warn(`MapRenderSystem: Sprite ${visuals.avatar} not found for entity ${entity.id}`);
-                        continue;
-                    }
-                    if (!sprite.complete) {
-                        console.warn(`MapRenderSystem: Sprite ${visuals.avatar} not loaded for entity ${entity.id}`);
-                        continue;
-                    }
-                    const renderX = (pos.x - startX) * this.SCALE_FACTOR;
-                    const renderY = (pos.y - startY) * this.SCALE_FACTOR;
-                    this.ctx.save();
-                    if (visuals.faceLeft === true) {
-                        this.ctx.scale(-1, 1);
-                        this.ctx.drawImage(
-                            sprite,
-                            -(renderX + visuals.w * this.SCALE_FACTOR),
-                            renderY,
-                            visuals.w * this.SCALE_FACTOR,
-                            visuals.h * this.SCALE_FACTOR
-                        );
-                    } else {
-                        this.ctx.drawImage(
-                            sprite,
-                            renderX,
-                            renderY,
-                            visuals.w * this.SCALE_FACTOR,
-                            visuals.h * this.SCALE_FACTOR
-                        );
-                    }
-                    this.ctx.restore();
-                    continue;
-                }
-            }
-
             if (!spritePath) {
                 console.log(`MapRenderSystem: No spritePath in Visuals.avatar for entity ${entity.id}, components: ${Array.from(entity.components.keys())}`);
                 if (entity.hasComponent('Wall')) {
@@ -275,7 +214,7 @@ export class MapRenderSystem extends System {
                 } else if (entity.hasComponent('Fountain')) {
                     spritePath = 'img/avatars/fountain.png';
                 } else if (entity.hasComponent('Portal')) {
-                    spritePath = 'img/avatars/portal.png';
+                    spritePath = 'img/anim/Portal-Animation.png'; // Use the sprite strip for portals
                 } else if (entity.hasComponent('LootData')) {
                     spritePath = 'img/avatars/chest.png';
                 } else if (entity.hasComponent('NPCData')) {
@@ -310,7 +249,55 @@ export class MapRenderSystem extends System {
 
             // Render the entity sprite
             this.ctx.save();
-            if (visuals.faceLeft === true) {
+            if (entity.hasComponent('Portal')) {
+                // Render animated portal using the sprite strip
+                const frameX = this.portalCurrentFrame * this.portalFrameWidth;
+                this.ctx.drawImage(
+                    sprite,
+                    frameX, 0, // Source x, y
+                    this.portalFrameWidth, this.portalFrameHeight, // Source width, height
+                    renderX, renderY, // Destination x, y
+                    this.portalRenderWidth, this.portalRenderHeight // Destination width, height
+                );
+            } else if (entity.hasComponent('LootData')) {
+                // Add faint golden glow for treasure chests
+                this.ctx.shadowColor = 'rgba(255, 215, 0, 0.5)'; // Golden glow
+                this.ctx.shadowBlur = 10;
+                this.ctx.drawImage(
+                    sprite,
+                    renderX,
+                    renderY,
+                    visuals.w * this.SCALE_FACTOR,
+                    visuals.h * this.SCALE_FACTOR
+                );
+                this.ctx.shadowBlur = 0; // Reset shadow
+            } else if (entity.hasComponent('MonsterData')) {
+                const monsterData = entity.getComponent('MonsterData');
+                if (monsterData.isBoss || monsterData.isElite) {
+                    // Add faint red glow for bosses and elites
+                    this.ctx.shadowColor = 'rgba(255, 0, 0, 0.5)'; // Red glow
+                    this.ctx.shadowBlur = 10;
+                }
+                if (visuals.faceLeft === true) {
+                    this.ctx.scale(-1, 1);
+                    this.ctx.drawImage(
+                        sprite,
+                        -(renderX + visuals.w * this.SCALE_FACTOR),
+                        renderY,
+                        visuals.w * this.SCALE_FACTOR,
+                        visuals.h * this.SCALE_FACTOR
+                    );
+                } else {
+                    this.ctx.drawImage(
+                        sprite,
+                        renderX,
+                        renderY,
+                        visuals.w * this.SCALE_FACTOR,
+                        visuals.h * this.SCALE_FACTOR
+                    );
+                }
+                this.ctx.shadowBlur = 0; // Reset shadow
+            } else if (visuals.faceLeft === true) {
                 this.ctx.scale(-1, 1);
                 this.ctx.drawImage(
                     sprite,
@@ -331,7 +318,109 @@ export class MapRenderSystem extends System {
             this.ctx.restore();
         }
 
-        // Second pass: Render health bars
+        // Second pass: Render the player sprite (to ensure it appears on top)
+        for (const entity of entities) {
+            if (entity.id !== 'player') continue; // Only render the player
+
+            const pos = entity.getComponent('Position');
+            const tileX = Math.floor(pos.x / this.TILE_SIZE);
+            const tileY = Math.floor(pos.y / this.TILE_SIZE);
+            const isDiscovered = true; // Temporarily disabled
+            if (!isDiscovered) {
+                console.log(`MapRenderSystem: Tile (${tileX},${tileY}) not discovered for entity ${entity.id}`);
+                continue;
+            }
+            const visuals = entity.getComponent('Visuals');
+            if (!visuals) {
+                console.warn(`MapRenderSystem: Entity ${entity.id} missing Visuals component`);
+                continue;
+            }
+
+            const animation = entity.hasComponent('Animation') ? entity.getComponent('Animation') : null;
+            const animState = entity.hasComponent('AnimationState') ? entity.getComponent('AnimationState') : null;
+
+            let spritePath = visuals.avatar;
+            let sprite = null;
+
+            if (animation && animState) {
+                const animData = animation.animations[animation.currentAnimation];
+                if (!animData) {
+                    console.warn(`MapRenderSystem: No animation data for ${animation.currentAnimation} in ${entity.id}`);
+                    continue;
+                }
+                // Use attack animation if isAttacking
+                spritePath = animState.isAttacking ? 'img/anim/Player/Attack_Fire_2.png' :
+                    animation.currentAnimation === 'idle' ? 'img/anim/Player/Idle.png' :
+                        'img/anim/Player/Walk.png';
+                sprite = this.sprites.get(spritePath);
+                if (!sprite || !sprite.complete) {
+                    console.warn(`MapRenderSystem: Sprite ${spritePath} not loaded for ${entity.id}`);
+                    sprite = this.sprites.get('img/avatars/player.png'); // Fallback
+                } else {
+                    const frame = animData.frames[animation.currentFrame];
+                    const renderX = (pos.x - startX) * this.SCALE_FACTOR;
+                    const renderY = (pos.y - startY) * this.SCALE_FACTOR;
+                    this.ctx.save();
+                    if (visuals.faceLeft) {
+                        this.ctx.scale(-1, 1);
+                        this.ctx.drawImage(
+                            sprite,
+                            frame.x + 32, // Center horizontally: (128 - 64) / 2
+                            64, // Bottom half: 128 - 64
+                            64, 64, // Source 64x64 area
+                            -(renderX + visuals.w * this.SCALE_FACTOR), renderY,
+                            visuals.w * this.SCALE_FACTOR, visuals.h * this.SCALE_FACTOR
+                        );
+                    } else {
+                        this.ctx.drawImage(
+                            sprite,
+                            frame.x + 32,
+                            64,
+                            64, 64,
+                            renderX, renderY,
+                            visuals.w * this.SCALE_FACTOR, visuals.h * this.SCALE_FACTOR
+                        );
+                    }
+                    this.ctx.restore();
+                    continue;
+                }
+            } else {
+                sprite = this.sprites.get(visuals.avatar);
+                if (!sprite) {
+                    console.warn(`MapRenderSystem: Sprite ${visuals.avatar} not found for entity ${entity.id}`);
+                    continue;
+                }
+                if (!sprite.complete) {
+                    console.warn(`MapRenderSystem: Sprite ${visuals.avatar} not loaded for entity ${entity.id}`);
+                    continue;
+                }
+                const renderX = (pos.x - startX) * this.SCALE_FACTOR;
+                const renderY = (pos.y - startY) * this.SCALE_FACTOR;
+                this.ctx.save();
+                if (visuals.faceLeft === true) {
+                    this.ctx.scale(-1, 1);
+                    this.ctx.drawImage(
+                        sprite,
+                        -(renderX + visuals.w * this.SCALE_FACTOR),
+                        renderY,
+                        visuals.w * this.SCALE_FACTOR,
+                        visuals.h * this.SCALE_FACTOR
+                    );
+                } else {
+                    this.ctx.drawImage(
+                        sprite,
+                        renderX,
+                        renderY,
+                        visuals.w * this.SCALE_FACTOR,
+                        visuals.h * this.SCALE_FACTOR
+                    );
+                }
+                this.ctx.restore();
+                continue;
+            }
+        }
+
+        // Third pass: Render health bars
         for (const entity of entities) {
             if (!entity.hasComponent('HpBar')) continue;
 

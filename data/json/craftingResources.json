@@ -1,0 +1,18 @@
+﻿{
+  "stones": {
+    "ashenShards": 0,
+    "ashenCrystals": 0,
+    "ashenGems": 0,
+    "sylduranShards": 0,
+    "sylduranCrystals": 0,
+    "sylduranGems": 0
+  },
+  "ingots": {
+    "iron": 0,
+    "steel": 0,
+    "mithril": 0,
+    "silver": 0,
+    "gold": 0,
+    "platinum":  0
+  }
+}

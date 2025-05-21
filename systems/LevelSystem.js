@@ -66,7 +66,7 @@ export class LevelSystem extends System {
             this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent());
             this.entityManager.addComponentToEntity(levelEntity.id, new SpatialBucketsComponent());
             console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier 0 in init`);
-            this.addLevel({ tier: 0, customLevel: this.generateSurfaceLevel(levelEntity) });
+            this.addLevel({ tier: 0, customLevel: this.generateCustomLevel(levelEntity) });
             // Explicitly call checkLevelAfterTransitions for tier 0 to ensure shop inventories are generated
             this.checkLevelAfterTransitions({ tier: 0, levelEntity });
         }
@@ -166,7 +166,7 @@ export class LevelSystem extends System {
             if (customLevel || tier === 0) {
                 if (!customLevel && tier === 0) {
                     console.log(`LevelSystem.js: Generating Tier 0 with generateSurfaceLevel`);
-                    customLevel = this.generateSurfaceLevel(levelEntity);
+                    customLevel = this.generateCustomLevel(levelEntity);
                 } else {
                     console.log(`LevelSystem.js: Using provided customLevel for tier ${tier}`);
                 }
@@ -829,6 +829,25 @@ export class LevelSystem extends System {
         return farHalf[Math.floor(Math.random() * farHalf.length)]?.roomId || null;
     }
 
+    generateStairEntity(levelData, entityList, tier, direction, x, y, returnEntity = false) {
+        const map = levelData.map;
+        const stairId = `stair_${tier}_stair_${direction}_${x}_${y}`
+        const stairEntity = this.entityManager.createEntity(stairId);
+        this.entityManager.addComponentToEntity(stairEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
+        this.entityManager.addComponentToEntity(stairEntity.id, new StairComponent(direction));
+        this.entityManager.addComponentToEntity(stairEntity.id, new VisualsComponent(32, 42));
+        this.entityManager.addComponentToEntity(stairEntity.id, new HitboxComponent(28, 38));
+        const visuals = stairEntity.getComponent('Visuals');
+        visuals.avatar = `img/avatars/stairs${direction}.png`;
+        entityList.stairs.push(stairEntity.id);
+        const stairChar = direction === 'down' ? '⇓' : '⇑';
+        map[y][x] = stairChar;
+        if (direction === 'down') { levelData.stairsDown = { x, y }; } else { levelData.stairsUp = { x, y } }
+        console.log(`LevelSystem.js: Placed stairs ${direction} at (${x}, ${y}) on tier ${tier}`);
+
+        if (returnEntity) return stairEntity;
+    }
+
     placeStairs(levelEntity, levelData, hasBossRoom) {
         console.log(`LevelSystem.js: placeStairs - Starting for tier ${levelEntity.getComponent('Tier').value}, hasBossRoom: ${hasBossRoom}`);
         const map = levelData.map;
@@ -849,21 +868,11 @@ export class LevelSystem extends System {
                     stairDownX = bossRoom.left + 1;
                     stairDownY = bossRoom.top + 1;
                     break;
-                }
+                } 
             } while (map[stairDownY][stairDownX] !== ' ');
 
-            const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
-            this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
-            this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
-            this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 42));
-            this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-            const visuals = stairDownEntity.getComponent('Visuals');
-            visuals.avatar = 'img/avatars/stairsdown.png';
-            entityList.stairs.push(stairDownEntity.id);
+            const stairDownEntity = this.generateStairEntity(levelData, entityList, tier, 'down', stairDownX, stairDownY, true);
 
-            map[stairDownY][stairDownX] = '⇓';
-            levelData.stairsDown = { x: stairDownX, y: stairDownY };
-            console.log(`LevelSystem.js: Placed stairsDown at (${stairDownX}, ${stairDownY}) on tier ${tier}`);
         } else {
             let attempts = 0;
             const mapCenterX = Math.floor(this.state.WIDTH / 2);
@@ -874,18 +883,8 @@ export class LevelSystem extends System {
                 stairDownX = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
                 stairDownY = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
                 if (map[stairDownY][stairDownX] === ' ' && this.calculateDistance(stairDownX, stairDownY, mapCenterX, mapCenterY) >= this.MIN_STAIR_DISTANCE) {
-                    const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
-                    this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
-                    this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
-                    this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 42));
-                    this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-                    const visuals = stairDownEntity.getComponent('Visuals');
-                    visuals.avatar = 'img/avatars/stairsdown.png';
-                    entityList.stairs.push(stairDownEntity.id);
-
-                    map[stairDownY][stairDownX] = '⇓';
-                    levelData.stairsDown = { x: stairDownX, y: stairDownY };
-                    console.log(`LevelSystem.js: Placed stairsDown at (${stairDownX}, ${stairDownY}) on tier ${tier}`);
+                    const stairDownEntity = this.generateStairEntity(levelData, entityList, tier, 'down', stairDownX, stairDownY, true);
+                    room.suppressMonsters = true;
                     break;
                 }
                 attempts++;
@@ -895,19 +894,9 @@ export class LevelSystem extends System {
                 const fallbackRoom = this.entityManager.getEntity(levelData.roomEntityIds[0]).getComponent('Room');
                 stairDownX = fallbackRoom.left + 1;
                 stairDownY = fallbackRoom.top + 1;
-
-                const stairDownEntity = this.entityManager.createEntity(`stair_${tier}_stair_down_${stairDownX}_${stairDownY}`);
-                this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(stairDownX * this.TILE_SIZE, stairDownY * this.TILE_SIZE));
-                this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
-                this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(32, 42));
-                this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-                const visuals = stairDownEntity.getComponent('Visuals');
-                visuals.avatar = 'img/avatars/stairsdown.png';
-                entityList.stairs.push(stairDownEntity.id);
-
-                map[stairDownY][stairDownX] = '⇓';
-                levelData.stairsDown = { x: stairDownX, y: stairDownY };
+                const stairDownEntity = this.generateStairEntity(levelData, entityList, tier, 'down', stairDownX, stairDownY, true);
                 console.log(`LevelSystem.js: Placed stairsDown (fallback) at (${stairDownX}, ${stairDownY}) on tier ${tier}`);
+                fallbackRoom.suppressMonsters = true;
             }
         }
 
@@ -919,18 +908,8 @@ export class LevelSystem extends System {
             stairUpX = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
             stairUpY = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
             if (map[stairUpY][stairUpX] === ' ' && this.calculateDistance(stairUpX, stairUpY, levelData.stairsDown.x, levelData.stairsDown.y) >= this.MIN_STAIR_DISTANCE) {
-                const stairUpEntity = this.entityManager.createEntity(`stair_${tier}_stair_up_${stairUpX}_${stairUpY}`);
-                this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(stairUpX * this.TILE_SIZE, stairUpY * this.TILE_SIZE));
-                this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
-                this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(32, 42));
-                this.entityManager.addComponentToEntity(stairUpEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-                const visuals = stairUpEntity.getComponent('Visuals');
-                visuals.avatar = 'img/avatars/stairsup.png';
-                entityList.stairs.push(stairUpEntity.id);
-
-                map[stairUpY][stairUpX] = '⇑';
-                levelData.stairsUp = { x: stairUpX, y: stairUpY };
-                console.log(`LevelSystem.js: Placed stairsUp at (${stairUpX}, ${stairUpY}) on tier ${tier}`);
+                const stairUpEntity = this.generateStairEntity(levelData, entityList, tier, 'up', stairUpX, stairUpY, true);
+                room.suppressMonsters = true;
                 break;
             }
             attempts++;
@@ -940,18 +919,8 @@ export class LevelSystem extends System {
             const fallbackRoom = this.entityManager.getEntity(upRooms[0]).getComponent('Room');
             stairUpX = fallbackRoom.left + 1;
             stairUpY = fallbackRoom.top + 1;
-
-            const stairUpEntity = this.entityManager.createEntity(`stair_${tier}_stair_up_${stairUpX}_${stairUpY}`);
-            this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(stairUpX * this.TILE_SIZE, stairUpY * this.TILE_SIZE));
-            this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
-            this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(32, 42));
-            this.entityManager.addComponentToEntity(stairUpEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-            const visuals = stairUpEntity.getComponent('Visuals');
-            visuals.avatar = 'img/avatars/stairsup.png';
-            entityList.stairs.push(stairUpEntity.id);
-
-            map[stairUpY][stairUpX] = '⇑';
-            levelData.stairsUp = { x: stairUpX, y: stairUpY };
+            const stairUpEntity = this.generateStairEntity(levelData, entityList, tier, 'up', stairUpX, stairUpY, true);
+            fallbackRoom.suppressMonsters = true;
             console.log(`LevelSystem.js: Placed stairsUp (fallback) at (${stairUpX}, ${stairUpY}) on tier ${tier}`);
         }
 
@@ -1064,7 +1033,7 @@ export class LevelSystem extends System {
         return fountains;
     }
 
-    generateSurfaceLevel(levelEntity) {
+    generateCustomLevel(levelEntity) {
         console.log(`LevelSystem.js: generateSurfaceLevel - Starting for tier 0`);
         const width = this.state.WIDTH;
         const height = this.state.HEIGHT;
@@ -1073,6 +1042,9 @@ export class LevelSystem extends System {
         const floors = [];
         const stairs = [];
         const npcs = [];
+       
+        const tier = 0;
+        const stairPos = { upX: 2, upY: 2, downX: 12, downY: 8 }
 
         for (let y = 1; y <= 9; y++) {
             for (let x = 1; x <= 13; x++) {
@@ -1103,36 +1075,14 @@ export class LevelSystem extends System {
             }
         }
 
-        const stairUpId = `stair_0_stair_up_2_2`;
-        const stairUpEntity = this.entityManager.createEntity(stairUpId);
-        this.entityManager.addComponentToEntity(stairUpEntity.id, new PositionComponent(2 * this.TILE_SIZE, 2 * this.TILE_SIZE));
-        this.entityManager.addComponentToEntity(stairUpEntity.id, new StairComponent('up'));
-        this.entityManager.addComponentToEntity(stairUpEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
-        const upVisuals = stairUpEntity.getComponent('Visuals');
-        upVisuals.avatar = 'img/avatars/stairsup.png';
-        this.entityManager.addComponentToEntity(stairUpEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-        stairs.push(stairUpId);
-        map[2][2] = '⇑';
-
-        const stairDownId = `stair_0_stair_down_12_8`;
-        const stairDownEntity = this.entityManager.createEntity(stairDownId);
-        this.entityManager.addComponentToEntity(stairDownEntity.id, new PositionComponent(12 * this.TILE_SIZE, 8 * this.TILE_SIZE));
-        this.entityManager.addComponentToEntity(stairDownEntity.id, new StairComponent('down'));
-        this.entityManager.addComponentToEntity(stairDownEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
-        const downVisuals = stairDownEntity.getComponent('Visuals');
-        downVisuals.avatar = 'img/avatars/stairsdown.png';
-        this.entityManager.addComponentToEntity(stairDownEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
-        stairs.push(stairDownId);
-        map[8][12] = '⇓';
-
         const levelData = {
             map: map,
             walls: walls,
             floors: floors,
             stairs: stairs,
             npcs: npcs,
-            stairsDown: { x: 12, y: 8 },
-            stairsUp: { x: 2, y: 2 },
+            stairsDown: { x: stairPos.downX, y: stairPos.downY },
+            stairsUp:  { x: stairPos.upX, y: stairPos.upY },
             roomEntityIds: []
         };
 
@@ -1140,13 +1090,17 @@ export class LevelSystem extends System {
         this.entityManager.addComponentToEntity(levelEntity.id, mapComp);
         console.log(`LevelSystem.js: Added MapComponent to ${levelEntity.id} during generateSurfaceLevel`);
 
-        const entityListComp = levelEntity.getComponent('EntityList');
-        entityListComp.walls = walls;
-        entityListComp.floors = floors;
-        entityListComp.stairs = stairs;
-        entityListComp.npcs = npcs;
+        const entityList = levelEntity.getComponent('EntityList');
+        entityList.walls = walls;
+        entityList.floors = floors;
+        entityList.stairs = stairs;
+        entityList.npcs = npcs;
         console.log(`LevelSystem.js: Updated EntityListComponent for ${levelEntity.id} in generateSurfaceLevel`);
-
+       
+       
+        const stairUpEntity = this.generateStairEntity(levelData, entityList, tier, 'up', stairPos.upX, stairPos.upY, true);
+        const stairDownEntity = this.generateStairEntity(levelData, entityList, tier, 'down', stairPos.downX, stairPos.downY, true);
+        
         this.eventBus.emit('SpawnNPCs', {
             tier: 0,
             npcs: [
@@ -1354,10 +1308,10 @@ export class LevelSystem extends System {
                     const portalEntity = this.entityManager.createEntity(`portal_${tier}_portal_${entityList.portals.length}`);
                     this.entityManager.addComponentToEntity(portalEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
                     this.entityManager.addComponentToEntity(portalEntity.id, new PortalComponent());
-                    this.entityManager.addComponentToEntity(portalEntity.id, new VisualsComponent(40, 32));
-                    this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(40, 32));
+                    this.entityManager.addComponentToEntity(portalEntity.id, new VisualsComponent(128,128));
+                    this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(54, 44));
                     const visuals = portalEntity.getComponent('Visuals');
-                    visuals.avatar = 'img/avatars/portal.png';
+                    visuals.avatar = 'img/anim/Portal-Animation.png';
                     entityList.portals.push(portalEntity.id);
                     mapComp.map[y][x] = '?';
                     this.eventBus.emit('PortalAdded');
@@ -1365,7 +1319,7 @@ export class LevelSystem extends System {
             }
         }
 
-        // Add a shopkeeper NPC on tier 10 if none exists
+        // Add a shopkeeper NPC every 10 tiers if none exists
         if (tier > 0 && tier % 10 === 0) {
             const hasShopkeeper = entityList.npcs.some(npcId => {
                 const npc = this.entityManager.getEntity(npcId);

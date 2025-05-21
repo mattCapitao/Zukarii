@@ -82,6 +82,8 @@ export class PlayerCollisionSystem extends System {
                 }
             }
             if (target.hasComponent('Portal')) {
+                const portalComp = target.getComponent('Portal');
+                if (!portalComp.active) return;
                 this.sfxQueue.push({ sfx: 'portal0', volume: 0.5 });
                 const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
                 this.entityManager.getEntity('gameState').getComponent('GameState').transitionLock = true;

@@ -601,6 +601,20 @@ export class UISystem extends System {
                 }
             });
         }
+
+        const gameOver = document.getElementById('game-over');
+        if (gameOver) {
+            gameOver.addEventListener('click', (event) => {
+                const target = event.target;
+                if (target.id === 'view-log') {
+                    this.toggleOverlay({ tab: 'log' });
+                } else if (target.id === 'restart-button') {
+                    location.reload(true);
+                } else if (target.id === 'menu') {
+                    this.toggleOverlay({ tab: 'menu' });
+                }
+            });
+        }
     }
 
     applyStatusUpdates() {
@@ -633,23 +647,37 @@ export class UISystem extends System {
         const mana = player.getComponent('Mana');
         const playerState = player.getComponent('PlayerState');
         const resource = player.getComponent('Resource');
+        console.log("Resource - on load", resource);
 
         this.statusUpdates.hp = { value: health.hp, max: health.maxHp };
         this.statusUpdates.mana = { value: mana.mana, max: mana.maxMana };
         this.statusUpdates.xp = { value: playerState.xp, next: playerState.nextLevelXp };
         this.statusUpdates.healPotions = resource.healPotions;
         this.statusUpdates.torches = resource.torches;
+        this.statusUpdates.ashenShards = resource.craftResources.ashenShard || 0;
+        this.statusUpdates.portalBinding = resource.portalBinding || 0;
+
+        console.log("Resource - after statusUpdates", resource);
 
         if (this.playerInfo) {
             const playerNameSpan = this.playerInfo.querySelector('#playerName');
             const playerLevelSpan = this.playerInfo.querySelector('#playerLevel');
             const dungeonTierSpan = this.playerInfo.querySelector('#dungeonTier');
             const playerGoldSpan = this.playerInfo.querySelector('#playerGold');
+            const playerShardSpan = this.playerInfo.querySelector('#playerShards');
+            const portalBindingSpan = this.playerInfo.querySelector('#portalBinding');
+
             const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+
             if (playerNameSpan) playerNameSpan.textContent = playerState.name;
             if (playerLevelSpan) playerLevelSpan.textContent = playerState.level;
             if (dungeonTierSpan) dungeonTierSpan.textContent = gameState.tier;
             if (playerGoldSpan) playerGoldSpan.textContent = resource.gold !== undefined ? resource.gold : 'N/A';
+            if (playerShardSpan) playerShardSpan.textContent = resource.craftResources.ashenShard !== undefined ? resource.craftResources.ashenShard : 0;
+            console.log("Resource - before output", resource);
+            if (portalBindingSpan) portalBindingSpan.textContent = resource.portalBinding !== undefined ? resource.portalBinding : 0;
+            console.log("Resource - after output", resource);
+
         }
 
         if (!this.needsUpdate) {

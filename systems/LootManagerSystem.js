@@ -129,6 +129,9 @@ export class LootManagerSystem extends System {
         this.TORCH_CHANCE_MEDIUM_TORCHES = 0.075;
         this.TORCH_DESPERATION_CHANCE = 0.20;
         this.TORCH_DROP_FAIL_THRESHOLD = 3; 
+
+        //CRAFTING  
+        this.BASE_STONE_CHANCE = 1;
     }
 
     init() {
@@ -170,7 +173,8 @@ export class LootManagerSystem extends System {
         const gold = this.calculateGoldGain(modifiers.gold || 1);
         const torches = this.calculateTorchDrop(playerResource, lightingState, modifiers.torches || 1);
         const healPotions = this.calculatePotionDrop(playerResource, playerHealth, modifiers.healPotions || 1);
-
+        const stones = this.calculateStoneDrop(sourceData, modifiers.stones || 1);
+        console.log("Ashen: Stones", stones);
         const items = await this.buildItemsDropped(sourceData, player, modifiers);
         console.log(`LootManagerSystem: handleLootDrop() generated items:`, items);
 
@@ -182,8 +186,10 @@ export class LootManagerSystem extends System {
             gold,
             torches,
             healPotions,
-            items
+            items,
+            stones,
         });
+        console.log("Ashen: LootData Created", lootData);
         this.entityManager.addComponentToEntity(lootEntity.id, position);
         this.entityManager.addComponentToEntity(lootEntity.id, lootData);
 
@@ -191,6 +197,7 @@ export class LootManagerSystem extends System {
             gold ? `${gold} gold` : '',
             torches ? `${torches} torch${torches > 1 ? 'es' : ''}` : '',
             healPotions ? `${healPotions} heal potion${healPotions > 1 ? 's' : ''}` : '',
+            stones.count ? `${stones.count} ${stones.text}${stones.count > 1 ? 's' : ''}` : '',
             items.length ? items.map(i => i.name).join(', ') : ''
         ].filter(Boolean).join(', ');
         if (sourceData.name === 'Treasure Chest') {
@@ -312,7 +319,24 @@ export class LootManagerSystem extends System {
             torchChance = this.TORCH_CHANCE_MEDIUM_TORCHES;
         }
 
-        return Math.random() < torchChance * multiplier ? 1 : 0;
+        return Math.random() < (torchChance * multiplier) ? 1 : 0;
+    }
+
+    calculateStoneDrop(sourceData, multiplier) {
+        const tier = sourceData.tier
+        const stones = {};
+        let stoneChance = this.BASE_STONE_CHANCE;
+        stones.count = Math.random() < (stoneChance * multiplier) ? 1 : 0;
+        let stoneType = 'ashenShard';
+        if (tier > 20) stoneType = 'ashenCrystal';
+        if (tier > 40) stoneType = 'ashenGem';
+        stones.type = stoneType;
+        const stoneText = this.utilities.camelToTitleCase(stoneType);
+        stones.text = stoneText;
+        console.log("Ashen: Calculated Stones", stones);
+        return stones;
+        
+        //EXAMPLE stones = {count:1, type:'ashenShard', text:"Ashen Shard"}
     }
 
     calculatePotionDrop(resource, health, multiplier) {

@@ -66,6 +66,30 @@ export class LootCollectionSystem extends System {
             playerResource.healPotions += lootData.healPotions;
             pickupMessage.push(`${lootData.healPotions} heal potion${lootData.healPotions > 1 ? 's' : ''}`);
         }
+        console.log("Ashen: LootData", lootData);
+        if (lootData.stones) {
+            console.log("Ashen: LootCollectionSystem: Stones", lootData.stones);
+            if (lootData.stones.count > 0) {
+                const stoneType = lootData.stones.type;
+                // Initialize craftResources[stoneType] if undefined
+                if (!(stoneType in playerResource.craftResources)) {
+                    console.warn(`LootCollectionSystem: craftResources.${stoneType} not initialized, setting to 0`);
+                    playerResource.craftResources[stoneType] = 0;
+                }
+                // Ensure the value is a number
+                if (typeof playerResource.craftResources[stoneType] !== 'number' || isNaN(playerResource.craftResources[stoneType])) {
+                    console.warn(`LootCollectionSystem: craftResources.${stoneType} is invalid (${playerResource.craftResources[stoneType]}), resetting to 0`);
+                    playerResource.craftResources[stoneType] = 0;
+                }
+                console.log(`LootCollectionSystem: Before increment - craftResources.${stoneType}:`, playerResource.craftResources[stoneType]);
+                playerResource.craftResources[stoneType] += lootData.stones.count;
+                console.log(`LootCollectionSystem: After increment - craftResources.${stoneType}:`, playerResource.craftResources[stoneType]);
+                pickupMessage.push(`${lootData.stones.count} ${lootData.stones.text}${lootData.stones.count > 1 ? 's' : ''}`);
+                console.log("Ashen: PlayerResource", playerResource);
+            }
+        } else {
+            console.log("Ashen: LootCollectionSystem: No Stones object in loot Data");
+        }
         if (lootData.items && lootData.items.length) {
             lootData.items.forEach(item => {
                 playerInventory.items.push(item);
@@ -80,11 +104,10 @@ export class LootCollectionSystem extends System {
         entityList.treasures.splice(lootIndex, 1);
         this.entityManager.removeEntity(lootEntity.id);
         gameState.needsRender = true;
-        //this.eventBus.emit('RenderNeeded');
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
 
-        this.sfxQueue.push({ sfx: 'loot0' , volume: .7 });
+        this.sfxQueue.push({ sfx: 'loot0', volume: .7 });
 
         if (playerResource.gold >= 1e12) {
             gameState.isVictory = true;

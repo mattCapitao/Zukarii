@@ -66,13 +66,38 @@ export class InventoryComponent {
 }
 
 export class ResourceComponent {
-    constructor(torches = 0, healPotions = 0, gold = 0, potionDropFail = 0, torchDropFail = 0) {
+    constructor({
+        torches = 0,
+        healPotions = 0,
+        gold = 0,
+        potionDropFail = 0,
+        torchDropFail = 0,
+        portalBinding = 0,
+        craftResources = {
+            ashenShard: 0,
+            ashenCrystal: 0,
+            ashenGem: 0,
+            sylduranShard: 0,
+            sylduranCrystal: 0,
+            sylduranGem: 0,
+        }
+    } = {}) {
         this.type = 'Resource';
-        this.torches = torches;
-        this.healPotions = healPotions;
-        this.gold = gold;
-        this.potionDropFail = potionDropFail;
-        this.torchDropFail = torchDropFail;
+        this.torches = Number(torches) || 0;
+        this.healPotions = Number(healPotions) || 0;
+        this.gold = Number(gold) || 0;
+        this.potionDropFail = Number(potionDropFail) || 0;
+        this.torchDropFail = Number(torchDropFail) || 0;
+        this.portalBinding = Number(portalBinding) || 0;
+        // Deep-copy and validate craftResources
+        this.craftResources = {
+            ashenShard: Number(craftResources.ashenShard) || 0,
+            ashenCrystal: Number(craftResources.ashenCrystal) || 0,
+            ashenGem: Number(craftResources.ashenGem) || 0,
+            sylduranShard: Number(craftResources.sylduranShard) || 0,
+            sylduranCrystal: Number(craftResources.sylduranCrystal) || 0,
+            sylduranGem: Number(craftResources.sylduranGem) || 0,
+        };
     }
 }
 export class PlayerStateComponent {

@@ -194,6 +194,10 @@ export class MonsterSpawnSystem extends System {
             console.error(`MonsterSpawnSystem.js: RoomComponent not found for room ${roomId}`);
             return null;
         }
+        if (room.suppressMonsters) {
+            console.warn(`MonsterSpawnSystem.js: Monsters suppressed for room ${roomId}`);
+            return null;
+        }
         let tileX, tileY;
         let attempts = 0;
         const maxAttempts = 50;

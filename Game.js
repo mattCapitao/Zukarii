@@ -84,7 +84,7 @@ export class Game {
             equipped: { mainhand: null, offhand: null, armor: null, amulet: null, leftring: null, rightring: null },
             items: []
         }));
-        this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0));
+        this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0, 0, {}));
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
         this.entityManager.addComponentToEntity('player', new JourneyStateComponent());
         this.entityManager.addComponentToEntity('player', new InputStateComponent());
