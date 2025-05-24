@@ -1,0 +1,28 @@
+﻿[
+  {
+    "itemId": null,
+    "journeyItemId": "stoneOfReturn",
+    "name": "Stone of Return",
+    "type": "consumable",
+    "itemTier": "common",
+    "goldValue": 0,
+    "useItem": true,
+    "useEffect": "teleportToTier",
+    "params": { "tier": 0 },
+    "description": "A mystical stone that returns you to the surface of Zurath.",
+    "icon": "stone_of_return.png",
+    "isSellable": false
+  },
+  {
+    "itemId": null,
+    "joutneyItemId": "shardOfEchoes",
+    "name": "Shard of Echoes",
+    "type": "quest",
+    "itemTier": "relic",
+    "goldValue": 0,
+    "isQuestItem": true,
+    "description": "A fragment pulsing with ancient whispers, guiding you to the Echoes.",
+    "icon": "shard_of_echoes.png",
+    "isSellable": false
+  }
+]

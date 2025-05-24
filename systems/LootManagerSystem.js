@@ -99,7 +99,7 @@ export class LootManagerSystem extends System {
         this.uniqueItemsPromise = null;
 
         // Constants
-        this.BASE_DROP_CHANCE = 0.95;
+        this.BASE_DROP_CHANCE = 1;
 
         //GOLD
         this.BASE_GOLD_CHANCE = 0.95;
@@ -125,13 +125,13 @@ export class LootManagerSystem extends System {
 
         //TORCHES
         this.BASE_TORCH_CHANCE = 0.025;
-        this.TORCH_CHANCE_LOW_TORCHES = 0.125;
+        this.TORCH_CHANCE_LOW_TORCHES = 0.125 ;
         this.TORCH_CHANCE_MEDIUM_TORCHES = 0.075;
         this.TORCH_DESPERATION_CHANCE = 0.20;
         this.TORCH_DROP_FAIL_THRESHOLD = 3; 
 
         //CRAFTING  
-        this.BASE_STONE_CHANCE = 1;
+        this.BASE_STONE_CHANCE = .3;
     }
 
     init() {
@@ -175,6 +175,7 @@ export class LootManagerSystem extends System {
         const healPotions = this.calculatePotionDrop(playerResource, playerHealth, modifiers.healPotions || 1);
         const stones = this.calculateStoneDrop(sourceData, modifiers.stones || 1);
         console.log("Ashen: Stones", stones);
+
         const items = await this.buildItemsDropped(sourceData, player, modifiers);
         console.log(`LootManagerSystem: handleLootDrop() generated items:`, items);
 
@@ -324,9 +325,10 @@ export class LootManagerSystem extends System {
 
     calculateStoneDrop(sourceData, multiplier) {
         const tier = sourceData.tier
+        if (tier < 7) return { count: 0, stoneType: '', stoneText: '' };
         const stones = {};
         let stoneChance = this.BASE_STONE_CHANCE;
-        stones.count = Math.random() < (stoneChance * multiplier) ? 1 : 0;
+        stones.count = Math.random() > (stoneChance * multiplier) ? 1 : 0;
         let stoneType = 'ashenShard';
         if (tier > 20) stoneType = 'ashenCrystal';
         if (tier > 40) stoneType = 'ashenGem';

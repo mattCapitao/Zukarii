@@ -230,8 +230,14 @@ export class ItemROGSystem extends System {
             item.goldValue = this.calculateGoldValue(item, dungeonTier);
             item.isSellable = true;
 
-            console.log(`ItemROGSystem: Successfully generated item:`, item);
-            return item;
+            // Ensure all properties from partialItem are preserved
+            const finalItem = {
+                ...partialItem, // Preserve all original properties
+                ...item // Overwrite with generated properties
+            };
+
+            console.log(`ItemROGSystem: Successfully generated item:`, finalItem);
+            return finalItem;
         } catch (err) {
             console.error('ItemROGSystem: Error in generateRogItem:', err);
             return null;

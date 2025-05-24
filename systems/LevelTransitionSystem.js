@@ -3,7 +3,7 @@ import { HpBarComponent, LightingState } from '../core/Components.js';
 import { System } from '../core/Systems.js';
 
 export class LevelTransitionSystem extends System {
-    constructor(entityManager, eventBus) {
+    constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus);
         this.requiredComponents = ['Map', 'Tier', 'Exploration'];
         this.pendingTransition = null;
@@ -222,13 +222,27 @@ export class LevelTransitionSystem extends System {
         setTimeout(() => { sfxQueue.push({ sfx: 'portal1', volume: .5 }); }, 1000 * deltaTime);
     }
 
+
     transitionViaLoad(tier, data) {
         console.log('LevelTransitionSystem: Starting transitionViaLoad for tier:', tier);
 
         // Update gameState
-        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
-        Object.assign(gameState, data.gameState.GameState);
-        gameState.tier = tier;
+        const gameState = this.entityManager.getEntity('gameState');
+        const gameStateComp = gameState.getComponent('GameState');
+        Object.assign(gameStateComp, data.gameState.GameState);
+        gameStateComp.tier = tier;
+
+        // Restore quest-related components for gameState
+        if (data.gameState.JourneyPaths) {
+            const journeyPathsComp = gameState.getComponent('JourneyPaths');
+            journeyPathsComp.paths = data.gameState.JourneyPaths.paths; // Deep copy to preserve arrays
+            console.log('LevelTransitionSystem: Restored JourneyPaths:', journeyPathsComp.paths);
+        }
+        if (data.gameState.OfferedQuests) {
+            const offeredQuestsComp = gameState.getComponent('OfferedQuests');
+            offeredQuestsComp.quests = data.gameState.OfferedQuests.quests; // Deep copy to preserve arrays
+            console.log('LevelTransitionSystem: Restored OfferedQuests:', offeredQuestsComp.quests);
+        }
 
         // Update player (exclude Position)
         const player = this.entityManager.getEntity('player');
@@ -237,36 +251,43 @@ export class LevelTransitionSystem extends System {
             if (compName !== 'Position') {
                 const comp = player.getComponent(compName);
                 console.log(`Updating ${compName} component for player:`, comp);
-                if (comp) Object.assign(comp, compData);
+                if (comp) {
+                    if (compName === 'JourneyState') {
+                        comp.completedPaths = compData.completedPaths; // Deep copy to preserve arrays
+                        console.log('LevelTransitionSystem: Restored JourneyState:', comp.completedPaths);
+                    } else if (compName === 'JourneyPath') {
+                        comp.paths = compData.paths; // Deep copy to preserve arrays
+                        console.log('LevelTransitionSystem: Restored JourneyPath:', comp.paths);
+                    } else {
+                        Object.assign(comp, compData);
+                    }
+                }
             }
         });
-        
+
         // Update overlay
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
         Object.assign(overlayState, data.overlayState.OverlayState);
 
-
-       
         // Clear and regenerate level
         let levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
         if (tier !== 0 && levelEntity) {
             this.clearLevelEntities(tier);
         }
-      
+
         // Set pendingTransition to 'load' to indicate a load operation
         if (tier !== 0) {
             this.pendingTransition = 'load';
             this.eventBus.emit('AddLevel', { tier });
         } else {
             console.log('LevelTransitionSystem: Tier 0 load, preserving existing setup');
-            gameState.needsInitialRender = true;
-            gameState.needsRender = true;
+            gameStateComp.needsInitialRender = true;
+            gameStateComp.needsRender = true;
             this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
+            this.eventBus.emit('JourneyStateUpdated');
             const healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
             healthUpdates.push({ entityId: 'player', amount: 0 });
         }
-     
-        
     }
 
     handleLevelAdded({ tier, entityId }) {

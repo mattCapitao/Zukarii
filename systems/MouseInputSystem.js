@@ -1,4 +1,4 @@
-﻿import { MovementIntentComponent, MouseTargetComponent, PositionComponent, HitboxComponent, CollisionComponent } from '../core/Components.js';
+﻿import { MovementIntentComponent, MouseTargetComponent, PositionComponent, HitboxComponent, CollisionComponent, InteractionIntentComponent } from '../core/Components.js';
 
 export class MouseInputSystem {
     constructor(entityManager, eventBus, state) {
@@ -13,10 +13,11 @@ export class MouseInputSystem {
         this.lastMouseY = null;
         this.mouseDownTime = null;
         this.MIN_CLICK_INTERVAL = 150;
-        this.CLICK_THRESHOLD = 155; // ms to distinguish click vs. hold
+        this.CLICK_THRESHOLD = 155;
         this.lastAttackTime = 0;
         this.lastClickTime = 0;
         this.HITBOX_BUFFER = 4;
+        this.hasInteractedWithNPC = false;
         if (!this.canvas) {
             console.error('MouseInputSystem: Canvas element with id="viewport-canvas" not found');
             return;
@@ -26,7 +27,6 @@ export class MouseInputSystem {
         this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
         this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
         window.addEventListener('resize', () => this.handleResize());
-        // Listen for level transitions to clear movement
         this.eventBus.on('LevelAdded', () => this.clearMovement());
     }
 
@@ -41,6 +41,12 @@ export class MouseInputSystem {
     }
 
     handleMouseDown(event) {
+        const dialogue = this.entityManager.getEntity('dialogueState')?.getComponent('Dialogue');
+        if (dialogue?.isOpen) {
+            event.stopPropagation();
+            return;
+        }
+
         if (event.button !== 0) return;
         const now = performance.now();
         if (now - this.lastClickTime < this.MIN_CLICK_INTERVAL) {
@@ -56,12 +62,12 @@ export class MouseInputSystem {
         }
 
         this.isMouseDown = true;
+        this.hasInteractedWithNPC = false;
 
         const { worldX, worldY } = this.getWorldCoordinates(event);
         this.lastMouseX = worldX;
         this.lastMouseY = worldY;
 
-        // Initial movement or attack
         this.processInput(worldX, worldY);
     }
 
@@ -74,6 +80,20 @@ export class MouseInputSystem {
     }
 
     handleMouseUp(event) {
+        const dialogue = this.entityManager.getEntity('dialogueState')?.getComponent('Dialogue');
+        if (dialogue?.isOpen) {
+            event.stopPropagation();
+            this.isMouseDown = false; // Reset mouse state even if dialogue is open
+            this.lastMouseX = null;
+            this.lastMouseY = null;
+            this.mouseDownTime = null;
+            this.hasInteractedWithNPC = false;
+            this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
+            this.eventBus.emit('StopMovement', { entityId: 'player' });
+            console.log('MouseInputSystem: Reset mouse state due to dialogue being open');
+            return;
+        }
+
         if (event.button !== 0) return;
 
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
@@ -94,11 +114,9 @@ export class MouseInputSystem {
 
         if (this.lastMouseX !== null && this.lastMouseY !== null) {
             if (isQuickClick) {
-                // Quick click: Process attack or movement
                 this.processInput(this.lastMouseX, this.lastMouseY, true);
                 console.log(`MouseInputSystem: Quick click detected (${duration.toFixed(2)}ms)`);
             } else {
-                // Hold: Stop movement
                 this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
                 this.eventBus.emit('StopMovement', { entityId: 'player' });
                 console.log(`MouseInputSystem: Hold release detected (${duration.toFixed(2)}ms), stopped movement`);
@@ -109,9 +127,26 @@ export class MouseInputSystem {
         this.lastMouseX = null;
         this.lastMouseY = null;
         this.mouseDownTime = null;
+        this.hasInteractedWithNPC = false;
     }
 
     update(deltaTime) {
+        const dialogue = this.entityManager.getEntity('dialogueState')?.getComponent('Dialogue');
+        if (dialogue?.isOpen) {
+            // Reset mouse state if dialogue opens during a hold
+            if (this.isMouseDown) {
+                this.isMouseDown = false;
+                this.lastMouseX = null;
+                this.lastMouseY = null;
+                this.mouseDownTime = null;
+                this.hasInteractedWithNPC = false;
+                this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
+                this.eventBus.emit('StopMovement', { entityId: 'player' });
+                console.log('MouseInputSystem: Reset mouse state in update due to dialogue being open');
+            }
+            return;
+        }
+
         if (!this.isMouseDown || this.lastMouseX === null || this.lastMouseY === null) return;
 
         const player = this.entityManager.getEntity('player');
@@ -124,7 +159,6 @@ export class MouseInputSystem {
         const worldX = this.lastMouseX;
         const worldY = this.lastMouseY;
 
-        // Process continuous input
         this.processInput(worldX, worldY);
     }
 
@@ -136,6 +170,7 @@ export class MouseInputSystem {
             this.lastMouseX = null;
             this.lastMouseY = null;
             this.mouseDownTime = null;
+            this.hasInteractedWithNPC = false;
             this.eventBus.emit('StopMovement', { entityId: 'player' });
             console.log('MouseInputSystem: Cleared movement components and mouse state due to level transition');
         }
@@ -179,8 +214,6 @@ export class MouseInputSystem {
         const visuals = player.getComponent('Visuals');
         const lightingState = this.entityManager.getEntity('lightingState')?.getComponent('LightingState');
 
-
-        // Check for NPCs
         const npc = this.getNPCAtPosition(worldX, worldY);
         if (npc) {
             const npcPos = npc.getComponent('Position');
@@ -188,18 +221,20 @@ export class MouseInputSystem {
             const dx = npcPos.x - playerPos.x;
             const dy = npcPos.y - playerPos.y;
             const distance = Math.sqrt(dx * dx + dy * dy) / this.TILE_SIZE;
-            //const visibilityRadius = lightingState?.visibilityRadius || 5;
             const interactRange = 2;
 
-            if (distance <= interactRange) {
-                // Within visual radius: trigger interaction
-                this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
-                this.eventBus.emit('StopMovement', { entityId: 'player' });
-                this.eventBus.emit('InteractWithNPC', { npcId: npc.id });
-                console.log(`MouseInputSystem: Interacting with NPC ${npc.id} at (${npcPos.x}, ${npcPos.y})`);
+            if (isClick || distance <= interactRange) {
+                if (!this.hasInteractedWithNPC) {
+                    this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
+                    this.eventBus.emit('StopMovement', { entityId: 'player' });
+                    const intent = player.getComponent('InteractionIntent') || new InteractionIntentComponent();
+                    intent.intents.push({ action: 'interactWithNPC', params: { npcId: npc.id } });
+                    player.addComponent(intent);
+                    console.log(`MouseInputSystem: Interacting with NPC ${npc.id} at (${npcPos.x}, ${npcPos.y})`);
+                    this.hasInteractedWithNPC = true;
+                }
                 return;
             } else {
-                // Outside visual radius: move to NPC's tile
                 const tileX = Math.floor(npcPos.x / this.TILE_SIZE);
                 const tileY = Math.floor(npcPos.y / this.TILE_SIZE);
                 const targetX = tileX * this.TILE_SIZE;
@@ -210,18 +245,16 @@ export class MouseInputSystem {
             }
         }
 
-        // Check for monsters
         const monster = this.getMonsterAtPosition(worldX, worldY);
         const hasRangedWeapon = (inventory.equipped.offhand?.attackType === 'ranged' && inventory.equipped.offhand?.baseRange > 0) ||
             (inventory.equipped.mainhand?.attackType === 'ranged' && inventory.equipped.mainhand?.baseRange > 0);
 
-        // Hold position in ranged mode (space held) or with ranged weapon on monster
         if (gameState.isRangedMode || (monster && hasRangedWeapon)) {
             if (hasRangedWeapon && attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed && mana.mana >= 3) {
                 const now = performance.now();
                 if (now - this.lastAttackTime >= attackSpeed.attackSpeed) {
-                    const targetX = monster ? (monster.getComponent('Position').x /*+ monster.getComponent('Visuals').w / 2*/) : worldX;
-                    const targetY = monster ? (monster.getComponent('Position').y /*+ monster.getComponent('Visuals').h / 2*/) : worldY;
+                    const targetX = monster ? (monster.getComponent('Position').x) : worldX;
+                    const targetY = monster ? (monster.getComponent('Position').y) : worldY;
                     let dx = targetX - player.getComponent('Position').x;
                     let dy = targetY - player.getComponent('Position').y;
                     const magnitude = Math.sqrt(dx * dx + dy * dy);
@@ -229,7 +262,6 @@ export class MouseInputSystem {
                         dx /= magnitude;
                         dy /= magnitude;
                     }
-                    // Set facing direction based on dx
                     visuals.faceLeft = dx < 0;
                     console.log(`MouseInputSystem: Ranged attack - direction: dx=${dx.toFixed(2)}, dy=${dy.toFixed(2)}, faceLeft: ${visuals.faceLeft}`);
 
@@ -240,22 +272,19 @@ export class MouseInputSystem {
                     console.log(`MouseInputSystem: Ranged attack triggered, source: ${direction.source}, target: (${targetX.toFixed(2)}, ${targetY.toFixed(2)})`);
                 }
             }
-            return; // Skip movement
+            return;
         }
 
-        // Handle monster input without ranged weapon
         if (monster) {
-            // Move to monster's tile
             const monsterPos = monster.getComponent('Position');
             const tileX = Math.floor(monsterPos.x / this.TILE_SIZE);
             const tileY = Math.floor(monsterPos.y / this.TILE_SIZE);
-            const targetX = tileX * this.TILE_SIZE /*+ this.TILE_SIZE / 2*/;
-            const targetY = tileY * this.TILE_SIZE /*+ this.TILE_SIZE / 2*/;
+            const targetX = tileX * this.TILE_SIZE;
+            const targetY = tileY * this.TILE_SIZE;
             this.setMovementTarget(targetX, targetY);
             return;
         }
 
-        // Set movement target for tiles
         this.setMovementTarget(worldX, worldY);
     }
 
@@ -281,13 +310,13 @@ export class MouseInputSystem {
             return;
         }
 
-        const targetX = tileX * this.TILE_SIZE /*+ this.TILE_SIZE / 2*/;
-        const targetY = tileY * this.TILE_SIZE /*+ this.TILE_SIZE / 2*/;
+        const targetX = tileX * this.TILE_SIZE;
+        const targetY = tileY * this.TILE_SIZE;
         const player = this.entityManager.getEntity('player');
         const moveDx = targetX - player.getComponent('Position').x;
         const moveDy = targetY - player.getComponent('Position').y;
         this.entityManager.addComponentToEntity('player', new MouseTargetComponent(targetX, targetY));
-        console.log(`MouseInputSystem: Setting movement target to (${targetX.toFixed(2)}, ${targetY.toFixed(2)}) for tile (${tileX}, ${tileY}), direction: (${moveDx.toFixed(2)}, ${moveDy.toFixed(2)})`);
+        //console.log(`MouseInputSystem: Setting movement target to (${targetX.toFixed(2)}, ${targetY.toFixed(2)}) for tile (${tileX}, ${tileY}), direction: (${moveDx.toFixed(2)}, ${moveDy.toFixed(2)})`);
     }
 
     getMonsterAtPosition(worldX, worldY) {

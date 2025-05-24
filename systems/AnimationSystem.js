@@ -93,7 +93,7 @@ export class AnimationSystem extends System {
                     const currentSpeed = movementSpeedComp.movementSpeed;
                     const speedRatio = currentSpeed / this.baselineSpeed;
                     effectiveFrameTime = animData.frameTime / speedRatio;
-                    console.log(`AnimationSystem: Walk speed: ${currentSpeed.toFixed(2)}, speedRatio: ${speedRatio.toFixed(2)}, effectiveFrameTime: ${effectiveFrameTime.toFixed(2)}ms`);
+                   // console.log(`AnimationSystem: Walk speed: ${currentSpeed.toFixed(2)}, speedRatio: ${speedRatio.toFixed(2)}, effectiveFrameTime: ${effectiveFrameTime.toFixed(2)}ms`);
                 }
             }
 

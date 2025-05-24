@@ -65,10 +65,17 @@
             <div class="player-info-child">Gold: <span id="playerGold"></span></div>
             <div class="player-info-child">Ashen Shards: <span id="playerShards"></span></div>
             <div class="player-info-child">Portal Bindings: <span id="portalBinding"></span></div>
-            
+
         </div>
 
         <canvas id="minimap-canvas" width="248" height="138"></canvas>
+
+        <div id="dialogue-window" style="display: none;">
+            <div id="dialogue-text"></div>
+            <div id="dialogue-buttons">
+                <!-- Buttons will be dynamically added by DialogueUISystem.js -->
+            </div>
+        </div>
 
         <div id="player-status">
             <div class="player-status-child">Heal Potions: <span id="healPotionCount"></span></div><!-- set innerHTML on #healPotionCount -->

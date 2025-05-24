@@ -1,20 +1,74 @@
 ﻿[
   {
-    "id": "zu_master",
-    "name": "Zu Master",
+    "id": "sehnrhyx_syliri",
+    "name": "Sehnrhyx Syliri",
     "avatar": "img/avatars/npcs/zu-master.png",
-    "greeting": "Hello Zukarii",
-    "faceLeft" : true,
+    "greeting": "Welcome, Zukarrii. Your Journey begins in Zurath.",
+    "faceLeft": true,
     "width": 42,
     "height": 42,
     "hitboxWidth": 42,
-    "hitboxHeight": 42
+    "hitboxHeight": 42,
+    "dialogues": {
+      "whisper_child_1_1": {
+        "text": "Speak with me to embrace your destiny in Zurath.",
+        "onComplete": "Well done. Now seek the Vestment of Zukarath in the depths."
+      },
+      "whisper_child_2_4": {
+        "text": "Return with the Vestment to prove your worth.",
+        "onComplete": "You have earned the Vestment. Speak to me about the Sigil."
+      },
+      "whisper_child_3_1": {
+        "text": "The Sigil of Zukarath awaits you. Seek it on Tier 6.",
+        "onComplete": "The path is clear. Defeat the guardian."
+      },
+      "whisper_child_3_5": {
+        "text": "You bear the Sigil. What did you find in the depths?",
+        "onComplete": "The corruption grows. We must act."
+      },
+      "whisper_child_4_1": {
+        "text": "Are you ready to face the corruption on Tier 7?",
+        "onComplete": "Go now, and gather the Ashen Shards."
+      },
+      "whisper_child_4_4": {
+        "text": "Do you have the Ashen Shards?",
+        "onComplete": "The shards will aid us. Seek more."
+      },
+      "whisper_child_5_4": {
+        "text": "The Rings of the Magi are yours. What power do they hold?",
+        "onComplete": "Impressive. Now seek Ashangal."
+      },
+      "whisper_child_6_1": {
+        "text": "Ashangal calls. Are you ready?",
+        "onComplete": "Find the entrance on Tier 10."
+      },
+      "whisper_child_7_1": {
+        "text": "Ashangal’s corruption is strong. Teleport to Tier 11?",
+        "onComplete": "Collect the shards and return."
+      },
+      "whisper_child_7_4": {
+        "text": "The Ashen Shards are vital. Do you have them?",
+        "onComplete": "Well done. Now the Shard of Echoes."
+      },
+      "whisper_child_7_5": {
+        "text": "What is this Shard of Echoes?",
+        "onComplete": "This shard speaks of Echoes. Seek them out."
+      },
+      "whisper_child_8_2": {
+        "text": "What have you learned from the Echoes?",
+        "onComplete": "The Echoes guide us. Continue your path."
+      },
+      "whisper_child_9_3": {
+        "text": "Your magic gear is impressive. Are you ready?",
+        "onComplete": "Choose your reward: Blade or Staff."
+      }
+    }
   },
   {
     "id": "shop_keeper",
     "name": "Shop Keeper",
     "avatar": "img/avatars/npcs/merchant.png",
-    "greeting": "Hello Zukarii",
+    "greeting": "Browse my wares!",
     "faceLeft": false,
     "width": 36,
     "height": 36,

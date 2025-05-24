@@ -46,23 +46,32 @@ export class PlayerCollisionSystem extends System {
                 }
                 // Remove the processed collision entry
                 collision.collisions.splice(i, 1);
-                //break;
+                continue;
             }
             if (target.hasComponent('Fountain')) {
                 this.eventBus.emit('UseFountain', { fountainEntityId: target.id });
                 this.endTurn('useFountain');
                 // Remove the processed collision entry
                 collision.collisions.splice(i, 1);
-  
+                continue;
             }
             if (target.hasComponent('LootData')) {
                 const pos = target.getComponent('Position');
                 this.eventBus.emit('PickupTreasure', { x: pos.x, y: pos.y });
                 // Remove the processed collision entry
                 collision.collisions.splice(i, 1);
-
+                continue;
             }
             if (target.hasComponent('Stair') && !player.hasComponent('StairLock')) {
+                const stairComp = target.getComponent('Stair');
+                if (!stairComp.active) {
+                    player.addComponent(new StairLockComponent());
+                    this.eventBus.emit('LogMessage', { message: 'The Stairs are blocked by a magical barrier' });
+                    setTimeout(() => {
+                        player.removeComponent(new StairLockComponent());
+                    }, 2000);
+                    continue;
+                }
                 const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
                 player.addComponent(new StairLockComponent());
                 if (levelTransition && levelTransition.pendingTransition === null) {
@@ -83,7 +92,7 @@ export class PlayerCollisionSystem extends System {
             }
             if (target.hasComponent('Portal')) {
                 const portalComp = target.getComponent('Portal');
-                if (!portalComp.active) return;
+                if (!portalComp.active)continue;
                 this.sfxQueue.push({ sfx: 'portal0', volume: 0.5 });
                 const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
                 this.entityManager.getEntity('gameState').getComponent('GameState').transitionLock = true;

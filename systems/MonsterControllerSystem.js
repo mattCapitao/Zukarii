@@ -3,9 +3,10 @@ import { System } from '../core/Systems.js';
 import { LootSourceData, MovementIntentComponent, RemoveEntityComponent } from '../core/Components.js';
 
 export class MonsterControllerSystem extends System {
-    constructor(entityManager, eventBus) {
+    constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'Health', 'MonsterData'];
+        this.utilities = utilities;
     }
 
     init() {
@@ -122,17 +123,19 @@ export class MonsterControllerSystem extends System {
         this.eventBus.emit('LogMessage', { message: `${monsterData.name} defeated!` });
         this.eventBus.emit('AwardXp', { amount: baseXp });
 
+        if (monsterData.isBoss) {
+                this.utilities.pushPlayerActions('bossKill', { monsterId: monsterData.id, tier });
+        }
+
         const lootSource = this.entityManager.createEntity(`loot_source_${monsterData.tier}_${Date.now()}`);
-        // Validate and process uniqueItemsDropped
         const items = Array.isArray(monsterData.uniqueItemsDropped)
             ? monsterData.uniqueItemsDropped.filter(item => {
                 if (!item || typeof item !== 'object' || !item.type || !item.data) {
                     console.warn(`MonsterControllerSystem: Invalid uniqueItemsDropped entry for ${monsterData.name}:`, item);
                     return false;
                 }
-                // Only require data.name for customUnique type
                 if (item.type === 'customUnique' && typeof item.data.name !== 'string') {
-                    console.warn(`MonsterControllerSystem: Invalid customUnique entry for ${monsterData.name} (missing or invalid name):`, item);
+                    console.warn(`MonsterControllerSystem: Invalid customUnique entry for ${monsterData.name}:`, item);
                     return false;
                 }
                 return true;
@@ -151,11 +154,13 @@ export class MonsterControllerSystem extends System {
                 item: 1,
                 uniqueItem: 1
             },
-            maxItems: items.length > 0 ? items.length : 1, // Use number of valid drops, default to 1
+            maxItems: items.length > 0 ? items.length : 1,
             items: items
         }));
         console.log(`MonsterControllerSystem: Emitting DropLoot for ${monsterData.name} with items:`, items);
         this.eventBus.emit('DropLoot', { lootSource });
+
+        this.utilities.pushPlayerActions('monsterKill', { monsterId: monsterData.id, tier });
     }
 
     // systems/MonsterControllerSystem.js - New isWalkable method

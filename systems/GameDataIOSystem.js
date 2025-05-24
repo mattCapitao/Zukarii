@@ -76,7 +76,8 @@ export class GameDataIOSystem extends System {
             this.eventBus.emit('RequestLoadGameFromStorage', { key: `save_${saveId}` }, (data) => {
                 if (data) {
                     const tier = data.tier;
-                    console.log("Player Data: ", data.player); 
+                    console.log("Player Data: ", data.player);
+                    // Pass the entire save data to TransitionLoad, including quest state
                     this.eventBus.emit('TransitionLoad', { tier, data });
                     this.eventBus.emit('GameLoaded', { saveId, success: true, message: 'Game loaded successfully', data });
                     if (uiCallback) uiCallback({ success: true, data });
@@ -93,18 +94,18 @@ export class GameDataIOSystem extends System {
         this.isProcessing = false;
         console.log('GameDataIOSystem: Reset isProcessing to false after successful load');
         this.eventBus.emit('StartGame');
-
     }
 
     bundleGameData() {
         const player = this.entityManager.getEntity('player');
-        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const gameState = this.entityManager.getEntity('gameState');
+        const gameStateComp = gameState.getComponent('GameState');
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
 
         return {
             timestamp: new Date().toLocaleString(),
             characterName: player ? player.getComponent('PlayerState').name : 'Unknown',
-            tier: gameState ? gameState.tier : 0,
+            tier: gameStateComp ? gameStateComp.tier : 0,
             isDead: player ? player.getComponent('PlayerState').dead : false,
             player: player ? {
                 Position: player.getComponent('Position'),
@@ -113,13 +114,16 @@ export class GameDataIOSystem extends System {
                 Stats: player.getComponent('Stats'),
                 Inventory: player.getComponent('Inventory'),
                 Resource: player.getComponent('Resource'),
-               // MovementSpeed: player.getComponent('MovementSpeed'),
                 AttackSpeed: player.getComponent('AttackSpeed'),
                 Affix: player.getComponent('Affix'),
-                PlayerState: player.getComponent('PlayerState')
+                PlayerState: player.getComponent('PlayerState'),
+                JourneyState: player.getComponent('JourneyState'), // Add JourneyState
+                JourneyPath: player.getComponent('JourneyPath')    // Add JourneyPath
             } : null,
             gameState: gameState ? {
-                GameState: gameState
+                GameState: gameStateComp,
+                JourneyPaths: gameState.getComponent('JourneyPaths'), // Add JourneyPaths
+                OfferedQuests: gameState.getComponent('OfferedQuests') // Add OfferedQuests
             } : null,
             overlayState: overlayState ? {
                 OverlayState: overlayState

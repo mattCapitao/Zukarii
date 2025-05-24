@@ -192,10 +192,18 @@ export class NPCDataComponent {
 }
 
 export class DialogueComponent {
-    constructor(npcId = '', text = '', isOpen = false) {
+    constructor(npcId = '', text = '', options = [], isOpen = false) {
         this.type = 'Dialogue';
-        this.npcId = npcId; // NPC entity ID
-        this.text = text; // Dialogue text
-        this.isOpen = isOpen; // Whether dialogue is open
+        this.npcId = npcId;
+        this.text = text;
+        this.options = options; // [{ label: string, action: string, params: object }]
+        this.isOpen = isOpen;
+    }
+}
+
+export class InteractionIntentComponent {
+    constructor() {
+        this.type = 'InteractionIntent';
+        this.intents = []; // [{ action: string, params: object }]
     }
 }

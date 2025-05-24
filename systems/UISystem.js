@@ -1,5 +1,6 @@
-﻿import { System } from '../core/Systems.js';
-import { ShopInteractionComponent } from '../core/Components.js'; // Updated import
+﻿// systems/UISystem.js
+import { System } from '../core/Systems.js';
+import { ShopInteractionComponent } from '../core/Components.js';
 
 export class UISystem extends System {
     constructor(entityManager, eventBus, utilities) {
@@ -14,7 +15,7 @@ export class UISystem extends System {
         this.journeyContent = null;
         this.shopContent = null;
         this.activeMenuSection = 'controls-button';
-        this.activeJourneyTab = 'whispers';
+        this.activeJourneyTab = 'whispers'; // Default to Whispers
         this.tooltipCache = new Map();
         this.activeInventoryTab = 'all';
         this.playerEntity = this.entityManager.getEntity('player');
@@ -80,6 +81,7 @@ export class UISystem extends System {
         this.eventBus.off('GameLoaded');
         this.eventBus.off('SaveCompleted');
         this.eventBus.off('PlayerStateUpdated');
+        this.eventBus.off('JourneyStateUpdated');
 
         this.eventBus.on('ToggleOverlay', (data) => {
             console.log('UISystem: ToggleOverlay event received:', data);
@@ -116,6 +118,7 @@ export class UISystem extends System {
             }
         });
         this.eventBus.on('PlayerStateUpdated', (data) => this.updateStatusUI(data));
+        this.eventBus.on('JourneyStateUpdated', () => this.updateJourney());
 
         this.updateStatusUI({ entityId: 'player' });
         this.eventBus.emit('GearChanged', { entityId: 'player' });
@@ -326,11 +329,15 @@ export class UISystem extends System {
                 if (!itemElement) return;
                 const itemData = JSON.parse(itemElement.getAttribute('data-item') || '{}');
                 if (!itemData.uniqueId) {
-                    console.error('UISystem: Item missing uniqueId for deletion:', itemData);
+                    console.error('UISystem: Item missing uniqueId:', itemData);
                     return;
                 }
                 this.hideItemTooltip(itemData);
-                this.eventBus.emit('DropItem', { uniqueId: itemData.uniqueId });
+                if (itemData.useItem) {
+                    this.eventBus.emit('UseItem', { entityId: 'player', uniqueId: itemData.uniqueId });
+                } else {
+                    this.eventBus.emit('DropItem', { uniqueId: itemData.uniqueId });
+                }
                 this.updateCharacterUI({ entityId: 'player' });
             });
 
@@ -438,7 +445,7 @@ export class UISystem extends System {
                 shopItems.classList.remove('drag-over');
                 console.log('UISystem: Drop on shop-items');
 
-                const rawData = event.dataTransfer.getData('text/plain');
+                const rawData = e.dataTransfer.getData('text/plain');
                 let data;
                 try {
                     data = JSON.parse(rawData);
@@ -567,16 +574,13 @@ export class UISystem extends System {
             }
 
             const masterPaths = journeyPath.paths.filter(path => path.id === path.parentId);
-            const tabMap = {};
-            masterPaths.forEach((path, index) => {
-                const tabId = `journey-tab-${path.id.replace(/_/g, '-')}`;
-                const tabName = path.id.replace('master_', '');
-                tabMap[tabId] = tabName;
-                if (index === 0) {
-                    this.activeJourneyTab = tabName;
-                }
-            });
+            const tabMap = {
+                'journey-tab-whispers': 'whispers',
+                'journey-tab-echoes': 'echoes',
+                'journey-tab-lore': 'lore'
+            };
 
+            // Ensure all expected tabs are present, even if no quests exist for them
             journeyTabs.innerHTML = Object.entries(tabMap)
                 .map(([tabId, tabName]) => {
                     const path = masterPaths.find(p => p.id === `master_${tabName}`);
@@ -677,7 +681,6 @@ export class UISystem extends System {
             console.log("Resource - before output", resource);
             if (portalBindingSpan) portalBindingSpan.textContent = resource.portalBinding !== undefined ? resource.portalBinding : 0;
             console.log("Resource - after output", resource);
-
         }
 
         if (!this.needsUpdate) {
@@ -983,37 +986,22 @@ export class UISystem extends System {
 
     updateJourney() {
         const player = this.entityManager.getEntity('player');
-        if (!player) {
-            console.error('UISystem: Player entity not found in updateJourney');
-            return;
-        }
+        if (!player) return;
 
         const journeyState = player.getComponent('JourneyState');
         const journeyPath = player.getComponent('JourneyPath');
-        if (!journeyState || !journeyPath) {
-            console.error('UISystem: JourneyState or JourneyPath component not found on player');
-            return;
-        }
+        if (!journeyState || !journeyPath) return;
 
         const activePaths = journeyPath.paths;
         const completedPaths = journeyState.completedPaths;
-
-        console.log('UISystem: All Active Paths:', activePaths.map(p => ({
-            id: p.id,
-            parentId: p.parentId,
-            completionCondition: p.completionCondition,
-            completed: p.completed
-        })));
-
         const masterPaths = activePaths.filter(path => path.id === path.parentId);
-        const masterPathNames = masterPaths.map(path => path.id.replace('master_', ''));
+        const masterPathNames = ['whispers', 'echoes', 'lore'];
 
         if (!masterPathNames.includes(this.activeJourneyTab)) {
             this.activeJourneyTab = masterPathNames[0] || '';
         }
 
         const journeyDiv = document.getElementById('journey-items-wrapper');
-
         if (masterPathNames.includes(this.activeJourneyTab)) {
             const masterPathId = `master_${this.activeJourneyTab}`;
             const masterPath = activePaths.find(path => path.id === masterPathId);
@@ -1022,95 +1010,56 @@ export class UISystem extends System {
                 return;
             }
 
-            const directChildren = activePaths.filter(path => path.parentId === masterPathId && path.id !== masterPathId);
-            const directChildIds = directChildren.map(child => child.id);
-            const childPaths = activePaths.filter(path => directChildIds.includes(path.parentId));
-            const relatedPaths = [...directChildren, ...childPaths];
-
-            console.log(`UISystem: Master Path ID: ${masterPathId}`);
-            console.log(`UISystem: Related Paths:`, relatedPaths.map(p => ({
-                id: p.id,
-                parentId: p.parentId,
-                completionCondition: p.completionCondition,
-                completed: p.completed
-            })));
-
-            const activeParentPaths = relatedPaths.filter(path => !path.completionCondition);
-            const activeChildPaths = relatedPaths.filter(path => path.completionCondition);
-
-            console.log(`UISystem: Active Parent Paths:`, activeParentPaths.map(p => ({
-                id: p.id,
-                completionCondition: p.completionCondition,
-                completed: p.completed
-            })));
-            console.log(`UISystem: Active Child Paths:`, activeChildPaths.map(p => ({
-                id: p.id,
-                completionCondition: p.completionCondition,
-                completed: p.completed
-            })));
-
-            const activeGroupedPaths = activeParentPaths.map(parent => {
-                const children = activeChildPaths.filter(child => child.parentId === parent.id);
-                console.log(`UISystem: Children for parent ${parent.id}:`, children.map(c => ({
-                    id: c.id,
-                    completionCondition: c.completionCondition,
-                    completed: c.completed
-                })));
-                return { parent, children };
-            });
-
-            const completedRelatedPaths = completedPaths.filter(path => path.parentId === masterPathId);
-
+            const activeQuests = activePaths.filter(path => path.parentId === masterPathId && path.id !== masterPathId);
             let activeContent = '';
-            if (activeGroupedPaths.length > 0) {
+            if (activeQuests.length > 0) {
                 activeContent = `
-                    <h3>Active: ${masterPath.title}</h3>
-                    ${activeGroupedPaths.map(group => `
-                        <div class="journey-path">
-                            <p><strong>${group.parent.title}</strong></p>
-                            <p>${group.parent.description}</p>
-                            ${group.children.length > 0 ? group.children.map(child => {
+      <h3>Active: ${masterPath.title}</h3>
+      ${activeQuests.map(quest => `
+        <div class="journey-path">
+          <p><strong>${quest.title}</strong></p>
+          <p>${quest.description}</p>
+          <p>Progress: ${quest.tasks.filter(t => t.completed).length}/${quest.tasks.length} tasks complete</p>
+          ${quest.tasks.map(task => {
                     let progressText = '';
-                    if (child.completionCondition.type === 'reachTier') {
+                    if (task.completionCondition.type === 'reachTier') {
                         const currentTier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
-                        progressText = `Current Tier: ${currentTier}/${child.completionCondition.tier}`;
-                    } else if (child.completionCondition.type === 'findArtifact') {
+                        progressText = `Current Tier: ${currentTier}/${task.completionCondition.tier}`;
+                    } else if (task.completionCondition.type === 'findItem') { // Updated from findItem
                         const inventory = this.entityManager.getEntity('player').getComponent('Inventory');
-                        const hasArtifact = inventory.items.some(item => item.itemId === child.completionCondition.artifactId) ||
-                            Object.values(inventory.equipped).some(item => item && item.itemId === child.completionCondition.artifactId);
-                        progressText = `Artifact Found: ${hasArtifact ? 'Yes' : 'No'}`;
+                        const hasItem = inventory.items.some(item => item.journeyItemId === task.completionCondition.journeyItemId) ||
+                            Object.values(inventory.equipped).some(item => item && item.journeyItemId === task.completionCondition.journeyItemId);
+                        progressText = `Item Found: ${hasItem ? 'Yes' : 'No'}`; // Updated from item Found
+                    } else if (task.completionCondition.type === 'collectResource') {
+                        const resources = this.entityManager.getEntity('player').getComponent('Resource');
+                        const count = resources.craftResources[task.completionCondition.resourceType] || 0;
+                        progressText = `Collected: ${count}/${task.completionCondition.quantity}`;
                     }
                     return `
-                                    <div class="journey-task">
-                                        <p>${child.title} (${child.completed ? 'Completed' : 'In Progress'})</p>
-                                        <p>${child.description}</p>
-                                        ${progressText ? `<p>${progressText}</p>` : ''}
-                                    </div>
-                                `;
-                }).join('') : ''}
-                        </div>
-                    `).join('')}
-                `;
+              <div class="journey-task">
+                <p>${task.title} (${task.completed ? 'Completed' : 'In Progress'})</p>
+                <p>${task.description}</p>
+                ${progressText ? `<p>${progressText}</p>` : ''}
+              </div>
+            `;
+                }).join('')}
+        </div>
+      `).join('')}
+    `;
             }
 
             let completedContent = '';
+            const completedRelatedPaths = completedPaths.filter(path => path.parentId === masterPathId);
             if (completedRelatedPaths.length > 0) {
                 completedContent = `
-                    <h3>Completed: ${masterPath.title}</h3>
-                    ${completedRelatedPaths.map(path => `
-                        <p>${path.title} (Completed on ${new Date(path.completedAt).toLocaleDateString()})</p>
-                    `).join('')}
-                `;
+      <h3>Completed: ${masterPath.title}</h3>
+      ${completedRelatedPaths.map(path => `
+        <p>${path.title} (Completed on ${new Date(path.completedAt).toLocaleDateString()})</p>
+      `).join('')}
+    `;
             }
 
-            if (activeContent || completedContent) {
-                journeyDiv.innerHTML = `
-                    ${activeContent}
-                    ${completedContent}
-                `;
-            } else {
-                journeyDiv.innerHTML = `<p>${masterPath.description}</p>`;
-            }
+            journeyDiv.innerHTML = activeContent || completedContent ? `${activeContent}${completedContent}` : `<p>${masterPath.description}</p>`;
         } else {
             journeyDiv.innerHTML = '<p>Invalid journey tab selected.</p>';
         }

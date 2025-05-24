@@ -171,4 +171,27 @@ export class ShopInteractionComponent {
     
 }
 
+export class PlayerActionQueueComponent {
+    constructor() {
+        this.type = 'PlayerActionQueue';
+        this.actions = []; // [{ type: string, data: object, timestamp: number }]
+    }
+}
+
+export class PlayerAchievementsComponent {
+    constructor() {
+        this.type = 'PlayerAchievements';
+        this.stats = {
+            monstersKilled: 0,
+            bossesKilled: 0,
+            itemsUsed: 0,
+            potionsUsed: 0,
+            resourcesCollected: { ashenShard: 0, sylduranShard: 0,},
+            itemsCollected: 0,
+            interactions: 0,
+            tiersReached: 0,           
+        };
+        this.history = []; // [{ type: string, data: object, timestamp: number }]
+    }
+}
 

@@ -244,7 +244,46 @@ export class MonsterSpawnSystem extends System {
         this.entityManager.addComponentToEntity(entity.id, new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity(entity.id, new HealthComponent(maxHp, maxHp));
         this.entityManager.addComponentToEntity(entity.id, new AttackSpeedComponent(1000));
-        this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(80));
+        this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(80)); 
+
+        if (tier === 3 && template.isBoss) {
+            template.uniqueItemsDropped.push({
+                type: 'rog',
+                dropChance: 1,
+                data: {
+                    tierIndex: 2,
+                    type: "armor",
+                    name: 'Vestment of Zukarath',
+                    journeyItemId: 'vestmentOfZukarath'
+                }
+            });
+        }
+        if (tier === 6 && template.isBoss) {
+            template.uniqueItemsDropped.push({
+                type: 'rog',
+                dropChance: 1,
+                data: {
+                    tierIndex: 2,
+                    type: "amulet",
+                    name: 'Sigil of Zukarath',
+                    journeyItemId: 'sigilOfZukarath'
+                }
+            });
+        }
+        if (tier > 6 && tier < 11 && template.isElite) {
+            const roll = Math.random();
+            let name = 'Band of Zu';
+            let journeyItemId = 'bandOfZu';
+            if (roll < 0.5) {
+                name = 'Band of Karn';
+                journeyItemId = 'bandOfKarn';
+            }
+            template.uniqueItemsDropped.push({
+                type: 'customUnique',
+                dropChance: 0.33,
+                data: { name }
+            });
+        }
         
 
         this.entityManager.addComponentToEntity(entity.id, {

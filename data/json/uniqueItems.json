@@ -19,6 +19,7 @@
     },
     "description": "Crafted in acnient times by the finest Zukarath artificers and inspired by the works of the legendary Zu Mage Mbphu, this staff is singualr in purpose. To seek out and destroy dark magic used by inferior arcane artificers.",
     "uniqueId": null,
+    "journeyItemId": "mbphuStaff",
     "icon": "mbphu-staff.svg",
     "affixes": [
       {
@@ -56,6 +57,7 @@
     },
     "description": "An ancient reproduction of the Krys Knife of Emrhys, one of the greatest Karn mages the order has ever known. This blade was never carried by Emrhys, it is a functional replica forged for some of the most powerful Karn in the order.",
     "uniqueId": null,
+    "journeyItemId": "emrhysKrys",
     "icon": "dagger.svg",
     "affixes": []
   },
@@ -111,6 +113,7 @@
     },
     "description": "A majestic helm worthy of a monarch.",
     "uniqueId": null,
+    "journeyItemId": "goldenKhepresh",
     "icon": "golden-khepresh.svg",
     "affixes": [
       {
@@ -147,6 +150,7 @@
     },
     "description": "Shiny golden armor with fancy magic swirlies, Its beauty is the envy of all, but it does not seem to do anything. The thought of wearing it leaves you feeling like you just broke a mirror while trying to avoid stepping on a black cat as you walked under a ladder!",
     "uniqueId": null,
+    "journeyItemId": "goldenSkinOfAvarice",
     "icon": "golden-skin.png",
     "affixes": []
   },
@@ -184,5 +188,41 @@
 
       }
     ]
+  },
+  {
+    "name": "Band of Zu",
+    "type": "ring",
+    "slot": "ring",
+    "luck": 10,
+    "tierIndex": 2,
+    "itemTier": "rare",
+    "goldValue": 500,
+    "stats": {
+      "intellect": 2,
+      "agility": 2
+    },
+    "description": "The Power of the Zarath flows through this mithril band.",
+    "uniqueId": null,
+    "journeyItemId": "bandOfZu",
+    "icon": "ring.svg",
+    "affixes": []
+  },
+  {
+    "name": "Band of Karn",
+    "type": "ring",
+    "slot": "ring",
+    "luck": 10,
+    "tierIndex": 2,
+    "itemTier": "rare",
+    "goldValue": 500,
+    "stats": {
+      "prowess": 2,
+      "maxHp": 50
+    },
+    "description": "The Power of the Khetar flows through this steel band.",
+    "uniqueId": null,
+    "journeyItemId": "bandOfKarn",
+    "icon": "ring.svg",
+    "affixes": []
   }
 ]

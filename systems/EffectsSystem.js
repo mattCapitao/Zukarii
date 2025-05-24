@@ -32,6 +32,10 @@ export class EffectsSystem extends System {
             }
         });
         console.log('EffectsSystem: Initialized and listening for applyEffect events');
+
+        this.eventBus.on('UseItem', ({ entityId, item, effect, params }) => {
+            this.applyEffect({ entityId, effect, params, context: { itemId: item.itemId } });
+        });
     }
 
     update() {
@@ -201,5 +205,21 @@ export class EffectsSystem extends System {
             message: `Reflect Damage hits your attacker for ${reflectAmount} HP! `
         });
         console.log(`EffectsSystem: Reflect Damage hits your attacker for ${entity.id} for ${reflectAmount} HP. `);
+    }
+
+    teleportToTier(entityId, params, context) {
+        const entity = this.entityManager.getEntity(entityId);
+        if (!entity) {
+            console.warn(`EffectsSystem: Entity ${entityId} not found for teleportToTier`);
+            return;
+        }
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+        const tier = params.tier || 0;
+        gameState.tier = tier;
+        levelTransition.pendingTransition = 'portal';
+        this.entityManager.setActiveTier(tier);
+        this.eventBus.emit('LogMessage', { message: `The Stone of Return transports you to Tier ${tier}!` });
+        this.eventBus.emit('ItemUsed', { entityId, itemId: context.itemId });
     }
 }

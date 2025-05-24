@@ -62,9 +62,11 @@ export class FloorComponent {
 }
 
 export class StairComponent {
-    constructor(direction) { // 'up' or 'down'
+    constructor(direction, active = true) { // 'up' or 'down'
         this.type = 'Stair';
         this.direction = direction; // 'up' for '⇑', 'down' for '⇓'
+        this.active = active;
+
     }
 }
 

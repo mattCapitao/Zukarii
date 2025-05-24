@@ -2,9 +2,10 @@
 import { System } from '../core/Systems.js';
 
 export class LootCollectionSystem extends System {
-    constructor(entityManager, eventBus) {
+    constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'TreasureData'];
+        this.utilities = utilities;
     }
 
     init() {
@@ -108,6 +109,29 @@ export class LootCollectionSystem extends System {
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
 
         this.sfxQueue.push({ sfx: 'loot0', volume: .7 });
+
+        if (lootData.stones && lootData.stones.count > 0) {
+            this.utilities.pushPlayerActions('collectResource', {
+                resourceType: lootData.stones.type,
+                quantity: lootData.stones.count
+            });
+            console.log(`LootCollectionSystem: Pushed collectResource to PlayerActionQueue`, {
+                resourceType: lootData.stones.type,
+                quantity: lootData.stones.count
+            });
+        }
+        if (lootData.items && lootData.items.length) {
+            lootData.items.forEach(item => {
+                this.utilities.pushPlayerActions(item.journeyItemId ? 'findItem' : 'collectItem', {
+                    journeyItemId: item.journeyItemId,
+                    itemId: item.id
+                });
+                console.log(`LootCollectionSystem: Pushed ${item.journeyItemId ? 'findItem' : 'collectItem'} to PlayerActionQueue`, {
+                    journeyItemId: item.journeyItemId,
+                    itemId: item.id
+                });
+            });
+        }
 
         if (playerResource.gold >= 1e12) {
             gameState.isVictory = true;

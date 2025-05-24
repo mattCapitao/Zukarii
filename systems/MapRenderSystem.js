@@ -52,6 +52,7 @@ export class MapRenderSystem extends System {
             stairsup: 'img/avatars/stairsup.png',
             stairsdown: 'img/avatars/stairsdown.png',
             portal: 'img/anim/Portal-Animation.png',  // This will be the sprite strip (replacing static portal.png)
+            inactivePortal: 'img/avatars/inactive-portal.png',
             chest: 'img/avatars/chest.png',
             fountain: 'img/avatars/fountain.png',
             player_idle: 'img/anim/Player/Idle.png',
@@ -214,7 +215,8 @@ export class MapRenderSystem extends System {
                 } else if (entity.hasComponent('Fountain')) {
                     spritePath = 'img/avatars/fountain.png';
                 } else if (entity.hasComponent('Portal')) {
-                    spritePath = 'img/anim/Portal-Animation.png'; // Use the sprite strip for portals
+                    const portalComp = entity.getComponent('Portal');
+                    spritePath = portalComp.active ? 'img/anim/Portal-Animation.png' : 'img/avatars/inactive-portal.png'; // Use the sprite strip for portals
                 } else if (entity.hasComponent('LootData')) {
                     spritePath = 'img/avatars/chest.png';
                 } else if (entity.hasComponent('NPCData')) {
@@ -250,15 +252,27 @@ export class MapRenderSystem extends System {
             // Render the entity sprite
             this.ctx.save();
             if (entity.hasComponent('Portal')) {
-                // Render animated portal using the sprite strip
-                const frameX = this.portalCurrentFrame * this.portalFrameWidth;
-                this.ctx.drawImage(
-                    sprite,
-                    frameX, 0, // Source x, y
-                    this.portalFrameWidth, this.portalFrameHeight, // Source width, height
-                    renderX, renderY, // Destination x, y
-                    this.portalRenderWidth, this.portalRenderHeight // Destination width, height
-                );
+                const portalComp = entity.getComponent('Portal');
+                if (portalComp.active) { 
+                    // Render animated portal using the sprite strip
+                    const frameX = this.portalCurrentFrame * this.portalFrameWidth;
+                    this.ctx.drawImage(
+                        sprite,
+                        frameX, 0, // Source x, y
+                        this.portalFrameWidth, this.portalFrameHeight, // Source width, height
+                        renderX, renderY, // Destination x, y
+                        this.portalRenderWidth, this.portalRenderHeight // Destination width, height
+                    );
+                } else {
+                    // Render static inactive portal
+                    this.ctx.drawImage(
+                        sprite,
+                        renderX,
+                        renderY,
+                        visuals.w * this.SCALE_FACTOR,
+                        visuals.h * this.SCALE_FACTOR
+                    );
+                }
             } else if (entity.hasComponent('LootData')) {
                 // Add faint golden glow for treasure chests
                 this.ctx.shadowColor = 'rgba(255, 215, 0, 0.5)'; // Golden glow

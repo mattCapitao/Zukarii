@@ -203,3 +203,23 @@ export class ShopComponent {
         this.sellMultiplier = sellMultiplier;
     }
 }
+export class JourneyPathsComponent {
+    constructor() {
+        this.type = 'JourneyPaths';
+        this.paths = []; // Array of all journey paths loaded from journeyPaths.json
+    }
+}
+
+export class OfferedQuestsComponent {
+    constructor() {
+        this.type = 'OfferedQuests';
+        this.quests = []; // Array of offered quest objects { questId, offeredBy }
+    }
+}
+
+export class JourneyUpdateQueueComponent {
+    constructor() {
+        this.type = 'JourneyUpdateQueue';
+        this.queue = []; // [{ type: string, data: object, timestamp: number }]
+    }
+}

@@ -2,8 +2,24 @@
 
 export class Utilities {
     constructor() {
-        // No properties needed for now, but constructor is here for instance creation
+        this.entityManager = null; 
+    } 
+
+    pushPlayerActions(actionType, actionData) {
+        if (!this.entityManager) {
+            console.error('Utilities: entityManager not initialized');
+            return;
+        }
+        const playerActionQueue = this.entityManager.getEntity('player').getComponent('PlayerActionQueue');
+        if (!playerActionQueue) {
+            console.error(`Utilities: PlayerActionQueue component not found on player`);
+            return;
+        }
+        const action = { type: actionType, data: actionData, timestamp: Date.now() };
+        playerActionQueue.actions.push(action);
+        console.log(`Utilities: Pushed ${actionType} to PlayerActionQueue`, action);
     }
+
 
     camelToTitleCase(str) {
         return str

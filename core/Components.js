@@ -24,6 +24,8 @@ import {
     NewCharacterComponent,
     JourneyStateComponent,
     ShopInteractionComponent,
+    PlayerActionQueueComponent,
+    PlayerAchievementsComponent,
 } from './components/PlayerComponents.js';
 
 import {
@@ -42,6 +44,9 @@ import {
     LevelTransitionComponent,
     MouseTargetComponent,
     ShopComponent,
+    JourneyPathsComponent,
+    OfferedQuestsComponent,
+    JourneyUpdateQueueComponent,
 } from './components/GameComponents.js';
 
 import {
@@ -67,6 +72,7 @@ import {
     AnimationComponent,
     NPCDataComponent, // Add
     DialogueComponent, // Add
+    InteractionIntentComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -92,6 +98,8 @@ export {
     NewCharacterComponent,
     JourneyStateComponent,
     ShopInteractionComponent,
+    PlayerActionQueueComponent,
+    PlayerAchievementsComponent,
 
     // Game-related components
     UIComponent,
@@ -109,6 +117,9 @@ export {
     LevelTransitionComponent,
     MouseTargetComponent,
     ShopComponent,
+    JourneyPathsComponent,
+    OfferedQuestsComponent,
+    JourneyUpdateQueueComponent,
 
     // Common components
     PositionComponent,
@@ -133,6 +144,7 @@ export {
     AnimationComponent,
     NPCDataComponent, // Add
     DialogueComponent, // Add
+    InteractionIntentComponent,
 };
 
 // Utility functions

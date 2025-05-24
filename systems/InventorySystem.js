@@ -26,6 +26,7 @@ export class InventorySystem extends System {
         this.eventBus.on('BuyItem', (data) => {
             this.buyItem(data);
         });
+        this.eventBus.on('UseItem', ({ entityId, uniqueId }) => this.useItem({ entityId, uniqueId }));
     }
 
     addItem({ entityId, item }) {
@@ -273,6 +274,31 @@ export class InventorySystem extends System {
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
 
         console.log(`InventorySystem: Bought item ${item.name} (uniqueId: ${uniqueId}) for ${item.purchasePrice} gold`);
+    }
+
+    useItem({ entityId, uniqueId }) {
+        const player = this.entityManager.getEntity(entityId);
+        if (!player) return;
+        const inventory = player.getComponent('Inventory');
+        if (!inventory) return;
+
+        const itemIndex = inventory.items.findIndex(item => item.uniqueId === uniqueId);
+        if (itemIndex === -1) {
+            console.error('InventorySystem: Item with uniqueId not found:', uniqueId);
+            return;
+        }
+
+        const item = inventory.items[itemIndex];
+        if (!item.useItem) {
+            console.warn('InventorySystem: Item is not usable:', item);
+            return;
+        }
+
+        inventory.items.splice(itemIndex, 1); // Remove consumable item
+        this.eventBus.emit('UseItem', { entityId, item, effect: item.useEffect, params: item.params || {} });
+        this.utilities.pushPlayerActions('useItem', { itemId: item.id });
+        this.eventBus.emit('LogMessage', { message: `Used ${item.name}` });
+        this.eventBus.emit('StatsUpdated', { entityId });
     }
 
     isSlotCompatible(item, slot) {

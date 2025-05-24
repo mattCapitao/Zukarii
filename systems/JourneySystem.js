@@ -1,4 +1,5 @@
-﻿import { System } from '../core/Systems.js';
+﻿// systems/JourneySystem.js
+import { System } from '../core/Systems.js';
 import { JourneyStateComponent, JourneyPathComponent } from '../core/Components.js';
 
 export class JourneySystem extends System {
@@ -9,100 +10,110 @@ export class JourneySystem extends System {
     }
 
     init() {
-        // Initialize the pathTree cache based on existing paths in the player's JourneyPathComponent
-        this.updatePathTree();
+        this.eventBus.on('BossKilled', ({ tier }) => {
+            const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+            if (!gameState.bossKills) gameState.bossKills = [];
+            gameState.bossKills.push({ tier, killed: true });
+        });
+        this.eventBus.on('ItemUsed', ({ entityId, itemId }) => {
+            if (entityId === 'player') {
+                const journeyPath = this.entityManager.getEntity('player').getComponent('JourneyPath');
+                journeyPath.paths.forEach(path => {
+                    path.tasks?.forEach(task => {
+                        if (task.completionCondition?.type === 'useItem' && task.completionCondition.itemId === itemId && !task.completed) {
+                            task.completed = true;
+                            this.eventBus.emit('LogMessage', { message: task.completionText });
+                            this.checkParentCompletion(path);
+                        }
+                    });
+                });
+            }
+        });
+        this.eventBus.on('AcceptQuest', ({ questId }) => {
+            const player = this.entityManager.getEntity('player');
+            const journeyPath = player.getComponent('JourneyPath');
+            const gameState = this.entityManager.getEntity('gameState');
+            const journeyPathsComp = gameState.getComponent('JourneyPaths');
+            const offeredQuestsComp = gameState.getComponent('OfferedQuests');
+
+            const quest = journeyPathsComp.paths.find(path => path.id === questId);
+            if (!quest || journeyPath.paths.some(p => p.id === questId)) return;
+
+            journeyPath.paths.push({ ...quest });
+            offeredQuestsComp.quests = offeredQuestsComp.quests.filter(q => q.questId !== questId);
+            this.eventBus.emit('LogMessage', { message: `Quest accepted: ${quest.title}` });
+            this.eventBus.emit('QuestAccepted', { questId });
+        });
+        this.eventBus.on('InteractWithNPC', ({ npcId }) => {
+            const player = this.entityManager.getEntity('player');
+            const journeyPath = player.getComponent('JourneyPath');
+            journeyPath.paths.forEach(path => {
+                path.tasks?.forEach(task => {
+                    if (task.completionCondition?.type === 'interactWithNPC' && task.completionCondition.npc === npcId && !task.completed) {
+                        let canComplete = true;
+                        if (task.completionCondition.requiresResource) {
+                            const resources = player.getComponent('Resource');
+                            const resourceCount = resources.craftResources[task.completionCondition.requiresResource.resourceType] || 0;
+                            if (resourceCount >= task.completionCondition.requiresResource.quantity) {
+                                resources.craftResources[task.completionCondition.requiresResource.resourceType] -= task.completionCondition.requiresResource.quantity;
+                            } else {
+                                canComplete = false;
+                            }
+                        } else if (task.completionCondition.requiresItem) {
+                            const inventory = player.getComponent('Inventory');
+                            const itemIndex = inventory.items.findIndex(item => item.itemId === task.completionCondition.requiresItem.itemId);
+                            if (itemIndex !== -1) {
+                                inventory.items.splice(itemIndex, 1);
+                            } else {
+                                canComplete = false;
+                            }
+                        }
+                        if (canComplete) {
+                            task.completed = true;
+                            this.eventBus.emit('LogMessage', { message: task.completionText });
+                            this.checkParentCompletion(path);
+                        }
+                    }
+                });
+            });
+        });
     }
 
     update(deltaTime) {
         const player = this.entityManager.getEntity('player');
         if (!player) {
             console.error('JourneySystem: Player entity not found');
-            return; 
+            return;
         }
 
         const journeyState = player.getComponent('JourneyState');
-        if (!journeyState) {
-            console.error('JourneySystem: JourneyState component not found on player');
-            return;
-        }
-
         const journeyPath = player.getComponent('JourneyPath');
-        if (!journeyPath) {
-            console.error('JourneySystem: JourneyPath component not found on player');
+        if (!journeyState || !journeyPath) {
+            console.error('JourneySystem: JourneyState or JourneyPath component not found on player');
             return;
         }
 
-        // Get all active paths from the JourneyPathComponent
-        const activePaths = journeyPath.paths;
-
-        // Update pathTree if the paths have changed
-        this.updatePathTree();
-
-        // Process each active path
-        activePaths.forEach(path => {
-            // Skip Master Paths (they are never completed)
-            if (path.id === path.parentId) {
-                return;
-            }
-
-            // Skip already completed paths (though they should have been removed)
-            if (path.completed) {
-                return;
-            }
-
-            // Evaluate completion conditions for leaf paths
-            if (path.completionCondition) {
-                this.evaluateCompletionCondition(path, journeyState);
-            }
-
-            // Check completion for parent paths (all children must be completed)
-            if (!path.completionCondition) {
-                this.checkParentCompletion(path, journeyState);
-            }
+        // Process active quests
+        const activeQuests = journeyPath.paths.filter(path => path.id !== path.parentId);
+        activeQuests.forEach(quest => {
+            if (quest.completed) return;
+            quest.tasks?.forEach(task => {
+                if (!task.completed) {
+                    this.evaluateCompletionCondition(task, journeyState);
+                }
+            });
+            this.checkParentCompletion(quest, journeyState);
         });
     }
 
-    updatePathTree() {
-        const player = this.entityManager.getEntity('player');
-        const journeyState = player.getComponent('JourneyState');
-        const journeyPath = player.getComponent('JourneyPath');
-        if (!player || !journeyState || !journeyPath) {
-            console.error('JourneySystem: Player, JourneyState, or JourneyPath not found');
-            return;
-        }
-
-        // Get all paths from the JourneyPathComponent
-        const activePaths = journeyPath.paths;
-
-        // *** CHANGE START: Add detailed logging ***
-        /*console.log('JourneySystem: Active Paths before building pathTree:', activePaths.map(p => ({
-            id: p.id,
-            parentId: p.parentId,
-            completionCondition: p.completionCondition,
-            completed: p.completed
-        })));
-        */
-        // *** CHANGE END ***
-
-        // Rebuild the pathTree
-        journeyState.pathTree.clear();
-        activePaths.forEach(path => {
-            const parentId = path.parentId;
-            if (!journeyState.pathTree.has(parentId)) {
-                journeyState.pathTree.set(parentId, []);
-            }
-            journeyState.pathTree.get(parentId).push(path);
-        });
-
-      //  console.log('JourneySystem: Updated pathTree with', activePaths.length, 'paths');
-    }
-
-    evaluateCompletionCondition(path, journeyState) {
+    evaluateCompletionCondition(task, journeyState) {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const playerResources = this.entityManager.getEntity('player').getComponent('Resource');
+        const inventory = this.entityManager.getEntity('player').getComponent('Inventory');
 
         let isCompleted = false;
-        const condition = path.completionCondition;
+        const condition = task.completionCondition;
+        if (!condition) return;
 
         switch (condition.type) {
             case 'reachTier':
@@ -110,151 +121,121 @@ export class JourneySystem extends System {
                     isCompleted = true;
                 }
                 break;
-            case 'findArtifact':
-                // Check if the player has the artifact in their inventory or resources
-                const inventory = this.entityManager.getEntity('player').getComponent('Inventory');
-                const hasArtifactInInventory = inventory.items.some(item => item.itemId === condition.artifactId);
-                const hasArtifactEquipped = Object.values(inventory.equipped).some(item => item && item.itemId === condition.artifactId);
+            case 'findItem':
+                const hasArtifactInInventory = inventory.items.some(item => item.journeyItemId===condition.journeyItemId);
+                const hasArtifactEquipped = Object.values(inventory.equipped).some(item => item && item.journeyItemId===condition.journeyItemId);
                 if (gameState.tier >= condition.tier && (hasArtifactInInventory || hasArtifactEquipped)) {
                     isCompleted = true;
                 }
                 break;
-            case 'discoverLore':
-                // For now, assume discoverLore is completed when triggered (e.g., by InteractionSystem)
-                isCompleted = condition.target === true;
-                break;
             case 'interactWithNPC':
-                // This would typically be set by InteractionSystem; for now, assume false
-                isCompleted = false;
+                // Handled via event listener
+                break;
+            case 'bossKill':
+                if (gameState.bossKills?.some(b => b.tier === condition.tier && b.killed)) {
+                    isCompleted = true;
+                }
+                break;
+            case 'collectItem':
+                const hasItem = inventory.items.some(item => item.itemId === condition.itemId) ||
+                    Object.values(inventory.equipped).some(item => item && item.itemId === condition.itemId);
+                if (hasItem) {
+                    isCompleted = true;
+                }
+                break;
+            case 'collectResource':
+                const resourceCount = playerResources.craftResources[condition.resourceType] || 0;
+                if (resourceCount >= condition.quantity) {
+                    isCompleted = true;
+                }
+                break;
+            case 'useItem':
+                // Handled via ItemUsed event
+                break;
+            case 'completeEchoes':
+                isCompleted = true; // Auto-completed for testing
                 break;
             default:
-                console.warn(`JourneySystem: Unknown completion condition type ${condition.type} for path ${path.id}`);
-                return;
+                console.warn(`JourneySystem: Unknown completion condition type ${condition.type}`);
         }
 
         if (isCompleted) {
-            path.completed = true;
-            this.eventBus.emit('LogMessage', { message: path.completionText });
-            console.log(`JourneySystem: Completed leaf path ${path.id}`);
-            const parentPath = this.findParentPath(path.parentId);
-            this.checkParentCompletion(parentPath, journeyState);
+            task.completed = true;
+            this.eventBus.emit('LogMessage', { message: task.completionText });
         }
     }
 
-    findParentPath(parentId) {
-        const player = this.entityManager.getEntity('player');
-        const journeyPath = player.getComponent('JourneyPath');
-        if (!player || !journeyPath) {
-            console.error('JourneySystem: Player or JourneyPath not found');
-            return null;
-        }
-        return this.utilities.findPath(journeyPath, parentId);
-    }
+    checkParentCompletion(quest, journeyState) {
+        if (!quest || quest.completed) return;
 
-    checkParentCompletion(parentPath, journeyState) {
-        if (!parentPath || parentPath.completed) {
-            return;
-        }
+        const allTasksCompleted = quest.tasks?.length > 0 && quest.tasks.every(task => task.completed);
+        if (!allTasksCompleted) return;
 
-        // Find all child paths using pathTree
-        const childPaths = journeyState.pathTree.get(parentPath.id) || [];
+        quest.completed = true;
+        this.eventBus.emit('LogMessage', { message: quest.completionText });
 
-        // Check if all children are completed
-        const allChildrenCompleted = childPaths.length > 0 && childPaths.every(child => child.completed);
+        // Record completion in JourneyState
+        const journeyStateComp = this.entityManager.getEntity('player').getComponent('JourneyState');
+        journeyStateComp.completedPaths.push({
+            id: quest.id,
+            parentId: quest.parentId,
+            title: quest.title,
+            completedAt: new Date().toISOString(),
+            completionText: quest.completionText
+        });
 
-        if (allChildrenCompleted) {
-            parentPath.completed = true;
-            this.eventBus.emit('LogMessage', { message: parentPath.completionText });
-
-            // Grant rewards
-            parentPath.rewards.forEach(reward => {
-                if (reward.type === 'item' && !reward.rewarded) {
-                    const inventory = this.entityManager.getEntity('player').getComponent('Inventory');
-                    inventory.items.push({ itemId: reward.itemId, quantity: reward.quantity });
-                    this.eventBus.emit('LogMessage', { message: `Received ${reward.quantity} ${reward.itemId} for completing ${parentPath.title}` });
-                    reward.rewarded = true;
-                }
-            });
-
-            // Move parent and children to completedPaths
-            const completedEntry = {
-                id: parentPath.id,
-                parentId: parentPath.parentId,
-                title: parentPath.title,
-                completedAt: new Date().toISOString(),
-                completionText: parentPath.completionText
-            };
-            journeyState.completedPaths.push(completedEntry);
-
-            childPaths.forEach(child => {
-                journeyState.completedPaths.push({
-                    id: child.id,
-                    parentId: child.parentId,
-                    title: child.title,
-                    completedAt: new Date().toISOString(),
-                    completionText: child.completionText
+        // Handle rewards
+        quest.rewards?.forEach(reward => {
+            if (reward.type === 'item' && !reward.rewarded) {
+                this.eventBus.emit('AddItem', {
+                    entityId: 'player',
+                    item: {
+                        itemId: reward.itemId,
+                        quantity: reward.quantity || 1,
+                        useItem: reward.useItem,
+                        useEffect: reward.useEffect,
+                        params: reward.params
+                    }
                 });
-            });
-
-            // Remove parent and children from the player's JourneyPathComponent
-            const journeyPath = this.entityManager.getEntity('player').getComponent('JourneyPath');
-            this.utilities.removePath(journeyPath, parentPath.id);
-            childPaths.forEach(child => {
-                this.utilities.removePath(journeyPath, child.id);
-            });
-
-            // Update pathTree after removal
-            this.updatePathTree();
-
-            // Start the next path if specified
-            if (parentPath.nextPathId) {
-                this.startNextPath(parentPath.nextPathId, parentPath.parentId);
+                reward.rewarded = true;
+            } else if (reward.type === 'xp') {
+                const playerState = this.entityManager.getEntity('player').getComponent('PlayerState');
+                playerState.xp += reward.xp;
+                this.eventBus.emit('LogMessage', { message: `Gained ${reward.xp} XP` });
+            } else if (reward.type === 'gold') {
+                const resources = this.entityManager.getEntity('player').getComponent('Resource');
+                resources.gold += reward.gold;
+                this.eventBus.emit('LogMessage', { message: `Gained ${reward.gold} gold` });
+            } else if (reward.type === 'unlock' && reward.mechanic === 'portalBinding') {
+                this.entityManager.addComponentToEntity('player', new PortalBindingsComponent([0]));
+                this.eventBus.emit('LogMessage', { message: `Unlocked Portal Binding` });
             }
+        });
 
-            console.log(`JourneySystem: Completed parent path ${parentPath.id}`);
-            this.eventBus.emit('JourneyStateUpdated');
+        // Offer the next quest
+        if (quest.nextPathId) {
+            const gameState = this.entityManager.getEntity('gameState');
+            const journeyPathsComp = gameState.getComponent('JourneyPaths');
+            const offeredQuestsComp = gameState.getComponent('OfferedQuests');
+            const nextQuest = journeyPathsComp.paths.find(path => path.id === quest.nextPathId);
+            if (nextQuest && !offeredQuestsComp.quests.some(q => q.questId === nextQuest.id)) {
+                offeredQuestsComp.quests.push({ questId: nextQuest.id, offeredBy: nextQuest.offeredBy });
+                this.eventBus.emit('LogMessage', { message: `New quest available: ${nextQuest.title}` });
+            }
         }
-    }
 
-    startNextPath(nextPathId, parentId) {
-        const journeyPath = this.entityManager.getEntity('player').getComponent('JourneyPath');
-        if (!journeyPath) {
-            console.error('JourneySystem: JourneyPath component not found on player');
-            return;
+        // Trigger additional master paths (e.g., Echoes)
+        if (quest.triggersMasterPath) {
+            const journeyPath = this.entityManager.getEntity('player').getComponent('JourneyPath');
+            const gameState = this.entityManager.getEntity('gameState');
+            const journeyPathsComp = gameState.getComponent('JourneyPaths');
+            const masterPath = journeyPathsComp.paths.find(path => path.id === quest.triggersMasterPath);
+            if (masterPath && !journeyPath.paths.some(p => p.id === masterPath.id)) {
+                journeyPath.paths.push({ ...masterPath });
+                this.eventBus.emit('LogMessage', { message: `New path unlocked: ${masterPath.title}` });
+            }
         }
 
-        // For now, hardcode the next Whisper; this can be replaced with data-driven logic later
-        if (nextPathId === 'whisper_parent_2') {
-            this.utilities.addPath(journeyPath, {
-                id: 'whisper_parent_2',
-                parentId: 'master_whispers',
-                nextPathId: 'whisper_parent_3',
-                completed: false,
-                title: 'Echoes of the Past',
-                description: 'The Zukran Masters sense a disturbance. Find the Shard of Zukarath on Tier 3 to uncover its secrets.',
-                completionCondition: null,
-                rewards: [
-                    { type: 'item', itemId: 'shardOfZukarath', quantity: 1, rewarded: false },
-                    { type: 'logMessage', message: 'The shard pulses with ancient energy, whispering forgotten secrets.' }
-                ],
-                completionText: 'You have uncovered the secrets of the Shard of Zukarath.',
-                logCompletion: true
-            });
-            this.utilities.addPath(journeyPath, {
-                id: 'whisper_child_2_1',
-                parentId: 'whisper_parent_2',
-                nextPathId: '',
-                completed: false,
-                title: 'Find the Shard of Zukarath',
-                description: 'Locate the Shard of Zukarath on Tier 3.',
-                completionCondition: { type: 'findArtifact', artifactId: 'shardOfZukarath', tier: 3 },
-                rewards: [],
-                completionText: 'You have found the Shard of Zukarath.',
-                logCompletion: true
-            });
-            console.log(`JourneySystem: Started next path ${nextPathId}`);
-            this.updatePathTree();
-            this.eventBus.emit('JourneyStateUpdated');
-        }
+        this.eventBus.emit('JourneyStateUpdated');
     }
 }
