@@ -48,10 +48,10 @@ export class LootSpawnSystem extends System {
         entityList.treasures.push(lootEntity.id);
 
         lootEntity.addComponent(new PositionComponent(position.x, position.y));
-        lootEntity.addComponent(new VisualsComponent(24, 32));
+        lootEntity.addComponent(new VisualsComponent(24, 30));
         const lootVisuals = lootEntity.getComponent('Visuals');
         lootVisuals.avatar = 'img/avatars/chest.png';
-        lootEntity.addComponent(new HitboxComponent(24, 32));
+        lootEntity.addComponent(new HitboxComponent(24, 30));
 
         this.eventBus.emit('LootEntityCreated', { entityId: lootEntity.id, tier });
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');

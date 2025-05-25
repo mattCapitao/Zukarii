@@ -56,7 +56,7 @@ export class NPCControllerSystem extends System {
             }
 
             if (npcs.length === 0) {
-                console.error('NPCControllerSystem: No NPCs found with ShopComponent and NPCData in tier', tier);
+                console.log('NPCControllerSystem: No NPCs found with ShopComponent and NPCData in tier', tier);
                 const npcDataEntities = this.entityManager.getEntitiesWith(['NPCData'], tier);
                 console.log('NPCControllerSystem: Entities with NPCData in tier', tier, ':', npcDataEntities.map(n => n.id));
                 return;

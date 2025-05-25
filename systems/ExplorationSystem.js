@@ -11,6 +11,7 @@ export class ExplorationSystem extends System {
         this.WIDTH = 122;
         this.HEIGHT = 67;
         this.TILE_SIZE = 32;
+        this.revealFullMinimap = false; // Set to true to reveal the full minimap
     }
 
     init() {
@@ -47,19 +48,40 @@ export class ExplorationSystem extends System {
         this.minimapCtx.fillStyle = '#111';
         this.minimapCtx.fillRect(0, 0, this.minimapCanvas.width, this.minimapCanvas.height);
 
-        this.minimapCtx.fillStyle = '#333';
-        for (const tileKey of exploration.discoveredFloors) {
-            const [x, y] = tileKey.split(',').map(Number);
-            if (x >= 0 && x < this.WIDTH && y >= 0 && y < this.HEIGHT) {
-                this.minimapCtx.fillRect(x * this.PIXELS_PER_TILE, y * this.PIXELS_PER_TILE, this.PIXELS_PER_TILE, this.PIXELS_PER_TILE);
+        this.revealFullMinimap = true;
+        if (this.revealFullMinimap) {
+            const mapComp = levelEntity.getComponent('Map');
+            if (mapComp && mapComp.map) {
+                for (let y = 0; y < this.HEIGHT; y++) {
+                    for (let x = 0; x < this.WIDTH; x++) {
+                        if (mapComp.map[y] && mapComp.map[y][x]) {
+                            if (mapComp.map[y][x] === ' ') {
+                                this.minimapCtx.fillStyle = '#333';
+                            } else if (mapComp.map[y][x] === '#') {
+                                this.minimapCtx.fillStyle = '#26214b';
+                            } else {
+                                continue;
+                            }
+                            this.minimapCtx.fillRect(x * this.PIXELS_PER_TILE, y * this.PIXELS_PER_TILE, this.PIXELS_PER_TILE, this.PIXELS_PER_TILE);
+                        }
+                    }
+                }
             }
-        }
+        }else{ 
+            this.minimapCtx.fillStyle = '#333';
+            for (const tileKey of exploration.discoveredFloors) {
+                const [x, y] = tileKey.split(',').map(Number);
+                if (x >= 0 && x < this.WIDTH && y >= 0 && y < this.HEIGHT) {
+                    this.minimapCtx.fillRect(x * this.PIXELS_PER_TILE, y * this.PIXELS_PER_TILE, this.PIXELS_PER_TILE, this.PIXELS_PER_TILE);
+                }
+            }
 
-        this.minimapCtx.fillStyle = '#26214b';
-        for (const tileKey of exploration.discoveredWalls) {
-            const [x, y] = tileKey.split(',').map(Number);
-            if (x >= 0 && x < this.WIDTH && y >= 0 && y < this.HEIGHT) {
-                this.minimapCtx.fillRect(x * this.PIXELS_PER_TILE, y * this.PIXELS_PER_TILE, this.PIXELS_PER_TILE, this.PIXELS_PER_TILE);
+            this.minimapCtx.fillStyle = '#26214b';
+            for (const tileKey of exploration.discoveredWalls) {
+                const [x, y] = tileKey.split(',').map(Number);
+                if (x >= 0 && x < this.WIDTH && y >= 0 && y < this.HEIGHT) {
+                    this.minimapCtx.fillRect(x * this.PIXELS_PER_TILE, y * this.PIXELS_PER_TILE, this.PIXELS_PER_TILE, this.PIXELS_PER_TILE);
+                }
             }
         }
 

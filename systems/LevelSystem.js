@@ -19,11 +19,11 @@ import {
 } from '../core/Components.js';
 
 const roomTypes = [
-    { type: 'SquareRoom', probability: 30, minW: 17, maxW: 23, minH: 9, maxH: 12 },
-    { type: 'VerticalRoom', probability: 20, minW: 12, maxW: 14, minH: 14, maxH: 18 },
-    { type: 'HorizontalRoom', probability: 35, minW: 21, maxW: 32, minH: 9, maxH: 12 },
-    { type: 'AlcoveSpecial', probability: 10, minW: 12, maxW: 12, minH: 6, maxH: 6 },
-    { type: 'BossChamberSpecial', probability: 5, minW: 30, maxW: 36, minH: 15, maxH: 18 }
+    { type: 'SquareRoom', probability: 45, minW: 15, maxW: 21, minH: 8, maxH: 11 },
+    { type: 'VerticalRoom', probability: 30, minW: 10, maxW: 14, minH: 14, maxH: 20 },
+    { type: 'HorizontalRoom', probability: 5, minW: 21, maxW: 25, minH: 9, maxH: 12 },
+    { type: 'AlcoveSpecial', probability: 15, minW: 12, maxW: 12, minH: 6, maxH: 6 },
+    { type: 'BossChamberSpecial', probability: 5, minW: 25, maxW: 30, minH: 15, maxH: 18 }
 ];
 
 export class LevelSystem extends System {
@@ -40,14 +40,14 @@ export class LevelSystem extends System {
         this.ROOM_EDGE_BUFFER = 4;
         this.CORRIDOR_EDGE_BUFFER = 2;
         this.MIN_ROOM_SIZE = 8;
-        this.MAX_OVERLAP_PERCENT = 0.10;
-        this.INITIAL_MIN_DISTANCE = 30;
+        this.MAX_OVERLAP_PERCENT = 0.02;
+        this.INITIAL_MIN_DISTANCE = 35;
         this.MIN_DISTANCE_FLOOR = 3;
         this.BOSS_ROOM_EVERY_X_LEVELS = 3;
         this.lastBossTier = 0;
-        this.MAX_PLACEMENT_ATTEMPTS = 100; // Reduced to prevent performance issues
-        this.roomsPerLevel = 30; // Reduced to prevent performance issues
-        this.MIN_STAIR_DISTANCE = 18;
+        this.MAX_PLACEMENT_ATTEMPTS = 30; // Reduced to prevent performance issues
+        this.roomsPerLevel = 42; // Reduced to prevent performance issues
+        this.MIN_STAIR_DISTANCE = 24;
         this.TILE_SIZE = this.state.TILE_SIZE || 32;
         this.isAddingLevel = false; // Guard against re-entrant calls
     }
@@ -248,8 +248,11 @@ export class LevelSystem extends System {
             const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
             gameState.needsInitialRender = true;
             gameState.needsRender = true;
-            this.ensureRoomConnections(levelEntity);
 
+            const ercPasses = 3;
+            for (let i = 0; i < ercPasses; i++) {
+                this.ensureRoomConnections(levelEntity);
+            }
             this.checkLevelAfterTransitions({ tier, levelEntity });
 
             const mapComponent = levelEntity.getComponent('Map');
@@ -328,6 +331,132 @@ export class LevelSystem extends System {
         };
     }
 
+
+    placeRooms(numRooms, hasBossRoom, levelEntityId, tier) {
+        console.log(`LevelSystem.js: placeRooms - Improved - Starting for tier ${tier}, numRooms: ${numRooms}, hasBossRoom: ${hasBossRoom}`);
+        const roomOrigins = new Set();
+        const roomEntityIds = [];
+        let bossChamberPlaced = !hasBossRoom;
+
+        // 1. Build a prioritized list: boss, then large to small, then alcoves
+        let roomSpecs = [];
+        if (hasBossRoom) {
+            const bossType = roomTypes.find(rt => rt.type === 'BossChamberSpecial');
+            roomSpecs.push(bossType);
+        }
+        // Fill with other rooms, sorted by area descending
+        let otherRooms = [];
+        for (let i = 0; i < numRooms - (hasBossRoom ? 1 : 0); i++) {
+            let type = this.selectRoomType();
+            if (type.type === 'BossChamberSpecial' && bossChamberPlaced) {
+                type = roomTypes.find(rt => rt.type === 'AlcoveSpecial');
+            }
+            otherRooms.push(type);
+        }
+        otherRooms.sort((a, b) => (b.maxW * b.maxH) - (a.maxW * a.maxH));
+        roomSpecs = roomSpecs.concat(otherRooms);
+
+        // 2. Try to place each room
+        for (let i = 0; i < roomSpecs.length; i++) {
+            const roomType = roomSpecs[i];
+            let bestCandidate = null;
+            let bestScore = Infinity;
+            let placed = false;
+            let attempts = 0;
+            let minDistance = this.INITIAL_MIN_DISTANCE;
+            let maxOverlap = this.MAX_OVERLAP_PERCENT;
+
+            // Try up to MAX_PLACEMENT_ATTEMPTS, relaxing constraints as we go
+            while (attempts < this.MAX_PLACEMENT_ATTEMPTS && !placed) {
+                // Try several random positions per attempt, pick best
+                for (let tryNum = 0; tryNum < 5; tryNum++) {
+                    let room = this.generateRoomDimensions(roomType);
+                    room.x = Math.floor(Math.random() * (this.state.WIDTH - room.width - 2 * this.ROOM_EDGE_BUFFER)) + this.ROOM_EDGE_BUFFER;
+                    room.y = Math.floor(Math.random() * (this.state.HEIGHT - room.height - 2 * this.ROOM_EDGE_BUFFER)) + this.ROOM_EDGE_BUFFER;
+
+                    if (roomOrigins.has(`${room.x},${room.y}`)) continue;
+
+                    const existingRooms = roomEntityIds.map(id => this.entityManager.getEntity(id).getComponent('Room'));
+                    // Use relaxed constraints as attempts increase
+                    let currentMinDistance = Math.max(this.MIN_DISTANCE_FLOOR, minDistance - Math.floor(attempts / 10));
+                    let currentMaxOverlap = Math.min(0.25, maxOverlap + attempts * 0.005);
+
+                    // Overlap and distance checks
+                    let overlap = this.doesRoomOverlapCustom(room, existingRooms, currentMaxOverlap);
+                    let tooClose = existingRooms.length > 0 && this.isTooClose(room, existingRooms, currentMinDistance);
+
+                    // Score: penalize overlap and closeness, prefer central placement
+                    //let centerScore = Math.abs(room.x + room.width / 2 - this.state.WIDTH / 2) + Math.abs(room.y + room.height / 2 - this.state.HEIGHT / 2);
+                   // let score = (overlap ? 1000 : 0) + (tooClose ? 500 : 0) + centerScore;
+
+                    // Score: penalize overlap and closeness, prefer decentralized placement
+                    let distFromCenter = Math.abs(room.x + room.width / 2 - this.state.WIDTH / 2) + Math.abs(room.y + room.height / 2 - this.state.HEIGHT / 2);
+                    let centerScore = -distFromCenter; // Negative means further is better
+                    let score = (overlap ? 1000 : 0) + (tooClose ? 500 : 0) + centerScore;
+
+                    if (!overlap && !tooClose) {
+                        // Place immediately if perfect
+                        bestCandidate = { ...room };
+                        bestScore = score;
+                        placed = true;
+                        break;
+                    } else if (score < bestScore) {
+                        bestCandidate = { ...room };
+                        bestScore = score;
+                    }
+                }
+                attempts++;
+            }
+
+            // Fallback: if not placed, use best candidate with minimal constraints
+            if (!placed && bestCandidate) {
+                console.warn(`LevelSystem.js: placeRooms - Placing room with relaxed constraints: ${roomType.type}`);
+                placed = true;
+            }
+
+            if (placed && bestCandidate) {
+                const roomEntity = this.entityManager.createEntity(`room_${tier}_${bestCandidate.x}_${bestCandidate.y}`);
+                this.entityManager.addComponentToEntity(roomEntity.id, new RoomComponent({
+                    left: bestCandidate.x,
+                    top: bestCandidate.y,
+                    width: bestCandidate.width,
+                    height: bestCandidate.height,
+                    type: bestCandidate.type,
+                    centerX: bestCandidate.x + Math.floor(bestCandidate.width / 2),
+                    centerY: bestCandidate.y + Math.floor(bestCandidate.height / 2),
+                    connections: []
+                }));
+                roomEntityIds.push(roomEntity.id);
+                roomOrigins.add(`${bestCandidate.x},${bestCandidate.y}`);
+                if (roomType.type === 'BossChamberSpecial') bossChamberPlaced = true;
+            } else {
+                console.warn(`LevelSystem.js: placeRooms - Failed to place room of type ${roomType.type} after ${this.MAX_PLACEMENT_ATTEMPTS} attempts`);
+            }
+        }
+
+        roomOrigins.clear();
+        console.log(`LevelSystem.js: placeRooms - Improved - Placed ${roomEntityIds.length} out of ${numRooms} rooms for tier ${tier}`);
+        return roomEntityIds;
+    }
+
+    // Helper: allows custom overlap percent per attempt
+    doesRoomOverlapCustom(newRoom, existingRooms, maxOverlapPercent) {
+        const buffer = newRoom.type === 'BossChamberSpecial' || newRoom.type === 'AlcoveSpecial' ? this.CORRIDOR_EDGE_BUFFER : this.ROOM_EDGE_BUFFER;
+        for (const room of existingRooms) {
+            const overlapX = Math.max(0, Math.min(newRoom.x + newRoom.width + buffer, room.left + room.width) - Math.max(newRoom.x - buffer, room.left));
+            const overlapY = Math.max(0, Math.min(newRoom.y + newRoom.height + buffer, room.top + room.height) - Math.max(newRoom.y - buffer, room.top));
+            const overlapArea = overlapX * overlapY;
+            const newRoomArea = newRoom.width * newRoom.height;
+            const roomArea = room.width * room.height;
+            const minArea = Math.min(newRoomArea, roomArea);
+            if (overlapArea > minArea * maxOverlapPercent) return true;
+        }
+        return false;
+    }
+
+
+
+    /*
     placeRooms(numRooms, hasBossRoom, levelEntityId, tier) {
         console.log(`LevelSystem.js: placeRooms - Starting for tier ${tier}, numRooms: ${numRooms}, hasBossRoom: ${hasBossRoom}`);
         const roomOrigins = new Set();
@@ -356,7 +485,10 @@ export class LevelSystem extends System {
                         top: room.y,
                         width: room.width,
                         height: room.height,
-                        type: room.type
+                        type: room.type,
+                        centerX: room.x + Math.floor(room.width / 2),
+                        centerY: room.y + Math.floor(room.height / 2),
+                        connections: []
                     }));
                     roomEntityIds.push(roomEntity.id);
                     roomOrigins.add(`${room.x},${room.y}`);
@@ -425,7 +557,7 @@ export class LevelSystem extends System {
         console.log(`LevelSystem.js: placeRooms - Completed for tier ${tier}`);
         return roomEntityIds;
     }
-
+    */
     selectRoomType() {
         const totalProbability = roomTypes.reduce((sum, room) => sum + room.probability, 0);
         let roll = Math.random() * totalProbability;
@@ -460,6 +592,85 @@ export class LevelSystem extends System {
         return existingRooms.some(room => this.calculateDistance(newRoom.x, newRoom.y, room.centerX, room.centerY) < minDistance);
     }
 
+    connectRooms(roomEntityIds, map, floors, walls, floorPositions, tier) {
+        console.log(`LevelSystem.js: connectRooms (MST) - Starting for tier ${tier}, roomEntityIds: ${roomEntityIds.length}`);
+        if (roomEntityIds.length === 0) return;
+        const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
+
+        // Build a list of room centers for easy access
+        const roomCenters = roomEntityIds.map(id => {
+            const room = this.entityManager.getEntity(id).getComponent('Room');
+            return { id, x: room.centerX, y: room.centerY };
+        });
+
+        // Prim's algorithm for MST
+        const connected = new Set();
+        const edges = [];
+        connected.add(roomCenters[0].id);
+
+        while (connected.size < roomCenters.length) {
+            let minDist = Infinity;
+            let minEdge = null;
+
+            for (const fromId of connected) {
+                const fromRoom = roomCenters.find(r => r.id === fromId);
+                for (const toRoom of roomCenters) {
+                    if (connected.has(toRoom.id)) continue;
+                    const dist = this.calculateDistance(fromRoom.x, fromRoom.y, toRoom.x, toRoom.y);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        minEdge = { from: fromRoom.id, to: toRoom.id };
+                    }
+                }
+            }
+
+            if (minEdge) {
+                edges.push(minEdge);
+                connected.add(minEdge.to);
+            } else {
+                // Should not happen, but break to avoid infinite loop
+                break;
+            }
+        }
+
+        // Optionally, add a few random extra connections for loops
+        const extraConnections = Math.floor(roomEntityIds.length / 8); // tweak as desired
+        for (let i = 0; i < extraConnections; i++) {
+            const a = roomEntityIds[Math.floor(Math.random() * roomEntityIds.length)];
+            let b;
+            do {
+                b = roomEntityIds[Math.floor(Math.random() * roomEntityIds.length)];
+            } while (a === b || edges.some(e => (e.from === a && e.to === b) || (e.from === b && e.to === a)));
+            edges.push({ from: a, to: b });
+        }
+
+        // Carve corridors and update connections
+        for (const edge of edges) {
+            this.carveCorridor(edge.from, edge.to, map, roomEntityIds, floors, walls, floorPositions, levelEntity);
+            const roomA = this.entityManager.getEntity(edge.from).getComponent('Room');
+            const roomB = this.entityManager.getEntity(edge.to).getComponent('Room');
+            if (!roomA.connections.includes(edge.to)) roomA.connections.push(edge.to);
+            if (!roomB.connections.includes(edge.from)) roomB.connections.push(edge.from);
+        }
+
+        // Special handling for alcove/boss rooms (optional, as in your original)
+        for (const roomId of roomEntityIds) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            if ((room.roomType === 'AlcoveSpecial' || room.roomType === 'BossChamberSpecial') && room.connections.length > 1) {
+                room.connections = [room.connections[0]];
+            }
+        }
+
+        // Debug output
+        console.log(`LevelSystem.js: Room connections after connectRooms (MST) for tier ${tier}:`);
+        for (const roomId of roomEntityIds) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length} (${room.connections.join(', ')})`);
+        }
+        console.log(`LevelSystem.js: connectRooms (MST) - Completed for tier ${tier}`);
+    }
+
+    /*
     connectRooms(roomEntityIds, map, floors, walls, floorPositions, tier) {
         console.log(`LevelSystem.js: connectRooms - Starting for tier ${tier}, roomEntityIds: ${roomEntityIds.length}`);
         if (roomEntityIds.length === 0) return;
@@ -554,15 +765,15 @@ export class LevelSystem extends System {
         }
         console.log(`LevelSystem.js: connectRooms - Completed for tier ${tier}`);
     }
-
+    */
     carveCorridor(startRoomId, endRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity) {
         if (!startRoomId || !endRoomId) {
             console.error(`carveCorridor: Invalid room ID - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
         }
         const rand = Math.random();
-        if (rand < 0.2) {
+        if (rand < 0.10) {
             this.carveStraightCorridor(startRoomId, endRoomId, map, floors, walls, floorPositions, levelEntity);
-        } else if (rand < 0.6) {
+        } else if (rand < 0.70) {
             this.carveLCorridor(startRoomId, endRoomId, map, floors, walls, floorPositions, levelEntity);
         } else {
             this.carveTCorridor(startRoomId, endRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity);
@@ -577,7 +788,19 @@ export class LevelSystem extends System {
         const startY = startRoom.centerY;
         const endX = endRoom.centerX;
         const endY = endRoom.centerY;
-
+        console.log(`LevelSystem: Carving corridor from (${startX},${startY}) to (${endX},${endY})`);
+        // Defensive checks
+        if (
+            !Number.isFinite(startX) || !Number.isFinite(startY) ||
+            !Number.isFinite(endX) || !Number.isFinite(endY) ||
+            startX < 0 || startX >= this.state.WIDTH ||
+            startY < 0 || startY >= this.state.HEIGHT ||
+            endX < 0 || endX >= this.state.WIDTH ||
+            endY < 0 || endY >= this.state.HEIGHT
+        ) {
+            console.error(`LevelSystem: Corridor carving aborted: Invalid room centers: start(${startX},${startY}) end(${endX},${endY})`);
+            return;
+        }
         if (startX === endX) {
             const yMin = Math.min(startY, endY);
             const yMax = Math.max(startY, endY);
@@ -622,13 +845,13 @@ export class LevelSystem extends System {
     carveLCorridor(startRoomId, endRoomId, map, floors, walls, floorPositions, levelEntity) {
         const tier = levelEntity.getComponent('Tier').value;
         if (!startRoomId || !endRoomId) {
-            console.error(`carveLCorridor: Invalid room IDs - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
+            console.error(`LevelSystem: carveLCorridor: Invalid room IDs - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
             return;
         }
         const startRoom = this.entityManager.getEntity(startRoomId).getComponent('Room');
         const endRoom = this.entityManager.getEntity(endRoomId).getComponent('Room');
         if (!startRoom || !endRoom) {
-            console.error(`carveLCorridor: Failed to retrieve Room components - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
+            console.error(`LevelSystem: carveLCorridor: Failed to retrieve Room components - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
             return;
         }
 
@@ -637,6 +860,19 @@ export class LevelSystem extends System {
         const endX = endRoom.centerX;
         const endY = endRoom.centerY;
         const midX = Math.floor((startX + endX) / 2);
+        console.log(`LevelSystem: Carving corridor from (${startX},${startY}) to (${endX},${endY})`);
+        // Defensive checks
+        if (
+            !Number.isFinite(startX) || !Number.isFinite(startY) ||
+            !Number.isFinite(endX) || !Number.isFinite(endY) ||
+            startX < 0 || startX >= this.state.WIDTH ||
+            startY < 0 || startY >= this.state.HEIGHT ||
+            endX < 0 || endX >= this.state.WIDTH ||
+            endY < 0 || endY >= this.state.HEIGHT
+        ) {
+            console.error(`LevelSystem: Corridor carving aborted: Invalid room centers: start(${startX},${startY}) end(${endX},${endY})`);
+            return;
+        }
 
         let x = startX;
         while (x !== midX) {
@@ -699,13 +935,13 @@ export class LevelSystem extends System {
     carveTCorridor(startRoomId, endRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity) {
         const tier = levelEntity.getComponent('Tier').value;
         if (!startRoomId || !endRoomId) {
-            console.error(`carveTCorridor: Invalid room IDs - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
+            console.error(`LevelSystem: carveTCorridor: Invalid room IDs - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
             return;
         }
         const startRoom = this.entityManager.getEntity(startRoomId).getComponent('Room');
         const endRoom = this.entityManager.getEntity(endRoomId).getComponent('Room');
         if (!startRoom || !endRoom) {
-            console.error(`carveTCorridor: Failed to retrieve Room components - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
+            console.error(`LevelSystem: carveTCorridor: Failed to retrieve Room components - startRoomId: ${startRoomId}, endRoomId: ${endRoomId}`);
             return;
         }
 
@@ -713,6 +949,19 @@ export class LevelSystem extends System {
         const startY = startRoom.centerY;
         const endX = endRoom.centerX;
         const endY = endRoom.centerY;
+        console.log(`LevelSystem: Carving corridor from (${startX},${startY}) to (${endX},${endY})`);
+        // Defensive checks
+        if (
+            !Number.isFinite(startX) || !Number.isFinite(startY) ||
+            !Number.isFinite(endX) || !Number.isFinite(endY) ||
+            startX < 0 || startX >= this.state.WIDTH ||
+            startY < 0 || startY >= this.state.HEIGHT ||
+            endX < 0 || endX >= this.state.WIDTH ||
+            endY < 0 || endY >= this.state.HEIGHT
+        ) {
+            console.error(`LevelSystem: Corridor carving aborted: Invalid room centers: start(${startX},${startY}) end(${endX},${endY})`);
+            return;
+        }
 
         let x = startX;
         while (x !== endX) {
@@ -1120,11 +1369,95 @@ export class LevelSystem extends System {
         const mapComp = levelEntity.getComponent('Map');
         const entityList = levelEntity.getComponent('EntityList');
         const tier = levelEntity.getComponent('Tier').value;
+        const rooms = Array.isArray(entityList.rooms) ? entityList.rooms : [];
+        if (rooms.length === 0) return;
+
+        // Build adjacency list from room connections
+        const adj = {};
+        for (const roomId of rooms) {
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            adj[roomId] = new Set(room.connections || []);
+        }
+
+        // Find connected components using BFS
+        const visited = new Set();
+        const components = [];
+        for (const roomId of rooms) {
+            if (visited.has(roomId)) continue;
+            const queue = [roomId];
+            const component = [];
+            visited.add(roomId);
+            while (queue.length > 0) {
+                const curr = queue.shift();
+                component.push(curr);
+                for (const neighbor of adj[curr]) {
+                    if (!visited.has(neighbor)) {
+                        visited.add(neighbor);
+                        queue.push(neighbor);
+                    }
+                }
+            }
+            components.push(component);
+        }
+
+        // If only one component, all rooms are connected
+        if (components.length <= 1) {
+            console.log(`LevelSystem: All rooms are already connected for tier ${tier}`);
+            return;
+        }
+
+        // Otherwise, connect components together
+        console.warn(`LevelSystem: Found ${components.length} disconnected room clusters on tier ${tier}. Connecting...`);
+        while (components.length > 1) {
+            // Always connect the first component to the next
+            const compA = components[0];
+            const compB = components[1];
+
+            // Find the closest pair of rooms between compA and compB
+            let minDist = Infinity;
+            let pair = null;
+            for (const a of compA) {
+                const roomA = this.entityManager.getEntity(a).getComponent('Room');
+                for (const b of compB) {
+                    const roomB = this.entityManager.getEntity(b).getComponent('Room');
+                    const dist = this.calculateDistance(roomA.centerX, roomA.centerY, roomB.centerX, roomB.centerY);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        pair = [a, b];
+                    }
+                }
+            }
+
+            // Carve a corridor and update connections
+            if (pair) {
+                this.carveCorridor(pair[0], pair[1], mapComp.map, rooms, entityList.floors, entityList.walls, new Set(), levelEntity);
+                const roomA = this.entityManager.getEntity(pair[0]).getComponent('Room');
+                const roomB = this.entityManager.getEntity(pair[1]).getComponent('Room');
+                if (!roomA.connections.includes(pair[1])) roomA.connections.push(pair[1]);
+                if (!roomB.connections.includes(pair[0])) roomB.connections.push(pair[0]);
+                // Merge compB into compA and remove compB from components
+                compA.push(...compB);
+                components.splice(1, 1);
+            } else {
+                // Should not happen, but break to avoid infinite loop
+                break;
+            }
+        }
+        console.log(`LevelSystem: All rooms are now connected for tier ${tier}`);
+        this.ensureRoomConnectionsPassTwo(levelEntity);
+    }
+
+
+ 
+    ensureRoomConnectionsPassTwo(levelEntity) {
+        const mapComp = levelEntity.getComponent('Map');
+        const entityList = levelEntity.getComponent('EntityList');
+        const tier = levelEntity.getComponent('Tier').value;
 
         const rooms = Array.isArray(entityList.rooms) ? entityList.rooms : [];
-        console.log(`LevelSystem.js: Ensuring room connections for tier ${tier}, rooms: ${JSON.stringify(rooms)}`);
+        console.log(`LevelSystem: Ensuring room connections for tier ${tier}, rooms: ${JSON.stringify(rooms)}`);
 
-        console.log(`LevelSystem.ensureRoomConnections: Room types and connections before ensuring connections:`);
+        console.log(`LevelSystem ensureRoomConnections: Room types and connections before ensuring connections:`);
         for (const roomId of rooms) {
             const room = this.entityManager.getEntity(roomId).getComponent('Room');
             console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length}`);
