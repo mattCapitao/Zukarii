@@ -1496,6 +1496,7 @@ export class LevelSystem extends System {
             console.warn(`LevelSystem.js: No level entity found for tier ${tier}`);
             return;
         }
+        this.ensureRoomConnections(entity);
         console.log(`LevelSystem.js: Checking level ${entity.id}, components: ${Array.from(entity.components.keys())}`);
 
         const mapComp = entity.getComponent('Map');

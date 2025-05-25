@@ -207,3 +207,17 @@ export class InteractionIntentComponent {
         this.intents = []; // [{ action: string, params: object }]
     }
 }
+
+export class JourneyDialogueComponent {
+    constructor() {
+        this.type = 'JourneyDialogue';
+        this.dialogues = {}; // { [id]: { text: string, action: string, params: object } }
+    }
+}
+
+export class ShopDialogueComponent {
+    constructor() {
+        this.type = 'ShopDialogue';
+        this.dialogues = {}; // { shop: { text: string, action: string, params: object }, [id]: {...} }
+    }
+}

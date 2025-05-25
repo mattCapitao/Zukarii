@@ -15,7 +15,7 @@
   },
   {
     "itemId": null,
-    "joutneyItemId": "shardOfEchoes",
+    "journeyItemId": "shardOfEchoes",
     "name": "Shard of Echoes",
     "type": "quest",
     "itemTier": "relic",

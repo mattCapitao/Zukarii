@@ -26,6 +26,7 @@ import {
     ShopInteractionComponent,
     PlayerActionQueueComponent,
     PlayerAchievementsComponent,
+    JourneyRewardComponent,
 } from './components/PlayerComponents.js';
 
 import {
@@ -73,6 +74,8 @@ import {
     NPCDataComponent, // Add
     DialogueComponent, // Add
     InteractionIntentComponent,
+    JourneyDialogueComponent,
+    ShopDialogueComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -100,6 +103,7 @@ export {
     ShopInteractionComponent,
     PlayerActionQueueComponent,
     PlayerAchievementsComponent,
+    JourneyRewardComponent,
 
     // Game-related components
     UIComponent,
@@ -145,6 +149,8 @@ export {
     NPCDataComponent, // Add
     DialogueComponent, // Add
     InteractionIntentComponent,
+    JourneyDialogueComponent,
+    ShopDialogueComponent,
 };
 
 // Utility functions

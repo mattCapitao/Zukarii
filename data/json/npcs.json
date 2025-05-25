@@ -5,6 +5,7 @@
     "avatar": "img/avatars/npcs/zu-master.png",
     "greeting": "Welcome, Zukarrii. Your Journey begins in Zurath.",
     "faceLeft": true,
+    "hasJourneyPaths": true,
     "width": 42,
     "height": 42,
     "hitboxWidth": 42,

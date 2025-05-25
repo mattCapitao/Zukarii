@@ -195,3 +195,10 @@ export class PlayerAchievementsComponent {
     }
 }
 
+
+export class JourneyRewardComponent {
+    constructor() {
+        this.type = 'JourneyReward';
+        this.rewards = []; // Array of rewards
+    }
+}

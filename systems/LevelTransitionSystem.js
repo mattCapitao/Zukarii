@@ -29,6 +29,9 @@ export class LevelTransitionSystem extends System {
                 case 'portal':
                     this.transitionViaPortal(deltaTime);
                     break;
+                case 'stoneOfReturn':
+                    this.transitionViaPortal(deltaTime, 0);
+                    break;
                 case 'down':
                     this.transitionDown();
                     break;
@@ -182,7 +185,7 @@ export class LevelTransitionSystem extends System {
     }
 
 
-    transitionViaPortal(deltaTime) {
+    transitionViaPortal(deltaTime, tier=null) {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
         const currentLevel = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
@@ -192,12 +195,14 @@ export class LevelTransitionSystem extends System {
         let minTier = currentTier - 1;
         let maxTier = currentTier + 5;
         let destinationTier;
-
-        do {
-            destinationTier = Math.floor(Math.random() * (maxTier - minTier + 1)) + minTier;
-        } while (destinationTier === currentTier);
-        if (destinationTier < 1) destinationTier = 1;
-
+        if (tier !== null) {
+            destinationTier = tier;
+        } else {
+            do {
+                destinationTier = Math.floor(Math.random() * (maxTier - minTier + 1)) + minTier;
+            } while (destinationTier === currentTier);
+            if (destinationTier < 1) destinationTier = 1;
+        }
         const riskChance = Math.floor(currentTier / 10);
         if (Math.random() < riskChance / 100) {
             minTier = currentTier - 2;

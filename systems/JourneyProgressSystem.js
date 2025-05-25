@@ -1,17 +1,19 @@
 ﻿import { System } from '../core/Systems.js';
-import { JourneyUpdateQueueComponent, JourneyPathComponent, JourneyStateComponent, OfferedQuestsComponent, PlayerActionQueueComponent, ResourceComponent, InventoryComponent } from '../core/Components.js';
+import { JourneyUpdateQueueComponent, JourneyPathComponent, JourneyStateComponent, OfferedQuestsComponent, PlayerActionQueueComponent, JourneyRewardComponent } from '../core/Components.js';
 
 export class JourneyProgressSystem extends System {
     constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus);
         this.requiredComponents = [];
         this.utilities = utilities;
+        
     }
 
-    init() {
+    async init() {
         this.eventBus.on('FinalizeQuestCompletion', ({ questId }) => {
             this.finalizeQuestCompletion(questId);
         });
+       
     }
 
     update(deltaTime) {
@@ -200,45 +202,27 @@ export class JourneyProgressSystem extends System {
             requiredWeapons.every(attackType => equippedWeapons.has(attackType));
     }
 
-    applyRewards(quest) {
-        quest.rewards?.forEach(reward => {
-            if (!reward) {
-                console.warn(`JourneyProgressSystem: Skipping null reward in quest ${quest.id}`);
-                return;
-            }
-            if (reward.xp) {
-                this.eventBus.emit('AwardXp', { amount: reward.xp });
-                console.log(`JourneyProgressSystem: Emitted AwardXp for ${reward.xp}`);
-            }
-            if (reward.gold) {
-                const resource = this.entityManager.getEntity('player').getComponent('Resource');
-                resource.gold += reward.gold;
-                this.eventBus.emit('LogMessage', { message: `Gained ${reward.gold} gold` });
-                console.log(`JourneyProgressSystem: Added ${reward.gold} gold`);
-            }
-            if (reward.type === 'item' && !reward.rewarded) {
-                this.eventBus.emit('AddItem', {
-                    entityId: 'player',
-                    item: {
-                        itemId: reward.itemId,
-                        quantity: reward.quantity || 1,
-                        useItem: reward.useItem,
-                        useEffect: reward.useEffect,
-                        params: reward.params,
-                        isQuestItem: reward.isQuestItem
-                    }
-                });
-                reward.rewarded = true;
-                console.log(`JourneyProgressSystem: Emitted AddItem for ${reward.itemId}`);
-            } else if (reward.type === 'unlock' && reward.mechanic === 'portalBinding') {
-                this.eventBus.emit('AddComponent', { entityId: 'player', component: new PortalBindingsComponent([0]) });
-                this.eventBus.emit('LogMessage', { message: `Unlocked Portal Binding` });
-                console.log(`JourneyProgressSystem: Added PortalBindingsComponent`);
-            } else if (reward.type) {
-                console.warn(`JourneyProgressSystem: Unknown reward type ${reward.type} in quest ${quest.id}`);
-            }
-        });
-    }
+    applyRewards(quest) { // replace this with a method to build an array of awards and create a JourneyRewardComponent 
+    
+        const player = this.entityManager.getEntity('player');
+        const journeyReward = player.getComponent('JourneyReward');
+
+        if (!journeyReward) {
+            console.warn('JourneyProgressSystem: JourneyReward component not found on player');
+            return;
+        }
+        if (!quest.rewards) {
+            console.warn('JourneyProgressSystem: No rewards found for quest', quest.id);
+            return;
+        }
+        if (!quest.rewards.length) {
+            console.warn('JourneyProgressSystem: No rewards found for quest', quest.id);
+            return;
+        }
+        console.log('JourneyProgressSystem: arring rewards to JourneyRewardComponent:', quest.rewards);
+        journeyReward.rewards = quest.rewards;
+    } 
+
 
     offerNextQuest(quest) {
         if (quest.nextPathId) {

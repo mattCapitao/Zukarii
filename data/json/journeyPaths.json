@@ -3,12 +3,15 @@
     "id": "master_whispers",
     "parentId": "master_whispers",
     "nextPathId": "",
+    "accepted": true,
     "completed": false,
+    "completionType": "campaign",
     "title": "Whispers of Zukarath",
     "description": "Follow the guidance of the Zukran Masters to prove your worth.",
-    "completionCondition": null,
+    "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
+    "completionCondition": "allChildren",
     "rewards": [],
-    "completionText": "",
+    "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
     "logCompletion": false,
     "tasks": []
   },
@@ -16,26 +19,37 @@
     "id": "whisper_parent_1",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_2",
+    "offerType": "auto",
+    "offeredBy": "null",
+    "offered": false,
+    "accepted": false,
     "completed": false,
+    "logCompletion": true,
+    "startsAssigned": true,
     "title": "Enter Zurath",
-    "description": "Whispers yet echo, your fate has arrived. Enter Zurath to begin your Journey.",
-    "completionCondition": null,
+    "description": "Begin your journey by entering Zurath and speaking to Sehnrhyx Syliri.",
+    "offerText": "Whispers yet echo, and your fate has arrived. You must Enter Zurath to begin your Journey.",
+    "acceptedText": "You have accepted the Journey of Whispers. Sehnrhyx Syliri will guide you to begin your Journey.",
+    "activeText": "Speak to Sehnrhyx Syliri to start your trials.",
+    "completionText": "You may now enter Zurath to begin your trials.",
+    "completionCondition": "allChildren",
     "rewards": [
       {
         "xp": 25,
         "gold": 25
       }
     ],
-    "completionText": "Your Journey has begun.",
-    "logCompletion": true,
-    "startsAssigned": true,
     "tasks": [
       {
         "id": "whisper_child_1_1",
         "parentId": "whisper_parent_1",
-        "nextPathId": "",
         "completed": false,
+        "logCompletion": true,
         "title": "Setting Forth",
+        "offerText": "Speak to Sehnrhyx Syliri about your Journey.",
+        "acceptedText": "Speak to Sehnrhyx Syliri about your Journey.",
+        "activeText": "You need to speak to Sehnrhyx Syliri to continue your journey.",
+        "completionText": "Your training has gone well, you are deemed worthy for the trials.",
         "description": "Speak to Sehnrhyx Syliri about your Journey.",
         "completionCondition": {
           "type": "interactWithNPC",
@@ -46,9 +60,7 @@
             "xp": 25,
             "gold": 25
           }
-        ],
-        "completionText": "Your fate has arrived.",
-        "logCompletion": true
+        ]
       }
     ]
   },
@@ -56,9 +68,18 @@
     "id": "whisper_parent_2",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_3",
+    "offerType": "npc",
+    "offeredBy": "sehnrhyx_syliri",
+    "offered": false,
+    "accepted": false,
     "completed": false,
+    "logCompletion": true,
     "title": "Vestments of the Order",
     "description": "Venture into Zurath and defeat the guardian to claim your Vestment of Zukarath.",
+    "offerText": "Venture into Zurath and defeat the guardian to claim your Vestment of Zukarath. Will you take this challenge?",
+    "acceptedText": "You have accepted the quest to claim the Vestment of Zukarath.",
+    "activeText": "Continue your quest to defeat the guardian and claim the Vestment of Zukarath.",
+    "completionText": "You have earned the Vestment of Zukarath by your valor!",
     "completionCondition": null,
     "rewards": [
       {
@@ -67,22 +88,20 @@
       },
       {
         "type": "item",
-        "itemId": "stoneOfReturn",
+        "journeyItemId": "stoneOfReturn",
         "quantity": 1
       }
     ],
-    "completionText": "You have earned the Vestment of Zukarath.",
-    "logCompletion": true,
-    "startsOffered": true,
-    "offeredBy": "sehnrhyx_syliri",
     "tasks": [
       {
         "id": "whisper_child_2_1",
         "parentId": "whisper_parent_2",
-        "nextPathId": "",
         "completed": false,
         "title": "First Descent",
         "description": "Delve down to the third tier of Zurath.",
+        "activeText": "Descend to Tier 3 of Zurath.",
+        "completionText": "You have reached Tier 3.",
+        "logCompletion": true,
         "completionCondition": {
           "type": "reachTier",
           "tier": 3
@@ -92,17 +111,17 @@
             "xp": 50,
             "gold": 50
           }
-        ],
-        "completionText": "You have reached Tier 3.",
-        "logCompletion": true
+        ]
       },
       {
         "id": "whisper_child_2_2",
         "parentId": "whisper_parent_2",
-        "nextPathId": "",
         "completed": false,
         "title": "Battle Tested",
         "description": "Defeat the Guardian.",
+        "activeText": "Defeat the Guardian on Tier 3.",
+        "completionText": "Tier 3 Guardian Defeated.",
+        "logCompletion": true,
         "completionCondition": {
           "type": "bossKill",
           "tier": 3
@@ -112,17 +131,17 @@
             "xp": 50,
             "gold": 50
           }
-        ],
-        "completionText": "Tier 3 Guardian Defeated.",
-        "logCompletion": true
+        ]
       },
       {
         "id": "whisper_child_2_3",
         "parentId": "whisper_parent_2",
-        "nextPathId": "",
         "completed": false,
         "title": "Vested Acolyte",
         "description": "Recover a Vestment of Zukarath.",
+        "activeText": "Find the Vestment of Zukarath on Tier 3.",
+        "completionText": "You have claimed your Vestment of Zukarath.",
+        "logCompletion": true,
         "completionCondition": {
           "type": "findItem",
           "journeyItemId": "vestmentOfZukarath",
@@ -133,17 +152,17 @@
             "xp": 50,
             "gold": 50
           }
-        ],
-        "completionText": "You have claimed your Vestment of Zukarath.",
-        "logCompletion": true
+        ]
       },
       {
         "id": "whisper_child_2_4",
         "parentId": "whisper_parent_2",
-        "nextPathId": "",
         "completed": false,
         "title": "Triumphant Return",
         "description": "Return to Sehnrhyx Syliri.",
+        "activeText": "Speak to Sehnrhyx Syliri to report your success.",
+        "completionText": "You have returned to Sehnrhyx Syliri.",
+        "logCompletion": true,
         "completionCondition": {
           "type": "interactWithNPC",
           "npc": "sehnrhyx_syliri"
@@ -153,9 +172,7 @@
             "xp": 50,
             "gold": 50
           }
-        ],
-        "completionText": "You have returned to Sehnrhyx Syliri.",
-        "logCompletion": true
+        ]
       }
     ]
   },
@@ -174,11 +191,8 @@
       },
       {
         "type": "item",
-        "itemId": "stoneOfReturn",
-        "quantity": 1,
-        "useItem": true,
-        "useEffect": "teleportToTier",
-        "params": { "tier": 0 }
+        "journeyItemId": "stoneOfReturn",
+        "quantity": 1
       }
     ],
     "completionText": "You have earned the Sigil of Zukarath.",
@@ -275,7 +289,7 @@
         "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
         "completionCondition": {
           "type": "useItem",
-          "itemId": "stoneOfReturn"
+          "journeyItemId": "stoneOfReturn"
         },
         "rewards": [
           {
@@ -303,15 +317,12 @@
       },
       {
         "type": "item",
-        "itemId": "stoneOfReturn",
-        "quantity": 1,
-        "useItem": true,
-        "useEffect": "teleportToTier",
-        "params": { "tier": 0 }
+        "journeyItemId": "stoneOfReturn",
+        "quantity": 1
       },
       {
         "type": "item",
-        "itemId": "shardOfEchoes",
+        "journey": "shardOfEchoes",
         "quantity": 1,
         "isQuestItem": true
       }
@@ -369,7 +380,7 @@
         "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
         "completionCondition": {
           "type": "useItem",
-          "itemId": "stoneOfReturn"
+          "journeyItemId": "stoneOfReturn"
         },
         "rewards": [
           {
@@ -419,11 +430,8 @@
       },
       {
         "type": "item",
-        "itemId": "stoneOfReturn",
-        "quantity": 1,
-        "useItem": true,
-        "useEffect": "teleportToTier",
-        "params": { "tier": 0 }
+        "journeyItemId": "stoneOfReturn",
+        "quantity": 1
       }
     ],
     "completionText": "You have claimed the Rings of the Magi.",
@@ -526,11 +534,8 @@
       },
       {
         "type": "item",
-        "itemId": "stoneOfReturn",
-        "quantity": 1,
-        "useItem": true,
-        "useEffect": "teleportToTier",
-        "params": { "tier": 0 }
+        "journeyItemId": "stoneOfReturn",
+        "quantity": 1
       }
     ],
     "completionText": "You have found the entrance to Ashangal.",
@@ -803,8 +808,12 @@
       },
       {
         "type": "item",
-        "itemId": "choice:bladeOrStaff",
-        "options": [ "bladeOfKhetar", "staffOfZarath" ],
+        "journeyitemId": "bladeOfKhetar",
+        "quantity": 1
+      },
+      {
+        "type": "item",
+        "journeyitemId": "staffOfZarath",
         "quantity": 1
       }
     ],

@@ -38,7 +38,7 @@ import { PlayerCollisionSystem } from './systems/PlayerCollisionSystem.js';
 import { ProjectileCollisionSystem } from './systems/ProjectileCollisionSystem.js';
 import { SplashSystem } from './systems/SplashSystem.js';
 import { EntityRemovalSystem } from './systems/EntityRemovalSystem.js';
-import { JourneySystem } from './systems/JourneySystem.js';
+import { JourneyRewardSystem } from './systems/JourneyRewardSystem.js';
 import { PathSystem } from './systems/PathSystem.js';
 import { InteractionSystem } from './systems/InteractionSystem.js';
 import { MouseInputSystem } from './systems/MouseInputSystem.js';
@@ -57,7 +57,7 @@ import {
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
     LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
     AnimationComponent, AnimationStateComponent, JourneyStateComponent, JourneyPathComponent, DialogueComponent, JourneyPathsComponent,
-    OfferedQuestsComponent, PlayerActionQueueComponent,  PlayerAchievementsComponent, JourneyUpdateQueueComponent
+    OfferedQuestsComponent, PlayerActionQueueComponent, PlayerAchievementsComponent, JourneyUpdateQueueComponent, JourneyRewardComponent
 } from './core/Components.js';
 
 export class Game {
@@ -93,6 +93,7 @@ export class Game {
             equipped: { mainhand: null, offhand: null, armor: null, amulet: null, leftring: null, rightring: null },
             items: []
         }));
+        this.entityManager.addComponentToEntity('player', new JourneyRewardComponent());
         this.entityManager.addComponentToEntity('player', new ResourceComponent(0, 0, 0, 0, 0, 0, {}));
         this.entityManager.addComponentToEntity('player', new PlayerStateComponent(0, 1, 0, false, false, ''));
         this.entityManager.addComponentToEntity('player', new JourneyStateComponent());
@@ -256,7 +257,6 @@ export class Game {
         this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state, this.systems.entityGeneration, this.utilities);
         this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.path = new PathSystem(this.entityManager, this.state.eventBus, this.utilities);
-        //this.systems.journey = new JourneySystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.interaction = new InteractionSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.ui = new UISystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.levelTransition = new LevelTransitionSystem(this.entityManager, this.state.eventBus, this.utilities);
@@ -275,6 +275,7 @@ export class Game {
         this.systems.animation = new AnimationSystem(this.entityManager, this.state.eventBus);
         this.systems.dialogueUI = new DialogueUISystem(this.entityManager, this.state.eventBus, this.utilities, this.interactionSystem);
         this.systems.actionTracking = new ActionTrackingSystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.journeyReward = new JourneyRewardSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.journeyProgress = new JourneyProgressSystem(this.entityManager, this.state.eventBus, this.utilities);
         await Promise.all(Object.values(this.systems).map(system => system.init()));
     }
@@ -356,7 +357,7 @@ export class Game {
                 'health',
                 'mana',
                 'path',
-               // 'journey',
+                'journeyReward',
                 'interaction',
                 'actionTracking',
                 'journeyProgress',

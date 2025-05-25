@@ -38,6 +38,21 @@ export class EffectsSystem extends System {
         });
     }
 
+    applyEffect({ entityId, effect, params, context }) {    
+        console.log('EffectsSystem.applyEffect: this.entityManager:', this.entityManager);
+        console.log(`EffectsSystem: Applying effect ${effect} to ${entityId} with params:`, params);
+        const handlers = {
+            teleportToTier: this.teleportToTier.bind(this),
+            reflectDamage: this.reflectDamage.bind(this)
+        };
+        const handler = handlers[effect];
+        if (handler) {
+            handler(entityId, params, context);
+        } else {
+            console.warn(`EffectsSystem: No handler for effect ${effect} on ${entityId}`);
+        }
+    }
+
     update() {
         // No per-frame logic needed yet—event-driven for now
     }
@@ -210,14 +225,14 @@ export class EffectsSystem extends System {
     teleportToTier(entityId, params, context) {
         const entity = this.entityManager.getEntity(entityId);
         if (!entity) {
-            console.warn(`EffectsSystem: Entity ${entityId} not found for teleportToTier`);
+            console.warn(`EffectsSystem: Entity ${entityId} not found for teleportToTier`, params.tier);
             return;
         }
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
         const tier = params.tier || 0;
         gameState.tier = tier;
-        levelTransition.pendingTransition = 'portal';
+        levelTransition.pendingTransition = 'stoneOfReturn';
         this.entityManager.setActiveTier(tier);
         this.eventBus.emit('LogMessage', { message: `The Stone of Return transports you to Tier ${tier}!` });
         this.eventBus.emit('ItemUsed', { entityId, itemId: context.itemId });
