@@ -31,7 +31,7 @@
     "offerText": "Whispers yet echo, and your fate has arrived. You must Enter Zurath to begin your Journey.",
     "acceptedText": "You have accepted the Journey of Whispers. Sehnrhyx Syliri will guide you to begin your Journey.",
     "activeText": "Speak to Sehnrhyx Syliri to start your trials.",
-    "completionText": "You may now enter Zurath to begin your trials.",
+    "completionText": "Your training has gone well, you are deemed worthy! You may now enter Zurath to begin your journey on the Path of Whispers.",
     "completionCondition": "allChildren",
     "rewards": [
       {
@@ -48,7 +48,7 @@
         "title": "Setting Forth",
         "offerText": "Speak to Sehnrhyx Syliri about your Journey.",
         "acceptedText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "activeText": "You need to speak to Sehnrhyx Syliri to continue your journey.",
+        "activeText": "Im glad to see you i hope you have prepared well for your journey!.",
         "completionText": "Your training has gone well, you are deemed worthy for the trials.",
         "description": "Speak to Sehnrhyx Syliri about your Journey.",
         "completionCondition": {
@@ -164,7 +164,7 @@
         "completionText": "You have returned to Sehnrhyx Syliri.",
         "logCompletion": true,
         "completionCondition": {
-          "type": "interactWithNPC",
+          "type": "interactWithNPCFinal",
           "npc": "sehnrhyx_syliri"
         },
         "rewards": [
@@ -195,7 +195,7 @@
         "quantity": 1
       }
     ],
-    "completionText": "You have earned the Sigil of Zukarath.",
+    "completionText": "You have earned the Sigil of Zukarath through your valor.",
     "logCompletion": true,
     "offeredBy": "sehnrhyx_syliri",
     "tasks": [
@@ -268,8 +268,9 @@
         "title": "Attempt the Depths",
         "description": "Attempt to descend to Tier 7.",
         "completionCondition": {
-          "type": "reachTier",
-          "tier": 7
+          "type": "attemptStairs",
+          "fromTier": 6,
+          "toTier": 7
         },
         "rewards": [
           {
@@ -336,7 +337,27 @@
         "nextPathId": "",
         "completed": false,
         "title": "Prepare for the Depths",
-        "description": "Tell Sehnrhyx Syliri you are ready to teleport to Tier 7.",
+        "description": "Return to me when you are ready to face Tier 7.",
+        "completionCondition": {
+          "type": "interactWithNPC",
+          "npc": "sehnrhyx_syliri"
+        },
+        "rewards": [
+          {
+            "xp": 50,
+            "gold": 55
+          }
+        ],
+        "completionText": "prepareto face Tier 7.",
+        "logCompletion": true
+      },
+      {
+        "id": "whisper_child_4_2",
+        "parentId": "whisper_parent_4",
+        "nextPathId": "",
+        "completed": false,
+        "title": "Transport to the Depths",
+        "description": "Are you now ready to face the next challenge?.",
         "completionCondition": {
           "type": "interactWithNPC",
           "npc": "sehnrhyx_syliri"
@@ -351,7 +372,7 @@
         "logCompletion": true
       },
       {
-        "id": "whisper_child_4_2",
+        "id": "whisper_child_4_3",
         "parentId": "whisper_parent_4",
         "nextPathId": "",
         "completed": false,
@@ -372,7 +393,7 @@
         "logCompletion": true
       },
       {
-        "id": "whisper_child_4_3",
+        "id": "whisper_child_4_4",
         "parentId": "whisper_parent_4",
         "nextPathId": "",
         "completed": false,
@@ -392,7 +413,7 @@
         "logCompletion": true
       },
       {
-        "id": "whisper_child_4_4",
+        "id": "whisper_child_4_5",
         "parentId": "whisper_parent_4",
         "nextPathId": "",
         "completed": false,
@@ -779,7 +800,7 @@
         "title": "Return to Syliri",
         "description": "Return to Sehnrhyx Syliri to discuss the Echoes.",
         "completionCondition": {
-          "type": "interactWithNPC",
+          "type": "interactWithNPCFinal",
           "npc": "sehnrhyx_syliri"
         },
         "rewards": [
@@ -895,7 +916,7 @@
         "title": "Return to Syliri",
         "description": "Return to Sehnrhyx Syliri.",
         "completionCondition": {
-          "type": "interactWithNPC",
+          "type": "interactWithNPCFinal",
           "npc": "sehnrhyx_syliri"
         },
         "rewards": [
