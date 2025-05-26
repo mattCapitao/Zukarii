@@ -17,7 +17,7 @@ export class Utilities {
         }
         const action = { type: actionType, data: actionData, timestamp: Date.now() };
         playerActionQueue.actions.push(action);
-        console.log(`Utilities: Pushed ${actionType} to PlayerActionQueue`, action);
+        console.warn(`Utilities: Pushed ${actionType} to PlayerActionQueue`, action);
     }
 
 

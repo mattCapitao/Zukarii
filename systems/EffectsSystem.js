@@ -33,7 +33,7 @@ export class EffectsSystem extends System {
         });
         console.log('EffectsSystem: Initialized and listening for applyEffect events');
 
-        this.eventBus.on('UseItem', ({ entityId, item, effect, params }) => {
+        this.eventBus.on('ItemUsed', ({ entityId, item, effect, params }) => {
             this.applyEffect({ entityId, effect, params, context: { itemId: item.itemId } });
         });
     }
@@ -231,10 +231,12 @@ export class EffectsSystem extends System {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
         const tier = params.tier || 0;
-        gameState.tier = tier;
-        levelTransition.pendingTransition = 'stoneOfReturn';
-        this.entityManager.setActiveTier(tier);
-        this.eventBus.emit('LogMessage', { message: `The Stone of Return transports you to Tier ${tier}!` });
+       // gameState.destinationTier = tier;
+        console.warn(`EffectsSystem: Teleporting ${entityId} to Tier ${tier}`);
+        levelTransition.pendingTransition = 'teleportToTier';
+        levelTransition.destinationTier = tier;
+        //this.entityManager.setActiveTier(tier);
+        this.eventBus.emit('LogMessage', { message: `The Stone transports you to Tier ${tier}!` });
         this.eventBus.emit('ItemUsed', { entityId, itemId: context.itemId });
     }
 }

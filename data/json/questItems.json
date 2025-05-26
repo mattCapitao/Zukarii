@@ -15,6 +15,20 @@
   },
   {
     "itemId": null,
+    "journeyItemId": "stoneOfVeilPiercing",
+    "name": "Stone of Veil Piercing",
+    "type": "consumable",
+    "itemTier": "common",
+    "goldValue": 0,
+    "useItem": true,
+    "useEffect": "teleportToTier",
+    "params": { "tier": 7 },
+    "description": "A mystical stone that Will teleport you to the 7th tier of Zurath.",
+    "icon": "stone_of_return.png",
+    "isSellable": false
+  },
+  {
+    "itemId": null,
     "journeyItemId": "shardOfEchoes",
     "name": "Shard of Echoes",
     "type": "quest",

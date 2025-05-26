@@ -87,7 +87,7 @@ export class JourneyProgressSystem extends System {
         journeyPath.paths.forEach(path => {
             if (path.id === path.parentId || path.completed) return;
             this.updateTaskCounts(path);
-            if (path.id === 'whisper_parent_2' || path.id === 'whisper_parent_3' && false) {
+            if ((path.id === 'whisper_parent_2' || path.id === 'whisper_parent_3') && false) {
                console.log(`JourneyProgressSystem: Initialized task counts for ${path.id}`, {
                     totalTaskCount: path.totalTaskCount,
                     completedTaskCount: path.completedTaskCount
@@ -200,7 +200,7 @@ export class JourneyProgressSystem extends System {
                 });
             });
 
-            console.log(`JourneyProgressSystem: Updated JourneyDialogueComponent for Syliri`, dialogueComp.dialogues);
+           // console.log(`JourneyProgressSystem: Updated JourneyDialogueComponent for Syliri`, dialogueComp.dialogues);
         }
 
         // Check for completed quests
@@ -227,7 +227,7 @@ export class JourneyProgressSystem extends System {
     updateTaskCounts(path) {
         path.totalTaskCount = path.tasks ? path.tasks.length : 0;
         path.completedTaskCount = path.tasks ? path.tasks.filter(t => t.completed).length : 0;
-        if (path.id === 'whisper_parent_2' || path.id === 'whisper_parent_3' && false) {
+        if ((path.id === 'whisper_parent_2' || path.id === 'whisper_parent_3') && false) {
             console.log(`JourneyProgressSystem: Updated task counts for ${path.id}`, {
                 totalTaskCount: path.totalTaskCount,
                 completedTaskCount: path.completedTaskCount
@@ -252,8 +252,8 @@ export class JourneyProgressSystem extends System {
             case 'collectItem':
                 return (condition.type === 'findItem' || condition.type === 'collectItem') &&
                     (condition.journeyItemId === action.data.journeyItemId || condition.itemId === action.data.itemId);
-            case 'brickKill':
-                return condition.type === 'brickKill' && condition.tier === action.data.tier;
+            case 'bossKill':
+                return condition.type === 'bossKill' && condition.tier === action.data.tier;
             case 'interactWithNPC':
                 return (condition.type === 'interactWithNPC' || condition.type === 'interactWithNPCFinal') &&
                     condition.npc === action.data.npcId &&

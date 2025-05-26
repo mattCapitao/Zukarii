@@ -64,6 +64,7 @@ export class Game {
     constructor() {
         this.PLAYER_DEFAULT_MOVE_SPEED = 155;
         this.state = new State();
+        window.state = this.state; // Expose state globally for debugging
         this.entityManager = this.state.entityManager;
         this.utilities = this.state.utilities;
         this.utilities.entityManager = this.entityManager;

@@ -193,6 +193,11 @@
         "type": "item",
         "journeyItemId": "stoneOfReturn",
         "quantity": 1
+      },
+      {
+        "type": "item",
+        "journeyItemId": "stoneOfVeilPiercing",
+        "quantity": 1
       }
     ],
     "completionText": "You have earned the Sigil of Zukarath through your valor.",

@@ -295,7 +295,7 @@ export class InventorySystem extends System {
         }
 
         inventory.items.splice(itemIndex, 1); // Remove consumable item
-        this.eventBus.emit('UseItem', { entityId, item, effect: item.useEffect, params: item.params || {} });
+        this.eventBus.emit('ItemUsed', { entityId, item, effect: item.useEffect, params: item.params || {} });
         this.utilities.pushPlayerActions('useItem', { itemId: item.id });
         this.eventBus.emit('LogMessage', { message: `Used ${item.name}` });
         this.eventBus.emit('StatsUpdated', { entityId });

@@ -35,6 +35,8 @@ export class EntityGenerationSystem extends System {
         const lockedLevels = [6, 11];
         let active = true;
         if (direction === 'down' && lockedLevels.includes(tier) && gameState.highestTier <= tier) {
+            console.warn(`LevelSystem.js: generateStairEntity - Stairs down at tier ${tier} are locked until highest tier is reached.`);
+            console.warn(`LevelSystem.js: generateStairEntity - Highest tier is currently ${gameState.highestTier}.`);
             active = false;
         }
         const stairId = `stair_${tier}_stair_${direction}_${x}_${y}`
@@ -59,7 +61,7 @@ export class EntityGenerationSystem extends System {
         this.entityManager.addComponentToEntity(portalEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
         this.entityManager.addComponentToEntity(portalEntity.id, new PortalComponent());
         const portalComp = portalEntity.getComponent('Portal');
-        if (tier < 7) active = false; // Disable portal for tiers below 7
+        if (tier < 11) active = false; // Disable portal for tiers below 11 Old Zurath is the first 10 levels 
         portalComp.active = active;
         
 

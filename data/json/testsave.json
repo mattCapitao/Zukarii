@@ -1,0 +1,2433 @@
+﻿{
+  "timestamp": "5/27/2025, 5:17:45 AM",
+  "characterName": "erfgertg",
+  "tier": 0,
+  "isDead": false,
+  "player": {
+    "Position": {
+      "type": "Position",
+      "x": 64,
+      "y": 112
+    },
+    "Health": {
+      "type": "Health",
+      "hp": 116,
+      "maxHp": 174,
+      "healthRegen": 0,
+      "updated": false
+    },
+    "Mana": {
+      "type": "Mana",
+      "mana": 66,
+      "maxMana": 66,
+      "manaRegen": 3.4000000000000004,
+      "updated": false
+    },
+    "Stats": {
+      "type": "Stats",
+      "unallocated": 2,
+      "intellect": 17,
+      "prowess": 11,
+      "agility": 12,
+      "maxHp": 174,
+      "maxMana": 66,
+      "armor": 3,
+      "defense": 1,
+      "block": 5,
+      "dodge": 0,
+      "range": 6,
+      "resistMagic": 2,
+      "baseRange": 0,
+      "damageBonus": 0,
+      "meleeBonus": 0,
+      "rangedBonus": 0,
+      "luck": 0,
+      "maxLuck": 0,
+      "movementSpeed": 155,
+      "isLocked": false,
+      "_internal": {
+        "base": {
+          "intellect": 11,
+          "prowess": 10,
+          "agility": 10,
+          "maxHp": 31,
+          "maxMana": 10,
+          "armor": 0,
+          "defense": 0,
+          "block": 0,
+          "dodge": 0,
+          "range": 0,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 0,
+          "meleeBonus": 0,
+          "rangedBonus": 0,
+          "luck": 0,
+          "maxLuck": 0
+        },
+        "gear": {
+          "intellect": 0,
+          "prowess": 1,
+          "agility": 2,
+          "maxHp": 0,
+          "maxMana": 0,
+          "armor": 3,
+          "defense": 1,
+          "block": 5,
+          "dodge": 0,
+          "range": 6,
+          "resistMagic": 2,
+          "baseRange": 0,
+          "damageBonus": 0,
+          "meleeBonus": 0,
+          "rangedBonus": 0,
+          "luck": 0,
+          "maxLuck": 0,
+          "movementSpeed": 0
+        },
+        "temp": {
+          "intellect": 0,
+          "prowess": 0,
+          "agility": 0,
+          "luck": 0,
+          "maxHp": 0,
+          "maxMana": 0,
+          "movementSpeed": 0,
+          "armor": 0,
+          "defense": 0,
+          "block": 0,
+          "dodge": 0,
+          "range": 0,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 0,
+          "meleeBonus": 0,
+          "rangedBonus": 0,
+          "maxLuck": 0
+        },
+        "incremented": {
+          "intellect": 6,
+          "prowess": 0,
+          "agility": 0
+        }
+      }
+    },
+    "Inventory": {
+      "type": "Inventory",
+      "equipped": {
+        "mainhand": {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 7,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mb5tptq7-cmes9p-m50geo",
+          "description": "common weapon",
+          "goldValue": 142,
+          "isSellable": true,
+          "equippedSlot": "mainhand"
+        },
+        "offhand": {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 7,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "name": "common weapon",
+          "uniqueId": "mb5tg9f7-ncza8n-4l9lf0",
+          "description": "common weapon",
+          "goldValue": 133,
+          "isSellable": true,
+          "equippedSlot": "offhand"
+        },
+        "armor": {
+          "tierIndex": 2,
+          "type": "armor",
+          "name": "Vestment of Zukarath",
+          "journeyItemId": "vestmentOfZukarath",
+          "itemTier": "rare",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "uniqueId": "mb5qkea3-zzpnx5-ncrsi5",
+          "description": "rare armor",
+          "goldValue": 166,
+          "isSellable": true,
+          "equippedSlot": "armor"
+        },
+        "amulet": {
+          "tierIndex": 2,
+          "type": "amulet",
+          "name": "Sigil of Zukarath",
+          "journeyItemId": "sigilOfZukarath",
+          "itemTier": "rare",
+          "maxLuck": 5,
+          "icon": "amulet.svg",
+          "stats": {
+            "block": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "uniqueId": "mb5ttx1i-eu1t2o-mb4uke",
+          "description": "rare amulet",
+          "goldValue": 243,
+          "isSellable": true,
+          "equippedSlot": "amulet"
+        },
+        "leftring": null,
+        "rightring": {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": 7,
+          "icon": "ring.svg",
+          "stats": {
+            "agility": 1,
+            "resistMagic": 2
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mb5tpvbo-krvcv0-nwaezx",
+          "description": "rare ring",
+          "goldValue": 254,
+          "isSellable": true,
+          "equippedSlot": "rightring"
+        }
+      },
+      "items": [
+        {
+          "tierIndex": 2,
+          "type": "armor",
+          "name": "Vestment of Zukarath",
+          "journeyItemId": "vestmentOfZukarath",
+          "itemTier": "rare",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "uniqueId": "mb5r3eog-r08iyo-ox8oxb",
+          "description": "rare armor",
+          "goldValue": 166,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "type": "armor",
+          "name": "Vestment of Zukarath",
+          "journeyItemId": "vestmentOfZukarath",
+          "itemTier": "rare",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1,
+            "maxHp": 20
+          },
+          "critStats": [],
+          "uniqueId": "mb5s77qq-qf56sc-ijly0l",
+          "description": "rare armor",
+          "goldValue": 356,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "type": "armor",
+          "name": "Vestment of Zukarath",
+          "journeyItemId": "vestmentOfZukarath",
+          "itemTier": "rare",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1,
+            "maxHp": 11
+          },
+          "critStats": [],
+          "uniqueId": "mb5sq4sm-k93unn-w8zyjm",
+          "description": "rare armor",
+          "goldValue": 266,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "type": "armor",
+          "name": "Vestment of Zukarath",
+          "journeyItemId": "vestmentOfZukarath",
+          "itemTier": "rare",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1,
+            "maxHp": 15
+          },
+          "critStats": [],
+          "uniqueId": "mb5tgz68-wy7ju0-gvov2b",
+          "description": "rare armor",
+          "goldValue": 316,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5r1sv0-ogwsrv-ujytkb",
+          "description": "common armor",
+          "goldValue": 73,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5s62sm-eqz940-ndv6fg",
+          "description": "common armor",
+          "goldValue": 68,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5sppsq-705x5f-sbobae",
+          "description": "common armor",
+          "goldValue": 68,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5srkn5-o0knh7-hfixce",
+          "description": "common armor",
+          "goldValue": 64,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5tf017-h1c4pu-l0n2vl",
+          "description": "common armor",
+          "goldValue": 59,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mb5tffdx-ttiz68-8z2nrd",
+          "description": "common armor",
+          "goldValue": 73,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5tf3bo-9ga8he-ei9wz9",
+          "description": "common armor",
+          "goldValue": 73,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mb5th2pu-53emm8-dzyjaj",
+          "description": "common armor",
+          "goldValue": 83,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5tpawr-bj65l2-4j77wu",
+          "description": "common armor",
+          "goldValue": 87,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5tr8q8-ss0isg-382svy",
+          "description": "common armor",
+          "goldValue": 97,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5trv91-x1bfjx-mtjp2p",
+          "description": "common armor",
+          "goldValue": 97,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5trtik-k1pikh-x2u2ll",
+          "description": "common armor",
+          "goldValue": 97,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mb5tsi8t-ujapl1-z0m10j",
+          "description": "common armor",
+          "goldValue": 102,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mb5ttx1g-gjor0s-s5u0bd",
+          "description": "common armor",
+          "goldValue": 102,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5qhbqm-fwohii-c0tu2o",
+          "description": "junk armor",
+          "goldValue": 22,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5qi9ru-v2k4jg-netuv9",
+          "description": "junk armor",
+          "goldValue": 32,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5qkea1-3rtyld-l84n5n",
+          "description": "junk armor",
+          "goldValue": 32,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "type": "armor",
+          "itemTier": "junk",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5qe6yh-qscb8o-8kqj62",
+          "description": "junk armor",
+          "goldValue": 17,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5s65lr-jqyy4u-a64jix",
+          "description": "junk armor",
+          "goldValue": 32,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5sp1vb-4qkm0h-9okiz7",
+          "description": "junk armor",
+          "goldValue": 32,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5sp9d8-3y3ev2-sloj72",
+          "description": "junk armor",
+          "goldValue": 32,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5spd24-j2zjgs-usxuk9",
+          "description": "junk armor",
+          "goldValue": 32,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5sq4sl-pri9x0-gajlsk",
+          "description": "junk armor",
+          "goldValue": 32,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5srsk4-jnslx6-qf83r2",
+          "description": "junk armor",
+          "goldValue": 27,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5te234-afkzhx-dngf9i",
+          "description": "junk armor",
+          "goldValue": 27,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5tf86g-a5khg7-7cktqv",
+          "description": "junk armor",
+          "goldValue": 32,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mb5tfan0-sf8oea-8v9zp7",
+          "description": "junk armor",
+          "goldValue": 32,
+          "isSellable": true
+        },
+        {
+          "itemId": "mb5tvdyw-6e5fhn-l9ourp",
+          "journeyItemId": "stoneOfReturn",
+          "name": "Stone of Return",
+          "type": "consumable",
+          "itemTier": "common",
+          "goldValue": 0,
+          "useItem": true,
+          "useEffect": "teleportToTier",
+          "params": {
+            "tier": 0
+          },
+          "description": "A mystical stone that returns you to the surface of Zurath.",
+          "icon": "stone_of_return.png",
+          "isSellable": false,
+          "uniqueId": "mb5tdc03-3onzqo-rpp0cs"
+        },
+        {
+          "itemId": "mb5tvdyx-h8t97k-hnzuys",
+          "journeyItemId": "stoneOfVeilPiercing",
+          "name": "Stone of Veil Piercing",
+          "type": "consumable",
+          "itemTier": "common",
+          "goldValue": 0,
+          "useItem": true,
+          "useEffect": "teleportToTier",
+          "params": {
+            "tier": 7
+          },
+          "description": "A mystical stone that Will teleport you to the 7th tier of Zurath.",
+          "icon": "stone_of_return.png",
+          "isSellable": false,
+          "uniqueId": "mb5tvdyy-o0rfze-uqoevg"
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 6,
+          "icon": "dagger.svg",
+          "baseBlock": 2,
+          "name": "common weapon",
+          "uniqueId": "mb5qj45u-l9y8eu-l72wis",
+          "description": "common weapon",
+          "goldValue": 108,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 2,
+          "name": "common weapon",
+          "uniqueId": "mb5sqo8u-k2x5t2-uzk2uc",
+          "description": "common weapon",
+          "goldValue": 74,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 7,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "name": "common weapon",
+          "uniqueId": "mb5tfu0c-st13e8-u243xt",
+          "description": "common weapon",
+          "goldValue": 118,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 7,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "meleeBonus": 2
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mb5sp1v9-9or7mu-1i1mqc",
+          "description": "common weapon",
+          "goldValue": 128,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 1,
+          "name": "junk weapon",
+          "uniqueId": "mb5qh6gb-rqmvnt-rrqfnp",
+          "description": "junk weapon",
+          "goldValue": 30,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 1,
+          "name": "junk weapon",
+          "uniqueId": "mb5qihkt-k41zhn-v51ni0",
+          "description": "junk weapon",
+          "goldValue": 39,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 1,
+          "name": "junk weapon",
+          "uniqueId": "mb5qit6i-q4ydj0-d5bjqr",
+          "description": "junk weapon",
+          "goldValue": 39,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "type": "weapon",
+          "attackType": "melee",
+          "itemTier": "junk",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 1,
+          "name": "junk weapon",
+          "uniqueId": "mb5qe6yh-q01iv7-qqt7su",
+          "description": "junk weapon",
+          "goldValue": 25,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 1,
+          "name": "junk weapon",
+          "uniqueId": "mb5s63z0-iudpje-5l2vf9",
+          "description": "junk weapon",
+          "goldValue": 39,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 1,
+          "name": "junk weapon",
+          "uniqueId": "mb5s77qo-h0tqlp-7zdkrv",
+          "description": "junk weapon",
+          "goldValue": 39,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 1,
+          "name": "junk weapon",
+          "uniqueId": "mb5te81s-ch22pp-9tb7zl",
+          "description": "junk weapon",
+          "goldValue": 34,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 1,
+          "name": "junk weapon",
+          "uniqueId": "mb5tgz65-j3ptss-7mz3j9",
+          "description": "junk weapon",
+          "goldValue": 39,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 1,
+          "name": "junk weapon",
+          "uniqueId": "mb5ts016-8jt8tm-078fxg",
+          "description": "junk weapon",
+          "goldValue": 53,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "name": "common weapon",
+          "uniqueId": "mb5qe6yh-ggvl1j-wkivre",
+          "description": "common weapon",
+          "goldValue": 75,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "name": "common weapon",
+          "uniqueId": "mb5r3eoe-w71f6x-vumdlz",
+          "description": "common weapon",
+          "goldValue": 118,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "name": "common weapon",
+          "uniqueId": "mb5tooiq-qamd3o-inrvv5",
+          "description": "common weapon",
+          "goldValue": 142,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "name": "common weapon",
+          "uniqueId": "mb5sqqte-vwesxp-x10zra",
+          "description": "common weapon",
+          "goldValue": 114,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "name": "common weapon",
+          "uniqueId": "mb5trmqe-07p3v0-n1sfrv",
+          "description": "common weapon",
+          "goldValue": 157,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "name": "common weapon",
+          "uniqueId": "mb5tq2zs-mfjzy5-ga4qf4",
+          "description": "common weapon",
+          "goldValue": 152,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 3,
+          "icon": "orb-wand.svg",
+          "baseRange": 3,
+          "name": "junk weapon",
+          "uniqueId": "mb5qfqol-1tzaal-yfb1b8",
+          "description": "junk weapon",
+          "goldValue": 37,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 3,
+          "icon": "orb-wand.svg",
+          "baseRange": 3,
+          "name": "junk weapon",
+          "uniqueId": "mb5qidwn-hdy8z1-glwlaj",
+          "description": "junk weapon",
+          "goldValue": 47,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 3,
+          "icon": "orb-wand.svg",
+          "baseRange": 3,
+          "name": "junk weapon",
+          "uniqueId": "mb5sp73z-p9dmxi-9s4gyh",
+          "description": "junk weapon",
+          "goldValue": 47,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 3,
+          "icon": "orb-wand.svg",
+          "baseRange": 3,
+          "name": "junk weapon",
+          "uniqueId": "mb5th2pw-s85krd-c2i308",
+          "description": "junk weapon",
+          "goldValue": 51,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 3,
+          "icon": "orb-wand.svg",
+          "baseRange": 3,
+          "name": "junk weapon",
+          "uniqueId": "mb5ttfj0-gg1i92-ojjcm4",
+          "description": "junk weapon",
+          "goldValue": 61,
+          "isSellable": true
+        }
+      ]
+    },
+    "Resource": {
+      "type": "Resource",
+      "torches": 6,
+      "healPotions": 3,
+      "gold": 1683,
+      "potionDropFail": 0,
+      "torchDropFail": 0,
+      "portalBinding": 0,
+      "craftResources": {
+        "ashenShard": 0,
+        "ashenCrystal": 0,
+        "ashenGem": 0,
+        "sylduranShard": 0,
+        "sylduranCrystal": 0,
+        "sylduranGem": 0
+      }
+    },
+    "AttackSpeed": {
+      "type": "AttackSpeed",
+      "attackSpeed": 500,
+      "elapsedSinceLastAttack": 107622.29999995237
+    },
+    "Affix": {
+      "type": "Affix",
+      "affixes": []
+    },
+    "PlayerState": {
+      "type": "PlayerState",
+      "name": "erfgertg",
+      "level": 10,
+      "xp": 3579,
+      "nextLevelXp": 4211,
+      "dead": false,
+      "lampLit": false,
+      "discoveredTileCount": 20722,
+      "isInCombat": false
+    },
+    "JourneyState": {
+      "type": "JourneyState",
+      "completedPaths": [],
+      "pathTree": {}
+    },
+    "JourneyPath": {
+      "type": "JourneyPath",
+      "paths": [
+        {
+          "id": "master_whispers",
+          "parentId": "master_whispers",
+          "nextPathId": "",
+          "accepted": true,
+          "completed": false,
+          "completionType": "campaign",
+          "title": "Whispers of Zukarath",
+          "description": "Follow the guidance of the Zukran Masters to prove your worth.",
+          "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
+          "completionCondition": "allChildren",
+          "rewards": [],
+          "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
+          "logCompletion": false,
+          "tasks": []
+        },
+        {
+          "id": "master_echoes",
+          "parentId": "master_echoes",
+          "nextPathId": "",
+          "completed": false,
+          "title": "Echoes of Zurath",
+          "description": "Uncover the hidden Echoes within Zurath.",
+          "completionCondition": null,
+          "rewards": [],
+          "completionText": "",
+          "logCompletion": false,
+          "tasks": []
+        },
+        {
+          "id": "whisper_parent_4",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_5",
+          "completed": false,
+          "title": "Seeking Corruption",
+          "description": "Seek out the corruption within Zurath’s depths.",
+          "completionCondition": null,
+          "rewards": [
+            {
+              "xp": 200,
+              "gold": 200
+            },
+            {
+              "type": "item",
+              "journeyItemId": "stoneOfReturn",
+              "quantity": 1
+            },
+            {
+              "type": "item",
+              "journey": "shardOfEchoes",
+              "quantity": 1,
+              "isQuestItem": true
+            }
+          ],
+          "completionText": "You have uncovered signs of corruption.",
+          "logCompletion": true,
+          "tasks": [
+            {
+              "id": "whisper_child_4_1",
+              "parentId": "whisper_parent_4",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Prepare for the Depths",
+              "description": "Return to me when you are ready to face Tier 7.",
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 55
+                }
+              ],
+              "completionText": "prepareto face Tier 7.",
+              "logCompletion": true,
+              "completedAt": 1748308724626
+            },
+            {
+              "id": "whisper_child_4_2",
+              "parentId": "whisper_parent_4",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Transport to the Depths",
+              "description": "Are you now ready to face the next challenge?.",
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ],
+              "completionText": "You are ready to face Tier 7.",
+              "logCompletion": true,
+              "completedAt": 1748308727588
+            },
+            {
+              "id": "whisper_child_4_3",
+              "parentId": "whisper_parent_4",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Gather Shards",
+              "description": "Find 15 Ashen Shards.",
+              "completionCondition": {
+                "type": "collectResource",
+                "resourceType": "ashenShard",
+                "quantity": 15
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ],
+              "completionText": "You have gathered 15 Ashen Shards.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_4_4",
+              "parentId": "whisper_parent_4",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Return to Syliri",
+              "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "useItem",
+                "journeyItemId": "stoneOfReturn"
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ],
+              "completionText": "You have returned to Sehnrhyx Syliri.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_4_5",
+              "parentId": "whisper_parent_4",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Turn In Shards",
+              "description": "Give 15 Ashen Shards to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "turnIn",
+                "npc": "sehnrhyx_syliri",
+                "resourceType": "ashenShard",
+                "quantity": 15
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ],
+              "completionText": "The shards have been delivered.",
+              "logCompletion": true
+            }
+          ],
+          "accepted": true,
+          "totalTaskCount": 5,
+          "completedTaskCount": 2
+        }
+      ]
+    }
+  },
+  "gameState": {
+    "GameState": {
+      "type": "GameState",
+      "tier": 0,
+      "highestTier": 6,
+      "gameStarted": true,
+      "gameOver": false,
+      "isVictory": false,
+      "isRangedMode": false,
+      "transitionLock": false,
+      "needsRender": true,
+      "needsInitialRender": false
+    },
+    "JourneyPaths": {
+      "type": "JourneyPaths",
+      "paths": [
+        {
+          "id": "master_whispers",
+          "parentId": "master_whispers",
+          "nextPathId": "",
+          "accepted": true,
+          "completed": false,
+          "completionType": "campaign",
+          "title": "Whispers of Zukarath",
+          "description": "Follow the guidance of the Zukran Masters to prove your worth.",
+          "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
+          "completionCondition": "allChildren",
+          "rewards": [],
+          "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
+          "logCompletion": false,
+          "tasks": []
+        },
+        {
+          "id": "whisper_parent_1",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_2",
+          "offerType": "auto",
+          "offeredBy": "null",
+          "offered": false,
+          "accepted": false,
+          "completed": true,
+          "logCompletion": true,
+          "startsAssigned": true,
+          "title": "Enter Zurath",
+          "description": "Begin your journey by entering Zurath and speaking to Sehnrhyx Syliri.",
+          "offerText": "Whispers yet echo, and your fate has arrived. You must Enter Zurath to begin your Journey.",
+          "acceptedText": "You have accepted the Journey of Whispers. Sehnrhyx Syliri will guide you to begin your Journey.",
+          "activeText": "Speak to Sehnrhyx Syliri to start your trials.",
+          "completionText": "Your training has gone well, you are deemed worthy! You may now enter Zurath to begin your journey on the Path of Whispers.",
+          "completionCondition": "allChildren",
+          "rewards": [
+            {
+              "xp": 25,
+              "gold": 25
+            }
+          ],
+          "tasks": [
+            {
+              "id": "whisper_child_1_1",
+              "parentId": "whisper_parent_1",
+              "completed": true,
+              "logCompletion": true,
+              "title": "Setting Forth",
+              "offerText": "Speak to Sehnrhyx Syliri about your Journey.",
+              "acceptedText": "Speak to Sehnrhyx Syliri about your Journey.",
+              "activeText": "Im glad to see you i hope you have prepared well for your journey!.",
+              "completionText": "Your training has gone well, you are deemed worthy for the trials.",
+              "description": "Speak to Sehnrhyx Syliri about your Journey.",
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 25,
+                  "gold": 25
+                }
+              ],
+              "completedAt": 1748302904451
+            }
+          ],
+          "totalTaskCount": 1,
+          "completedTaskCount": 1,
+          "pendingCompletion": false
+        },
+        {
+          "id": "whisper_parent_2",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_3",
+          "offerType": "npc",
+          "offeredBy": "sehnrhyx_syliri",
+          "offered": false,
+          "accepted": false,
+          "completed": false,
+          "logCompletion": true,
+          "title": "Vestments of the Order",
+          "description": "Venture into Zurath and defeat the guardian to claim your Vestment of Zukarath.",
+          "offerText": "Venture into Zurath and defeat the guardian to claim your Vestment of Zukarath. Will you take this challenge?",
+          "acceptedText": "You have accepted the quest to claim the Vestment of Zukarath.",
+          "activeText": "Continue your quest to defeat the guardian and claim the Vestment of Zukarath.",
+          "completionText": "You have earned the Vestment of Zukarath by your valor!",
+          "completionCondition": null,
+          "rewards": [
+            {
+              "xp": 200,
+              "gold": 200
+            },
+            {
+              "type": "item",
+              "journeyItemId": "stoneOfReturn",
+              "quantity": 1
+            }
+          ],
+          "tasks": [
+            {
+              "id": "whisper_child_2_1",
+              "parentId": "whisper_parent_2",
+              "completed": false,
+              "title": "First Descent",
+              "description": "Delve down to the third tier of Zurath.",
+              "activeText": "Descend to Tier 3 of Zurath.",
+              "completionText": "You have reached Tier 3.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "reachTier",
+                "tier": 3
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ]
+            },
+            {
+              "id": "whisper_child_2_2",
+              "parentId": "whisper_parent_2",
+              "completed": false,
+              "title": "Battle Tested",
+              "description": "Defeat the Guardian.",
+              "activeText": "Defeat the Guardian on Tier 3.",
+              "completionText": "Tier 3 Guardian Defeated.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "bossKill",
+                "tier": 3
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ]
+            },
+            {
+              "id": "whisper_child_2_3",
+              "parentId": "whisper_parent_2",
+              "completed": false,
+              "title": "Vested Acolyte",
+              "description": "Recover a Vestment of Zukarath.",
+              "activeText": "Find the Vestment of Zukarath on Tier 3.",
+              "completionText": "You have claimed your Vestment of Zukarath.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "findItem",
+                "journeyItemId": "vestmentOfZukarath",
+                "tier": 3
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ]
+            },
+            {
+              "id": "whisper_child_2_4",
+              "parentId": "whisper_parent_2",
+              "completed": false,
+              "title": "Triumphant Return",
+              "description": "Return to Sehnrhyx Syliri.",
+              "activeText": "Speak to Sehnrhyx Syliri to report your success.",
+              "completionText": "You have returned to Sehnrhyx Syliri.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "interactWithNPCFinal",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "whisper_parent_3",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_4",
+          "completed": false,
+          "title": "Sigil of the Order",
+          "description": "Seek the Sigil of Zukarath to solidify your place among the Zukarrii.",
+          "completionCondition": null,
+          "rewards": [
+            {
+              "xp": 400,
+              "gold": 400
+            },
+            {
+              "type": "item",
+              "journeyItemId": "stoneOfReturn",
+              "quantity": 1,
+              "rewarded": true
+            },
+            {
+              "type": "item",
+              "journeyItemId": "stoneOfVeilPiercing",
+              "quantity": 1,
+              "rewarded": true
+            }
+          ],
+          "completionText": "You have earned the Sigil of Zukarath through your valor.",
+          "logCompletion": true,
+          "offeredBy": "sehnrhyx_syliri",
+          "tasks": [
+            {
+              "id": "whisper_child_3_1",
+              "parentId": "whisper_parent_3",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Seek Guidance",
+              "description": "Speak to Sehnrhyx Syliri about your Journey.",
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 100,
+                  "gold": 100
+                }
+              ],
+              "completionText": "Sehnrhyx Syliri has guided you toward the Sigil.",
+              "logCompletion": true,
+              "completedAt": 1748307881485
+            },
+            {
+              "id": "whisper_child_3_2",
+              "parentId": "whisper_parent_3",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Guardian’s Bane",
+              "description": "Defeat the guardian on Tier 6.",
+              "completionCondition": {
+                "type": "bossKill",
+                "tier": 6
+              },
+              "rewards": [
+                {
+                  "xp": 100,
+                  "gold": 100
+                }
+              ],
+              "completionText": "Tier 6 Guardian Defeated.",
+              "logCompletion": true,
+              "completedAt": 1748308651402
+            },
+            {
+              "id": "whisper_child_3_3",
+              "parentId": "whisper_parent_3",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Claim the Sigil",
+              "description": "Recover a Sigil of Zukarath.",
+              "completionCondition": {
+                "type": "findItem",
+                "journeyItemId": "sigilOfZukarath",
+                "tier": 6
+              },
+              "rewards": [
+                {
+                  "xp": 100,
+                  "gold": 100
+                }
+              ],
+              "completionText": "You have claimed the Sigil of Zukarath.",
+              "logCompletion": true,
+              "completedAt": 1748308050810
+            },
+            {
+              "id": "whisper_child_3_4",
+              "parentId": "whisper_parent_3",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Attempt the Depths",
+              "description": "Attempt to descend to Tier 7.",
+              "completionCondition": {
+                "type": "attemptStairs",
+                "fromTier": 6,
+                "toTier": 7
+              },
+              "rewards": [
+                {
+                  "xp": 100,
+                  "gold": 100
+                }
+              ],
+              "completionText": "The path to Tier 7 is blocked. Return to Sehnrhyx Syliri.",
+              "logCompletion": true,
+              "completedAt": 1748308686327
+            },
+            {
+              "id": "whisper_child_3_5",
+              "parentId": "whisper_parent_3",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Return to Syliri",
+              "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "useItem",
+                "journeyItemId": "stoneOfReturn"
+              },
+              "rewards": [
+                {
+                  "xp": 100,
+                  "gold": 100
+                }
+              ],
+              "completionText": "You have returned to Sehnrhyx Syliri with the Sigil.",
+              "logCompletion": true,
+              "completedAt": 1748308694519
+            }
+          ]
+        },
+        {
+          "id": "whisper_parent_4",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_5",
+          "completed": false,
+          "title": "Seeking Corruption",
+          "description": "Seek out the corruption within Zurath’s depths.",
+          "completionCondition": null,
+          "rewards": [
+            {
+              "xp": 200,
+              "gold": 200
+            },
+            {
+              "type": "item",
+              "journeyItemId": "stoneOfReturn",
+              "quantity": 1
+            },
+            {
+              "type": "item",
+              "journey": "shardOfEchoes",
+              "quantity": 1,
+              "isQuestItem": true
+            }
+          ],
+          "completionText": "You have uncovered signs of corruption.",
+          "logCompletion": true,
+          "tasks": [
+            {
+              "id": "whisper_child_4_1",
+              "parentId": "whisper_parent_4",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Prepare for the Depths",
+              "description": "Return to me when you are ready to face Tier 7.",
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 55
+                }
+              ],
+              "completionText": "prepareto face Tier 7.",
+              "logCompletion": true,
+              "completedAt": 1748308724626
+            },
+            {
+              "id": "whisper_child_4_2",
+              "parentId": "whisper_parent_4",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Transport to the Depths",
+              "description": "Are you now ready to face the next challenge?.",
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ],
+              "completionText": "You are ready to face Tier 7.",
+              "logCompletion": true,
+              "completedAt": 1748308727588
+            },
+            {
+              "id": "whisper_child_4_3",
+              "parentId": "whisper_parent_4",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Gather Shards",
+              "description": "Find 15 Ashen Shards.",
+              "completionCondition": {
+                "type": "collectResource",
+                "resourceType": "ashenShard",
+                "quantity": 15
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ],
+              "completionText": "You have gathered 15 Ashen Shards.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_4_4",
+              "parentId": "whisper_parent_4",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Return to Syliri",
+              "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "useItem",
+                "journeyItemId": "stoneOfReturn"
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ],
+              "completionText": "You have returned to Sehnrhyx Syliri.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_4_5",
+              "parentId": "whisper_parent_4",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Turn In Shards",
+              "description": "Give 15 Ashen Shards to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "turnIn",
+                "npc": "sehnrhyx_syliri",
+                "resourceType": "ashenShard",
+                "quantity": 15
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ],
+              "completionText": "The shards have been delivered.",
+              "logCompletion": true
+            }
+          ]
+        },
+        {
+          "id": "whisper_parent_5",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_6",
+          "completed": false,
+          "title": "Rings of the Magi",
+          "description": "Acquire the ancient rings to wield greater power.",
+          "completionCondition": null,
+          "rewards": [
+            {
+              "xp": 500,
+              "gold": 500
+            },
+            {
+              "type": "item",
+              "journeyItemId": "stoneOfReturn",
+              "quantity": 1
+            }
+          ],
+          "completionText": "You have claimed the Rings of the Magi.",
+          "logCompletion": true,
+          "tasks": [
+            {
+              "id": "whisper_child_5_1",
+              "parentId": "whisper_parent_5",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Acquire Band of Zu",
+              "description": "Find a Band of Zu in Zurath’s depths.",
+              "completionCondition": {
+                "type": "collectItem",
+                "itemId": "bandOfZu"
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                }
+              ],
+              "completionText": "You have acquired a Band of Zu.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_5_2",
+              "parentId": "whisper_parent_5",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Acquire Band of Karn",
+              "description": "Find a Band of Karn in Zurath’s depths.",
+              "completionCondition": {
+                "type": "collectItem",
+                "itemId": "bandOfKarn"
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                }
+              ],
+              "completionText": "You have acquired a Band of Karn.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_5_3",
+              "parentId": "whisper_parent_5",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Return to Syliri",
+              "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "useItem",
+                "itemId": "stoneOfReturn"
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                }
+              ],
+              "completionText": "You have returned to Sehnrhyx Syliri.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_5_4",
+              "parentId": "whisper_parent_5",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Speak to Syliri",
+              "description": "Speak to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                }
+              ],
+              "completionText": "You have spoken with Sehnrhyx Syliri.",
+              "logCompletion": true
+            }
+          ]
+        },
+        {
+          "id": "whisper_parent_6",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_7",
+          "completed": false,
+          "title": "Enter Ashangal",
+          "description": "Seek the entrance to the endless depths of Ashangal.",
+          "completionCondition": null,
+          "rewards": [
+            {
+              "xp": 500,
+              "gold": 500
+            },
+            {
+              "type": "item",
+              "journeyItemId": "stoneOfReturn",
+              "quantity": 1
+            }
+          ],
+          "completionText": "You have found the entrance to Ashangal.",
+          "logCompletion": true,
+          "tasks": [
+            {
+              "id": "whisper_child_6_1",
+              "parentId": "whisper_parent_6",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Prepare for Ashangal",
+              "description": "Speak to Sehnrhyx Syliri when you are ready to enter Ashangal.",
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                }
+              ],
+              "completionText": "You are ready to enter Ashangal.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_6_2",
+              "parentId": "whisper_parent_6",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Reach the Depths",
+              "description": "Locate the secret entrance on Tier 10.",
+              "completionCondition": {
+                "type": "reachTier",
+                "tier": 10
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                }
+              ],
+              "completionText": "You have reached Tier 10.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_6_3",
+              "parentId": "whisper_parent_6",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Return to Syliri",
+              "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "useItem",
+                "itemId": "stoneOfReturn"
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                }
+              ],
+              "completionText": "You have returned to Sehnrhyx Syliri.",
+              "logCompletion": true
+            }
+          ]
+        },
+        {
+          "id": "whisper_parent_7",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_8",
+          "completed": false,
+          "title": "Harnessing Corruption",
+          "description": "Harness the corruption to unlock new powers.",
+          "completionCondition": null,
+          "rewards": [
+            {
+              "xp": 750,
+              "gold": 500
+            },
+            {
+              "type": "unlock",
+              "mechanic": "portalBinding"
+            }
+          ],
+          "completionText": "You have unlocked the power of Portal Binding.",
+          "logCompletion": true,
+          "tasks": [
+            {
+              "id": "whisper_child_7_1",
+              "parentId": "whisper_parent_7",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Enter Ashangal",
+              "description": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ],
+              "completionText": "You have entered Ashangal.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_7_2",
+              "parentId": "whisper_parent_7",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Collect Shards",
+              "description": "Collect 50 Ashen Shards.",
+              "completionCondition": {
+                "type": "collectResource",
+                "resourceType": "ashenShard",
+                "quantity": 50
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ],
+              "completionText": "You have collected 50 Ashen Shards.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_7_3",
+              "parentId": "whisper_parent_7",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Return to Syliri",
+              "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "useItem",
+                "itemId": "stoneOfReturn"
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ],
+              "completionText": "You have returned to Sehnrhyx Syliri.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_7_4",
+              "parentId": "whisper_parent_7",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Turn In Shards",
+              "description": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "turnIn",
+                "npc": "sehnrhyx_syliri",
+                "resourceType": "ashenShard",
+                "quantity": 50
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ],
+              "completionText": "The shards have been delivered.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_7_5",
+              "parentId": "whisper_parent_7",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Turn In Echoes Shard",
+              "description": "Give the Shard of Echoes to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "turnIn",
+                "npc": "sehnrhyx_syliri",
+                "itemId": "shardOfEchoes",
+                "quantity": 1
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ],
+              "completionText": "The Shard of Echoes reveals the path of Echoes.",
+              "logCompletion": true
+            }
+          ]
+        },
+        {
+          "id": "whisper_parent_8",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_9",
+          "completed": false,
+          "title": "Listening for Echoes",
+          "description": "Seek out the Echoes hidden within Zurath.",
+          "completionCondition": null,
+          "rewards": [
+            {
+              "xp": 1000,
+              "gold": 750
+            }
+          ],
+          "completionText": "You have uncovered the secrets of the Echoes.",
+          "logCompletion": true,
+          "startsOffered": false,
+          "offeredBy": "sehnrhyx_syliri",
+          "triggersMasterPath": "master_echoes",
+          "tasks": [
+            {
+              "id": "whisper_child_8_1",
+              "parentId": "whisper_parent_8",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Complete Echoes",
+              "description": "Complete five Echoes.",
+              "completionCondition": {
+                "type": "completeEchoes",
+                "count": 5
+              },
+              "rewards": [
+                {
+                  "xp": 500,
+                  "gold": 375
+                }
+              ],
+              "completionText": "Five Echoes completed.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_8_2",
+              "parentId": "whisper_parent_8",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Return to Syliri",
+              "description": "Return to Sehnrhyx Syliri to discuss the Echoes.",
+              "completionCondition": {
+                "type": "interactWithNPCFinal",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 500,
+                  "gold": 375
+                }
+              ],
+              "completionText": "You have shared the Echoes with Sehnrhyx Syliri.",
+              "logCompletion": true
+            }
+          ]
+        },
+        {
+          "id": "whisper_parent_9",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_10",
+          "completed": false,
+          "title": "Clad in Magic",
+          "description": "Equip a full set of magic gear to wield its power.",
+          "completionCondition": null,
+          "rewards": [
+            {
+              "xp": 1000,
+              "gold": 1000
+            },
+            {
+              "type": "item",
+              "journeyitemId": "bladeOfKhetar",
+              "quantity": 1
+            },
+            {
+              "type": "item",
+              "journeyitemId": "staffOfZarath",
+              "quantity": 1
+            }
+          ],
+          "completionText": "You are clad in magic, a true Zukarrii.",
+          "logCompletion": true,
+          "tasks": [
+            {
+              "id": "whisper_child_9_1",
+              "parentId": "whisper_parent_9",
+              "nextPathId": "",
+              "completed": true,
+              "title": "Continue Echoes",
+              "description": "Complete five more Echoes.",
+              "completionCondition": {
+                "type": "completeEchoes",
+                "count": 5
+              },
+              "rewards": [
+                {
+                  "xp": 250,
+                  "gold": 250
+                }
+              ],
+              "completionText": "Five more Echoes completed.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_9_2",
+              "parentId": "whisper_parent_9",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Equip Magic Gear",
+              "description": "Equip a full set of magic gear (amulet, dagger, wand, armor, two rings).",
+              "completionCondition": {
+                "type": "equipGear",
+                "requirements": [
+                  {
+                    "slot": "amulet",
+                    "itemTier": "magic"
+                  },
+                  {
+                    "itemTier": "magic",
+                    "type": "weapon",
+                    "attackType": "melee"
+                  },
+                  {
+                    "itemTier": "magic",
+                    "type": "weapon",
+                    "attackType": "ranged"
+                  },
+                  {
+                    "slot": "armor",
+                    "itemTier": "magic"
+                  },
+                  {
+                    "slot": "leftring",
+                    "itemTier": "magic"
+                  },
+                  {
+                    "slot": "rightring",
+                    "itemTier": "magic"
+                  }
+                ]
+              },
+              "rewards": [
+                {
+                  "xp": 250,
+                  "gold": 250
+                }
+              ],
+              "completionText": "You have equipped a full set of magic gear.",
+              "logCompletion": true
+            },
+            {
+              "id": "whisper_child_9_3",
+              "parentId": "whisper_parent_9",
+              "nextPathId": "",
+              "completed": false,
+              "title": "Return to Syliri",
+              "description": "Return to Sehnrhyx Syliri.",
+              "completionCondition": {
+                "type": "interactWithNPCFinal",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 500,
+                  "gold": 500
+                }
+              ],
+              "completionText": "You have proven your magical prowess.",
+              "logCompletion": true
+            }
+          ]
+        },
+        {
+          "id": "master_echoes",
+          "parentId": "master_echoes",
+          "nextPathId": "",
+          "completed": false,
+          "title": "Echoes of Zurath",
+          "description": "Uncover the hidden Echoes within Zurath.",
+          "completionCondition": null,
+          "rewards": [],
+          "completionText": "",
+          "logCompletion": false,
+          "tasks": []
+        }
+      ]
+    },
+    "OfferedQuests": {
+      "type": "OfferedQuests",
+      "quests": []
+    }
+  },
+  "overlayState": {
+    "OverlayState": {
+      "type": "OverlayState",
+      "isOpen": true,
+      "activeTab": "menu",
+      "logMessages": [
+        "Load saved game complete",
+        "You are ready to face Tier 7.",
+        "prepareto face Tier 7.",
+        "Quest accepted: Seeking Corruption",
+        "Added Stone ofVeil Piercing to inventory",
+        "Added Stone of Return to inventory",
+        "Gained 400 gold",
+        "Gained 400 XP (3579/4211)",
+        "New quest available: Seeking Corruption",
+        "Game saved to save_mb5tv0kd-5k7ynm-mdbs2r",
+        "Game saved to save_mb5tv0kd-5k7ynm-mdbs2r",
+        "You step through a mysterious portal surging with chaotic energy and are transported to Tier 0!",
+        "You have returned to Sehnrhyx Syliri with the Sigil.",
+        "Used Stone of Return",
+        "The Stone of Return transports you to Tier 0!",
+        "The path to Tier 7 is blocked. Return to Sehnrhyx Syliri.",
+        "The Stairs are blocked by a magical barrier",
+        "Game saved to save_mb5tuc4e-d326gc-pg8wkx",
+        "Game saved to save_mb5tuc4e-d326gc-pg8wkx",
+        "Equipped Sigil of Zukarath to amulet",
+        "You are no longer in combat.",
+        "Found 104 gold, common armor, Sigil of Zukarath from The T`Kore-Tickrob Loot!",
+        "The T`Kore-Tickrob dropped 104 gold, common armor, Sigil of Zukarath!",
+        "Tier 6 Guardian Defeated.",
+        "Gained 260 XP (3179/4211)",
+        "T`Kore-Tickrob defeated!",
+        "You dealt 18 damage to T`Kore-Tickrob with your common weapon (-16/456)",
+        "You dodged the T`Kore-Tickrob's attack!",
+        "You dealt 17 damage to T`Kore-Tickrob with your common weapon (2/456)",
+        "You dealt 21 damage to T`Kore-Tickrob with your common weapon (19/456)",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 132 gold from you!",
+        "T`Kore-Tickrob hits for 7, armor protects you from: 1, defense skill mitigates: 0 resulting in 6 damage dealt to you",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 146 gold from you!",
+        "You dealt 21 damage to T`Kore-Tickrob with your common weapon (40/456)",
+        " (Critical Hit!) - You dealt 31 damage to T`Kore-Tickrob with your common weapon (61/456)",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 162 gold from you!",
+        "T`Kore-Tickrob hits for 9, armor protects you from: 2, defense skill mitigates: 0 resulting in 7 damage dealt to you",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 181 gold from you!",
+        "You dealt 20 damage to T`Kore-Tickrob with your common weapon (92/456)",
+        "You dealt 21 damage to T`Kore-Tickrob with your common weapon (112/456)",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 201 gold from you!",
+        "T`Kore-Tickrob hits for 7, armor protects you from: 1, defense skill mitigates: 0 resulting in 6 damage dealt to you",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 223 gold from you!",
+        "You dealt 21 damage to T`Kore-Tickrob with your common weapon (133/456)",
+        " (Critical Hit!) - You dealt 29 damage to T`Kore-Tickrob with your common weapon (154/456)",
+        "You dodged the T`Kore-Tickrob's attack!",
+        "You dealt 15 damage to T`Kore-Tickrob with your common weapon (183/456)",
+        "You dealt 18 damage to T`Kore-Tickrob with your common weapon (198/456)",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 248 gold from you!",
+        "T`Kore-Tickrob hits for 7, armor protects you from: 1, defense skill mitigates: 0 resulting in 6 damage dealt to you",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 275 gold from you!",
+        "You dealt 16 damage to T`Kore-Tickrob with your common weapon (216/456)",
+        "You dealt 19 damage to T`Kore-Tickrob with your common weapon (232/456)",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 306 gold from you!",
+        "T`Kore-Tickrob hits for 11, armor protects you from: 2, defense skill mitigates: 0 resulting in 9 damage dealt to you",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 340 gold from you!",
+        "You dealt 23 damage to T`Kore-Tickrob with your common weapon (251/456)",
+        "You dealt 23 damage to T`Kore-Tickrob with your common weapon (274/456)",
+        "You dodged the T`Kore-Tickrob's attack!",
+        "You dealt 20 damage to T`Kore-Tickrob with your common weapon (297/456)",
+        "You dealt 21 damage to T`Kore-Tickrob with your common weapon (317/456)",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 378 gold from you!",
+        "T`Kore-Tickrob hits for 9, armor protects you from: 2, defense skill mitigates: 0 resulting in 7 damage dealt to you",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 420 gold from you!",
+        "You dealt 16 damage to T`Kore-Tickrob with your common weapon (338/456)",
+        " (Critical Hit!) - You dealt 26 damage to T`Kore-Tickrob with your common weapon (354/456)",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 466 gold from you!",
+        "T`Kore-Tickrob hits for 9, armor protects you from: 2, defense skill mitigates: 0 resulting in 7 damage dealt to you",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 518 gold from you!",
+        "You dealt 21 damage to T`Kore-Tickrob with your common weapon (397/456)",
+        "You dealt 17 damage to T`Kore-Tickrob with your common weapon (401/456)",
+        "You dealt 19 damage to T`Kore-Tickrob with your common weapon (437/456)",
+        "You dealt 19 damage to T`Kore-Tickrob with your common weapon (437/456)",
+        "You enter combat by casting FlamingBolt!",
+        "You are no longer in combat.",
+        "Found 86 gold, junk weapon from The Skeleton Loot!",
+        "The Skeleton dropped 86 gold, junk weapon!",
+        "Gained 44 XP (2919/4211)",
+        "Skeleton defeated!",
+        "You dealt 21 damage to Skeleton with your common weapon (-10/47)",
+        "You dealt 15 damage to Skeleton with your common weapon (11/47)",
+        "You dealt 21 damage to Skeleton with your common weapon (26/47)",
+        "Skeleton hits for 12, armor protects you from: 2, defense skill mitigates: 0 resulting in 10 damage dealt to you",
+        "You enter combat by casting FlamingBolt!",
+        "You are no longer in combat.",
+        "Exploration milestone reached! Gained 1000 XP for discovering 20000 tiles.",
+        "Gained 1000 XP (2875/4211)",
+        "Found 107 gold from The Skeleton Loot!",
+        "The Skeleton dropped 107 gold!",
+        "Gained 43 XP (1875/4211)",
+        "Skeleton defeated!",
+        "You dealt 16 damage to Skeleton with your common weapon (-14/46)",
+        "You dealt 20 damage to Skeleton with your common weapon (2/46)",
+        "You dodged the Skeleton's attack!",
+        " (Critical Hit!) - You dealt 24 damage to Skeleton with your common weapon (22/46)",
+        "You enter combat by casting FlamingBolt!",
+        "You are no longer in combat.",
+        "Found 80 gold from The Skeleton Loot!",
+        "The Skeleton dropped 80 gold!",
+        "Gained 44 XP (1832/4211)",
+        "Skeleton defeated!",
+        "You dealt 19 damage to Skeleton with your common weapon (5/47)",
+        "You dealt 19 damage to Skeleton with your common weapon (5/47)",
+        "You dealt 23 damage to Skeleton with your common weapon (24/47)",
+        "Found 73 gold, common armor from The Zombie Loot!",
+        "Exploration milestone reached! Gained 1000 XP for discovering 19000 tiles.",
+        "Gained 1000 XP (1788/4211)",
+        "The Zombie dropped 73 gold, common armor!",
+        "Gained 49 XP (788/4211)",
+        "Zombie defeated!",
+        "You dealt 19 damage to Zombie with your common weapon (-18/55)",
+        "You dealt 17 damage to Zombie with your common weapon (1/55)",
+        "You dealt 21 damage to Zombie with your common weapon (18/55)",
+        "You dealt 16 damage to Zombie with your common weapon (39/55)",
+        "The fountain restores 163 HP. Current HP: 157/174",
+        "Found 91 gold from The Skeleton Loot!",
+        "The Skeleton dropped 91 gold!",
+        "Gained 43 XP (739/4211)",
+        "Skeleton defeated!",
+        "You dealt 20 damage to Skeleton with your common weapon (-14/46)",
+        "You dealt 23 damage to Skeleton with your common weapon (6/46)",
+        "Skeleton hits for 10, armor protects you from: 2, defense skill mitigates: 0 resulting in 8 damage dealt to you",
+        "You dealt 17 damage to Skeleton with your common weapon (29/46)",
+        "Found 98 gold from The Zombie Loot!",
+        "The Zombie dropped 98 gold!",
+        "Gained 49 XP (696/4211)",
+        "Zombie defeated!",
+        " (Critical Hit!) - You dealt 30 damage to Zombie with your common weapon (-2/56)",
+        " (Critical Hit!) - You dealt 28 damage to Zombie with your common weapon (28/56)",
+        "You enter combat by casting FlamingBolt!",
+        "You are no longer in combat.",
+        "Found 75 gold from The Wraith Loot!",
+        "The Wraith dropped 75 gold!",
+        "Gained 50 XP (647/4211)",
+        "Wraith defeated!",
+        "You dealt 20 damage to Wraith with your common weapon (-13/53)",
+        " (Critical Hit!) - You dealt 30 damage to Wraith with your common weapon (7/53)",
+        "Your shot hit a wall.",
+        "You dealt 16 damage to Wraith with your common weapon (37/53)",
+        "You enter combat by casting FlamingBolt!",
+        "You are no longer in combat.",
+        "Found 110 gold, junk weapon from The Orc Chieftan Loot!",
+        "The Orc Chieftan dropped 110 gold, junk weapon!",
+        "Gained 64 XP (597/4211)",
+        "Orc Chieftan defeated!",
+        " (Critical Hit!) - You dealt 26 damage to Orc Chieftan with your common weapon (-22/69)",
+        "Orc Chieftan hits for 11, armor protects you from: 2, defense skill mitigates: 0 resulting in 9 damage dealt to you",
+        " (Critical Hit!) - You dealt 28 damage to Orc Chieftan with your common weapon (4/69)",
+        "You dealt 16 damage to Orc Chieftan with your common weapon (53/69)",
+        "You dealt 21 damage to Orc Chieftan with your common weapon (48/69)",
+        "You enter combat by casting FlamingBolt!",
+        "You are no longer in combat.",
+        "Found 98 gold, common weapon from The Treasure Chest Loot!",
+        "Found 84 gold, common armor from The Skeleton Loot!",
+        "Found 88 gold from The Skeleton Loot!",
+        "Found 87 gold, common armor from The Banshee Loot!",
+        "The Skeleton dropped 88 gold!",
+        "Gained 43 XP (533/4211)",
+        "Skeleton defeated!",
+        "You dealt 16 damage to Skeleton with your common weapon (-14/45)",
+        "You dealt 20 damage to Skeleton with your common weapon (2/45)",
+        "You dealt 23 damage to Skeleton with your common weapon (22/45)",
+        "The Banshee dropped 87 gold, common armor!",
+        "Gained 57 XP (490/4211)",
+        "Banshee defeated!",
+        " (Critical Hit!) - You dealt 32 damage to Banshee with your common weapon (-24/63)",
+        "You dealt 23 damage to Banshee with your common weapon (-15/63)",
+        "You dealt 20 damage to Banshee with your common weapon (8/63)",
+        "You dealt 16 damage to Banshee with your common weapon (28/63)",
+        "You dealt 19 damage to Banshee with your common weapon (44/63)",
+        "The Skeleton dropped 84 gold, common armor!",
+        "Gained 43 XP (433/4211)",
+        "Skeleton defeated!",
+        " (Critical Hit!) - You dealt 26 damage to Skeleton with your common weapon (-22/46)",
+        "You dealt 21 damage to Skeleton with your common weapon (4/46)",
+        "You dealt 21 damage to Skeleton with your common weapon (25/46)",
+        "You enter combat by casting FlamingBolt!",
+        "You are no longer in combat.",
+        "Found 84 gold from The Treasure Chest Loot!",
+        "Found 87 gold from The Giant Rat Loot!",
+        "The Giant Rat dropped 87 gold!",
+        "Gained 43 XP (390/4211)",
+        "Giant Rat defeated!",
+        " (Critical Hit!) - You dealt 26 damage to Giant Rat with your common weapon (0/46)",
+        "You dealt 20 damage to Giant Rat with your common weapon (26/46)",
+        "Found 108 gold, common weapon from The Ghoul Loot!",
+        "The Ghoul dropped 108 gold, common weapon!",
+        "Gained 63 XP (347/4211)",
+        "Ghoul defeated!",
+        "You dealt 20 damage to Ghoul with your common weapon (-18/62)",
+        "You dealt 19 damage to Ghoul with your common weapon (2/62)",
+        "You dodged the Ghoul's attack!",
+        "You dealt 17 damage to Ghoul with your common weapon (21/62)",
+        " (Critical Hit!) - You dealt 24 damage to Ghoul with your common weapon (38/62)",
+        "You enter combat by casting FlamingBolt!",
+        "Exploration milestone reached! Gained 900 XP for discovering 18000 tiles.",
+        "Level up! Now level 10, , Gained 1 stat point to allocate!",
+        "Gained 900 XP (3766/3482)",
+        "You are no longer in combat.",
+        "Found 71 gold, common armor from The Orc Chieftan Loot!"
+      ],
+      "activeMenuSection": "controls-button",
+      "activeShopNpcId": null
+    }
+  },
+  "id": "mb6azia8-v01xpt-rb9fw3"
+}

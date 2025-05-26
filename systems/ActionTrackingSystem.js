@@ -128,7 +128,7 @@ export class ActionTrackingSystem extends System {
             case 'collectItem':
                 return condition.journeyItemId === action.data.journeyItemId ||
                     condition.itemId === action.data.itemId;
-            case 'brickKill':
+            case 'bossKill':
                 return condition.tier === action.data.tier;
             case 'interactWithNPC':
                 if (condition.type === 'interactWithNPC') {

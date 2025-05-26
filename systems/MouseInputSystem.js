@@ -244,12 +244,17 @@ export class MouseInputSystem {
                 return;
             }
         }
-
-        const monster = this.getMonsterAtPosition(worldX, worldY);
+        const target = this.getMonsterAtPosition(worldX, worldY);
+        let monster = null, rangeToTarget = 1;
+        if (target !== null) {
+            monster = target.monster;
+            rangeToTarget = target.range;
+        } 
+        const playerRange = player.getComponent('Stats')?.range || 1; 
         const hasRangedWeapon = (inventory.equipped.offhand?.attackType === 'ranged' && inventory.equipped.offhand?.baseRange > 0) ||
             (inventory.equipped.mainhand?.attackType === 'ranged' && inventory.equipped.mainhand?.baseRange > 0);
 
-        if (gameState.isRangedMode || (monster && hasRangedWeapon)) {
+        if (gameState.isRangedMode || (monster && hasRangedWeapon && rangeToTarget <= playerRange )) {
             if (hasRangedWeapon && attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed && mana.mana >= 3) {
                 const now = performance.now();
                 if (now - this.lastAttackTime >= attackSpeed.attackSpeed) {
@@ -344,7 +349,15 @@ export class MouseInputSystem {
                 const dx = worldX - centerX;
                 const dy = worldY - centerY;
                 console.log(`MouseInputSystem: Hit monster ${monster.id}, distance from center: ${Math.sqrt(dx * dx + dy * dy).toFixed(2)} pixels`);
-                return monster;
+
+
+                const playerPos = this.entityManager.getEntity('player').getComponent('Position');
+                const rx = pos.x + visuals.w / 2 - playerPos.x;
+                const ry = pos.y + visuals.h / 2 - playerPos.y;
+                const distance = Math.sqrt(rx * rx + ry * ry);
+                console.log(`MouseInputSystem: Hit monster ${monster.id}, distance from player: ${distance.toFixed(2)} pixels`);
+                const range = Math.floor(distance / this.TILE_SIZE);
+                return { monster, range };
             }
         }
         return null;

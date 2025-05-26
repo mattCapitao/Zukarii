@@ -29,8 +29,12 @@ export class LevelTransitionSystem extends System {
                 case 'portal':
                     this.transitionViaPortal(deltaTime);
                     break;
-                case 'stoneOfReturn':
-                    this.transitionViaPortal(deltaTime, 0);
+                case 'teleportToTier':
+                    const transition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+
+                    console.log('LevelTransitionSystem: Teleporting to tier:', transition.destinationTier);
+                    this.transitionViaPortal(deltaTime, transition.destinationTier);
+                    transition.destinationTier = null; // Clear after use
                     break;
                 case 'down':
                     this.transitionDown();
@@ -157,11 +161,6 @@ export class LevelTransitionSystem extends System {
 
         const newTier = gameState.tier + 1;
         gameState.tier = newTier;
-        if (newTier > gameState.highestTier) {
-            gameState.highestTier = newTier;
-            this.eventBus.emit('AwardXp', { amount: 5 * newTier });
-            this.eventBus.emit('LogMessage', { message: `You Reached Tier ${newTier}` });
-        }
 
         this.eventBus.emit('AddLevel', { tier: newTier });
     }
@@ -184,36 +183,48 @@ export class LevelTransitionSystem extends System {
         this.eventBus.emit('AddLevel', { tier: newTier });
     }
 
+    randomizeTier(currentTier) {
+        // Normal range: can go down to 0, up to currentTier + 5
+        let minTier = Math.max(0, currentTier - 1);
+        let maxTier = currentTier + 5;
 
-    transitionViaPortal(deltaTime, tier=null) {
+        let destinationTier;
+        do {
+            destinationTier = Math.floor(Math.random() * (maxTier - minTier + 1)) + minTier;
+        } while (destinationTier === currentTier);
+
+        // Risk chance: expand range, still allow 0, never currentTier
+        const riskChance = Math.floor(currentTier / 10);
+        if (Math.random() < riskChance / 100) {
+            minTier = Math.max(0, currentTier - 2);
+            maxTier = currentTier + 10;
+            do {
+                destinationTier = Math.floor(Math.random() * (maxTier - minTier + 1)) + minTier;
+            } while (destinationTier === currentTier);
+        }
+
+        return destinationTier;
+    }
+
+    transitionViaPortal(deltaTime, destinationTier = null) {
+        console.warn('LevelTransitionSystem:  transitionViaPortal called with destinationTier:', destinationTier);
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
         const currentLevel = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
         if (!currentLevel) return;
 
         const currentTier = gameState.tier;
-        let minTier = currentTier - 1;
-        let maxTier = currentTier + 5;
-        let destinationTier;
-        if (tier !== null) {
-            destinationTier = tier;
-        } else {
-            do {
-                destinationTier = Math.floor(Math.random() * (maxTier - minTier + 1)) + minTier;
-            } while (destinationTier === currentTier);
-            if (destinationTier < 1) destinationTier = 1;
+        
+        console.warn('LevelTransitionSystem: Starting transitionViaPortal for currentTier:', currentTier, 'destinationTier:', destinationTier);
+        if (destinationTier === null) {
+            destinationTier = this.randomizeTier(currentTier);
         }
-        const riskChance = Math.floor(currentTier / 10);
-        if (Math.random() < riskChance / 100) {
-            minTier = currentTier - 2;
-            maxTier = currentTier + 10;
-            do {
-                destinationTier = Math.floor(Math.random() * (maxTier - minTier + 1)) + minTier;
-            } while (destinationTier === currentTier);
-            if (destinationTier < 1) destinationTier = 1;
-        }
+        let teleportMessage = `You step through a mysterious portal surging with chaotic energy and are transported to Tier`;
 
-        this.eventBus.emit('LogMessage', { message: `You step through a mysterious portal surging with chaotic energy and are transported to Tier ${destinationTier}!` });
+        if (this.pendingTransition== 'teleportToTier') {
+            teleportMessage = `The power of the stone surges with chaotic energy and instsantly transports you to Tier`;
+        }
+        this.eventBus.emit('LogMessage', { message: `${teleportMessage} ${destinationTier}!` });
         gameState.tier = destinationTier;
 
         renderControl.locked = true;
@@ -222,11 +233,12 @@ export class LevelTransitionSystem extends System {
         //this.eventBus.emit('RenderNeeded');
         gameState.needsRender = true;
         this.eventBus.emit('AddLevel', { tier: destinationTier });
+        console.warn('LevelTransitionSystem: Emitted AddLevel for destinationTier:', destinationTier);
         const sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
 
         setTimeout(() => { sfxQueue.push({ sfx: 'portal1', volume: .5 }); }, 1000 * deltaTime);
     }
-
+    
 
     transitionViaLoad(tier, data) {
         console.log('LevelTransitionSystem: Starting transitionViaLoad for tier:', tier);
@@ -236,7 +248,7 @@ export class LevelTransitionSystem extends System {
         const gameStateComp = gameState.getComponent('GameState');
         Object.assign(gameStateComp, data.gameState.GameState);
         gameStateComp.tier = tier;
-
+ 
         // Restore quest-related components for gameState
         if (data.gameState.JourneyPaths) {
             const journeyPathsComp = gameState.getComponent('JourneyPaths');
@@ -247,6 +259,10 @@ export class LevelTransitionSystem extends System {
             const offeredQuestsComp = gameState.getComponent('OfferedQuests');
             offeredQuestsComp.quests = data.gameState.OfferedQuests.quests; // Deep copy to preserve arrays
             console.log('LevelTransitionSystem: Restored OfferedQuests:', offeredQuestsComp.quests);
+        }
+        if (data.gameState.GameState.highestTier) {
+            gameStateComp.highestTier = data.gameState.GameState.highestTier; // Ensure highestTier is restored
+            console.warn('LevelTransitionSystem: Restored highestTier:', gameStateComp.highestTier);
         }
 
         // Update player (exclude Position)
@@ -317,6 +333,13 @@ export class LevelTransitionSystem extends System {
 
         const isNewTier = tier > gameState.highestTier;
 
+        // Update highestTier if needed
+        if (isNewTier) {
+            gameState.highestTier = tier;
+            this.eventBus.emit('AwardXp', { amount: 5 * tier });
+            this.eventBus.emit('LogMessage', { message: `You Reached Tier ${tier}` });
+        }
+
         const TILE_SIZE = 32; // Match LevelSystem's TILE_SIZE
 
         if (this.pendingTransition === 'down') {
@@ -327,7 +350,7 @@ export class LevelTransitionSystem extends System {
             const downStair = mapComp.stairsDown;
             console.log(`LevelTransitionSystem: Transition up to tier ${tier}, positioning near stairsDown at (${downStair.x}, ${downStair.y})`);
             pos = this.findAdjacentTile(downStair.x, downStair.y);
-        } else if (this.pendingTransition === 'portal' || this.pendingTransition === 'load') {
+        } else if (this.pendingTransition === 'portal' || this.pendingTransition === 'teleportToTier' || this.pendingTransition === 'load') {
             const upStair = mapComp.stairsUp;
             console.log(`LevelTransitionSystem: Transition via portal/load to tier ${tier}, positioning near stairsUp at (${upStair.x}, ${upStair.y})`);
             pos = this.findAdjacentTile(upStair.x, upStair.y);

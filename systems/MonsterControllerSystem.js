@@ -7,6 +7,7 @@ export class MonsterControllerSystem extends System {
         super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'Health', 'MonsterData'];
         this.utilities = utilities;
+        this.utilities.entityManager = this.entityManager; // Ensure utilities have access to the entity manager
     }
 
     init() {
@@ -124,7 +125,11 @@ export class MonsterControllerSystem extends System {
         this.eventBus.emit('AwardXp', { amount: baseXp });
 
         if (monsterData.isBoss) {
-                this.utilities.pushPlayerActions('bossKill', { monsterId: monsterData.id, tier });
+            this.utilities.pushPlayerActions('bossKill', { monsterId: monsterData.id, tier });
+            console.log(`MonsterControllerSystem: Boss defeated: ${monsterData.name}, awarding special actions and loot.`);
+        } else {
+            this.utilities.pushPlayerActions('monsterKill', { monsterId: monsterData.id, tier });
+            console.log(`MonsterControllerSystem: Monster defeated: ${monsterData.name}, awarding actions and loot.`);
         }
 
         const lootSource = this.entityManager.createEntity(`loot_source_${monsterData.tier}_${Date.now()}`);
@@ -160,7 +165,7 @@ export class MonsterControllerSystem extends System {
         //console.log(`MonsterControllerSystem: Emitting DropLoot for ${monsterData.name} with items:`, items);
         this.eventBus.emit('DropLoot', { lootSource });
 
-        this.utilities.pushPlayerActions('monsterKill', { monsterId: monsterData.id, tier });
+        
     }
 
     // systems/MonsterControllerSystem.js - New isWalkable method
