@@ -75,7 +75,7 @@ export class MonsterControllerSystem extends System {
                     if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
                         this.eventBus.emit('MonsterAttack', { entityId: monster.id });
                         attackSpeed.elapsedSinceLastAttack = 0;
-                        console.log(`MonsterControllerSystem: ${monsterData.name} attacked player at distance ${distance.toFixed(2)} pixels`);
+                        //console.log(`MonsterControllerSystem: ${monsterData.name} attacked player at distance ${distance.toFixed(2)} pixels`);
                     }
                     return; // Stop moving if in melee range
                 }
@@ -101,7 +101,7 @@ export class MonsterControllerSystem extends System {
 
                     // Set MovementIntent for collision detection and resolution
                     this.entityManager.addComponentToEntity(monster.id, new MovementIntentComponent(newX, newY));
-                    console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to (${newX.toFixed(2)}, ${newY.toFixed(2)}), distance to player: ${distance.toFixed(2)} pixels`);
+                    //console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to (${newX.toFixed(2)}, ${newY.toFixed(2)}), distance to player: ${distance.toFixed(2)} pixels`);
                 }
             }
         });
@@ -119,7 +119,7 @@ export class MonsterControllerSystem extends System {
 
         const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
         const baseXp = Math.round((health.maxHp / 3 + (monsterData.minBaseDamage + monsterData.maxBaseDamage * 1.5)) * (1 + tier * 0.1));
-        console.log(`MonsterControllerSystem: Monster defeated: ${monsterData.name}, XP calc - maxHp: ${health.maxHp}, minDmg: ${monsterData.minBaseDamage}, maxDmg: ${monsterData.maxBaseDamage}, tier: ${tier}, baseXp: ${baseXp}`);
+        //console.log(`MonsterControllerSystem: Monster defeated: ${monsterData.name}, XP calc - maxHp: ${health.maxHp}, minDmg: ${monsterData.minBaseDamage}, maxDmg: ${monsterData.maxBaseDamage}, tier: ${tier}, baseXp: ${baseXp}`);
         this.eventBus.emit('LogMessage', { message: `${monsterData.name} defeated!` });
         this.eventBus.emit('AwardXp', { amount: baseXp });
 
@@ -157,7 +157,7 @@ export class MonsterControllerSystem extends System {
             maxItems: items.length > 0 ? items.length : 1,
             items: items
         }));
-        console.log(`MonsterControllerSystem: Emitting DropLoot for ${monsterData.name} with items:`, items);
+        //console.log(`MonsterControllerSystem: Emitting DropLoot for ${monsterData.name} with items:`, items);
         this.eventBus.emit('DropLoot', { lootSource });
 
         this.utilities.pushPlayerActions('monsterKill', { monsterId: monsterData.id, tier });

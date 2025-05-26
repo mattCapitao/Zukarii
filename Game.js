@@ -289,7 +289,7 @@ export class Game {
         activeGameSystems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.movementResolution = new MovementResolutionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
-        activeGameSystems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus);
+        activeGameSystems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus, this.utilities);
         activeGameSystems.entityRemoval = new EntityRemovalSystem(this.entityManager);
         activeGameSystems.npcController = new NPCControllerSystem(this.entityManager, this.state.eventBus, this.utilities);
 

@@ -43,6 +43,7 @@ export class LevelSystem extends System {
         this.MAX_OVERLAP_PERCENT = 0.02;
         this.INITIAL_MIN_DISTANCE = 35;
         this.MIN_DISTANCE_FLOOR = 3;
+        this.MIN_BOSS_LEVEL = 3
         this.BOSS_ROOM_EVERY_X_LEVELS = 3;
         this.lastBossTier = 0;
         this.MAX_PLACEMENT_ATTEMPTS = 30; // Reduced to prevent performance issues
@@ -200,7 +201,22 @@ export class LevelSystem extends System {
                 console.log(`LevelSystem.js: addLevel - Adjusting player position for tier ${tier}, transitionDirection: ${transitionDirection}`);
                 this.adjustPlayerPosition(levelEntity, transitionDirection === 'down' ? levelData.stairsUp : (levelData.stairsDown || levelData.stairsUp));
             } else {
-                const hasBossRoom = (tier - this.lastBossTier >= this.BOSS_ROOM_EVERY_X_LEVELS) || Math.random() < 0.05;
+
+                const questBossLevels = [3,6]
+                let hasBossRoom = false;
+
+                switch (true) {
+                    case (tier - this.lastBossTier >= this.BOSS_ROOM_EVERY_X_LEVELS):
+                    case (Math.random() < 0.05) :
+                    case questBossLevels.includes(tier):
+                        hasBossRoom = true;
+                        break;
+                    default:
+                        hasBossRoom = false;
+                        break;
+
+                }
+
                 this.sfxQueue.push({ sfx: 'bossLevel0', volume: 0.5 });
 
                 const entityList = new EntityListComponent({
