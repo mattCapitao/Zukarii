@@ -1,4 +1,5 @@
-﻿import { System } from '../core/Systems.js';
+﻿// ActionTrackingSystem.js
+import { System } from '../core/Systems.js';
 import { PlayerActionQueueComponent, JourneyPathComponent, JourneyUpdateQueueComponent, PlayerAchievementsComponent } from '../core/Components.js';
 
 export class ActionTrackingSystem extends System {
@@ -6,11 +7,10 @@ export class ActionTrackingSystem extends System {
         super(entityManager, eventBus);
         this.requiredComponents = [];
         this.utilities = utilities;
-        this.echoCounter = 0; // Temporary counter for Echo quest completions
+        this.echoCounter = 0;
     }
 
     init() {
-        // No event listeners; relies on PlayerActionQueue
     }
 
     update(deltaTime) {
@@ -42,7 +42,6 @@ export class ActionTrackingSystem extends System {
             return;
         }
 
-        // Cache open tasks and types
         const openTypes = new Set();
         const taskMap = new Map();
         journeyPath.paths.forEach(path => {
@@ -58,9 +57,7 @@ export class ActionTrackingSystem extends System {
             });
         });
 
-        // Process actions
         playerActionQueue.actions.forEach(action => {
-            // Track Echo completions for completeEchoes tasks
             if (action.type === 'completeWhispers') {
                 const path = journeyPath.paths.find(p => p.id === action.data.pathId);
                 if (path && path.parentId === 'master_echoes') {
@@ -69,12 +66,11 @@ export class ActionTrackingSystem extends System {
                     if (this.echoCounter >= 5) {
                         this.utilities.pushPlayerActions('completeEchoes', { count: this.echoCounter });
                         console.log(`ActionTrackingSystem: Pushed completeEchoes with count ${this.echoCounter}`);
-                        this.echoCounter = 0; // Reset for next set
+                        this.echoCounter = 0;
                     }
                 }
             }
 
-            // Filter quest-relevant actions
             if (!openTypes.has(action.type)) {
                 console.log(`ActionTrackingSystem: Skipped non-quest action ${action.type}`, action.data);
                 return;
@@ -89,7 +85,6 @@ export class ActionTrackingSystem extends System {
             }
         });
 
-        // Clear processed actions
         playerActionQueue.actions = [];
         console.log('ActionTrackingSystem: Cleared PlayerActionQueue actions');
     }
@@ -107,7 +102,8 @@ export class ActionTrackingSystem extends System {
             case 'bossKill':
                 return condition.tier === action.data.tier;
             case 'interactWithNPC':
-                return condition.npc === action.data.npcId;
+                return condition.npc === action.data.npcId &&
+                    action.data.taskId === task.id; // Validate taskId
             case 'useItem':
                 return condition.itemId === action.data.itemId;
             case 'reachTier':

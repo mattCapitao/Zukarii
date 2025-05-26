@@ -1014,52 +1014,56 @@ export class UISystem extends System {
             let activeContent = '';
             if (activeQuests.length > 0) {
                 activeContent = `
-      <h3>Active: ${masterPath.title}</h3>
-      ${activeQuests.map(quest => `
-        <div class="journey-path">
-          <p><strong>${quest.title}</strong></p>
-          <p>${quest.description}</p>
-          <p>Progress: ${quest.tasks.filter(t => t.completed).length}/${quest.tasks.length} tasks complete</p>
-          ${quest.tasks.map(task => {
+                <h3>Active: ${masterPath.title}</h3>
+                ${activeQuests.map(quest => `
+                    <div class="journey-path">
+                        <p><strong>${quest.title}</strong></p>
+                        <p>${quest.description}</p>
+                        <p>Progress: ${quest.tasks.filter(t => t.completed).length}/${quest.tasks.length} tasks complete</p>
+                        ${quest.tasks.map(task => {
                     let progressText = '';
                     if (task.completionCondition.type === 'reachTier') {
                         const currentTier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
                         progressText = `Current Tier: ${currentTier}/${task.completionCondition.tier}`;
-                    } else if (task.completionCondition.type === 'findItem') { // Updated from findItem
+                    } else if (task.completionCondition.type === 'findItem') {
                         const inventory = this.entityManager.getEntity('player').getComponent('Inventory');
                         const hasItem = inventory.items.some(item => item.journeyItemId === task.completionCondition.journeyItemId) ||
                             Object.values(inventory.equipped).some(item => item && item.journeyItemId === task.completionCondition.journeyItemId);
-                        progressText = `Item Found: ${hasItem ? 'Yes' : 'No'}`; // Updated from item Found
+                        progressText = `Item Found: ${hasItem ? 'Yes' : 'No'}`;
                     } else if (task.completionCondition.type === 'collectResource') {
                         const resources = this.entityManager.getEntity('player').getComponent('Resource');
                         const count = resources.craftResources[task.completionCondition.resourceType] || 0;
                         progressText = `Collected: ${count}/${task.completionCondition.quantity}`;
                     }
                     return `
-              <div class="journey-task">
-                <p>${task.title} (${task.completed ? 'Completed' : 'In Progress'})</p>
-                <p>${task.description}</p>
-                ${progressText ? `<p>${progressText}</p>` : ''}
-              </div>
-            `;
+                                <div class="journey-task">
+                                    <p>${task.title} (${task.completed ? 'Completed' : 'In Progress'})</p>
+                                    <p>${task.description}</p>
+                                    ${progressText ? `<p>${progressText}</p>` : ''}
+                                </div>
+                            `;
                 }).join('')}
-        </div>
-      `).join('')}
-    `;
+                    </div>
+                `).join('')}
+            `;
             }
 
             let completedContent = '';
             const completedRelatedPaths = completedPaths.filter(path => path.parentId === masterPathId);
             if (completedRelatedPaths.length > 0) {
                 completedContent = `
-      <h3>Completed: ${masterPath.title}</h3>
-      ${completedRelatedPaths.map(path => `
-        <p>${path.title} (Completed on ${new Date(path.completedAt).toLocaleDateString()})</p>
-      `).join('')}
-    `;
+                <h3>Completed: ${masterPath.title}</h3>
+                ${completedRelatedPaths.map(path => `
+                    <div class="journey-path">
+                        <p><strong>${path.title}</strong> (Completed on ${new Date(path.completedAt).toLocaleDateString()})</p>
+                        <p>${path.completionText}</p>
+                    </div>
+                `).join('')}
+            `;
             }
 
             journeyDiv.innerHTML = activeContent || completedContent ? `${activeContent}${completedContent}` : `<p>${masterPath.description}</p>`;
+            console.log(`UISystem: Updated journey log for ${this.activeJourneyTab}`);
         } else {
             journeyDiv.innerHTML = '<p>Invalid journey tab selected.</p>';
         }
