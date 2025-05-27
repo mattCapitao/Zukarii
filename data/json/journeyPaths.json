@@ -336,13 +336,14 @@
     "completionText": "You have uncovered signs of corruption.",
     "logCompletion": true,
     "tasks": [
+
       {
         "id": "whisper_child_4_1",
         "parentId": "whisper_parent_4",
         "nextPathId": "",
         "completed": false,
         "title": "Prepare for the Depths",
-        "description": "Return to me when you are ready to face Tier 7.",
+        "description": "You must use the Stone of Veil Piercing to bypass the magical barrier and reach Tier 7.",
         "completionCondition": {
           "type": "interactWithNPC",
           "npc": "sehnrhyx_syliri"
@@ -353,7 +354,7 @@
             "gold": 55
           }
         ],
-        "completionText": "prepareto face Tier 7.",
+        "completionText": "Use the Stone when you are ready .",
         "logCompletion": true
       },
       {
@@ -364,16 +365,17 @@
         "title": "Transport to the Depths",
         "description": "Are you now ready to face the next challenge?.",
         "completionCondition": {
-          "type": "interactWithNPC",
-          "npc": "sehnrhyx_syliri"
+          "type": "reachTier",
+          "tier": 7
         },
+      
         "rewards": [
           {
             "xp": 50,
             "gold": 50
           }
         ],
-        "completionText": "You are ready to face Tier 7.",
+        "completionText": "You are ready to face the depths of Zurath.",
         "logCompletion": true
       },
       {
