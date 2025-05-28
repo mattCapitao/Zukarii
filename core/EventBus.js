@@ -15,7 +15,7 @@ export class EventBus {
             this.listeners.set(eventName, []);
         }
         this.listeners.get(eventName).push(callback);
-        console.log(`EventBus: Registered listener for event: ${eventName}`);
+       // console.log(`EventBus: Registered listener for event: ${eventName}`);
         return () => this.off(eventName, callback); // Return unsubscribe function
     }
 
@@ -26,7 +26,7 @@ export class EventBus {
         const index = callbacks.indexOf(callback);
         if (index !== -1) {
             callbacks.splice(index, 1);
-            console.log(`EventBus: Removed listener for event: ${eventName}`);
+           // console.log(`EventBus: Removed listener for event: ${eventName}`);
         }
         if (callbacks.length === 0) {
             this.listeners.delete(eventName);
@@ -34,17 +34,17 @@ export class EventBus {
     }
 
     emit(eventName, ...args) {
-        console.log(`EventBus: Emitting event: ${eventName}`, args);
+        //console.log(`EventBus: Emitting event: ${eventName}`, args);
         if (!this.listeners.has(eventName)) {
-            console.log(`EventBus: No listeners for event: ${eventName}`);
+           // console.log(`EventBus: No listeners for event: ${eventName}`);
             return;
         }
         const callbacks = this.listeners.get(eventName).slice(); // Copy to avoid mutation issues
         callbacks.forEach((callback, index) => {
             try {
-                console.log(`EventBus: Invoking callback ${index} for event: ${eventName}`, args);
+               // console.log(`EventBus: Invoking callback ${index} for event: ${eventName}`, args);
                 callback(...args);
-                console.log(`EventBus: Callback ${index} for event ${eventName} executed successfully`);
+              //  console.log(`EventBus: Callback ${index} for event ${eventName} executed successfully`);
             } catch (error) {
                 console.error(`EventBus: Error in callback ${index} for event ${eventName}:`, error);
             }
@@ -55,10 +55,10 @@ export class EventBus {
     clear(eventName = null) {
         if (eventName) {
             this.listeners.delete(eventName);
-            console.log(`EventBus: Cleared listeners for event: ${eventName}`);
+            //console.log(`EventBus: Cleared listeners for event: ${eventName}`);
         } else {
             this.listeners.clear();
-            console.log('EventBus: Cleared all listeners');
+            //console.log('EventBus: Cleared all listeners');
         }
     }
 }

@@ -70,6 +70,7 @@ export class PlayerCollisionSystem extends System {
                     const highestTier = this.entityManager.getEntity('gameState').getComponent('GameState').highestTier;
                     const currentTier = this.entityManager.getActiveTier();
                     if (highestTier > currentTier && stairComp.direction === 'down') {
+                        console.warn(`PlayerCollisionSystem: Stairs down at tier ${currentTier} unocked for highest tier: .`, highestTier);
                         stairComp.active = true;
                     } else {
 

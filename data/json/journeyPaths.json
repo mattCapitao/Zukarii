@@ -37,7 +37,13 @@
       {
         "xp": 25,
         "gold": 25
+      },
+      {
+        "type": "item",
+        "journeyItemId": "stoneOfReturn",
+        "quantity": 1
       }
+      
     ],
     "tasks": [
       {
@@ -60,6 +66,7 @@
             "xp": 25,
             "gold": 25
           }
+         
         ]
       }
     ]
@@ -164,7 +171,7 @@
         "completionText": "You have returned to Sehnrhyx Syliri.",
         "logCompletion": true,
         "completionCondition": {
-          "type": "interactWithNPCFinal",
+          "type": "interactWithNPC ",
           "npc": "sehnrhyx_syliri"
         },
         "rewards": [
@@ -481,7 +488,7 @@
         "description": "Find a Band of Zu in Zurath’s depths.",
         "completionCondition": {
           "type": "collectItem",
-          "itemId": "bandOfZu"
+          "journeyItemId": "bandOfZu"
         },
         "rewards": [
           {
@@ -501,7 +508,7 @@
         "description": "Find a Band of Karn in Zurath’s depths.",
         "completionCondition": {
           "type": "collectItem",
-          "itemId": "bandOfKarn"
+          "journeyItemId": "bandOfKarn"
         },
         "rewards": [
           {
@@ -521,7 +528,7 @@
         "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
         "completionCondition": {
           "type": "useItem",
-          "itemId": "stoneOfReturn"
+          "journeyItemId": "stoneOfReturn"
         },
         "rewards": [
           {
@@ -626,7 +633,7 @@
         "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
         "completionCondition": {
           "type": "useItem",
-          "itemId": "stoneOfReturn"
+          "journeyItemId": "stoneOfReturn"
         },
         "rewards": [
           {
@@ -711,7 +718,7 @@
         "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
         "completionCondition": {
           "type": "useItem",
-          "itemId": "stoneOfReturn"
+          "journeyItemId": "stoneOfReturn"
         },
         "rewards": [
           {

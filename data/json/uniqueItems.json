@@ -196,6 +196,7 @@
     "luck": 10,
     "tierIndex": 2,
     "itemTier": "rare",
+    "collectItem": true,
     "goldValue": 0,
     "isSellable": false,
     "stats": {
@@ -215,6 +216,7 @@
     "luck": 10,
     "tierIndex": 2,
     "itemTier": "rare",
+    "collectItem": true,
     "goldValue": 0,
     "isSellable": false,
     "stats": {

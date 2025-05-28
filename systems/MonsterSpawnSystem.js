@@ -307,23 +307,24 @@ export class MonsterSpawnSystem extends System {
                 journeyItemId = 'bandOfKarn';
             }
             const player = this.entityManager.getEntity('player');
-            achivements = player.getComponent('Achievements');
+            const uniqueItemsCollected = player.getComponent('PlayerAchievements').stats.uniqueItemDrops;
 
             let found = false;
-            for (const obj of achivements) {
+            for (const obj of uniqueItemsCollected) {
                 if (obj.journeyItemId === journeyItemId) {
                     found = true;
                     break;
                 }
             }
             const drop = 0.10; // Base drop chance for the item
+            let dropModifier = 0; // Default drop modifier
             if (tier > 8) {
-                const dropModifier = (tier - 8) * 0.2; // Increase drop chance by 20% per tier above 8
+                 dropModifier = (tier - 8) * 0.2; // Increase drop chance by 20% per tier above 8
             }
             const dropRoll = Math.random();
 
             if (!found && (dropRoll < drop + dropModifier)) {
-                achivements.uniqueItems.push({ journeyItemId, name });
+                uniqueItemsCollected.push({ journeyItemId, name });
                 template.uniqueItemsDropped.push({
                     type: 'customUnique',
                     dropChance: 1,

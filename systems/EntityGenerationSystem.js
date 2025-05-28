@@ -32,7 +32,7 @@ export class EntityGenerationSystem extends System {
     generateStairEntity(levelData, entityList, tier, direction, x, y, returnEntity = false) {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState')
         const map = levelData.map;
-        const lockedLevels = [6, 11];
+        const lockedLevels = [6, 10];
         let active = true;
         if (direction === 'down' && lockedLevels.includes(tier) && gameState.highestTier <= tier) {
             console.warn(`LevelSystem.js: generateStairEntity - Stairs down at tier ${tier} are locked until highest tier is reached.`);

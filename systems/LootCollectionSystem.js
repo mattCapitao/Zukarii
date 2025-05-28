@@ -122,11 +122,11 @@ export class LootCollectionSystem extends System {
         }
         if (lootData.items && lootData.items.length) {
             lootData.items.forEach(item => {
-                this.utilities.pushPlayerActions(item.journeyItemId ? 'findItem' : 'collectItem', {
+                this.utilities.pushPlayerActions(item.collectItem ? 'collectItem' : 'findItem', {
                     journeyItemId: item.journeyItemId,
                     itemId: item.id
                 });
-                console.log(`LootCollectionSystem: Pushed ${item.journeyItemId ? 'findItem' : 'collectItem'} to PlayerActionQueue`, {
+                console.log(`LootCollectionSystem: Pushed ${item.collectItem ? 'collectItem' : 'findItem' } to PlayerActionQueue`, {
                     journeyItemId: item.journeyItemId,
                     itemId: item.id
                 });

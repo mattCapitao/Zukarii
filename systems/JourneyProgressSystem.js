@@ -199,21 +199,9 @@ export class JourneyProgressSystem extends System {
                             action,
                             params
                         };
-                        // Comment out to reduce log spam
-                        // if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_4_5') {
-                        //     console.log(`JourneyProgressSystem: Set dialogue for ${task.id}`, {
-                        //         text: task.activeText || task.description,
-                        //         action,
-                        //         params,
-                        //         totalTaskCount: path.totalTaskCount,
-                        //         completedTaskCount: path.completedTaskCount
-                        //     });
-                        // }
                     }
                 });
             });
-
-            // console.log(`JourneyProgressSystem: Updated JourneyDialogueComponent for Syliri`, dialogueComp.dialogues);
         }
 
         // Check for completed journeys
@@ -229,6 +217,12 @@ export class JourneyProgressSystem extends System {
                 }
             }
         });
+
+        // clear actions from queue
+        if (journeyUpdateQueue.queue.length > 0) {
+            console.log(`JourneyProgressSystem: Cleared ${journeyUpdateQueue.queue.length} actions from JourneyUpdateQueue`, journeyUpdateQueue.queue);
+            journeyUpdateQueue.queue = [];
+        }
     }
 
     updateTaskCounts(path) {
@@ -244,11 +238,18 @@ export class JourneyProgressSystem extends System {
 
     matchesTask(action, task) {
         const condition = task.completionCondition;
+
         console.log(`JourneyProgressSystem: Matching task ${task.id} with action ${action.type}`, { condition, actionData: action.data });
         if (!condition.type) {
             console.error(`JourneyProgressSystem: Task ${task.id} has invalid completion condition:`, condition);
             return false;
         }
+        let npcLogicalId;
+        if (action.data.npcId) { 
+            const npcEntity = this.entityManager.getEntity(action.data.npcId);
+            npcLogicalId = npcEntity ? npcEntity.getComponent('NPCData')?.id : action.data.npcId;
+        }
+
 
         switch (action.type) {
             case 'collectResource':
@@ -265,31 +266,34 @@ export class JourneyProgressSystem extends System {
                         !condition.quantity);
 
             case 'findItem':
+                console.log(`JourneyProgressSystem: Evaluated findItem for task ${task}`,condition, action);
+                if (!action.data || !action.data.journeyItemId) return false;
+                return (condition.type === 'findItem' && condition.journeyItemId === action.data.journeyItemId);
+
             case 'collectItem':
-                return (condition.type === 'findItem' || condition.type === 'collectItem') &&
-                    (condition.journeyItemId === action.data.journeyItemId || condition.itemId === action.data.itemId);
+                console.log(`JourneyProgressSystem: Evaluated collectItem for task ${task}`,condition, action);
+                if (!action.data || !action.data.journeyItemId) return false;
+                return  condition.type === 'collectItem' && condition.journeyItemId === action.data.journeyItemId ;
+                
+
             case 'bossKill':
                 return condition.type === 'bossKill' && condition.tier === action.data.tier;
             case 'interactWithNPC':
+                // have to allow normal interactions to complete Final condition until issues ironed out in dialogue system
                 return (condition.type === 'interactWithNPC' || condition.type === 'interactWithNPCFinal') &&
-                    condition.npc === action.data.npcId &&
+                    condition.npc === npcLogicalId &&
                     action.data.taskId === task.id;
+                break;
             case 'interactWithNPCFinal':
+
                 const path = this.entityManager.getEntity('player').getComponent('JourneyPath').paths.find(p => p.id === task.parentId);
                 const isMatch = condition.type === 'interactWithNPCFinal' &&
-                    condition.npc === action.data.npcId &&
+                    condition.npc === npcLogicalId &&
                     action.data.taskId === task.id &&
                     (path.completedTaskCount || 0) === (path.totalTaskCount || 0) - 1;
-                if (task.id === 'whisper_child_2_4') {
-                    console.log(`JourneyProgressSystem: Evaluated whisper_child_2_4`, {
-                        matches: isMatch,
-                        npcId: action.data.npcId,
-                        taskId: action.data.taskId,
-                        totalTaskCount: path.totalTaskCount,
-                        completedTaskCount: path.completedTaskCount
-                    });
-                }
+
                 return isMatch;
+                break;
             case 'attemptStairs':
                 const isAttemptMatch = condition.type === 'attemptStairs' &&
                     condition.fromTier === action.data.fromTier &&
@@ -313,14 +317,7 @@ export class JourneyProgressSystem extends System {
             case 'completeWhispers':
                 return condition.type === 'completeWhispers' && condition.pathId === action.data.pathId;
             case 'turnIn':
-                const npcEntity = this.entityManager.getEntity(action.data.npcId);
-                const npcLogicalId = npcEntity ? npcEntity.getComponent('NPCData')?.id : action.data.npcId;
-                console.log(`JourneyProgressSystem: Evaluating turnIn for task ${task.id}`, {
-                    condition,
-                    actionData: action.data,
-                    npcLogicalId,
-                    npcEntityId: action.data.npcId
-                });
+               
                 return condition.type === 'turnIn' &&
                     task.id === action.data.taskId &&
                     condition.npc === npcLogicalId &&
@@ -408,6 +405,7 @@ export class JourneyProgressSystem extends System {
             return;
         }
         console.log('JourneyProgressSystem: Adding rewards to JourneyRewardComponent:', journey.rewards);
+        // @Grok we should probably add the array to JourneyRewardrewards instead of overwriting it
         journeyReward.rewards = journey.rewards;
     }
 
