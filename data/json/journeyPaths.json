@@ -32,7 +32,7 @@
     "acceptedText": "You have accepted the Journey of Whispers. Sehnrhyx Syliri will guide you to begin your Journey.",
     "activeText": "Speak to Sehnrhyx Syliri to start your trials.",
     "completionText": "Your training has gone well, you are deemed worthy! You may now enter Zurath to begin your journey on the Path of Whispers.",
-    "completionCondition": "allChildren",
+    "completionCondition": null,
     "rewards": [
       {
         "xp": 25,
@@ -329,9 +329,8 @@
       },
       {
         "type": "item",
-        "journeyItemId": "shardOfEchoes",
-        "quantity": 1,
-        "isJourneyItem": true
+        "journeyItemId": "stoneOfVeilPiercing",
+        "quantity": 1
       }
     ],
     "completionText": "You have uncovered signs of corruption.",
@@ -462,6 +461,12 @@
         "type": "item",
         "journeyItemId": "stoneOfReturn",
         "quantity": 1
+      },
+      {
+        "type": "item",
+        "journeyItemId": "shardOfEchoes",
+        "quantity": 1,
+        "isJourneyItem": true
       }
     ],
     "completionText": "You have claimed the Rings of the Magi.",
@@ -556,7 +561,7 @@
     "offeredBy": "sehnrhyx_syliri",
     "completed": false,
     "title": "Enter Ashangal",
-    "description": "Seek the entrance to the endless depths of Ashangal.",
+    "description": "Seek out echos that may help you discover the entrance to the endless depths of Ashangal.",
     "completionCondition": null,
     "rewards": [
       {
@@ -781,7 +786,6 @@
     "completionText": "You have uncovered the secrets of the Echoes.",
     "logCompletion": true,
     "startsOffered": false,
-    "offeredBy": "sehnrhyx_syliri",
     "triggersMasterPath": "master_echoes",
     "tasks": [
       {

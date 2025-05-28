@@ -196,7 +196,8 @@
     "luck": 10,
     "tierIndex": 2,
     "itemTier": "rare",
-    "goldValue": 500,
+    "goldValue": 0,
+    "isSellable": false,
     "stats": {
       "intellect": 2,
       "agility": 2
@@ -214,7 +215,8 @@
     "luck": 10,
     "tierIndex": 2,
     "itemTier": "rare",
-    "goldValue": 500,
+    "goldValue": 0,
+    "isSellable": false,
     "stats": {
       "prowess": 2,
       "maxHp": 50

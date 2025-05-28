@@ -189,7 +189,8 @@ export class PlayerAchievementsComponent {
             resourcesCollected: { ashenShard: 0, sylduranShard: 0,},
             itemsCollected: 0,
             interactions: 0,
-            tiersReached: 0,           
+            tiersReached: 0,  
+            uniqueItemDrops: [],
         };
         this.history = []; // [{ type: string, data: object, timestamp: number }]
     }

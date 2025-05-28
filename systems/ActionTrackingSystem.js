@@ -10,6 +10,7 @@ export class ActionTrackingSystem extends System {
     }
 
     init() {
+
     }
 
     update(deltaTime) {
@@ -115,6 +116,13 @@ export class ActionTrackingSystem extends System {
 
     matchesTask(action, task) {
         const condition = task.completionCondition;
+        const npcData = this.entityManager.getEntity(action.data.npcId)?.getComponent('NPCData');
+        if (npcData) {
+            action.data.logicalId = npcData.id; // Use logical NPC ID for matching
+        } else {
+            console.warn(`ActionTrackingSystem: No NPCData found for action ${action.type} with entityId ${action.data.npcId}`);
+            return false;
+        }
         console.log(`ActionTrackingSystem: Matching task ${task.id} with action ${action.type}`, { condition, actionData: action.data });
         let isMatch;
         switch (action.type) {

@@ -298,21 +298,39 @@ export class MonsterSpawnSystem extends System {
                 }
             });
         }
-        if (tier > 6 && tier < 11 && template.isElite) {
-            const roll = Math.random();
+        if (tier > 7 && tier < 11 && template.isElite) {
+            const itemRoll = Math.random();
             let name = 'Band of Zu';
             let journeyItemId = 'bandOfZu';
-            if (roll < 0.5) {
+            if (itemRoll < 0.5) {
                 name = 'Band of Karn';
                 journeyItemId = 'bandOfKarn';
             }
-            template.uniqueItemsDropped.push({
-                type: 'customUnique',
-                dropChance: 0.33,
-                data: { name }
-            });
-        }
+            const player = this.entityManager.getEntity('player');
+            achivements = player.getComponent('Achievements');
 
+            let found = false;
+            for (const obj of achivements) {
+                if (obj.journeyItemId === journeyItemId) {
+                    found = true;
+                    break;
+                }
+            }
+            const drop = 0.10; // Base drop chance for the item
+            if (tier > 8) {
+                const dropModifier = (tier - 8) * 0.2; // Increase drop chance by 20% per tier above 8
+            }
+            const dropRoll = Math.random();
+
+            if (!found && (dropRoll < drop + dropModifier)) {
+                achivements.uniqueItems.push({ journeyItemId, name });
+                template.uniqueItemsDropped.push({
+                    type: 'customUnique',
+                    dropChance: 1,
+                    data: { name }
+                });
+            }
+        }
 
         this.entityManager.addComponentToEntity(entity.id, {
             type: 'MonsterData',
