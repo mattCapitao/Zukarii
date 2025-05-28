@@ -9,7 +9,7 @@
     "title": "Whispers of Zukarath",
     "description": "Follow the guidance of the Zukran Masters to prove your worth.",
     "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
-    "completionCondition": "allChildren",
+    "completionCondition": null,
     "rewards": [],
     "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
     "logCompletion": false,

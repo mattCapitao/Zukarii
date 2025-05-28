@@ -1,207 +1,119 @@
 ﻿import { System } from '../core/Systems.js';
-import { PlayerActionQueueComponent, JourneyPathComponent, JourneyUpdateQueueComponent, PlayerAchievementsComponent } from '../core/Components.js';
+import { PlayerActionQueueComponent, JourneyUpdateQueueComponent, AchievementUpdateQueueComponent } from '../core/Components.js';
 
 export class ActionTrackingSystem extends System {
     constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus);
         this.requiredComponents = [];
         this.utilities = utilities;
-        this.echoCounter = 0;
     }
 
     init() {
-
     }
 
     update(deltaTime) {
+        const components = this.validateComponents();
+        if (!components) return;
+
+        const { playerActionQueue, journeyUpdateQueue, achievementUpdateQueue } = components;
+        if (playerActionQueue.actions.length === 0) return;
+
+        const { journeyRelevantTypes, achievementRelevantTypes } = this.buildRelevanceTypeSets(components.journeyPaths);
+        const unprocessedActions = this.processActions(
+            playerActionQueue.actions,
+            journeyRelevantTypes,
+            achievementRelevantTypes,
+            journeyUpdateQueue,
+            achievementUpdateQueue
+        );
+        this.logUnprocessedActions(unprocessedActions);
+        this.flushInputQueue(playerActionQueue);
+    }
+
+    validateComponents() {
         const player = this.entityManager.getEntity('player');
-        const playerActionQueue = player.getComponent('PlayerActionQueue');
-        const journeyPath = player.getComponent('JourneyPath');
         const gameState = this.entityManager.getEntity('gameState');
-        const journeyUpdateQueue = gameState.getComponent('JourneyUpdateQueue');
-        const achievements = player.getComponent('PlayerAchievements');
+
+        const playerActionQueue = player?.getComponent('PlayerActionQueue');
+        const journeyUpdateQueue = gameState?.getComponent('JourneyUpdateQueue');
+        const achievementUpdateQueue = gameState?.getComponent('AchievementUpdateQueue');
+        const journeyPaths = gameState?.getComponent('JourneyPaths');
 
         if (!playerActionQueue) {
             console.error('ActionTrackingSystem: PlayerActionQueue component not found on player');
-            return;
-        }
-        if (!journeyPath) {
-            console.error('ActionTrackingSystem: JourneyPath component not found on player');
-            return;
+            return null;
         }
         if (!journeyUpdateQueue) {
             console.error('ActionTrackingSystem: JourneyUpdateQueue component not found on gameState');
-            return;
+            return null;
         }
-        if (!achievements) {
-            console.error('ActionTrackingSystem: PlayerAchievements component not found on player');
-            return;
+        if (!achievementUpdateQueue) {
+            console.error('ActionTrackingSystem: AchievementUpdateQueue component not found on gameState');
+            return null;
+        }
+        if (!journeyPaths) {
+            console.error('ActionTrackingSystem: JourneyPaths component not found on gameState');
+            return null;
         }
 
-        if (playerActionQueue.actions.length === 0) {
-            return;
-        }
+        return { playerActionQueue, journeyUpdateQueue, achievementUpdateQueue, journeyPaths };
+    }
 
-        const openTypes = new Set();
-        const taskMap = new Map();
-        journeyPath.paths.forEach(path => {
-            if (path.id === path.parentId || path.completed) return;
+    buildRelevanceTypeSets(journeyPaths) {
+        const journeyRelevantTypes = new Set();
+        journeyPaths.paths.forEach(path => {
             path.tasks?.forEach(task => {
-                if (task.completed) return;
-                const type = task.completionCondition.type;
-                if (!taskMap.has(type)) {
-                    openTypes.add(type);
-                    taskMap.set(type, []);
-                }
-                taskMap.get(type).push(task);
-                // Allow interactWithNPC actions for interactWithNPCFinal tasks
-                if (type === 'interactWithNPCFinal') {
-                    openTypes.add('interactWithNPC');
-                    if (!taskMap.has('interactWithNPC')) {
-                        taskMap.set('interactWithNPC', []);
-                    }
-                    taskMap.get('interactWithNPC').push(task);
+                if (task.completionCondition?.type) {
+                    journeyRelevantTypes.add(task.completionCondition.type);
                 }
             });
         });
 
-        playerActionQueue.actions.forEach(action => {
-            if (action.type === 'completeWhispers') {
-                const path = journeyPath.paths.find(p => p.id === action.data.pathId);
-                if (path && path.parentId === 'master_echoes') {
-                    this.echoCounter += 1;
-                    console.log(`ActionTrackingSystem: Incremented echoCounter to ${this.echoCounter}`);
-                    if (this.echoCounter >= 5) {
-                        this.utilities.pushPlayerActions('completeEchoes', { count: this.echoCounter });
-                        console.log(`ActionTrackingSystem: Pushed completeEchoes with count ${this.echoCounter}`);
-                        this.echoCounter = 0;
-                    }
-                }
-            }
-            if (action.type === 'attemptStairs') {
-                console.log(`ActionTrackingSystem: AttemptStairs action detected, fromTier: ${action.data.fromTier}, toTier: ${action.data.toTier}, success: ${action.data.success}`);
-                console.log(`ActionTrackingSystem: JourneyPath`, journeyPath);
-                console.log('ActionTrackingSystem: Processing actions', playerActionQueue.actions.length, 'openTypes:', Array.from(openTypes), 'taskMap size:', taskMap.size);
-            }
-            if (!openTypes.has(action.type)) {
-                console.log(`ActionTrackingSystem: Skipped non-journey action ${action.type}`, action.data);
+        // Hardcode completeWhispers for achievements
+        const achievementRelevantTypes = new Set(['completeWhispers']);
+
+        return { journeyRelevantTypes, achievementRelevantTypes };
+    }
+
+    processActions(actions, journeyRelevantTypes, achievementRelevantTypes, journeyUpdateQueue, achievementUpdateQueue) {
+        const unprocessedActions = [];
+        actions.forEach(action => {
+            if (!action.type) {
+                unprocessedActions.push({ ...action, error: 'Missing type' });
+                console.log(`ActionTrackingSystem: Skipped malformed action`, action);
                 return;
             }
 
-            const tasks = taskMap.get(action.type) || [];
-            for (const task of tasks) {
-                if (this.matchesTask(action, task)) {
-                    console.log(`ActionTrackingSystem: Task ${task.id} matches action ${action.type}`, { actionData: action.data, taskCondition: task.completionCondition });
-                    if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4' || task.id === 'whisper_child_4_5') {
-                        const path = journeyPath.paths.find(p => p.id === task.parentId);
-                        console.log(`ActionTrackingSystem: Forwarding ${task.id}`, {
-                            totalTaskCount: path.totalTaskCount,
-                            completedTaskCount: path.completedTaskCount
-                        });
-                    }
-                    journeyUpdateQueue.queue.push({ ...action });
-                    console.log(`ActionTrackingSystem: Forwarded ${action.type} to JourneyUpdateQueue`, action.data);
-                } else if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4' || task.id === 'whisper_child_4_5') {
-                    console.log(`ActionTrackingSystem: Task ${task.id} did not match action ${action.type}`, {
-                        actionData: action.data,
-                        taskCondition: task.completionCondition
-                    });
-                }
+            let processed = false;
+
+            if (journeyRelevantTypes.has(action.type)) {
+                journeyUpdateQueue.queue.push({ ...action });
+                console.log(`ActionTrackingSystem: Forwarded ${action.type} to JourneyUpdateQueue`, action.data);
+                processed = true;
+            }
+
+            if (achievementRelevantTypes.has(action.type)) {
+                achievementUpdateQueue.queue.push({ ...action });
+                console.log(`ActionTrackingSystem: Forwarded ${action.type} to AchievementUpdateQueue`, action.data);
+                processed = true;
+            }
+
+            if (!processed) {
+                unprocessedActions.push(action);
+                console.log(`ActionTrackingSystem: Skipped non-relevant action ${action.type}`, action.data);
             }
         });
-
-        playerActionQueue.actions = [];
-        console.log('ActionTrackingSystem: Cleared PlayerActionQueue actions');
+        return unprocessedActions;
     }
 
-    matchesTask(action, task) {
-        const condition = task.completionCondition;
-        const npcData = this.entityManager.getEntity(action.data.npcId)?.getComponent('NPCData');
-        if (npcData) {
-            action.data.logicalId = npcData.id; // Use logical NPC ID for matching
-        } else {
-            console.warn(`ActionTrackingSystem: No NPCData found for action ${action.type} with entityId ${action.data.npcId}`);
-            return false;
+    logUnprocessedActions(unprocessedActions) {
+        if (unprocessedActions.length > 0) {
+            console.log('ActionTrackingSystem: Unprocessed actions:', unprocessedActions);
         }
-        console.log(`ActionTrackingSystem: Matching task ${task.id} with action ${action.type}`, { condition, actionData: action.data });
-        let isMatch;
-        switch (action.type) {
-            case 'collectResource':
-                return condition.type === 'collectResource' && condition.resourceType === action.data.resourceType;
-            case 'findItem':
-            case 'collectItem':
-                return condition.journeyItemId === action.data.journeyItemId ||
-                    condition.itemId === action.data.itemId;
-            case 'bossKill':
-                return condition.tier === action.data.tier;
-            case 'interactWithNPC':
-                if (condition.type === 'interactWithNPC') {
-                    return condition.npc === action.data.npcId &&
-                        action.data.taskId === task.id;
-                } else if (condition.type === 'interactWithNPCFinal') {
-                    const path = this.entityManager.getEntity('player').getComponent('JourneyPath').paths.find(p => p.id === task.parentId);
-                    isMatch = condition.npc === action.data.npcId &&
-                        action.data.taskId === task.id &&
-                        (path.completedTaskCount || 0) === (path.totalTaskCount || 0) - 1;
-                    if (task.id === 'whisper_child_2_4') {
-                        console.log(`ActionTrackingSystem: Evaluated whisper_child_2_4 for interactWithNPC`, {
-                            matches: isMatch,
-                            npcId: action.data.npcId,
-                            taskId: action.data.taskId,
-                            totalTaskCount: path.totalTaskCount,
-                            completedTaskCount: path.completedTaskCount
-                        });
-                    }
-                    return isMatch;
-                }
-                return false;
-            case 'interactWithNPCFinal':
-                const path = this.entityManager.getEntity('player').getComponent('JourneyPath').paths.find(p => p.id === task.parentId);
-                isMatch = condition.type === 'interactWithNPCFinal' &&
-                    condition.npc === action.data.npcId &&
-                    action.data.taskId === task.id &&
-                    (path.completedTaskCount || 0) === (path.totalTaskCount || 0) - 1;
-                if (task.id === 'whisper_child_2_4') {
-                    console.log(`ActionTrackingSystem: Evaluated whisper_child_2_4`, {
-                        matches: isMatch,
-                        npcId: action.data.npcId,
-                        taskId: action.data.taskId,
-                        totalTaskCount: path.totalTaskCount,
-                        completedTaskCount: path.completedTaskCount
-                    });
-                }
-                return isMatch;
-            case 'attemptStairs':
-                isMatch = condition.type === 'attemptStairs' &&
-                    condition.fromTier === action.data.fromTier &&
-                    condition.toTier === action.data.toTier &&
-                    action.data.success === false;
-                if (task.id === 'whisper_child_3_4') {
-                    console.log(`ActionTrackingSystem: Evaluated whisper_child_3_4 for attemptStairs`, {
-                        matches: isMatch,
-                        fromTier: action.data.fromTier,
-                        toTier: action.data.toTier,
-                        success: action.data.success
-                    });
-                }
-                return isMatch;
-            case 'useItem':
-                return condition.type === 'useItem' && condition.itemId === action.data.itemId;
-            case 'reachTier':
-                return condition.type === 'reachTier' && condition.tier === action.data.tier;
-            case 'completeEchoes':
-                return condition.type === 'completeEchoes' && condition.count <= action.data.count;
-            case 'completeWhispers':
-                return condition.type === 'completeWhispers' && condition.pathId === action.data.pathId;
-            case 'turnIn':
-                const npcEntity = this.entityManager.getEntity(action.data.npcId);
-                const npcLogicalId = npcEntity ? npcEntity.getComponent('NPCData')?.id : action.data.npcId;
-                isMatch = condition.type === 'turnIn' && task.id === action.data.taskId && condition.npc === npcLogicalId;
-                console.log(`ActionTrackingSystem: turnIn match for task ${task.id}`, { isMatch, taskId: action.data.taskId, npc: npcLogicalId, entityId: action.data.npcId });
-                return isMatch;
-            default:
-                console.warn(`ActionTrackingSystem: Unknown task type ${action.type}`);
-                return false;
-        }
+    }
+
+    flushInputQueue(playerActionQueue) {
+        playerActionQueue.actions = [];
+        console.log('ActionTrackingSystem: Cleared PlayerActionQueue actions');
     }
 }

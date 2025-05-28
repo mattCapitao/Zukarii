@@ -48,6 +48,7 @@ import {
     JourneyPathsComponent,
     OfferedJourneysComponent,
     JourneyUpdateQueueComponent,
+    AchievementUpdateQueueComponent
 } from './components/GameComponents.js';
 
 import {
@@ -124,6 +125,7 @@ export {
     JourneyPathsComponent,
     OfferedJourneysComponent,
     JourneyUpdateQueueComponent,
+    AchievementUpdateQueueComponent,
 
     // Common components
     PositionComponent,

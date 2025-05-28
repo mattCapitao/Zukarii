@@ -223,3 +223,10 @@ export class JourneyUpdateQueueComponent {
         this.queue = []; // [{ type: string, data: object, timestamp: number }]
     }
 }
+
+export class AchievementUpdateQueueComponent {
+    constructor() {
+        this.type = 'AchievementUpdateQueue';
+        this.queue = []; // [{ type: string, data: object, timestamp: number }]
+    }
+}

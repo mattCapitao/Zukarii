@@ -57,7 +57,7 @@ import {
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
     LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
     AnimationComponent, AnimationStateComponent, JourneyStateComponent, JourneyPathComponent, DialogueComponent, JourneyPathsComponent,
-    OfferedJourneysComponent, PlayerActionQueueComponent, PlayerAchievementsComponent, JourneyUpdateQueueComponent, JourneyRewardComponent
+    OfferedJourneysComponent, PlayerActionQueueComponent, PlayerAchievementsComponent, JourneyUpdateQueueComponent, JourneyRewardComponent, AchievementUpdateQueueComponent
 } from './core/Components.js';
 
 export class Game {
@@ -193,6 +193,8 @@ export class Game {
         this.entityManager.addComponentToEntity('gameState', new JourneyPathsComponent());
         this.entityManager.addComponentToEntity('gameState', new OfferedJourneysComponent());
         this.entityManager.addComponentToEntity('gameState', new JourneyUpdateQueueComponent());
+        this.entityManager.addComponentToEntity('gameState', new AchievementUpdateQueueComponent());
+        
 
         this.initializeSystems().then(() => {
             // Load journey paths into gameState
