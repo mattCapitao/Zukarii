@@ -313,6 +313,7 @@
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_5",
     "completed": false,
+    "offeredBy": "sehnrhyx_syliri",
     "title": "Seeking Corruption",
     "description": "Seek out the corruption within Zurath’s depths.",
     "completionCondition": null,
@@ -368,7 +369,7 @@
           "type": "reachTier",
           "tier": 7
         },
-      
+
         "rewards": [
           {
             "xp": 50,
@@ -447,6 +448,7 @@
     "id": "whisper_parent_5",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_6",
+    "offeredBy": "sehnrhyx_syliri",
     "completed": false,
     "title": "Rings of the Magi",
     "description": "Acquire the ancient rings to wield greater power.",
