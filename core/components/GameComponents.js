@@ -210,10 +210,10 @@ export class JourneyPathsComponent {
     }
 }
 
-export class OfferedQuestsComponent {
+export class OfferedJourneysComponent {
     constructor() {
-        this.type = 'OfferedQuests';
-        this.quests = []; // Array of offered quest objects { questId, offeredBy }
+        this.type = 'OfferedJourneys';
+        this.journeys = []; // Array of offered journey objects { journeyId, offeredBy }
     }
 }
 

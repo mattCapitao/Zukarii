@@ -64,7 +64,6 @@ export class ActionTrackingSystem extends System {
             });
         });
 
-  
         playerActionQueue.actions.forEach(action => {
             if (action.type === 'completeWhispers') {
                 const path = journeyPath.paths.find(p => p.id === action.data.pathId);
@@ -79,14 +78,12 @@ export class ActionTrackingSystem extends System {
                 }
             }
             if (action.type === 'attemptStairs') {
-                
                 console.log(`ActionTrackingSystem: AttemptStairs action detected, fromTier: ${action.data.fromTier}, toTier: ${action.data.toTier}, success: ${action.data.success}`);
                 console.log(`ActionTrackingSystem: JourneyPath`, journeyPath);
                 console.log('ActionTrackingSystem: Processing actions', playerActionQueue.actions.length, 'openTypes:', Array.from(openTypes), 'taskMap size:', taskMap.size);
-
             }
             if (!openTypes.has(action.type)) {
-                console.log(`ActionTrackingSystem: Skipped non-quest action ${action.type}`, action.data);
+                console.log(`ActionTrackingSystem: Skipped non-journey action ${action.type}`, action.data);
                 return;
             }
 
@@ -94,7 +91,7 @@ export class ActionTrackingSystem extends System {
             for (const task of tasks) {
                 if (this.matchesTask(action, task)) {
                     console.log(`ActionTrackingSystem: Task ${task.id} matches action ${action.type}`, { actionData: action.data, taskCondition: task.completionCondition });
-                    if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4') {
+                    if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4' || task.id === 'whisper_child_4_5') {
                         const path = journeyPath.paths.find(p => p.id === task.parentId);
                         console.log(`ActionTrackingSystem: Forwarding ${task.id}`, {
                             totalTaskCount: path.totalTaskCount,
@@ -103,7 +100,7 @@ export class ActionTrackingSystem extends System {
                     }
                     journeyUpdateQueue.queue.push({ ...action });
                     console.log(`ActionTrackingSystem: Forwarded ${action.type} to JourneyUpdateQueue`, action.data);
-                } else if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4') {
+                } else if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4' || task.id === 'whisper_child_4_5') {
                     console.log(`ActionTrackingSystem: Task ${task.id} did not match action ${action.type}`, {
                         actionData: action.data,
                         taskCondition: task.completionCondition
@@ -119,11 +116,10 @@ export class ActionTrackingSystem extends System {
     matchesTask(action, task) {
         const condition = task.completionCondition;
         console.log(`ActionTrackingSystem: Matching task ${task.id} with action ${action.type}`, { condition, actionData: action.data });
+        let isMatch;
         switch (action.type) {
             case 'collectResource':
-                return condition.type === 'collectResource' &&
-                    condition.resourceType === action.data.resourceType &&
-                    (condition.quantity <= action.data.quantity || !condition.quantity);
+                return condition.type === 'collectResource' && condition.resourceType === action.data.resourceType;
             case 'findItem':
             case 'collectItem':
                 return condition.journeyItemId === action.data.journeyItemId ||
@@ -136,7 +132,7 @@ export class ActionTrackingSystem extends System {
                         action.data.taskId === task.id;
                 } else if (condition.type === 'interactWithNPCFinal') {
                     const path = this.entityManager.getEntity('player').getComponent('JourneyPath').paths.find(p => p.id === task.parentId);
-                    const isMatch = condition.npc === action.data.npcId &&
+                    isMatch = condition.npc === action.data.npcId &&
                         action.data.taskId === task.id &&
                         (path.completedTaskCount || 0) === (path.totalTaskCount || 0) - 1;
                     if (task.id === 'whisper_child_2_4') {
@@ -153,7 +149,7 @@ export class ActionTrackingSystem extends System {
                 return false;
             case 'interactWithNPCFinal':
                 const path = this.entityManager.getEntity('player').getComponent('JourneyPath').paths.find(p => p.id === task.parentId);
-                const isMatch = condition.type === 'interactWithNPCFinal' &&
+                isMatch = condition.type === 'interactWithNPCFinal' &&
                     condition.npc === action.data.npcId &&
                     action.data.taskId === task.id &&
                     (path.completedTaskCount || 0) === (path.totalTaskCount || 0) - 1;
@@ -168,19 +164,19 @@ export class ActionTrackingSystem extends System {
                 }
                 return isMatch;
             case 'attemptStairs':
-                const isAttemptMatch = condition.type === 'attemptStairs' &&
+                isMatch = condition.type === 'attemptStairs' &&
                     condition.fromTier === action.data.fromTier &&
                     condition.toTier === action.data.toTier &&
                     action.data.success === false;
                 if (task.id === 'whisper_child_3_4') {
                     console.log(`ActionTrackingSystem: Evaluated whisper_child_3_4 for attemptStairs`, {
-                        matches: isAttemptMatch,
+                        matches: isMatch,
                         fromTier: action.data.fromTier,
                         toTier: action.data.toTier,
                         success: action.data.success
                     });
                 }
-                return isAttemptMatch;
+                return isMatch;
             case 'useItem':
                 return condition.type === 'useItem' && condition.itemId === action.data.itemId;
             case 'reachTier':
@@ -190,7 +186,11 @@ export class ActionTrackingSystem extends System {
             case 'completeWhispers':
                 return condition.type === 'completeWhispers' && condition.pathId === action.data.pathId;
             case 'turnIn':
-                return condition.type === 'turnIn' && condition.taskId === action.data.taskId && condition.npc === action.data.npcId;
+                const npcEntity = this.entityManager.getEntity(action.data.npcId);
+                const npcLogicalId = npcEntity ? npcEntity.getComponent('NPCData')?.id : action.data.npcId;
+                isMatch = condition.type === 'turnIn' && task.id === action.data.taskId && condition.npc === npcLogicalId;
+                console.log(`ActionTrackingSystem: turnIn match for task ${task.id}`, { isMatch, taskId: action.data.taskId, npc: npcLogicalId, entityId: action.data.npcId });
+                return isMatch;
             default:
                 console.warn(`ActionTrackingSystem: Unknown task type ${action.type}`);
                 return false;

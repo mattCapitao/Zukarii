@@ -31,10 +31,10 @@
     "itemId": null,
     "journeyItemId": "shardOfEchoes",
     "name": "Shard of Echoes",
-    "type": "quest",
+    "type": "journey",
     "itemTier": "relic",
     "goldValue": 0,
-    "isQuestItem": true,
+    "isJourneyItem": true,
     "description": "A fragment pulsing with ancient whispers, guiding you to the Echoes.",
     "icon": "shard_of_echoes.png",
     "isSellable": false

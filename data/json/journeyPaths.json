@@ -77,8 +77,8 @@
     "title": "Vestments of the Order",
     "description": "Venture into Zurath and defeat the guardian to claim your Vestment of Zukarath.",
     "offerText": "Venture into Zurath and defeat the guardian to claim your Vestment of Zukarath. Will you take this challenge?",
-    "acceptedText": "You have accepted the quest to claim the Vestment of Zukarath.",
-    "activeText": "Continue your quest to defeat the guardian and claim the Vestment of Zukarath.",
+    "acceptedText": "You have accepted the journey to claim the Vestment of Zukarath.",
+    "activeText": "Continue your journey to defeat the guardian and claim the Vestment of Zukarath.",
     "completionText": "You have earned the Vestment of Zukarath by your valor!",
     "completionCondition": null,
     "rewards": [
@@ -328,9 +328,9 @@
       },
       {
         "type": "item",
-        "journey": "shardOfEchoes",
+        "journeyItemId": "shardOfEchoes",
         "quantity": 1,
-        "isQuestItem": true
+        "isJourneyItem": true
       }
     ],
     "completionText": "You have uncovered signs of corruption.",

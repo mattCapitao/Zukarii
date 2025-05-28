@@ -3,6 +3,7 @@
     "id": "sehnrhyx_syliri",
     "name": "Sehnrhyx Syliri",
     "avatar": "img/avatars/npcs/zu-master.png",
+    "isUnique": true,
     "faceLeft": true,
     "hasJourneyPaths": true,
     "width": 42,

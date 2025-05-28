@@ -77,7 +77,7 @@ export class GameDataIOSystem extends System {
                 if (data) {
                     const tier = data.tier;
                     console.log("Player Data: ", data.player);
-                    // Pass the entire save data to TransitionLoad, including quest state
+                    // Pass the entire save data to TransitionLoad, including journey state
                     this.eventBus.emit('TransitionLoad', { tier, data });
                     this.eventBus.emit('GameLoaded', { saveId, success: true, message: 'Game loaded successfully', data });
                     if (uiCallback) uiCallback({ success: true, data });
@@ -123,7 +123,7 @@ export class GameDataIOSystem extends System {
             gameState: gameState ? {
                 GameState: gameStateComp,
                 JourneyPaths: gameState.getComponent('JourneyPaths'), // Add JourneyPaths
-                OfferedQuests: gameState.getComponent('OfferedQuests') // Add OfferedQuests
+                OfferedJourneys: gameState.getComponent('OfferedJourneys') // Add OfferedJourneys
             } : null,
             overlayState: overlayState ? {
                 OverlayState: overlayState

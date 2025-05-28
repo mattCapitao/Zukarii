@@ -57,7 +57,7 @@ import {
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
     LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
     AnimationComponent, AnimationStateComponent, JourneyStateComponent, JourneyPathComponent, DialogueComponent, JourneyPathsComponent,
-    OfferedQuestsComponent, PlayerActionQueueComponent, PlayerAchievementsComponent, JourneyUpdateQueueComponent, JourneyRewardComponent
+    OfferedJourneysComponent, PlayerActionQueueComponent, PlayerAchievementsComponent, JourneyUpdateQueueComponent, JourneyRewardComponent
 } from './core/Components.js';
 
 export class Game {
@@ -191,7 +191,7 @@ export class Game {
         this.entityManager.addComponentToEntity('gameState', new AudioQueueComponent());
         this.entityManager.addComponentToEntity('gameState', new LevelTransitionComponent());
         this.entityManager.addComponentToEntity('gameState', new JourneyPathsComponent());
-        this.entityManager.addComponentToEntity('gameState', new OfferedQuestsComponent());
+        this.entityManager.addComponentToEntity('gameState', new OfferedJourneysComponent());
         this.entityManager.addComponentToEntity('gameState', new JourneyUpdateQueueComponent());
 
         this.initializeSystems().then(() => {
@@ -202,22 +202,22 @@ export class Game {
                     journeyPathsComp.paths = journeyPaths;
                     console.log('Game.js: Journey paths loaded into gameState:', journeyPaths);
 
-                    // Initialize offered quests (excluding those that start assigned)
-                    const offeredQuestsComp = this.entityManager.getEntity('gameState').getComponent('OfferedQuests');
-                    offeredQuestsComp.quests = journeyPaths
+                    // Initialize offered journeys (excluding those that start assigned)
+                    const offeredJourneysComp = this.entityManager.getEntity('gameState').getComponent('OfferedJourneys');
+                    offeredJourneysComp.journeys = journeyPaths
                         .filter(path => path.startsOffered && !path.startsAssigned)
-                        .map(path => ({ questId: path.id, offeredBy: path.offeredBy }));
-                    console.log('Game.js: Offered quests initialized:', offeredQuestsComp.quests);
+                        .map(path => ({ journeyId: path.id, offeredBy: path.offeredBy }));
+                    console.log('Game.js: Offered journeys initialized:', offeredJourneysComp.journeys);
 
-                    // Initialize player with master paths and assigned quests only if not loading from a save
+                    // Initialize player with master paths and assigned journeys only if not loading from a save
                     const journeyPathComp = this.entityManager.getEntity('player').getComponent('JourneyPath');
                     if (!this.isLoadingFromSave) {
                         const masterPaths = journeyPaths.filter(path => path.id === path.parentId);
-                        const assignedQuests = journeyPaths.filter(path => path.startsAssigned);
-                        journeyPathComp.paths = [...masterPaths, ...assignedQuests];
+                        const assignedJourneys = journeyPaths.filter(path => path.startsAssigned);
+                        journeyPathComp.paths = [...masterPaths, ...assignedJourneys];
                         console.log('Game.js: Player journey paths initialized:', journeyPathComp.paths);
                     } else {
-                        console.log('Game.js: Skipping default quest initialization due to loading from save');
+                        console.log('Game.js: Skipping default journey initialization due to loading from save');
                     }
 
                     this.state.eventBus.emit('InitializePlayer');

@@ -66,26 +66,33 @@ export class PlayerCollisionSystem extends System {
             }
             if (target.hasComponent('Stair') && !player.hasComponent('StairLock')) {
                 const stairComp = target.getComponent('Stair');
-                if (!stairComp.active) {
-                    player.addComponent(new StairLockComponent());
-                    this.eventBus.emit('LogMessage', { message: 'The Stairs are blocked by a magical barrier' });
-                    const fromTier = this.entityManager.getActiveTier();
-                    if (fromTier === undefined || fromTier === null) {
-                        console.error('PlayerCollisionSystem: getActiveTier returned invalid value', { fromTier });
-                        player.removeComponent(new StairLockComponent());
-                        continue;
+                if (!stairComp.active) { 
+                    const highestTier = this.entityManager.getEntity('gameState').getComponent('GameState').highestTier;
+                    const currentTier = this.entityManager.getActiveTier();
+                    if (highestTier < currentTier && stairComp.direction === 'down') {
+                        stairComp.active = true;
+                    } else {
+
+                        player.addComponent(new StairLockComponent());
+                        this.eventBus.emit('LogMessage', { message: 'The Stairs are blocked by a magical barrier' });
+                        const fromTier = this.entityManager.getActiveTier();
+                        if (fromTier === undefined || fromTier === null) {
+                            console.error('PlayerCollisionSystem: getActiveTier returned invalid value', { fromTier });
+                            player.removeComponent(new StairLockComponent());
+                            continue;
+                        }
+                        const toTier = stairComp.direction === 'down' ? fromTier + 1 : fromTier - 1;
+                        try {
+                            this.utilities.pushPlayerActions('attemptStairs', { fromTier, toTier, success: false });
+                            console.log(`PlayerCollisionSystem: Pushed attemptStairs action`, { fromTier, toTier, success: false });
+                        } catch (error) {
+                            console.error('PlayerCollisionSystem: Failed to push attemptStairs action', { error: error.message });
+                        }
+                        setTimeout(() => {
+                            player.removeComponent(new StairLockComponent());
+                        }, 2000);
+                            continue;
                     }
-                    const toTier = stairComp.direction === 'down' ? fromTier + 1 : fromTier - 1;
-                    try {
-                        this.utilities.pushPlayerActions('attemptStairs', { fromTier, toTier, success: false });
-                        console.log(`PlayerCollisionSystem: Pushed attemptStairs action`, { fromTier, toTier, success: false });
-                    } catch (error) {
-                        console.error('PlayerCollisionSystem: Failed to push attemptStairs action', { error: error.message });
-                    }
-                    setTimeout(() => {
-                        player.removeComponent(new StairLockComponent());
-                    }, 2000);
-                    continue;
                 }
                 const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
                 player.addComponent(new StairLockComponent());

@@ -580,7 +580,7 @@ export class UISystem extends System {
                 'journey-tab-lore': 'lore'
             };
 
-            // Ensure all expected tabs are present, even if no quests exist for them
+            // Ensure all expected tabs are present, even if no journeys exist for them
             journeyTabs.innerHTML = Object.entries(tabMap)
                 .map(([tabId, tabName]) => {
                     const path = masterPaths.find(p => p.id === `master_${tabName}`);
@@ -1010,17 +1010,17 @@ export class UISystem extends System {
                 return;
             }
 
-            const activeQuests = activePaths.filter(path => path.parentId === masterPathId && path.id !== masterPathId);
+            const activeJourneys = activePaths.filter(path => path.parentId === masterPathId && path.id !== masterPathId);
             let activeContent = '';
-            if (activeQuests.length > 0) {
+            if (activeJourneys.length > 0) {
                 activeContent = `
                 <h3>Active: ${masterPath.title}</h3>
-                ${activeQuests.map(quest => `
+                ${activeJourneys.map(journey => `
                     <div class="journey-path">
-                        <p><strong>${quest.title}</strong></p>
-                        <p>${quest.description}</p>
-                        <p>Progress: ${quest.tasks.filter(t => t.completed).length}/${quest.tasks.length} tasks complete</p>
-                        ${quest.tasks.map(task => {
+                        <p><strong>${journey.title}</strong></p>
+                        <p>${journey.description}</p>
+                        <p>Progress: ${journey.tasks.filter(t => t.completed).length}/${journey.tasks.length} tasks complete</p>
+                        ${journey.tasks.map(task => {
                     let progressText = '';
                     if (task.completionCondition.type === 'reachTier') {
                         const currentTier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;

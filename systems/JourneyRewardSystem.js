@@ -7,30 +7,30 @@ export class JourneyRewardSystem extends System {
         super(entityManager, eventBus);
         this.requiredComponents = [JourneyRewardComponent];
         this.utilities = utilities;
-        this.questItems = null;
+        this.journeyItems = null;
     }
 
     async init() {
 
-        await this.requestQuestItmes();
-        console.log('JourneyRewardSystem: requestQuestItems completed');
+        await this.requestJourneyItmes();
+        console.log('JourneyRewardSystem: requestJourneyItems completed');
     }
 
-    async requestQuestItmes() {
-        console.log('JourneyRewardSystem: Rquesting questItems');
+    async requestJourneyItmes() {
+        console.log('JourneyRewardSystem: Rjourneying journeyItems');
         try {
             return new Promise((resolve) => {
-                this.eventBus.emit('GetQuestItems', {
-                    callback: (questItems) => {
-                        this.questItems = questItems;
-                        console.log('JourneyRewardSystem: Received questItems:', this.questItems);
+                this.eventBus.emit('GetJourneyItems', {
+                    callback: (journeyItems) => {
+                        this.journeyItems = journeyItems;
+                        console.log('JourneyRewardSystem: Received journeyItems:', this.journeyItems);
                         resolve();
                     }
                 });
             });
         } catch (err) {
-            console.error('JourneyRewardSystem: Error loading questItems:', err);
-            this.questItems = null;
+            console.error('JourneyRewardSystem: Error loading journeyItems:', err);
+            this.journeyItems = null;
         }
     }
 
@@ -43,8 +43,8 @@ export class JourneyRewardSystem extends System {
             console.warn('JourneyRewardSystem: GameState or Player not found');
             return;
         }
-        if (!this.questItems) {
-            console.warn('JourneyRewardSystem: Quest items not loaded');
+        if (!this.journeyItems) {
+            console.warn('JourneyRewardSystem: Journey items not loaded');
             return;
         }
         const rewards = player.getComponent('JourneyReward').rewards || [];
@@ -105,12 +105,12 @@ export class JourneyRewardSystem extends System {
         }
 
         // Defensive: filter out any items missing journeyItemId (or with typo)
-        const item = this.questItems.find(item =>
+        const item = this.journeyItems.find(item =>
             String(item.journeyItemId) === String(rewardId)
         );
 
         if (!item) {
-            console.warn(`JourneyRewardSystem: Item with journeyItemId ${rewardId} not found in questItems`);
+            console.warn(`JourneyRewardSystem: Item with journeyItemId ${rewardId} not found in journeyItems`);
             return;
         }
         item.itemId = this.utilities.generateUniqueId();

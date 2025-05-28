@@ -1,5 +1,5 @@
 ﻿import { System } from '../core/Systems.js';
-import { JourneyUpdateQueueComponent, JourneyPathComponent, JourneyStateComponent, OfferedQuestsComponent, PlayerActionQueueComponent, JourneyRewardComponent } from '../core/Components.js';
+import { JourneyUpdateQueueComponent, JourneyPathComponent, JourneyStateComponent, OfferedJourneysComponent, PlayerActionQueueComponent, JourneyRewardComponent } from '../core/Components.js';
 
 export class JourneyProgressSystem extends System {
     constructor(entityManager, eventBus, utilities) {
@@ -9,8 +9,8 @@ export class JourneyProgressSystem extends System {
     }
 
     async init() {
-        this.eventBus.on('FinalizeQuestCompletion', ({ questId }) => {
-            this.finalizeQuestCompletion(questId);
+        this.eventBus.on('FinalizeJourneyCompletion', ({ journeyId }) => {
+            this.finalizeJourneyCompletion(journeyId);
         });
     }
 
@@ -20,12 +20,12 @@ export class JourneyProgressSystem extends System {
         const journeyUpdateQueue = gameState.getComponent('JourneyUpdateQueue');
         const journeyPath = player.getComponent('JourneyPath');
         const journeyState = player.getComponent('JourneyState');
-        const offeredQuests = gameState.getComponent('OfferedQuests');
+        const offeredJourneys = gameState.getComponent('OfferedJourneys');
         const inventory = player.getComponent('Inventory');
         const resource = player.getComponent('Resource');
         const journeyPathsComp = gameState.getComponent('JourneyPaths');
 
-        if (!journeyUpdateQueue || !journeyPath || !journeyState || !offeredQuests || !inventory || !resource || !journeyPathsComp) {
+        if (!journeyUpdateQueue || !journeyPath || !journeyState || !offeredJourneys || !inventory || !resource || !journeyPathsComp) {
             console.error('JourneyProgressSystem: Missing required components');
             return;
         }
@@ -53,13 +53,15 @@ export class JourneyProgressSystem extends System {
         }
 
         // Process actions with task-specific validation
-        journeyUpdateQueue.queue.forEach(action => {
+        const processedActions = new Set();
+        journeyUpdateQueue.queue.forEach((action, index) => {
+            let actionProcessed = false;
             journeyPath.paths.forEach(path => {
                 if (path.completed || path.id === path.parentId) return;
                 path.tasks?.forEach(task => {
                     if (!task.completed && this.matchesTask(action, task)) {
                         console.log(`JourneyProgressSystem: Task ${task.id} matches action ${action.type}`, { actionData: action.data, taskCondition: task.completionCondition });
-                        if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4') {
+                        if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4' || task.id === 'whisper_child_4_5') {
                             console.log(`JourneyProgressSystem: Processing ${task.id} with parent ${path.id}`, {
                                 totalTaskCount: path.totalTaskCount,
                                 completedTaskCount: path.completedTaskCount
@@ -71,7 +73,8 @@ export class JourneyProgressSystem extends System {
                         this.eventBus.emit('JourneyStateUpdated');
                         console.log(`JourneyProgressSystem: Completed task ${task.id} for action ${action.type}`);
                         this.updateTaskCounts(path);
-                    } else if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4') {
+                        actionProcessed = true;
+                    } else if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4' || task.id === 'whisper_child_4_5') {
                         console.log(`JourneyProgressSystem: Task ${task.id} did not match action ${action.type}`, {
                             actionData: action.data,
                             taskCondition: task.completionCondition,
@@ -81,14 +84,23 @@ export class JourneyProgressSystem extends System {
                     }
                 });
             });
+            if (actionProcessed) {
+                processedActions.add(index);
+            }
         });
 
-        // Initialize task counts for active quests
+        // Remove processed actions from queue
+        journeyUpdateQueue.queue = journeyUpdateQueue.queue.filter((_, index) => !processedActions.has(index));
+        if (journeyUpdateQueue.queue.length) {
+            console.log('JourneyProgressSystem: Cleared processed actions from JourneyUpdateQueue', { remaining: journeyUpdateQueue.queue.length });
+        }
+        
+        // Initialize task counts for active journeys
         journeyPath.paths.forEach(path => {
             if (path.id === path.parentId || path.completed) return;
             this.updateTaskCounts(path);
             if ((path.id === 'whisper_parent_2' || path.id === 'whisper_parent_3') && false) {
-               console.log(`JourneyProgressSystem: Initialized task counts for ${path.id}`, {
+                console.log(`JourneyProgressSystem: Initialized task counts for ${path.id}`, {
                     totalTaskCount: path.totalTaskCount,
                     completedTaskCount: path.completedTaskCount
                 });
@@ -104,9 +116,9 @@ export class JourneyProgressSystem extends System {
             // Pending rewards
             journeyPath.paths.forEach(path => {
                 if (path.pendingCompletion && !path.completed) {
-                    const questData = journeyPathsComp.paths.find(p => p.id === path.id);
-                    if (questData) {
-                        const rewardStrings = questData.rewards?.map(reward => {
+                    const journeyData = journeyPathsComp.paths.find(p => p.id === path.id);
+                    if (journeyData) {
+                        const rewardStrings = journeyData.rewards?.map(reward => {
                             if (reward.xp) return `${reward.xp} XP`;
                             if (reward.gold) return `${reward.gold} gold`;
                             if (reward.type === 'item') {
@@ -117,11 +129,11 @@ export class JourneyProgressSystem extends System {
                             return '';
                         }).filter(str => str) || [];
                         const rewardMessage = rewardStrings.length > 0 ? rewardStrings.join(', ') : 'None';
-                        const dialogueText = `${questData.completionText} Rewards: ${rewardMessage}`;
+                        const dialogueText = `${journeyData.completionText} Rewards: ${rewardMessage}`;
                         dialogueComp.dialogues[path.id] = {
                             text: dialogueText,
                             action: 'acknowledgeCompletion',
-                            params: { questId: path.id, npcId: syliri.id }
+                            params: { journeyId: path.id, npcId: syliri.id }
                         };
                         if (!journeyState.completedPaths.some(p => p.id === path.id)) {
                             journeyState.completedPaths.push({
@@ -140,18 +152,18 @@ export class JourneyProgressSystem extends System {
                 }
             });
 
-            // Offered quests
-            offeredQuests.quests.forEach(quest => {
-                if (quest.offeredBy === 'sehnrhyx_syliri') {
-                    const questData = journeyPathsComp.paths.find(p => p.id === quest.questId);
-                    if (questData && !journeyPath.paths.some(p => p.id === quest.questId)) {
-                        dialogueComp.dialogues[quest.questId] = {
-                            text: questData.offerText || questData.description,
-                            action: 'acceptQuest',
-                            params: { questId: quest.questId, npcId: syliri.id }
+            // Offered journeys
+            offeredJourneys.journeys.forEach(journey => {
+                if (journey.offeredBy === 'sehnrhyx_syliri') {
+                    const journeyData = journeyPathsComp.paths.find(p => p.id === journey.journeyId);
+                    if (journeyData && !journeyPath.paths.some(p => p.id === journey.journeyId)) {
+                        dialogueComp.dialogues[journey.journeyId] = {
+                            text: journeyData.offerText || journeyData.description,
+                            action: 'acceptJourney',
+                            params: { journeyId: journey.journeyId, npcId: syliri.id }
                         };
-                        if (quest.questId === 'whisper_parent_3' || quest.questId === 'whisper_parent_4') {
-                            console.log(`JourneyProgressSystem: Set offer dialogue for ${quest.questId}`, { questId: quest.questId });
+                        if (journey.journeyId === 'whisper_parent_3' || journey.journeyId === 'whisper_parent_4') {
+                            console.log(`JourneyProgressSystem: Set offer dialogue for ${journey.journeyId}`, { journeyId: journey.journeyId });
                         }
                     }
                 }
@@ -171,7 +183,7 @@ export class JourneyProgressSystem extends System {
                                 resourceType: task.completionCondition.resourceType,
                                 itemId: task.completionCondition.itemId,
                                 quantity: task.completionCondition.quantity,
-                                npcId: syliri.id
+                                npcId: syliri.id // Entity ID
                             };
                         } else if (task.completionCondition.type === 'interactWithNPC') {
                             action = 'completeTask';
@@ -187,41 +199,36 @@ export class JourneyProgressSystem extends System {
                             action,
                             params
                         };
-                        if (task.id === 'whisper_child_2_4') {
-                            console.log(`JourneyProgressSystem: Set dialogue for whisper_child_2_4`, {
-                                text: task.activeText || task.description,
-                                action,
-                                params,
-                                totalTaskCount: path.totalTaskCount,
-                                completedTaskCount: path.completedTaskCount
-                            });
-                        }
+                        // Comment out to reduce log spam
+                        // if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_4_5') {
+                        //     console.log(`JourneyProgressSystem: Set dialogue for ${task.id}`, {
+                        //         text: task.activeText || task.description,
+                        //         action,
+                        //         params,
+                        //         totalTaskCount: path.totalTaskCount,
+                        //         completedTaskCount: path.completedTaskCount
+                        //     });
+                        // }
                     }
                 });
             });
 
-           // console.log(`JourneyProgressSystem: Updated JourneyDialogueComponent for Syliri`, dialogueComp.dialogues);
+            // console.log(`JourneyProgressSystem: Updated JourneyDialogueComponent for Syliri`, dialogueComp.dialogues);
         }
 
-        // Check for completed quests
-        journeyPath.paths.forEach(quest => {
-            if (quest.completed || quest.pendingCompletion || quest.id === quest.parentId) return;
-            const allTasksCompleted = quest.tasks?.length > 0 && quest.tasks.every(task => task.completed);
+        // Check for completed journeys
+        journeyPath.paths.forEach(journey => {
+            if (journey.completed || journey.pendingCompletion || journey.id === journey.parentId) return;
+            const allTasksCompleted = journey.tasks?.length > 0 && journey.tasks.every(task => task.completed);
             if (allTasksCompleted) {
-                quest.pendingCompletion = true;
+                journey.pendingCompletion = true;
                 this.eventBus.emit('JourneyStateUpdated');
-                console.log(`JourneyProgressSystem: Quest ${quest.id} set to pendingCompletion`);
-                if (quest.id === 'whisper_parent_2' || quest.id === 'whisper_parent_3') {
-                    console.log(`JourneyProgressSystem: ${quest.id} pending completion`, { tasks: quest.tasks.map(t => ({ id: t.id, completed: t.completed })) });
+                console.log(`JourneyProgressSystem: Journey ${journey.id} set to pendingCompletion`);
+                if (journey.id === 'whisper_parent_2' || journey.id === 'whisper_parent_3') {
+                    console.log(`JourneyProgressSystem: ${journey.id} pending completion`, { tasks: journey.tasks.map(t => ({ id: t.id, completed: t.completed })) });
                 }
             }
         });
-
-        // Clear processed actions
-        journeyUpdateQueue.queue = journeyUpdateQueue.queue.filter(action => !journeyPath.paths.some(path =>
-            path.tasks?.some(task => this.matchesTask(action, task))
-        ));
-       // console.log('JourneyProgressSystem: Cleared processed actions from JourneyUpdateQueue');
     }
 
     updateTaskCounts(path) {
@@ -245,9 +252,18 @@ export class JourneyProgressSystem extends System {
 
         switch (action.type) {
             case 'collectResource':
+                const player = this.entityManager.getEntity('player');
+                const resource = player.getComponent('Resource');
+                console.log(`JourneyProgressSystem: Evaluating collectResource for task ${task.id}`, resource, action, condition);
+                const crafting = resource.craftResources;
+
                 return condition.type === 'collectResource' &&
-                    condition.resourceType === action.data &&
-                    (condition.quantity <= action.data.quantity || !condition.quantity);
+                    condition.resourceType === action.data.resourceType &&
+                    (condition.quantity <= resource[condition.resourceType] ||
+                        condition.quantity <= crafting[condition.resourceType] ||
+                        condition.quantity <= action.data.quantity ||
+                        !condition.quantity);
+
             case 'findItem':
             case 'collectItem':
                 return (condition.type === 'findItem' || condition.type === 'collectItem') &&
@@ -297,8 +313,17 @@ export class JourneyProgressSystem extends System {
             case 'completeWhispers':
                 return condition.type === 'completeWhispers' && condition.pathId === action.data.pathId;
             case 'turnIn':
+                const npcEntity = this.entityManager.getEntity(action.data.npcId);
+                const npcLogicalId = npcEntity ? npcEntity.getComponent('NPCData')?.id : action.data.npcId;
+                console.log(`JourneyProgressSystem: Evaluating turnIn for task ${task.id}`, {
+                    condition,
+                    actionData: action.data,
+                    npcLogicalId,
+                    npcEntityId: action.data.npcId
+                });
                 return condition.type === 'turnIn' &&
-                    condition.npc === action.data.npcId &&
+                    task.id === action.data.taskId &&
+                    condition.npc === npcLogicalId &&
                     this.handleTurnInCondition(condition, action.data);
             default:
                 console.warn(`JourneyProgressSystem: Unknown task type ${action.type}`);
@@ -307,18 +332,30 @@ export class JourneyProgressSystem extends System {
     }
 
     handleTurnInCondition(condition, data) {
+        console.log(`JourneyProgressSystem: Handling turnIn condition`, { condition, data });
         if (condition.resourceType) {
             const resources = this.entityManager.getEntity('player').getComponent('Resource');
-            if (resources.craftResources[condition.resourceType] >= condition.quantity) {
+            const resourceCount = resources.craftResources[condition.resourceType] || 0;
+            if (resourceCount >= condition.quantity) {
                 resources.craftResources[condition.resourceType] -= condition.quantity;
+                console.log(`JourneyProgressSystem: Deducted ${condition.quantity} ${condition.resourceType}, remaining: ${resources.craftResources[condition.resourceType]}`);
                 return true;
+            } else {
+                console.log(`JourneyProgressSystem: Insufficient resources for turnIn`, {
+                    resourceType: condition.resourceType,
+                    required: condition.quantity,
+                    available: resourceCount
+                });
             }
         } else if (condition.itemId) {
             const inventory = this.entityManager.getEntity('player').getComponent('Inventory');
-            const itemIndex = inventory.items.findIndex(item => item.id === condition.itemId);
+            const itemIndex = inventory.items.findIndex(item => item.id === condition.itemId || item.journeyItemId === condition.itemId);
             if (itemIndex !== -1) {
                 inventory.items.splice(itemIndex, 1);
+                console.log(`JourneyProgressSystem: Removed item ${condition.itemId} from inventory`);
                 return true;
+            } else {
+                console.log(`JourneyProgressSystem: Item ${condition.itemId} not found in inventory`);
             }
         }
         return false;
@@ -354,7 +391,7 @@ export class JourneyProgressSystem extends System {
             requiredWeapons.every(attackType => equippedWeapons.has(attackType));
     }
 
-    applyRewards(quest) {
+    applyRewards(journey) {
         const player = this.entityManager.getEntity('player');
         const journeyReward = player.getComponent('JourneyReward');
 
@@ -362,42 +399,42 @@ export class JourneyProgressSystem extends System {
             console.warn('JourneyProgressSystem: JourneyReward component not found on player');
             return;
         }
-        if (!quest.rewards) {
-            console.warn('JourneyProgressSystem: No rewards found for quest', quest.id);
+        if (!journey.rewards) {
+            console.warn('JourneyProgressSystem: No rewards found for journey', journey.id);
             return;
         }
-        if (!quest.rewards.length) {
-            console.warn('JourneyProgressSystem: No rewards found for quest', quest.id);
+        if (!journey.rewards.length) {
+            console.warn('JourneyProgressSystem: No rewards found for journey', journey.id);
             return;
         }
-        console.log('JourneyProgressSystem: Adding rewards to JourneyRewardComponent:', quest.rewards);
-        journeyReward.rewards = quest.rewards;
+        console.log('JourneyProgressSystem: Adding rewards to JourneyRewardComponent:', journey.rewards);
+        journeyReward.rewards = journey.rewards;
     }
 
-    offerNextQuest(quest) {
-        if (quest.nextPathId) {
+    offerNextJourney(journey) {
+        if (journey.nextPathId) {
             const gameState = this.entityManager.getEntity('gameState');
             const journeyPathsComp = gameState.getComponent('JourneyPaths');
-            const offeredQuestsComp = gameState.getComponent('OfferedQuests');
-            const nextQuest = journeyPathsComp.paths.find(path => path.id === quest.nextPathId);
-            if (nextQuest && !offeredQuestsComp.quests.some(q => q.questId === nextQuest.id)) {
-                const offeredBy = nextQuest.offeredBy || quest.offeredBy || 'default_npc';
-                offeredQuestsComp.quests.push({ questId: nextQuest.id, offeredBy });
-                this.eventBus.emit('LogMessage', { message: `New quest available: ${nextQuest.title}` });
-                console.log(`JourneyProgressSystem: Offered next quest ${nextQuest.id} by ${offeredBy}`);
-                if (nextQuest.id === 'whisper_parent_3' || nextQuest.id === 'whisper_parent_4') {
-                    console.log(`JourneyProgressSystem: Offered ${nextQuest.id} after completing ${quest.id}`);
+            const offeredJourneysComp = gameState.getComponent('OfferedJourneys');
+            const nextJourney = journeyPathsComp.paths.find(path => path.id === journey.nextPathId);
+            if (nextJourney && !offeredJourneysComp.journeys.some(q => q.journeyId === nextJourney.id)) {
+                const offeredBy = nextJourney.offeredBy || journey.offeredBy || 'default_npc';
+                offeredJourneysComp.journeys.push({ journeyId: nextJourney.id, offeredBy });
+                this.eventBus.emit('LogMessage', { message: `New journey available: ${nextJourney.title}` });
+                console.log(`JourneyProgressSystem: Offered next journey ${nextJourney.id} by ${offeredBy}`);
+                if (nextJourney.id === 'whisper_parent_3' || nextJourney.id === 'whisper_parent_4') {
+                    console.log(`JourneyProgressSystem: Offered ${nextJourney.id} after completing ${journey.id}`);
                 }
             }
         }
     }
 
-    triggerMasterPath(quest) {
-        if (quest.triggersMasterPath) {
+    triggerMasterPath(journey) {
+        if (journey.triggersMasterPath) {
             const journeyPath = this.entityManager.getEntity('player').getComponent('JourneyPath');
             const gameState = this.entityManager.getEntity('gameState');
             const journeyPathsComp = gameState.getComponent('JourneyPaths');
-            const masterPath = journeyPathsComp.paths.find(path => path.id === quest.triggersMasterPath);
+            const masterPath = journeyPathsComp.paths.find(path => path.id === journey.triggersMasterPath);
             if (masterPath && !journeyPath.paths.some(p => p.id === masterPath.id)) {
                 this.utilities.addPath(journeyPath, masterPath);
                 this.eventBus.emit('LogMessage', { message: `New path unlocked: ${masterPath.title}` });
@@ -406,28 +443,28 @@ export class JourneyProgressSystem extends System {
         }
     }
 
-    finalizeQuestCompletion(questId) {
+    finalizeJourneyCompletion(journeyId) {
         const player = this.entityManager.getEntity('player');
         const journeyPath = player.getComponent('JourneyPath');
-        const quest = journeyPath.paths.find(q => q.id === questId && q.pendingCompletion);
-        if (!quest) {
-            console.warn(`JourneyProgressSystem: Quest ${questId} not found or not in pendingCompletion state`);
+        const journey = journeyPath.paths.find(q => q.id === journeyId && q.pendingCompletion);
+        if (!journey) {
+            console.warn(`JourneyProgressSystem: Journey ${journeyId} not found or not in pendingCompletion state`);
             return;
         }
 
-        quest.pendingCompletion = false;
-        quest.completed = true;
-        this.applyRewards(quest);
-        this.offerNextQuest(quest);
-        this.triggerMasterPath(quest);
-        this.utilities.pushPlayerActions('completeWhispers', { pathId: quest.id, title: quest.title });
+        journey.pendingCompletion = false;
+        journey.completed = true;
+        this.applyRewards(journey);
+        this.offerNextJourney(journey);
+        this.triggerMasterPath(journey);
+        this.utilities.pushPlayerActions('completeWhispers', { pathId: journey.id, title: journey.title });
         this.eventBus.emit('JourneyStateUpdated');
-        console.log(`JourneyProgressSystem: Finalized completion of quest ${questId}`);
-        if (questId === 'whisper_parent_2' || questId === 'whisper_parent_3') {
-            console.log(`JourneyProgressSystem: Completed ${questId}, nextPathId: ${quest.nextPathId}`);
+        console.log(`JourneyProgressSystem: Finalized completion of journey ${journeyId}`);
+        if (journeyId === 'whisper_parent_2' || journeyId === 'whisper_parent_3') {
+            console.log(`JourneyProgressSystem: Completed ${journeyId}, nextPathId: ${journey.nextPathId}`);
         }
 
-        this.utilities.removePath(journeyPath, questId);
-        console.log(`JourneyProgressSystem: Removed completed quest ${questId} from JourneyPath.paths`);
+        this.utilities.removePath(journeyPath, journeyId);
+        console.log(`JourneyProgressSystem: Removed completed journey ${journeyId} from JourneyPath.paths`);
     }
 }

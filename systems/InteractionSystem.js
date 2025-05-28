@@ -1,6 +1,5 @@
-﻿// InteractionSystem.js
-import { System } from '../core/Systems.js';
-import { JourneyPathComponent, DialogueComponent, InteractionIntentComponent, ShopInteractionComponent, JourneyPathsComponent, OfferedQuestsComponent, JourneyStateComponent } from '../core/Components.js';
+﻿import { System } from '../core/Systems.js';
+import { JourneyPathComponent, DialogueComponent, InteractionIntentComponent, ShopInteractionComponent, JourneyPathsComponent, OfferedJourneysComponent, JourneyStateComponent } from '../core/Components.js';
 
 export class InteractionSystem extends System {
     constructor(entityManager, eventBus, utilities) {
@@ -29,8 +28,8 @@ export class InteractionSystem extends System {
             intent.intents.forEach(({ action, params }) => {
                 if (action === 'interactWithNPC') {
                     this.handleInteractWithNPC(params);
-                } else if (action === 'acceptQuest') {
-                    this.handleAcceptQuest(params);
+                } else if (action === 'acceptJourney') {
+                    this.handleAcceptJourney(params);
                 } else if (action === 'openShop') {
                     this.handleOpenShop(params);
                 } else if (action === 'turnIn') {
@@ -84,24 +83,24 @@ export class InteractionSystem extends System {
             });
         }
 
-        this.utilities.pushPlayerActions('interactWithNPC', { npcId: npcData.id, taskId });
-        console.log(`InteractionSystem: Pushed interactWithNPC to PlayerActionQueue`, { npcId: npcData.id, taskId });
+        this.utilities.pushPlayerActions('interactWithNPC', { npcId, taskId });
+        console.log(`InteractionSystem: Pushed interactWithNPC to PlayerActionQueue`, { npcId, taskId });
         if (taskId === 'whisper_child_2_4') {
-            console.log(`InteractionSystem: Queued action for whisper_child_2_4`, { npcId: npcData.id, taskId });
+            console.log(`InteractionSystem: Queued action for whisper_child_2_4`, { npcId, taskId });
         }
 
         this.refreshDialogue(npcId);
     }
 
-    handleAcceptQuest({ questId, npcId }) {
+    handleAcceptJourney({ journeyId, npcId }) {
         const gameState = this.entityManager.getEntity('gameState');
-        const offeredQuestsComp = gameState.getComponent('OfferedQuests');
+        const offeredJourneysComp = gameState.getComponent('OfferedJourneys');
         const journeyPathsComp = gameState.getComponent('JourneyPaths');
         const player = this.entityManager.getEntity('player');
         const journeyPath = player.getComponent('JourneyPath');
 
-        if (!offeredQuestsComp) {
-            console.error('InteractionSystem: OfferedQuests component not found on gameState');
+        if (!offeredJourneysComp) {
+            console.error('InteractionSystem: OfferedJourneys component not found on gameState');
             return;
         }
         if (!journeyPathsComp) {
@@ -113,24 +112,24 @@ export class InteractionSystem extends System {
             return;
         }
 
-        const offeredQuest = offeredQuestsComp.quests.find(q => q.questId === questId);
-        if (!offeredQuest) {
-            console.error(`InteractionSystem: Offered quest ${questId} not found`);
+        const offeredJourney = offeredJourneysComp.journeys.find(q => q.journeyId === journeyId);
+        if (!offeredJourney) {
+            console.error(`InteractionSystem: Offered journey ${journeyId} not found`);
             return;
         }
 
-        const questData = journeyPathsComp.paths.find(path => path.id === questId);
-        if (!questData) {
-            console.error(`InteractionSystem: Quest data for ${questId} not found`);
+        const journeyData = journeyPathsComp.paths.find(path => path.id === journeyId);
+        if (!journeyData) {
+            console.error(`InteractionSystem: Journey data for ${journeyId} not found`);
             return;
         }
 
-        journeyPath.paths.push({ ...questData, accepted: true });
-        offeredQuestsComp.quests = offeredQuestsComp.quests.filter(q => q.questId !== questId);
-        this.eventBus.emit('LogMessage', { message: `Quest accepted: ${questData.title}` });
+        journeyPath.paths.push({ ...journeyData, accepted: true });
+        offeredJourneysComp.journeys = offeredJourneysComp.journeys.filter(q => q.journeyId !== journeyId);
+        this.eventBus.emit('LogMessage', { message: `Journey accepted: ${journeyData.title}` });
         this.eventBus.emit('JourneyStateUpdated');
-        console.log(`InteractionSystem: Quest ${questId} accepted by player`);
-        if (questId === 'whisper_parent_3') {
+        console.log(`InteractionSystem: Journey ${journeyId} accepted by player`);
+        if (journeyId === 'whisper_parent_3') {
             console.log(`InteractionSystem: Accepted whisper_parent_3`);
         }
 
@@ -161,6 +160,12 @@ export class InteractionSystem extends System {
     }
 
     handleTurnIn({ taskId, resourceType, itemId, quantity, npcId }) {
+        const npcEntity = this.entityManager.getEntity(npcId);
+        if (!npcEntity || !npcEntity.hasComponent('NPCData')) {
+            console.error(`InteractionSystem: NPC entity ${npcId} not found or missing NPCData`);
+            return;
+        }
+        console.log(`InteractionSystem: Handling turnIn intent`, { taskId, resourceType, itemId, quantity, npcId });
         this.utilities.pushPlayerActions('turnIn', { taskId, resourceType, itemId, quantity, npcId });
         console.log(`InteractionSystem: Pushed turnIn to PlayerActionQueue`, { taskId, resourceType, itemId, quantity, npcId });
         this.refreshDialogue(npcId);
@@ -197,7 +202,7 @@ export class InteractionSystem extends System {
         console.log(`InteractionSystem: Processed completeTask for ${taskId}`);
     }
 
-    handleAcknowledgeCompletion({ questId, npcId }) {
+    handleAcknowledgeCompletion({ journeyId, npcId }) {
         const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
         const player = this.entityManager.getEntity('player');
         const journeyState = player.getComponent('JourneyState');
@@ -210,11 +215,11 @@ export class InteractionSystem extends System {
             return;
         }
 
-        this.eventBus.emit('FinalizeQuestCompletion', { questId });
-        journeyState.completedPaths = journeyState.completedPaths.filter(path => path.id !== questId);
+        this.eventBus.emit('FinalizeJourneyCompletion', { journeyId });
+        journeyState.completedPaths = journeyState.completedPaths.filter(path => path.id !== journeyId);
         this.eventBus.emit('JourneyStateUpdated');
-        console.log(`InteractionSystem: Acknowledged completion of quest ${questId}`);
-        if (questId === 'whisper_parent_2') {
+        console.log(`InteractionSystem: Acknowledged completion of journey ${journeyId}`);
+        if (journeyId === 'whisper_parent_2') {
             console.log(`InteractionSystem: Completed acknowledgement for whisper_parent_2`);
         }
 
@@ -238,9 +243,9 @@ export class InteractionSystem extends System {
         const journeyState = player.getComponent('JourneyState');
         const gameState = this.entityManager.getEntity('gameState');
         const journeyPathsComp = gameState.getComponent('JourneyPaths');
-        const offeredQuestsComp = gameState.getComponent('OfferedQuests');
+        const offeredJourneysComp = gameState.getComponent('OfferedJourneys');
 
-        if (!dialogue || !journeyPath || !journeyState || !journeyPathsComp || !offeredQuestsComp) {
+        if (!dialogue || !journeyPath || !journeyState || !journeyPathsComp || !offeredJourneysComp) {
             console.error('InteractionSystem: Missing required components for refreshDialogue');
             return false;
         }
@@ -254,7 +259,7 @@ export class InteractionSystem extends System {
             path.tasks?.forEach(task => {
                 if (!task.completed && task.completionCondition.type === 'interactWithNPCFinal' && task.completionCondition.npc === npcData.id) {
                     if ((path.completedTaskCount || 0) < (path.totalTaskCount || 0) - 1) {
-                        dialogue.text = task.activeText || "You must complete all other tasks for this quest.";
+                        dialogue.text = task.activeText || "You must complete all other tasks for this journey.";
                         dialogue.options = [{ label: "Close", action: "closeDialogue", params: {} }];
                         dialogue.isOpen = true;
                         dialogue.npcId = npcId;
@@ -289,26 +294,44 @@ export class InteractionSystem extends System {
             if (dialogueEntries.length > 0) {
                 const completionEntry = dialogueEntries.find(([id]) => journeyState.completedPaths.some(p => p.id === id));
                 const activeEntry = dialogueEntries.find(([id]) => id.startsWith('whisper_child') && !journeyState.completedPaths.some(p => p.id === id));
-                const offerEntry = dialogueEntries.find(([id]) => offeredQuestsComp.quests.some(q => q.questId === id));
+                const offerEntry = dialogueEntries.find(([id]) => offeredJourneysComp.journeys.some(q => q.journeyId === id));
 
                 const selectedEntry = completionEntry || offerEntry || activeEntry;
                 if (selectedEntry) {
                     const [id, entry] = selectedEntry;
-                    dialogue.text = entry.text;
-                    if (entry.action) {
-                        dialogue.options.push({
-                            label: entry.action === 'acknowledgeCompletion' ? 'OK' : entry.action === 'completeTask' ? 'OK' : 'Accept',
-                            action: entry.action,
-                            params: entry.params
-                        });
+                    // Check if the task is completed
+                    let taskCompleted = false;
+                    journeyPath.paths.forEach(path => {
+                        if (path.id === path.parentId || path.completed) return;
+                        const task = path.tasks?.find(t => t.id === id);
+                        if (task && task.completed) {
+                            taskCompleted = true;
+                        }
+                    });
+
+                    if (taskCompleted) {
+                        dialogue.text = `Task completed: ${entry.text}`;
+                        dialogue.options = [{ label: "Close", action: "closeDialogue", params: {} }];
+                    } else {
+                        dialogue.text = entry.text;
+                        if (entry.action) {
+                            const params = { ...entry.params, npcId }; // Use entity ID
+                            dialogue.options.push({
+                                label: entry.action === 'acknowledgeCompletion' ? 'OK' :
+                                    entry.action === 'completeTask' ? 'OK' :
+                                        entry.action === 'turnIn' ? 'Deliver' : 'Accept',
+                                action: entry.action,
+                                params
+                            });
+                        }
+                        dialogue.options.push({ label: "Close", action: "closeDialogue", params: {} });
                     }
-                    dialogue.options.push({ label: "Close", action: "closeDialogue", params: {} });
                     dialogue.isOpen = true;
                     dialogue.npcId = npcId;
                     dialogue.dialogueStage = entry.action || 'task';
                     console.log(`InteractionSystem: Set dialogue from JourneyDialogueComponent for ${id}`, entry);
-                    if (id === 'whisper_child_2_4' || id === 'whisper_parent_2') {
-                        console.log(`InteractionSystem: Dialogue set for ${id}`, { text: entry.text, action: entry.action });
+                    if (id === 'whisper_child_4_5') {
+                        console.log(`InteractionSystem: Dialogue set for whisper_child_4_5`, { text: dialogue.text, action: entry.action, label: dialogue.options[0]?.label, npcId, taskCompleted });
                     }
                     return true;
                 }
@@ -317,46 +340,46 @@ export class InteractionSystem extends System {
 
         // Fallback to existing logic
         const completedPaths = [...journeyState.completedPaths].sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
-        const completedQuest = completedPaths.find(path =>
+        const completedJourney = completedPaths.find(path =>
             path.completionText && !this.shownCompletions.has(path.id)
         );
-        if (completedQuest) {
-            dialogue.text = `Quest completed: ${completedQuest.title}. Rewards: ${this.formatRewards(journeyPathsComp.paths.find(p => p.id === completedQuest.id)?.rewards || [])}`;
+        if (completedJourney) {
+            dialogue.text = `Journey completed: ${completedJourney.title}. Rewards: ${this.formatRewards(journeyPathsComp.paths.find(p => p.id === completedJourney.id)?.rewards || [])}`;
             dialogue.options = [
-                { label: 'OK', action: 'acknowledgeCompletion', params: { questId: completedQuest.id, npcId } },
+                { label: 'OK', action: 'acknowledgeCompletion', params: { journeyId: completedJourney.id, npcId } },
                 { label: 'Close', action: 'closeDialogue', params: {} }
             ];
             dialogue.isOpen = true;
             dialogue.npcId = npcId;
             dialogue.dialogueStage = 'completion';
-            this.shownCompletions.add(completedQuest.id);
-            console.log(`InteractionSystem: Showing completion message for quest ${completedQuest.id}`);
-            if (completedQuest.id === 'whisper_parent_2') {
+            this.shownCompletions.add(completedJourney.id);
+            console.log(`InteractionSystem: Showing completion message for journey ${completedJourney.id}`);
+            if (completedJourney.id === 'whisper_parent_2') {
                 console.log(`InteractionSystem: Completion dialogue for whisper_parent_2`, { text: dialogue.text });
             }
             return true;
         }
 
-        const offeredQuests = offeredQuestsComp.quests.filter(
-            quest => quest.offeredBy === npcData.id && !journeyPath.paths.some(p => p.id === quest.questId)
+        const offeredJourneys = offeredJourneysComp.journeys.filter(
+            journey => journey.offeredBy === npcData.id && !journeyPath.paths.some(p => p.id === journey.journeyId)
         );
-        if (offeredQuests.length > 0) {
-            const quest = offeredQuests[0];
-            const questData = journeyPathsComp.paths.find(path => path.id === quest.questId);
-            if (!questData) {
-                console.error(`InteractionSystem: Quest data for ${quest.questId} not found`);
+        if (offeredJourneys.length > 0) {
+            const journey = offeredJourneys[0];
+            const journeyData = journeyPathsComp.paths.find(path => path.id === journey.journeyId);
+            if (!journeyData) {
+                console.error(`InteractionSystem: Journey data for ${journey.journeyId} not found`);
                 return false;
             }
-            dialogue.text = `I have a task for you: ${questData.title}. ${questData.description} Will you accept?`;
+            dialogue.text = `I have a task for you: ${journeyData.title}. ${journeyData.description} Will you accept?`;
             dialogue.options = [
-                { label: 'Accept', action: 'acceptQuest', params: { questId: quest.questId, npcId } },
+                { label: 'Accept', action: 'acceptJourney', params: { journeyId: journey.journeyId, npcId } },
                 { label: 'Close', action: 'closeDialogue', params: {} }
             ];
             dialogue.isOpen = true;
             dialogue.npcId = npcId;
-            dialogue.dialogueStage = 'questOffer';
-            console.log(`InteractionSystem: Offering quest ${quest.questId}`);
-            if (quest.questId === 'whisper_parent_3') {
+            dialogue.dialogueStage = 'journeyOffer';
+            console.log(`InteractionSystem: Offering journey ${journey.journeyId}`);
+            if (journey.journeyId === 'whisper_parent_3') {
                 console.log(`InteractionSystem: Offering whisper_parent_3`, { text: dialogue.text });
             }
             return true;
@@ -366,6 +389,7 @@ export class InteractionSystem extends System {
         journeyPath.paths.forEach(path => {
             if (path.id === path.parentId || path.completed) return;
             path.tasks?.forEach(task => {
+                console.log(`InteractionSystem: Checking task ${task.id} for NPC ${npcData.id}`, { completed: task.completed, condition: task.completionCondition });
                 if (!task.completed && task.completionCondition.type === 'turnIn' && task.completionCondition.npc === npcData.id) {
                     const condition = task.completionCondition;
                     dialogue.options.push({
@@ -374,6 +398,14 @@ export class InteractionSystem extends System {
                         params: { taskId: task.id, resourceType: condition.resourceType, itemId: condition.itemId, quantity: condition.quantity, npcId }
                     });
                     hasTurnInOptions = true;
+                } else if (task.completed && task.completionCondition.type === 'turnIn' && task.completionCondition.npc === npcData.id) {
+                    dialogue.text = `Task completed: Delivered ${task.completionCondition.quantity} ${task.completionCondition.resourceType || task.completionCondition.itemId}`;
+                    dialogue.options = [{ label: "Close", action: "closeDialogue", params: {} }];
+                    dialogue.isOpen = true;
+                    dialogue.npcId = npcId;
+                    dialogue.dialogueStage = 'taskCompletion';
+                    console.log(`InteractionSystem: Set completion dialogue for task ${task.id}`, { text: dialogue.text });
+                    return true;
                 }
             });
         });

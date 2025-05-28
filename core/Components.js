@@ -46,7 +46,7 @@ import {
     MouseTargetComponent,
     ShopComponent,
     JourneyPathsComponent,
-    OfferedQuestsComponent,
+    OfferedJourneysComponent,
     JourneyUpdateQueueComponent,
 } from './components/GameComponents.js';
 
@@ -122,7 +122,7 @@ export {
     MouseTargetComponent,
     ShopComponent,
     JourneyPathsComponent,
-    OfferedQuestsComponent,
+    OfferedJourneysComponent,
     JourneyUpdateQueueComponent,
 
     // Common components

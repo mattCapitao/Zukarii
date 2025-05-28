@@ -249,16 +249,16 @@ export class LevelTransitionSystem extends System {
         Object.assign(gameStateComp, data.gameState.GameState);
         gameStateComp.tier = tier;
  
-        // Restore quest-related components for gameState
+        // Restore journey-related components for gameState
         if (data.gameState.JourneyPaths) {
             const journeyPathsComp = gameState.getComponent('JourneyPaths');
             journeyPathsComp.paths = data.gameState.JourneyPaths.paths; // Deep copy to preserve arrays
             console.log('LevelTransitionSystem: Restored JourneyPaths:', journeyPathsComp.paths);
         }
-        if (data.gameState.OfferedQuests) {
-            const offeredQuestsComp = gameState.getComponent('OfferedQuests');
-            offeredQuestsComp.quests = data.gameState.OfferedQuests.quests; // Deep copy to preserve arrays
-            console.log('LevelTransitionSystem: Restored OfferedQuests:', offeredQuestsComp.quests);
+        if (data.gameState.OfferedJourneys) {
+            const offeredJourneysComp = gameState.getComponent('OfferedJourneys');
+            offeredJourneysComp.journeys = data.gameState.OfferedJourneys.journeys; // Deep copy to preserve arrays
+            console.log('LevelTransitionSystem: Restored OfferedJourneys:', offeredJourneysComp.journeys);
         }
         if (data.gameState.GameState.highestTier) {
             gameStateComp.highestTier = data.gameState.GameState.highestTier; // Ensure highestTier is restored

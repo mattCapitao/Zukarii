@@ -66,7 +66,7 @@ export class DialogueUISystem extends System {
                     this.closeTimeout = null;
                     this.lastRenderedText = null;
                     this.lastRenderedOptions = null;
-                    console.log('DialogueUISystem: Closed dialogue after 600ms timeout');
+                    console.log('DialogueUISystem: Closed dialogue after 10000ms timeout');
                 }, 10000);
             } else {
                 const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
@@ -78,6 +78,19 @@ export class DialogueUISystem extends System {
                 this.lastRenderedText = null;
                 this.lastRenderedOptions = null;
                 console.log('DialogueUISystem: Closed dialogue via button click');
+            }
+        });
+
+        this.eventBus.on('LogMessage', ({ message }) => {
+            if (message.includes('delivered') || message.includes('completed')) {
+                const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
+                if (dialogue) {
+                    dialogue.text = message;
+                    dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
+                    dialogue.isOpen = true;
+                    dialogue.dialogueStage = 'taskCompletion';
+                    console.log(`DialogueUISystem: Updated dialogue for completion message`, { message });
+                }
             }
         });
     }

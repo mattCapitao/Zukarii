@@ -152,14 +152,14 @@ export class DataSystem extends System {
                 return [];
             });
 
-        console.log('DataSystem: Starting fetch for questItems.json');
-        this.questItemsPromise = fetch('data/json/questItems.json')
+        console.log('DataSystem: Starting fetch for journeyItems.json');
+        this.journeyItemsPromise = fetch('data/json/journeyItems.json')
             .then(response => {
-                if (!response.ok) throw new Error(`Failed to load questItems.json: ${response.status}`);
+                if (!response.ok) throw new Error(`Failed to load journeyItems.json: ${response.status}`);
                 return response.json();
             })
             .catch(error => {
-                console.error('DataSystem: Failed to load questItems.json:', error);
+                console.error('DataSystem: Failed to load journeyItems.json:', error);
                 return [];
             });
         
@@ -183,7 +183,7 @@ export class DataSystem extends System {
         this.eventBus.on('RequestSavedGamesList', (callback) => this.getSavedGamesList(callback));
         this.eventBus.on('GetNPCs', (data) => this.provideNPCs(data));
         this.eventBus.on('GetJourneyPaths', ({ callback }) => this.provideJourneyPaths({ callback }));
-        this.eventBus.on('GetQuestItems', ({ callback }) => this.provideQuestItems({ callback }));
+        this.eventBus.on('GetJourneyItems', ({ callback }) => this.provideJourneyItems({ callback }));
 
         // Preload data
         this.loadData();
@@ -219,8 +219,8 @@ export class DataSystem extends System {
             this.journeyPaths = await fetch('data/json/journeyPaths.json').then(r => r.json()).catch(() => []);
             console.log('DataSystem: Successfully loaded journeyPaths.json:', this.journeyPaths);
 
-            this.questItems = await fetch('data/json/questItems.json').then(r => r.json()).catch(() => []);
-            console.log('DataSystem: Successfully loaded questItems.json:', this.questItems);
+            this.journeyItems = await fetch('data/json/journeyItems.json').then(r => r.json()).catch(() => []);
+            console.log('DataSystem: Successfully loaded journeyItems.json:', this.journeyItems);
 
         } catch (error) {
             console.error('DataSystem: Failed to load data:', error);
@@ -386,12 +386,12 @@ export class DataSystem extends System {
         }
     }
 
-    async provideQuestItems({ callback }) {
+    async provideJourneyItems({ callback }) {
         try {
-            const questItems = await this.questItemsPromise;
-            callback(JSON.parse(JSON.stringify(questItems)));
+            const journeyItems = await this.journeyItemsPromise;
+            callback(JSON.parse(JSON.stringify(journeyItems)));
         } catch (error) {
-            console.error('DataSystem: Error providing questItems:', error);
+            console.error('DataSystem: Error providing journeyItems:', error);
             callback([]);
         }
     }

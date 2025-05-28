@@ -202,13 +202,13 @@ export class LevelSystem extends System {
                 this.adjustPlayerPosition(levelEntity, transitionDirection === 'down' ? levelData.stairsUp : (levelData.stairsDown || levelData.stairsUp));
             } else {
 
-                const questBossLevels = [3,6]
+                const journeyBossLevels = [3,6]
                 let hasBossRoom = false;
 
                 switch (true) {
                     case (tier - this.lastBossTier >= this.BOSS_ROOM_EVERY_X_LEVELS):
                     case (Math.random() < 0.05) :
-                    case questBossLevels.includes(tier):
+                    case journeyBossLevels.includes(tier):
                         hasBossRoom = true;
                         break;
                     default:
