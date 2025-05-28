@@ -313,6 +313,7 @@
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_5",
     "completed": false,
+    "offeredBy": "sehnrhyx_syliri",
     "title": "Seeking Corruption",
     "description": "Seek out the corruption within Zurath’s depths.",
     "completionCondition": null,
@@ -368,7 +369,7 @@
           "type": "reachTier",
           "tier": 7
         },
-      
+
         "rewards": [
           {
             "xp": 50,
@@ -447,6 +448,7 @@
     "id": "whisper_parent_5",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_6",
+    "offeredBy": "sehnrhyx_syliri",
     "completed": false,
     "title": "Rings of the Magi",
     "description": "Acquire the ancient rings to wield greater power.",
@@ -551,6 +553,7 @@
     "id": "whisper_parent_6",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_7",
+    "offeredBy": "sehnrhyx_syliri",
     "completed": false,
     "title": "Enter Ashangal",
     "description": "Seek the entrance to the endless depths of Ashangal.",
@@ -635,6 +638,7 @@
     "id": "whisper_parent_7",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_8",
+    "offeredBy": "sehnrhyx_syliri",
     "completed": false,
     "title": "Harnessing Corruption",
     "description": "Harness the corruption to unlock new powers.",
@@ -763,6 +767,7 @@
     "id": "whisper_parent_8",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_9",
+    "offeredBy": "sehnrhyx_syliri",
     "completed": false,
     "title": "Listening for Echoes",
     "description": "Seek out the Echoes hidden within Zurath.",
@@ -825,6 +830,7 @@
     "id": "whisper_parent_9",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_10",
+    "offeredBy": "sehnrhyx_syliri",
     "completed": false,
     "title": "Clad in Magic",
     "description": "Equip a full set of magic gear to wield its power.",
