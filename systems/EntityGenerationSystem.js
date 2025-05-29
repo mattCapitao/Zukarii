@@ -17,6 +17,7 @@ import {
     SpatialBucketsComponent,
     NPCDataComponent,
     ShopComponent,
+    TriggerAreaComponent,
 } from '../core/Components.js';
 
 export class EntityGenerationSystem extends System {
@@ -53,6 +54,13 @@ export class EntityGenerationSystem extends System {
         if (direction === 'down') { levelData.stairsDown = { x, y }; } else { levelData.stairsUp = { x, y } }
         console.log(`LevelSystem.js: Placed stairs ${direction} at (${x}, ${y}) on tier ${tier}`, stairEntity);
 
+        if (direction === 'down' && tier == 10) {
+
+            this.generateTriggerArea(entityList, x, y, 256, 256, 'DialogueMessage',  {
+                message: { message: 'You feel a strange dark force in this area!', params: '' }
+            })
+        }
+
         if (returnEntity) return stairEntity;
     }
 
@@ -65,8 +73,8 @@ export class EntityGenerationSystem extends System {
         portalComp.active = active;
         
 
-        this.entityManager.addComponentToEntity(portalEntity.id, new VisualsComponent(128, 128));
-        this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(90, 90));
+        this.entityManager.addComponentToEntity(portalEntity.id, new VisualsComponent(48, 72));
+        this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(60, 35));
         const visuals = portalEntity.getComponent('Visuals');
         visuals.avatar = portalComp.active ? 'img/anim/Portal-Animation.png' : 'img/avatars/inactive-portal.png';
         entityList.portals.push(portalEntity.id);
@@ -169,6 +177,39 @@ export class EntityGenerationSystem extends System {
         console.log(`Generated ${lootPerLevel} loot entity IDs for tier ${tier}`, lootEntityIds);
         console.log(`LevelSystem.js: generateLootEntities - Completed for tier ${tier}`);
         return lootEntityIds;
+    }
+
+
+
+
+    generateShopCounter(entityList, tier, mapComp, x, y) {
+        const shopCounterEntity = this.entityManager.createEntity(`shopCounter_${tier}_shopCounter_${entityList.shopCounters.length}`);
+        this.entityManager.addComponentToEntity(shopCounterEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
+        this.entityManager.addComponentToEntity(shopCounterEntity.id, new VisualsComponent(58, 112));
+        this.entityManager.addComponentToEntity(shopCounterEntity.id, new HitboxComponent(112, 58));
+        const visuals = shopCounterEntity.getComponent('Visuals');
+        visuals.avatar = 'img/avatars/shop-counter.png';
+        entityList.shopCounters.push(shopCounterEntity.id);
+        mapComp.map[y][x] = '?';
+        this.eventBus.emit('shopCounterAdded');
+
+        console.log(`LevelSystem - shopCounter - shopCounter Entity Created on tier: ${tier} at x:${x}, y:${y}`, shopCounterEntity);
+        return shopCounterEntity;
+    }
+
+
+    generateTriggerArea(entityList, x, y, width, height, action, data = {}) {
+        const xOffset = -(width / 2);
+        const yOffset = -(height / 2);
+        const triggerEntity = this.entityManager.createEntity(`trigger_area_${x}_${y}_${Date.now()}`);
+        this.entityManager.addComponentToEntity(triggerEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
+        this.entityManager.addComponentToEntity(triggerEntity.id, new HitboxComponent(width, height, xOffset, yOffset)) ;
+        this.entityManager.addComponentToEntity(triggerEntity.id, new TriggerAreaComponent(action, data));
+        // Add to entityList if you want to track them
+        if (entityList.triggerAreas) {
+            entityList.triggerAreas.push(triggerEntity.id);
+        }
+        return triggerEntity;
     }
 
 }

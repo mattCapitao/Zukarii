@@ -24,7 +24,7 @@ export class SpatialBucketsComponent {
 }
 
 export class EntityListComponent {
-    constructor({ walls = [], floors = [], stairs = [], portals = [], monsters = [], treasures = [], fountains = [], rooms = [] } = {}) {
+    constructor({ walls = [], floors = [], stairs = [], portals = [], monsters = [], treasures = [], fountains = [], shopCounters=[], triggerAreas=[], rooms = [] } = {}) {
         this.type = 'EntityList';
         this.walls = walls;
         this.floors = floors;
@@ -33,6 +33,8 @@ export class EntityListComponent {
         this.monsters = monsters;
         this.treasures = treasures;
         this.fountains = fountains;
+        this.shopCounters = shopCounters
+        this.triggerAreas = triggerAreas
         this.rooms = Array.isArray(rooms) ? rooms : []; // Ensure rooms is always an array
         console.log(`EntityListComponent: Initialized with rooms: ${JSON.stringify(this.rooms)}`);
     }
@@ -100,6 +102,15 @@ export class RoomComponent {
         this.roomType = type;
         this.connections = [];
         this.suppressMonsters = false;
+    }
+}
+
+export class TriggerAreaComponent {
+    constructor(action = null, data = {}, active = true) {
+        this.type = 'TriggerArea';
+        this.action = action; // e.g., a string or function name
+        this.data = data;
+        this.active = active;
     }
 }
 

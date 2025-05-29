@@ -16,9 +16,9 @@ export class MapRenderSystem extends System {
         // Portal animation properties
         this.portalFrameCount = 9;
         this.portalFrameWidth = 128;
-        this.portalFrameHeight = 128;
-        this.portalRenderWidth = 128;
-        this.portalRenderHeight = 128;
+        this.portalFrameHeight = 86;
+        this.portalRenderWidth = 144;
+        this.portalRenderHeight = 96;
         this.portalFrameDuration = 200; // 200ms per frame
         this.portalCurrentFrame = 0;
         this.lastPortalFrameTime = Date.now();
@@ -59,7 +59,8 @@ export class MapRenderSystem extends System {
             player_walk: 'img/anim/Player/Walk.png',
             player_attack: 'img/anim/Player/Attack_Fire_3.png',
             npc_zu_master: 'img/avatars/npcs/zu-master.png', // Add NPC sprite
-            npc_merchant: 'img/avatars/npcs/merchant.png'
+            npc_merchant: 'img/avatars/npcs/merchant.png',
+            shop_counter: 'img/avatars/shop-counter.png',
         };
         for (const [key, path] of Object.entries(spritePaths)) {
             const img = new Image();

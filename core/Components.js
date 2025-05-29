@@ -12,7 +12,8 @@ import {
     FloorComponent,
     StairComponent,
     PortalComponent,
-    FountainComponent
+    FountainComponent,
+    TriggerAreaComponent,
 } from './components/MapComponents.js';
 
 import {
@@ -92,6 +93,7 @@ export {
     StairComponent,
     PortalComponent,
     FountainComponent,
+    TriggerAreaComponent,
 
     // Player-related components
     StatsComponent,

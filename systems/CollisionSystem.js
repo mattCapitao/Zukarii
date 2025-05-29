@@ -30,11 +30,22 @@ export class CollisionSystem extends System {
             const range = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
             const nearbyEntities = entities.filter(target => this.isWithinProjectedPath(
-                { x: moverPos.x, y: moverPos.y, width: moverHitbox.width, height: moverHitbox.height },
-                { x: target.getComponent('Position').x, y: target.getComponent('Position').y, width: target.getComponent('Hitbox').width, height: target.getComponent('Hitbox').height },
+                {
+                    x: moverPos.x + (moverHitbox.offsetX || 0),
+                    y: moverPos.y + (moverHitbox.offsetY || 0),
+                    width: moverHitbox.width,
+                    height: moverHitbox.height
+                },
+                {
+                    x: target.getComponent('Position').x + (target.getComponent('Hitbox').offsetX || 0),
+                    y: target.getComponent('Position').y + (target.getComponent('Hitbox').offsetY || 0),
+                    width: target.getComponent('Hitbox').width,
+                    height: target.getComponent('Hitbox').height
+                },
                 deltaX,
                 deltaY
             ));
+
 
             for (const target of nearbyEntities) {
                 if (mover === target) continue;
@@ -43,8 +54,18 @@ export class CollisionSystem extends System {
                 const targetHitbox = target.getComponent('Hitbox');
 
                 const collision = this.sweptAABB(
-                    { x: moverPos.x, y: moverPos.y, width: moverHitbox.width, height: moverHitbox.height },
-                    { x: targetPos.x, y: targetPos.y, width: targetHitbox.width, height: targetHitbox.height },
+                    {
+                        x: moverPos.x + (moverHitbox.offsetX || 0),
+                        y: moverPos.y + (moverHitbox.offsetY || 0),
+                        width: moverHitbox.width,
+                        height: moverHitbox.height
+                    },
+                    {
+                        x: targetPos.x + (targetHitbox.offsetX || 0),
+                        y: targetPos.y + (targetHitbox.offsetY || 0),
+                        width: targetHitbox.width,
+                        height: targetHitbox.height
+                    },
                     deltaX,
                     deltaY
                 );
@@ -53,11 +74,7 @@ export class CollisionSystem extends System {
                     if (!mover.hasComponent('Collision')) {
                         mover.addComponent(new CollisionComponent());
                     }
-                    /*
-                    if (!target.hasComponent('Collision')) {
-                        target.addComponent(new CollisionComponent());
-                    }
-                    */
+
                     mover.getComponent('Collision').collisions.push({
                         moverId: mover.id,
                         targetId: target.id,
@@ -66,16 +83,7 @@ export class CollisionSystem extends System {
                         normalY: collision.normalY,
                         distance: collision.entryTime * range,
                     });
-                    /*
-                    target.getComponent('Collision').collisions.push({
-                        moverId: mover.id,
-                        targetId: target.id,
-                        collisionType: collision.entryTime === 0 ? "current" : "dynamic",
-                        normalX: -collision.normalX,
-                        normalY: -collision.normalY,
-                        distance: collision.entryTime * range,
-                    });
-                    */
+
                 }
             }
         }

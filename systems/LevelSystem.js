@@ -36,6 +36,7 @@ export class LevelSystem extends System {
         this.generatePortal = this.genSys.generatePortal.bind(this.genSys);
         this.generateFountains = this.genSys.generateFountains.bind(this.genSys);
         this.generateLootEntities = this.genSys.generateLootEntities.bind(this.genSys);
+        this.generateShopCounter = this.genSys.generateShopCounter.bind(this.genSys);
         this.requiredComponents = ['Map', 'Tier', 'Exploration'];
         this.ROOM_EDGE_BUFFER = 4;
         this.CORRIDOR_EDGE_BUFFER = 2;
@@ -1202,9 +1203,10 @@ export class LevelSystem extends System {
         const floors = [];
         const stairs = [];
         const npcs = [];
+        const shopCounters = [];
        
         const tier = 0;
-        const stairPos = { upX: 2, upY: 2, downX: 12, downY: 8 }
+        const stairPos = { upX: 14, upY: 8, downX: 3, downY: 8 }
 
         for (let y = 1; y <= 9; y++) {
             for (let x = 1; x <= 13; x++) {
@@ -1218,8 +1220,8 @@ export class LevelSystem extends System {
         }
 
         for (let y = 0; y <= 10; y++) {
-            for (let x = 0; x <= 14; x++) {
-                if (y === 0 || y === 10 || x === 0 || x === 14) {
+            for (let x = 0; x <= 20; x++) {
+                if (y === 0 || y === 10 || x === 0 || x === 20) {
                     const wallId = `wall_0_wall_${y}_${x}`;
                     const wallEntity = this.entityManager.createEntity(wallId);
                     const pixelX = x * this.TILE_SIZE;
@@ -1241,6 +1243,7 @@ export class LevelSystem extends System {
             floors: floors,
             stairs: stairs,
             npcs: npcs,
+            shopCounters : shopCounters,
             stairsDown: { x: stairPos.downX, y: stairPos.downY },
             stairsUp:  { x: stairPos.upX, y: stairPos.upY },
             roomEntityIds: []
@@ -1255,23 +1258,25 @@ export class LevelSystem extends System {
         entityList.floors = floors;
         entityList.stairs = stairs;
         entityList.npcs = npcs;
+        entityList.shopCounters = shopCounters;
         console.log(`LevelSystem.js: Updated EntityListComponent for ${levelEntity.id} in generateSurfaceLevel`);
        
        
         const stairUpEntity = this.generateStairEntity(levelData, entityList, tier, 'up', stairPos.upX, stairPos.upY, true);
         const stairDownEntity = this.generateStairEntity(levelData, entityList, tier, 'down', stairPos.downX, stairPos.downY, true);
         
+        
         this.eventBus.emit('SpawnNPCs', {
             tier: 0,
             npcs: [
-                { id: 'sehnrhyx_syliri', x: 7, y: 4 },
-                { id: 'shop_keeper', x: 2, y: 8 }
+                { id: 'sehnrhyx_syliri', x: 8, y: 3 },
+                { id: 'shop_keeper', x: 8, y: 8 }
             ]
         });
-        const portalPos = { x: 10, y:1 };
-
+        const portalPos = { x: 16, y: 2 };
         const portalEntity = this.generatePortal(entityList, tier, mapComp, portalPos.x, portalPos.y);
-       
+        const shopCounterPos = { x: 7, y: 8 };
+        const shopCounterEntity = this.generateShopCounter(entityList, tier, mapComp, shopCounterPos.x, shopCounterPos.y);
 
         console.log(`LevelSystem.js: generateSurfaceLevel - Completed for tier 0`);
         return levelData;

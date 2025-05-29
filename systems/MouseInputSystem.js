@@ -221,7 +221,7 @@ export class MouseInputSystem {
             const dx = npcPos.x - playerPos.x;
             const dy = npcPos.y - playerPos.y;
             const distance = Math.sqrt(dx * dx + dy * dy) / this.TILE_SIZE;
-            const interactRange = 2;
+            const interactRange = 3;
             // removed isClick || from this conditional to stop opening when range is too far.
             if ( isClick && distance <= interactRange) {
                 if (!this.hasInteractedWithNPC) {

@@ -103,20 +103,32 @@ export class MovementResolutionSystem extends System {
         const hitbox = entity.getComponent('Hitbox');
         const entities = this.entityManager.getEntitiesWith(['Position', 'Hitbox']);
 
+
         for (const other of entities) {
             if (other === entity || other.hasComponent('Projectile')) continue; // Skip self
-
+            if (other.hasComponent('TriggerArea')) continue;
             const otherPos = other.getComponent('Position');
             const otherHitbox = other.getComponent('Hitbox');
 
+            const thisLeft = newX + (hitbox.offsetX || 0);
+            const thisTop = newY + (hitbox.offsetY || 0);
+            const thisRight = thisLeft + hitbox.width;
+            const thisBottom = thisTop + hitbox.height;
+
+            const otherLeft = otherPos.x + (otherHitbox.offsetX || 0);
+            const otherTop = otherPos.y + (otherHitbox.offsetY || 0);
+            const otherRight = otherLeft + otherHitbox.width;
+            const otherBottom = otherTop + otherHitbox.height;
+
             if (
-                newX < otherPos.x + otherHitbox.width &&
-                newX + hitbox.width > otherPos.x &&
-                newY < otherPos.y + otherHitbox.height &&
-                newY + hitbox.height > otherPos.y
+                thisLeft < otherRight &&
+                thisRight > otherLeft &&
+                thisTop < otherBottom &&
+                thisBottom > otherTop
             ) {
                 return true; // Overlap detected
             }
+
         }
 
         return false; // No overlap

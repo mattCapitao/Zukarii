@@ -55,7 +55,7 @@ export class DialogueUISystem extends System {
             player.addComponent(intent);
             console.log(`DialogueUISystem: Added ${action} intent`, params);
 
-            if (action !== 'closeDialogue') {
+            if (action !== 'closeDialogue' && action !== 'openShop') {
                 this.refreshDialogueTimeout();
             } else {
                 const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
@@ -71,14 +71,33 @@ export class DialogueUISystem extends System {
         });
 
         this.eventBus.on('DialogueMessage', ({ message }) => {
-            if (message.includes('delivered') || message.includes('completed')) {
-                const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
-                if (dialogue) {
+            const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
+            if (!dialogue) return;
+
+            // If message is an object (from a trigger area)
+            if (typeof message === 'object' && message !== null && message.message) {
+                dialogue.text = message.message;
+                dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
+                dialogue.isOpen = true;
+                dialogue.dialogueStage = 'greeting';
+                console.log(`DialogueUISystem: Updated dialogue for trigger message`, { message });
+                this.refreshDialogueTimeout();
+            }
+            // If message is a string (legacy/NPC)
+            else if (typeof message === 'string') {
+                if (message.includes('delivered') || message.includes('completed')) {
                     dialogue.text = message;
                     dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
                     dialogue.isOpen = true;
                     dialogue.dialogueStage = 'taskCompletion';
                     console.log(`DialogueUISystem: Updated dialogue for completion message`, { message });
+                    this.refreshDialogueTimeout();
+                } else {
+                    dialogue.text = message;
+                    dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
+                    dialogue.isOpen = true;
+                    dialogue.dialogueStage = 'greeting';
+                    console.log(`DialogueUISystem: Updated dialogue for string message`, { message });
                     this.refreshDialogueTimeout();
                 }
             }

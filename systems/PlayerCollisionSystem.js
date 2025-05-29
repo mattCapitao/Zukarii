@@ -50,6 +50,27 @@ export class PlayerCollisionSystem extends System {
                 collision.collisions.splice(i, 1);
                 continue;
             }
+
+            if (target.hasComponent('TriggerArea')) {
+                const triggerArea = target.getComponent('TriggerArea');
+                if (triggerArea.active) {
+                    this.eventBus.emit(triggerArea.action, triggerArea.data );
+                    triggerArea.active = false; // Deactivate after triggering
+                }
+                collision.collisions.splice(i, 1);
+
+                const triggerAreaReset = setTimeout(() => {
+                    triggerArea.active = true; // Reactivate after a delay
+                }, triggerArea.resetDelay || 1000); // Default reset delay of 3 minutes
+
+                continue;
+            }
+            if (target.hasComponent('NPCData')) {
+
+                this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
+                collision.collisions.splice(i, 1);
+                continue;
+            } 
             if (target.hasComponent('Fountain')) {
                 this.eventBus.emit('UseFountain', { fountainEntityId: target.id });
                 this.endTurn('useFountain');
