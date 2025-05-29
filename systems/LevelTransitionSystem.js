@@ -251,9 +251,12 @@ export class LevelTransitionSystem extends System {
  
         // Restore journey-related components for gameState
         if (data.gameState.JourneyPaths) {
+            /*
             const journeyPathsComp = gameState.getComponent('JourneyPaths');
             journeyPathsComp.paths = data.gameState.JourneyPaths.paths; // Deep copy to preserve arrays
             console.log('LevelTransitionSystem: Restored JourneyPaths:', journeyPathsComp.paths);
+            */
+            console.log('LevelTransitionSystem: Skipping JourneyPaths resotre to preserve original data journeyPaths.json:', data.gameState.JourneyPaths);
         }
         if (data.gameState.OfferedJourneys) {
             const offeredJourneysComp = gameState.getComponent('OfferedJourneys');

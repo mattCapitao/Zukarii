@@ -299,37 +299,43 @@ export class MonsterSpawnSystem extends System {
             });
         }
         if (tier > 7 && tier < 11 && template.isElite) {
-            const itemRoll = Math.random();
-            let name = 'Band of Zu';
-            let journeyItemId = 'bandOfZu';
-            if (itemRoll < 0.5) {
-                name = 'Band of Karn';
-                journeyItemId = 'bandOfKarn';
-            }
-            const player = this.entityManager.getEntity('player');
-            const uniqueItemsCollected = player.getComponent('PlayerAchievements').stats.uniqueItemDrops;
 
-            let found = false;
-            for (const obj of uniqueItemsCollected) {
-                if (obj.journeyItemId === journeyItemId) {
-                    found = true;
-                    break;
-                }
-            }
-            const drop = 0.10; // Base drop chance for the item
+            const drop = 0.60; // Base drop chance for the item
             let dropModifier = 0; // Default drop modifier
             if (tier > 8) {
                  dropModifier = (tier - 8) * 0.2; // Increase drop chance by 20% per tier above 8
             }
             const dropRoll = Math.random();
 
-            if (!found && (dropRoll < drop + dropModifier)) {
-                uniqueItemsCollected.push({ journeyItemId, name });
-                template.uniqueItemsDropped.push({
-                    type: 'customUnique',
-                    dropChance: 1,
-                    data: { name }
-                });
+            if (dropRoll < drop + dropModifier) {
+
+                const rings = [
+                    { name: 'Band of Zu', journeyItemId: 'bandOfZu' },
+                    { name: 'Band of Karn', journeyItemId: 'bandOfKarn' }
+                ];
+
+                // Fisher-Yates shuffle
+                for (let i = rings.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [rings[i], rings[j]] = [rings[j], rings[i]];
+                }
+
+                const player = this.entityManager.getEntity('player');
+                const uniqueItemsCollected = player.getComponent('PlayerAchievements').stats.uniqueItemDrops;
+
+                // Find the first ring not yet collected
+                const ringToDrop = rings.find(ring =>
+                    !uniqueItemsCollected.some(collected => collected.journeyItemId === ring.journeyItemId)
+                );
+
+                if (ringToDrop) {
+                    template.uniqueItemsDropped.push({
+                        type: 'customUnique',
+                        dropChance: 1,
+                        data: { name: ringToDrop.name }
+                    });
+                }
+
             }
         }
 

@@ -91,8 +91,35 @@ export class LootCollectionSystem extends System {
         } else {
             console.log("Ashen: LootCollectionSystem: No Stones object in loot Data");
         }
+
         if (lootData.items && lootData.items.length) {
             lootData.items.forEach(item => {
+                if (item.collectItem) {
+                    const uniqueItemsCollected = player.getComponent('PlayerAchievements').stats.uniqueItemDrops;
+                    let found = false;
+                    for (const obj of uniqueItemsCollected) {
+                        if (obj.journeyItemId === item.journeyItemId) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        uniqueItemsCollected.push({ journeyItemId: item.journeyItemId, name: item.name });
+                    } else {
+                        console.warn(`LootCollectionSystem: Item ${item.name} already collected, skipping.`);
+                        return;
+                    }
+                }
+
+                this.utilities.pushPlayerActions(item.collectItem ? 'collectItem' : 'findItem', {
+                    journeyItemId: item.journeyItemId,
+                    itemId: item.id
+                });
+                console.log(`LootCollectionSystem: Pushed ${item.collectItem ? 'collectItem' : 'findItem'} to PlayerActionQueue`, {
+                    journeyItemId: item.journeyItemId,
+                    itemId: item.id
+                });
+                
                 playerInventory.items.push(item);
                 pickupMessage.push(item.name);
             });
@@ -120,19 +147,7 @@ export class LootCollectionSystem extends System {
                 quantity: lootData.stones.count
             });
         }
-        if (lootData.items && lootData.items.length) {
-            lootData.items.forEach(item => {
-                this.utilities.pushPlayerActions(item.collectItem ? 'collectItem' : 'findItem', {
-                    journeyItemId: item.journeyItemId,
-                    itemId: item.id
-                });
-                console.log(`LootCollectionSystem: Pushed ${item.collectItem ? 'collectItem' : 'findItem' } to PlayerActionQueue`, {
-                    journeyItemId: item.journeyItemId,
-                    itemId: item.id
-                });
-            });
-        }
-
+        
         if (playerResource.gold >= 1e12) {
             gameState.isVictory = true;
             this.eventBus.emit('GameOver', { message: "You amassed a trillion gold! Victory!" });

@@ -117,12 +117,13 @@ export class GameDataIOSystem extends System {
                 AttackSpeed: player.getComponent('AttackSpeed'),
                 Affix: player.getComponent('Affix'),
                 PlayerState: player.getComponent('PlayerState'),
-                JourneyState: player.getComponent('JourneyState'), // Add JourneyState
-                JourneyPath: player.getComponent('JourneyPath')    // Add JourneyPath
+                JourneyState: player.getComponent('JourneyState'), 
+                JourneyPath: player.getComponent('JourneyPath') ,   
+                PlayerAchievements: player.getComponent('PlayerAchievements') 
             } : null,
             gameState: gameState ? {
                 GameState: gameStateComp,
-                JourneyPaths: gameState.getComponent('JourneyPaths'), // Add JourneyPaths
+                //JourneyPaths: gameState.getComponent('JourneyPaths'), // Add JourneyPaths
                 OfferedJourneys: gameState.getComponent('OfferedJourneys') // Add OfferedJourneys
             } : null,
             overlayState: overlayState ? {

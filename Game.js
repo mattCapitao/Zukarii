@@ -82,6 +82,7 @@ export class Game {
             this.entityManager.removeEntity('player');
         }
         player = this.entityManager.createEntity('player', true);
+        window.player = player; // Expose player globally for debugging
         this.entityManager.addComponentToEntity('player', new PositionComponent(64, 112));
         this.entityManager.addComponentToEntity('player', new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new VisualsComponent(32, 32));
