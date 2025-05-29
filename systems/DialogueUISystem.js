@@ -56,18 +56,7 @@ export class DialogueUISystem extends System {
             console.log(`DialogueUISystem: Added ${action} intent`, params);
 
             if (action !== 'closeDialogue') {
-                this.closeTimeout = setTimeout(() => {
-                    const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
-                    dialogue.isOpen = false;
-                    dialogue.text = '';
-                    dialogue.options = [];
-                    dialogue.npcId = '';
-                    dialogue.dialogueStage = 'greeting';
-                    this.closeTimeout = null;
-                    this.lastRenderedText = null;
-                    this.lastRenderedOptions = null;
-                    console.log('DialogueUISystem: Closed dialogue after 10000ms timeout');
-                }, 10000);
+                this.refreshDialogueTimeout();
             } else {
                 const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
                 dialogue.isOpen = false;
@@ -81,7 +70,7 @@ export class DialogueUISystem extends System {
             }
         });
 
-        this.eventBus.on('LogMessage', ({ message }) => {
+        this.eventBus.on('DialogueMessage', ({ message }) => {
             if (message.includes('delivered') || message.includes('completed')) {
                 const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
                 if (dialogue) {
@@ -90,10 +79,31 @@ export class DialogueUISystem extends System {
                     dialogue.isOpen = true;
                     dialogue.dialogueStage = 'taskCompletion';
                     console.log(`DialogueUISystem: Updated dialogue for completion message`, { message });
+
+                    this.refreshDialogueTimeout();
                 }
             }
         });
+
     }
+    refreshDialogueTimeout() {
+        if (this.closeTimeout) {
+            clearTimeout(this.closeTimeout);
+        }
+        this.closeTimeout = setTimeout(() => {
+            const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
+            dialogue.isOpen = false;
+            dialogue.text = '';
+            dialogue.options = [];
+            dialogue.npcId = '';
+            dialogue.dialogueStage = 'greeting';
+            this.closeTimeout = null;
+            this.lastRenderedText = null;
+            this.lastRenderedOptions = null;
+            console.log('DialogueUISystem: Closed dialogue after 30000ms timeout');
+        }, 30000);
+    }
+
 
     update(deltaTime) {
         const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');

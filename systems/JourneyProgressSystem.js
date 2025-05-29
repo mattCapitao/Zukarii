@@ -43,6 +43,8 @@ export class JourneyProgressSystem extends System {
                             task.completed = true;
                             task.completedAt = Date.now();
                             this.eventBus.emit('LogMessage', { message: task.completionText });
+                            this.eventBus.emit('DialogueMessage', { message: task.completionText });
+                            
                             this.eventBus.emit('JourneyStateUpdated');
                             console.log(`JourneyProgressSystem: Completed equipGear task ${task.id}`);
                             this.updateTaskCounts(path);
@@ -70,6 +72,7 @@ export class JourneyProgressSystem extends System {
                         task.completed = true;
                         task.completedAt = Date.now();
                         this.eventBus.emit('LogMessage', { message: task.completionText });
+                        this.eventBus.emit('DialogueMessage', { message: task.completionText });
                         this.eventBus.emit('JourneyStateUpdated');
                         console.log(`JourneyProgressSystem: Completed task ${task.id} for action ${action.type}`);
                         this.updateTaskCounts(path);
@@ -239,15 +242,17 @@ export class JourneyProgressSystem extends System {
     matchesTask(action, task) {
         const condition = task.completionCondition;
 
-        console.log(`JourneyProgressSystem: Matching task ${task.id} with action ${action.type}`, { condition, actionData: action.data });
+       
         if (!condition.type) {
             console.error(`JourneyProgressSystem: Task ${task.id} has invalid completion condition:`, condition);
             return false;
         }
         let npcLogicalId;
-        if (action.data.npcId) { 
+        console.log(`JourneyProgressSystem: Matching task ${task.id} with action ${action.type}`, { condition, actionData: action.data });
+        if (action.data.npcId) {
             const npcEntity = this.entityManager.getEntity(action.data.npcId);
             npcLogicalId = npcEntity ? npcEntity.getComponent('NPCData')?.id : action.data.npcId;
+            console.log(`JourneyProgressSystem: NPC logical ID resolved to ${npcLogicalId} for action`, action);
         }
 
 
@@ -278,6 +283,7 @@ export class JourneyProgressSystem extends System {
 
             case 'bossKill':
                 return condition.type === 'bossKill' && condition.tier === action.data.tier;
+
             case 'interactWithNPC':
                 // have to allow normal interactions to complete Final condition until issues ironed out in dialogue system
                 return (condition.type === 'interactWithNPC' || condition.type === 'interactWithNPCFinal') &&
