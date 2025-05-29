@@ -79,7 +79,6 @@ export class DialogueUISystem extends System {
                     dialogue.isOpen = true;
                     dialogue.dialogueStage = 'taskCompletion';
                     console.log(`DialogueUISystem: Updated dialogue for completion message`, { message });
-
                     this.refreshDialogueTimeout();
                 }
             }
@@ -133,10 +132,52 @@ export class DialogueUISystem extends System {
                 button.className = 'dialogue-button';
                 this.dialogueButtons.appendChild(button);
             });
-
+          
             this.dialogueWindow.style.display = 'flex';
             this.dialogueButtons.style.display = 'block';
             this.dialogueText.style.display = 'block';
+
+            if (dialogue.npcId) {
+                const npc = this.entityManager.getEntity(dialogue.npcId);
+                if (npc && npc.hasComponent('Position')) {
+                    const npcPos = npc.getComponent('Position');
+                    const player = this.entityManager.getEntity('player');
+                    const playerPos = player.getComponent('Position');
+                    const canvas = document.getElementById('viewport-canvas');
+                    const SCALE_FACTOR = 2;
+                    const TILE_SIZE = 32;
+                    const mapWidth = 122 * TILE_SIZE;
+                    const mapHeight = 67 * TILE_SIZE;
+
+                    const viewportWidth = canvas.width / SCALE_FACTOR;
+                    const viewportHeight = canvas.height / SCALE_FACTOR;
+
+                    let startX = playerPos.x - viewportWidth / 2;
+                    let startY = playerPos.y - viewportHeight / 2;
+                    startX = Math.max(0, Math.min(startX, mapWidth - viewportWidth));
+                    startY = Math.max(0, Math.min(startY, mapHeight - viewportHeight));
+
+                    const screenX = (npcPos.x - startX) * SCALE_FACTOR;
+                    const screenY = (npcPos.y - startY) * SCALE_FACTOR;
+
+                    // Clamp to viewport if needed
+                    const dialogueWidth = this.dialogueWindow.offsetWidth;
+                    const dialogueHeight = this.dialogueWindow.offsetHeight;
+                    const maxX = canvas.width - dialogueWidth;
+                    const maxY = canvas.height - dialogueHeight;
+
+                    const X_OFFSET = 48; // pixels to the right
+                    const Y_OFFSET = 64; // pixels down
+
+                    let left = Math.max(0, Math.min(screenX + X_OFFSET, maxX));
+                    let top = Math.max(0, Math.min(screenY - dialogueHeight - 20 + Y_OFFSET, maxY));
+
+                    this.dialogueWindow.style.position = 'absolute';
+                    this.dialogueWindow.style.left = `${left}px`;
+                    this.dialogueWindow.style.top = `${top}px`;
+                }
+            }
+
             this.lastRenderedText = dialogue.text;
             this.lastRenderedOptions = optionsString;
             console.log('DialogueUISystem: Rendered dialogue, text:', dialogue.text, 'options:', dialogue.options, 'window display:', this.dialogueWindow.style.display);

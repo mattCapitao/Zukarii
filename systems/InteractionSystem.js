@@ -52,6 +52,8 @@ export class InteractionSystem extends System {
             console.error(`InteractionSystem: NPC ${npcId} not found or missing NPCData`);
             return;
         }
+
+
         const npcData = npc.getComponent('NPCData');
         console.log(`InteractionSystem: Interacting with NPC ${npcId}, NPCData ID: ${npcData.id}, Name: ${npcData.name}`);
 
