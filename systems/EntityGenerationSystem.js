@@ -56,7 +56,7 @@ export class EntityGenerationSystem extends System {
 
         if (direction === 'down' && tier == 10) {
 
-            this.generateTriggerArea(entityList, x, y, 256, 256, 'DialogueMessage',  {
+            this.generateTriggerArea(entityList, x, y, 512, 512, 'DialogueMessage',  {
                 message: { message: 'You feel a strange dark force in this area!', params: '' }
             })
         }
@@ -69,14 +69,30 @@ export class EntityGenerationSystem extends System {
         this.entityManager.addComponentToEntity(portalEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
         this.entityManager.addComponentToEntity(portalEntity.id, new PortalComponent());
         const portalComp = portalEntity.getComponent('Portal');
-        if (tier < 11) active = false; // Disable portal for tiers below 11 Old Zurath is the first 10 levels 
-        portalComp.active = active;
-        
+        const  gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
 
         this.entityManager.addComponentToEntity(portalEntity.id, new VisualsComponent(48, 72));
-        this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(60, 35));
+        this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(60, 35, 20, 20));
         const visuals = portalEntity.getComponent('Visuals');
-        visuals.avatar = portalComp.active ? 'img/anim/Portal-Animation.png' : 'img/avatars/inactive-portal.png';
+        const hitBox = portalEntity.getComponent('Hitbox');
+
+       let visualsImg = 'img/anim/Portal-Animation.png';
+       let cleansed = false; // Portals are not cleansed by default
+        if (tier < 11 && gameState.highestTier < 11) {
+            active = false; // Disable portal for tiers below 11 Old Zurath is the first 10 levels
+            visualsImg = 'img/avatars/inactive-portal.png';
+        } else if (tier < 11 && gameState.highestTier >= 11) {
+            active = true; // If player has reached tier 11, the portals from 0-10 are active
+            cleansed = true; // If player has reached tier 11, the cleansed portals from 0-10 are active
+            visualsImg = 'img/anim/Portal-Animation-Cleansed.png';
+        }
+        console.log(`LevelSystem.js: generatePortal - Portal visuals set to ${visualsImg} for tier ${tier}, cleansed: ${cleansed}`,gameState);
+
+        portalComp.active = active;
+        portalComp.cleansed = cleansed; 
+        visuals.avatar = visualsImg;
+
+ 
         entityList.portals.push(portalEntity.id);
         mapComp.map[y][x] = '?';
         this.eventBus.emit('PortalAdded');
@@ -85,7 +101,7 @@ export class EntityGenerationSystem extends System {
         return portalEntity;
     }
 
-    generateFountains(tier, map, roomEntityIds) {
+    generateFountains(tier, map, roomEntityIds, entityList) {
         console.log(`LevelSystem.js: generateFountains - Starting for tier ${tier}`);
         const fountainsPerLevel = Math.floor(Math.random() * 2) + 1;
         const fountains = [];
@@ -109,13 +125,30 @@ export class EntityGenerationSystem extends System {
                 this.entityManager.addComponentToEntity(fountainEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
                 this.entityManager.addComponentToEntity(fountainEntity.id, new FountainComponent(false, false));
                 this.entityManager.addComponentToEntity(fountainEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
-                this.entityManager.addComponentToEntity(fountainEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE));
+                this.entityManager.addComponentToEntity(fountainEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE, this.TILE_SIZE/2, this.TILE_SIZE,));
                 const visuals = fountainEntity.getComponent('Visuals');
                 visuals.avatar = 'img/avatars/fountain.png';
+                visuals.avatar = 'img/anim/fountain/128x64_fountain_stone_shadow_anim.png';
                 fountains.push(fountainEntity.id);
                 map[y][x] = '≅';
+                const fountainComp = fountainEntity.getComponent('Fountain');
+                if (fountainComp.active) {
+                    this.generateTriggerArea(
+                        entityList,
+                        x, y,
+                        512, 512,
+                        'PlayTrackControl',
+                        { track: 'fountain_loop', play: true, volume: 0.2, fadeIn: 1.5 },
+                        'PlayTrackControl',
+                        { track: 'fountain_loop', play: false, fadeOut: 2.0 },
+                        'Presence'
+                    );
+                }
             }
         }
+        
+       
+
         console.log(`LevelSystem.js: generateFountains - Completed for tier ${tier}`);
         return fountains;
     }
@@ -198,13 +231,13 @@ export class EntityGenerationSystem extends System {
     }
 
 
-    generateTriggerArea(entityList, x, y, width, height, action, data = {}) {
+    generateTriggerArea(entityList, x, y, width, height, action, data = {}, stopAction = null, stopData = {}, mode) {
         const xOffset = -(width / 2);
         const yOffset = -(height / 2);
         const triggerEntity = this.entityManager.createEntity(`trigger_area_${x}_${y}_${Date.now()}`);
         this.entityManager.addComponentToEntity(triggerEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
         this.entityManager.addComponentToEntity(triggerEntity.id, new HitboxComponent(width, height, xOffset, yOffset)) ;
-        this.entityManager.addComponentToEntity(triggerEntity.id, new TriggerAreaComponent(action, data));
+        this.entityManager.addComponentToEntity(triggerEntity.id, new TriggerAreaComponent(action, data, stopAction, stopData, mode));
         // Add to entityList if you want to track them
         if (entityList.triggerAreas) {
             entityList.triggerAreas.push(triggerEntity.id);

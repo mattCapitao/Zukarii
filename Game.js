@@ -49,6 +49,7 @@ import { NPCSpawnSystem } from './systems/NPCSpawnSystem.js';
 import { DialogueUISystem } from './systems/DialogueUISystem.js';
 import { NPCControllerSystem } from './systems/NPCControllerSystem.js';
 import { EntityGenerationSystem } from './systems/EntityGenerationSystem.js';
+import { TriggerAreaSystem } from './systems/TriggerAreaSystem.js'; 
 
 
 import {
@@ -105,7 +106,7 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(155));
         this.entityManager.addComponentToEntity('player', new AffixComponent());
         this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32, 32));
-        this.entityManager.addComponentToEntity('player', new HitboxComponent(28, 28));
+        this.entityManager.addComponentToEntity('player', new HitboxComponent(28,28,2,4));
         this.entityManager.addComponentToEntity('player', new PlayerActionQueueComponent());
         this.entityManager.addComponentToEntity('player', new PlayerAchievementsComponent());
         this.entityManager.addComponentToEntity('player', new AnimationStateComponent());
@@ -291,6 +292,7 @@ export class Game {
         activeGameSystems.monsterTimer = new MonsterTimerSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.monsterCollision = new MonsterCollisionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.collisions = new CollisionSystem(this.entityManager, this.state.eventBus);
+        activeGameSystems.triggerArea = new TriggerAreaSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.movementResolution = new MovementResolutionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.projectileCollisions = new ProjectileCollisionSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus, this.utilities);
@@ -352,6 +354,7 @@ export class Game {
                 'monsterController',
                 'monsterTimer',
                 'collisions',
+                'triggerArea', 
                 'playerCollision',
                 'monsterCollision',
                 'projectileCollisions',

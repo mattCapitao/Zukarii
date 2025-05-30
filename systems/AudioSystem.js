@@ -17,8 +17,10 @@ export class AudioSystem extends System {
             console.log(`AudioSystem: Immediate playback requested for sfx: ${sfx} at volume: ${volume}`);
             this.playSfx({ sfx, volume });
         });
-        this.eventBus.on('PlayTrackControl', ({ track, play, volume }) => {
-            this.playTrackControl({ track, play, volume });
+    
+        this.eventBus.on('PlayTrackControl', (data) => {
+            this.playTrackControl(data);
+            console.warn(`AudioSystem: Track control requested for track: ${data.track}, play: ${data.play}, volume: ${data.volume}, fadeIn: ${data.fadeIn}, fadeOut: ${data.fadeOut}`);
         });
 
         console.warn('AudioSystem initialized', this.audioContext);
@@ -35,10 +37,10 @@ export class AudioSystem extends System {
             console.log('AudioSystem: Processed and cleared AudioQueue SFX');
         }
         if (this.trackControlQueue.length > 0) {
-            this.trackControlQueue.forEach(({ track, play, volume }) => {
-                const playCommand = play ? 'play' : 'stop';
-                console.log(`AudioSystem: Processing AudioQueue - Track Control ${playCommand} track: ${track} at Volume: ${volume}`);
-                this.playTrackControl({ track, play, volume });
+            this.trackControlQueue.forEach((data) => {
+                const playCommand = data.play ? 'play' : 'stop';
+                console.log(`AudioSystem: Processing AudioQueue - Track Control ${playCommand} track: ${data.track} at Volume: ${data.volume}, fadeIn: ${data.fadeIn}, fadeOut: ${data.fadeOut}`);
+                this.playTrackControl(data);
             });
             this.trackControlQueue.length = 0;
             console.log('AudioSystem: Processed and cleared AudioQueue TrackControl');
@@ -63,6 +65,7 @@ export class AudioSystem extends System {
         }
     }
 
+
     scheduleSfx(sfx, volume) {
         const source = this.audioContext.createBufferSource();
         source.buffer = this.soundBuffers[sfx];
@@ -74,7 +77,85 @@ export class AudioSystem extends System {
         console.log(`AudioSystem: Playback scheduled for ${sfx}`);
     }
 
+    // Add fadeIn and fadeOut parameters (default to 0.5s for smoothness)
+    playTrackControl({ track, play = true, volume = 0.05, fadeIn = 0.5, fadeOut = 0.5 }) {
+        console.warn(`AudioSystem: playTrackControl called with track: ${track}, play: ${play}, volume: ${volume}, fadeIn: ${fadeIn}, fadeOut: ${fadeOut}`);
+        if (play) {
+            // Stop existing source with fadeOut if any
+            if (this.trackSources.has(track)) {
+                const existingSource = this.trackSources.get(track);
+                if (existingSource.gainNode) {
+                    const now = this.audioContext.currentTime;
+                    existingSource.gainNode.gain.cancelScheduledValues(now);
+                    existingSource.gainNode.gain.setValueAtTime(existingSource.gainNode.gain.value, now);
+                    existingSource.gainNode.gain.linearRampToValueAtTime(0, now + fadeOut);
+                    existingSource.stop(now + fadeOut);
+                } else {
+                    existingSource.stop();
+                }
+                this.trackSources.delete(track);
+                console.log(`AudioSystem: Stopped existing ${track} with fadeOut`);
+            }
+            // Play new track if buffer exists
+            if (this.soundBuffers[track]) {
+                const source = this.audioContext.createBufferSource();
+                source.buffer = this.soundBuffers[track];
+                source.loop = true;
+                const gainNode = this.audioContext.createGain();
+                // Start at 0 volume for fadeIn
+                gainNode.gain.value = 0;
+                source.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                source.gainNode = gainNode;
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume().then(() => {
+                        const now = this.audioContext.currentTime;
+                        source.start(now);
+                        // Fade in to target volume
+                        gainNode.gain.setValueAtTime(0, now);
+                        gainNode.gain.linearRampToValueAtTime(volume, now + fadeIn);
+                        this.trackSources.set(track, source);
+                        console.log(`AudioSystem: Playing ${track} with fadeIn to Volume: ${volume}`);
+                    }).catch(error => {
+                        console.error(`AudioSystem: Failed to resume AudioContext for ${track}:`, error);
+                    });
+                } else {
+                    const now = this.audioContext.currentTime;
+                    source.start(now);
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(volume, now + fadeIn);
+                    this.trackSources.set(track, source);
+                    console.log(`AudioSystem: Playing ${track} with fadeIn to Volume: ${volume}`);
+                }
+            } else {
+                console.warn(`AudioSystem: Sound buffer ${track} not found`);
+            }
+        } else {
+            // Stop track with fadeOut if source exists
+            if (this.trackSources.has(track)) {
+                const source = this.trackSources.get(track);
+                if (source.gainNode) {
+                    const now = this.audioContext.currentTime;
+                    source.gainNode.gain.cancelScheduledValues(now);
+                    source.gainNode.gain.setValueAtTime(source.gainNode.gain.value, now);
+                    source.gainNode.gain.linearRampToValueAtTime(0, now + fadeOut);
+                    source.stop(now + fadeOut);
+                    setTimeout(() => {
+                        this.trackSources.delete(track);
+                        console.log(`AudioSystem: Stopped ${track} with fadeOut`);
+                    }, fadeOut * 1000 + 100); // Remove after fadeOut
+                } else {
+                    source.stop();
+                    this.trackSources.delete(track);
+                    console.log(`AudioSystem: Stopped ${track}`);
+                }
+            }
+        }
+    }
+
+    /*
     playTrackControl({ track, play = true, volume = 0.05 }) {
+        console.warn(`AudioSystem: playTrackControl called with track: ${track}, play: ${play}, volume: ${volume}`);
         if (play) {
             // Stop existing source if any
             if (this.trackSources.has(track)) {
@@ -92,6 +173,7 @@ export class AudioSystem extends System {
                 gainNode.gain.value = volume;
                 source.connect(gainNode);
                 gainNode.connect(this.audioContext.destination);
+                source.gainNode = gainNode;
                 if (this.audioContext.state === 'suspended') {
                     this.audioContext.resume().then(() => {
                         source.start(0);
@@ -101,6 +183,7 @@ export class AudioSystem extends System {
                         console.error(`AudioSystem: Failed to resume AudioContext for ${track}:`, error);
                     });
                 } else {
+                    console.log('About to play:', track, 'Buffer:', this.soundBuffers[track]);
                     source.start(0);
                     this.trackSources.set(track, source);
                     console.log(`AudioSystem: Playing ${track} at Volume: ${volume}`);
@@ -118,7 +201,7 @@ export class AudioSystem extends System {
             }
         }
     }
-
+    */
     async preloadSounds() {
         const soundFiles = {
             torchBurning: 'audio/torch-burning.mp3',
@@ -130,6 +213,7 @@ export class AudioSystem extends System {
             portal1: 'audio/portal/portal_1.wav',
             bossLevel0: 'audio/boss/level/boss-level_0.wav',
             fountain0: 'audio/fountain/fountain_0.wav',
+            fountain_loop: 'audio/fountain/fountain_loop.mp3',
             firecast0: 'audio/spell/cast/firecast_0.wav',
             firehit0: 'audio/spell/hit/firehit_0.wav',
             miss0: 'audio/miss/miss_0.wav',

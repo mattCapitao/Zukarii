@@ -76,17 +76,20 @@ export class PortalComponent {
     constructor(active = true) {
         this.type = 'Portal';
         this.active = active;
+        this.cleansed = false;
     }
     
 }
 
 export class FountainComponent {
-    constructor(used = false, discovered = false) {
+    constructor(used = false, discovered = false, active=true) {
         this.type = 'Fountain';
         this.used = used;
         this.discovered = discovered;
+        this.active = active;
         this.useCdExpiresAt = 0;
         this.healCdExpiresAt = 0;
+        
     }
 }
 
@@ -106,11 +109,14 @@ export class RoomComponent {
 }
 
 export class TriggerAreaComponent {
-    constructor(action = null, data = {}, active = true) {
+    constructor(action = null, data = {}, stopAction = null, stopData = {}, mode = 'Entry', active = true) {
         this.type = 'TriggerArea';
         this.action = action; // e.g., a string or function name
         this.data = data;
+        this.stopAction = stopAction;
+        this.stopData = stopData;
         this.active = active;
+        this.mode = mode; // Entry or Presence
     }
 }
 

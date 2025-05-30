@@ -16,12 +16,21 @@ export class MapRenderSystem extends System {
         // Portal animation properties
         this.portalFrameCount = 9;
         this.portalFrameWidth = 128;
-        this.portalFrameHeight = 86;
+        this.portalFrameHeight = 128;
         this.portalRenderWidth = 144;
-        this.portalRenderHeight = 96;
+        this.portalRenderHeight =144;
         this.portalFrameDuration = 200; // 200ms per frame
         this.portalCurrentFrame = 0;
         this.lastPortalFrameTime = Date.now();
+        // Fountain animation properties
+        this.fountainFrameCount = 10; // 4x4 grid
+        this.fountainFrameWidth = 384;
+        this.fountainFrameHeight = 384;
+        this.fountainRenderWidth = 144;
+        this.fountainRenderHeight = 144;
+        this.fountainFrameDuration = 120; // 200ms per frame
+        this.fountainCurrentFrame = 0;
+        this.lastFountainFrameTime = Date.now();
     }
 
     init() {
@@ -53,8 +62,10 @@ export class MapRenderSystem extends System {
             stairsdown: 'img/avatars/stairsdown.png',
             portal: 'img/anim/Portal-Animation.png',  // This will be the sprite strip (replacing static portal.png)
             inactivePortal: 'img/avatars/inactive-portal.png',
+            cleansedPortal: 'img/anim/Portal-Animation-Cleansed.png',
             chest: 'img/avatars/chest.png',
-            fountain: 'img/avatars/fountain.png',
+            fountain: 'img/anim/fountain/128x64_fountain_stone_shadow_anim.png',
+            inactiveFountain: 'img/avatars/fountain.png',
             player_idle: 'img/anim/Player/Idle.png',
             player_walk: 'img/anim/Player/Walk.png',
             player_attack: 'img/anim/Player/Attack_Fire_3.png',
@@ -181,6 +192,12 @@ export class MapRenderSystem extends System {
             this.lastPortalFrameTime = currentTime;
         }
 
+        // Update fountain animation frame
+        if (currentTime - this.lastFountainFrameTime >= this.fountainFrameDuration) {
+            this.fountainCurrentFrame = (this.fountainCurrentFrame + 1) % this.fountainFrameCount;
+            this.lastFountainFrameTime = currentTime;
+        }
+
         let wallCount = 0;
         // First pass: Render all entity sprites except the player
         for (const entity of entities) {
@@ -213,11 +230,19 @@ export class MapRenderSystem extends System {
                 } else if (entity.hasComponent('Stair')) {
                     const stairComp = entity.getComponent('Stair');
                     spritePath = stairComp.direction === 'up' ? 'img/avatars/stairsup.png' : 'img/avatars/stairsdown.png';
-                } else if (entity.hasComponent('Fountain')) {
-                    spritePath = 'img/avatars/fountain.png';
-                } else if (entity.hasComponent('Portal')) {
+                }  else if (entity.hasComponent('Portal')) {
                     const portalComp = entity.getComponent('Portal');
-                    spritePath = portalComp.active ? 'img/anim/Portal-Animation.png' : 'img/avatars/inactive-portal.png'; // Use the sprite strip for portals
+
+                    if (!portalComp.active) {
+                        spritePath = 'img/avatars/inactive-portal.png';
+                    } else {
+                        if (portalComp.cleansed) {
+                            spritePath = 'img/anim/Portal-Animation-Cleansed.png';
+                        } else {
+                            spritePath = 'img/anim/Portal-Animation.png';
+                        }
+                    }
+                    
                 } else if (entity.hasComponent('LootData')) {
                     spritePath = 'img/avatars/chest.png';
                 } else if (entity.hasComponent('NPCData')) {
@@ -272,6 +297,29 @@ export class MapRenderSystem extends System {
                         renderY,
                         visuals.w * this.SCALE_FACTOR,
                         visuals.h * this.SCALE_FACTOR
+                    );
+                }
+            } else if (entity.hasComponent('Fountain')) {
+                const fountainComp = entity.getComponent('Fountain');
+                if (fountainComp.active) {
+                    // Render animated fountain using the sprite strip
+                    const actualFrame = this.fountainCurrentFrame + 2; // Start at frame 2
+                    const frameX = (actualFrame % 4) * this.fountainFrameWidth; // 4 columns
+                    const frameY = Math.floor(actualFrame / 4) * this.fountainFrameHeight; // 4 rows
+                    this.ctx.drawImage(
+                        sprite,
+                        frameX, frameY, // Source x, y
+                        this.fountainFrameWidth, this.fountainFrameHeight, // Source width, height
+                        renderX, renderY, // Destination x, y
+                        this.fountainRenderWidth, this.fountainRenderHeight // Destination width, height
+                    );
+                } else {
+                    // Render static inactive fountain
+                    this.ctx.drawImage(
+                        sprite,
+                        renderX,
+                        renderY,
+                        this.fountainRenderWidth, this.fountainRenderHeight
                     );
                 }
             } else if (entity.hasComponent('LootData')) {

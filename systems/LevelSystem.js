@@ -243,7 +243,7 @@ export class LevelSystem extends System {
                 entityList.walls = levelData.walls;
                 entityList.floors = levelData.floors;
                 entityList.rooms = levelData.roomEntityIds;
-                entityList.fountains = this.generateFountains(tier, levelData.map, levelData.roomEntityIds);
+                entityList.fountains = this.generateFountains(tier, levelData.map, levelData.roomEntityIds, entityList);
 
                 this.placeStairs(levelEntity, levelData, hasBossRoom);
                 entityList.treasures = this.generateLootEntities(tier, levelData.map, levelData.roomEntityIds);

@@ -27,6 +27,8 @@ export class InventorySystem extends System {
             this.buyItem(data);
         });
         this.eventBus.on('UseItem', ({ entityId, uniqueId }) => this.useItem({ entityId, uniqueId }));
+        this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || []
+        
     }
 
     addItem({ entityId, item }) {
@@ -224,7 +226,7 @@ export class InventorySystem extends System {
         inventory.items.splice(itemIndex, 1);
 
         this.eventBus.emit('LogMessage', { message: `Sold ${itemToSell.name} for ${goldValue} gold` });
-        this.eventBus.emit('PlaySfxImmediate', { sfx: 'coin', volume: 0.25 });
+        this.sfxQueue.push({ sfx: 'loot0', volume: .33 });
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
 
