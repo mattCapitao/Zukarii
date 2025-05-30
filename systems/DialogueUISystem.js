@@ -93,12 +93,14 @@ export class DialogueUISystem extends System {
                     console.log(`DialogueUISystem: Updated dialogue for completion message`, { message });
                     this.refreshDialogueTimeout();
                 } else {
+                    /*
                     dialogue.text = message;
                     dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
                     dialogue.isOpen = true;
                     dialogue.dialogueStage = 'greeting';
                     console.log(`DialogueUISystem: Updated dialogue for string message`, { message });
                     this.refreshDialogueTimeout();
+                    */
                 }
             }
         });
