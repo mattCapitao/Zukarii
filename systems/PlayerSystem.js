@@ -44,7 +44,7 @@ export class PlayerSystem extends System {
         stats._internal.base.luck = 0;
         stats._internal.base.maxHp = 30
         stats._internal.base.maxMana = 10
-        stats._internal.base.movementSpeed = 155; // Default movement speed
+        stats._internal.base.movementSpeed = 100; // Default movement speed
 
         stats._internal.temp = {
             intellect: 0,
@@ -264,8 +264,9 @@ export class PlayerSystem extends System {
         stats.luck = stats._internal.base.luck + (stats._internal.gear.luck || 0) + (stats._internal.temp.luck || 0);
         stats.maxLuck = (stats._internal.gear.maxLuck || 0) + (stats._internal.temp.maxLuck || 0);
 
-        const movementSpeed = 155 + (stats._internal.gear.movementSpeed || 0) + (stats._internal.temp.movementSpeed || 0);
-        stats.movementSpeed = isNaN(movementSpeed) ? 155 : movementSpeed;
+        stats._internal.base.movementSpeed = isNaN(stats._internal.base.movementSpeed) ? 100 : stats._internal.base.movementSpeed;
+        const movementSpeed = stats._internal.base.movementSpeed + (stats._internal.gear.movementSpeed || 0) + (stats._internal.temp.movementSpeed || 0);
+        stats.movementSpeed =  movementSpeed;
         console.log(`PlayerSystem.js: calculateStats - Calculated movementSpeed: ${stats.movementSpeed}`);
         // Update MovementSpeedComponent
         movementSpeedComp.movementSpeed = stats.movementSpeed;

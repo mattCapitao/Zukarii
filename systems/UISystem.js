@@ -649,12 +649,14 @@ export class UISystem extends System {
         const player = this.entityManager.getEntity('player');
         const health = player.getComponent('Health');
         const mana = player.getComponent('Mana');
+        const stats = player.getComponent('Stats');
         const playerState = player.getComponent('PlayerState');
         const resource = player.getComponent('Resource');
         console.log("Resource - on load", resource);
 
         this.statusUpdates.hp = { value: health.hp, max: health.maxHp };
         this.statusUpdates.mana = { value: mana.mana, max: mana.maxMana };
+        this.statusUpdates.movementSpeed = stats.movementSpeed;
         this.statusUpdates.xp = { value: playerState.xp, next: playerState.nextLevelXp };
         this.statusUpdates.healPotions = resource.healPotions;
         this.statusUpdates.torches = resource.torches;
@@ -668,6 +670,7 @@ export class UISystem extends System {
             const playerLevelSpan = this.playerInfo.querySelector('#playerLevel');
             const dungeonTierSpan = this.playerInfo.querySelector('#dungeonTier');
             const playerGoldSpan = this.playerInfo.querySelector('#playerGold');
+            const playerSpeedSpan = this.playerInfo.querySelector('#playerSpeed');
             const playerShardSpan = this.playerInfo.querySelector('#playerShards');
             const portalBindingSpan = this.playerInfo.querySelector('#portalBinding');
 
@@ -677,6 +680,7 @@ export class UISystem extends System {
             if (playerLevelSpan) playerLevelSpan.textContent = playerState.level;
             if (dungeonTierSpan) dungeonTierSpan.textContent = gameState.tier;
             if (playerGoldSpan) playerGoldSpan.textContent = resource.gold !== undefined ? resource.gold : 'N/A';
+            if (playerSpeedSpan) playerSpeedSpan.textContent = stats.movementSpeed !== undefined ? stats.movementSpeed : 'N/A';
             if (playerShardSpan) playerShardSpan.textContent = resource.craftResources.ashenShard !== undefined ? resource.craftResources.ashenShard : 0;
             console.log("Resource - before output", resource);
             if (portalBindingSpan) portalBindingSpan.textContent = resource.portalBinding !== undefined ? resource.portalBinding : 0;
@@ -1082,7 +1086,8 @@ export class UISystem extends System {
             { stat: 'defense', incrementable: false },
             { stat: 'damageBonus', incrementable: false },
             { stat: 'meleeBonus', incrementable: false },
-            { stat: 'rangedBonus', incrementable: false }
+            { stat: 'rangedBonus', incrementable: false },
+            { stat: 'moveementSpeed', incrementable: false }, 
         ];
 
         let statHtml = `

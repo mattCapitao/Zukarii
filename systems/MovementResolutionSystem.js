@@ -4,11 +4,11 @@ export class MovementResolutionSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'MovementIntent'];
-        this.BASE_MOVEMENT_SPEED_PPS = 155; 
+        this.BASE_MOVEMENT_SPEED_PPS = 155; // Base movement speed in pixels per second
+        this.MAX_ACTUAL_SPEED = 320;         // Maximum allowed speed in pixels per second
     }
 
     update(deltaTime) {
-
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         if (gameState.transitionLock) {
             console.log('MovementResolutionSystem: Skipped update due to transitionLock');
@@ -21,7 +21,6 @@ export class MovementResolutionSystem extends System {
         const entities = this.entityManager.getEntitiesWith(this.requiredComponents);
 
         for (const entity of entities) {
-            // Skip entities without MovementIntent
             const intent = entity.getComponent('MovementIntent');
             const pos = entity.getComponent('Position');
             let lastPos = null;
@@ -31,70 +30,85 @@ export class MovementResolutionSystem extends System {
             let deltaX = intent.targetX - pos.x;
             let deltaY = intent.targetY - pos.y;
 
+            // Projectiles: unchanged logic
             if (entity.hasComponent('Projectile')) {
-
                 if (lastPos) {
                     lastPos.x = pos.x;
                     lastPos.y = pos.y;
                 }
                 pos.x += deltaX;
                 pos.y += deltaY;
-
-                // Emit position change event
-                
                 continue;
             }
 
+            // Calculate movement speed multiplier (default 100 = 1.0x)
+            let speedMultiplier = 100;
+            if (entity.hasComponent('MovementSpeed')) {
+                speedMultiplier = entity.getComponent('MovementSpeed').movementSpeed;
+            }
+            // Calculate actual speed in pixels per second, clamp to MAX_ACTUAL_SPEED
+            let actualSpeed = this.BASE_MOVEMENT_SPEED_PPS * (speedMultiplier / 100);
+            if (actualSpeed > this.MAX_ACTUAL_SPEED) actualSpeed = this.MAX_ACTUAL_SPEED;
+
+            // Calculate direction and distance to target
+            const dx = intent.targetX - pos.x;
+            const dy = intent.targetY - pos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Calculate max distance this frame
+            const maxStep = actualSpeed * deltaTime;
+
+            let moveX = 0, moveY = 0;
+            if (distance <= maxStep) {
+                moveX = dx;
+                moveY = dy;
+            } else if (distance > 0) {
+                moveX = (dx / distance) * maxStep;
+                moveY = (dy / distance) * maxStep;
+            }
+
+            // Collision handling
             if (entity.hasComponent('Collision').collisions) {
                 const collisions = entity.getComponent('Collision').collisions;
-                if (!collisions || collisions.length < 1) return;
-                
-                //console.log(`MovementResolutionSystem: Checking entity ${entity.id} collisions:`, collisions);
+                if (!collisions || collisions.length < 1) continue;
 
                 for (const collision of collisions) {
-                    //console.log('MovementResolutionSystem: Collision detected:', collision);
-
-                    // Block movement along the colliding axis
                     if (collision.normalX !== 0) {
-                        deltaX = 0; // Stop X movement
-                        intent.targetX = pos.x; // Adjust intent to stop X movement
+                        moveX = 0;
+                        intent.targetX = pos.x;
                     }
                     if (collision.normalY !== 0) {
-                        deltaY = 0; // Stop Y movement
-                        intent.targetY = pos.y; // Adjust intent to stop Y movement
+                        moveY = 0;
+                        intent.targetY = pos.y;
                     }
                 }
             }
 
-            // Check for potential overlap along the X-axis
-            const newX = pos.x + deltaX;
+            // Overlap checks
+            const newX = pos.x + moveX;
             if (this.wouldOverlap(entity, newX, pos.y)) {
-                //console.log('MovementResolutionSystem: Overlap detected along X-axis, stopping X movement.', deltaX);
-                deltaX = 0;
-                intent.targetX = pos.x; // Stop X movement
+                moveX = 0;
+                intent.targetX = pos.x;
             }
-
-            // Check for potential overlap along the Y-axis
-            const newY = pos.y + deltaY;
+            const newY = pos.y + moveY;
             if (this.wouldOverlap(entity, pos.x, newY)) {
-                //console.log('MovementResolutionSystem: Overlap detected along Y-axis, stopping Y movement.', deltaY);
-                deltaY = 0;
-                intent.targetY = pos.y; // Stop Y movement
+                moveY = 0;
+                intent.targetY = pos.y;
             }
 
             if (lastPos) {
                 lastPos.x = pos.x;
                 lastPos.y = pos.y;
             }
-            // Apply remaining movement
-            pos.x += deltaX;
-            pos.y += deltaY;
+            pos.x += moveX;
+            pos.y += moveY;
 
-            // Emit position change event
-            
+            // Remove MovementIntent if arrived at target
+            if (distance <= maxStep) {
+                this.entityManager.removeComponentFromEntity(entity.id, 'MovementIntent');
+            }
         }
     }
-
 
     /**
      * Check if moving the entity to (newX, newY) would cause overlap with other entities.
@@ -103,7 +117,6 @@ export class MovementResolutionSystem extends System {
         if (entity.hasComponent('Projectile')) { return false; }
         const hitbox = entity.getComponent('Hitbox');
         const entities = this.entityManager.getEntitiesWith(['Position', 'Hitbox']);
-
 
         for (const other of entities) {
             if (other === entity || other.hasComponent('Projectile')) continue; // Skip self
@@ -129,9 +142,7 @@ export class MovementResolutionSystem extends System {
             ) {
                 return true; // Overlap detected
             }
-
         }
-
         return false; // No overlap
     }
 }

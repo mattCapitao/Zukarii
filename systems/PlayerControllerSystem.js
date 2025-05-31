@@ -1,16 +1,12 @@
-﻿import { AttackSpeedComponent, MovementSpeedComponent, NeedsRenderComponent, VisualsComponent, MovementIntentComponent } from '../core/Components.js';
+﻿import { MovementIntentComponent, NeedsRenderComponent } from '../core/Components.js';
+
+const BASE_MOVE_DISTANCE = 32; // Set to your tile size or desired step in pixels
 
 export class PlayerControllerSystem {
     constructor(entityManager, eventBus) {
         this.entityManager = entityManager;
         this.eventBus = eventBus;
         this.lastInputState = {};
-        this.previousKeyStates = {
-            ArrowUp: false,
-            ArrowDown: false,
-            ArrowLeft: false,
-            ArrowRight: false
-        };
     }
 
     async init() {
@@ -22,6 +18,8 @@ export class PlayerControllerSystem {
         this.eventBus.on('ToggleRangedMode', (data) => this.toggleRangedMode(data));
         this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
         this.healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
+        this.TILE_SIZE = 32;
+        this.MELEE_RANGE = 1.5 * this.TILE_SIZE;
     }
 
     update(deltaTime) {
@@ -38,15 +36,9 @@ export class PlayerControllerSystem {
 
         if (!gameState || gameState.gameOver || gameState.transitionLock) return;
 
-        const currentKeys = JSON.stringify(inputState.keys);
-        const lastKeys = JSON.stringify(this.lastInputState);
-        if (currentKeys !== lastKeys) {
-            this.lastInputState = { ...inputState.keys };
-        }
-
         // Ranged mode (keyboard input)
         if (gameState.isRangedMode) {
-            if (this.entityManager.getEntity('player').getComponent('Mana').mana <=2) {
+            if (player.getComponent('Mana').mana <= 2) {
                 this.eventBus.emit('LogMessage', { message: `you cannot cast ranged attacks without mana!` });
                 return;
             }
@@ -59,90 +51,84 @@ export class PlayerControllerSystem {
 
             const direction = { dx, dy, source: 'keyboard' };
             if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed && (direction.dx !== 0 || direction.dy !== 0)) {
-                console.log(`PlayerControllerSystem: Emitting RangedAttack - direction: `, direction);
                 this.eventBus.emit('RangedAttack', direction);
                 attackSpeed.elapsedSinceLastAttack = 0;
                 this.endTurn('rangedAttack');
                 if (dx < 0) this.VisualsComponent.faceLeft = true;
                 if (dx > 0) this.VisualsComponent.faceLeft = false;
             }
-
             return;
         }
 
         // Movement (keyboard or mouse)
-        let speed = player.getComponent('MovementSpeed').movementSpeed;
-        if (player.hasComponent('InCombat')) {
-            speed = Math.round(speed * 0.8);
-            console.log(`PlayerControllerSystem: Player speed reduced to ${speed} due to combat!`);
-        }
-
-        let vx = 0, vy = 0;
         let hasKeyboardInput = false;
+        let dx = 0, dy = 0;
 
-        // Keyboard movement
+        // Keyboard movement: set intent as a fixed step in the direction
         if (inputState.keys['ArrowUp'] || inputState.keys['w']) {
-            vy -= speed;
+            dy -= 1;
             hasKeyboardInput = true;
         }
         if (inputState.keys['ArrowDown'] || inputState.keys['s']) {
-            vy += speed;
+            dy += 1;
             hasKeyboardInput = true;
         }
         if (inputState.keys['ArrowLeft'] || inputState.keys['a']) {
-            vx -= speed;
+            dx -= 1;
             this.VisualsComponent.faceLeft = true;
             hasKeyboardInput = true;
         }
         if (inputState.keys['ArrowRight'] || inputState.keys['d']) {
-            vx += speed;
+            dx += 1;
             this.VisualsComponent.faceLeft = false;
             hasKeyboardInput = true;
         }
 
-        // Normalize diagonal keyboard movement
-        if (vx !== 0 && vy !== 0) {
-            const magnitude = Math.sqrt(vx * vx + vy * vy);
-            vx = (vx / magnitude) * speed;
-            vy = (vy / magnitude) * speed;
+        // Only set a new intent if a direction is pressed
+        if (hasKeyboardInput && (dx !== 0 || dy !== 0)) {
+            // Normalize for diagonal movement
+            const magnitude = Math.sqrt(dx * dx + dy * dy);
+            const stepX = (dx / magnitude) * BASE_MOVE_DISTANCE;
+            const stepY = (dy / magnitude) * BASE_MOVE_DISTANCE;
+            const targetX = position.x + stepX;
+            const targetY = position.y + stepY;
+
+            this.entityManager.addComponentToEntity('player', new MovementIntentComponent(targetX, targetY));
+            this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(targetX, targetY));
+            gameState.needsRender = true;
+
+            // Remove MouseTarget if keyboard input is used
+            if (player.hasComponent('MouseTarget')) {
+                this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
+            }
+            return;
         }
 
-        // Mouse movement
+        // Mouse movement: set intent as the mouse target position
         if (mouseTarget && !hasKeyboardInput) {
-            const dx = mouseTarget.targetX - position.x;
-            const dy = mouseTarget.targetY - position.y;
+            const targetX = mouseTarget.targetX;
+            const targetY = mouseTarget.targetY;
+            // Only set intent if not already at target
+            const dx = targetX - position.x;
+            const dy = targetY - position.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-
             if (distance > 2) {
-                const magnitude = distance;
-                vx = (dx / magnitude) * speed;
-                vy = (dy / magnitude) * speed;
+                this.entityManager.addComponentToEntity('player', new MovementIntentComponent(targetX, targetY));
+                this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(targetX, targetY));
+                gameState.needsRender = true;
                 this.VisualsComponent.faceLeft = dx < 0;
             } else {
                 this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
-                vx = 0;
-                vy = 0;
+                if (player.hasComponent('MovementIntent')) {
+                    this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
+                }
             }
+            return;
         }
 
-        // Clear MouseTarget if keyboard input is used
-        if (hasKeyboardInput && mouseTarget) {
-            this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
-        }
-
-        // Set or remove movement intent
-        if (vx !== 0 || vy !== 0) {
-            const newX = position.x + vx * deltaTime;
-            const newY = position.y + vy * deltaTime;
-            this.entityManager.addComponentToEntity('player', new MovementIntentComponent(newX, newY));
-            this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(newX, newY));
-            gameState.needsRender = true;
-        } else {
-            // Remove MovementIntentComponent when there's no movement
-            if (player.hasComponent('MovementIntent')) {
-                this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
-                console.log('PlayerControllerSystem: Removed MovementIntentComponent as player stopped moving');
-            }
+        // No movement input: remove intent if present
+        if (player.hasComponent('MovementIntent')) {
+            this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
         }
     }
 

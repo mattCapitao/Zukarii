@@ -63,7 +63,7 @@ import {
 
 export class Game {
     constructor() {
-        this.PLAYER_DEFAULT_MOVE_SPEED = 155;
+        this.PLAYER_DEFAULT_MOVE_SPEED = 100;
         this.state = new State();
         window.state = this.state; // Expose state globally for debugging
         this.entityManager = this.state.entityManager;
@@ -103,7 +103,7 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new JourneyPathComponent());
         this.entityManager.addComponentToEntity('player', new InputStateComponent());
         this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
-        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent(155));
+        this.entityManager.addComponentToEntity('player', new MovementSpeedComponent());
         this.entityManager.addComponentToEntity('player', new AffixComponent());
         this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32, 32));
         this.entityManager.addComponentToEntity('player', new HitboxComponent(28,28,2,4));
@@ -411,9 +411,10 @@ export class Game {
         this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume: .05 });
 
         const player = this.entityManager.getEntity('player');
+
         const movementSpeed = player.getComponent('MovementSpeed');
         if (movementSpeed) {
-            movementSpeed.movementSpeed = 155;
+            movementSpeed.movementSpeed = 100;
         }
         const newPlayerComp = player.getComponent('NewCharacter');
         if (newPlayerComp) {

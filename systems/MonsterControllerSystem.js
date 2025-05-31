@@ -11,7 +11,9 @@ export class MonsterControllerSystem extends System {
     }
 
     init() {
-
+        this.TILE_SIZE = 32;
+        this.AGGRO_RANGE = 4 * this.TILE_SIZE; // 4 tiles in pixels (32 pixels per tile)
+        this.MELEE_RANGE = 1.5 * this.TILE_SIZE; // Pixel distance to trigger melee attack
     }
     update(deltaTime) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
@@ -24,17 +26,13 @@ export class MonsterControllerSystem extends System {
         const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
         if (!levelEntity) return;
 
-        const AGGRO_RANGE = 4 * 32; // 4 tiles in pixels (32 pixels per tile)
-        const MELEE_RANGE = 40; // Pixel distance to trigger melee attack
-        const TILE_SIZE = 32;
-
         const monsters = this.entityManager.getEntitiesWith(this.requiredComponents);
 
         const now = Date.now();
 
         monsters.forEach(monster => {
             const health = monster.getComponent('Health');
-            const hpBarWidth = Math.floor((health.hp / health.maxHp) * (TILE_SIZE / 2));
+            const hpBarWidth = Math.floor((health.hp / health.maxHp) * (this.TILE_SIZE / 2));
             const monsterData = monster.getComponent('MonsterData');
             monsterData.hpBarWidth = hpBarWidth;
 
@@ -56,7 +54,7 @@ export class MonsterControllerSystem extends System {
 
             const pos = monster.getComponent('Position');
             const attackSpeed = monster.getComponent('AttackSpeed');
-            const movementSpeed = monster.getComponent('MovementSpeed');
+            // const movementSpeed = monster.getComponent('MovementSpeed'); // No longer needed
             const playerPos = player.getComponent('Position');
             const dx = playerPos.x - pos.x;
             const dy = playerPos.y - pos.y;
@@ -65,14 +63,14 @@ export class MonsterControllerSystem extends System {
             // Accumulate time for attacks (deltaTime in seconds, convert to ms)
             attackSpeed.elapsedSinceLastAttack += deltaTime * 1000;
 
-            if (distance <= AGGRO_RANGE + (2 * TILE_SIZE)) { monsterData.isDetected = true; }
+            if (distance <= this.AGGRO_RANGE + (2 * this.TILE_SIZE)) { monsterData.isDetected = true; }
 
-            if (distance <= AGGRO_RANGE) { monsterData.isAggro = true; }
+            if (distance <= this.AGGRO_RANGE) { monsterData.isAggro = true; }
 
-            if (distance > AGGRO_RANGE * 2 && !isInCombat) { monsterData.isAggro = false; }
+            if (distance > this.AGGRO_RANGE * 2 && !isInCombat) { monsterData.isAggro = false; }
 
             if (monsterData.isAggro) {
-                if (distance <= MELEE_RANGE) {
+                if (distance <= this.MELEE_RANGE) {
                     if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
                         this.eventBus.emit('MonsterAttack', { entityId: monster.id });
                         attackSpeed.elapsedSinceLastAttack = 0;
@@ -81,29 +79,17 @@ export class MonsterControllerSystem extends System {
                     return; // Stop moving if in melee range
                 }
 
-                // Smooth movement toward the player using MovementIntent (allow diagonal movement)
-                const speed = movementSpeed.movementSpeed; // Pixels per second (e.g., 100)
-                const moveDistance = speed * deltaTime; // Distance to move this frame
+                // Set facing direction
+                if (dx <= 0) { monster.getComponent('Visuals').faceLeft = true; }
+                if (dx > 0) { monster.getComponent('Visuals').faceLeft = false; }
 
-                // Move directly toward the player (diagonal movement allowed)
-                const magnitude = Math.sqrt(dx * dx + dy * dy);
-                if (magnitude > 0) {
-                    const moveX = (dx / magnitude) * moveDistance;
-                    const moveY = (dy / magnitude) * moveDistance;
-
-                    const newX = pos.x + moveX;
-                    const newY = pos.y + moveY;
-
-                    const lastX = monster.getComponent('LastPosition').x;
-
-                    // Set facing direction
-                    if ( dx <= 0) { monster.getComponent('Visuals').faceLeft = true; }
-                    if ( dx > 0) { monster.getComponent('Visuals').faceLeft = false; }
-
-                    // Set MovementIntent for collision detection and resolution
-                    this.entityManager.addComponentToEntity(monster.id, new MovementIntentComponent(newX, newY));
-                    //console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to (${newX.toFixed(2)}, ${newY.toFixed(2)}), distance to player: ${distance.toFixed(2)} pixels`);
-                }
+                // Set MovementIntent for collision detection and resolution
+                // Destination is always the player's current position
+                this.entityManager.addComponentToEntity(
+                    monster.id,
+                    new MovementIntentComponent(playerPos.x, playerPos.y)
+                );
+                //console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to player at (${playerPos.x}, ${playerPos.y}), distance to player: ${distance.toFixed(2)} pixels`);
             }
         });
     }
@@ -120,7 +106,6 @@ export class MonsterControllerSystem extends System {
 
         const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
         const baseXp = Math.round((health.maxHp / 3 + (monsterData.minBaseDamage + monsterData.maxBaseDamage * 1.5)) * (1 + tier * 0.1));
-        //console.log(`MonsterControllerSystem: Monster defeated: ${monsterData.name}, XP calc - maxHp: ${health.maxHp}, minDmg: ${monsterData.minBaseDamage}, maxDmg: ${monsterData.maxBaseDamage}, tier: ${tier}, baseXp: ${baseXp}`);
         this.eventBus.emit('LogMessage', { message: `${monsterData.name} defeated!` });
         this.eventBus.emit('AwardXp', { amount: baseXp });
 
@@ -162,10 +147,9 @@ export class MonsterControllerSystem extends System {
             maxItems: items.length > 0 ? items.length : 1,
             items: items
         }));
-        //console.log(`MonsterControllerSystem: Emitting DropLoot for ${monsterData.name} with items:`, items);
         this.eventBus.emit('DropLoot', { lootSource });
 
-        
+
     }
 
     // systems/MonsterControllerSystem.js - New isWalkable method

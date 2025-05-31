@@ -26,7 +26,6 @@ export class PlayerCollisionSystem extends System {
             return;
         }
 
-        const attackSpeed = player.getComponent('AttackSpeed');
         const movementIntent = player.getComponent('MovementIntent');
         const movementDirection = movementIntent
             ? { dx: movementIntent.targetX - player.getComponent('Position').x, dy: movementIntent.targetY - player.getComponent('Position').y }
@@ -40,38 +39,55 @@ export class PlayerCollisionSystem extends System {
                 console.warn(`PlayerCollisionSystem: Target entity ${collisionData.targetId} not found for player ${player.id}`);
                 continue;
             }
+            const isAdjacent = this.isAdjacentToPlayer(player, target);
+            const isOverlapping = this.isOverlappingPlayer(player, target);
 
             if (target.hasComponent('MonsterData') && target.getComponent('Health').hp > 0) {
-                if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
-                    this.eventBus.emit('MeleeAttack', { targetEntityId: target.id });
-                    attackSpeed.elapsedSinceLastAttack = 0;
-                    this.endTurn('meleeAttack');
+                const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+                // Only allow melee if NOT in ranged mode
+                if (!gameState?.isRangedMode) {
+                    // Adjacency check (melee range)          
+                    if (isAdjacent || isOverlapping) {
+                        const attackSpeed = player.getComponent('AttackSpeed');
+                        if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
+                            this.eventBus.emit('MeleeAttack', { targetEntityId: target.id });
+                            attackSpeed.elapsedSinceLastAttack = 0;
+                            this.endTurn('meleeAttack');
+                        }
+                        collision.collisions.splice(i, 1);
+                    }
                 }
-                collision.collisions.splice(i, 1);
                 continue;
             }
 
             // Entry (one-shot) triggers: fire once per entry, then cooldown
             if (target.hasComponent('TriggerArea')) {
-                const triggerArea = target.getComponent('TriggerArea');
-                if (triggerArea.mode !== 'Presence' && triggerArea.active) {
-                    this.eventBus.emit(triggerArea.action, triggerArea.data);
-                    triggerArea.active = false;
-                    setTimeout(() => {
-                        triggerArea.active = true;
-                    }, triggerArea.resetDelay || 120000);
+                if (isOverlapping) { 
+                    const triggerArea = target.getComponent('TriggerArea');
+                    if (triggerArea.mode !== 'Presence' && triggerArea.active) {
+                        this.eventBus.emit(triggerArea.action, triggerArea.data);
+                        triggerArea.active = false;
+                        setTimeout(() => {
+                            triggerArea.active = true;
+                        }, triggerArea.resetDelay || 120000);
+                    }
                 }
                 continue;
-            }
+            } 
 
             if (target.hasComponent('NPCData')) {
-                this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
-                collision.collisions.splice(i, 1);
+                if (isAdjacent || isOverlapping) { 
+                    this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
+                    collision.collisions.splice(i, 1);
+                }
+               
                 continue;
             }
             if (target.hasComponent('Fountain')) {
-                this.eventBus.emit('UseFountain', { fountainEntityId: target.id });
-                this.endTurn('useFountain');
+                if (isAdjacent || isOverlapping) {
+                    this.eventBus.emit('UseFountain', { fountainEntityId: target.id });
+                    this.endTurn('useFountain');
+                }
                 collision.collisions.splice(i, 1);
                 continue;
             }
@@ -82,52 +98,60 @@ export class PlayerCollisionSystem extends System {
                 continue;
             }
             if (target.hasComponent('Stair') && !player.hasComponent('StairLock')) {
-                const stairComp = target.getComponent('Stair');
-                if (!stairComp.active) {
-                    const highestTier = this.entityManager.getEntity('gameState').getComponent('GameState').highestTier;
-                    const currentTier = this.entityManager.getActiveTier();
-                    if (highestTier > currentTier && stairComp.direction === 'down') {
-                        console.warn(`PlayerCollisionSystem: Stairs down at tier ${currentTier} unocked for highest tier: .`, highestTier);
-                        stairComp.active = true;
-                    } else {
-                        player.addComponent(new StairLockComponent());
-                        this.eventBus.emit('LogMessage', { message: 'The Stairs are blocked by a magical barrier' });
-                        const fromTier = this.entityManager.getActiveTier();
-                        if (fromTier === undefined || fromTier === null) {
-                            console.error('PlayerCollisionSystem: getActiveTier returned invalid value', { fromTier });
-                            player.removeComponent(new StairLockComponent());
-                            continue;
-                        }
-                        const toTier = stairComp.direction === 'down' ? fromTier + 1 : fromTier - 1;
-                        try {
-                            this.utilities.pushPlayerActions('attemptStairs', { fromTier, toTier, success: false });
-                            console.log(`PlayerCollisionSystem: Pushed attemptStairs action`, { fromTier, toTier, success: false });
-                        } catch (error) {
-                            console.error('PlayerCollisionSystem: Failed to push attemptStairs action', { error: error.message });
-                        }
-                        setTimeout(() => {
-                            player.removeComponent(new StairLockComponent());
-                        }, 2000);
-                        continue;
-                    }
-                }
-                const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
-                player.addComponent(new StairLockComponent());
-                if (levelTransition && levelTransition.pendingTransition === null) {
+                if (isAdjacent || isOverlapping) {
+
                     const stairComp = target.getComponent('Stair');
-                    levelTransition.lastMovementDirection = movementDirection;
-                    if (stairComp.direction === 'down') {
-                        levelTransition.pendingTransition = 'down';
-                        this.endTurn('transitionDown');
-                    } else if (stairComp.direction === 'up') {
-                        levelTransition.pendingTransition = 'up';
-                        this.endTurn('transitionUp');
+                    if (!stairComp.active) {
+                        const highestTier = this.entityManager.getEntity('gameState').getComponent('GameState').highestTier;
+                        const currentTier = this.entityManager.getActiveTier();
+                        if (highestTier > currentTier && stairComp.direction === 'down') {
+                            console.warn(`PlayerCollisionSystem: Stairs down at tier ${currentTier} unocked for highest tier: .`, highestTier);
+                            stairComp.active = true;
+                        } else {
+                            player.addComponent(new StairLockComponent());
+                            this.eventBus.emit('LogMessage', { message: 'The Stairs are blocked by a magical barrier' });
+                            const fromTier = this.entityManager.getActiveTier();
+                            if (fromTier === undefined || fromTier === null) {
+                                console.error('PlayerCollisionSystem: getActiveTier returned invalid value', { fromTier });
+                                player.removeComponent(new StairLockComponent());
+                                continue;
+                            }
+                            const toTier = stairComp.direction === 'down' ? fromTier + 1 : fromTier - 1;
+                            try {
+                                this.utilities.pushPlayerActions('attemptStairs', { fromTier, toTier, success: false });
+                                console.log(`PlayerCollisionSystem: Pushed attemptStairs action`, { fromTier, toTier, success: false });
+                            } catch (error) {
+                                console.error('PlayerCollisionSystem: Failed to push attemptStairs action', { error: error.message });
+                            }
+                            setTimeout(() => {
+                                player.removeComponent(new StairLockComponent());
+                            }, 2000);
+                            continue;
+
+                        }
                     }
-                    collision.collisions.splice(i, 1);
-                    break;
+                        const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+                        player.addComponent(new StairLockComponent());
+                        if (levelTransition && levelTransition.pendingTransition === null) {
+                            const stairComp = target.getComponent('Stair');
+                            levelTransition.lastMovementDirection = movementDirection;
+                            if (stairComp.direction === 'down') {
+                                levelTransition.pendingTransition = 'down';
+                                this.endTurn('transitionDown');
+                            } else if (stairComp.direction === 'up') {
+                                levelTransition.pendingTransition = 'up';
+                                this.endTurn('transitionUp');
+                            }
+                            collision.collisions.splice(i, 1);
+                            break;
+                        }
+                    
                 }
             }
             if (target.hasComponent('Portal')) {
+                if (!isAdjacent && !isOverlapping) {
+                    continue; // Only process portal if adjacent or overlapping
+                }
                 const portalComp = target.getComponent('Portal');
                 if (!portalComp.active) continue;
                 this.sfxQueue.push({ sfx: 'portal0', volume: 0.5 });
@@ -144,6 +168,38 @@ export class PlayerCollisionSystem extends System {
             }
         }
     }
+
+    isAdjacentToPlayer(player, target, range = 1.5 * 32) {
+        const playerPos = player.getComponent('Position');
+        const targetPos = target.getComponent('Position');
+        if (!playerPos || !targetPos) return false;
+        const dx = targetPos.x - playerPos.x;
+        const dy = targetPos.y - playerPos.y;
+        return Math.sqrt(dx * dx + dy * dy) <= range;
+    }
+
+    isOverlappingPlayer(player, target) {
+        const playerPos = player.getComponent('Position');
+        if (!playerPos) return false;
+        if (!target.hasComponent('TriggerArea')) return false;
+        const triggerArea = target.getComponent('TriggerArea');
+        // Assume triggerArea has x, y, width, height
+        if (
+            typeof triggerArea.x === 'number' &&
+            typeof triggerArea.y === 'number' &&
+            typeof triggerArea.width === 'number' &&
+            typeof triggerArea.height === 'number'
+        ) {
+            return (
+                playerPos.x >= triggerArea.x &&
+                playerPos.x < triggerArea.x + triggerArea.width &&
+                playerPos.y >= triggerArea.y &&
+                playerPos.y < triggerArea.y + triggerArea.height
+            );
+        }
+        return false;
+    }
+
 
 
     endTurn(source) {
