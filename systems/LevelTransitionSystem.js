@@ -311,8 +311,18 @@ export class LevelTransitionSystem extends System {
             this.eventBus.emit('JourneyStateUpdated');
             const healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
             healthUpdates.push({ entityId: 'player', amount: 0 });
+
+            this.updatePortalsForTier(tier);
+
+            // uncomment this block if updatePortalsForTier fix doesnt work
+             /*
+            const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === 0);
+            if (levelEntity) {
+                this.handleLevelAdded({ tier: 0, entityId: levelEntity.id });
+            }
+            */
         }
-    }
+    } 
 
     handleLevelAdded({ tier, entityId }) {
         console.log(`LevelAdded event for tier ${tier}, entityId: ${entityId}`);
@@ -437,4 +447,34 @@ export class LevelTransitionSystem extends System {
         const healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
         healthUpdates.push({ entityId: 'player', amount: 0 });
     }
+
+    updatePortalsForTier(tier) {
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const portals = this.entityManager.getEntitiesWith(['Portal', 'Visuals', 'Position']);
+        for (const portalEntity of portals) {
+            // Only update portals on the current tier
+            const entityTier = parseInt(portalEntity.id.split('_')[1], 10) || 0;
+            if (entityTier !== tier) continue;
+
+            const portalComp = portalEntity.getComponent('Portal');
+            const visuals = portalEntity.getComponent('Visuals');
+            let visualsImg = 'img/anim/Portal-Animation.png';
+            let cleansed = false;
+            let active = portalComp.active; // default to current state
+
+            if (entityTier < 11 && gameState.highestTier < 11) {
+                active = false;
+                cleansed = false;
+                visualsImg = 'img/avatars/inactive-portal.png';
+            } else if (entityTier < 11 && gameState.highestTier >= 11) {
+                active = true;
+                cleansed = true;
+                visualsImg = 'img/anim/Portal-Animation-Cleansed.png';
+            }
+            portalComp.active = active;
+            portalComp.cleansed = cleansed;
+            visuals.avatar = visualsImg;
+        }
+    }
+
 }  

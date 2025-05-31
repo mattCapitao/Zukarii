@@ -4,6 +4,7 @@ export class MovementResolutionSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'MovementIntent'];
+        this.BASE_MOVEMENT_SPEED_PPS = 155; 
     }
 
     update(deltaTime) {

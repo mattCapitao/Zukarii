@@ -36,7 +36,6 @@ export class EntityListComponent {
         this.shopCounters = shopCounters
         this.triggerAreas = triggerAreas
         this.rooms = Array.isArray(rooms) ? rooms : []; // Ensure rooms is always an array
-        console.log(`EntityListComponent: Initialized with rooms: ${JSON.stringify(this.rooms)}`);
     }
 }
 
@@ -77,6 +76,7 @@ export class PortalComponent {
         this.type = 'Portal';
         this.active = active;
         this.cleansed = false;
+        this.destinationTier = Number; // Tier number for the destination portal
     }
     
 }

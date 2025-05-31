@@ -44,6 +44,7 @@ export class PlayerSystem extends System {
         stats._internal.base.luck = 0;
         stats._internal.base.maxHp = 30
         stats._internal.base.maxMana = 10
+        stats._internal.base.movementSpeed = 155; // Default movement speed
 
         stats._internal.temp = {
             intellect: 0,
@@ -72,7 +73,7 @@ export class PlayerSystem extends System {
         stats.luck = stats._internal.base.luck;
         stats.maxHp = stats._internal.base.maxHp;
         stats.maxMana = stats._internal.base.maxMana;
-        stats.movementSpeed = 155;
+        stats.movementSpeed = stats._internal.base.movementSpeed;
         stats.unallocated = 3;
 
         const health = player.getComponent('Health');
