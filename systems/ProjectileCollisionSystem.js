@@ -22,19 +22,21 @@ export class ProjectileCollisionSystem extends System {
                const targetId = projectile.id === collisionData.moverId ? collisionData.targetId : collisionData.moverId;
                const target = this.entityManager.getEntity(targetId)
 
+               const isOverlapping = this.isOverlapping(projectile, target);
+
                 console.log(`ProjectileCollisionSystem: ${projectile.id} collided with ${target.id}`);
 
-                if (target.hasComponent('Wall')) {
+                if (target.hasComponent('Wall') && isOverlapping) {
                     if (!projectile.hasComponent('RemoveEntity')) {
                         projectile.addComponent(new RemoveEntityComponent());
                     }
                     this.sfxQueue.push({ sfx: 'firehit0', volume: .1 });
                     this.eventBus.emit('LogMessage', { message: 'Your shot hit a wall.' });
                     console.log(`ProjectileCollisionSystem: ${projectile.id} hit wall ${target.id}`);
-                    continue;
+                    break;
                 }
 
-                if ((target.hasComponent('MonsterData') && !target.hasComponent('Dead'))) {
+                if ((target.hasComponent('MonsterData') && !target.hasComponent('Dead')) && isOverlapping) {
 
                     console.log(`ProjectileCollisionSystem: ${projectile.id} hit target ${target.id}`);
                     const weapon = projData.weapon;
@@ -61,7 +63,7 @@ export class ProjectileCollisionSystem extends System {
                     if (!projData.isPiercing && !projectile.hasComponent('RemoveEntity')) {
                         projectile.rangeLeft = 0;
                         projectile.addComponent(new RemoveEntityComponent());
-
+                        break;
                     } else {
                         projectile.rangeLeft -=1
                     }
@@ -72,6 +74,39 @@ export class ProjectileCollisionSystem extends System {
             projectile.removeComponent('Collision');
         }
     }
+
+
+    isOverlapping(projectile, target) {
+        const projectilePos = projectile.getComponent('Position');
+        const projectileHitbox = projectile.getComponent('Hitbox');
+        if (!projectilePos || !projectileHitbox) return false;
+
+        // Always use Hitbox and Position for area checks
+        if (target.hasComponent('Hitbox') && target.hasComponent('Position')) {
+            const targetPos = target.getComponent('Position');
+            const targetHitbox = target.getComponent('Hitbox');
+            const areaLeft = targetPos.x + (targetHitbox.offsetX || 0);
+            const areaTop = targetPos.y + (targetHitbox.offsetY || 0);
+            const areaRight = areaLeft + targetHitbox.width;
+            const areaBottom = areaTop + targetHitbox.height;
+
+            // projectile hitbox bounds
+            const projectileLeft = projectilePos.x + (projectileHitbox.offsetX || 0);
+            const projectileTop = projectilePos.y + (projectileHitbox.offsetY || 0);
+            const projectileRight = projectileLeft + projectileHitbox.width;
+            const projectileBottom = projectileTop + projectileHitbox.height;
+
+            // Rectangle overlap check
+            return (
+                projectileLeft < areaRight &&
+                projectileRight > areaLeft &&
+                projectileTop < areaBottom &&
+                projectileBottom > areaTop
+            );
+        }
+        return false;
+    }
+
 
 }
 

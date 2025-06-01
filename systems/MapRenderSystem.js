@@ -299,6 +299,25 @@ export class MapRenderSystem extends System {
                         visuals.h * this.SCALE_FACTOR
                     );
                 }
+                /*
+                // After drawing the portal sprite (inside the entity render loop)
+                if (entity.hasComponent('Portal') && entity.hasComponent('Hitbox')) {
+                    const hitbox = entity.getComponent('Hitbox');
+                    const pos = entity.getComponent('Position');
+                    // Calculate hitbox position relative to the viewport and scale
+                    const hitboxX = (pos.x + (hitbox.offsetX || 0) - startX) * this.SCALE_FACTOR;
+                    const hitboxY = (pos.y + (hitbox.offsetY || 0) - startY) * this.SCALE_FACTOR;
+                    const hitboxW = hitbox.width * this.SCALE_FACTOR;
+                    const hitboxH = hitbox.height * this.SCALE_FACTOR;
+
+                    this.ctx.save();
+                    this.ctx.strokeStyle = 'red';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeRect(hitboxX, hitboxY, hitboxW, hitboxH);
+                    this.ctx.restore();
+                }
+                */
+
             } else if (entity.hasComponent('Fountain')) {
                 const fountainComp = entity.getComponent('Fountain');
                 if (fountainComp.active) {

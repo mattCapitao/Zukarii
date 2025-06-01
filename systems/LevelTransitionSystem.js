@@ -313,7 +313,7 @@ export class LevelTransitionSystem extends System {
             healthUpdates.push({ entityId: 'player', amount: 0 });
 
             this.updatePortalsForTier(tier);
-
+            this.eventBus.emit('GearChanged', { entityId:'player' });
             // uncomment this block if updatePortalsForTier fix doesnt work
              /*
             const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === 0);
@@ -325,6 +325,8 @@ export class LevelTransitionSystem extends System {
     } 
 
     handleLevelAdded({ tier, entityId }) {
+   
+        this.eventBus.emit('PlayTrackControl', { track: 'fountain_loop', play: false, fadeOut: 1.0 });
         console.log(`LevelAdded event for tier ${tier}, entityId: ${entityId}`);
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
@@ -440,7 +442,7 @@ export class LevelTransitionSystem extends System {
         console.log('Pending transition after switch:', this.pendingTransition, 'Tier:', tier);
       
         this.pendingTransition = null;
-
+        this.eventBus.emit('GearChanged', { entityId: 'player' });
         // Trigger UI update after loading
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
         

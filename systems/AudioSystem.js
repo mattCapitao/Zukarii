@@ -6,7 +6,10 @@ export class AudioSystem extends System {
         super(entityManager, eventBus);
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.soundBuffers = {};
-        this.trackSources = new Map(); // Track sources for play/stop (e.g., torchBurning, backgroundMusic)
+        this.trackSources = new Map(); // Track sources for play/stop (e.g., torchBurning, backgroundMusic) 
+        this.trackState = new Map();
+        this.playingTracks = new Set();
+        this.fadeTimeouts = new Map();
         this.preloadSounds();
     }
 
@@ -22,7 +25,7 @@ export class AudioSystem extends System {
             this.playTrackControl(data);
             console.warn(`AudioSystem: Track control requested for track: ${data.track}, play: ${data.play}, volume: ${data.volume}, fadeIn: ${data.fadeIn}, fadeOut: ${data.fadeOut}`);
         });
-
+       
         console.warn('AudioSystem initialized', this.audioContext);
     }
 
@@ -79,79 +82,97 @@ export class AudioSystem extends System {
 
     // Add fadeIn and fadeOut parameters (default to 0.5s for smoothness)
     playTrackControl({ track, play = true, volume = 0.05, fadeIn = 0.5, fadeOut = 0.5 }) {
-        console.warn(`AudioSystem: playTrackControl called with track: ${track}, play: ${play}, volume: ${volume}, fadeIn: ${fadeIn}, fadeOut: ${fadeOut}`);
+        // Cancel any pending fade-out timeout if a new play/stop comes in
+        if (this.fadeTimeouts.has(track)) {
+            clearTimeout(this.fadeTimeouts.get(track));
+            this.fadeTimeouts.delete(track);
+        }
+
+        const state = this.trackState.get(track);
+
         if (play) {
-            // Stop existing source with fadeOut if any
+            // If a previous source exists, stop it immediately to avoid overlap
             if (this.trackSources.has(track)) {
-                const existingSource = this.trackSources.get(track);
-                if (existingSource.gainNode) {
-                    const now = this.audioContext.currentTime;
-                    existingSource.gainNode.gain.cancelScheduledValues(now);
-                    existingSource.gainNode.gain.setValueAtTime(existingSource.gainNode.gain.value, now);
-                    existingSource.gainNode.gain.linearRampToValueAtTime(0, now + fadeOut);
-                    existingSource.stop(now + fadeOut);
-                } else {
-                    existingSource.stop();
-                }
+                const oldSource = this.trackSources.get(track);
+                try { oldSource.stop(); } catch (e) { }
                 this.trackSources.delete(track);
-                console.log(`AudioSystem: Stopped existing ${track} with fadeOut`);
+                this.trackState.set(track, 'stopped');
             }
-            // Play new track if buffer exists
+            // Start new track with fade-in
             if (this.soundBuffers[track]) {
                 const source = this.audioContext.createBufferSource();
                 source.buffer = this.soundBuffers[track];
                 source.loop = true;
                 const gainNode = this.audioContext.createGain();
-                // Start at 0 volume for fadeIn
                 gainNode.gain.value = 0;
                 source.connect(gainNode);
                 gainNode.connect(this.audioContext.destination);
                 source.gainNode = gainNode;
-                if (this.audioContext.state === 'suspended') {
-                    this.audioContext.resume().then(() => {
-                        const now = this.audioContext.currentTime;
-                        source.start(now);
-                        // Fade in to target volume
-                        gainNode.gain.setValueAtTime(0, now);
-                        gainNode.gain.linearRampToValueAtTime(volume, now + fadeIn);
-                        this.trackSources.set(track, source);
-                        console.log(`AudioSystem: Playing ${track} with fadeIn to Volume: ${volume}`);
-                    }).catch(error => {
-                        console.error(`AudioSystem: Failed to resume AudioContext for ${track}:`, error);
-                    });
-                } else {
+                source.onended = () => {
+                    this.trackState.set(track, 'stopped');
+                    this.trackSources.delete(track);
+                    this.fadeTimeouts.delete(track);
+                    console.log(`AudioSystem: Track ${track} ended and removed from trackState.`);
+                };
+                const startTrack = () => {
                     const now = this.audioContext.currentTime;
                     source.start(now);
                     gainNode.gain.setValueAtTime(0, now);
                     gainNode.gain.linearRampToValueAtTime(volume, now + fadeIn);
                     this.trackSources.set(track, source);
+                    this.trackState.set(track, 'playing');
                     console.log(`AudioSystem: Playing ${track} with fadeIn to Volume: ${volume}`);
+                };
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume().then(startTrack).catch(error => {
+                        console.error(`AudioSystem: Failed to resume AudioContext for ${track}:`, error);
+                    });
+                } else {
+                    startTrack();
                 }
             } else {
                 console.warn(`AudioSystem: Sound buffer ${track} not found`);
             }
         } else {
-            // Stop track with fadeOut if source exists
+            // Fade out and stop
             if (this.trackSources.has(track)) {
                 const source = this.trackSources.get(track);
+                if (source.loop) source.loop = false;
                 if (source.gainNode) {
                     const now = this.audioContext.currentTime;
                     source.gainNode.gain.cancelScheduledValues(now);
                     source.gainNode.gain.setValueAtTime(source.gainNode.gain.value, now);
                     source.gainNode.gain.linearRampToValueAtTime(0, now + fadeOut);
-                    source.stop(now + fadeOut);
-                    setTimeout(() => {
+                    // Stop after fade-out
+                    const timeoutId = setTimeout(() => {
+                        try { source.stop(); } catch (e) { }
                         this.trackSources.delete(track);
+                        this.trackState.set(track, 'stopped');
+                        this.fadeTimeouts.delete(track);
                         console.log(`AudioSystem: Stopped ${track} with fadeOut`);
-                    }, fadeOut * 1000 + 100); // Remove after fadeOut
+                    }, fadeOut * 1000 + 100);
+                    this.fadeTimeouts.set(track, timeoutId);
+                    this.trackState.set(track, 'stopping');
                 } else {
-                    source.stop();
+                    try { source.stop(); } catch (e) { }
                     this.trackSources.delete(track);
+                    this.trackState.set(track, 'stopped');
+                    this.fadeTimeouts.delete(track);
                     console.log(`AudioSystem: Stopped ${track}`);
                 }
+            } else {
+                // If not playing, ensure state is stopped
+                this.trackState.set(track, 'stopped');
+                this.fadeTimeouts.delete(track);
             }
         }
     }
+
+
+
+
+
+
 
     /*
     playTrackControl({ track, play = true, volume = 0.05 }) {

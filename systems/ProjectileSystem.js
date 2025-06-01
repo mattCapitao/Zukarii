@@ -29,15 +29,7 @@ export class ProjectileSystem extends System {
             const map = levelEntity.getComponent('Map').map;
 
             if (projData.rangeLeft >= 0) {
-                // Calculate movement direction
-               /* let dx = 0, dy = 0;
-                switch (projData.direction) {
-                    case 'ArrowUp': dy = -1; break;
-                    case 'ArrowDown': dy = 1; break;
-                    case 'ArrowLeft': dx = -1; break;
-                    case 'ArrowRight': dx = 1; break;
-                }
-                */
+
                 console.log(`ProjectileSystem: ${projectile.id} has direction:`, projData.direction);
                 const { dx, dy } = projData.direction; 
 
@@ -54,7 +46,7 @@ export class ProjectileSystem extends System {
 
                 const moveX = (dx / magnitude) * moveDistance;
                 const moveY = (dy / magnitude) * moveDistance;
-
+                console.log(`ProjectileSystem: ${projectile.id} moving by (${moveX.toFixed(2)}, ${moveY.toFixed(2)}) pixels`);
                 const newX = pos.x + moveX;
                 const newY = pos.y + moveY;
 

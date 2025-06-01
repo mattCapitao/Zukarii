@@ -3,12 +3,13 @@ import { System } from '../core/Systems.js';
 import { PositionComponent, LastPositionComponent, ProjectileComponent, MovementSpeedComponent, InCombatComponent, NeedsRenderComponent, HitboxComponent, VisualsComponent } from '../core/Components.js';
 
 export class CombatSystem extends System {
-    constructor(entityManager, eventBus) {
+    constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'Health'];
         this.queues = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues') || {};
         this.healthUpdates = this.queues.HealthUpdates || [];
         this.manaUpdates = this.queues.ManaUpdates;
+        this.utilities = utilities;
        
         this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || []
     }
@@ -197,16 +198,16 @@ export class CombatSystem extends System {
         this.eventBus.emit('AnimateRangedAttack');
 
         setTimeout(() => {
-            const projectile = this.entityManager.createEntity(`projectile_${Date.now()}`);
+            const projectile = this.entityManager.createEntity(`projectile_${this.utilities.generateUniqueId()}`);
             this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y + 4));
             this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
             this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, 'player', weapon, isPiercing));
-            this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(250)); // 320 pixels/second (was 32 pixels every 100 ms)
-            this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(20, 20));
-            this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(16, 16));
+            this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(320)); // 320 pixels/second (was 32 pixels every 100 ms)
+            this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(32, 32));
+            this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(18, 18));
             const visuals = this.entityManager.getEntity(projectile.id).getComponent('Visuals');
             visuals.avatar = 'img/avatars/projectile.png';
-            visuals.offsetX = 16; visuals.offsetY = 0;
+            visuals.offsetX = 0; visuals.offsetY = 0;
             this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
         }, CAST_TIME);
     }

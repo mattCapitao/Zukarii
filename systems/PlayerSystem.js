@@ -267,7 +267,7 @@ export class PlayerSystem extends System {
         stats._internal.base.movementSpeed = isNaN(stats._internal.base.movementSpeed) ? 100 : stats._internal.base.movementSpeed;
         const movementSpeed = stats._internal.base.movementSpeed + (stats._internal.gear.movementSpeed || 0) + (stats._internal.temp.movementSpeed || 0);
         stats.movementSpeed =  movementSpeed;
-        console.log(`PlayerSystem.js: calculateStats - Calculated movementSpeed: ${stats.movementSpeed}`);
+        console.warn(`PlayerSystem.js: calculateStats - Calculated movementSpeed: ${stats.movementSpeed}`);
         // Update MovementSpeedComponent
         movementSpeedComp.movementSpeed = stats.movementSpeed;
 

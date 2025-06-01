@@ -112,7 +112,7 @@ export class PlayerControllerSystem {
             const dx = targetX - position.x;
             const dy = targetY - position.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance > 2) {
+            if (distance >  1) {
                 this.entityManager.addComponentToEntity('player', new MovementIntentComponent(targetX, targetY));
                 this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(targetX, targetY));
                 gameState.needsRender = true;
@@ -152,6 +152,8 @@ export class PlayerControllerSystem {
         } else if (event.type === 'keydown' && event.key === ' ' && !event.repeat) {
             if ((offWeapon?.attackType === 'ranged' && offWeapon?.baseRange > 0) ||
                 (mainWeapon?.attackType === 'ranged' && mainWeapon?.baseRange > 0)) {
+                this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
+
                 gameState.isRangedMode = true;
             } else {
                 this.eventBus.emit('LogMessage', { message: 'You need a valid ranged weapon equipped to use ranged mode!' });

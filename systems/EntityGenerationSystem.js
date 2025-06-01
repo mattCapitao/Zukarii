@@ -72,7 +72,7 @@ export class EntityGenerationSystem extends System {
         const  gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
 
         this.entityManager.addComponentToEntity(portalEntity.id, new VisualsComponent(48, 72));
-        this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(60, 35, 20, 20));
+        this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(24,24,23,43));
         const visuals = portalEntity.getComponent('Visuals');
         const hitBox = portalEntity.getComponent('Hitbox');
 
@@ -123,7 +123,7 @@ export class EntityGenerationSystem extends System {
             if (attempts <= 50) {
                 const fountainEntity = this.entityManager.createEntity(`fountain_${tier}_fountain_${i}`);
                 this.entityManager.addComponentToEntity(fountainEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
-                this.entityManager.addComponentToEntity(fountainEntity.id, new FountainComponent(false, false));
+                this.entityManager.addComponentToEntity(fountainEntity.id, new FountainComponent(false, false, true));
                 this.entityManager.addComponentToEntity(fountainEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
                 this.entityManager.addComponentToEntity(fountainEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE, this.TILE_SIZE/2, this.TILE_SIZE,));
                 const visuals = fountainEntity.getComponent('Visuals');
@@ -138,9 +138,9 @@ export class EntityGenerationSystem extends System {
                         x, y,
                         512, 512,
                         'PlayTrackControl',
-                        { track: 'fountain_loop', play: true, volume: 0.2, fadeIn: 1.5 },
+                        { track: 'fountain_loop', play: true, volume: 0.2, fadeIn: 1},
                         'PlayTrackControl',
-                        { track: 'fountain_loop', play: false, fadeOut: 2.0 },
+                        { track: 'fountain_loop', play: false, fadeOut: 1 },
                         'Presence'
                     );
                 }

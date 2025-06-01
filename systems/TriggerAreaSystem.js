@@ -1,12 +1,12 @@
-﻿import { System } from '../core/Systems.js';
+﻿// systems/TriggerAreaSystem.js
+import { System } from '../core/Systems.js';
 
 export class TriggerAreaSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.lastOverlaps = new Set();
         this._debuggedIds = new Set();
-        this.activeTrackCounts = new Map(); // trackId -> count of overlapping areas
-        this.pendingFadeOuts = new Map(); // trackId -> fadeOut time
+        // No audio-specific or track-specific state
     }
 
     update(deltaTime) {
@@ -17,15 +17,8 @@ export class TriggerAreaSystem extends System {
         const triggerAreas = this.entityManager.getEntitiesWith(['TriggerArea', 'Position', 'Hitbox']);
         const currentOverlaps = new Set();
 
-        // Count overlaps per track
-        const trackOverlapCounts = new Map();
-
         for (const triggerEntity of triggerAreas) {
             const triggerArea = triggerEntity.getComponent('TriggerArea');
-            if (!this._debuggedIds.has(triggerEntity.id)) {
-               
-                this._debuggedIds.add(triggerEntity.id);
-            }
             if (triggerArea.mode !== 'Presence') continue;
             const triggerPos = triggerEntity.getComponent('Position');
             const triggerHitbox = triggerEntity.getComponent('Hitbox');
@@ -47,13 +40,6 @@ export class TriggerAreaSystem extends System {
                 playerBottom > triggerTop
             ) {
                 currentOverlaps.add(triggerEntity.id);
-                if (triggerArea.action === 'PlayTrackControl' && triggerArea.data && triggerArea.data.track) {
-                    const track = triggerArea.data.track;
-                    trackOverlapCounts.set(track, (trackOverlapCounts.get(track) || 0) + 1);
-                }
-            } else {
-               // this.eventBus.emit('PlayTrackControl', { track: 'fountain_loop', play: false, fadeOut: 2.0 });
-               // console.log(`TriggerAreaSystem: Player NOT overlapping with ${triggerEntity.id}, track: ${triggerArea.data?.track}`);
             }
         }
 
@@ -64,28 +50,7 @@ export class TriggerAreaSystem extends System {
                 if (triggerEntity) {
                     const triggerArea = triggerEntity.getComponent('TriggerArea');
                     if (triggerArea && triggerArea.stopAction && triggerArea.stopData) {
-                        if (triggerArea.stopAction === 'PlayTrackControl' && triggerArea.stopData && triggerArea.stopData.track) {
-                            const track = triggerArea.stopData.track;
-                            const prevCount = this.activeTrackCounts.get(track) || 1;
-                            if (prevCount === 1) {
-                                this.activeTrackCounts.delete(track);
-
-                                // Debounce: schedule fade-out, but allow cancel if re-entered
-                                const fadeOut = triggerArea.stopData.fadeOut || 0.5;
-                                if (this.pendingFadeOuts.has(track)) {
-                                    clearTimeout(this.pendingFadeOuts.get(track));
-                                }
-                                const timeoutId = setTimeout(() => {
-                                    this.eventBus.emit(triggerArea.stopAction, triggerArea.stopData);
-                                    this.pendingFadeOuts.delete(track);
-                                }, fadeOut * 1000);
-                                this.pendingFadeOuts.set(track, timeoutId);
-                            } else {
-                                this.activeTrackCounts.set(track, prevCount - 1);
-                            }
-                        } else {
-                            this.eventBus.emit(triggerArea.stopAction, triggerArea.stopData);
-                        }
+                        this.eventBus.emit(triggerArea.stopAction, triggerArea.stopData);
                     }
                 }
             }
@@ -98,23 +63,7 @@ export class TriggerAreaSystem extends System {
                 if (triggerEntity) {
                     const triggerArea = triggerEntity.getComponent('TriggerArea');
                     if (triggerArea && triggerArea.action && triggerArea.data) {
-                        if (triggerArea.action === 'PlayTrackControl' && triggerArea.data && triggerArea.data.track) {
-                            const track = triggerArea.data.track;
-                            const prevCount = this.activeTrackCounts.get(track) || 0;
-                            // Cancel pending fade-out if any
-                            if (this.pendingFadeOuts.has(track)) {
-                                clearTimeout(this.pendingFadeOuts.get(track));
-                                this.pendingFadeOuts.delete(track);
-                            }
-                            if (prevCount === 0) {
-                                this.activeTrackCounts.set(track, 1);
-                                this.eventBus.emit(triggerArea.action, triggerArea.data);
-                            } else {
-                                this.activeTrackCounts.set(track, prevCount + 1);
-                            }
-                        } else {
-                            this.eventBus.emit(triggerArea.action, triggerArea.data);
-                        }
+                        this.eventBus.emit(triggerArea.action, triggerArea.data);
                     }
                 }
             }
@@ -123,4 +72,3 @@ export class TriggerAreaSystem extends System {
         this.lastOverlaps = currentOverlaps;
     }
 }
-

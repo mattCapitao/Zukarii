@@ -102,7 +102,7 @@ export class InCombatComponent {
     constructor(duration = 3000) { // ms
         this.type = 'InCombat';
         this.duration = duration;
-        this.elapsed = 0;
+        this.elapsed = 0; 
     }
 }
 
@@ -120,6 +120,7 @@ export class MovementSpeedComponent {
         this.type = 'MovementSpeed';
         this.movementSpeed = movementSpeed; // px per second
         this.elapsedSinceLastMove = 0; // Time since last move in ms
+        this.combatSpeedMultiplier = 1; // Modifier for combat speed, default is 1 (no change)
     }
 }
 

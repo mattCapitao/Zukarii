@@ -48,7 +48,7 @@ export class MonsterCollisionSystem extends System {
                 if (target.hasComponent('Projectile')) {
                     const projData = target.getComponent('Projectile');
                     const source = this.entityManager.getEntity(projData.sourceEntityId);
-                    
+                    const isOverlapping = this.isOverlapping(target, monster);
                     if (source.id === 'player') {
                         console.log(`MonsterCollisionSystem: Monster ${monster.id} collided with player projectile ${target.id}`);
                         const projectile = target;
@@ -82,5 +82,37 @@ export class MonsterCollisionSystem extends System {
                 */
             }
         }
+    }
+
+
+    isOverlapping(projectile, target) {
+        const projectilePos = projectile.getComponent('Position');
+        const projectileHitbox = projectile.getComponent('Hitbox');
+        if (!projectilePos || !projectileHitbox) return false;
+
+        // Always use Hitbox and Position for area checks
+        if (target.hasComponent('Hitbox') && target.hasComponent('Position')) {
+            const targetPos = target.getComponent('Position');
+            const targetHitbox = target.getComponent('Hitbox');
+            const areaLeft = targetPos.x + (targetHitbox.offsetX || 0);
+            const areaTop = targetPos.y + (targetHitbox.offsetY || 0);
+            const areaRight = areaLeft + targetHitbox.width;
+            const areaBottom = areaTop + targetHitbox.height;
+
+            // projectile hitbox bounds
+            const projectileLeft = projectilePos.x + (projectileHitbox.offsetX || 0);
+            const projectileTop = projectilePos.y + (projectileHitbox.offsetY || 0);
+            const projectileRight = projectileLeft + projectileHitbox.width;
+            const projectileBottom = projectileTop + projectileHitbox.height;
+
+            // Rectangle overlap check
+            return (
+                projectileLeft < areaRight &&
+                projectileRight > areaLeft &&
+                projectileTop < areaBottom &&
+                projectileBottom > areaTop
+            );
+        }
+        return false;
     }
 }

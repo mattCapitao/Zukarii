@@ -92,9 +92,11 @@ export class PlayerCollisionSystem extends System {
                 continue;
             }
             if (target.hasComponent('LootData')) {
-                const pos = target.getComponent('Position');
-                this.eventBus.emit('PickupTreasure', { x: pos.x, y: pos.y });
-                collision.collisions.splice(i, 1);
+                if (this.isAdjacentToPlayer(player, target, 128)) {
+                    const pos = target.getComponent('Position');
+                    this.eventBus.emit('PickupTreasure', { x: pos.x, y: pos.y });
+                    collision.collisions.splice(i, 1);
+                }
                 continue;
             }
             if (target.hasComponent('Stair') && !player.hasComponent('StairLock')) {
@@ -149,56 +151,77 @@ export class PlayerCollisionSystem extends System {
                 }
             }
             if (target.hasComponent('Portal')) {
-                if (!isAdjacent && !isOverlapping) {
-                    continue; // Only process portal if adjacent or overlapping
-                }
                 const portalComp = target.getComponent('Portal');
                 if (!portalComp.active) continue;
-                this.sfxQueue.push({ sfx: 'portal0', volume: 0.5 });
-                const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
-                this.entityManager.getEntity('gameState').getComponent('GameState').transitionLock = true;
-
+                let levelTransition = null;
+                if (isOverlapping || this.isAdjacentToPlayer(player, target, 36)) { 
+                    this.sfxQueue.push({ sfx: 'portal0', volume: 0.5 });
+                   levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+                    this.entityManager.getEntity('gameState').getComponent('GameState').transitionLock = true;
+                }
                 if (levelTransition && levelTransition.pendingTransition === null) {
                     levelTransition.lastMovementDirection = movementDirection;
                     levelTransition.pendingTransition = 'portal';
                     this.endTurn('transitionPortal');
+                    collision.collisions.splice(i, 1);
+                    break;
                 }
-                collision.collisions.splice(i, 1);
-                break;
+                
             }
         }
     }
 
     isAdjacentToPlayer(player, target, range = 1.5 * 32) {
         const playerPos = player.getComponent('Position');
+        const playerHitbox = player.getComponent('Hitbox');
         const targetPos = target.getComponent('Position');
-        if (!playerPos || !targetPos) return false;
-        const dx = targetPos.x - playerPos.x;
-        const dy = targetPos.y - playerPos.y;
+        const targetHitbox = target.getComponent('Hitbox');
+        if (!playerPos || !targetPos || !playerHitbox || !targetHitbox) return false;
+
+        // Include hitbox offsets in center calculation
+        const playerCenterX = playerPos.x + (playerHitbox.offsetX || 0) + (playerHitbox.width / 2);
+        const playerCenterY = playerPos.y + (playerHitbox.offsetY || 0) + (playerHitbox.height / 2);
+        const targetCenterX = targetPos.x + (targetHitbox.offsetX || 0) + (targetHitbox.width / 2);
+        const targetCenterY = targetPos.y + (targetHitbox.offsetY || 0) + (targetHitbox.height / 2);
+
+        const dx = targetCenterX - playerCenterX;
+        const dy = targetCenterY - playerCenterY;
         return Math.sqrt(dx * dx + dy * dy) <= range;
     }
 
     isOverlappingPlayer(player, target) {
         const playerPos = player.getComponent('Position');
-        if (!playerPos) return false;
-        if (!target.hasComponent('TriggerArea')) return false;
-        const triggerArea = target.getComponent('TriggerArea');
-        // Assume triggerArea has x, y, width, height
-        if (
-            typeof triggerArea.x === 'number' &&
-            typeof triggerArea.y === 'number' &&
-            typeof triggerArea.width === 'number' &&
-            typeof triggerArea.height === 'number'
-        ) {
+        const playerHitbox = player.getComponent('Hitbox');
+        if (!playerPos || !playerHitbox) return false;
+
+        // Always use Hitbox and Position for area checks
+        if (target.hasComponent('Hitbox') && target.hasComponent('Position')) {
+            const targetPos = target.getComponent('Position');
+            const targetHitbox = target.getComponent('Hitbox');
+            const areaLeft = targetPos.x + (targetHitbox.offsetX || 0);
+            const areaTop = targetPos.y + (targetHitbox.offsetY || 0);
+            const areaRight = areaLeft + targetHitbox.width;
+            const areaBottom = areaTop + targetHitbox.height;
+
+            // Player hitbox bounds
+            const playerLeft = playerPos.x + (playerHitbox.offsetX || 0);
+            const playerTop = playerPos.y + (playerHitbox.offsetY || 0);
+            const playerRight = playerLeft + playerHitbox.width;
+            const playerBottom = playerTop + playerHitbox.height;
+
+            // Rectangle overlap check
             return (
-                playerPos.x >= triggerArea.x &&
-                playerPos.x < triggerArea.x + triggerArea.width &&
-                playerPos.y >= triggerArea.y &&
-                playerPos.y < triggerArea.y + triggerArea.height
+                playerLeft < areaRight &&
+                playerRight > areaLeft &&
+                playerTop < areaBottom &&
+                playerBottom > areaTop
             );
         }
         return false;
     }
+
+
+
 
 
 

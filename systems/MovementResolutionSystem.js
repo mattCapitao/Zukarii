@@ -43,11 +43,19 @@ export class MovementResolutionSystem extends System {
 
             // Calculate movement speed multiplier (default 100 = 1.0x)
             let speedMultiplier = 100;
+            let moveSpeedComp = null;
             if (entity.hasComponent('MovementSpeed')) {
-                speedMultiplier = entity.getComponent('MovementSpeed').movementSpeed;
+                moveSpeedComp = entity.getComponent('MovementSpeed');
+                speedMultiplier = moveSpeedComp.movementSpeed;
             }
+           
             // Calculate actual speed in pixels per second, clamp to MAX_ACTUAL_SPEED
             let actualSpeed = this.BASE_MOVEMENT_SPEED_PPS * (speedMultiplier / 100);
+
+            if (entity.hasComponent('InCombat') && entity.hasComponent('MovementSpeed')) {
+                actualSpeed *= moveSpeedComp.combatSpeedMultiplier; 
+            }
+
             if (actualSpeed > this.MAX_ACTUAL_SPEED) actualSpeed = this.MAX_ACTUAL_SPEED;
 
             // Calculate direction and distance to target
@@ -120,7 +128,7 @@ export class MovementResolutionSystem extends System {
 
         for (const other of entities) {
             if (other === entity || other.hasComponent('Projectile')) continue; // Skip self
-            if (other.hasComponent('TriggerArea')) continue;
+            if (other.hasComponent('TriggerArea') || other.hasComponent('Portal')) { continue; }
             const otherPos = other.getComponent('Position');
             const otherHitbox = other.getComponent('Hitbox');
 
