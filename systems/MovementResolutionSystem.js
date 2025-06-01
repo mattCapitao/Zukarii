@@ -128,7 +128,7 @@ export class MovementResolutionSystem extends System {
 
         for (const other of entities) {
             if (other === entity || other.hasComponent('Projectile')) continue; // Skip self
-            if (other.hasComponent('TriggerArea') || other.hasComponent('Portal')) { continue; }
+            if (other.hasComponent('TriggerArea') || other.hasComponent('Portal') || other.hasComponent('Stair') ) { continue; }
             const otherPos = other.getComponent('Position');
             const otherHitbox = other.getComponent('Hitbox');
 

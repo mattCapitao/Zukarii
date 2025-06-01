@@ -100,7 +100,7 @@ export class PlayerCollisionSystem extends System {
                 continue;
             }
             if (target.hasComponent('Stair') && !player.hasComponent('StairLock')) {
-                if (isAdjacent || isOverlapping) {
+                if (/*isAdjacent || */isOverlapping) {
 
                     const stairComp = target.getComponent('Stair');
                     if (!stairComp.active) {
@@ -154,7 +154,7 @@ export class PlayerCollisionSystem extends System {
                 const portalComp = target.getComponent('Portal');
                 if (!portalComp.active) continue;
                 let levelTransition = null;
-                if (isOverlapping || this.isAdjacentToPlayer(player, target, 36)) { 
+                if (isOverlapping /* || this.isAdjacentToPlayer(player, target, 36)*/ ){ 
                     this.sfxQueue.push({ sfx: 'portal0', volume: 0.5 });
                    levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
                     this.entityManager.getEntity('gameState').getComponent('GameState').transitionLock = true;
