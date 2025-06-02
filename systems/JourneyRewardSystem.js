@@ -80,7 +80,18 @@ export class JourneyRewardSystem extends System {
             if (reward.type === 'item' && !reward.rewarded) {
                 reward.journeyItemId = reward.journeyItemId ? reward.journeyItemId : reward.itemId;
                 this.handleItemReward(reward);
-            } else if (reward.type === 'unlock' && reward.mechanic === 'portalBinding') {
+            }
+            if (reward.type === 'unlock' && reward.mechanic === 'tier0Portal') {
+                const portalEntity = this.utilities.findPortalOnTier(0);
+                const portalComp = portalEntity.getComponent('Portal');
+                const visuals = portalEntity.getComponent('Visuals');
+
+                portalComp.destinationTier = 8;
+                portalComp.active = true;
+                portalComp.cleansed = true;
+                visuals.avatar = 'img/anim/Portal-Animation-Cleansed.png';
+            }
+            if (reward.type === 'unlock' && reward.mechanic === 'portalBinding') {
                 // this.eventBus.emit('AddComponent', { entityId: 'player', component: new PortalBindingsComponent([0]) });
                 // this.eventBus.emit('LogMessage', { message: `Unlocked Portal Binding` });
                 console.log(`JourneyRewardSystem: Added PortalBindingsComponent`);

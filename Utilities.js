@@ -98,4 +98,31 @@ export class Utilities {
     findPath(journeyPathComponent, pathId) {
         return journeyPathComponent.paths.find(path => path.id === pathId) || null;
     }
+
+    findPortalOnTier(tier) {
+        // 1. Find the level entity for the given tier
+        const levelEntity = this.entityManager.getEntitiesWith(['Tier'])
+            .find(e => e.getComponent('Tier').value === tier);
+        if (!levelEntity) {
+            console.warn(`No level entity found for tier ${tier}`);
+            return null;
+        }
+
+        // 2. Get the EntityListComponent and its portals array
+        const entityList = levelEntity.getComponent('EntityList');
+        if (!entityList || !Array.isArray(entityList.portals) || entityList.portals.length === 0) {
+            console.warn(`No portals found in tier ${tier} EntityList`);
+            return null;
+        }
+
+        // 3. Return the first portal entity (or all if you want to return an array)
+        const portalId = entityList.portals[0];
+        const portalEntity = this.entityManager.getEntity(portalId);
+        if (!portalEntity) {
+            console.warn(`Portal entity with ID ${portalId} not found`);
+            return null;
+        }
+        return portalEntity;
+    }
+
 }

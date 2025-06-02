@@ -27,7 +27,9 @@ export class LevelTransitionSystem extends System {
 
             switch (this.pendingTransition) {
                 case 'portal':
-                    this.transitionViaPortal(deltaTime);
+                    const destinationTier = this.levelTransition.destinationTier || null;
+
+                    this.transitionViaPortal(deltaTime, destinationTier);
                     break;
                 case 'teleportToTier':
                     const transition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
@@ -216,7 +218,7 @@ export class LevelTransitionSystem extends System {
         const currentTier = gameState.tier;
         
         console.warn('LevelTransitionSystem: Starting transitionViaPortal for currentTier:', currentTier, 'destinationTier:', destinationTier);
-        if (destinationTier === null) {
+        if (destinationTier == null) {
             destinationTier = this.randomizeTier(currentTier);
         }
         let teleportMessage = `You step through a mysterious portal surging with chaotic energy and are transported to Tier`;

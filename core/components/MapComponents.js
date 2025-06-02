@@ -105,6 +105,7 @@ export class RoomComponent {
         this.roomType = type;
         this.connections = [];
         this.suppressMonsters = false;
+        this.hasEntities = []; //{ id: '', type: ''  } // Track entities in this room}
     }
 }
 

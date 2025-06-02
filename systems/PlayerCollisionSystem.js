@@ -156,7 +156,11 @@ export class PlayerCollisionSystem extends System {
                 let levelTransition = null;
                 if (isOverlapping /* || this.isAdjacentToPlayer(player, target, 36)*/ ){ 
                     this.sfxQueue.push({ sfx: 'portal0', volume: 0.5 });
-                   levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+                    levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+                    if (portalComp.destinationTier !== undefined && portalComp.destinationTier !== null) {
+                        levelTransition.destinationTier = portalComp.destinationTier;
+                    }
+
                     this.entityManager.getEntity('gameState').getComponent('GameState').transitionLock = true;
                 }
                 if (levelTransition && levelTransition.pendingTransition === null) {

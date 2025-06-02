@@ -72,6 +72,7 @@ export class MapRenderSystem extends System {
             npc_zu_master: 'img/avatars/npcs/zu-master.png', // Add NPC sprite
             npc_merchant: 'img/avatars/npcs/merchant.png',
             shop_counter: 'img/avatars/shop-counter.png',
+            ashangal_guardian: `img/avatars/ashangal_guardian.png`,
         };
         for (const [key, path] of Object.entries(spritePaths)) {
             const img = new Image();

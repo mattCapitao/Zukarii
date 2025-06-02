@@ -186,6 +186,7 @@ export class LevelTransitionComponent {
         this.type = 'LevelTransition';
         this.pendingTransition = pendingTransition; // Indicates if a level transition is pending
         this.lastMovementDirection = { dx: 0, dy: 0 }
+        this.destinationTier = null;
     }
 }
 

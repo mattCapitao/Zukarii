@@ -29,18 +29,7 @@ export class MovementResolutionSystem extends System {
             }
             let deltaX = intent.targetX - pos.x;
             let deltaY = intent.targetY - pos.y;
-
-            // Projectiles: unchanged logic
-            if (entity.hasComponent('Projectile')) {
-                if (lastPos) {
-                    lastPos.x = pos.x;
-                    lastPos.y = pos.y;
-                }
-                pos.x += deltaX;
-                pos.y += deltaY;
-                continue;
-            }
-
+          
             // Calculate movement speed multiplier (default 100 = 1.0x)
             let speedMultiplier = 100;
             let moveSpeedComp = null;
@@ -56,7 +45,7 @@ export class MovementResolutionSystem extends System {
                 actualSpeed *= moveSpeedComp.combatSpeedMultiplier; 
             }
 
-            if (actualSpeed > this.MAX_ACTUAL_SPEED) actualSpeed = this.MAX_ACTUAL_SPEED;
+            if (actualSpeed > this.MAX_ACTUAL_SPEED && !entity.hasComponent('Projectile')) actualSpeed = this.MAX_ACTUAL_SPEED;
 
             // Calculate direction and distance to target
             const dx = intent.targetX - pos.x;
@@ -127,7 +116,7 @@ export class MovementResolutionSystem extends System {
         const entities = this.entityManager.getEntitiesWith(['Position', 'Hitbox']);
 
         for (const other of entities) {
-            if (other === entity || other.hasComponent('Projectile')) continue; // Skip self
+            if (other === entity /*|| other.hasComponent('Projectile')*/) continue; // Skip self
             if (other.hasComponent('TriggerArea') || other.hasComponent('Portal') || other.hasComponent('Stair') ) { continue; }
             const otherPos = other.getComponent('Position');
             const otherHitbox = other.getComponent('Hitbox');

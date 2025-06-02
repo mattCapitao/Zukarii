@@ -81,6 +81,10 @@ export class ProjectileCollisionSystem extends System {
         const projectileHitbox = projectile.getComponent('Hitbox');
         if (!projectilePos || !projectileHitbox) return false;
 
+        if (!target) {
+            console.warn(`ProjectileCollisionSystem: Target not found in isOverlapping for projectile ${projectile.id}`);
+        }
+
         // Always use Hitbox and Position for area checks
         if (target.hasComponent('Hitbox') && target.hasComponent('Position')) {
             const targetPos = target.getComponent('Position');

@@ -338,9 +338,13 @@
         "type": "item",
         "journeyItemId": "stoneOfVeilPiercing",
         "quantity": 1
+      },
+      {
+        "type": "unlock",
+        "mechanic": "tier0Portal"
       }
     ],
-    "completionText": "You have uncovered signs of corruption.",
+    "completionText": "With shards you gathered I have activated and cleansed this old portal, you may now return to the depths without the need of a Stone of Veil Piercing.",
     "logCompletion": true,
     "tasks": [
 

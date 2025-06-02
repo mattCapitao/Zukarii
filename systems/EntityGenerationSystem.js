@@ -30,10 +30,13 @@ export class EntityGenerationSystem extends System {
     }
 
 
-    generateStairEntity(levelData, entityList, tier, direction, x, y, returnEntity = false) {
+    generateStairEntity(levelData, entityList, tier, roomId, direction, x, y, returnEntity = false) {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState')
         const map = levelData.map;
         const lockedLevels = [6, 10];
+        const roomEntity = this.entityManager.getEntity(roomId);
+        const room = roomEntity.getComponent('Room');
+        
         let active = true;
         if (direction === 'down' && lockedLevels.includes(tier) && gameState.highestTier <= tier) {
             console.warn(`LevelSystem.js: generateStairEntity - Stairs down at tier ${tier} are locked until highest tier is reached.`);
@@ -42,6 +45,10 @@ export class EntityGenerationSystem extends System {
         }
         const stairId = `stair_${tier}_stair_${direction}_${x}_${y}`
         const stairEntity = this.entityManager.createEntity(stairId);
+        if (!Array.isArray(room.hasEntities)) {
+            room.hasEntities = [];
+        }
+        room.hasEntities.push({ id: stairId, type: 'Stair' });
         this.entityManager.addComponentToEntity(stairEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
         this.entityManager.addComponentToEntity(stairEntity.id, new StairComponent(direction, active));
         this.entityManager.addComponentToEntity(stairEntity.id, new VisualsComponent(32, 42));
@@ -55,7 +62,9 @@ export class EntityGenerationSystem extends System {
         console.log(`LevelSystem.js: Placed stairs ${direction} at (${x}, ${y}) on tier ${tier}`, stairEntity);
 
         if (direction === 'down' && tier == 10) {
-
+            visuals.avatar = `img/avatars/ashangal_guardian.png`;
+            visuals.w = 64;
+            visuals.h = 54;
             this.generateTriggerArea(entityList, x, y, 512, 512, 'DialogueMessage',  {
                 message: { message: 'You feel a strange dark force in this area!', params: '' }
             })
@@ -101,14 +110,24 @@ export class EntityGenerationSystem extends System {
         return portalEntity;
     }
 
-    generateFountains(tier, map, roomEntityIds, entityList) {
+    generateFountains(tier, levelData, entityList) {
+        const map = levelData.map;
+        const roomEntityIds = levelData.roomEntityIds;
+        const isCustomLevel = levelData.isCustomLevel || false;
         console.log(`LevelSystem.js: generateFountains - Starting for tier ${tier}`);
-        const fountainsPerLevel = Math.floor(Math.random() * 2) + 1;
+        const fountainsPerLevel = () => {
+            let r = Math.random();
+            return r < 0.10 ? 0 : r < 0.95 ? 1 : 2;
+        }
         const fountains = [];
 
         for (let i = 0; i < fountainsPerLevel; i++) {
             const roomId = roomEntityIds[Math.floor(Math.random() * roomEntityIds.length)];
             const room = this.entityManager.getEntity(roomId).getComponent('Room');
+            if (!isCustomLEvel && Array.isArray(room.hasEntities) && room.hasEntities.some(e => e.type === 'Fountain' || e.type === 'Stair')) {
+                i--;
+                continue;
+            }
             let x, y;
             let attempts = 0;
             do {
@@ -130,6 +149,7 @@ export class EntityGenerationSystem extends System {
                 visuals.avatar = 'img/avatars/fountain.png';
                 visuals.avatar = 'img/anim/fountain/128x64_fountain_stone_shadow_anim.png';
                 fountains.push(fountainEntity.id);
+                room.hasEntities.push({ id: fountainEntity.id, type: 'Fountain' });
                 map[y][x] = '≅';
                 const fountainComp = fountainEntity.getComponent('Fountain');
                 if (fountainComp.active) {
