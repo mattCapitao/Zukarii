@@ -191,6 +191,7 @@ export class PlayerAchievementsComponent {
             interactions: 0,
             tiersReached: 0,  
             uniqueItemDrops: [],
+            unlockedPortals:[],
         };
         this.history = []; // [{ type: string, data: object, timestamp: number }]
     }

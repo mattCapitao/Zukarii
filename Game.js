@@ -422,6 +422,7 @@ export class Game {
             const saveId = null;
             this.state.eventBus.emit('RequestSaveGame', { saveId });
             player.removeComponent('NewCharacter');
+           
             setTimeout(() => { this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'intro', volume: 0.25 }); }, 2000);
         }
         this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });

@@ -462,15 +462,17 @@ export class LevelTransitionSystem extends System {
 
             const portalComp = portalEntity.getComponent('Portal');
             const visuals = portalEntity.getComponent('Visuals');
+            const unlockedPortals = player.getComponent('PlayerAchievements').stats.unlockedPortals || [];
+
             let visualsImg = 'img/anim/Portal-Animation.png';
             let cleansed = false;
             let active = portalComp.active; // default to current state
 
-            if (entityTier < 11 && gameState.highestTier < 11) {
+            if (entityTier < 11 && gameState.highestTier < 11 && !unlockedPortals.includes(tier)) {
                 active = false;
                 cleansed = false;
                 visualsImg = 'img/avatars/inactive-portal.png';
-            } else if (entityTier < 11 && gameState.highestTier >= 11) {
+            } else if ((entityTier < 11 && gameState.highestTier >= 11) || unlockedPortals.includes(tier)) {
                 active = true;
                 cleansed = true;
                 visualsImg = 'img/anim/Portal-Animation-Cleansed.png';

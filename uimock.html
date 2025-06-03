@@ -1,0 +1,559 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zukarii: The Descent Modern HUD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #111; /* Dark dungeon background */
+            font-family: 'Courier New', Courier, monospace;
+            color: #0f0; /* Green text for game aesthetic */
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top and Bottom Containers */
+        #top-container, #bottom-container {
+            height: 50vh;
+            width: 100%;
+            display: flex;
+        }
+
+        /* Left and Right Sections */
+        #top-left, #top-right, #bottom-left, #bottom-right {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Sections */
+        #top-left, #top-right {
+            padding: 20px;
+        }
+
+        /* Bottom Sections */
+        #bottom-left, #bottom-right {
+            padding: 20px;
+        }
+
+        /* Alignments */
+        #top-left {
+            justify-content: flex-start; /* Left-align content */
+            align-items: flex-start;
+        }
+
+        #top-right {
+            justify-content: flex-start; /* Right-align content */
+            align-items: flex-end;
+        }
+
+        #bottom-left {
+            justify-content: flex-end; /* Push content toward bottom */
+            align-items: center;
+        }
+
+        #bottom-right {
+            justify-content: flex-end; /* Push content toward bottom */
+            align-items: center;
+        }
+
+        /* Top-Left Section (Player Info and HP/Mana) */
+        #top-left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        /* Player Info (Top-Left) */
+        #player-info {
+            width: 250px;
+            background: rgba(26, 42, 26, 0.8); /* Semi-transparent dark green */
+            border: 2px solid #0f0;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.4); /* Glowing effect */
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-image {
+            width: 30px;
+            height: 30px;
+            background: #0f0; /* Placeholder for character image */
+            border-radius: 50%;
+        }
+
+        .player-details {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+            .player-details h2 {
+                font-size: 18px;
+                text-shadow: 0 0 5px #00ff00aa;
+                margin: 0;
+            }
+
+            .player-details .level {
+                font-size: 12px;
+                text-shadow: 0 0 3px #000;
+            }
+
+        /* HP and Mana Indicators (Below Player Info) */
+        #status-indicators {
+            width: 250px;
+        }
+
+        .status-item {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            background: #0f0; /* Placeholder for icons */
+            border-radius: 4px;
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+        }
+
+        .progress-bar {
+            width: 100%; /* Fill the width of the nameplate (250px) */
+            height: 18px;
+            background: #222;
+            border: 2px solid #0f0;
+            border-radius: 6px;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.4);
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .health-fill {
+            width: 80%; /* Static for mockup */
+            background: linear-gradient(to right, #e63946, #8b0000); /* Red gradient */
+            box-shadow: 0 0 5px #ff0000aa;
+        }
+
+        .mana-fill {
+            width: 60%; /* Static for mockup */
+            background: linear-gradient(to right, #1d4ed8, #00008b); /* Blue gradient */
+            box-shadow: 0 0 5px #0000ffaa;
+        }
+
+        .status-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #000;
+            z-index: 2;
+        }
+
+        .status-divider {
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: #0f0;
+            opacity: 0.5;
+        }
+
+        /* Minimap Section (Top-Right) with Tier Caption */
+        #minimap-section {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 900;
+        }
+
+        #minimap {
+            width: 150px;
+            height: 150px;
+            background: rgba(26, 42, 26, 0.7);
+            border: 3px solid #0f0;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
+        }
+
+        #minimap-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        #tier-caption {
+            font-size: 12px;
+            text-shadow: 0 0 3px #000;
+            text-align: center;
+            width: 150px; /* Match minimap width for centering */
+        }
+
+        /* Hotbar Container (Parent for Consumables, XP Bar, and Skill Bar) */
+        #hotbar-container {
+            height: 125px; /* Match height of log window */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Vertically center content */
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* Bottom Section (Consumables, XP Bar, and Skill Bar) */
+        #bottom-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Consumables (Potions and Torches) */
+        #consumables {
+            display: flex; /* Side by side */
+            gap: 20px;
+        }
+
+        .consumable {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            text-shadow: 0 0 3px #000;
+        }
+
+        .consumable-icon {
+            width: 16px;
+            height: 16px;
+            background: #0f0; /* Placeholder for icons */
+            border-radius: 50%;
+        }
+
+        /* XP Bar */
+        #xp-bar {
+            width: 360px; /* Matches skill bar width */
+            height: 15px;
+            background: #222;
+            border: 2px solid #0f0;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
+            position: relative;
+        }
+
+        .xp-fill {
+            width: 40%; /* Static for mockup */
+            height: 100%;
+            background: linear-gradient(to right, #facc15, #b8860b); /* Yellow gradient */
+            box-shadow: 0 0 10px #ffff00aa;
+            border-radius: 6px;
+        }
+
+        .xp-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #000;
+            z-index: 2;
+        }
+
+        .xp-divider {
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: #0f0;
+            opacity: 0.5;
+        }
+
+        /* Skill Bar */
+        #skill-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .skill-button {
+            width: 50px;
+            height: 50px;
+            background: #222;
+            border: 2px solid #0f0;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .skill-button:hover {
+                transform: scale(1.1);
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+            }
+
+            .skill-button::before {
+                content: '';
+                width: 32px;
+                height: 32px;
+                background: #0f0; /* Placeholder for skill icons */
+                border-radius: 4px;
+            }
+
+            .skill-button.cooldown::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(128, 128, 128, 0.5); /* Gray overlay for cooldown */
+                border-radius: 8px;
+            }
+
+        .skill-label {
+            position: absolute;
+            bottom: -15px;
+            font-size: 10px;
+            text-shadow: 0 0 3px #000;
+        }
+
+        /* Bottom-Left Section (Log Messages with Tabs) */
+        #hud-log-window {
+            width: 375px;
+            height: 125px;
+            background: rgba(26, 42, 26, 0.8);
+            border: none; /* No border on log window */
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
+            z-index: 1000;
+        }
+
+        #hud-log-tabs {
+            display: flex;
+            gap: 5px;
+            background: rgba(26, 42, 26, 0.8);
+            border: none; /* Remove all borders from container */
+            padding: 0; /* Remove padding */
+        }
+
+        .hud-log-tab {
+            flex: 1;
+            padding: 5px;
+            background: #2c672c;
+            color: #000;
+            border: 2px solid #0f0; /* Keep outline around each tab */
+            border-bottom: none; /* Remove bottom border to blend with container */
+            border-radius: 6px 6px 0 0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: none;
+        }
+
+            .hud-log-tab.active {
+                background: #0f0;
+                border: 2px solid #0f0; /* Keep outline for active tab */
+                border-bottom: none; /* Remove bottom border */
+            }
+
+        #hud-log-content {
+            height: calc(100% - 30px); /* Subtract tab height */
+            overflow-y: auto;
+            scrollbar-color: #0f0 #111;
+            scrollbar-width: thin;
+            padding: 10px;
+            border: 2px solid #0f0; /* Border on text window */
+            border-radius: 0 0 8px 8px; /* Bottom-left and bottom-right radius */
+        }
+
+            #hud-log-content p {
+                font-size: 12px;
+                margin-bottom: 5px;
+                text-shadow: 0 0 3px #000;
+                line-height: 1.2;
+            }
+    </style>
+</head>
+<body>
+    <!-- Top Container -->
+    <div id="top-container">
+        <!-- Top-Left Section -->
+        <div id="top-left">
+            <div id="top-left-section">
+                <!-- Player Info -->
+                <div id="player-info">
+                    <div class="player-image"></div>
+                    <div class="player-details">
+                        <h2>Zukarii</h2>
+                        <div class="level">Level: 10</div>
+                    </div>
+                </div>
+
+                <!-- HP and Mana Indicators -->
+                <div id="status-indicators">
+                    <div class="status-item">
+                        <div class="status-icon" title="Health (Heart)"></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill health-fill"></div>
+                            <div class="status-label">80/100</div>
+                            <div class="status-divider" style="left: 10%"></div>
+                            <div class="status-divider" style="left: 20%"></div>
+                            <div class="status-divider" style="left: 30%"></div>
+                            <div class="status-divider" style="left: 40%"></div>
+                            <div class="status-divider" style="left: 50%"></div>
+                            <div class="status-divider" style="left: 60%"></div>
+                            <div class="status-divider" style="left: 70%"></div>
+                            <div class="status-divider" style="left: 80%"></div>
+                            <div class="status-divider" style="left: 90%"></div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-icon" title="Mana (Crystal)"></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill mana-fill"></div>
+                            <div class="status-label">60/100</div>
+                            <div class="status-divider" style="left: 10%"></div>
+                            <div class="status-divider" style="left: 20%"></div>
+                            <div class="status-divider" style="left: 30%"></div>
+                            <div class="status-divider" style="left: 40%"></div>
+                            <div class="status-divider" style="left: 50%"></div>
+                            <div class="status-divider" style="left: 60%"></div>
+                            <div class="status-divider" style="left: 70%"></div>
+                            <div class="status-divider" style="left: 80%"></div>
+                            <div class="status-divider" style="left: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top-Right Section -->
+        <div id="top-right">
+            <div id="minimap-section">
+                <div id="minimap">
+                    <canvas id="minimap-canvas"></canvas>
+                </div>
+                <div id="tier-caption">Tier: 3</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Container -->
+    <div id="bottom-container">
+        <!-- Bottom-Left Section -->
+        <div id="bottom-left">
+            <div id="log-window">
+                <div id="log-tabs">
+                    <div class="log-tab active">All</div>
+                    <div class="log-tab">Combat</div>
+                    <div class="log-tab">Loot</div>
+                    <div class="log-tab">Journey</div>
+                    <div class="log-tab">System</div>
+                </div>
+                <div id="log-content">
+                    <p>Entered dungeon level 3.</p>
+                    <p>Found 50 gold!</p>
+                    <p>Defeated a shadow beast.</p>
+                    <p>Health critically low!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom-Right Section -->
+        <div id="bottom-right">
+            <div id="hotbar-container">
+                <div id="bottom-section">
+                    <!-- Consumables (Potions and Torches) -->
+                    <div id="consumables">
+                        <div class="consumable">
+                            <div class="consumable-icon" title="Potions"></div>
+                            <span>Potions: 5</span>
+                        </div>
+                        <div class="consumable">
+                            <div class="consumable-icon" title="Torches"></div>
+                            <span>Torches: 3</span>
+                        </div>
+                    </div>
+
+                    <!-- XP Bar -->
+                    <div id="xp-bar">
+                        <div class="xp-fill"></div>
+                        <div class="xp-label">400/1000</div>
+                        <div class="xp-divider" style="left: 10%"></div>
+                        <div class="xp-divider" style="left: 20%"></div>
+                        <div class="xp-divider" style="left: 30%"></div>
+                        <div class="xp-divider" style="left: 40%"></div>
+                        <div class="xp-divider" style="left: 50%"></div>
+                        <div class="xp-divider" style="left: 60%"></div>
+                        <div class="xp-divider" style="left: 70%"></div>
+                        <div class="xp-divider" style="left: 80%"></div>
+                        <div class="xp-divider" style="left: 90%"></div>
+                    </div>
+
+                    <!-- Skill Bar -->
+                    <div id="skill-bar">
+                        <div class="skill-button"><span class="skill-label">1</span></div>
+                        <div class="skill-button"><span class="skill-label">2</span></div>
+                        <div class="skill-button"><span class="skill-label">3</span></div>
+                        <div class="skill-button"><span class="skill-label">4</span></div>
+                        <div class="skill-button"><span class="skill-label">5</span></div>
+                        <div class="skill-button cooldown"><span class="skill-label">6</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Draw static minimap
+        const canvas = document.getElementById('minimap-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 150;
+        canvas.height = 150;
+
+        // Draw a simple grid to represent dungeon rooms
+        ctx.fillStyle = '#0f0';
+        ctx.fillRect(50, 50, 20, 20); // Room 1
+        ctx.fillRect(80, 50, 20, 20); // Room 2
+        ctx.fillRect(50, 80, 20, 20); // Room 3
+        ctx.strokeStyle = '#0f0';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(60, 70);
+        ctx.lineTo(80, 70); // Corridor
+        ctx.moveTo(60, 70);
+        ctx.lineTo(60, 80);
+        ctx.stroke();
+
+        // Player position
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(60, 60, 5, 0, Math.PI * 2);
+        ctx.fill();
+    </script>
+</body>
+</html>

@@ -201,44 +201,97 @@ hr {
     overflow: hidden; /* Prevent child overflow */
 }
 
+.status-divider {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: #222;
+    opacity: 0.7;
+}
+
 #player-info {
     position: absolute;
     display: flex;
-    justify-content: space-evenly;
-    top: 0;
-    left: 0;
-    width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
-    margin: 0.0625rem;
-    height: 3rem; /* ~48px */
-    background-color: #000000cc;
-    pointer-events: none; /* Non-clickable, children can override */
-    z-index: 500; /* Above game but below splash */
-    overflow: hidden; /* Prevent child overflow */
-}
+    flex-direction: column;
+    /* width: calc(100vw - 0.15rem);*/ /* Account for border (1px each side) */
 
+    top: 1.5rem;
+    left: 1.5rem;
+    width: 248px;
+    padding: .3125rem;
+    z-index: 599;
+    pointer-events: none;
+    margin: 0;
+    border: 2px solid #0f0;
+    border-radius: 0.625rem;
+    background-color: #222222cc;
+    overflow: hidden; /* Prevent child overflow */
+    box-shadow: 0 0 6px rgba(0, 255, 0, 0.8);
+}
+    #player-info .player {
+        font-size: 1.25rem; /* ~20px */
+    }
+    #player-info .level {
+        font-size: 1rem; /* ~16px */
+    }
+    #player-info .resource {
+        font-size: 0.725rem; /* ~12px */
+    }
     #player-info > * {
         font-weight: bold;
-        text-align: center;
+        text-align: left;
         color: #0f0;
-        z-index: 1000;
-        padding: 0.625rem; /* ~10px */
+        z-index: 600;
+        padding: 0.1725rem;
+        margin: 0;
+        pointer-events: none;
     }
 
 #minimap-canvas {
     position: absolute;
-    top: 3.5rem;
+    top: 0;
     right: 0;
     width: 248px;
     height: 138px;
-    padding: 2px;
-    border: 1px solid #0f0;
-    border-radius: 0.625rem;
-    background: #222;
-    z-index: 600;
+    padding: 2px 0 0 2px;
+    margin:0;
+    border-bottom: 1px solid #0f0;
+    z-index: 597;
     pointer-events: none;
 }
+#minimap-wrapper {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 254px;
+    height: 162px;
+    padding: 0px;
+    margin: 0;
+    border: 2px solid #0f0;
+    border-radius: 0.625rem;
+    background: #222222cc;
+    z-index: 598;
+    pointer-events: none;
+    box-shadow: 0 0 6px rgba(0, 255, 0, 0.8);
+}
+    #minimap-wrapper #tierInfo {
+        position: absolute;
+        display: flex;
+        justify-content: space-evenly;
+        bottom: 0;
+        padding: 2px;
+        margin: 0px;
+        width: 100%;
+        text-align: center;
+        z-index: 599;
+        pointer-events: none;
+        color: #0f0;
+        font-weight: bold;
+        font-size: .725rem;
+    }
 
-    #minimap-canvas.hidden {
+    #minimap-wrapper.hidden {
         display: none;
     }
 
@@ -246,56 +299,266 @@ hr {
     position: absolute;
     display: flex;
     justify-content: space-evenly;
-    bottom: 0;
+    top: 0;
     left: 0;
     width: calc(100vw - 0.125rem); /* Account for border (1px each side) */
-    margin: 0.0625rem;
-    height: 3rem; /* ~48px */
-    background-color: #000000cc;
+    padding: 0;
+    margin: 0;
+    height: calc(100vh - 0.125rem); /* ~48px */
     pointer-events: none; /* Non-clickable, children can override */
     z-index: 500; /* Above game but below splash */
     overflow: hidden; /* Prevent child overflow */
+}
+
+#hp-mana {
+    position: absolute;
+    top: 6rem;
+    left: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .3125rem; /* ~5px */
 }
 
     #player-status > * {
         font-weight: bold;
         text-align: center;
         color: #0f0;
-        z-index: 1000;
+        z-index: 510;
         padding: 0.5rem;
     }
 /* Container for the progress bar */
 .progress-bar {
+    position: relative;
     width: 100%; /* Full width of the parent */
     max-width: 15rem; /* Adjust this to fit your UI */
-    height: .5rem; /* Bar height */
-    background-color: #333; /* Gray background for empty portion */
-    border-radius: .325rem; /* Rounded edges */
+    height: 1.25rem;
+    border: 2px solid #0f0;
+    border-radius: .575rem;
+    box-shadow: 0 0 6px rgba(0, 255, 0, 0.5);
     overflow: hidden; /* Keeps fill inside */
+}
+
+.progress-bar div span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f0;
+    font-weight: bold;
+    text-shadow: 0 0 2px #000;
 }
 
 .bar {
     width: 15rem;
 }
 
+#xp-bar-container.bar {
+    width:19rem;
+   
+}
+#xp-bar-container .progress-bar {
+    max-width: 19rem;
+    height: 1rem;
+}
 /* The filled portion of the bar */
 .progress-fill {
     height: 100%;
     transition: width 0.2s ease; /* Smooth fill animation */
+    font-size: 0.6125rem; /* ~12px */
 }
 
 /* Specific colors for each stat */
 .hp-fill {
-    background-color: #e63946; /* Red for HP */
+    background-color: #a21e28; 
 }
 
 .mana-fill {
-    background-color: #1d4ed8; /* Blue for Mana */
+    background-color: #163aa0; 
 }
 
 .xp-fill {
-    background-color: #facc15; /* Yellow for XP */
+    background-color: #a48610; 
     transition: width 0.5s ease; /* Slower xp fill animation */
+}
+
+/* Bottom-Left Section (Log Messages with Tabs) */
+#hud-log-window {
+    position: absolute;
+    bottom: 0;
+    left: 1.5rem;
+    width: 375px;
+    height: 125px;
+    border: none;
+    
+    z-index: 1000;
+    margin: 0;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+#hud-log-tabs {
+    display: flex;
+    gap: 5px;
+
+    border: none; /* Remove all borders from container */
+    padding: 0; /* Remove padding */
+}
+
+.hud-log-tab {
+    flex: 1;
+    padding: 5px;
+    background: #2c672c;
+    color: #000;
+    border: 2px solid #0f0; /* Keep outline around each tab */
+    border-bottom: none; /* Remove bottom border to blend with container */
+    border-radius: 6px 6px 0 0;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: none;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
+}
+
+    .hud-log-tab.active {
+        background: #0f0;
+        border: 2px solid #0f0; /* Keep outline for active tab */
+        border-bottom: none; /* Remove bottom border */
+    }
+
+#hud-log-content {
+    height: calc(100% - 30px); /* Subtract tab height */
+    overflow-y: auto;
+    scrollbar-color: #0f0 #111;
+    scrollbar-width: thin;
+    padding: 10px;
+    border: 2px solid #0f0; /* Border on text window */
+    border-radius: 0 0 8px 8px; /* Bottom-left and bottom-right radius */
+    background: rgba(26, 42, 26, 0.8);
+    text-align: left;
+    padding: .3125rem;
+    gap: .1625rem;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
+}
+
+    #hud-log-content p {
+        font-size: 12px;
+        margin-bottom: 5px;
+        text-shadow: 0 0 3px #000;
+        line-height: 1.2;
+    }
+
+#bottom-hud-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 10rem;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 500;
+    gap: 0;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    margin-bottom: .5rem;
+}
+
+#xp-hotbars {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    height: 10rem;
+    pointer-events: none;
+    z-index: 510;
+    padding: 0;
+    margin: 0;
+    gap: .5rem;
+
+}
+
+#hotbarwrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+#hotbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0.3125rem;
+    background: rgba(20, 30, 20, 0.7);
+    border: 0.125rem solid #0f0;
+    border-radius: .625rem;
+    font-size: .725rem;
+    pointer-events: none;
+    box-shadow: 0 0 6px rgba(0, 255, 0, 0.8);
+    gap:.5rem;
+    height: 4.175rem;
+}
+
+.hotbar-slot {
+    height: 3.25rem; /* ~44px */
+    width: 2.6625rem;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.hotbar-icon-wrapper {
+    border: 1px solid #0f0;
+    border-radius: .3125rem; /* ~5px */
+    height: 2.75rem; /* ~40px */
+    width: 2.75rem;
+    padding:1px;
+    
+}
+
+.hotbar-icon {
+    height: 2.5rem; /* ~40px */
+    width: 2.5rem;
+    border: 2px solid #222;
+}
+
+#resources {
+    position: absolute;
+    bottom: 0;
+    right: 1.5rem;
+    width: 180px;
+    height: 125px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    z-index: 510;
+    font-size: .725rem;
+    border: 2px solid #0f0;
+    pointer-events: none;
+    border-radius: .575rem;
+    box-shadow: 0 0 6px rgba(0, 255, 0, 0.5);
+    overflow: hidden;
+    margin: 0;
+    background: rgba(26, 42, 26, 0.8);
+    text-align: left;
+    padding: .3125rem;
+    gap: .1625rem;
 }
 
 #tabs {
@@ -831,13 +1094,13 @@ li.new-save-game {
     border-bottom: 0.125rem solid #2c672c; /* ~1px */
 }
 
-#save-name-input, #character-select {
+#save-name-input, #player-name-input, #character-select, #save-notes {
     border: 0.125rem solid #ccc;
     background-color: #2c672c80;
     color: #080;
 }
 
-.save-game-name {
+.save-game-input, #save-notes {
     display: inline-block;
     width: 30rem;
 }

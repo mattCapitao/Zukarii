@@ -51,7 +51,7 @@ export class JourneyRewardSystem extends System {
         
         if (rewards.length > 0) {
             console.log('JourneyRewardSystem: Player rewards:', rewards);
-            this.applyRewards(rewards);
+            this.applyRewards(player, rewards);
         } else {
            // console.warn('JourneyRewardSystem: No rewards found');
             return;
@@ -59,7 +59,7 @@ export class JourneyRewardSystem extends System {
     }
 
 
-    applyRewards(rewards) {
+    applyRewards(player, rewards) {
         console.log('JourneyRewardSystem: Applying rewards:', rewards);
 
         rewards?.forEach(reward => {
@@ -67,6 +67,8 @@ export class JourneyRewardSystem extends System {
                 console.warn(`JourneyRewardSystem: Skipping null reward`);
                 return;
             }
+            if (reward.rewarded) return;
+
             if (reward.xp) {
                 this.eventBus.emit('AwardXp', { amount: reward.xp });
                 console.log(`JourneyRewardSystem: Emitted AwardXp for ${reward.xp}`);
@@ -81,15 +83,25 @@ export class JourneyRewardSystem extends System {
                 reward.journeyItemId = reward.journeyItemId ? reward.journeyItemId : reward.itemId;
                 this.handleItemReward(reward);
             }
-            if (reward.type === 'unlock' && reward.mechanic === 'tier0Portal') {
+            if (reward.type === 'unlock' && reward.mechanic === 'tier0Portal' && !reward.rewarded) {
                 const portalEntity = this.utilities.findPortalOnTier(0);
                 const portalComp = portalEntity.getComponent('Portal');
                 const visuals = portalEntity.getComponent('Visuals');
+                const achievements = player.getComponent('PlayerAchievements');
 
+                console.log(`JourneyRewardSystem: achievements befpore unlock `, achievements);
+             
+                if (!Array.isArray(achievements.stats.unlockedPortals)) {
+                    achievements.stats.unlockedPortals = [0];
+                } else {
+                    achievements.stats.unlockedPortals.push(0);
+                }
+                console.log(`JourneyRewardSystem: achievements after unlock `, achievements);
                 portalComp.destinationTier = 8;
                 portalComp.active = true;
                 portalComp.cleansed = true;
                 visuals.avatar = 'img/anim/Portal-Animation-Cleansed.png';
+
             }
             if (reward.type === 'unlock' && reward.mechanic === 'portalBinding') {
                 // this.eventBus.emit('AddComponent', { entityId: 'player', component: new PortalBindingsComponent([0]) });
@@ -101,7 +113,6 @@ export class JourneyRewardSystem extends System {
         });
 
         // Properly clear the rewards on the player's component
-        const player = this.entityManager.getEntity('player');
         const journeyReward = player.getComponent('JourneyReward');
         journeyReward.rewards = [];
         console.log('JourneyRewardSystem: Cleared rewards on player component');

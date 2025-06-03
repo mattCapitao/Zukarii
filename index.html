@@ -58,18 +58,6 @@
     </div>
 
     <div id="hud-layer" style="visibility:hidden;">
-        <div id="player-info">
-            <div class="player-info-child">Player: <span id="playerName"></span></div>
-            <div class="player-info-child">Level: <span id="playerLevel"></span></div>
-            <div class="player-info-child">Dungeon Tier: <span id="dungeonTier"></span></div>
-            <div class="player-info-child">Gold: <span id="playerGold"></span></div>
-            <div class="player-info-child">Speed: <span id="playerSpeed"></span>%</div>
-            <div class="player-info-child">Ashen Shards: <span id="playerShards"></span></div>
-            <div class="player-info-child">Portal Bindings: <span id="portalBinding"></span></div>
-
-        </div>
-
-        <canvas id="minimap-canvas" width="248" height="138"></canvas>
 
         <div id="dialogue-window" style="display: none;">
             <div id="dialogue-text"></div>
@@ -78,243 +66,358 @@
             </div>
         </div>
 
+        <div id="hud-top-left">
+            <div id="player-info">
+                <div class="player-info-child player"> <span id="playerName"></span></div>
+                <div class="player-info-child level">Level: <span id="playerLevel"></span></div>
+            </div>
+
+
+        </div>
+
+        <div id="minimap-wrapper" class="hidden">
+            <canvas id="minimap-canvas" width="248" height="138"></canvas>
+            <div id="tierInfo">
+                <div>Tier: <span id="dungeonTier"></span></div>
+                <div>Highest: <span id="highestTier"></span></div>
+            </div>
+        </div>
+
         <div id="player-status">
-            <div class="player-status-child">Heal Potions: <span id="healPotionCount"></span></div><!-- set innerHTML on #healPotionCount -->
-            <div class="player-status-child bar">
-                <div class="progress-bar">
-                    <div id="hpBar" class="progress-fill hp-fill" style="width: 0;"></div> <!-- update CSS Property width on #hpBar-->
+            <div id="hp-mana">
+                <div class="player-status-child bar">
+                    <div class="progress-bar">
+                        <div id="hpBar" class="progress-fill hp-fill" style="width: 0;">
+                            <span id="hpText"></span>
+                            <div class="status-divider" style="left: 10%"></div>
+                            <div class="status-divider" style="left: 20%"></div>
+                            <div class="status-divider" style="left: 30%"></div>
+                            <div class="status-divider" style="left: 40%"></div>
+                            <div class="status-divider" style="left: 50%"></div>
+                            <div class="status-divider" style="left: 60%"></div>
+                            <div class="status-divider" style="left: 70%"></div>
+                            <div class="status-divider" style="left: 80%"></div>
+                            <div class="status-divider" style="left: 90%"></div>
+                        </div> <!-- update CSS Property width on #hpBar-->
+                    </div>
                 </div>
-                HP: <span id="hpText"></span> <!-- set innerHTML on #hpText -->
+                <div class="player-status-child bar">
+                    <div class="progress-bar">
+                        <div id="manaBar" class="progress-fill mana-fill" style="width: 0;">
+                            <span id="manaText"></span>
+                            <div class="status-divider" style="left: 10%"></div>
+                            <div class="status-divider" style="left: 20%"></div>
+                            <div class="status-divider" style="left: 30%"></div>
+                            <div class="status-divider" style="left: 40%"></div>
+                            <div class="status-divider" style="left: 50%"></div>
+                            <div class="status-divider" style="left: 60%"></div>
+                            <div class="status-divider" style="left: 70%"></div>
+                            <div class="status-divider" style="left: 80%"></div>
+                            <div class="status-divider" style="left: 90%"></div>
+                        </div><!-- update CSS Property width on #manaBar-->
+                    </div>
+                </div>
             </div>
-            <div class="player-status-child bar">
-                <div class="progress-bar">
-                    <div id="manaBar" class="progress-fill mana-fill" style="width: 0;"></div><!-- update CSS Property width on #manaBar-->
+
+            <div id="bottom-hud-panel">
+                               
+                <div id="hud-log-window">
+                    <div id="hud-log-tabs">
+                        <div class="hud-log-tab active">All</div>
+                        <div class="hud-log-tab">Combat</div>
+                        <div class="hud-log-tab">Loot</div>
+                        <div class="hud-log-tab">Journey</div>
+                        <div class="hud-log-tab">System</div>
+                    </div>
+                    <div id="hud-log-content">
+                 
+                    </div>
                 </div>
-                Mana: <span id="manaText"></span><!-- set innerHTML on #manaText -->
-            </div>
-            <div class="player-status-child bar">
-                <div class="progress-bar">
-                    <div id="xpBar" class="progress-fill xp-fill" style="width:0;"></div><!-- update CSS Property width on #hpBar-->
-                </div>
-                XP: <span id="xpText"></span><!-- set innerHTML on #xpText -->
-            </div>
-            <div class="player-status-child">Torches: <span id="torchCount"></span></div><!-- set innerHTML on #torchCount -->
-        </div>
 
-
-    </div>
-    <div id="ui-layer">
-
-
-
-        <div id="game-over" class="death">
-            <h1>GAME OVER</h1>
-            <p id="game-over-message"></p>
-            <button id="view-log"> View Log </button><button id="restart-button"> Play Again </button><button id="menu"> Menu </button>
-        </div>
-
-        <div id="tabs" class="hidden">
-            <div id="tab-wrapper">
-                <div id="tab-menu"></div>
-
-                <div id="menu-content" class="ui-tab">
-
-                    <div id="game-menu">
-                        <h2>Game Menu</h2>
-                        <div id="menu-buttons">
-                            <button id="controls-button"> Controls </button>
-                            <button id="map-key-button"> Map Key </button>
-                            <button id="options-button"> Options </button>
-                            <button id="save-games-button"> Save Game </button>
-                            <button id="load-games-button"> Load Game </button>
-                            <button id="new-game-button"> New Game </button>
-                            <button id="exit-button"> Exit Game </button>
-                            <button id="about-button"> About </button>
+                <div id="xp-hotbars">
+                    <div id="xp-bar-container" class="player-status-child bar" >
+                        <div class="progress-bar">
+                            <div id="xpBar" class="progress-fill xp-fill" style="width:0;">
+                                <span id="xpText"></span>
+                                <div class="status-divider" style="left: 10%"></div>
+                                <div class="status-divider" style="left: 20%"></div>
+                                <div class="status-divider" style="left: 30%"></div>
+                                <div class="status-divider" style="left: 40%"></div>
+                                <div class="status-divider" style="left: 50%"></div>
+                                <div class="status-divider" style="left: 60%"></div>
+                                <div class="status-divider" style="left: 70%"></div>
+                                <div class="status-divider" style="left: 80%"></div>
+                                <div class="status-divider" style="left: 90%"></div>
+                            </div><!-- update CSS Property width on #hpBar-->
                         </div>
                     </div>
 
-                    <div id="menu-panel">
-                        <h2>Menu Option Details</h2>
-                        <div id="menu-data-wrapper">
-                            <div id="controls-data">
-                                <h3>Controls:</h3>
-                                <ul>
-                                    <li>Arrow keys: Move / Mele Attack</li>
-                                    <li>wasd: Move / Mele Attack</li>
-                                    <li>Hold Space: + WASD / Arrows: Ranged attack (*)</li>
-                                    <li>T key: Light Torch</li>
-                                    <li>C key: Character</li>
-                                    <li>L key: Adventure Log</li>
-                                    <li>Esc key: Menu</li>
-                                </ul>
-                            </div>
-                            <div id="map-key-data" style="display:none;">
-                                <h3>Map Key:</h3>
-                                <ul>
-                                    <li>𓀠: The Battle Mage - (You) </li>
-                                    <li> $: Treasure (aka Da Lootz!)</li>
-                                    <li> a-z, A-Z: Monster (Kill or Be Killed)</li>
-                                    <li>≅: Magic Fountain (Heal, Boost, ???)</li>
-                                    <li>#: Wall (You Can't Go Here)</li>
-                                    <li> ⇓: Stairs Down ∞ (Infinite) </li>
-                                    <li>⇑: Stairs Up (Tier 1 Exit Game)</li>
-                                </ul>
-                            </div>
-                            <div id="options-data" style="display:none;"><h3>Options:</h3></div>
-                            <div id="save-games-data" style="display:none;"><h3>Saved Games:</h3></div>
-                            <div id="load-games-data" style="display:none;"><h3>Load Games:</h3></div>
-                            <div id="new-game-data" style="display:none;">
-                                <h3>New Game: - Create Character</h3>
-                                <ul>
-                                    <li>Give your new champion their Zukarii name and press "Start New Game" to play now!</li>
-                                    <li><label>New Charater Name: </label> <input type="text" id="player-name-input" class="save-game-input" size="42" placeholder="Enter New Charater Name"></li>
-                                    <li><button id="start-new-game-button" class="new-game" data-save-id="new" style="background-color:#0f0;">Start New Game</button></li>
-
-
-                                </ul>
-
-                            </div>
-                            <div id="about-data" style="display:none;">
-                                <h3>About:</h3>
-                                <h4>Developers:</h4>
-                                <ul>
-                                    <li>Creator / Game Director / Lead Engineer: Matt Capitao</li>
-                                </ul>
-                                <h4>AI Devs</h4>
-                                <ul>
-                                    <li>Supporting AI - Architect / Engineer: Grok3</li>
-                                    <li>Supporting AI - QA / Debug Engineer : GitHub Copilot</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-
-                <div id="character-content" class="ui-tab">
-                    <div id="character">
-                        <h2>Equipped Items</h2>
-                        <div id="equipped-items">
-                            <div class="col">
-                                <div class="equipped-item">
-                                    <p class="equip-slot mainhand empty" data-equip_slot='{"slotId": 0, "slot": "mainhand"}'></p>
-                                    <span class="item-label">Mainhand</span>
+                    <div id="hotbarwrapper">
+                        <div id="hotbar">
+                            <div id="hotbar1" class="hotbar-slot" data-hotbar-id="1">
+                                <div class="hotbar-icon-wrapper">
+                                    <img src="img/icons/empty-hotbar-slot.png" class="hotbar-icon" />
                                 </div>
-                                <div class="equipped-item">
-                                    <p class="equip-slot rightring empty" data-equip_slot='{"slotId": 1, "slot": "rightring"}'></p>
-                                    <span class="item-label">Right Ring</span>
-                                </div>
+                                <span class="hotbar-slot-label">1</span>
                             </div>
-                            <div class="col">
-                                <div class="equipped-item">
-                                    <p class="equip-slot amulet empty" data-equip_slot='{"slotId": 2, "slot": "amulet"}'></p>
-                                    <span class="item-label">Amulet</span>
+                            <div id="hotbar2" class="hotbar-slot" data-hotbar-id="2">
+                                <div class="hotbar-icon-wrapper">
+                                    <img src="img/icons/empty-hotbar-slot.png" class="hotbar-icon" />
                                 </div>
-                                <div class="equipped-item">
-                                    <p class="equip-slot armor empty" data-equip_slot='{"slotId": 3, "slot": "armor"}'></p>
-                                    <span class="item-label">Armor</span>
-                                </div>
+                                <span class="hotbar-slot-label">2</span>
                             </div>
-                            <div class="col">
-                                <div class="equipped-item">
-                                    <p class="equip-slot offhand empty" data-equip_slot='{"slotId": 4, "slot": "offhand"}'></p>
-                                    <span class="item-label">Offhand</span>
+                            <div id="hotbar3" class="hotbar-slot" data-hotbar-id="3">
+                                <div class="hotbar-icon-wrapper">
+                                    <img src="img/icons/empty-hotbar-slot.png" class="hotbar-icon" />
                                 </div>
-                                <div class="equipped-item">
-                                    <p class="equip-slot leftring empty" data-equip_slot='{"slotId": 5, "slot": "leftring"}'></p>
-                                    <span class="item-label">Left Ring</span>
+                                <span class="hotbar-slot-label">3</span>
+                            </div>
+                            <div id="hotbar4" class="hotbar-slot" data-hotbar-id="4">
+                                <div class="hotbar-icon-wrapper">
+                                    <img src="img/icons/empty-hotbar-slot.png" class="hotbar-icon" />
                                 </div>
+                                <span class="hotbar-slot-label">4</span>
                             </div>
-                        </div>
-                        <h2>Character Stats</h2>
-                        <div id="character-stat-wrapper"></div>
-                    </div>
-
-                    <div id="inventory">
-                        <h2>Inventory Items</h2>
-                        <div id=inventory-window-wrapper>
-                            <div id="inventory-tabs">
-                                <button id="inventory-tab-all" class="inventory-tab-button tab" style="background: #0f0;">All</button>
-                                <button id="inventory-tab-armor" class="inventory-tab-button tab">Armor</button>
-                                <button id="inventory-tab-weapon-melee" class="inventory-tab-button tab">Melee</button>
-                                <button id="inventory-tab-weapon-ranged" class="inventory-tab-button tab">Ranged</button>
-                                <button id="inventory-tab-amulet" class="inventory-tab-button tab">Amulet</button>
-                                <button id="inventory-tab-ring" class="inventory-tab-button tab">Ring</button>
-                                <button id="sort-inventory-tab" class="inventory-tab-button sort">Sort</button>
+                            <div id="hotbar5" class="hotbar-slot" data-hotbar-id="5">
+                                <div class="hotbar-icon-wrapper">
+                                    <img src="img/icons/empty-hotbar-slot.png" class="hotbar-icon" />
+                                </div>
+                                <span class="hotbar-slot-label">5</span>
                             </div>
-
-                            <div id="inventory-item-wrapper">
+                            <div id="hotbar6" class="hotbar-slot" data-hotbar-id="6">
+                                <div class="hotbar-icon-wrapper">
+                                    <img src="img/icons/empty-hotbar-slot.png" class="hotbar-icon" />
+                                </div>
+                                <span class="hotbar-slot-label">6</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="log-content" class="ui-tab">
-                    <h2>Adventure Log</h2>
-                    <div id="log"></div>
+                <div id="resources">
+                    <div class="player-status-child"> Torches: <span id="torchCount"></span> </div><!-- set innerHTML on #torchCount -->
+                    <div class="player-status-child">Heal Potions: <span id="healPotionCount"></span></div><!-- set innerHTML on #healPotionCount -->
+                    <div class="player-info-child resource">Gold: <span id="playerGold"></span></div>
+                    <div class="player-info-child resource">Speed: <span id="playerSpeed"></span>%</div>
+                    <div class="player-info-child resource">Ashen Shards: <span id="playerShards"></span></div>
+                    <!--<div class="player-info-child">Portal Bindings: <span id="portalBinding"></span></div>-->
                 </div>
-                <div id="journey-content" class="ui-tab">
-                    <div id="journey">
-                        <h2>Journey Progress</h2>
-                        <div id="journey-window-wrapper">
-                            <div id="journey-tabs"></div>
-                            <div id="journey-items-wrapper"></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="shop-content" class="ui-tab content">
 
-                    <div id="shop-left">
-                        <div id="shop-info">
-                            <h2 id="shop-type"></h2>
-                            <p>Right-Click or Drag Items to Buy/Sell</p>
-                        </div>
-                        <div id="shop-items">
 
-                        </div>
-                    </div>
-                    <div id="shop-inventory-wrapper">
-                        <h2>Inventory Items</h2>
-                        <div id="inventory-window-wrapper">
-                            <div id="shop-inventory-tabs">
-                                <button id="inventory-tab-all" class="inventory-tab-button tab active">All</button>
-                                <button id="inventory-tab-armor" class="inventory-tab-button tab">Armor</button>
-                                <button id="inventory-tab-weapon-melee" class="inventory-tab-button tab">Melee</button>
-                                <button id="inventory-tab-weapon-ranged" class="inventory-tab-button tab">Ranged</button>
-                                <button id="inventory-tab-amulet" class="inventory-tab-button tab">Amulet</button>
-                                <button id="inventory-tab-ring" class="inventory-tab-button tab">Ring</button>
-                                <button id="sort-inventory-tab" class="inventory-tab-button sort">Sort</button>
-                            </div>
-                            <div id="shop-inventory-wrapper-inner"></div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
-    <script type="module" src="init.js"></script>
-    <script>
-        // Only track events on game.zukarii.com (where GA4 is loaded)
-        if (window.location.host === 'game.zukarii.com') {
-            // Get the elements
-            const startNewGameButton = document.getElementById('start-new-game-button');
-            const saveNameInput = document.getElementById('player-name-input');
+        <div id="ui-layer">
 
-            // Check if both elements exist before proceeding
-            if (startNewGameButton && saveNameInput) {
-                startNewGameButton.addEventListener('click', function () {
-                    const characterName = saveNameInput.value || 'Unknown';
-                    gtag('event', 'start_new_game', {
-                        'character_name': characterName
+            <div id="game-over" class="death">
+                <h1>GAME OVER</h1>
+                <p id="game-over-message"></p>
+                <button id="view-log"> View Log </button><button id="restart-button"> Play Again </button><button id="menu"> Menu </button>
+            </div>
+
+            <div id="tabs" class="hidden">
+                <div id="tab-wrapper">
+                    <div id="tab-menu"></div>
+
+                    <div id="menu-content" class="ui-tab">
+
+                        <div id="game-menu">
+                            <h2>Game Menu</h2>
+                            <div id="menu-buttons">
+                                <button id="controls-button"> Controls </button>
+                                <button id="map-key-button"> Map Key </button>
+                                <button id="options-button"> Options </button>
+                                <button id="save-games-button"> Save Game </button>
+                                <button id="load-games-button"> Load Game </button>
+                                <button id="new-game-button"> New Game </button>
+                                <button id="exit-button"> Exit Game </button>
+                                <button id="about-button"> About </button>
+                            </div>
+                        </div>
+
+                        <div id="menu-panel">
+                            <h2>Menu Option Details</h2>
+                            <div id="menu-data-wrapper">
+                                <div id="controls-data">
+                                    <h3>Controls:</h3>
+                                    <ul>
+                                        <li>Arrow keys: Move / Mele Attack</li>
+                                        <li>wasd: Move / Mele Attack</li>
+                                        <li>Hold Space: + WASD / Arrows: Ranged attack (*)</li>
+                                        <li>T key: Light Torch</li>
+                                        <li>C key: Character</li>
+                                        <li>L key: Adventure Log</li>
+                                        <li>Esc key: Menu</li>
+                                    </ul>
+                                </div>
+                                <div id="map-key-data" style="display:none;">
+                                    <h3>Map Key:</h3>
+                                    <ul>
+                                        <li>𓀠: The Battle Mage - (You) </li>
+                                        <li> $: Treasure (aka Da Lootz!)</li>
+                                        <li> a-z, A-Z: Monster (Kill or Be Killed)</li>
+                                        <li>≅: Magic Fountain (Heal, Boost, ???)</li>
+                                        <li>#: Wall (You Can't Go Here)</li>
+                                        <li> ⇓: Stairs Down ∞ (Infinite) </li>
+                                        <li>⇑: Stairs Up (Tier 1 Exit Game)</li>
+                                    </ul>
+                                </div>
+                                <div id="options-data" style="display:none;"><h3>Options:</h3></div>
+                                <div id="save-games-data" style="display:none;"><h3>Saved Games:</h3></div>
+                                <div id="load-games-data" style="display:none;"><h3>Load Games:</h3></div>
+                                <div id="new-game-data" style="display:none;">
+                                    <h3>New Game: - Create Character</h3>
+                                    <ul>
+                                        <li>Give your new champion their Zukarii name and press "Start New Game" to play now!</li>
+                                        <li><label>New Charater Name: </label> <input type="text" id="player-name-input" class="save-game-input" size="42" placeholder="Enter New Charater Name"></li>
+                                        <li><button id="start-new-game-button" class="new-game" data-save-id="new" style="background-color:#0f0;">Start New Game</button></li>
+
+
+                                    </ul>
+
+                                </div>
+                                <div id="about-data" style="display:none;">
+                                    <h3>About:</h3>
+                                    <h4>Developers:</h4>
+                                    <ul>
+                                        <li>Creator / Game Director / Lead Engineer: Matt Capitao</li>
+                                    </ul>
+                                    <h4>AI Devs</h4>
+                                    <ul>
+                                        <li>Supporting AI - Architect / Engineer: Grok3</li>
+                                        <li>Supporting AI - QA / Debug Engineer : GitHub Copilot</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div id="character-content" class="ui-tab">
+                        <div id="character">
+                            <h2>Equipped Items</h2>
+                            <div id="equipped-items">
+                                <div class="col">
+                                    <div class="equipped-item">
+                                        <p class="equip-slot mainhand empty" data-equip_slot='{"slotId": 0, "slot": "mainhand"}'></p>
+                                        <span class="item-label">Mainhand</span>
+                                    </div>
+                                    <div class="equipped-item">
+                                        <p class="equip-slot rightring empty" data-equip_slot='{"slotId": 1, "slot": "rightring"}'></p>
+                                        <span class="item-label">Right Ring</span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="equipped-item">
+                                        <p class="equip-slot amulet empty" data-equip_slot='{"slotId": 2, "slot": "amulet"}'></p>
+                                        <span class="item-label">Amulet</span>
+                                    </div>
+                                    <div class="equipped-item">
+                                        <p class="equip-slot armor empty" data-equip_slot='{"slotId": 3, "slot": "armor"}'></p>
+                                        <span class="item-label">Armor</span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="equipped-item">
+                                        <p class="equip-slot offhand empty" data-equip_slot='{"slotId": 4, "slot": "offhand"}'></p>
+                                        <span class="item-label">Offhand</span>
+                                    </div>
+                                    <div class="equipped-item">
+                                        <p class="equip-slot leftring empty" data-equip_slot='{"slotId": 5, "slot": "leftring"}'></p>
+                                        <span class="item-label">Left Ring</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h2>Character Stats</h2>
+                            <div id="character-stat-wrapper"></div>
+                        </div>
+
+                        <div id="inventory">
+                            <h2>Inventory Items</h2>
+                            <div id=inventory-window-wrapper>
+                                <div id="inventory-tabs">
+                                    <button id="inventory-tab-all" class="inventory-tab-button tab" style="background: #0f0;">All</button>
+                                    <button id="inventory-tab-armor" class="inventory-tab-button tab">Armor</button>
+                                    <button id="inventory-tab-weapon-melee" class="inventory-tab-button tab">Melee</button>
+                                    <button id="inventory-tab-weapon-ranged" class="inventory-tab-button tab">Ranged</button>
+                                    <button id="inventory-tab-amulet" class="inventory-tab-button tab">Amulet</button>
+                                    <button id="inventory-tab-ring" class="inventory-tab-button tab">Ring</button>
+                                    <button id="sort-inventory-tab" class="inventory-tab-button sort">Sort</button>
+                                </div>
+
+                                <div id="inventory-item-wrapper">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="log-content" class="ui-tab">
+                        <h2>Adventure Log</h2>
+                        <div id="log"></div>
+                    </div>
+                    <div id="journey-content" class="ui-tab">
+                        <div id="journey">
+                            <h2>Journey Progress</h2>
+                            <div id="journey-window-wrapper">
+                                <div id="journey-tabs"></div>
+                                <div id="journey-items-wrapper"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="shop-content" class="ui-tab content">
+
+                        <div id="shop-left">
+                            <div id="shop-info">
+                                <h2 id="shop-type"></h2>
+                                <p>Right-Click or Drag Items to Buy/Sell</p>
+                            </div>
+                            <div id="shop-items">
+
+                            </div>
+                        </div>
+                        <div id="shop-inventory-wrapper">
+                            <h2>Inventory Items</h2>
+                            <div id="inventory-window-wrapper">
+                                <div id="shop-inventory-tabs">
+                                    <button id="inventory-tab-all" class="inventory-tab-button tab active">All</button>
+                                    <button id="inventory-tab-armor" class="inventory-tab-button tab">Armor</button>
+                                    <button id="inventory-tab-weapon-melee" class="inventory-tab-button tab">Melee</button>
+                                    <button id="inventory-tab-weapon-ranged" class="inventory-tab-button tab">Ranged</button>
+                                    <button id="inventory-tab-amulet" class="inventory-tab-button tab">Amulet</button>
+                                    <button id="inventory-tab-ring" class="inventory-tab-button tab">Ring</button>
+                                    <button id="sort-inventory-tab" class="inventory-tab-button sort">Sort</button>
+                                </div>
+                                <div id="shop-inventory-wrapper-inner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="module" src="init.js"></script>
+        <script>
+            // Only track events on game.zukarii.com (where GA4 is loaded)
+            if (window.location.host === 'game.zukarii.com') {
+                // Get the elements
+                const startNewGameButton = document.getElementById('start-new-game-button');
+                const saveNameInput = document.getElementById('player-name-input');
+
+                // Check if both elements exist before proceeding
+                if (startNewGameButton && saveNameInput) {
+                    startNewGameButton.addEventListener('click', function () {
+                        const characterName = saveNameInput.value || 'Unknown';
+                        gtag('event', 'start_new_game', {
+                            'character_name': characterName
+                        });
+                        console.log('GA4 Event: start_new_game tracked with character_name:', characterName);
                     });
-                    console.log('GA4 Event: start_new_game tracked with character_name:', characterName);
-                });
-            } else {
-                console.log('GA4 Tracking: Skipped start_new_game event listener - required elements not found');
+                } else {
+                    console.log('GA4 Tracking: Skipped start_new_game event listener - required elements not found');
+                }
             }
-        }
-    </script>
+        </script>
 </body>
 </html>

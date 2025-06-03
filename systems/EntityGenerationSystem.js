@@ -78,30 +78,31 @@ export class EntityGenerationSystem extends System {
         this.entityManager.addComponentToEntity(portalEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
         this.entityManager.addComponentToEntity(portalEntity.id, new PortalComponent());
         const portalComp = portalEntity.getComponent('Portal');
-        const  gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
 
         this.entityManager.addComponentToEntity(portalEntity.id, new VisualsComponent(48, 72));
-        this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(24,24,23,43));
+        this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(24, 24, 23, 43));
         const visuals = portalEntity.getComponent('Visuals');
         const hitBox = portalEntity.getComponent('Hitbox');
 
-       let visualsImg = 'img/anim/Portal-Animation.png';
-       let cleansed = false; // Portals are not cleansed by default
-        if (tier < 11 && gameState.highestTier < 11) {
+        let visualsImg = 'img/anim/Portal-Animation.png';
+        let cleansed = false; // Portals are not cleansed by default
+
+        const unlockedPortals = player.getComponent('PlayerAchievements').stats.unlockedPortals || [];
+        if (tier < 11 && gameState.highestTier < 11 && !unlockedPortals.includes(tier)) {
             active = false; // Disable portal for tiers below 11 Old Zurath is the first 10 levels
             visualsImg = 'img/avatars/inactive-portal.png';
-        } else if (tier < 11 && gameState.highestTier >= 11) {
+        } else if ((tier < 11 && gameState.highestTier >= 11) || unlockedPortals.includes(tier)) {
             active = true; // If player has reached tier 11, the portals from 0-10 are active
             cleansed = true; // If player has reached tier 11, the cleansed portals from 0-10 are active
             visualsImg = 'img/anim/Portal-Animation-Cleansed.png';
         }
-        console.log(`LevelSystem.js: generatePortal - Portal visuals set to ${visualsImg} for tier ${tier}, cleansed: ${cleansed}`,gameState);
+        console.log(`LevelSystem.js: generatePortal - Portal visuals set to ${visualsImg} for tier ${tier}, cleansed: ${cleansed}`, gameState);
 
         portalComp.active = active;
         portalComp.cleansed = cleansed; 
         visuals.avatar = visualsImg;
 
- 
         entityList.portals.push(portalEntity.id);
         mapComp.map[y][x] = '?';
         this.eventBus.emit('PortalAdded');

@@ -668,7 +668,8 @@ export class UISystem extends System {
         if (this.playerInfo) {
             const playerNameSpan = this.playerInfo.querySelector('#playerName');
             const playerLevelSpan = this.playerInfo.querySelector('#playerLevel');
-            const dungeonTierSpan = this.playerInfo.querySelector('#dungeonTier');
+            const dungeonTierSpan = document.getElementById('dungeonTier');
+            const highestTierSpan = document.getElementById('highestTier');
             const playerGoldSpan = this.playerInfo.querySelector('#playerGold');
             const playerSpeedSpan = this.playerInfo.querySelector('#playerSpeed');
             const playerShardSpan = this.playerInfo.querySelector('#playerShards');
@@ -679,6 +680,7 @@ export class UISystem extends System {
             if (playerNameSpan) playerNameSpan.textContent = playerState.name;
             if (playerLevelSpan) playerLevelSpan.textContent = playerState.level;
             if (dungeonTierSpan) dungeonTierSpan.textContent = gameState.tier;
+            if (highestTierSpan) highestTierSpan.textContent = gameState.highestTier;
             if (playerGoldSpan) playerGoldSpan.textContent = resource.gold !== undefined ? resource.gold : 'N/A';
             if (playerSpeedSpan) playerSpeedSpan.textContent = stats.movementSpeed !== undefined ? stats.movementSpeed : 'N/A';
             if (playerShardSpan) playerShardSpan.textContent = resource.craftResources.ashenShard !== undefined ? resource.craftResources.ashenShard : 0;
@@ -924,7 +926,9 @@ export class UISystem extends System {
                             .join('');
 
                         if (isSaveMode) {
-                            html += `<li class="new-save-game"><button class="save-game" data-save-id="new" style="background-color:#0f0;">New Save</button> | <select id="character-select" >${selectOptions}<option value="all">All Characters</option></select></li>`;
+                            html += `<li class="new-save-game"><button class="save-game" data-save-id="new" style="background-color:#0f0;">New Save</button> |
+                            <input type="text" id="save-notes" placeholder="Save Game Notes - not yet enabled :p">
+                            <select id="character-select" disabled >${selectOptions}<option value="all">All Characters</option></select></li>`;
                         } else {
                             html += `<li class="new-save-game"><select id="character-select" >${selectOptions}<option value="all">All Characters</option></select></li>`;
                         }

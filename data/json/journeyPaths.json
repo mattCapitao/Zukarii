@@ -277,8 +277,8 @@
         "parentId": "whisper_parent_3",
         "nextPathId": "",
         "completed": false,
-        "title": "Attempt the Depths",
-        "description": "Attempt to descend to Tier 7.",
+        "title": "Enter the Depths",
+        "description": "Descescend to Tier 7 and report your findings.",
         "completionCondition": {
           "type": "attemptStairs",
           "fromTier": 6,
@@ -290,7 +290,7 @@
             "gold": 100
           }
         ],
-        "completionText": "The path to Tier 7 is blocked. Return to Sehnrhyx Syliri.",
+        "completionText": "The way to Tier 7 is blocked by a magical barrier. You had better let Sehnrhyx Syliri know.",
         "logCompletion": true
       },
       {
@@ -344,7 +344,7 @@
         "mechanic": "tier0Portal"
       }
     ],
-    "completionText": "With shards you gathered I have activated and cleansed this old portal, you may now return to the depths without the need of a Stone of Veil Piercing.",
+    "completionText": "With shards you gathered I will activate and cleanse this old portal, to aid you in your investigation of this corruption.",
     "logCompletion": true,
     "tasks": [
 
@@ -449,7 +449,7 @@
             "gold": 50
           }
         ],
-        "completionText": "The shards have been delivered.",
+        "completionText": "Thank you for brining these to me. This confirms what I feared. The corruption of Ashangal has escaped containment.",
         "logCompletion": true
       }
     ]

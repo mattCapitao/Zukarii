@@ -17,15 +17,19 @@ export class ExplorationSystem extends System {
     init() {
         this.eventBus.on('ToggleMinimap', () => {
             this.isMinimapVisible = !this.isMinimapVisible;
+            this.minimapWrapper.style.display = this.isMinimapVisible ? 'flex' : "none";
             this.minimapCanvas.style.display = this.isMinimapVisible ? 'block' : 'none';
             if (this.isMinimapVisible) this.renderMinimap();
         });
 
         this.minimapCanvas = document.getElementById('minimap-canvas');
+        this.minimapWrapper = document.getElementById('minimap-wrapper');
+       
         if (!this.minimapCanvas) {
             return;
         }
         this.minimapCtx = this.minimapCanvas.getContext('2d');
+        this.minimapWrapper.style.display = this.isMinimapVisible ? 'flex' : "none";
         this.minimapCanvas.style.display = this.isMinimapVisible ? 'block' : 'none';
     }
 
@@ -34,6 +38,7 @@ export class ExplorationSystem extends System {
     }
 
     renderMinimap() {
+        this.minimapWrapper.classList.remove('hidden');
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
         if (!levelEntity) {
