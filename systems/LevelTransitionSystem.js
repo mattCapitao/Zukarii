@@ -301,6 +301,11 @@ export class LevelTransitionSystem extends System {
             this.clearLevelEntities(tier);
         }
 
+        this.pendingTransition = 'load';
+        this.eventBus.emit('AddLevel', { tier });
+
+        /*
+
         // Set pendingTransition to 'load' to indicate a load operation
         if (tier !== 0) {
             this.pendingTransition = 'load';
@@ -316,14 +321,9 @@ export class LevelTransitionSystem extends System {
 
             this.updatePortalsForTier(tier);
             this.eventBus.emit('GearChanged', { entityId:'player' });
-            // uncomment this block if updatePortalsForTier fix doesnt work
-             /*
-            const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === 0);
-            if (levelEntity) {
-                this.handleLevelAdded({ tier: 0, entityId: levelEntity.id });
-            }
-            */
+
         }
+        */
     } 
 
     handleLevelAdded({ tier, entityId }) {
@@ -449,7 +449,11 @@ export class LevelTransitionSystem extends System {
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
         
         const healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
-        healthUpdates.push({ entityId: 'player', amount: 0 });
+        healthUpdates.push({ entityId: 'player', amount: 0 }); 
+
+        if (tier < 11) {
+            this.updatePortalsForTier(tier);
+        }
     }
 
     updatePortalsForTier(tier) {

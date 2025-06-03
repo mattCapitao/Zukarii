@@ -613,11 +613,12 @@
         "parentId": "whisper_parent_6",
         "nextPathId": "",
         "completed": false,
-        "title": "Reach the Depths",
+        "title": "Clear the path to the the depths",
         "description": "Locate the secret entrance on Tier 10.",
         "completionCondition": {
-          "type": "reachTier",
-          "tier": 10
+            "type": "attemptStairs",
+            "fromTier": 10,
+            "toTier": 11
         },
         "rewards": [
           {
@@ -625,7 +626,7 @@
             "gold": 125
           }
         ],
-        "completionText": "You have reached Tier 10.",
+        "completionText": "You have discovered the pathc.",
         "logCompletion": true
       },
       {

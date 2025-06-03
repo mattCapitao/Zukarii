@@ -190,7 +190,7 @@ hr {
 
 #hud-layer {
     position: absolute;
-    opacity: 0.85;
+    opacity: 0.65;
     top: 0;
     left: 0;
     width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
@@ -201,6 +201,8 @@ hr {
     overflow: hidden; /* Prevent child overflow */
 }
 
+
+
 .status-divider {
     position: absolute;
     top: 0;
@@ -210,10 +212,20 @@ hr {
     opacity: 0.7;
 }
 
+
+#hud-top-left {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding:0;
+}
+
+
+
 #player-info {
     position: absolute;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     /* width: calc(100vw - 0.15rem);*/ /* Account for border (1px each side) */
 
     top: 1.5rem;
@@ -228,12 +240,13 @@ hr {
     background-color: #222222cc;
     overflow: hidden; /* Prevent child overflow */
     box-shadow: 0 0 6px rgba(0, 255, 0, 0.8);
+    gap: .625rem; /* ~5px */
 }
     #player-info .player {
-        font-size: 1.25rem; /* ~20px */
+        font-size: 1.5rem; /* ~24px */
     }
     #player-info .level {
-        font-size: 1rem; /* ~16px */
+        font-size: .75rem; /* ~12px */
     }
     #player-info .resource {
         font-size: 0.725rem; /* ~12px */
@@ -247,6 +260,29 @@ hr {
         margin: 0;
         pointer-events: none;
     }
+
+#nameplate_icon {
+    height: 3rem; /* ~48px */
+    width: 3rem; /* ~48px */
+    padding: 0.125rem; /* ~2px */
+    background-color: black;
+    border: 1px solid #0f0; /* ~1px */
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(0, 255, 0, 0.8);
+}
+
+    #nameplate_icon img {
+        height: 2.625rem;
+        border-radius: 50%;
+        margin:0;padding:0;
+    }
+
+
+#nameplate-text {
+    display: flex;
+    flex-direction: column;
+    /* width: calc(100vw - 0.15rem);*/ /* Account for border (1px each side) */
+}
 
 #minimap-canvas {
     position: absolute;
@@ -312,13 +348,12 @@ hr {
 
 #hp-mana {
     position: absolute;
-    top: 6rem;
-    left: 1.5rem;
+    top: 5.625rem;
+    left: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: .3125rem; /* ~5px */
+    gap: .625rem; /* ~10px */
 }
-
     #player-status > * {
         font-weight: bold;
         text-align: center;
@@ -331,7 +366,7 @@ hr {
     position: relative;
     width: 100%; /* Full width of the parent */
     max-width: 15rem; /* Adjust this to fit your UI */
-    height: 1.25rem;
+    height: 1rem;
     border: 2px solid #0f0;
     border-radius: .575rem;
     box-shadow: 0 0 6px rgba(0, 255, 0, 0.5);
