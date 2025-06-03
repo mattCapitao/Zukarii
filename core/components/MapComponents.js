@@ -76,7 +76,7 @@ export class PortalComponent {
         this.type = 'Portal';
         this.active = active;
         this.cleansed = false;
-        this.destinationTier = Number; // Tier number for the destination portal
+        this.destinationTier =  null; // Tier number for the destination portal
     }
     
 }

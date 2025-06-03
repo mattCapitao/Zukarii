@@ -50,6 +50,7 @@ import { DialogueUISystem } from './systems/DialogueUISystem.js';
 import { NPCControllerSystem } from './systems/NPCControllerSystem.js';
 import { EntityGenerationSystem } from './systems/EntityGenerationSystem.js';
 import { TriggerAreaSystem } from './systems/TriggerAreaSystem.js'; 
+import { HotBarSystem } from './systems/HotBarSystem.js';
 
 
 import {
@@ -300,6 +301,7 @@ export class Game {
         activeGameSystems.playerCollision = new PlayerCollisionSystem(this.entityManager, this.state.eventBus, this.utilities);
         activeGameSystems.entityRemoval = new EntityRemovalSystem(this.entityManager);
         activeGameSystems.npcController = new NPCControllerSystem(this.entityManager, this.state.eventBus, this.utilities);
+        activeGameSystems.hotBar = new HotBarSystem(this.entityManager, this.state.eventBus, this.utilities);
 
         Object.values(activeGameSystems).forEach(system => system.init());
         this.systems = { ...this.systems, ...activeGameSystems };
@@ -348,6 +350,7 @@ export class Game {
             this.updateSystems([
                 'playerInput',
                 'mouseInput',
+                'hotBar',
                 'playerController',
                 'playerTimer',
                 'player',
@@ -357,9 +360,6 @@ export class Game {
                 'monsterTimer',
                 'collisions',
                 'triggerArea', 
-                
-                
-                
                 'movementResolution',
                 'playerCollision',
                 'projectileCollisions',

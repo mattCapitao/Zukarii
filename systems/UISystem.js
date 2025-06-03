@@ -27,7 +27,9 @@ export class UISystem extends System {
             xpBar: null,
             xpText: null,
             healPotionCount: null,
-            torchCount: null
+            torchCount: null,
+            goldCount: null,
+            ashenShardCount: null
         };
         this.statusUpdates = {};
         this.needsUpdate = false;
@@ -42,12 +44,14 @@ export class UISystem extends System {
     init() {
         this.playerInfo = document.getElementById('player-info');
         this.playerStatus = document.getElementById('player-status');
+        this.hud = document.getElementById('hud-layer');
         this.tabs = document.getElementById('tabs');
         this.logContent = document.getElementById('log-content');
         this.characterContent = document.getElementById('character-content');
         this.menuContent = document.getElementById('menu-content');
         this.journeyContent = document.getElementById('journey-content');
         this.shopContent = document.getElementById('shop-content');
+        this.resources = document.getElementById('resources');
 
         if (!this.playerInfo || !this.playerStatus || !this.tabs || !this.logContent || !this.characterContent || !this.menuContent || !this.journeyContent || !this.shopContent) {
             console.log("Menu", this.menuContent);
@@ -64,6 +68,8 @@ export class UISystem extends System {
         this.statusDOM.xpText = this.playerStatus.querySelector('#xpText');
         this.statusDOM.healPotionCount = this.playerStatus.querySelector('#healPotionCount');
         this.statusDOM.torchCount = this.playerStatus.querySelector('#torchCount');
+        this.statusDOM.goldCount = this.resources.querySelector('#goldCount');
+        this.statusDOM.ashenShardCount = this.resources.querySelector('#ashenShardCount');
 
         if (!this.statusDOM.hpBar || !this.statusDOM.hpText ||
             !this.statusDOM.manaBar || !this.statusDOM.manaText ||
@@ -640,6 +646,12 @@ export class UISystem extends System {
         if (this.statusUpdates.torches !== undefined) {
             this.statusDOM.torchCount.textContent = this.statusUpdates.torches;
         }
+        if (this.statusUpdates.goldCount !== undefined) {
+            this.statusDOM.goldCount.textContent = this.statusUpdates.goldCount;
+        }
+        if (this.statusUpdates.ashenShardCount !== undefined) {
+            this.statusDOM.ashenShardCount.textContent = this.statusUpdates.ashenShardCount;
+        }
         this.statusUpdates = {};
     }
 
@@ -660,8 +672,9 @@ export class UISystem extends System {
         this.statusUpdates.xp = { value: playerState.xp, next: playerState.nextLevelXp };
         this.statusUpdates.healPotions = resource.healPotions;
         this.statusUpdates.torches = resource.torches;
-        this.statusUpdates.ashenShards = resource.craftResources.ashenShard || 0;
-        this.statusUpdates.portalBinding = resource.portalBinding || 0;
+        this.statusUpdates.ashenShardCount = resource.craftResources.ashenShard || 0;
+        this.statusUpdates.goldCount = resource.gold !== undefined ? resource.gold : 0;
+
 
         console.log("Resource - after statusUpdates", resource);
 
@@ -670,10 +683,9 @@ export class UISystem extends System {
             const playerLevelSpan = this.playerInfo.querySelector('#playerLevel');
             const dungeonTierSpan = document.getElementById('dungeonTier');
             const highestTierSpan = document.getElementById('highestTier');
-            const playerGoldSpan = this.playerInfo.querySelector('#playerGold');
-            const playerSpeedSpan = this.playerInfo.querySelector('#playerSpeed');
-            const playerShardSpan = this.playerInfo.querySelector('#playerShards');
-            const portalBindingSpan = this.playerInfo.querySelector('#portalBinding');
+            const playerGoldSpan = document.getElementById('#goldCount');
+            const playerShardSpan = document.getElementById('#ashenShardCount');
+
 
             const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
 
@@ -682,11 +694,7 @@ export class UISystem extends System {
             if (dungeonTierSpan) dungeonTierSpan.textContent = gameState.tier;
             if (highestTierSpan) highestTierSpan.textContent = gameState.highestTier;
             if (playerGoldSpan) playerGoldSpan.textContent = resource.gold !== undefined ? resource.gold : 'N/A';
-            if (playerSpeedSpan) playerSpeedSpan.textContent = stats.movementSpeed !== undefined ? stats.movementSpeed : 'N/A';
             if (playerShardSpan) playerShardSpan.textContent = resource.craftResources.ashenShard !== undefined ? resource.craftResources.ashenShard : 0;
-            console.log("Resource - before output", resource);
-            if (portalBindingSpan) portalBindingSpan.textContent = resource.portalBinding !== undefined ? resource.portalBinding : 0;
-            console.log("Resource - after output", resource);
         }
 
         if (!this.needsUpdate) {
@@ -1223,6 +1231,8 @@ export class UISystem extends System {
         if (overlayState.isOpen && overlayState.activeTab === 'log') {
             this.renderOverlay('log');
         }
+        const hudLogElement = document.getElementById('hud-log-content');
+        hudLogElement.innerHTML = overlayState.logMessages.slice(0, 20).map(line => `<p>${line}</p>`).join('');
     }
 
     isSlotCompatible(item, slot) {

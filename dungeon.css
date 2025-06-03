@@ -206,7 +206,7 @@ hr {
     top: 0;
     width: 1px;
     height: 100%;
-    background: #222;
+    background: #ddd;
     opacity: 0.7;
 }
 
@@ -511,11 +511,11 @@ hr {
     pointer-events: none;
     box-shadow: 0 0 6px rgba(0, 255, 0, 0.8);
     gap:.5rem;
-    height: 4.175rem;
+    height:3.5rem;
 }
 
 .hotbar-slot {
-    height: 3.25rem; /* ~44px */
+    height: 2.6625rem;
     width: 2.6625rem;
     margin: 0;
     padding: 0;
@@ -523,12 +523,12 @@ hr {
 }
 
 .hotbar-icon-wrapper {
+    position: relative;
     border: 1px solid #0f0;
     border-radius: .3125rem; /* ~5px */
     height: 2.75rem; /* ~40px */
     width: 2.75rem;
-    padding:1px;
-    
+    padding: 1px;
 }
 
 .hotbar-icon {
@@ -537,6 +537,19 @@ hr {
     border: 2px solid #222;
 }
 
+.hotbar-slot-label {
+    position: absolute;
+    bottom: .06125rem;
+    left: .06125rem;
+    height: .725rem;
+    width: .725rem;
+    text-align: center;
+    font-size: .625rem; /* ~12px */
+    color: #0f0;
+    background: rgba(0, 0, 0, 0.6);
+    padding: .06125rem; /* ~2px */
+    border-radius: 50%;
+}
 #resources {
     position: absolute;
     bottom: 0;

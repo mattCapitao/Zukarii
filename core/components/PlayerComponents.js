@@ -171,6 +171,13 @@ export class ShopInteractionComponent {
     
 }
 
+export class HotBarIntentComponent {
+    constructor(hotBarKey = null) {
+        this.type = 'HotBarIntent';
+        this.hotBarKey = hotBarKey; // Array of hotbar intents, e.g., [{ slot: 1, action: 'use', target: 'itemId' }]
+    }
+}
+
 export class PlayerActionQueueComponent {
     constructor() {
         this.type = 'PlayerActionQueue';

@@ -468,11 +468,15 @@ export class LevelTransitionSystem extends System {
             let cleansed = false;
             let active = portalComp.active; // default to current state
 
-            if (entityTier < 11 && gameState.highestTier < 11 && !unlockedPortals.includes(tier)) {
+            if (unlockedPortals.includes(tier)) {
+                active = true;
+                cleansed = true;
+                visualsImg = 'img/anim/Portal-Animation-Cleansed.png';
+            } else if (tier < 11 && gameState.highestTier < 11) {
                 active = false;
                 cleansed = false;
                 visualsImg = 'img/avatars/inactive-portal.png';
-            } else if ((entityTier < 11 && gameState.highestTier >= 11) || unlockedPortals.includes(tier)) {
+            } else if (tier < 11 && gameState.highestTier >= 11) {
                 active = true;
                 cleansed = true;
                 visualsImg = 'img/anim/Portal-Animation-Cleansed.png';

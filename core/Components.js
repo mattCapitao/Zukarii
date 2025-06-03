@@ -28,6 +28,7 @@ import {
     PlayerActionQueueComponent,
     PlayerAchievementsComponent,
     JourneyRewardComponent,
+    HotBarIntentComponent,
 } from './components/PlayerComponents.js';
 
 import {
@@ -107,6 +108,7 @@ export {
     PlayerActionQueueComponent,
     PlayerAchievementsComponent,
     JourneyRewardComponent,
+    HotBarIntentComponent,
 
     // Game-related components
     UIComponent,

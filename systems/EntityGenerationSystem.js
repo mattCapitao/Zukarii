@@ -89,12 +89,17 @@ export class EntityGenerationSystem extends System {
         let cleansed = false; // Portals are not cleansed by default
 
         const unlockedPortals = player.getComponent('PlayerAchievements').stats.unlockedPortals || [];
-        if (tier < 11 && gameState.highestTier < 11 && !unlockedPortals.includes(tier)) {
-            active = false; // Disable portal for tiers below 11 Old Zurath is the first 10 levels
+        if (unlockedPortals.includes(tier)) {
+            active = true;
+            cleansed = true;
+            visualsImg = 'img/anim/Portal-Animation-Cleansed.png';
+        } else if (tier < 11 && gameState.highestTier < 11) {
+            active = false;
+            cleansed = false;
             visualsImg = 'img/avatars/inactive-portal.png';
-        } else if ((tier < 11 && gameState.highestTier >= 11) || unlockedPortals.includes(tier)) {
-            active = true; // If player has reached tier 11, the portals from 0-10 are active
-            cleansed = true; // If player has reached tier 11, the cleansed portals from 0-10 are active
+        } else if (tier < 11 && gameState.highestTier >= 11) {
+            active = true;
+            cleansed = true;
             visualsImg = 'img/anim/Portal-Animation-Cleansed.png';
         }
         console.log(`LevelSystem.js: generatePortal - Portal visuals set to ${visualsImg} for tier ${tier}, cleansed: ${cleansed}`, gameState);
