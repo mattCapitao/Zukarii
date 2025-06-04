@@ -45,7 +45,7 @@ export class SplashSystem extends System {
 
         // Load images with error handling
         this.zuImg.src = 'img/splash/zu-mage.png';
-        this.karnImg.src = 'img/splash/zu-mage.png';
+        this.karnImg.src = 'img/splash/karn-mage.png';
         this.zukarathImg.src = 'img/splash/zukarath.png';
         this.caerVorythImg.src = 'img/splash/caer-voryth.png';
         this.vortexImg.src = 'img/splash/vortex.png';
