@@ -275,7 +275,7 @@ export class MonsterSpawnSystem extends System {
         const attackSpeed = template.attackSpeed || 1000; // Default attack speed if not specified
         this.entityManager.addComponentToEntity(entity.id, new AttackSpeedComponent(attackSpeed));
 
-        const movemntSpeed = template.movementSpeed || 85; // Default movement speed if not specified
+        const movemntSpeed = template.movementSpeed || 70; // Default movement speed if not specified
         this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(movemntSpeed));
 
         if (tier === 3 && template.isBoss) {

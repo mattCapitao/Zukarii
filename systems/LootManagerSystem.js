@@ -154,7 +154,11 @@ export class LootManagerSystem extends System {
         console.log(`LootManagerSystem: Handling loot drop for ${sourceData.name}, items:`, sourceData.items);
 
         if (Math.random() >= this.BASE_DROP_CHANCE) {
-            this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped nothing.` });
+           // this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped nothing.` });
+            this.utilities.logMessage({
+                channel: 'system',
+                message: `The ${sourceData.name} dropped nothing.`
+            });
             const sourceEntityId = sourceData.sourceDetails?.id;
             if (sourceEntityId) {
                 this.processDeadLootSource(sourceEntityId)
@@ -202,9 +206,13 @@ export class LootManagerSystem extends System {
             items.length ? items.map(i => i.name).join(', ') : ''
         ].filter(Boolean).join(', ');
         if (sourceData.name === 'Treasure Chest') {
-            this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} contained ${dropMessage}!` });
+            //this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} contained ${dropMessage}!` });
         } else {
-            this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped ${dropMessage}!` });
+            //this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped ${dropMessage}!` });
+            this.utilities.logMessage({
+                channel: 'system',
+                message: `The ${sourceData.name} dropped ${dropMessage}!`
+            });
         }
 
         const sourceEntityId = sourceData.sourceDetails?.id;
@@ -311,7 +319,11 @@ export class LootManagerSystem extends System {
             if (resource.torchDropFail >= this.TORCH_DROP_FAIL_THRESHOLD) {
                 resource.torches = 1;
                 resource.torchDropFail = 0;
-                this.eventBus.emit('LogMessage', { message: 'You found a discarded torch lying on the ground!' });
+                //this.eventBus.emit('LogMessage', { message: 'You found a discarded torch lying on the ground!' });
+                this.utilities.logMessage({
+                    channel: 'system',
+                    message: 'You found a discarded torch lying on the ground!'
+                });
                 return 1; // Mercy torch - if no active torch and no torches in inventory, give 1 torch after 3 failed drops
             }
         } else if (resource.torches < 2) {

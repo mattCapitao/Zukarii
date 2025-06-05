@@ -190,7 +190,7 @@ hr {
 
 #hud-layer {
     position: absolute;
-    opacity: 0.65;
+    opacity: 0.75;
     top: 0;
     left: 0;
     width: calc(100vw - 0.15rem); /* Account for border (1px each side) */
@@ -291,10 +291,11 @@ hr {
     width: 248px;
     height: 138px;
     padding: 2px 0 0 2px;
-    margin:0;
+    margin: 0;
     border-bottom: 1px solid #0f0;
     z-index: 597;
     pointer-events: none;
+    background: rgba(134, 134, 134, 1);
 }
 #minimap-wrapper {
     position: absolute;
@@ -426,7 +427,7 @@ hr {
     bottom: 0;
     left: 1.5rem;
     width: 375px;
-    height: 125px;
+    height: 175px;
     border: none;
     
     z-index: 1000;
@@ -436,6 +437,8 @@ hr {
     flex-direction: column;
     justify-content: flex-end;
 }
+
+
 
 #hud-log-tabs {
     display: flex;
@@ -475,7 +478,7 @@ hr {
     padding: 10px;
     border: 2px solid #0f0; /* Border on text window */
     border-radius: 0 0 8px 8px; /* Bottom-left and bottom-right radius */
-    background: rgba(26, 42, 26, 0.8);
+    background: rgba(26, 32, 26, 1);
     text-align: left;
     padding: .3125rem;
     gap: .1625rem;
@@ -483,11 +486,21 @@ hr {
 }
 
     #hud-log-content p {
-        font-size: 12px;
-        margin-bottom: 5px;
-        text-shadow: 0 0 3px #000;
+        font-size: 10px;
+        margin-bottom: 4px;
+        text-shadow: 0 0 1px #000;
         line-height: 1.2;
     }
+
+.channel-system {
+    color: #fff;
+}
+.channel-loot {
+    color: #fbd013;
+}
+.channel-combat {
+    color: #e00000;
+}
 
 #bottom-hud-panel {
     position: absolute;

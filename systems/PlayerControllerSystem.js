@@ -31,7 +31,7 @@ export class PlayerControllerSystem {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         const attackSpeed = player.getComponent('AttackSpeed');
         const mouseTarget = player.getComponent('MouseTarget');
-
+        const playerState = player.getComponent('PlayerState');
         attackSpeed.elapsedSinceLastAttack += deltaTime * 1000;
 
         if (!gameState || gameState.gameOver || gameState.transitionLock) return;
@@ -50,7 +50,9 @@ export class PlayerControllerSystem {
             if (inputState.keys['ArrowRight'] || inputState.keys['d']) dx += 1;
 
             const direction = { dx, dy, source: 'keyboard' };
-            if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed && (direction.dx !== 0 || direction.dy !== 0)) {
+            if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed
+                && (direction.dx !== 0 || direction.dy !== 0)
+                && !playerState.isCasting) {
                 this.eventBus.emit('RangedAttack', direction);
                 attackSpeed.elapsedSinceLastAttack = 0;
                 this.endTurn('rangedAttack');
@@ -152,7 +154,8 @@ export class PlayerControllerSystem {
         } else if (event.type === 'keydown' && event.key === ' ' && !event.repeat) {
             if ((offWeapon?.attackType === 'ranged' && offWeapon?.baseRange > 0) ||
                 (mainWeapon?.attackType === 'ranged' && mainWeapon?.baseRange > 0)) {
-                this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
+                    //keeping this here as a reminder that this could be a place to hook into cast supression for projectiles
+               // this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
 
                 gameState.isRangedMode = true;
             } else {

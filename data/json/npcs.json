@@ -9,7 +9,11 @@
     "width": 42,
     "height": 42,
     "hitboxWidth": 42,
-    "hitboxHeight": 42
+    "hitboxHeight": 42,
+    "lightSource": {
+      "color": "rgba(5,255,5,0.7)",
+      "radius": 12
+    }
   },
   {
     "id": "shop_keeper",

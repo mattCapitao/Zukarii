@@ -22,6 +22,11 @@ export class ProjectileCollisionSystem extends System {
                const targetId = projectile.id === collisionData.moverId ? collisionData.targetId : collisionData.moverId;
                const target = this.entityManager.getEntity(targetId)
 
+                if (target.hasComponent('Projectile')) {
+                    target.sourceEntityId = target.getComponent('Projectile').sourceEntityId; 
+                    if (projData.sourceEntityId === target.sourceEntityId) break;
+                }
+
                const isOverlapping = this.isOverlapping(projectile, target);
 
                 console.log(`ProjectileCollisionSystem: ${projectile.id} collided with ${target.id}`);

@@ -79,6 +79,8 @@ import {
     InteractionIntentComponent,
     JourneyDialogueComponent,
     ShopDialogueComponent,
+    LogComponent,
+    LightSourceComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -157,6 +159,8 @@ export {
     InteractionIntentComponent,
     JourneyDialogueComponent,
     ShopDialogueComponent,
+    LogComponent,
+    LightSourceComponent,
 };
 
 // Utility functions

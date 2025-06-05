@@ -3,6 +3,7 @@
 export class Utilities {
     constructor() {
         this.entityManager = null; 
+        this.eventBus = null;
     } 
 
     pushPlayerActions(actionType, actionData) {
@@ -124,5 +125,71 @@ export class Utilities {
         }
         return portalEntity;
     }
+
+    logMessage(logData) {
+        if (!logData || typeof logData !== 'object' || !logData.message) {
+            console.error("Invalid log data provided. Expected an object.");
+            return;
+        }
+        // Default entityId to "player" if not provided
+        const entityId = logData.entityId || 'player';
+        const channel = logData.channel || 'system';
+        const message = logData.message;
+        const timestamp = Date.now(); // Generate timestamp at write time
+
+        // Get the entity’s log component (implementation depends on your ECS)
+        const logEntity = this.entityManager.getEntity(entityId);
+        const logComponent = logEntity.getComponent('Log');
+
+        // Add the log entry
+        logComponent.messages.unshift({channel, message, timestamp });
+
+        // Optional: Limit log size to prevent memory issues
+        if (logComponent.messages.length > 200) {
+            logComponent.messages.pop(); // Remove oldest entry
+        }
+        this.eventBus.emit('LogUpdated');
+    }
+
+    getLogMessages(options = {}) {
+        const entityId = options.entityId || "player";
+        const channel = options.channel || "all";
+        const limit = options.limit || null;
+
+        const entity = this.entityManager.getEntity(entityId);
+        if (!entity) {
+            console.error(`Entity with ID ${entityId} not found.`);
+            return [];
+        }
+
+        const logComponent = entity.getComponent("Log");
+        if (!logComponent) {
+            console.error(`Entity ${entityId} does not have a Log component.`);
+            return [];
+        }
+
+        let messages = logComponent.messages;
+
+        if (channel !== "all") {
+
+            const channels = typeof channel === "string" ? [channel] : channel;
+            if (!Array.isArray(channels)) {
+                console.error("Invalid channel parameter. Must be a string or an array of strings.");
+                return [];
+            }
+            if (!channels.every(ch => typeof ch === "string")) {
+                console.error("Channel array must contain only strings.");
+                return [];
+            }
+            messages = messages.filter(msg => channels.includes(msg.channel));
+        }
+
+        if (limit !== null) {
+            messages = messages.slice(0, limit);
+        }
+
+        return messages;
+    }
+
 
 }

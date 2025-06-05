@@ -1,30 +1,36 @@
 ﻿// systems/LightingSystem.js - Updated
 import { System } from '../core/Systems.js';
+import { LightSourceComponent } from '../core/Components.js'; 
 
 export class LightingSystem extends System {
-    constructor(entityManager, eventBus) {
-        super(entityManager, eventBus);
+    constructor(entityManager, eventBus, utilities) {
+        super(entityManager, eventBus, utilities);
         this.requiredComponents = ['LightingState', 'LightSourceDefinitions'];
        
     }
 
     init() {
-        this.RENDER_RADIUS_MODIFIER = 2;
-        this.DEFAULT_VISIBLE_RADIUS = 3
+        this.RENDER_RADIUS_MODIFIER = 3;
+        this.DEFAULT_VISIBLE_RADIUS = 3;
         this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
         this.eventBus.on('LightSourceActivated', (data) => this.activateLightSource(data));
-        // this.eventBus.on('TurnEnded', () => this.checkExpiration());
-        // turn ended has been removed from the game when reactivsating lighting system we will need to change expiration handling
-
+        this.eventBus.on('LightExpired', () => this.checkExpiration());
         this.renderState = this.entityManager.getEntity('renderState')?.getComponent('RenderState');
     }
 
-    checkExpiration() {
+    update(deltaTime) {
+       this.checkExpiration(deltaTime);
+    }
+
+    checkExpiration(deltaTime) {
         const lightingStateEntity = this.entityManager.getEntity('lightingState');
         const lightingState = lightingStateEntity.getComponent('LightingState');
 
         if (lightingState.isLit && lightingState.remainingDuration > 0) {
-            lightingState.remainingDuration--;
+
+            const deltaMs = deltaTime * 1000;
+
+            lightingState.remainingDuration -= (deltaMs / 1000);
 
             if (lightingState.remainingDuration <= 0) {
                 lightingState.isLit = false;
@@ -32,18 +38,17 @@ export class LightingSystem extends System {
                 lightingState.visibleRadius = this.DEFAULT_VISIBLE_RADIUS; // Default radius
                 this.renderState.renderRadius = this.DEFAULT_VISIBLE_RADIUS + this.RENDER_RADIUS_MODIFIER;
                 console.log(`LightingSystem: Torch expired, visibleRadius reset to ${lightingState.visibleRadius}`);
-                this.eventBus.emit('LogMessage', { message: 'The torch has burned out!' });
+                this.utilities.logMessage({ channel: 'system',  message: 'The torch has burned out!' });
                 this.trackControlQueue.push({ track: 'torchBurning', play: false, volume: 0 });
             }
         }
     }
 
-    activateLightSource({ type }) {
+    activateLightSource({ type , entityId = 'player' }) {
         console.log('LightingSystem: Activating light source:', type);
         const lightingStateEntity = this.entityManager.getEntity('lightingState');
         const lightingState = lightingStateEntity.getComponent('LightingState');
         const definitions = lightingStateEntity.getComponent('LightSourceDefinitions').definitions;
-
         if (!definitions[type]) {
             console.warn(`LightingSystem: Unknown light source type: ${type}`);
             return;

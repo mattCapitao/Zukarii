@@ -10,6 +10,7 @@ export class MovementResolutionSystem extends System {
 
     update(deltaTime) {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+
         if (gameState.transitionLock) {
             console.log('MovementResolutionSystem: Skipped update due to transitionLock');
             // Clear any existing movement intents
@@ -27,6 +28,8 @@ export class MovementResolutionSystem extends System {
             if (entity.hasComponent('LastPosition')) {
                 lastPos = entity.getComponent('LastPosition');
             }
+
+
             let deltaX = intent.targetX - pos.x;
             let deltaY = intent.targetY - pos.y;
           

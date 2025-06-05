@@ -222,3 +222,20 @@ export class ShopDialogueComponent {
         this.dialogues = {}; // { shop: { text: string, action: string, params: object }, [id]: {...} }
     }
 }
+
+export class LogComponent {
+    constructor() {
+        this.type = 'Log';
+        this.messages = []; // Array of log entries
+    }
+}
+
+export class LightSourceComponent {
+    constructor(radius = 3, color = 'rgba(255,255,255,0.5)' ) {
+        this.type = 'LightSource';
+        this.color = color; // Color of the light in hex format
+        this.radius = radius; // Radius of the light source
+        this.expires = false;
+        this.remainingDuration = 0;
+    }
+}

@@ -16,6 +16,8 @@ import { LootCollectionSystem } from './systems/LootCollectionSystem.js';
 import { ItemROGSystem } from './systems/ItemROGSystem.js';
 import { LootManagerSystem } from './systems/LootManagerSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
+import { HudUiSystem } from './systems/HudUiSystem.js'; 
+import { MenuUiSystem } from './systems/MenuUiSystem.js'; 
 import { UISystem } from './systems/UISystem.js';
 import { LevelTransitionSystem } from './systems/LevelTransitionSystem.js';
 import { AudioSystem } from './systems/AudioSystem.js';
@@ -55,7 +57,7 @@ import { HotBarSystem } from './systems/HotBarSystem.js';
 
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
-    PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent,
+    PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent, LogComponent,
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
     LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
     AnimationComponent, AnimationStateComponent, JourneyStateComponent, JourneyPathComponent, DialogueComponent, JourneyPathsComponent,
@@ -70,6 +72,7 @@ export class Game {
         this.entityManager = this.state.entityManager;
         this.utilities = this.state.utilities;
         this.utilities.entityManager = this.entityManager;
+        this.utilities.eventBus = this.state.eventBus;
         this.systems = {};
         this.lastUpdateTime = 0;
         this.lastMouseEventTime = 0;
@@ -85,6 +88,7 @@ export class Game {
         }
         player = this.entityManager.createEntity('player', true);
         window.player = player; // Expose player globally for debugging
+        this.entityManager.addComponentToEntity('player', new LogComponent());
         this.entityManager.addComponentToEntity('player', new PositionComponent(64, 112));
         this.entityManager.addComponentToEntity('player', new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new VisualsComponent(32, 32));
@@ -250,7 +254,7 @@ export class Game {
         this.systems.data = new DataSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.splash = new SplashSystem(this.entityManager, this.state.eventBus);
         this.systems.action = new ActionSystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.damageCalculation = new DamageCalculationSystem(this.entityManager, this.state.eventBus);
+        this.systems.damageCalculation = new DamageCalculationSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.combat = new CombatSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.projectile = new ProjectileSystem(this.entityManager, this.state.eventBus);
         this.systems.mapRender = new MapRenderSystem(this.entityManager, this.state.eventBus, this.state);
@@ -266,11 +270,13 @@ export class Game {
         this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.path = new PathSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.interaction = new InteractionSystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.ui = new UISystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.hudUi = new HudUiSystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.menuUi = new MenuUiSystem(this.entityManager, this.state.eventBus, this.utilities);
+        //this.systems.ui = new UISystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.levelTransition = new LevelTransitionSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.audio = new AudioSystem(this.entityManager, this.state.eventBus);
         this.systems.exploration = new ExplorationSystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.lighting = new LightingSystem(this.entityManager, this.state.eventBus);
+        this.systems.lighting = new LightingSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.gameDataIO = new GameDataIOSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.playerInput = new PlayerInputSystem(this.entityManager, this.state.eventBus);
         this.systems.playerController = new PlayerControllerSystem(this.entityManager, this.state.eventBus);
@@ -353,6 +359,7 @@ export class Game {
                 'hotBar',
                 'playerController',
                 'playerTimer',
+                'lighting',
                 'player',
                 'exploration',
                 'projectile',
@@ -374,7 +381,9 @@ export class Game {
                 'actionTracking',
                 'journeyProgress',
                 'npcController',
-                'ui',
+                'hudUi', 
+                'menuUi',
+                //'ui',
                 'dialogueUI',
                 'audio',
                 'levelTransition',

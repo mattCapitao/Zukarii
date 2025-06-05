@@ -127,7 +127,7 @@ export class ActionSystem extends System {
 
         resource.torches--;
         this.eventBus.emit('LightSourceActivated', { type: 'torch' });
-        this.eventBus.emit('StatsUpdated', { entityId: 'player' });
+        this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
 
         let message = 'The darkness is at bay... for now!';
         if (resource.torches < 1) {

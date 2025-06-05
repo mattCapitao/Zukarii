@@ -24,7 +24,7 @@ export class ExplorationSystem extends System {
 
         this.minimapCanvas = document.getElementById('minimap-canvas');
         this.minimapWrapper = document.getElementById('minimap-wrapper');
-       
+
         if (!this.minimapCanvas) {
             return;
         }
@@ -41,19 +41,14 @@ export class ExplorationSystem extends System {
         this.minimapWrapper.classList.remove('hidden');
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
-        if (!levelEntity) {
-            return;
-        }
+        if (!levelEntity) return;
 
         const exploration = levelEntity.getComponent('Exploration');
-        if (!exploration) {
-            return;
-        }
+        if (!exploration) return;
 
         this.minimapCtx.fillStyle = '#111';
         this.minimapCtx.fillRect(0, 0, this.minimapCanvas.width, this.minimapCanvas.height);
 
-        this.revealFullMinimap = true;
         if (this.revealFullMinimap) {
             const mapComp = levelEntity.getComponent('Map');
             if (mapComp && mapComp.map) {
@@ -72,7 +67,7 @@ export class ExplorationSystem extends System {
                     }
                 }
             }
-        }else{ 
+        } else {
             this.minimapCtx.fillStyle = '#333';
             for (const tileKey of exploration.discoveredFloors) {
                 const [x, y] = tileKey.split(',').map(Number);
@@ -107,7 +102,7 @@ export class ExplorationSystem extends System {
             if (exploration.discoveredFloors.has(tileKey) || exploration.discoveredWalls.has(tileKey)) {
                 if (entity.hasComponent('Stair')) {
                     const stairComp = entity.getComponent('Stair');
-                    this.minimapCtx.fillStyle = stairComp.direction === 'up' ? '#fff' : '#ff2'; // white for up, Dark Gray for down
+                    this.minimapCtx.fillStyle = stairComp.direction === 'up' ? '#fff' : '#ff2'; // white for up, yellow for down
                 } else if (entity.hasComponent('Fountain')) {
                     this.minimapCtx.fillStyle = '#F00'; // Red for fountains
                 } else if (entity.hasComponent('Portal')) {
@@ -132,7 +127,14 @@ export class ExplorationSystem extends System {
         }
     }
 
-    isTileVisible(playerX, playerY, targetX, targetY, walls, renderState) {
+    isTileVisible(playerX, playerY, targetX, targetY, renderState) {
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
+        if (!levelEntity) return false;
+        const mapComp = levelEntity.getComponent('Map');
+        const map = mapComp ? mapComp.map : null;
+        if (!map) return false;
+
         let x0 = playerX;
         let y0 = playerY;
         const x1 = targetX;
@@ -147,10 +149,7 @@ export class ExplorationSystem extends System {
         let visible = true;
         while (true) {
             const tileKey = `${x0},${y0}`;
-            const isWall = walls.some(w => {
-                const pos = w.getComponent('Position');
-                return pos.x === x0 && pos.y === y0;
-            });
+            const isWall = map[y0] && map[y0][x0] === '#';
             if (isWall && (x0 !== playerX || y0 !== playerY)) {
                 renderState.activeRenderZone.add(tileKey);
                 visible = false;
@@ -174,52 +173,61 @@ export class ExplorationSystem extends System {
     }
 
     updateExploration() {
-        const player = this.entityManager.getEntity('player');
-        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
-        const renderState = this.entityManager.getEntity('renderState').getComponent('RenderState');
-        const lightingState = this.entityManager.getEntity('lightingState').getComponent('LightingState');
-        const pendingTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
-        const state = this.entityManager.getEntity('state');
-        if (!player || !gameState || !renderState || !state) {
+        // Cache all needed entities/components at the start
+        const gameStateEntity = this.entityManager.getEntity('gameState');
+        const playerEntity = this.entityManager.getEntity('player');
+        const renderStateEntity = this.entityManager.getEntity('renderState');
+        const lightingStateEntity = this.entityManager.getEntity('lightingState');
+        const stateEntity = this.entityManager.getEntity('state');
+        if (!gameStateEntity || !playerEntity || !renderStateEntity || !lightingStateEntity || !stateEntity) {
             console.warn('ExplorationSystem: Missing required entities or components');
             return;
         }
 
+        const gameState = gameStateEntity.getComponent('GameState');
+        const renderState = renderStateEntity.getComponent('RenderState');
+        const lightingState = lightingStateEntity.getComponent('LightingState');
+        const state = stateEntity.getComponent('State');
+        const player = playerEntity;
         const playerState = player.getComponent('PlayerState');
         const playerPos = player.getComponent('Position');
+        const lastPos = player.getComponent('LastPosition');
         const playerX = Math.floor(playerPos.x / this.TILE_SIZE);
         const playerY = Math.floor(playerPos.y / this.TILE_SIZE);
-        const lastPos = player.getComponent('LastPosition');
 
+        const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
+        if (!levelEntity) return;
+        const mapComp = levelEntity.getComponent('Map');
+        const map = mapComp ? mapComp.map : null;
+        if (!map) return;
+        const exploration = levelEntity.getComponent('Exploration');
+        if (!exploration) return;
+
+        // Early exit if player hasn't moved and no initial render is needed
         if (((playerPos.x === lastPos.x && playerPos.y === lastPos.y) || (lastPos.x === 0 && lastPos.y === 0))
             && (gameState.needsInitialRender !== true)
         ) { return; }
 
         const renderRadius = renderState.renderRadius;
         const visibleRadius = lightingState.visibleRadius;
-        const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
-        if (!levelEntity) return;
 
-        const exploration = levelEntity.getComponent('Exploration');
-        const walls = this.entityManager.getEntitiesWith(['Position', 'Wall']);
         renderState.activeRenderZone = renderState.activeRenderZone || new Set();
         renderState.activeRenderZone.clear();
 
         let newDiscoveryCount = 0;
+        const visibleRadiusSq = visibleRadius * visibleRadius;
+        const renderRadiusSq = renderRadius * renderRadius;
 
+        // Discover tiles in visible radius
         for (let y = Math.max(0, playerY - visibleRadius); y <= Math.min(this.HEIGHT - 1, playerY + visibleRadius); y++) {
             for (let x = Math.max(0, playerX - visibleRadius); x <= Math.min(this.WIDTH - 1, playerX + visibleRadius); x++) {
+                if (!map[y] || typeof map[y][x] === 'undefined') continue;
                 const dx = x - playerX;
                 const dy = y - playerY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance <= visibleRadius) {
+                if (dx * dx + dy * dy <= visibleRadiusSq) {
                     const tileKey = `${x},${y}`;
                     const wasDiscovered = exploration.discoveredWalls.has(tileKey) || exploration.discoveredFloors.has(tileKey);
-                    const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
-                        const pos = e.getComponent('Position');
-                        return Math.floor(pos.x / this.TILE_SIZE) === x && Math.floor(pos.y / this.TILE_SIZE) === y;
-                    });
-                    const isWall = entitiesAtTarget.some(e => e.hasComponent('Wall'));
+                    const isWall = map[y][x] === '#';
                     if (!wasDiscovered) {
                         if (isWall) {
                             exploration.discoveredWalls.add(tileKey);
@@ -232,39 +240,39 @@ export class ExplorationSystem extends System {
             }
         }
 
+        // Update active render zone in render radius
         for (let y = Math.max(0, playerY - renderRadius); y <= Math.min(this.HEIGHT - 1, playerY + renderRadius); y++) {
             for (let x = Math.max(0, playerX - renderRadius); x <= Math.min(this.WIDTH - 1, playerX + renderRadius); x++) {
+                if (!map[y] || typeof map[y][x] === 'undefined') continue;
                 const dx = x - playerX;
                 const dy = y - playerY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance <= renderRadius) {
-                    if (this.isTileVisible(playerX, playerY, x, y, walls, renderState)) {
+                if (dx * dx + dy * dy <= renderRadiusSq) {
+                    if (this.isTileVisible(playerX, playerY, x, y, renderState)) {
                         renderState.activeRenderZone.add(`${x},${y}`);
                     }
                 }
             }
         }
 
+        // Only render minimap once per update
+        let minimapRendered = false;
         if (newDiscoveryCount > 0) {
             playerState.discoveredTileCount += newDiscoveryCount;
             this.eventBus.emit('TilesDiscovered', { count: newDiscoveryCount, total: playerState.discoveredTileCount });
             if (this.isMinimapVisible) {
                 this.renderMinimap();
-                return;
+                minimapRendered = true;
             }
         }
 
         const lastTileX = Math.floor(lastPos.x / this.TILE_SIZE);
         const lastTileY = Math.floor(lastPos.y / this.TILE_SIZE);
 
-        if (!lastPos || (lastPos.x === 0 && lastPos.y === 0)) {
-
-        } else {
+        if (lastPos && !(lastPos.x === 0 && lastPos.y === 0)) {
             const shouldRenderMinimap = this.isMinimapVisible && (
                 playerX !== lastTileX || playerY !== lastTileY
             );
-
-            if (shouldRenderMinimap) {
+            if (shouldRenderMinimap && !minimapRendered) {
                 this.renderMinimap();
             }
         }

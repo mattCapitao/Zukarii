@@ -144,7 +144,7 @@ export class RenderControlComponent {
 
 // Add to GameComponents.js
 export class LightingState {
-    constructor({ isLit = false, expiresOnTurn = 0, visibleRadius = 4 } = {}) {
+    constructor({ isLit = false, expiresOnTurn = 0, visibleRadius = 3 } = {}) {
         this.type = 'LightingState';
         this.isLit = isLit;
         this.expiresOnTurn = expiresOnTurn;
@@ -158,8 +158,9 @@ export class LightSourceDefinitions {
         this.type = 'LightSourceDefinitions';
         this.definitions = {
             unlit: { duration: 0, visibleRadius: 0 }, // No light source
-            torch: { duration: 300, visibleRadius: 4 }, // Adjusted for testing
-            lamp: { duration: 500, visibleRadius: 5 } // For future extensibility
+            torch: { duration: 300, visibleRadius: 6 }, // Adjusted for testing
+            lamp: { duration: 500, visibleRadius: 7 }, // For future extensibility
+            glow: {},
         };
     }
 }

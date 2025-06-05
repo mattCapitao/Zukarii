@@ -207,6 +207,7 @@ export class MouseInputSystem {
 
     processInput(worldX, worldY, isClick = false) {
         const player = this.entityManager.getEntity('player');
+        const playerState = player.getComponent('PlayerState');
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         const attackSpeed = player.getComponent('AttackSpeed');
         const mana = player.getComponent('Mana');
@@ -255,7 +256,7 @@ export class MouseInputSystem {
             (inventory.equipped.mainhand?.attackType === 'ranged' && inventory.equipped.mainhand?.baseRange > 0);
 
         if (gameState.isRangedMode || (monster && hasRangedWeapon && rangeToTarget <= playerRange )) {
-            if (hasRangedWeapon && attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed && mana.mana >= 3) {
+            if (hasRangedWeapon && attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed && mana.mana >= 2 && !playerState.isCasting) {
                 const now = performance.now();
                 if (now - this.lastAttackTime >= attackSpeed.attackSpeed) {
                     const targetX = monster ? (monster.getComponent('Position').x) : worldX;

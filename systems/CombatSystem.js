@@ -81,14 +81,16 @@ export class CombatSystem extends System {
 
         const dodgeRoll = Math.round((Math.random() * 100) + (playerStats.agility / 2) );
         if (dodgeRoll >= 85) {
-            this.eventBus.emit('LogMessage', { message: `You dodged the ${monsterData.name}'s attack!` });
+           // this.eventBus.emit('LogMessage', { message: `You dodged the ${monsterData.name}'s attack!` });
+            this.utilities.logMessage({  channel: 'combat', message: `You dodged the ${monsterData.name}'s attack!` }); 
             this.combatSfx('miss');
             return;
         }
 
         const blockRoll = Math.round((Math.random() * 100) + (playerStats.block / 2) );
         if (blockRoll >= 85) {
-            this.eventBus.emit('LogMessage', { message: `You blocked the ${monsterData.name}'s attack!` });
+            //this.eventBus.emit('LogMessage', { message: `You blocked the ${monsterData.name}'s attack!` });
+            this.utilities.logMessage({ channel: 'combat', message: `You blocked the ${monsterData.name}'s attack!` });
             this.combatSfx('block');
             return;
         }
@@ -131,21 +133,24 @@ export class CombatSystem extends System {
 
             const missChance = isDualWield ? (index === 0 ? 15 : 25) : 0;
             if (Math.random() * 100 < missChance) {
-                this.eventBus.emit('LogMessage', { message: `Your ${weapon.name} missed the ${targetMonsterData.name}!` });
+               // this.eventBus.emit('LogMessage', { message: `Your ${weapon.name} missed the ${targetMonsterData.name}!` });
+                this.utilities.logMessage({ channel: 'combat', message: `Your ${weapon.name} missed the ${targetMonsterData.name}!` });
                 this.combatSfx('miss');
                 return;
             }
 
             const dodgeRoll = Math.random() * 100;
             if (dodgeRoll >= 99) {
-                this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} dodged your ${weapon.name} attack!` });
+               // this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} dodged your ${weapon.name} attack!` });
+                this.utilities.logMessage({ channel: 'combat', message: `${targetMonsterData.name} dodged your ${weapon.name} attack!` });
                 this.combatSfx('miss');
                 return;
             }
 
             const blockRoll = Math.random() * 100;
             if (blockRoll >= 99) {
-                this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} blocked your ${weapon.name} attack!` });
+               // this.eventBus.emit('LogMessage', { message: `${targetMonsterData.name} blocked your ${weapon.name} attack!` });
+                this.utilities.logMessage({ channel: 'combat', message: `${targetMonsterData.name} blocked your ${weapon.name} attack!` });
                 this.combatSfx('block');
                 return;
             }
@@ -160,14 +165,14 @@ export class CombatSystem extends System {
     }
 
     handleRangedAttack(direction ) {
-
-        console.log('CombatSystem: handleRangedAttack called with direction:', direction);
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const player = this.entityManager.getEntity('player');
         if (!player) return;
 
-        const manaCost = 3;
+        const playerState = player.getComponent('PlayerState');
+        if (playerState.isCasting) return;
 
+        const manaCost = 2;
         if (this.entityManager.getEntity('player').getComponent('Mana').mana < manaCost) {
             console.log(`you do not have enough mana to cast FlamingBolt`);
             return;
@@ -176,13 +181,15 @@ export class CombatSystem extends System {
         const combat = player.getComponent('InCombat');
         if (!combat) {
             player.addComponent(new InCombatComponent(3000));
-            this.eventBus.emit('LogMessage', { message: 'You enter combat by casting FlamingBolt!' });
+            //this.eventBus.emit('LogMessage', { message: 'You enter combat by casting FlamingBolt!' });
+            this.utilities.logMessage({ channel: 'combat', message: 'You enter combat by casting FlamingBolt!' });
         } else {
             combat.elapsed = 0; // Reset to extend 3s
         }
 
         const playerPos = player.getComponent('Position');
         const stats = player.getComponent('Stats');
+       
         const weapon = this.getBestRangedWeapon();
         const range = stats.range || weapon?.baseRange || 3;
 
@@ -195,6 +202,7 @@ export class CombatSystem extends System {
         this.sfxQueue.push({ sfx, volume: .1 });
         this.manaUpdates.push({ entityId: 'player', amount: -manaCost });
         const CAST_TIME = 100;
+        playerState.isCasting = true;
         this.eventBus.emit('AnimateRangedAttack');
 
         setTimeout(() => {
@@ -209,6 +217,7 @@ export class CombatSystem extends System {
             visuals.avatar = 'img/avatars/projectile.png';
             visuals.offsetX = 0; visuals.offsetY = 0;
             this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
+            playerState.isCasting = false;
         }, CAST_TIME);
     }
 
@@ -230,11 +239,13 @@ export class CombatSystem extends System {
 
         switch ('player') {
             case attacker:
-                this.eventBus.emit('LogMessage', { message: `You enter combat with ${target.getComponent('MonsterData').name}!` });
+                //this.eventBus.emit('LogMessage', { message: `You enter combat with ${target.getComponent('MonsterData').name}!` });
+                this.utilities.logMessage({ channel: 'combat', message: `You enter combat with ${target.getComponent('MonsterData').name}!` });
                 console.log(`${ target.getComponent('MonsterData').name } enters combat after being hit by player`)
                 break;
             case target:
-                this.eventBus.emit('LogMessage', { message: `${attacker.getComponent('MonsterData').name} enters combat with you!` });
+                //this.eventBus.emit('LogMessage', { message: `${attacker.getComponent('MonsterData').name} enters combat with you!` });
+                this.utilities.logMessage({ channel: 'combat', message: `${attacker.getComponent('MonsterData').name} enters combat with you!` });
                 console.log(`${attacker.getComponent('MonsterData').name } Initiates combat by attacking player}`)
                 break;
             default:

@@ -126,7 +126,11 @@ export class LootCollectionSystem extends System {
         }
 
         if (pickupMessage.length) {
-            this.eventBus.emit('LogMessage', { message: `Found ${pickupMessage.join(', ')} from ${lootData.name}!` });
+            //this.eventBus.emit('LogMessage', { message: `Found ${pickupMessage.join(', ')} from ${lootData.name}!` });
+            this.utilities.logMessage({
+                channel: 'loot',
+                message: `Found ${pickupMessage.join(', ')} from ${lootData.name}!`
+            });
         }
 
         entityList.treasures.splice(lootIndex, 1);

@@ -17,18 +17,6 @@ export class PlayerTimerSystem extends System {
         const deltaMs = deltaTime * 1000; 
 
         for (const entity of entities) {
-            /*
-            const combat = entity.getComponent('InCombat');
-            if (!combat) continue;
-            combat.elapsed += deltaMs;
-            const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
-            if (combat.elapsed >= combat.duration && gameState) {
-                entity.removeComponent('InCombat');
-                this.eventBus.emit('LogMessage', { message: 'You are no longer in combat.' });
-                gameState.needsRender = true;
-                //this.eventBus.emit('RenderNeeded');
-            }
-            */
             if (entity.hasComponent('InCombat')) {
                 const combat = entity.getComponent('InCombat');
                 combat.elapsed += deltaMs;

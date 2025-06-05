@@ -122,7 +122,7 @@
     "baseHp": 20,
     "maxHp": 20,
     "hp": 20,
-    "movementSpeed": 70,
+    "movementSpeed": 50,
     "attackSpeed": 1250,
     "minBaseDamage": 2.5,
     "maxBaseDamage": 3.7,

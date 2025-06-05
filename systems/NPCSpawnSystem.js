@@ -1,5 +1,5 @@
 ﻿import { System } from '../core/Systems.js';
-import { PositionComponent, VisualsComponent, HitboxComponent, NPCDataComponent, JourneyDialogueComponent, ShopComponent, ShopDialogueComponent } from '../core/Components.js';
+import { PositionComponent, VisualsComponent, HitboxComponent, NPCDataComponent, JourneyDialogueComponent, ShopComponent, ShopDialogueComponent , LightSourceComponent} from '../core/Components.js';
 
 export class NPCSpawnSystem extends System {
     constructor(entityManager, eventBus, dataSystem, utilities) {
@@ -74,6 +74,12 @@ export class NPCSpawnSystem extends System {
                 if (template.hasJourneyPaths) {
                     this.entityManager.addComponentToEntity(entity.id, new JourneyDialogueComponent());
                     console.log(`NPCSpawnSystem: Added JourneyDialogueComponent to NPC ${entity.id}`);
+                }
+
+
+                if (template.lightSource) {
+                    const light = template.lightSource;
+                    this.entityManager.addComponentToEntity(entity.id, new LightSourceComponent(light.radius, light.color ));
                 }
 
                 if (template.shopType) {

@@ -2,8 +2,8 @@
 import { System } from '../core/Systems.js';
 
 export class DamageCalculationSystem extends System {
-    constructor(entityManager, eventBus) {
-        super(entityManager, eventBus);
+    constructor(entityManager, eventBus, utilities) {
+        super(entityManager, eventBus, utilities);
         this.requiredComponents = [];
 
         this.queues = this.entityManager.getEntity('gameState')?.getComponent('DataProcessQueues') || {};
@@ -74,7 +74,11 @@ export class DamageCalculationSystem extends System {
 
         // NEW: Log—includes monster HP (matches current CombatSystem), revisit later
         const targetHealth = target.getComponent('Health');
-        this.eventBus.emit('LogMessage', {
+        //this.eventBus.emit('LogMessage', {
+           // message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${totalDamage} damage to ${target.getComponent('MonsterData').name} with your ${weapon?.name || 'Fists'} (${targetHealth.hp - totalDamage}/${targetHealth.maxHp})`
+       // });
+        this.utilities.logMessage({
+            channel: 'combat',
             message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${totalDamage} damage to ${target.getComponent('MonsterData').name} with your ${weapon?.name || 'Fists'} (${targetHealth.hp - totalDamage}/${targetHealth.maxHp})`
         });
 
@@ -109,10 +113,13 @@ export class DamageCalculationSystem extends System {
         this.healthUpdates.push({ entityId: target.id, amount: -totalDamage, attackerId: attacker });
 
         // NEW: Log—no player HP, per your call
-        this.eventBus.emit('LogMessage', {
+        //this.eventBus.emit('LogMessage', {
+        //    message: `${isCritical ? ' (Critical Hit!) - ' : ''}${monsterData.name} hits for ${preReductionDamage}, armor protects you from: ${armorReduction}, defense skill mitigates: ${defenseReduction} resulting in ${totalDamage} damage dealt to you`
+       // });
+        this.utilities.logMessage({
+            channel: 'combat',
             message: `${isCritical ? ' (Critical Hit!) - ' : ''}${monsterData.name} hits for ${preReductionDamage}, armor protects you from: ${armorReduction}, defense skill mitigates: ${defenseReduction} resulting in ${totalDamage} damage dealt to you`
         });
-
         return { damage: totalDamage };
     }
 }
