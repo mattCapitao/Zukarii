@@ -124,7 +124,7 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new AttackSpeedComponent(500));
         this.entityManager.addComponentToEntity('player', new MovementSpeedComponent());
         const movementSpeedComp = this.entityManager.getEntity('player').getComponent('MovementSpeed');
-        movementSpeedComp.combatSpeedMultiplier = 0.8; 
+        movementSpeedComp.combatSpeedMultiplier = 0.9; 
         this.entityManager.addComponentToEntity('player', new AffixComponent());
         this.entityManager.addComponentToEntity('player', new NeedsRenderComponent(32, 32));
         this.entityManager.addComponentToEntity('player', new HitboxComponent(28,28,2,4));
@@ -397,7 +397,7 @@ export class Game {
                 'monsterController',
                 'monsterTimer',
                 'collisions',
-                'triggerArea', 
+                'triggerArea',
                 'movementResolution',
                 'playerCollision',
                 'projectileCollisions',
@@ -412,9 +412,8 @@ export class Game {
                 'actionTracking',
                 'journeyProgress',
                 'npcController',
-                'hudUi', 
+                'hudUi',
                 'menuUi',
-                //'ui',
                 'dialogueUI',
                 'audio',
                 'levelTransition',
