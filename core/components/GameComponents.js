@@ -158,51 +158,98 @@ export class LightSourceDefinitions {
         this.type = 'LightSourceDefinitions';
         this.definitions = {
             unlit: {
-                duration: 0,
-                visibleRadius: 2,
-  
-            },
-            torch: {
-                duration: 300,
-                visibleRadius: 6,
-                radius: 6,
-                opacitySteps: [0.75, 0.15, 0], // For visibility
-                glowOpacitySteps: [0.35, 0.10, 0], // For orange glow
-                color: 'rgba(255,220,120,0.35)', // Base color for glow
-                glowIntensity: 1.0,
-                proximityFactor: 1.0,
-                pulse: null,
-                flicker: true // Enable flicker effect
-            },
-            lamp: {
-                duration: 500,
-                visibleRadius: 7,
-                radius: 7,
-                opacitySteps: [0.75, 0.15, 0],
-                color: 'rgba(255,255,255,0.5)',
-                glowIntensity: 0.5,
+                visibilityEnabled: false,
+                visibilityRadius: 0,
+                visibilityOpacitySteps: [0.75, 0.15, 0],
+                visibilityTintColor: 'rgba(255,255,255,0)',
+                glowEnabled: false,
+                glowType: 'outline',
+                glowColor: 'rgba(255,255,255,0)',
+                glowIntensity: 0,
+                glowSize: 0,
                 proximityFactor: 1.0,
                 pulse: null
             },
-            lootGlow: {
-                radius: 3,
-                opacitySteps: [0.75, 0.15, 0],
-                color: 'rgba(255,215,0,0.6)',
-                glowIntensity: 0.75,
-                proximityFactor: 2,
-                pulse: { amplitude: 0.2, frequency: 0.5 }
-            },
-            magic: {
-                radius: 6,
-                visibleRadius:50,
-                opacitySteps: [0.75, 0.15, 0], // For visibility
-                glowOpacitySteps: [0.35, 0.10, 0], // For orange glow
-                color: "rgba(5,255,5,0.7)",  // Base color for glow
-                glowIntensity: 5.0,
+            torch: {
+                visibilityEnabled: true,
+                visibilityRadius: 6,
+                visibilityOpacitySteps: [0.75, 0.15, 0],
+                visibilityTintColor: 'rgba(255,220,120,0.2)', // Subtle yellow tint
+                glowEnabled: true,
+                glowType: 'environmental', // Environmental glow for torch
+                glowColor: 'rgba(255,220,120,0.35)', // Used for environmental gradient
+                glowIntensity: 1.0,
+                glowSize: 0, // Not used for environmental glow
                 proximityFactor: 1.0,
                 pulse: null,
-                pulse: { amplitude: 0.2, frequency: 0.5 }
+                duration: 300
             },
+            lamp: {
+                visibilityEnabled: true,
+                visibilityRadius: 7,
+                visibilityOpacitySteps: [0.75, 0.15, 0],
+                visibilityTintColor: 'rgba(255,255,255,0.2)', // Subtle white tint
+                glowEnabled: false, // No glow/outline for lamp
+                glowType: 'outline',
+                glowColor: 'rgba(255,255,255,0)',
+                glowIntensity: 0,
+                glowSize: 0,
+                proximityFactor: 1.0,
+                pulse: null,
+                duration: 500
+            },
+            lootGlow: {
+                visibilityEnabled: true,
+                visibilityRadius: .75, // Small visibility radius
+                visibilityOpacitySteps: [0.75, 0.15, 0],
+                visibilityTintColor: 'rgba(255,215,0,0.2)', // Subtle gold tint
+                glowEnabled: true,
+                glowType: 'outline', // Outline glow for treasure chest
+                glowColor: 'rgba(255,215,0,1)', // Bright gold glow
+                glowIntensity: 1, // Bright glow
+                glowSize: 3, // Medium-sized outline
+                proximityFactor: 10, // Brighter when player is near
+                pulse: { amplitude: 0.25, frequency: 0.5 } // Subtle pulsing
+            },
+            magic: { // Example for NPC on tier 0
+                visibilityEnabled: true,
+                visibilityRadius: 18, // Large visibility radius
+                visibilityOpacitySteps: [0.75, 0.15, 0],
+                visibilityTintColor: 'rgba(0,255,0,0.4)', // Subtle green tint
+                glowEnabled: true,
+                glowType: 'outline',
+                glowColor: 'rgba(0,128,0,1)', // Green glow
+                glowIntensity: .25, // Faint glow
+                glowSize: 10, // Small outline
+                proximityFactor: 1.5, // Slightly brighter when player is near
+                pulse: null
+            },
+            elite: { // Example for elite monster
+                visibilityEnabled: true, // No visibility effect
+                visibilityRadius: .75,
+                visibilityOpacitySteps: [0.75, 0.15, 0],
+                visibilityTintColor: 'rgba(255,255,255,0)',
+                glowEnabled: true,
+                glowType: 'outline',
+                glowColor: 'rgba(255,0,0,1)', // Red glow
+                glowIntensity: 0.5, // Medium intensity
+                glowSize: 8, // Medium outline
+                proximityFactor: 1.0,
+                pulse: null
+            },
+            boss: { // Example for boss
+                visibilityEnabled: true, // No visibility effect
+                visibilityRadius: 1.5,
+                visibilityOpacitySteps: [0.75, 0.15, 0],
+                visibilityTintColor: 'rgba(255,255,255,0)',
+                glowEnabled: true,
+                glowType: 'outline',
+                glowColor: 'rgba(255,0,0,1)', // Red glow
+                glowIntensity: 1.0, // High intensity
+                glowSize: 12, // Large outline
+                proximityFactor: 1.0,
+                pulse: { amplitude: 0.3, frequency: 0.3 } // Strong pulsing
+            }
         };
     }
 }

@@ -88,7 +88,20 @@ export class Game {
         }
         player = this.entityManager.createEntity('player', true);
         window.player = player; // Expose player globally for debugging
-        this.entityManager.addComponentToEntity('player', new LightSourceComponent({ definitionKey: 'unlit' }));
+        this.entityManager.addComponentToEntity('player', new LightSourceComponent({
+            definitionKey: 'unlit',
+            visibilityEnabled: true,
+            visibilityRadius: .2,
+            visibilityOpacitySteps: [0.75, 0.15, 0],
+            visibilityTintColor: 'rgba(255,255,255,.5)',
+            glowEnabled: false,
+            glowType: 'outline',
+            glowColor: 'rgba(255,255,255,0)',
+            glowIntensity: .5,
+            glowSize: 1,
+            proximityFactor: 1.0,
+            pulse: null
+        }));
         this.entityManager.addComponentToEntity('player', new LogComponent());
         this.entityManager.addComponentToEntity('player', new PositionComponent(64, 112));
         this.entityManager.addComponentToEntity('player', new LastPositionComponent(0, 0));

@@ -370,6 +370,13 @@ export class MonsterSpawnSystem extends System {
         const hbPadding = 2;
         this.entityManager.addComponentToEntity(entity.id, new HitboxComponent(hbWidth - hbPadding, hbHeight - hbPadding));
 
+        if (template.isElite) {
+            this.eventBus.emit('LightSourceActivated', ({ type: 'elite', entityId: entity.id }));
+        } else if (template.isBoss) {
+            this.eventBus.emit('LightSourceActivated', ({ type: 'boss', entityId: entity.id }));
+        }
+
+
         // Add AffixComponent for each affix in template.affixes
         const affixDefinitions = (template.affixes || []).map(affixName => {
             const affixData = this.AFFIX_MAP[affixName];

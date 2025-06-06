@@ -11,7 +11,7 @@ export class LightingSystem extends System {
 
     init() {
         this.RENDER_RADIUS_MODIFIER = 3;
-        this.DEFAULT_VISIBLE_RADIUS = 3;
+        this.DEFAULT_VISIBLE_RADIUS = 1;
         this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
         this.eventBus.on('LightSourceActivated', (data) => this.activateLightSource(data));
         this.eventBus.on('LightExpired', () => this.checkExpiration());
@@ -77,47 +77,72 @@ export class LightingSystem extends System {
             return;
         }
 
+        if (entity.hasComponent('LightSource')) {
+            entity.removeComponent('LightSource');
+            console.warn(`LightingSystem: Removing Existing LightSourceComponent from Entity ${entityId} `);
+
+        }
+
         const def = this.definitions[type];
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const currentTurn = gameState.turn || 0;
 
         if (entityId === 'player') {
             this.lightingState.isLit = true;
-            this.lightingState.expiresOnTurn = currentTurn + def.duration;
-            this.lightingState.visibleRadius = def.visibleRadius;
-            this.lightingState.remainingDuration = def.duration;
-            this.renderState.renderRadius = def.visibleRadius + this.RENDER_RADIUS_MODIFIER;
-
-            entity.removeComponent('LightSource'); // Remove existing LightSource
+            this.lightingState.expiresOnTurn = currentTurn + (def.duration || 0);
+            this.lightingState.visibleRadius = def.visibilityRadius || 0;
+            this.lightingState.remainingDuration = def.duration || 0;
+            this.renderState.renderRadius = def.visibilityRadius + this.RENDER_RADIUS_MODIFIER;
+            
             entity.addComponent(new LightSourceComponent({
                 definitionKey: type,
-                radius: def.radius || def.visibleRadius,
-                opacitySteps: def.opacitySteps || [0.75, 0.15, 0],
-                color: def.color || 'rgba(255,220,120,0.35)',
+                visibilityEnabled: def.visibilityEnabled,
+                visibilityRadius: def.visibilityRadius,
+                visibilityOpacitySteps: def.visibilityOpacitySteps || [0.75, 0.15, 0],
+                visibilityTintColor: def.visibilityTintColor || 'rgba(255,255,255,0)',
+                glowEnabled: def.glowEnabled,
+                glowType: def.glowType || 'environmental',
+                glowColor: def.glowColor || 'rgba(255,220,120,0.35)',
                 glowIntensity: def.glowIntensity || 1.0,
+                glowSize: def.glowSize || 0,
                 proximityFactor: def.proximityFactor || 1.0,
                 pulse: def.pulse || null,
-                expires: def.duration > 0,
-                remainingDuration: def.duration || 0,
-                flicker: def.flicker || false
+                expires: (def.duration || 0) > 0,
+                remainingDuration: def.duration || 0
             }));
 
             console.log(`LightingSystem: Activated ${type} for player - visibleRadius: ${this.lightingState.visibleRadius}, expires on turn: ${this.lightingState.expiresOnTurn}`);
             this.trackControlQueue.push({ track: 'torchBurning', play: true, volume: 0.05 });
         } else {
-            entity.addComponent(new LightSourceComponent({
+
+            const lightingStateEntity = this.entityManager.getEntity('lightingState');
+            const definitions = lightingStateEntity.getComponent('LightSourceDefinitions').definitions;
+            if (!definitions[type]) {
+                console.warn(`LightingSystem: Unknown light source type: ${type}`);
+                return;
+            }
+
+            let lightSourceComp = (new LightSourceComponent({
                 definitionKey: type,
-                radius: def.radius || def.visibleRadius,
-                opacitySteps: def.opacitySteps || [0.75, 0.15, 0],
-                color: def.color || 'rgba(255,255,255,0.5)',
+                visibilityEnabled: def.visibilityEnabled,
+                visibilityRadius: def.visibilityRadius || 0,
+                visibilityOpacitySteps: def.visibilityOpacitySteps || [0.75, 0.15, 0],
+                visibilityTintColor: def.visibilityTintColor || 'rgba(255,255,255,0)',
+                glowEnabled: def.glowEnabled,
+                glowType: def.glowType || 'outline',
+                glowColor: def.glowColor || 'rgba(255,255,255,0.5)',
                 glowIntensity: def.glowIntensity || 0.5,
+                glowSize: def.glowSize || 10,
                 proximityFactor: def.proximityFactor || 1.0,
                 pulse: def.pulse || null,
-                expires: def.duration > 0,
-                remainingDuration: def.duration || 0,
-                flicker: def.flicker || false
+                expires: (def.duration || 0) > 0,
+                remainingDuration: def.duration || 0
             }));
-            console.log(`LightingSystem: Activated ${type} for entity ${entityId}`);
+
+
+ 
+            entity.addComponent(lightSourceComp);
+            console.warn(`LightingSystem: Activated ${type} for entity ${entityId}`, entity, lightSourceComp);
         }
     }
 
@@ -131,12 +156,8 @@ export class LightingSystem extends System {
             const pos = entity.getComponent('Position');
             const light = entity.getComponent('LightSource');
 
-            // Apply flicker effect
-            if (light.flicker) {
-                light.currentFlicker = 1 + 0.18 * (Math.random() - 0.5) + 0.08 * (Math.random() - 0.5);
-            } else {
-                light.currentFlicker = 1.0;
-            }
+            // Skip torch (player) since its glow is handled differently
+            if (entity.id === 'player' && light.definitionKey === 'torch') continue;
 
             // Update proximity-based glow intensity
             const dx = pos.x - playerPos.x;
@@ -144,7 +165,7 @@ export class LightingSystem extends System {
             const distance = Math.sqrt(dx * dx + dy * dy) / 32; // TILE_SIZE = 32
 
             if (light.proximityFactor > 1.0) {
-                const maxDistance = light.radius * 2;
+                const maxDistance = light.visibilityRadius * 2;
                 const t = Math.max(0, Math.min(1, 1 - distance / maxDistance));
                 light.currentGlowIntensity = light.glowIntensity * (1 + (light.proximityFactor - 1) * t);
             } else {

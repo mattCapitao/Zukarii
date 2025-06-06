@@ -233,24 +233,40 @@ export class LogComponent {
 export class LightSourceComponent {
     constructor({
         definitionKey = null,
-        radius = 3,
-        opacitySteps = [0.75, 0.15, 0],
-        color = 'rgba(255,255,255,0.5)',
-        glowIntensity = 0.5,
-        proximityFactor = 1.0,
-        pulse = null,
+        // Visibility effect properties
+        visibilityEnabled = true, // Whether to clear darkness around the entity
+        visibilityRadius = 3, // Radius for clearing darkness (in tiles)
+        visibilityOpacitySteps = [0.75, 0.15, 0], // Gradient stops for visibility
+        visibilityTintColor = 'rgba(255,255,255,0)', // Tint color for the visibility area
+        // Glow effect properties
+        glowEnabled = true, // Whether to apply a glow/outline effect
+        glowType = 'outline', // 'outline' for non-torch, 'environmental' for torch
+        glowColor = 'rgba(255,255,255,0.5)', // Color of the glow/outline
+        glowIntensity = 0.5, // Intensity of the glow (affects opacity/brightness)
+        glowSize = 10, // Size/spread of the glow (pixels for outline, radius for environmental)
+        proximityFactor = 1.0, // Intensity multiplier based on player proximity
+        pulse = null, // Pulsing effect for glow intensity
+        // General properties
         expires = false,
         remainingDuration = 0
     } = {}) {
         this.type = 'LightSource';
-        this.definitionKey = definitionKey; // Reference to LightSourceDefinitions key
-        this.radius = radius;
-        this.opacitySteps = opacitySteps;
-        this.color = color;
+        this.definitionKey = definitionKey;
+        // Visibility properties
+        this.visibilityEnabled = visibilityEnabled;
+        this.visibilityRadius = visibilityRadius;
+        this.visibilityOpacitySteps = visibilityOpacitySteps;
+        this.visibilityTintColor = visibilityTintColor;
+        // Glow properties
+        this.glowEnabled = glowEnabled;
+        this.glowType = glowType;
+        this.glowColor = glowColor;
         this.glowIntensity = glowIntensity;
         this.currentGlowIntensity = glowIntensity; // Dynamic value updated by LightingSystem
+        this.glowSize = glowSize;
         this.proximityFactor = proximityFactor;
-        this.pulse = pulse; // { amplitude, frequency } for pulsing effect
+        this.pulse = pulse;
+        // General properties
         this.expires = expires;
         this.remainingDuration = remainingDuration;
     }

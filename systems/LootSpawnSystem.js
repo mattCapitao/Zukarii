@@ -52,7 +52,8 @@ export class LootSpawnSystem extends System {
         const lootVisuals = lootEntity.getComponent('Visuals');
         lootVisuals.avatar = 'img/avatars/chest.png';
         lootEntity.addComponent(new HitboxComponent(24, 30));
-        lootEntity.addComponent(new LightSourceComponent({ definitionKey: 'lootGlow' }));
+        //lootEntity.addComponent(new LightSourceComponent({ definitionKey: 'lootGlow', entityId: lootEntity.id }));
+        this.eventBus.emit('LightSourceActivated', ({ type: 'lootGlow', entityId: lootEntity.id }));
 
         this.eventBus.emit('LootEntityCreated', { entityId: lootEntity.id, tier });
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
