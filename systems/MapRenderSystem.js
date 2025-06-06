@@ -331,8 +331,7 @@ export class MapRenderSystem extends System {
                     );
                 }
             } else if (entity.hasComponent('LootData')) {
-                this.ctx.shadowColor = 'rgba(255, 215, 0, 0.5)';
-                this.ctx.shadowBlur = 10;
+
                 this.ctx.drawImage(
                     sprite,
                     renderX,
@@ -340,13 +339,10 @@ export class MapRenderSystem extends System {
                     visuals.w * this.SCALE_FACTOR,
                     visuals.h * this.SCALE_FACTOR
                 );
-                this.ctx.shadowBlur = 0;
+
             } else if (entity.hasComponent('MonsterData')) {
                 const monsterData = entity.getComponent('MonsterData');
-                if (monsterData.isBoss || monsterData.isElite) {
-                    this.ctx.shadowColor = 'rgba(255, 0, 0, 0.5)';
-                    this.ctx.shadowBlur = 10;
-                }
+
                 if (visuals.faceLeft === true) {
                     this.ctx.scale(-1, 1);
                     this.ctx.drawImage(
@@ -365,7 +361,6 @@ export class MapRenderSystem extends System {
                         visuals.h * this.SCALE_FACTOR
                     );
                 }
-                this.ctx.shadowBlur = 0;
             } else if (visuals.faceLeft === true) {
                 this.ctx.scale(-1, 1);
                 this.ctx.drawImage(
@@ -637,8 +632,8 @@ export class MapRenderSystem extends System {
             this.ctx.lineWidth = 1;
             this.ctx.strokeRect(barX, barY, barWidth, barHeight);
 
-            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            this.ctx.shadowBlur = 4;
+            //this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            //this.ctx.shadowBlur = 4;
 
             this.ctx.restore();
 

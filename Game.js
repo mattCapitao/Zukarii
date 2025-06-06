@@ -450,6 +450,9 @@ export class Game {
         this.iniitalizeActiveGameSystems();
 
         this.splashScreen.style.display = 'none';
+        if (this.systems.splash) {
+            this.systems.splash.destroy();
+        }
         document.getElementById('hud-layer').style.visibility = 'visible';
         gameState.needsRender = true;
         this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume: .05 });

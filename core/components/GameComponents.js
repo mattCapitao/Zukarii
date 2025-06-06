@@ -200,10 +200,10 @@ export class LightSourceDefinitions {
             },
             lootGlow: {
                 visibilityEnabled: true,
-                visibilityRadius: 1, // Small visibility radius
-                visibilityOpacitySteps: [0.75, 0.15, 0],
-                visibilityTintColor: 'rgba(255,215,0,0.2)', // Subtle gold tint
-                glowEnabled: true,
+                visibilityRadius: 1.5, // Small visibility radius
+                visibilityOpacitySteps: [0.75, 0.25, 0],
+                visibilityTintColor: 'rgba(255,215,0,1)', // Subtle gold tint
+                glowEnabled: false,
                 glowType: 'outline', // Outline glow for treasure chest
                 glowColor: 'rgba(255,215,0,1)', // Bright gold glow
                 glowIntensity: 1, // Bright glow
