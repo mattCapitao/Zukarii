@@ -176,13 +176,13 @@ export class MapRenderSystem extends System {
         // Get level entity for active tier
         const levelEntity = this.entityManager.getEntity(`level_${this.entityManager.getActiveTier()}`);
         if (!levelEntity) return;
-
-        // --- FLICKERING TORCH GLOW AROUND PLAYER ---
+        
+        // --- FLICKERING TORCH GLOW AROUND PLAYER --- 
         const lightingStateEntity = this.entityManager.getEntity('lightingState');
         const lightingState = lightingStateEntity ? lightingStateEntity.getComponent('LightingState') : null;
         const renderStateEntity = this.entityManager.getEntity('renderState');
         const renderState = renderStateEntity ? renderStateEntity.getComponent('RenderState') : null;
-
+        
         if (lightingState && lightingState.isLit) {
             const baseRadius = lightingState.visibleRadius * this.TILE_SIZE * this.SCALE_FACTOR * 1.15;
             //const flicker = 1 + 0.08 * (Math.random() - 0.5);
@@ -208,6 +208,7 @@ export class MapRenderSystem extends System {
             this.ctx.fill();
             this.ctx.restore();
         }
+        
 
         const bucketsComp = levelEntity.getComponent('SpatialBuckets');
         if (!bucketsComp) return;
@@ -492,7 +493,7 @@ export class MapRenderSystem extends System {
         // 2. Fill lighting canvas with opaque black
         lightingCtx.globalAlpha = 1;
         lightingCtx.globalCompositeOperation = 'source-over';
-        lightingCtx.fillStyle = 'rgba(0,0,0,.9)';
+        lightingCtx.fillStyle = 'rgba(0,0,0,.95)';
         lightingCtx.fillRect(0, 0, this.lightingCanvas.width, this.lightingCanvas.height);
 
         // 3. Prepare gradient for clearing

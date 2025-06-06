@@ -1,4 +1,7 @@
-﻿import { System } from '../core/Systems.js';
+﻿
+
+
+import { System } from '../core/Systems.js';
 
 export class MovementResolutionSystem extends System {
     constructor(entityManager, eventBus) {
@@ -110,16 +113,16 @@ export class MovementResolutionSystem extends System {
         }
     }
 
-    /**
-     * Check if moving the entity to (newX, newY) would cause overlap with other entities.
-     */
+
+     // Check if moving the entity to (newX, newY) would cause overlap with other entities.
+
     wouldOverlap(entity, newX, newY) {
         if (entity.hasComponent('Projectile')) { return false; }
         const hitbox = entity.getComponent('Hitbox');
         const entities = this.entityManager.getEntitiesWith(['Position', 'Hitbox']);
 
         for (const other of entities) {
-            if (other === entity /*|| other.hasComponent('Projectile')*/) continue; // Skip self
+            if (other === entity ) continue; // Skip self
             if (other.hasComponent('TriggerArea') || other.hasComponent('Portal') || other.hasComponent('Stair') ) { continue; }
             const otherPos = other.getComponent('Position');
             const otherHitbox = other.getComponent('Hitbox');

@@ -207,16 +207,17 @@ export class CombatSystem extends System {
 
         setTimeout(() => {
             const projectile = this.entityManager.createEntity(`projectile_${this.utilities.generateUniqueId()}`);
-            this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y + 4));
+            this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(playerPos.x, playerPos.y));
             this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
             this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, 'player', weapon, isPiercing));
             this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(320)); // 320 pixels/second (was 32 pixels every 100 ms)
             this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(32, 32));
-            this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(18, 18));
+            this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(24, 24));
             const visuals = this.entityManager.getEntity(projectile.id).getComponent('Visuals');
             visuals.avatar = 'img/avatars/projectile.png';
-            visuals.offsetX = 0; visuals.offsetY = 0;
+            visuals.offsetX = 8; visuals.offsetY = 8;
             this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
+            this.eventBus.emit('LightSourceActivated', ({ type: 'firebolt', entityId: projectile.id }));
             playerState.isCasting = false;
         }, CAST_TIME);
     }

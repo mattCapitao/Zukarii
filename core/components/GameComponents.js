@@ -144,7 +144,7 @@ export class RenderControlComponent {
 
 // Add to GameComponents.js
 export class LightingState {
-    constructor({ isLit = false, expiresOnTurn = 0, visibleRadius = 3 } = {}) {
+    constructor({ isLit = false, expiresOnTurn = 0, visibleRadius = 2 } = {}) {
         this.type = 'LightingState';
         this.isLit = isLit;
         this.expiresOnTurn = expiresOnTurn;
@@ -158,8 +158,8 @@ export class LightSourceDefinitions {
         this.type = 'LightSourceDefinitions';
         this.definitions = {
             unlit: {
-                visibilityEnabled: false,
-                visibilityRadius: 0,
+                visibilityEnabled: true,
+                visibilityRadius: 2,
                 visibilityOpacitySteps: [0.75, 0.15, 0],
                 visibilityTintColor: 'rgba(255,255,255,0)',
                 glowEnabled: false,
@@ -200,7 +200,7 @@ export class LightSourceDefinitions {
             },
             lootGlow: {
                 visibilityEnabled: true,
-                visibilityRadius: .75, // Small visibility radius
+                visibilityRadius: 1, // Small visibility radius
                 visibilityOpacitySteps: [0.75, 0.15, 0],
                 visibilityTintColor: 'rgba(255,215,0,0.2)', // Subtle gold tint
                 glowEnabled: true,
@@ -213,7 +213,7 @@ export class LightSourceDefinitions {
             },
             magic: { // Example for NPC on tier 0
                 visibilityEnabled: true,
-                visibilityRadius: 18, // Large visibility radius
+                visibilityRadius: 15, // Large visibility radius
                 visibilityOpacitySteps: [0.75, 0.15, 0],
                 visibilityTintColor: 'rgba(0,255,0,0.4)', // Subtle green tint
                 glowEnabled: true,
@@ -226,7 +226,7 @@ export class LightSourceDefinitions {
             },
             elite: { // Example for elite monster
                 visibilityEnabled: true, // No visibility effect
-                visibilityRadius: .75,
+                visibilityRadius: 1,
                 visibilityOpacitySteps: [0.75, 0.15, 0],
                 visibilityTintColor: 'rgba(255,255,255,0)',
                 glowEnabled: true,
@@ -249,7 +249,19 @@ export class LightSourceDefinitions {
                 glowSize: 12, // Large outline
                 proximityFactor: 1.0,
                 pulse: { amplitude: 0.3, frequency: 0.3 } // Strong pulsing
-            }
+            },
+            firebolt: {
+                visibilityEnabled: true,
+                visibilityRadius: 4, // Small visibility radius
+                visibilityOpacitySteps: [0.75, 0.15, 0],
+                visibilityTintColor: 'rgba(255,215,0,0.6)', 
+                glowType: 'environmental', // Environmental glow for torch
+                glowColor: 'rgba(255,220,120,0.35)', // Used for environmental gradient
+                glowIntensity: 1, // Bright glow
+                glowSize: 3, // Medium-sized outline
+                proximityFactor: 10, // Brighter when player is near
+                pulse: { amplitude: 0.25, frequency: 0.15 } // Subtle pulsing
+            },
         };
     }
 }

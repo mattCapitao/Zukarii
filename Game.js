@@ -91,14 +91,14 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new LightSourceComponent({
             definitionKey: 'unlit',
             visibilityEnabled: true,
-            visibilityRadius: .2,
+            visibilityRadius: 2,
             visibilityOpacitySteps: [0.75, 0.15, 0],
             visibilityTintColor: 'rgba(255,255,255,.5)',
-            glowEnabled: false,
+            glowEnabled: true,
             glowType: 'outline',
             glowColor: 'rgba(255,255,255,0)',
             glowIntensity: .5,
-            glowSize: 1,
+            glowSize: 2, 
             proximityFactor: 1.0,
             pulse: null
         }));
@@ -362,10 +362,27 @@ export class Game {
     startGameLoop() {
         this.GameLoopRunning = true;
         let lastTime = performance.now();
+
+        let frameCount = 0;
+        let fps = 0;
+        let lastFpsUpdate = performance.now();
+        const fpsCounter = document.getElementById('fps-counter');
+
         const gameLoop = (currentTime) => {
             this.gameLoopId = requestAnimationFrame(gameLoop);
             const deltaTime = (currentTime - lastTime) / 1000;
             lastTime = currentTime;
+
+            // FPS calculation
+            frameCount++;
+            if (currentTime - lastFpsUpdate > 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsUpdate = currentTime;
+                if (fpsCounter) {
+                    fpsCounter.textContent = `FPS: ${fps}`;
+                }
+            }
 
             this.updateSystems([
                 'playerInput',

@@ -54,11 +54,13 @@
 
     <div id="game">
         <canvas id="viewport-canvas" style="width:100%;height:100%;position:absolute;z-index:1;"></canvas>
-        <!--<pre id="map"></pre>-->
+        
     </div>
 
     <div id="hud-layer" style="visibility:hidden;">
-
+        <div id="fps-counter" style="position:fixed;top:5px;left:5px;color:#fff;background:rgba(0,0,0,0.7);padding:2px 8px;z-index:9999;font-family:monospace;font-size:14px;">
+        FPS: 0
+    </div>
         <div id="dialogue-window" style="display: none;">
             <div id="dialogue-text"></div>
             <div id="dialogue-buttons">
