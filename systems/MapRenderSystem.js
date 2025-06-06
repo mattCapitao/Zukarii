@@ -1,5 +1,4 @@
-﻿
-import { System } from '../core/Systems.js';
+﻿import { System } from '../core/Systems.js';
 
 export class MapRenderSystem extends System {
     constructor(entityManager, eventBus, state) {
@@ -12,6 +11,12 @@ export class MapRenderSystem extends System {
         this.SCALE_FACTOR = 2;
         this.sprites = new Map();
         this.lightingCanvas = null;
+        this.floorBuffer = null;
+        this.floorBufferCtx = null;
+        this.lastFloorStartX = null;
+        this.lastFloorStartY = null;
+        this.lastFloorWidth = null;
+        this.lastFloorHeight = null;
         this.initializeCanvas();
         this.loadSprites();
         window.addEventListener('resize', () => this.resizeCanvas());
@@ -33,6 +38,14 @@ export class MapRenderSystem extends System {
         this.fountainFrameDuration = 120;
         this.fountainCurrentFrame = 0;
         this.lastFountainFrameTime = Date.now();
+
+        // Floor buffer for optimized floor rendering
+        this.floorBuffer = document.createElement('canvas');
+        this.floorBufferCtx = this.floorBuffer.getContext('2d');
+        this.lastFloorStartX = null;
+        this.lastFloorStartY = null;
+        this.lastFloorWidth = null;
+        this.lastFloorHeight = null;
     }
 
     init() {
@@ -46,6 +59,9 @@ export class MapRenderSystem extends System {
             return;
         }
         this.ctx = this.canvas.getContext('2d');
+        // Initialize floor buffer after main canvas is available
+        this.floorBuffer = document.createElement('canvas');
+        this.floorBufferCtx = this.floorBuffer.getContext('2d');
         this.resizeCanvas();
     }
 
@@ -53,6 +69,16 @@ export class MapRenderSystem extends System {
         if (!this.canvas) return;
         this.canvas.width = Math.min(window.innerWidth, 1920);
         this.canvas.height = Math.min(window.innerHeight, 1080);
+        // Also resize the floor buffer if it exists
+        if (this.floorBuffer) {
+            this.floorBuffer.width = this.canvas.width;
+            this.floorBuffer.height = this.canvas.height;
+        }
+        // Force redraw of floor buffer on next update
+        this.lastFloorStartX = null;
+        this.lastFloorStartY = null;
+        this.lastFloorWidth = null;
+        this.lastFloorHeight = null;
     }
 
     loadSprites() {
@@ -157,37 +183,54 @@ export class MapRenderSystem extends System {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Render floor
+        // --- Optimized Floor Rendering ---
         const floorSprite = this.sprites.get('img/map/floor.png');
+        const floorNeedsRedraw =
+            this.lastFloorStartX !== startX ||
+            this.lastFloorStartY !== startY ||
+            this.lastFloorWidth !== this.canvas.width ||
+            this.lastFloorHeight !== this.canvas.height;
+
         if (floorSprite && floorSprite.complete) {
-            this.ctx.save();
-            this.ctx.scale(this.SCALE_FACTOR, this.SCALE_FACTOR);
-            this.ctx.translate(-(startX % this.TILE_SIZE), -(startY % this.TILE_SIZE));
-            const pattern = this.ctx.createPattern(floorSprite, 'repeat');
-            this.ctx.fillStyle = pattern || 'black';
-            const buffer = this.TILE_SIZE;
-            this.ctx.fillRect(0, 0, viewportWidth + buffer, viewportHeight + buffer);
-            this.ctx.restore();
+            if (floorNeedsRedraw) {
+                this.floorBuffer.width = this.canvas.width;
+                this.floorBuffer.height = this.canvas.height;
+                this.floorBufferCtx.save();
+                this.floorBufferCtx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+                this.floorBufferCtx.clearRect(0, 0, this.floorBuffer.width, this.floorBuffer.height);
+                this.floorBufferCtx.scale(this.SCALE_FACTOR, this.SCALE_FACTOR);
+                this.floorBufferCtx.translate(-(startX % this.TILE_SIZE), -(startY % this.TILE_SIZE));
+                const pattern = this.floorBufferCtx.createPattern(floorSprite, 'repeat');
+                this.floorBufferCtx.fillStyle = pattern || 'black';
+                const buffer = this.TILE_SIZE;
+                this.floorBufferCtx.fillRect(0, 0, viewportWidth + buffer, viewportHeight + buffer);
+                this.floorBufferCtx.restore();
+                this.lastFloorStartX = startX;
+                this.lastFloorStartY = startY;
+                this.lastFloorWidth = this.canvas.width;
+                this.lastFloorHeight = this.canvas.height;
+            }
+            this.ctx.drawImage(this.floorBuffer, 0, 0);
         } else {
             this.ctx.fillStyle = 'black';
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
 
+        // --- The rest of your update method remains unchanged ---
+
         // Get level entity for active tier
         const levelEntity = this.entityManager.getEntity(`level_${this.entityManager.getActiveTier()}`);
         if (!levelEntity) return;
-        
+
         // --- FLICKERING TORCH GLOW AROUND PLAYER --- 
         const lightingStateEntity = this.entityManager.getEntity('lightingState');
         const lightingState = lightingStateEntity ? lightingStateEntity.getComponent('LightingState') : null;
         const renderStateEntity = this.entityManager.getEntity('renderState');
         const renderState = renderStateEntity ? renderStateEntity.getComponent('RenderState') : null;
-        
+
         if (lightingState && lightingState.isLit) {
             const baseRadius = lightingState.visibleRadius * this.TILE_SIZE * this.SCALE_FACTOR * 1.15;
-            //const flicker = 1 + 0.08 * (Math.random() - 0.5);
             const flicker = 1 + 0.18 * (Math.random() - 0.5) + 0.08 * (Math.random() - 0.5);
-            //const flicker = 1 + 0.25 * (Math.random() - 0.5) + 0.12 * (Math.random() - 0.5);
             const radius = baseRadius * flicker;
             const playerScreenX = (playerPos.x - startX) * this.SCALE_FACTOR + this.TILE_SIZE * this.SCALE_FACTOR / 2;
             const playerScreenY = (playerPos.y - startY) * this.SCALE_FACTOR + this.TILE_SIZE * this.SCALE_FACTOR / 2;
@@ -208,7 +251,6 @@ export class MapRenderSystem extends System {
             this.ctx.fill();
             this.ctx.restore();
         }
-        
 
         const bucketsComp = levelEntity.getComponent('SpatialBuckets');
         if (!bucketsComp) return;
@@ -474,7 +516,6 @@ export class MapRenderSystem extends System {
             }
         }
 
-
         // --- PIXEL-BASED lighting OF WAR PASS ---
         // 1. Create or resize lighting canvas
         if (!this.lightingCanvas || this.lightingCanvas.width !== this.canvas.width || this.lightingCanvas.height !== this.canvas.height) {
@@ -528,7 +569,6 @@ export class MapRenderSystem extends System {
         lightingCtx.arc(playerScreenX, playerScreenY, pxRender, 0, 2 * Math.PI);
         lightingCtx.fill();
         lightingCtx.globalCompositeOperation = 'source-over';
-
 
         // After the player lighting clearing code, add:
         for (const entity of entities) {
@@ -631,9 +671,6 @@ export class MapRenderSystem extends System {
             this.ctx.strokeStyle = 'rgba(226,226,226,.8)';
             this.ctx.lineWidth = 1;
             this.ctx.strokeRect(barX, barY, barWidth, barHeight);
-
-            //this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            //this.ctx.shadowBlur = 4;
 
             this.ctx.restore();
 
