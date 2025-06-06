@@ -78,6 +78,11 @@ hr {
     z-index: 0;
 }
 
+.zfont {
+    font-family: 'Zukarii', 'Verdana', Roboto, sans-serif;
+    font-size: .85rem;
+}
+
 .splash-title {
     position: absolute;
     top: 11%;
