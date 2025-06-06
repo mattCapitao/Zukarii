@@ -1,583 +1,63 @@
-﻿import { System } from '../core/Systems.js';
-import { JourneyUpdateQueueComponent, JourneyPathComponent, JourneyStateComponent, OfferedJourneysComponent, JourneyRewardComponent } from '../core/Components.js';
+﻿
+import { System } from '../core/Systems.js';
+import { PositionComponent, VisualsComponent, NeedsRenderComponent, HitboxComponent, LightSourceComponent } from '../core/Components.js';
 
-export class JourneyProgressSystem extends System {
-    constructor(entityManager, eventBus, utilities) {
+export class LootSpawnSystem extends System {
+    constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
-        this.requiredComponents = [];
-        this.utilities = utilities;
+        this.requiredComponents = ['Position', 'TreasureData'];
     }
 
-    async init() {
-        this.eventBus.on('FinalizeJourneyCompletion', ({ journeyId }) => {
-            this.finalizeJourneyCompletion(journeyId);
-        });
-    }
-
-    update(deltaTime) {
-        const components = this.validateComponents();
-        if (!components) return;
-
-        const { journeyUpdateQueue, journeyPath, inventory, journeyState, offeredJourneys, journeyPaths } = components;
-        if (journeyUpdateQueue.queue.length === 0) return;
-
-        this.processEquipGearTasks(journeyPath, inventory);
-        const failedMatches = this.processJourneyActions(journeyUpdateQueue, journeyPath);
-        this.initializeTaskCounts(journeyPath);
-        this.updateJourneyDialogue(journeyPath, journeyState, offeredJourneys, journeyPaths);
-        this.checkJourneyCompletions(journeyPath);
-        this.logFailedMatches(failedMatches);
-    }
-
-    validateComponents() {
-        const gameState = this.entityManager.getEntity('gameState');
-        const player = this.entityManager.getEntity('player');
-
-        const journeyUpdateQueue = gameState.getComponent('JourneyUpdateQueue');
-        const journeyPath = player.getComponent('JourneyPath');
-        const journeyState = player.getComponent('JourneyState');
-        const offeredJourneys = gameState.getComponent('OfferedJourneys');
-        const inventory = player.getComponent('Inventory');
-        const resource = player.getComponent('Resource');
-        const journeyPaths = gameState.getComponent('JourneyPaths');
-
-        if (!journeyUpdateQueue || !journeyPath || !journeyState || !offeredJourneys || !inventory || !resource || !journeyPaths) {
-            console.error('JourneyProgressSystem: Missing required components');
-            return null;
-        }
-
-        return { journeyUpdateQueue, journeyPath, journeyState, offeredJourneys, inventory, resource, journeyPaths };
-    }
-
-    processEquipGearTasks(journeyPath, inventory) {
-        const hasEquipGearTask = journeyPath.paths.some(path =>
-            path.tasks?.some(task => !task.completed && task.completionCondition.type === 'equipGear')
-        );
-        if (hasEquipGearTask) {
-            journeyPath.paths.forEach(path => {
-                if (path.completed || path.id === path.parentId) return;
-                path.tasks?.forEach(task => {
-                    if (!task.completed && task.completionCondition.type === 'equipGear') {
-                        if (this.checkEquipGear(task, inventory)) {
-                            task.completed = true;
-                            task.completedAt = Date.now();
-                            this.eventBus.emit('LogMessage', { message: task.completionText });
-                            this.eventBus.emit('JourneyStateUpdated');
-                            console.log(`JourneyProgressSystem: Completed equipGear task ${task.id}`);
-                            this.updateTaskCounts(path);
-                        }
-                    }
-                });
-            });
-        }
-    }
-
-    processJourneyActions(journeyUpdateQueue, journeyPath) {
-        const processedActions = new Set();
-        const failedMatches = [];
-
-        journeyUpdateQueue.queue.forEach((action, index) => {
-            let actionProcessed = false;
-            journeyPath.paths.forEach(path => {
-                if (path.completed || path.id === path.parentId) return;
-                path.tasks?.forEach(task => {
-                    if (!task.completed) {
-                        const { isMatch, failLog } = this.matchesTask(action, task);
-                        if (isMatch) {
-                            console.log(`JourneyProgressSystem: Task ${task.id} matches action ${action.type}`, { actionData: action.data, taskCondition: task.completionCondition });
-                            if (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4' || task.id === 'whisper_child_4_5') {
-                                console.log(`JourneyProgressSystem: Processing ${task.id} with parent ${path.id}`, {
-                                    totalTaskCount: path.totalTaskCount,
-                                    completedTaskCount: path.completedTaskCount
-                                });
-                            }
-                            task.completed = true;
-                            task.completedAt = Date.now();
-                            this.eventBus.emit('LogMessage', { message: task.completionText });
-                            this.eventBus.emit('JourneyStateUpdated');
-                            console.log(`JourneyProgressSystem: Completed task ${task.id} for action ${action.type}`);
-                            this.updateTaskCounts(path);
-                            actionProcessed = true;
-                        } else if (failLog && (task.id === 'whisper_child_2_4' || task.id === 'whisper_child_3_4' || task.id === 'whisper_child_4_5')) {
-                            console.log(`JourneyProgressSystem: Task ${task.id} did not match action ${action.type}`, {
-                                actionData: action.data,
-                                taskCondition: task.completionCondition,
-                                totalTaskCount: path.totalTaskCount,
-                                completedTaskCount: path.completedTaskCount
-                            });
-                        }
-                        if (failLog) {
-                            failedMatches.push(failLog);
-                        }
-                    }
-                });
-            });
-            if (actionProcessed) {
-                processedActions.add(index);
-            }
-        });
-
-        // Preserve original queue clearing logic
-        journeyUpdateQueue.queue = journeyUpdateQueue.queue.filter((_, index) => !processedActions.has(index));
-        if (journeyUpdateQueue.queue.length) {
-            console.log('JourneyProgressSystem: Cleared processed actions from JourneyUpdateQueue', { remaining: journeyUpdateQueue.queue.length });
-        }
-
-        return failedMatches;
-    }
-
-    initializeTaskCounts(journeyPath) {
-        journeyPath.paths.forEach(path => {
-            if (path.id === path.parentId || path.completed) return;
-            this.updateTaskCounts(path);
-            if ((path.id === 'whisper_parent_2' || path.id === 'whisper_parent_3') && false) {
-                console.log(`JourneyProgressSystem: Initialized task counts for ${path.id}`, {
-                    totalTaskCount: path.totalTaskCount,
-                    completedTaskCount: path.completedTaskCount
-                });
-            }
-        });
-    }
-
-    updateJourneyDialogue(journeyPath, journeyState, offeredJourneys, journeyPaths) {
-        const syliri = this.entityManager.getEntitiesWith(['NPCData']).find(e => e.getComponent('NPCData').id === 'sehnrhyx_syliri');
-        if (syliri && syliri.hasComponent('JourneyDialogue')) {
-            const dialogueComp = syliri.getComponent('JourneyDialogue');
-            dialogueComp.dialogues = {};
-
-            // Pending rewards
-            journeyPath.paths.forEach(path => {
-                if (path.pendingCompletion && !path.completed) {
-                    const journeyData = journeyPaths.paths.find(p => p.id === path.id);
-                    if (journeyData) {
-                        const rewardStrings = journeyData.rewards?.map(reward => {
-                            if (reward.xp) return `${reward.xp} XP`;
-                            if (reward.gold) return `${reward.gold} gold`;
-                            if (reward.type === 'item') {
-                                const itemName = reward.journeyItemId === 'stoneOfReturn' ? 'Stone of Return' : reward.journeyItemId;
-                                return itemName;
-                            }
-                            if (reward.type === 'unlock') return `${reward.mechanic}`;
-                            return '';
-                        }).filter(str => str) || [];
-                        const rewardMessage = rewardStrings.length > 0 ? rewardStrings.join(', ') : 'None';
-                        const dialogueText = `${journeyData.completionText} Rewards: ${rewardMessage}`;
-                        dialogueComp.dialogues[path.id] = {
-                            text: dialogueText,
-                            action: 'acknowledgeCompletion',
-                            params: { journeyId: path.id, npcId: syliri.id }
-                        };
-                        if (!journeyState.completedPaths.some(p => p.id === path.id)) {
-                            journeyState.completedPaths.push({
-                                id: path.id,
-                                parentId: path.parentId,
-                                title: path.title,
-                                completedAt: new Date().toISOString(),
-                                completionText: path.completionText,
-                                rewards: path.rewards
-                            });
-                        }
-                        if (path.id === 'whisper_parent_2' || path.id === 'whisper_parent_3') {
-                            console.log(`JourneyProgressSystem: Set completion dialogue for ${path.id}`, { dialogueText });
-                        }
-                    }
-                }
-            });
-
-            // Offered journeys
-            offeredJourneys.journeys.forEach(journey => {
-                if (journey.offeredBy === 'sehnrhyx_syliri') {
-                    const journeyData = journeyPaths.paths.find(p => p.id === journey.journeyId);
-                    if (journeyData && !journeyPath.paths.some(p => p.id === journey.journeyId)) {
-                        dialogueComp.dialogues[journey.journeyId] = {
-                            text: journeyData.offerText || journeyData.description,
-                            action: 'acceptJourney',
-                            params: { journeyId: journey.journeyId, npcId: syliri.id }
-                        };
-                        if (journey.journeyId === 'whisper_parent_3' || journey.journeyId === 'whisper_parent_4') {
-                            console.log(`JourneyProgressSystem: Set offer dialogue for ${journey.journeyId}`, { journeyId: journey.journeyId });
-                        }
-                    }
-                }
-            });
-
-            // Active tasks
-            journeyPath.paths.forEach(path => {
-                if (path.id === path.parentId || path.completed) return;
-                path.tasks?.forEach(task => {
-                    if (!task.completed && (task.completionCondition.npc === 'sehnrhyx_syliri' || path.offeredBy === 'sehnrhyx_syliri')) {
-                        let action = null;
-                        let params = null;
-                        if (task.completionCondition.type === 'turnIn') {
-                            action = 'turnIn';
-                            params = {
-                                taskId: task.id,
-                                resourceType: task.completionCondition.resourceType,
-                                itemId: task.completionCondition.itemId,
-                                quantity: task.completionCondition.quantity,
-                                npcId: syliri.id
-                            };
-                        } else if (task.completionCondition.type === 'interactWithNPC') {
-                            action = 'completeTask';
-                            params = { taskId: task.id, npcId: syliri.id };
-                        } else if (task.completionCondition.type === 'interactWithNPCFinal') {
-                            if ((path.completedTaskCount || 0) === (path.totalTaskCount || 0) - 1) {
-                                action = 'completeTask';
-                                params = { taskId: task.id, npcId: syliri.id };
-                            }
-                        }
-                        dialogueComp.dialogues[task.id] = {
-                            text: task.activeText || task.description,
-                            action,
-                            params
-                        };
-                    }
-                });
-            });
-        }
-    }
-
-    checkJourneyCompletions(journeyPath) {
-        journeyPath.paths.forEach(journey => {
-            if (journey.completed || journey.pendingCompletion || journey.id === journey.parentId) return;
-            const allTasksCompleted = journey.tasks?.length > 0 && journey.tasks.every(task => task.completed);
-            if (allTasksCompleted) {
-                journey.pendingCompletion = true;
-                this.eventBus.emit('JourneyStateUpdated');
-                console.log(`JourneyProgressSystem: Journey ${journey.id} set to pendingCompletion`);
-                if (journey.id === 'whisper_parent_2' || journey.id === 'whisper_parent_3') {
-                    console.log(`JourneyProgressSystem: ${journey.id} pending completion`, { tasks: journey.tasks.map(t => ({ id: t.id, completed: t.completed })) });
-                }
-            }
-        });
-    }
-
-    logFailedMatches(failedMatches) {
-        if (failedMatches.length > 0) {
-            console.log('JourneyProgressSystem: Failed task matches:', failedMatches);
-        }
-    }
-
-    matchesTask(action, task) {
-        if (!task.completionCondition?.type) {
-            console.error(`JourneyProgressSystem: Task ${task.id} has invalid completion condition:`, task.completionCondition);
-            return { isMatch: false, failLog: { taskId: task.id, actionType: action.type, error: 'Invalid condition' } };
-        }
-
-        const evaluators = {
-            collectResource: this.evaluateCollectResource,
-            findItem: this.evaluateFindOrCollectItem,
-            collectItem: this.evaluateFindOrCollectItem,
-            bossKill: this.evaluateBossKill,
-            interactWithNPC: this.evaluateInteractWithNPC,
-            interactWithNPCFinal: this.evaluateInteractWithNPCFinal,
-            attemptStairs: this.evaluateAttemptStairs,
-            useItem: this.evaluateUseItem,
-            reachTier: this.evaluateReachTier,
-            completeEchoes: this.evaluateCompleteEchoes,
-            completeWhispers: this.evaluateCompleteWhispers,
-            turnIn: this.evaluateTurnIn
-        };
-
-        const evaluator = evaluators[action.type] || (() => ({
-            isMatch: false,
-            failLog: { taskId: task.id, actionType: action.type, error: 'Unknown type' }
-        }));
-        return evaluator.call(this, action, task);
-    }
-
-    evaluateCollectResource(action, task) {
-        const condition = task.completionCondition;
-        const player = this.entityManager.getEntity('player');
-        const resource = player.getComponent('Resource');
-        console.log(`JourneyProgressSystem: Evaluating collectResource for task ${task.id}`, resource, action, condition);
-        const crafting = resource.craftResources;
-        const isMatch = condition.type === 'collectResource' &&
-            condition.resourceType === action.data.resourceType &&
-            (condition.quantity <= resource[condition.resourceType] ||
-                condition.quantity <= crafting[condition.resourceType] ||
-                condition.quantity <= action.data.quantity ||
-                !condition.quantity);
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    evaluateFindOrCollectItem(action, task) {
-        const condition = task.completionCondition;
-        const isMatch = (condition.type === 'findItem' || condition.type === 'collectItem') &&
-            (condition.journeyItemId === action.data.journeyItemId || condition.itemId === action.data.itemId);
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    evaluateBossKill(action, task) {
-        const condition = task.completionCondition;
-        const isMatch = condition.type === 'bossKill' && condition.tier === action.data.tier;
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    evaluateInteractWithNPC(action, task) {
-        const condition = task.completionCondition;
-        const isMatch = (condition.type === 'interactWithNPC' || condition.type === 'interactWithNPCFinal') &&
-            condition.npc === action.data.npcId &&
-            action.data.taskId === task.id;
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    evaluateInteractWithNPCFinal(action, task) {
-        const condition = task.completionCondition;
-        const path = this.entityManager.getEntity('player').getComponent('JourneyPath').paths.find(p => p.id === task.parentId);
-        const isMatch = condition.type === 'interactWithNPCFinal' &&
-            condition.npc === action.data.npcId &&
-            action.data.taskId === task.id &&
-            (path.completedTaskCount || 0) === (path.totalTaskCount || 0) - 1;
-        if (task.id === 'whisper_child_2_4') {
-            console.log(`JourneyProgressSystem: Evaluated whisper_child_2_4`, {
-                matches: isMatch,
-                npcId: action.data.npcId,
-                taskId: action.data.taskId,
-                totalTaskCount: path.totalTaskCount,
-                completedTaskCount: path.completedTaskCount
-            });
-        }
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    evaluateAttemptStairs(action, task) {
-        const condition = task.completionCondition;
-        const isMatch = condition.type === 'attemptStairs' &&
-            condition.fromTier === action.data.fromTier &&
-            condition.toTier === action.data.toTier &&
-            action.data.success === false;
-        if (task.id === 'whisper_child_3_4') {
-            console.log(`JourneyProgressSystem: Evaluated whisper_child_3_4 for attemptStairs`, {
-                matches: isMatch,
-                fromTier: action.data.fromTier,
-                toTier: action.data.toTier,
-                success: action.data.success
-            });
-        }
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    evaluateUseItem(action, task) {
-        const condition = task.completionCondition;
-        const isMatch = condition.type === 'useItem' && condition.itemId === action.data.itemId;
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    evaluateReachTier(action, task) {
-        const condition = task.completionCondition;
-        const isMatch = condition.type === 'reachTier' && condition.tier === action.data.tier;
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    evaluateCompleteEchoes(action, task) {
-        const condition = task.completionCondition;
-        const isMatch = condition.type === 'completeEchoes' && condition.count <= action.data.count;
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    evaluateCompleteWhispers(action, task) {
-        const condition = task.completionCondition;
-        const isMatch = condition.type === 'completeWhispers' && condition.pathId === action.data.pathId;
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    evaluateTurnIn(action, task) {
-        const condition = task.completionCondition;
-        const npcEntity = this.entityManager.getEntity(action.data.npcId);
-        const npcLogicalId = npcEntity ? npcEntity.getComponent('NPCData')?.id : action.data.npcId;
-        console.log(`JourneyProgressSystem: Evaluating turnIn for task ${task.id}`, {
-            condition,
-            actionData: action.data,
-            npcLogicalId,
-            npcEntityId: action.data.npcId
-        });
-        const isMatch = condition.type === 'turnIn' &&
-            task.id === action.data.taskId &&
-            condition.npc === npcLogicalId &&
-            this.handleTurnInCondition(condition, action.data);
-        return {
-            isMatch,
-            failLog: isMatch ? null : { taskId: task.id, actionType: action.type, actionData: action.data, condition }
-        };
-    }
-
-    updateTaskCounts(path) {
-        path.totalTaskCount = path.tasks ? path.tasks.length : 0;
-        path.completedTaskCount = path.tasks ? path.tasks.filter(t => t.completed).length : 0;
-        if ((path.id === 'whisper_parent_2' || path.id === 'whisper_parent_3') && false) {
-            console.log(`JourneyProgressSystem: Updated task counts for ${path.id}`, {
-                totalTaskCount: path.totalTaskCount,
-                completedTaskCount: path.completedTaskCount
-            });
-        }
-    }
-
-    handleTurnInCondition(condition, data) {
-        console.log(`JourneyProgressSystem: Handling turnIn condition`, { condition, data });
-        if (condition.resourceType) {
-            const resources = this.entityManager.getEntity('player').getComponent('Resource');
-            const resourceCount = resources.craftResources[condition.resourceType] || 0;
-            if (resourceCount >= condition.quantity) {
-                resources.craftResources[condition.resourceType] -= condition.quantity;
-                console.log(`JourneyProgressSystem: Deducted ${condition.quantity} ${condition.resourceType}, remaining: ${resources.craftResources[condition.resourceType]}`);
-                return true;
+    init() {
+        console.log('LootSpawnSystem: Initializing with EventBus:', this.eventBus);
+        this.eventBus.on('PlaceTreasure', (data) => {
+            console.log('LootSpawnSystem: Received PlaceTreasure event with raw data:', data);
+            if (data && data.treasure && data.tier !== undefined) {
+                console.log('LootSpawnSystem: Processed data - treasure:', data.treasure, 'tier:', data.tier);
+                this.spawnLootEntity({ treasure: data.treasure, tier: data.tier });
             } else {
-                console.log(`JourneyProgressSystem: Insufficient resources for turnIn`, {
-                    resourceType: condition.resourceType,
-                    required: condition.quantity,
-                    available: resourceCount
-                });
+                console.error('LootSpawnSystem: Invalid data structure:', data);
             }
-        } else if (condition.itemId) {
-            const inventory = this.entityManager.getEntity('player').getComponent('Inventory');
-            const itemIndex = inventory.items.findIndex(item => item.id === condition.itemId || item.journeyItemId === condition.itemId);
-            if (itemIndex !== -1) {
-                inventory.items.splice(itemIndex, 1);
-                console.log(`JourneyProgressSystem: Removed item ${condition.itemId} from inventory`);
-                return true;
-            } else {
-                console.log(`JourneyProgressSystem: Item ${condition.itemId} not found in inventory`);
-            }
-        }
-        return false;
+        });
+        this.eventBus.on('SpawnLoot', (data) => {
+            console.log('LootSpawnSystem: Received SpawnLoot event with raw data:', data);
+            this.spawnLootEntity(data);
+        });
+        this.eventBus.on('DiscardItem', (data) => this.spawnLootEntity(data));
     }
 
-    checkEquipGear(task, inventory) {
-        const requiredTypes = new Set(['amulet', 'armor', 'ring', 'ring', 'weapon', 'weapon']);
-        const requiredWeapons = new Set(['melee', 'ranged']);
-        const equippedTypes = new Set();
-        const equippedWeapons = new Set();
+    spawnLootEntity({ treasure, tier }) {
+        console.log('LootSpawnSystem: Spawning loot entity with treasure:', treasure, 'tier:', tier);
 
-        for (const item of Object.values(inventory.equipped)) {
-            if (!item || item.itemTier !== 'magic') continue;
-            if (item.type === 'amulet' || item.type === 'armor') {
-                equippedTypes.add(item.type);
-            } else if (item.type === 'ring') {
-                if (!equippedTypes.has('ring')) {
-                    equippedTypes.add('ring');
-                } else if (equippedTypes.has('ring') && !equippedTypes.has('ring2')) {
-                    equippedTypes.add('ring2');
-                }
-            } else if (item.type === 'weapon') {
-                if (item.attackType === 'melee' || item.attackType === 'ranged') {
-                    equippedWeapons.add(item.attackType);
-                    equippedTypes.add('weapon');
-                }
-            }
-        }
-
-        return requiredTypes.size === equippedTypes.size &&
-            requiredTypes.every(type => type === 'weapon' || equippedTypes.has(type)) &&
-            requiredWeapons.size === equippedWeapons.size &&
-            requiredWeapons.every(attackType => equippedWeapons.has(attackType));
-    }
-
-    applyRewards(journey) {
-        const player = this.entityManager.getEntity('player');
-        const journeyReward = player.getComponent('JourneyReward');
-
-        if (!journeyReward) {
-            console.warn('JourneyProgressSystem: JourneyReward component not found on player');
-            return;
-        }
-        if (!journey.rewards) {
-            console.warn('JourneyProgressSystem: No rewards found for journey', journey.id);
-            return;
-        }
-        if (!journey.rewards.length) {
-            console.warn('JourneyProgressSystem: No rewards found for journey', journey.id);
-            return;
-        }
-        console.log('JourneyProgressSystem: Adding rewards to JourneyRewardComponent:', journey.rewards);
-        // @Grok we should probably add the array to JourneyRewardrewards instead of overwriting it
-        journeyReward.rewards = journey.rewards;
-    }
-
-    offerNextJourney(journey) {
-        if (journey.nextPathId) {
-            const gameState = this.entityManager.getEntity('gameState');
-            const journeyPathsComp = gameState.getComponent('JourneyPaths');
-            const offeredJourneysComp = gameState.getComponent('OfferedJourneys');
-            const nextJourney = journeyPathsComp.paths.find(path => path.id === journey.nextPathId);
-            if (nextJourney && !offeredJourneysComp.journeys.some(q => q.journeyId === nextJourney.id)) {
-                const offeredBy = nextJourney.offeredBy || journey.offeredBy || 'default_npc';
-                offeredJourneysComp.journeys.push({ journeyId: nextJourney.id, offeredBy });
-                this.eventBus.emit('LogMessage', { message: `New journey available: ${nextJourney.title}` });
-                console.log(`JourneyProgressSystem: Offered next journey ${nextJourney.id} by ${offeredBy}`);
-                if (nextJourney.id === 'whisper_parent_3' || nextJourney.id === 'whisper_parent_4') {
-                    console.log(`JourneyProgressSystem: Offered ${nextJourney.id} after completing ${journey.id}`);
-                }
-            }
-        }
-    }
-
-    triggerMasterPath(journey) {
-        if (journey.triggersMasterPath) {
-            const journeyPath = this.entityManager.getEntity('player').getComponent('JourneyPath');
-            const gameState = this.entityManager.getEntity('gameState');
-            const journeyPathsComp = gameState.getComponent('JourneyPaths');
-            const masterPath = journeyPathsComp.paths.find(path => path.id === journey.triggersMasterPath);
-            if (masterPath && !journeyPath.paths.some(p => p.id === masterPath.id)) {
-                this.utilities.addPath(journeyPath, masterPath);
-                this.eventBus.emit('LogMessage', { message: `New path unlocked: ${masterPath.title}` });
-                console.log(`JourneyProgressSystem: Triggered master path ${masterPath.id}`);
-            }
-        }
-    }
-
-    finalizeJourneyCompletion(journeyId) {
-        const player = this.entityManager.getEntity('player');
-        const journeyPath = player.getComponent('JourneyPath');
-        const journey = journeyPath.paths.find(q => q.id === journeyId && q.pendingCompletion);
-        if (!journey) {
-            console.warn(`JourneyProgressSystem: Journey ${journeyId} not found or not in pendingCompletion state`);
+        const position = treasure.getComponent('Position');
+        const lootData = treasure.getComponent('LootData');
+        if (!position || !lootData) {
+            console.error('LootSpawnSystem: Missing Position or LootData components on treasure entity:', treasure);
             return;
         }
 
-        journey.pendingCompletion = false;
-        journey.completed = true;
-        this.applyRewards(journey);
-        this.offerNextJourney(journey);
-        this.triggerMasterPath(journey);
-        this.utilities.pushPlayerActions('completeWhispers', { pathId: journey.id, title: journey.title });
-        this.eventBus.emit('JourneyStateUpdated');
-        console.log(`JourneyProgressSystem: Finalized completion of journey ${journeyId}`);
-        if (journeyId === 'whisper_parent_2' || journeyId === 'whisper_parent_3') {
-            console.log(`JourneyProgressSystem: Completed ${journeyId}, nextPathId: ${journey.nextPathId}`);
+        const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
+        if (!levelEntity) {
+            console.error(`LootSpawnSystem: No level entity found for tier ${tier}`);
+            return;
         }
 
-        this.utilities.removePath(journeyPath, journeyId);
-        console.log(`JourneyProgressSystem: Removed completed journey ${journeyId} from JourneyPath.paths`);
+        const entityList = levelEntity.getComponent('EntityList');
+
+        const lootEntity = treasure;
+        entityList.treasures.push(lootEntity.id);
+
+        lootEntity.addComponent(new PositionComponent(position.x, position.y));
+        lootEntity.addComponent(new VisualsComponent(24, 30));
+        const lootVisuals = lootEntity.getComponent('Visuals');
+        lootVisuals.avatar = 'img/avatars/chest.png';
+        lootEntity.addComponent(new HitboxComponent(24, 30));
+        lootEntity.addComponent(new LightSourceComponent({ definitionKey: 'chestGlow' }));
+
+        this.eventBus.emit('LootEntityCreated', { entityId: lootEntity.id, tier });
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        if (!lootData.suppressRender && gameState) {
+            lootEntity.addComponent(new NeedsRenderComponent());
+        }
     }
 }

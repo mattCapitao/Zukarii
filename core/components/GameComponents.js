@@ -157,10 +157,52 @@ export class LightSourceDefinitions {
     constructor() {
         this.type = 'LightSourceDefinitions';
         this.definitions = {
-            unlit: { duration: 0, visibleRadius: 0 }, // No light source
-            torch: { duration: 300, visibleRadius: 6 }, // Adjusted for testing
-            lamp: { duration: 500, visibleRadius: 7 }, // For future extensibility
-            glow: {},
+            unlit: {
+                duration: 0,
+                visibleRadius: 2,
+  
+            },
+            torch: {
+                duration: 300,
+                visibleRadius: 6,
+                radius: 6,
+                opacitySteps: [0.75, 0.15, 0], // For visibility
+                glowOpacitySteps: [0.35, 0.10, 0], // For orange glow
+                color: 'rgba(255,220,120,0.35)', // Base color for glow
+                glowIntensity: 1.0,
+                proximityFactor: 1.0,
+                pulse: null,
+                flicker: true // Enable flicker effect
+            },
+            lamp: {
+                duration: 500,
+                visibleRadius: 7,
+                radius: 7,
+                opacitySteps: [0.75, 0.15, 0],
+                color: 'rgba(255,255,255,0.5)',
+                glowIntensity: 0.5,
+                proximityFactor: 1.0,
+                pulse: null
+            },
+            lootGlow: {
+                radius: 3,
+                opacitySteps: [0.75, 0.15, 0],
+                color: 'rgba(255,215,0,0.6)',
+                glowIntensity: 0.75,
+                proximityFactor: 2,
+                pulse: { amplitude: 0.2, frequency: 0.5 }
+            },
+            magic: {
+                radius: 6,
+                visibleRadius:50,
+                opacitySteps: [0.75, 0.15, 0], // For visibility
+                glowOpacitySteps: [0.35, 0.10, 0], // For orange glow
+                color: "rgba(5,255,5,0.7)",  // Base color for glow
+                glowIntensity: 5.0,
+                proximityFactor: 1.0,
+                pulse: null,
+                pulse: { amplitude: 0.2, frequency: 0.5 }
+            },
         };
     }
 }

@@ -79,7 +79,7 @@ export class NPCSpawnSystem extends System {
 
                 if (template.lightSource) {
                     const light = template.lightSource;
-                    this.entityManager.addComponentToEntity(entity.id, new LightSourceComponent(light.radius, light.color ));
+                    this.entityManager.addComponentToEntity(entity.id, new LightSourceComponent({ definitionKey: 'magic' } ));
                 }
 
                 if (template.shopType) {

@@ -1,5 +1,5 @@
 ﻿import { System } from '../core/Systems.js';
-import { PositionComponent, VisualsComponent, NeedsRenderComponent, HitboxComponent } from '../core/Components.js';
+import { PositionComponent, VisualsComponent, NeedsRenderComponent, HitboxComponent, LightSourceComponent } from '../core/Components.js';
 
 export class LootSpawnSystem extends System {
     constructor(entityManager, eventBus) {
@@ -52,6 +52,7 @@ export class LootSpawnSystem extends System {
         const lootVisuals = lootEntity.getComponent('Visuals');
         lootVisuals.avatar = 'img/avatars/chest.png';
         lootEntity.addComponent(new HitboxComponent(24, 30));
+        lootEntity.addComponent(new LightSourceComponent({ definitionKey: 'lootGlow' }));
 
         this.eventBus.emit('LootEntityCreated', { entityId: lootEntity.id, tier });
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');

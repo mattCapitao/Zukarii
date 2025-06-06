@@ -231,11 +231,27 @@ export class LogComponent {
 }
 
 export class LightSourceComponent {
-    constructor(radius = 3, color = 'rgba(255,255,255,0.5)' ) {
+    constructor({
+        definitionKey = null,
+        radius = 3,
+        opacitySteps = [0.75, 0.15, 0],
+        color = 'rgba(255,255,255,0.5)',
+        glowIntensity = 0.5,
+        proximityFactor = 1.0,
+        pulse = null,
+        expires = false,
+        remainingDuration = 0
+    } = {}) {
         this.type = 'LightSource';
-        this.color = color; // Color of the light in hex format
-        this.radius = radius; // Radius of the light source
-        this.expires = false;
-        this.remainingDuration = 0;
+        this.definitionKey = definitionKey; // Reference to LightSourceDefinitions key
+        this.radius = radius;
+        this.opacitySteps = opacitySteps;
+        this.color = color;
+        this.glowIntensity = glowIntensity;
+        this.currentGlowIntensity = glowIntensity; // Dynamic value updated by LightingSystem
+        this.proximityFactor = proximityFactor;
+        this.pulse = pulse; // { amplitude, frequency } for pulsing effect
+        this.expires = expires;
+        this.remainingDuration = remainingDuration;
     }
 }

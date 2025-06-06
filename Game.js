@@ -57,7 +57,7 @@ import { HotBarSystem } from './systems/HotBarSystem.js';
 
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
-    PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent, LogComponent,
+    PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent, LogComponent, LightSourceComponent,
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
     LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
     AnimationComponent, AnimationStateComponent, JourneyStateComponent, JourneyPathComponent, DialogueComponent, JourneyPathsComponent,
@@ -88,6 +88,7 @@ export class Game {
         }
         player = this.entityManager.createEntity('player', true);
         window.player = player; // Expose player globally for debugging
+        this.entityManager.addComponentToEntity('player', new LightSourceComponent({ definitionKey: 'unlit' }));
         this.entityManager.addComponentToEntity('player', new LogComponent());
         this.entityManager.addComponentToEntity('player', new PositionComponent(64, 112));
         this.entityManager.addComponentToEntity('player', new LastPositionComponent(0, 0));

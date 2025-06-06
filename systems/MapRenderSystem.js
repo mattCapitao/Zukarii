@@ -1,4 +1,8 @@
-﻿import { System } from '../core/Systems.js';
+﻿
+
+
+
+import { System } from '../core/Systems.js';
 
 export class MapRenderSystem extends System {
     constructor(entityManager, eventBus, state) {
