@@ -79,6 +79,8 @@ export class MapRenderSystem extends System {
         this.lastFloorStartY = null;
         this.lastFloorWidth = null;
         this.lastFloorHeight = null;
+        window.canvasSize = { h: this.canvas.height, w: this.canvas.width };
+
     }
 
     loadSprites() {
