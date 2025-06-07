@@ -14,6 +14,7 @@ export class MonsterControllerSystem extends System {
         this.TILE_SIZE = 32;
         this.AGGRO_RANGE = 4 * this.TILE_SIZE; // 4 tiles in pixels (32 pixels per tile)
         this.MELEE_RANGE = 1.5 * this.TILE_SIZE; // Pixel distance to trigger melee attack
+        this.MONSTER_WANDER_CHANCE = 5;
     }
     update(deltaTime) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
@@ -74,7 +75,7 @@ export class MonsterControllerSystem extends System {
                     if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
                         this.eventBus.emit('MonsterAttack', { entityId: monster.id });
                         attackSpeed.elapsedSinceLastAttack = 0;
-                        //console.log(`MonsterControllerSystem: ${monsterData.name} attacked player at distance ${distance.toFixed(2)} pixels`);
+                        ////console.log(`MonsterControllerSystem: ${monsterData.name} attacked player at distance ${distance.toFixed(2)} pixels`);
                     }
                     return; // Stop moving if in melee range
                 }
@@ -89,7 +90,28 @@ export class MonsterControllerSystem extends System {
                     monster.id,
                     new MovementIntentComponent(playerPos.x, playerPos.y)
                 );
-                //console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to player at (${playerPos.x}, ${playerPos.y}), distance to player: ${distance.toFixed(2)} pixels`);
+                ////console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to player at (${playerPos.x}, ${playerPos.y}), distance to player: ${distance.toFixed(2)} pixels`);
+            } else {
+                // If not aggro, random chance to wander
+
+                if (!monster.hasComponent('MovementIntent')
+                    && (Math.floor(Math.random() * 100) < this.MONSTER_WANDER_CHANCE)
+                    && monsterData.isBoss !== true)
+                { // Bosses don't wander
+                 
+                    const wander = {};
+                    wander.x = pos.x + (Math.floor(Math.random() * 3) - 1) * this.TILE_SIZE;
+                    wander.y = pos.y + (Math.floor(Math.random() * 3) - 1) * this.TILE_SIZE;
+
+                    if (this.isWalkable(wander.x, wander.y)) {
+                        this.entityManager.addComponentToEntity(
+                            monster.id,
+                            new MovementIntentComponent(wander.x, wander.y)
+                        );
+                    } //console.log(`MonsterControllerSystem: ${monsterData.name} intends to wander to (${wander.x}, ${wander.y})`);
+
+                }
+               
             }
         });
     }
@@ -111,10 +133,10 @@ export class MonsterControllerSystem extends System {
 
         if (monsterData.isBoss) {
             this.utilities.pushPlayerActions('bossKill', { monsterId: monsterData.id, tier });
-            console.log(`MonsterControllerSystem: Boss defeated: ${monsterData.name}, awarding special actions and loot.`);
+            //console.log(`MonsterControllerSystem: Boss defeated: ${monsterData.name}, awarding special actions and loot.`);
         } else {
             this.utilities.pushPlayerActions('monsterKill', { monsterId: monsterData.id, tier });
-            console.log(`MonsterControllerSystem: Monster defeated: ${monsterData.name}, awarding actions and loot.`);
+            //console.log(`MonsterControllerSystem: Monster defeated: ${monsterData.name}, awarding actions and loot.`);
         }
 
         const lootSource = this.entityManager.createEntity(`loot_source_${monsterData.tier}_${Date.now()}`);

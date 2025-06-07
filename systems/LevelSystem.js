@@ -54,25 +54,25 @@ export class LevelSystem extends System {
     }
 
     init() {
-        console.log('LevelSystem.js: init - Starting');
+        //console.log('LevelSystem.js: init - Starting');
         this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
         this.eventBus.on('AddLevel', (data) => this.addLevel(data));
         this.eventBus.on('CheckLevelAfterTransitions', (data) => this.checkLevelAfterTransitions(data));
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const isNewGame = gameState.tier === 0;
 
-        console.log(`LevelSystem.js: init - Starting with gameState.tier=${gameState.tier}, isNewGame=${isNewGame}`);
+        //console.log(`LevelSystem.js: init - Starting with gameState.tier=${gameState.tier}, isNewGame=${isNewGame}`);
 
         // Always create Tier 0 with the custom surface level if it doesn't exist
         if (!this.entityManager.getEntitiesWith(['Tier']).some(e => e.getComponent('Tier').value === 0)) {
             this.entityManager.setActiveTier(0);
-            console.log(`LevelSystem.js: init - Set active tier to 0 for tier 0 creation`);
+            //console.log(`LevelSystem.js: init - Set active tier to 0 for tier 0 creation`);
             const levelEntity = this.entityManager.createEntity(`level_0`);
             this.entityManager.addComponentToEntity(levelEntity.id, { type: 'Tier', value: 0 });
             this.entityManager.addComponentToEntity(levelEntity.id, new EntityListComponent());
             this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent());
             this.entityManager.addComponentToEntity(levelEntity.id, new SpatialBucketsComponent());
-            console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier 0 in init`);
+            //console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier 0 in init`);
             this.addLevel({ tier: 0, customLevel: this.generateCustomLevel(levelEntity) });
             // Explicitly call checkLevelAfterTransitions for tier 0 to ensure shop inventories are generated
             this.checkLevelAfterTransitions({ tier: 0, levelEntity });
@@ -81,7 +81,7 @@ export class LevelSystem extends System {
         if (isNewGame) {
             gameState.tier = 0;
             this.entityManager.setActiveTier(0);
-            console.log(`LevelSystem.js: init - gameState.tier set to ${gameState.tier} for a new game, active tier: ${this.entityManager.getActiveTier()}`);
+            //console.log(`LevelSystem.js: init - gameState.tier set to ${gameState.tier} for a new game, active tier: ${this.entityManager.getActiveTier()}`);
         } else {
             // For loaded games, generate levels from 1 up to the current tier (if not already generated)
             for (let tier = 1; tier <= gameState.tier; tier++) {
@@ -92,9 +92,9 @@ export class LevelSystem extends System {
             // Only set active tier if it hasn't been set by a transition
             if (this.entityManager.getActiveTier() !== gameState.tier) {
                 this.entityManager.setActiveTier(gameState.tier);
-                console.log(`LevelSystem.js: init - Preserved loaded tier ${gameState.tier}, active tier set to: ${this.entityManager.getActiveTier()}`);
+                //console.log(`LevelSystem.js: init - Preserved loaded tier ${gameState.tier}, active tier set to: ${this.entityManager.getActiveTier()}`);
             } else {
-                console.log(`LevelSystem.js: init - Active tier already set to ${this.entityManager.getActiveTier()}, skipping setActiveTier`);
+                //console.log(`LevelSystem.js: init - Active tier already set to ${this.entityManager.getActiveTier()}, skipping setActiveTier`);
             }
             // Explicitly call checkLevelAfterTransitions for the loaded tier
             const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
@@ -102,7 +102,7 @@ export class LevelSystem extends System {
                 this.checkLevelAfterTransitions({ tier: gameState.tier, levelEntity });
             }
         }
-        console.log('LevelSystem.js: init - Completed');
+        //console.log('LevelSystem.js: init - Completed');
     }
 
     removeWallAtPosition(x, y, walls, levelEntity) {
@@ -120,7 +120,7 @@ export class LevelSystem extends System {
         });
 
         if (wallEntities.length === 0) {
-            console.log(`LevelSystem.js: No wall entities found at pixel (${pixelX}, ${pixelY}) for tile (${x}, ${y}) on tier ${tier}`);
+            //console.log(`LevelSystem.js: No wall entities found at pixel (${pixelX}, ${pixelY}) for tile (${x}, ${y}) on tier ${tier}`);
         }
 
         wallEntities.forEach(wall => {
@@ -158,25 +158,25 @@ export class LevelSystem extends System {
             return;
         }
         this.isAddingLevel = true;
-        console.log(`LevelSystem.js: addLevel - Starting for tier ${tier}, transitionDirection: ${transitionDirection}`);
+        //console.log(`LevelSystem.js: addLevel - Starting for tier ${tier}, transitionDirection: ${transitionDirection}`);
 
         this.entityManager.setActiveTier(tier);
-        console.log(`LevelSystem.js: addLevel - Set active tier to ${tier}, active tier: ${this.entityManager.getActiveTier()}`);
+        //console.log(`LevelSystem.js: addLevel - Set active tier to ${tier}, active tier: ${this.entityManager.getActiveTier()}`);
         let levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
 
         if (!levelEntity) {
             levelEntity = this.entityManager.createEntity(`level_${tier}`);
-            console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier ${tier}`);
+            //console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier ${tier}`);
             this.entityManager.addComponentToEntity(levelEntity.id, { type: 'Tier', value: tier });
 
             let levelData;
             if (customLevel != null || tier === 0) {
                 
                 if (customLevel == null && tier === 0) {
-                    console.log(`LevelSystem.js: Generating Tier 0 with generateSurfaceLevel`);
+                    //console.log(`LevelSystem.js: Generating Tier 0 with generateSurfaceLevel`);
                     customLevel = this.generateCustomLevel(levelEntity);
                 } else {
-                    console.log(`LevelSystem.js: Using provided customLevel for tier ${tier}`);
+                    //console.log(`LevelSystem.js: Using provided customLevel for tier ${tier}`);
                 }
                 levelData = customLevel;
                 levelData.isCustomLevel = true;
@@ -200,7 +200,7 @@ export class LevelSystem extends System {
                 this.entityManager.addComponentToEntity(levelEntity.id, entityListComp);
                 this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent());
                 this.entityManager.addComponentToEntity(levelEntity.id, new SpatialBucketsComponent());
-                console.log(`LevelSystem.js: addLevel - Adjusting player position for tier ${tier}, transitionDirection: ${transitionDirection}`);
+                //console.log(`LevelSystem.js: addLevel - Adjusting player position for tier ${tier}, transitionDirection: ${transitionDirection}`);
                 this.adjustPlayerPosition(levelEntity, transitionDirection === 'down' ? levelData.stairsUp : (levelData.stairsDown || levelData.stairsUp));
             } else {
 
@@ -250,7 +250,7 @@ export class LevelSystem extends System {
                 entityList.treasures = this.generateLootEntities(tier, levelData.map, levelData.roomEntityIds);
                 mapComp.stairsUp = levelData.stairsUp;
                 mapComp.stairsDown = levelData.stairsDown;
-                console.log(`LevelSystem.js: addLevel - Adjusting player position for tier ${tier}, transitionDirection: ${transitionDirection}`);
+                //console.log(`LevelSystem.js: addLevel - Adjusting player position for tier ${tier}, transitionDirection: ${transitionDirection}`);
                 this.adjustPlayerPosition(levelEntity, transitionDirection === 'down' ? levelData.stairsUp : levelData.stairsDown);
                 if (hasBossRoom) this.lastBossTier = tier;
 
@@ -289,11 +289,11 @@ export class LevelSystem extends System {
             }
         }
         this.isAddingLevel = false;
-        console.log(`LevelSystem.js: addLevel - Completed for tier ${tier}`);
+        //console.log(`LevelSystem.js: addLevel - Completed for tier ${tier}`);
     }
 
     generateLevel(hasBossRoom, tier, levelEntityId) {
-        console.log(`LevelSystem.js: generateLevel - Starting for tier ${tier}, hasBossRoom: ${hasBossRoom}`);
+        //console.log(`LevelSystem.js: generateLevel - Starting for tier ${tier}, hasBossRoom: ${hasBossRoom}`);
         const levelEntity = this.entityManager.getEntity(levelEntityId);
         const map = Array.from({ length: this.state.HEIGHT }, () => Array(this.state.WIDTH).fill('#'));
         const walls = [];
@@ -339,7 +339,7 @@ export class LevelSystem extends System {
         }
 
         this.connectRooms(roomEntityIds, map, floors, walls, floorPositions, tier);
-        console.log(`LevelSystem.js: generateLevel - Completed for tier ${tier}`);
+        //console.log(`LevelSystem.js: generateLevel - Completed for tier ${tier}`);
         return {
             map,
             roomEntityIds,
@@ -351,7 +351,7 @@ export class LevelSystem extends System {
 
 
     placeRooms(numRooms, hasBossRoom, levelEntityId, tier) {
-        console.log(`LevelSystem.js: placeRooms - Improved - Starting for tier ${tier}, numRooms: ${numRooms}, hasBossRoom: ${hasBossRoom}`);
+        //console.log(`LevelSystem.js: placeRooms - Improved - Starting for tier ${tier}, numRooms: ${numRooms}, hasBossRoom: ${hasBossRoom}`);
         const roomOrigins = new Set();
         const roomEntityIds = [];
         let bossChamberPlaced = !hasBossRoom;
@@ -453,7 +453,7 @@ export class LevelSystem extends System {
         }
 
         roomOrigins.clear();
-        console.log(`LevelSystem.js: placeRooms - Improved - Placed ${roomEntityIds.length} out of ${numRooms} rooms for tier ${tier}`);
+        //console.log(`LevelSystem.js: placeRooms - Improved - Placed ${roomEntityIds.length} out of ${numRooms} rooms for tier ${tier}`);
         return roomEntityIds;
     }
 
@@ -507,7 +507,7 @@ export class LevelSystem extends System {
     }
 
     connectRooms(roomEntityIds, map, floors, walls, floorPositions, tier) {
-        console.log(`LevelSystem.js: connectRooms (MST) - Starting for tier ${tier}, roomEntityIds: ${roomEntityIds.length}`);
+        //console.log(`LevelSystem.js: connectRooms (MST) - Starting for tier ${tier}, roomEntityIds: ${roomEntityIds.length}`);
         if (roomEntityIds.length === 0) return;
         const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
 
@@ -576,12 +576,12 @@ export class LevelSystem extends System {
         }
 
         // Debug output
-        console.log(`LevelSystem.js: Room connections after connectRooms (MST) for tier ${tier}:`);
+        //console.log(`LevelSystem.js: Room connections after connectRooms (MST) for tier ${tier}:`);
         for (const roomId of roomEntityIds) {
             const room = this.entityManager.getEntity(roomId).getComponent('Room');
-            console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length} (${room.connections.join(', ')})`);
+            //console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length} (${room.connections.join(', ')})`);
         }
-        console.log(`LevelSystem.js: connectRooms (MST) - Completed for tier ${tier}`);
+        //console.log(`LevelSystem.js: connectRooms (MST) - Completed for tier ${tier}`);
     }
 
     carveCorridor(startRoomId, endRoomId, map, roomEntityIds, floors, walls, floorPositions, levelEntity) {
@@ -606,7 +606,7 @@ export class LevelSystem extends System {
         const startY = startRoom.centerY;
         const endX = endRoom.centerX;
         const endY = endRoom.centerY;
-        console.log(`LevelSystem: Carving corridor from (${startX},${startY}) to (${endX},${endY})`);
+        //console.log(`LevelSystem: Carving corridor from (${startX},${startY}) to (${endX},${endY})`);
         // Defensive checks
         if (
             !Number.isFinite(startX) || !Number.isFinite(startY) ||
@@ -746,7 +746,7 @@ export class LevelSystem extends System {
         const endX = endRoom.centerX;
         const endY = endRoom.centerY;
         const midX = Math.floor((startX + endX) / 2);
-        console.log(`LevelSystem: Carving corridor from (${startX},${startY}) to (${endX},${endY})`);
+        //console.log(`LevelSystem: Carving corridor from (${startX},${startY}) to (${endX},${endY})`);
         // Defensive checks
         if (
             !Number.isFinite(startX) || !Number.isFinite(startY) ||
@@ -954,7 +954,7 @@ export class LevelSystem extends System {
         const startY = startRoom.centerY;
         const endX = endRoom.centerX;
         const endY = endRoom.centerY;
-        console.log(`LevelSystem: Carving corridor from (${startX},${startY}) to (${endX},${endY})`);
+        //console.log(`LevelSystem: Carving corridor from (${startX},${startY}) to (${endX},${endY})`);
         // Defensive checks
         if (
             !Number.isFinite(startX) || !Number.isFinite(startY) ||
@@ -1090,7 +1090,7 @@ export class LevelSystem extends System {
     }
 
     placeStairs(levelEntity, levelData, hasBossRoom) {
-        console.log(`LevelSystem.js: placeStairs - Starting for tier ${levelEntity.getComponent('Tier').value}, hasBossRoom: ${hasBossRoom}`);
+        //console.log(`LevelSystem.js: placeStairs - Starting for tier ${levelEntity.getComponent('Tier').value}, hasBossRoom: ${hasBossRoom}`);
         const map = levelData.map;
         const entityList = levelEntity.getComponent('EntityList');
         const tier = levelEntity.getComponent('Tier').value;
@@ -1136,7 +1136,7 @@ export class LevelSystem extends System {
                 stairDownX = fallbackRoom.left + 1;
                 stairDownY = fallbackRoom.top + 1;
                 const stairDownEntity = this.generateStairEntity(levelData, entityList, tier, roomId, 'down', stairDownX, stairDownY, true);
-                console.log(`LevelSystem.js: Placed stairsDown (fallback) at (${stairDownX}, ${stairDownY}) on tier ${tier}`);
+                //console.log(`LevelSystem.js: Placed stairsDown (fallback) at (${stairDownX}, ${stairDownY}) on tier ${tier}`);
                 fallbackRoom.suppressMonsters = true;
             }
         }
@@ -1162,11 +1162,11 @@ export class LevelSystem extends System {
             stairUpY = fallbackRoom.top + 1;
             const stairUpEntity = this.generateStairEntity(levelData, entityList, tier, roomId, 'up', stairUpX, stairUpY, true);
             fallbackRoom.suppressMonsters = true;
-            console.log(`LevelSystem.js: Placed stairsUp (fallback) at (${stairUpX}, ${stairUpY}) on tier ${tier}`);
+            //console.log(`LevelSystem.js: Placed stairsUp (fallback) at (${stairUpX}, ${stairUpY}) on tier ${tier}`);
         }
 
         if (hasBossRoom) {
-            console.log(`Has boss room = ${hasBossRoom}, checking stairsDown distance to map center`);
+            //console.log(`Has boss room = ${hasBossRoom}, checking stairsDown distance to map center`);
             const bossRoomId = levelData.roomEntityIds.find(rId => this.entityManager.getEntity(rId).getComponent('Room').roomType === 'BossChamberSpecial');
             const bossRoom = this.entityManager.getEntity(bossRoomId).getComponent('Room');
             const paddedDistance = this.MIN_STAIR_DISTANCE + Math.floor((bossRoom.width + bossRoom.height) / 2);
@@ -1177,13 +1177,13 @@ export class LevelSystem extends System {
 
         levelData.walls = entityList.walls;
         levelData.floors = entityList.floors;
-        console.log(`LevelSystem.js: placeStairs - Completed for tier ${tier}`);
+        //console.log(`LevelSystem.js: placeStairs - Completed for tier ${tier}`);
     }
 
 
 
     generateCustomLevel(levelEntity) {
-        console.log(`LevelSystem.js: generateSurfaceLevel - Starting for tier 0`);
+        //console.log(`LevelSystem.js: generateSurfaceLevel - Starting for tier 0`);
         const width = this.state.WIDTH;
         const height = this.state.HEIGHT;
         const map = Array(height).fill().map(() => Array(width).fill('#'));
@@ -1255,7 +1255,7 @@ export class LevelSystem extends System {
 
         const mapComp = new MapComponent(levelData);
         this.entityManager.addComponentToEntity(levelEntity.id, mapComp);
-        console.log(`LevelSystem.js: Added MapComponent to ${levelEntity.id} during generateSurfaceLevel`);
+        //console.log(`LevelSystem.js: Added MapComponent to ${levelEntity.id} during generateSurfaceLevel`);
 
         const entityList = levelEntity.getComponent('EntityList');
         entityList.walls = walls;
@@ -1263,7 +1263,7 @@ export class LevelSystem extends System {
         entityList.stairs = stairs;
         entityList.npcs = npcs;
         entityList.shopCounters = shopCounters;
-        console.log(`LevelSystem.js: Updated EntityListComponent for ${levelEntity.id} in generateSurfaceLevel`);
+        //console.log(`LevelSystem.js: Updated EntityListComponent for ${levelEntity.id} in generateSurfaceLevel`);
        
        
         const stairUpEntity = this.generateStairEntity(levelData, entityList, tier, roomEntityId, 'up', stairPos.upX, stairPos.upY, true);
@@ -1282,12 +1282,12 @@ export class LevelSystem extends System {
         const shopCounterPos = { x: 7, y: 8 };
         const shopCounterEntity = this.generateShopCounter(entityList, tier, mapComp, shopCounterPos.x, shopCounterPos.y);
 
-        console.log(`LevelSystem.js: generateSurfaceLevel - Completed for tier 0`);
+        //console.log(`LevelSystem.js: generateSurfaceLevel - Completed for tier 0`);
         return levelData;
     }
 
     padMap(map, walls = [], floors = [], tier = 0) {
-        console.log(`LevelSystem.js: padMap - Starting for tier ${tier}`);
+        //console.log(`LevelSystem.js: padMap - Starting for tier ${tier}`);
         const padded = Array.from({ length: this.state.HEIGHT }, () => Array(this.state.WIDTH).fill('#'));
 
         for (let y = 0; y < map.length; y++) {
@@ -1307,12 +1307,12 @@ export class LevelSystem extends System {
             }
         }
 
-        console.log(`LevelSystem.js: padMap - Completed for tier ${tier}`);
+        //console.log(`LevelSystem.js: padMap - Completed for tier ${tier}`);
         return padded;
     }
 
     adjustPlayerPosition(levelEntity, stair) {
-        console.log(`LevelSystem.js: adjustPlayerPosition - Starting for tier ${levelEntity.getComponent('Tier').value}`);
+        //console.log(`LevelSystem.js: adjustPlayerPosition - Starting for tier ${levelEntity.getComponent('Tier').value}`);
         const mapComponent = levelEntity.getComponent('Map');
         if (!mapComponent || !mapComponent.map) {
             console.error(`LevelSystem: No valid MapComponent or map for entity ${levelEntity.id}`);
@@ -1320,7 +1320,7 @@ export class LevelSystem extends System {
         }
         const map = mapComponent.map;
         const tier = levelEntity.getComponent('Tier').value;
-        console.log(`LevelSystem.js: adjustPlayerPosition - Adjusting player position for tier ${tier}, stair: (${stair?.x}, ${stair?.y})`);
+        //console.log(`LevelSystem.js: adjustPlayerPosition - Adjusting player position for tier ${tier}, stair: (${stair?.x}, ${stair?.y})`);
 
         // Log the map state around the stair
         if (stair) {
@@ -1328,13 +1328,13 @@ export class LevelSystem extends System {
             const maxY = Math.min(map.length - 1, stair.y + 1);
             const minX = Math.max(0, stair.x - 1);
             const maxX = Math.min(map[0].length - 1, stair.x + 1);
-            console.log(`LevelSystem.js: Map state around stair (${stair.x}, ${stair.y}):`);
+            //console.log(`LevelSystem.js: Map state around stair (${stair.x}, ${stair.y}):`);
             for (let y = minY; y <= maxY; y++) {
                 let row = '';
                 for (let x = minX; x <= maxX; x++) {
                     row += map[y][x] + ' ';
                 }
-                console.log(`Row ${y}: ${row}`);
+                //console.log(`Row ${y}: ${row}`);
             }
         }
 
@@ -1427,7 +1427,7 @@ export class LevelSystem extends System {
 
         // If only one component, all rooms are connected
         if (components.length <= 1) {
-            console.log(`LevelSystem: All rooms are already connected for tier ${tier}`);
+            //console.log(`LevelSystem: All rooms are already connected for tier ${tier}`);
             return;
         }
 
@@ -1468,7 +1468,7 @@ export class LevelSystem extends System {
                 break;
             }
         }
-        console.log(`LevelSystem: All rooms are now connected for tier ${tier}`);
+        //console.log(`LevelSystem: All rooms are now connected for tier ${tier}`);
         this.ensureRoomConnectionsPassTwo(levelEntity);
     }
 
@@ -1480,12 +1480,12 @@ export class LevelSystem extends System {
         const tier = levelEntity.getComponent('Tier').value;
 
         const rooms = Array.isArray(entityList.rooms) ? entityList.rooms : [];
-        console.log(`LevelSystem: Ensuring room connections for tier ${tier}, rooms: ${JSON.stringify(rooms)}`);
+        //console.log(`LevelSystem: Ensuring room connections for tier ${tier}, rooms: ${JSON.stringify(rooms)}`);
 
-        console.log(`LevelSystem ensureRoomConnections: Room types and connections before ensuring connections:`);
+        //console.log(`LevelSystem ensureRoomConnections: Room types and connections before ensuring connections:`);
         for (const roomId of rooms) {
             const room = this.entityManager.getEntity(roomId).getComponent('Room');
-            console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length}`);
+            //console.log(`Room ${roomId} at (${room.left}, ${room.top}), type: ${room.roomType}, connections: ${room.connections.length}`);
         }
 
         for (const roomId of rooms) {
@@ -1515,14 +1515,14 @@ export class LevelSystem extends System {
     }
 
     async checkLevelAfterTransitions({ tier, levelEntity = null }) {
-        console.log(`LevelSystem.js: checkLevelAfterTransitions - Starting for tier ${tier}`);
+        //console.log(`LevelSystem.js: checkLevelAfterTransitions - Starting for tier ${tier}`);
         const entity = levelEntity || this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
         if (!entity) {
             console.warn(`LevelSystem.js: No level entity found for tier ${tier}`);
             return;
         }
         this.ensureRoomConnections(entity);
-        console.log(`LevelSystem.js: Checking level ${entity.id}, components: ${Array.from(entity.components.keys())}`);
+        //console.log(`LevelSystem.js: Checking level ${entity.id}, components: ${Array.from(entity.components.keys())}`);
 
         const mapComp = entity.getComponent('Map');
         if (!mapComp) {
@@ -1541,7 +1541,7 @@ export class LevelSystem extends System {
             entityList.npcs = [];
         }
 
-        console.log(`LevelSystem.js: EntityListComponent.npcs before spawning:`, entityList.npcs);
+        //console.log(`LevelSystem.js: EntityListComponent.npcs before spawning:`, entityList.npcs);
 
         const hasPortal = entityList.portals.length > 0;
         const minPortalPlacementTier = 3;
@@ -1605,7 +1605,7 @@ export class LevelSystem extends System {
                             const onNPCsSpawned = ({ spawnedTier }) => {
                                 if (spawnedTier === tier) {
                                     this.eventBus.off('NPCsSpawned', onNPCsSpawned);
-                                    console.log(`LevelSystem.js: Spawned shopkeeper NPC on tier ${tier} at tile (${tileX}, ${tileY})`);
+                                    //console.log(`LevelSystem.js: Spawned shopkeeper NPC on tier ${tier} at tile (${tileX}, ${tileY})`);
                                     resolve();
                                 }
                             };
@@ -1622,14 +1622,14 @@ export class LevelSystem extends System {
                     console.warn(`LevelSystem.js: No valid rooms to place shopkeeper NPC on tier ${tier}`);
                 }
             } else {
-                console.log(`LevelSystem.js: Shopkeeper NPC already exists on tier ${tier}`);
+                //console.log(`LevelSystem.js: Shopkeeper NPC already exists on tier ${tier}`);
             }
         }
 
         // Generate shop inventories only after NPC spawning is confirmed
-        console.log(`LevelSystem.js: Emitting GenerateShopInventories for tier ${tier} after NPC spawning`);
+        //console.log(`LevelSystem.js: Emitting GenerateShopInventories for tier ${tier} after NPC spawning`);
         this.eventBus.emit('GenerateShopInventories', { tier });
-        console.log(`LevelSystem.js: checkLevelAfterTransitions - Completed for tier ${tier}`);
+        //console.log(`LevelSystem.js: checkLevelAfterTransitions - Completed for tier ${tier}`);
 
         this.utilities.pushPlayerActions('reachTier', { tier });
     }

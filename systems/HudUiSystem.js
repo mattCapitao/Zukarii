@@ -69,7 +69,7 @@ export class HudUiSystem extends System {
 
         // Set up HUD log tab event listeners
         this.setupHudLogTabs();
-        console.log('HudUiSystem: Initialized and event listeners set up');
+        //console.log('HudUiSystem: Initialized and event listeners set up');
     }
 
     update() {
@@ -97,7 +97,7 @@ export class HudUiSystem extends System {
         const logHudTabs = document.getElementById('hud-log-tabs');
         if (logHudTabs) {
             logHudTabs.addEventListener('click', (event) => {
-                console.log('HudUiSystem: logHudTabs click event fired', event.target.id);
+                //console.log('HudUiSystem: logHudTabs click event fired', event.target.id);
                 const target = event.target.closest('.hud-log-tab');
                 if (!target) return;
 
@@ -158,7 +158,7 @@ export class HudUiSystem extends System {
         const stats = player.getComponent('Stats');
         const playerState = player.getComponent('PlayerState');
         const resource = player.getComponent('Resource');
-        console.log("Resource - on load", resource);
+        //console.log("Resource - on load", resource);
 
         this.statusUpdates.hp = { value: health.hp, max: health.maxHp };
         this.statusUpdates.mana = { value: mana.mana, max: mana.maxMana };
@@ -169,7 +169,7 @@ export class HudUiSystem extends System {
         this.statusUpdates.ashenShardCount = resource.craftResources.ashenShard || 0;
         this.statusUpdates.goldCount = resource.gold !== undefined ? resource.gold : 0;
 
-        console.log("Resource - after statusUpdates", resource);
+        //console.log("Resource - after statusUpdates", resource);
 
         if (this.playerInfo) {
             const playerNameSpan = this.playerInfo.querySelector('#playerName');

@@ -42,31 +42,7 @@ export class MonsterCollisionSystem extends System {
                 if (target.hasComponent('MonsterData') && target.getComponent('Health').hp > 0 && !target.hasComponent('Dead')) {
                     const targetMonsterData = target.getComponent('MonsterData');
                     if (monsterData.isAggro) targetMonsterData.isAggro = true;
-                    console.log(`MonsterCollisionSystem: Monster ${monster.id} collided with monster ${target.id}`,monster, target);
-                }
-
-                if (target.hasComponent('Projectile')) {
-                    const projData = target.getComponent('Projectile');
-                    const source = this.entityManager.getEntity(projData.sourceEntityId);
-                    const isOverlapping = this.isOverlapping(target, monster);
-                    if (source.id === 'player') {
-                        console.log(`MonsterCollisionSystem: Monster ${monster.id} collided with player projectile ${target.id}`);
-                        const projectile = target;
-                        if (!projectile.hasComponent('Collision')) {
-                            console.log(`MonsterCollisionSystem: Attempting to add Collision component to projectile ${projectile.id}`, projectile);
-                            projectile.addComponent(new CollisionComponent());
-                            
-                        }
-                       const position = projectile.getComponent('Position');
-                        projectile.getComponent('Collision').collisions.push({
-                            moverId: projectile.id,
-                            targetId: monster.id,
-                            collisionType:  "current",
-                            normalX: position.x,
-                            normalY: position.y,
-                            distance: 0,
-                        });
-                    }
+                    //console.log(`MonsterCollisionSystem: Monster ${monster.id} collided with monster ${target.id}`,monster, target);
                 }
                 /*
                 if (target.hasComponent('Fountain')) {

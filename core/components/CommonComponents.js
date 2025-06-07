@@ -35,6 +35,26 @@ export class MovementIntentComponent {
     }
 }
 
+export class WanderIntentComponent {
+    constructor() {
+        this.type = 'WanderIntent';
+        this.targetX = null; // Target X coordinate for wandering
+        this.targetY = null; // Target Y coordinate for wandering
+        this.failedAttempts = 0; // Number of failed attempts to wander
+        this.wanderTime = 0; // Time spent wandering
+        this.wanderDuration = 0; // Duration of the wandering state
+        this.wanderCooldown = 0; // Cooldown before next wander
+        this.wanderCooldownDuration = 0; // Duration of the cooldown
+        this.wanderTarget = null; // Target entity to wander towards, if any
+        this.wanderTargetId = null; // ID of the target entity to wander towards
+        this.wanderTargetType = null; // Type of the target entity to wander towards
+        this.wanderTargetPosition = { x: 0, y: 0 };// Position of the target entity to wander towards
+        this.wanderTargetPositionOffsetX = 0; // X offset from the target position
+        this.wanderTargetPositionOffsetY = 0; // Y offset from the target position
+        this.wanderTargetPositionOffset = { x: 0, y: 0 }; // Combined offset for target position
+    }
+}
+
 export class CollisionComponent {
     constructor() {
         this.type = 'Collision';

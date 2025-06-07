@@ -27,6 +27,39 @@ export class CollisionSystem extends System {
             const deltaX = intent.targetX - moverPos.x;
             const deltaY = intent.targetY - moverPos.y;
 
+
+          
+                // Static overlap check for all entities except self and projectile source
+                const sourceEntityId = mover.getComponent('Projectile')?.sourceEntityId;
+                for (const target of entities) {
+                    if (!mover.hasComponent('Projectile') && !target.hasComponent('Projectile')) continue; // Only check for projectiles)
+                    if (mover === target) continue;
+                    if (!target.hasComponent('Health')) continue;
+                    if (target.id === sourceEntityId) continue; // Skip the source entity
+                    const targetPos = target.getComponent('Position');
+                    const targetHitbox = target.getComponent('Hitbox');
+                    if (
+                        moverPos.x + (moverHitbox.offsetX || 0) < targetPos.x + (targetHitbox.offsetX || 0) + targetHitbox.width &&
+                        moverPos.x + (moverHitbox.offsetX || 0) + moverHitbox.width > targetPos.x + (targetHitbox.offsetX || 0) &&
+                        moverPos.y + (moverHitbox.offsetY || 0) < targetPos.y + (targetHitbox.offsetY || 0) + targetHitbox.height &&
+                        moverPos.y + (moverHitbox.offsetY || 0) + moverHitbox.height > targetPos.y + (targetHitbox.offsetY || 0)
+                    ) {
+                        if (!mover.hasComponent('Collision')) {
+                            mover.addComponent(new CollisionComponent());
+                        }
+                        mover.getComponent('Collision').collisions.push({
+                            moverId: mover.id,
+                            targetId: target.id,
+                            collisionType: "current",
+                            normalX: 0,
+                            normalY: 0,
+                            distance: 0,
+                        });
+                    }
+                }
+               
+
+
             const range = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
             const nearbyEntities = entities.filter(target => this.isWithinProjectedPath(
@@ -83,6 +116,23 @@ export class CollisionSystem extends System {
                         normalY: collision.normalY,
                         distance: collision.entryTime * range,
                     });
+
+                    
+                    if (target.hasComponent('Projectile') && mover.hasComponent('Health')) {
+
+                        if (!target.hasComponent('Collision')) {
+                            target.addComponent(new CollisionComponent());
+                        }
+
+                        target.getComponent('Collision').collisions.push({
+                            moverId: mover.id,
+                            targetId: target.id,
+                            collisionType: collision.entryTime === 0 ? "current" : "dynamic",
+                            normalX: -collision.normalX, // Invert normal for target
+                            normalY: -collision.normalY,
+                            distance: collision.entryTime * range,
+                        });
+                    }
 
                 }
             }
