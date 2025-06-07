@@ -3,8 +3,8 @@ import { System } from '../core/Systems.js';
 import { ResourceComponent } from '../core/Components.js';
 
 export class EffectsSystem extends System {
-    constructor(entityManager, eventBus) {
-        super(entityManager, eventBus);
+    constructor(entityManager, eventBus, utilities) {
+        super(entityManager, eventBus, utilities);
         this.requiredComponents = [];
         this.healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
     }
@@ -43,7 +43,8 @@ export class EffectsSystem extends System {
         console.log(`EffectsSystem: Applying effect ${effect} to ${entityId} with params:`, params);
         const handlers = {
             teleportToTier: this.teleportToTier.bind(this),
-            reflectDamage: this.reflectDamage.bind(this)
+            reflectDamage: this.reflectDamage.bind(this),
+            forgeSpectralWyrmKey: this.forgeSpectralWyrmKey.bind(this),
         };
         const handler = handlers[effect];
         if (handler) {
@@ -238,5 +239,83 @@ export class EffectsSystem extends System {
         //this.entityManager.setActiveTier(tier);
         this.eventBus.emit('LogMessage', { message: `The Stone transports you to Tier ${tier}!` });
         this.eventBus.emit('ItemUsed', { entityId, itemId: context.itemId });
+    }
+
+    forgeSpectralWyrmKey(entityId, params, context) {
+        const player = this.entityManager.getEntity('player');
+        const hasForgedKey = player.getComponent('Inventory')?.items?.some(item => item.itemId === 'spectralWyrmKey');
+        if (hasForgedKey) {
+            this.eventBus.emit('LogMessage', { message: `You have already forged the Spectral Wyrm Key!` });
+            return;
+        }
+
+        console.log(`EffectsSystem: Attempting to forge Spectral Wyrm Key from ${entityId}`);
+        
+        const playerResource = player.getComponent('Resource');
+        console.log(`EffectsSystem: Player resource component:`, playerResource);
+        const requiredResources = params.craftResources 
+        console.log(`EffectsSystem: Required resources for forging Spectral Wyrm Key: ${requiredResources}`);
+        console.log(`EffectsSystem: Player resource component:`, playerResource.craftResources);
+        const craftResourceAmount = playerResource.craftResources[requiredResources] || 0;
+        const amount = params.amount;
+        console.log(`EffectsSystem: Player has ${craftResourceAmount} of ${amount} required ${requiredResources}`);
+
+        let hasResources = false;
+        if (craftResourceAmount < amount) {
+            this.utilities.logMessage({ channel: 'system', message: `You need at least ${amount} ${requiredResources} to forge the Spectral Wyrm Key!` });
+            return;
+        } else { hasResources = true; console.log(`EffectsSystem: Player has ${craftResourceAmount} of ${amount} required ${requiredResources}`)}
+
+        const proximityEntity = params.proximity; 
+        const tier = params.tier; 
+        //need to check distance from player to specific entity (stairsDown) in the specified tier
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState')
+        let inProximity = false; // Initialize proximity check
+        if (gameState.tier !== tier) {
+            this.utilities.logMessage({ channel: 'system', message: `You must be near the stairs down in Tier ${tier} to forge the Spectral Wyrm Key!` });
+            return;
+        } else {
+             console.log(`EffectsSystem: Player is in on tier ${tier}`)  
+        }
+        
+        const stairsDownEntity = this.utilities.findStairOnTier(tier, 'down');
+        console.log(`EffectsSystem: stairsDownEntity:`, stairsDownEntity);
+        const stairsDownPosition = stairsDownEntity.getComponent('Position');
+        const playerPosition = player.getComponent('Position');
+        const distance = Math.sqrt(Math.pow(stairsDownPosition.x - playerPosition.x, 2) + Math.pow(stairsDownPosition.y - playerPosition.y, 2));
+        const proximityDistance = 320; // Define the proximity distance threshold 5 tiles * 32px * 2 scaling per tile
+        inProximity = distance <= proximityDistance; // Check if player is within proximity distance
+        console.log(`EffectsSystem: Player is ${distance} units away from stairs down in Tier ${tier}. Proximity check: ${distance} <= ${proximityDistance}`);
+
+        if (hasResources && inProximity) {
+            // need to unlock stairs
+            const stairsDownComponent = stairsDownEntity.getComponent('Stair');
+            if (!stairsDownComponent) {
+                console.warn(`EffectsSystem: Stairs down entity ${stairsDownEntity.id} has no Stair component`);
+                return;
+            }
+            stairsDownComponent.active = true; // Unlock the stairs down
+            // Remove 20 Ashen Shards and add the key item to inventory
+            playerResource.craftResources[requiredResources] -= amount;
+            const playerInventory = player.getComponent('Inventory');
+            // Need to get item from journeyItems.json
+            const spectralWyrmKey = {
+                itemId: null,
+                journeyItemId: "spectralWyrmKey",
+                name: "Spectral Wyrm Key",
+                type: "journey",
+                itemTier: "magic",
+                goldValue: 0,
+                isJourneyItem: true,
+                description: "Posessing this Key allows passage to Ashangal.",
+                icon: "spectral_wyrm_key.png",
+                isSellable: false
+            
+            };
+            
+           // Need to add item to inventory
+            this.eventBus.emit('HandleItemReward', { reward: spectralWyrmKey, entityId: player.id }); 
+            this.utilities.logMessage( { channel: "journey", message: `You have forged the Spectral Wyrm Key!` });
+        }  
     }
 }

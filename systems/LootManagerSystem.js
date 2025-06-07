@@ -142,6 +142,14 @@ export class LootManagerSystem extends System {
                 this.uniqueItems = uniqueItems;
             }
         });
+
+        // Fetch journey items
+        this.eventBus.emit('GetJourneyItems', {
+            callback: (journeyItems) => {
+                console.log('LootManagerSystem: Received journey items from DataSystem:', journeyItems);
+                this.journeyItems = journeyItems;
+            }
+        });
     }
 
     async handleLootDrop({ lootSource }) {
@@ -420,6 +428,7 @@ export class LootManagerSystem extends System {
     async getUniqueItem({ type = "randomUnique", data = {} }) {
         console.log(`LootManagerSystem: getUniqueItem() called with type: ${type}, data:`, data);
         let uniqueItems = await this.uniqueItemsPromise;
+
         if (!uniqueItems) {
             console.warn('LootManagerSystem: uniqueItemsPromise resolved to null, fetching synchronously...');
             uniqueItems = await new Promise(resolve => {
@@ -430,14 +439,34 @@ export class LootManagerSystem extends System {
                     }
                 });
             });
+        } 
+        let journeyItems = this.journeyItems;
+        if (!journeyItems) {
+            journeyItems = await new Promise(resolve => {
+                this.eventBus.emit('GetJourneyItems', {
+                    callback: (items) => resolve(items)
+                });
+            });
         }
+
         if (!uniqueItems || uniqueItems.length === 0) {
             console.error('LootManagerSystem: No unique items available after fetch');
             return null;
         }
+        if (!journeyItems || journeyItems.length === 0) {
+            console.warn('LootManagerSystem: No journey items available');
+        }
+
         console.log('LootManagerSystem: Available unique items:', uniqueItems);
         let uniqueItem;
         if (type === "customUnique") {
+            // Check journey items first // Move this to seperate block later... no need to check journey items if type is randomUnique or even customUnique
+            uniqueItem = journeyItems.find(i => i.journeyItemId === data.journeyItemId && (!data.type || i.type === data.type));
+            if (uniqueItem) {
+                console.log(`LootManagerSystem: Fetched journey item '${data.journeyItemId}':`, uniqueItem);
+                return { ...uniqueItem, uniqueId: this.utilities.generateUniqueId() };
+            }
+            // Fallback to unique items
             // Fetch specific unique by name
             uniqueItem = uniqueItems.find(i => i.name === data.name);
             if (!uniqueItem) {

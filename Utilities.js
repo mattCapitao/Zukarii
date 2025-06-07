@@ -126,6 +126,36 @@ export class Utilities {
         return portalEntity;
     }
 
+    findStairOnTier(tier, direction) {
+
+        const levelEntity = this.entityManager.getEntitiesWith(['Tier'])
+            .find(e => e.getComponent('Tier').value === tier);
+        if (!levelEntity) {
+            console.warn(`No level entity found for tier ${tier}`);
+            return null;
+        }
+
+        const entityList = levelEntity.getComponent('EntityList');
+        if (!entityList || !Array.isArray(entityList.stairs) || entityList.stairs.length === 0) {
+            console.warn(`No stairs found in tier ${tier} EntityList`);
+            return null;
+        }
+
+        for (const stairId of entityList.stairs) {
+            const stairEntity = this.entityManager.getEntity(stairId);
+            if (!stairEntity) continue;
+            // Try to get the direction from a component, e.g., 'Stair' or 'StairData'
+            const stairComp = stairEntity.getComponent('Stair') || stairEntity.getComponent('StairData');
+            if (stairComp && stairComp.direction === direction) {
+                return stairEntity; // or return stairId if you prefer
+            }
+        }
+
+        console.warn(`No stairs with direction "${direction}" found in tier ${tier}`);
+        return null;
+    }
+
+
     logMessage(logData) {
         if (!logData || typeof logData !== 'object' || !logData.message) {
             console.error("Invalid log data provided. Expected an object.");

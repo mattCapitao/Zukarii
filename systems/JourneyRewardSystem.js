@@ -14,6 +14,9 @@ export class JourneyRewardSystem extends System {
 
         await this.requestJourneyItmes();
         console.log('JourneyRewardSystem: requestJourneyItems completed');
+        this.eventBus.on('HandleItemReward', (data) => {
+            this.handleItemReward(data.reward);
+        });
     }
 
     async requestJourneyItmes() {
@@ -103,6 +106,15 @@ export class JourneyRewardSystem extends System {
                 visuals.avatar = 'img/anim/Portal-Animation-Cleansed.png';
 
             }
+            if (reward.type === 'unlock' && reward.mechanic === 'setPortalDestination' && !reward.rewarded) {
+                const portalEntity = this.utilities.findPortalOnTier(reward.fromPortal);
+                const portalComp = portalEntity.getComponent('Portal');
+                const visuals = portalEntity.getComponent('Visuals');
+                portalComp.destinationTier = reward.toPortal;
+                portalComp.active = true;
+                portalComp.cleansed = true;
+                visuals.avatar = 'img/anim/Portal-Animation-Cleansed.png';
+            }
             if (reward.type === 'unlock' && reward.mechanic === 'portalBinding') {
                 // this.eventBus.emit('AddComponent', { entityId: 'player', component: new PortalBindingsComponent([0]) });
                 // this.eventBus.emit('LogMessage', { message: `Unlocked Portal Binding` });
@@ -125,12 +137,12 @@ export class JourneyRewardSystem extends System {
             console.warn('JourneyRewardSystem: Reward has no journeyItemId:', reward);
             return;
         }
-
+        console.log(`JourneyRewardSystem: Handling item reward for ${rewardId}`);
         // Defensive: filter out any items missing journeyItemId (or with typo)
         const item = this.journeyItems.find(item =>
             String(item.journeyItemId) === String(rewardId)
         );
-
+        console.log(this.journeyItems);
         if (!item) {
             console.warn(`JourneyRewardSystem: Item with journeyItemId ${rewardId} not found in journeyItems`);
             return;

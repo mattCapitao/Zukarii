@@ -494,10 +494,10 @@
               "quantity": 1
             },
             {
-              "type": "item",
-              "journeyItemId": "shardOfEchoes",
-              "quantity": 1,
-              "isJourneyItem": true
+              "type": "unlock",
+              "mechanic": "setPortalDestination",
+              "fromPortal": 0,
+              "toPortal": 10
             }
           ],
           "completionText": "You have claimed the Rings of the Magi.",

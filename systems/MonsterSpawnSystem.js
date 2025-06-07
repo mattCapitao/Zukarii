@@ -278,6 +278,27 @@ export class MonsterSpawnSystem extends System {
         const movemntSpeed = template.movementSpeed || 70; // Default movement speed if not specified
         this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(movemntSpeed));
 
+
+
+        if (tier >= 8 && tier <= 10 && template.isElite) {
+            const dropChance = 0.6; // 60% base chance
+            const dropModifier = (tier - 8) * 0.2; // +20% per tier above 8
+            const dropRoll = Math.random();
+            const player = this.entityManager.getEntity('player');
+            const uniqueItemsCollected = player.getComponent('PlayerAchievements').stats.uniqueItemDrops;
+            const hasBothRings = uniqueItemsCollected.some(item => item.journeyItemId === 'bandOfZu') &&
+                uniqueItemsCollected.some(item => item.journeyItemId === 'bandOfKarn');
+            const hasWyrmTooth = uniqueItemsCollected.some(item => item.journeyItemId === 'wyrmTooth');
+
+            if (hasBothRings && !hasWyrmTooth && dropRoll < dropChance + dropModifier) {
+                template.uniqueItemsDropped.push({
+                    type: 'customUnique',
+                    dropChance: 1,
+                    data: { name: 'Wyrm Tooth', journeyItemId: 'wyrmTooth' }
+                });
+            }
+        } 
+
         if (tier === 3 && template.isBoss) {
             template.uniqueItemsDropped.push({
                 type: 'rog',

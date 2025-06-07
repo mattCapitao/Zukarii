@@ -38,5 +38,39 @@
     "description": "A fragment pulsing with ancient whispers, guiding you to the Echoes.",
     "icon": "shard_of_echoes.png",
     "isSellable": false
+  },
+  {
+    "itemId": null,
+    "journeyItemId": "wyrmTooth",
+    "name": "Wyrm Tooth",
+    "type": "consumable",
+    "itemTier": "rare",
+    "goldValue": 0,
+    "collectItem": true,
+    "isJourneyItem": true,
+    "useItem": true,
+    "useEffect": "forgeSpectralWyrmKey",
+    "params": {
+      "craftResources": "ashenShard",
+      "amount": 20,
+      "proximity": "stairsDown",
+      "tier": 10
+    },
+    "description": "This tooth was found wrapped in a velum parchment with the inscription: \" Offer this tooth to The Guardian among the ashen, and the key to Ashangal shall be yours\"",
+    "icon": "wyrm_tooth.png",
+    "isSellable": false
+  },
+  {
+    "itemId": null,
+    "journeyItemId": "spectralWyrmKey",
+    "name": "Spectral Wyrm Key",
+    "type": "journey",
+    "itemTier": "magic",
+    "goldValue": 0,
+    "collectItem": true,
+    "isJourneyItem": true,
+    "description": "Posessing this Key allows passage to Ashangal.",
+    "icon": "spectral_wyrm_key.png",
+    "isSellable": false
   }
 ]

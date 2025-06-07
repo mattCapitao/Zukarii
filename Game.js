@@ -295,7 +295,7 @@ export class Game {
         this.systems.playerInput = new PlayerInputSystem(this.entityManager, this.state.eventBus);
         this.systems.playerController = new PlayerControllerSystem(this.entityManager, this.state.eventBus);
         this.systems.affix = new AffixSystem(this.entityManager, this.state.eventBus);
-        this.systems.effects = new EffectsSystem(this.entityManager, this.state.eventBus);
+        this.systems.effects = new EffectsSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.health = new HealthSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.mana = new ManaSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.spatialBuckets = new SpatialBucketsSystem(this.entityManager, this.state.eventBus, this.state);

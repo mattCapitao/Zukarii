@@ -47,6 +47,15 @@ export class InventorySystem extends System {
             inventory.items.push({ ...item });
             this.eventBus.emit('LogMessage', { message: `Added ${item.name} to inventory` });
         }
+
+        if (item.journeyItemId) {
+            // Use collectItem if the item is marked as such, otherwise findItem
+            this.utilities.pushPlayerActions(item.collectItem ? 'collectItem' : 'findItem', {
+                journeyItemId: item.journeyItemId,
+                itemId: item.id || item.uniqueId
+            });
+        }
+
     }
 
     equipItem({ entityId, item, slot }) {

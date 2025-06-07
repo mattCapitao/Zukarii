@@ -474,10 +474,10 @@
         "quantity": 1
       },
       {
-        "type": "item",
-        "journeyItemId": "shardOfEchoes",
-        "quantity": 1,
-        "isJourneyItem": true
+        "type": "unlock",
+        "mechanic": "setPortalDestination",
+        "fromPortal": 0,
+        "toPortal": 10
       }
     ],
     "completionText": "You have claimed the Rings of the Magi.",
@@ -572,7 +572,7 @@
     "offeredBy": "sehnrhyx_syliri",
     "completed": false,
     "title": "Enter Ashangal",
-    "description": "Seek out echos that may help you discover the entrance to the endless depths of Ashangal.",
+    "description": "Discover the entrance to the endless depths of Ashangal.",
     "completionCondition": null,
     "rewards": [
       {
@@ -583,9 +583,15 @@
         "type": "item",
         "journeyItemId": "stoneOfReturn",
         "quantity": 1
+      },
+      {
+        "type": "item",
+        "journeyItemId": "shardOfEchoes",
+        "quantity": 1,
+        "isJourneyItem": true
       }
     ],
-    "completionText": "You have found the entrance to Ashangal.",
+    "completionText": "It seems an Echo of Ashangal has led you to the entrance! The Shard of echos is attuned to Ashangal and will help you in further discoveries in the depths.",
     "logCompletion": true,
     "tasks": [
       {
@@ -604,8 +610,9 @@
             "xp": 125,
             "gold": 125
           }
+          
         ],
-        "completionText": "You are ready to enter Ashangal.",
+        "completionText": "I used the last of the Ashen Shards to realign our portal to take you to Ashangals doorstep!.",
         "logCompletion": true
       },
       {
@@ -613,12 +620,12 @@
         "parentId": "whisper_parent_6",
         "nextPathId": "",
         "completed": false,
-        "title": "Clear the path to the the depths",
+        "title": "Passage to the the depths",
         "description": "Locate the secret entrance on Tier 10.",
         "completionCondition": {
-            "type": "attemptStairs",
-            "fromTier": 10,
-            "toTier": 11
+          "type": "attemptStairs",
+          "fromTier": 10,
+          "toTier": 11
         },
         "rewards": [
           {
@@ -626,11 +633,57 @@
             "gold": 125
           }
         ],
-        "completionText": "You have discovered the pathc.",
+        "completionText": "You have discovered the path.",
         "logCompletion": true
       },
       {
         "id": "whisper_child_6_3",
+        "parentId": "whisper_parent_6",
+        "completed": false,
+        "title": " ",
+        "description": "do something to expose the illusion.",
+        "completionCondition": {
+          "type": "collectItem",
+          "journeyItemId": "spectralWyrmTooth",
+          "tier": 10
+        },
+        "rewards": [
+          {
+            "xp": 125,
+            "gold": 125
+
+          },
+          {
+            "type": "stairUnlock",
+            "stairFrom": 10,
+            "stairTo": 11
+          }
+        ],
+        "completionText": "You have dispelled the guardians Illusion. Enter Ashangal!",
+        "logCompletion": true
+      },
+      {
+        "id": "whisper_child_6_4",
+        "parentId": "whisper_parent_6",
+        "completed": false,
+        "title": "Deeper Descent",
+        "description": "Use the secret passage to enter Ashangal.",
+        "activeText": "Descend to from Zurath into Ashangal.",
+        "completionText": "You have entered Ashangal.",
+        "logCompletion": true,
+        "completionCondition": {
+          "type": "reachTier",
+          "tier": 11
+        },
+        "rewards": [
+          {
+            "xp": 50,
+            "gold": 50
+          }
+        ]
+      },
+      {
+        "id": "whisper_child_6_4",
         "parentId": "whisper_parent_6",
         "nextPathId": "",
         "completed": false,
@@ -688,6 +741,12 @@
           {
             "xp": 150,
             "gold": 100
+          },
+          {
+            "type": "unlock",
+            "mechanic": "setPortalDestination",
+            "fromPortal": 0,
+            "toPortal": 11
           }
         ],
         "completionText": "You have entered Ashangal.",
