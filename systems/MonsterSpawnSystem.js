@@ -281,16 +281,17 @@ export class MonsterSpawnSystem extends System {
 
 
         if (tier >= 8 && tier <= 10 && template.isElite) {
-            const dropChance = 0.6; // 60% base chance
-            const dropModifier = (tier - 8) * 0.2; // +20% per tier above 8
+            const dropChance = 0.4; // 60% base chance
+            const dropModifier = (tier - 8) * 0.3; // +20% per tier above 8
             const dropRoll = Math.random();
             const player = this.entityManager.getEntity('player');
             const uniqueItemsCollected = player.getComponent('PlayerAchievements').stats.uniqueItemDrops;
-            const hasBothRings = uniqueItemsCollected.some(item => item.journeyItemId === 'bandOfZu') &&
-                uniqueItemsCollected.some(item => item.journeyItemId === 'bandOfKarn');
+           /* const hasBothRings = uniqueItemsCollected.some(item => item.journeyItemId === 'bandOfZu') &&
+                uniqueItemsCollected.some(item => item.journeyItemId === 'bandOfKarn');*/
             const hasWyrmTooth = uniqueItemsCollected.some(item => item.journeyItemId === 'wyrmTooth');
 
-            if (hasBothRings && !hasWyrmTooth && dropRoll < dropChance + dropModifier) {
+            // if (hasBothRings && !hasWyrmTooth && dropRoll < dropChance + dropModifier) {
+            if (!hasWyrmTooth && dropRoll < dropChance + dropModifier) {
                 template.uniqueItemsDropped.push({
                     type: 'customUnique',
                     dropChance: 1,
@@ -325,10 +326,10 @@ export class MonsterSpawnSystem extends System {
         }
         if (tier > 7 && tier < 11 && template.isElite) {
 
-            const drop = 0.60; // Base drop chance for the item
+            const drop = 0.40; // Base drop chance for the item
             let dropModifier = 0; // Default drop modifier
             if (tier > 8) {
-                 dropModifier = (tier - 8) * 0.2; // Increase drop chance by 20% per tier above 8
+                 dropModifier = (tier - 8) * 0.3; // Increase drop chance by 20% per tier above 8
             }
             const dropRoll = Math.random();
 

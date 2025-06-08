@@ -1,0 +1,908 @@
+﻿{
+  "timestamp": "6/8/2025, 9:09:29 AM",
+  "characterName": "journey bunny",
+  "tier": 11,
+  "isDead": false,
+  "player": {
+    "Position": {
+      "type": "Position",
+      "x": 2176.8779952847217,
+      "y": 1258.9593317615743
+    },
+    "Health": {
+      "type": "Health",
+      "hp": 337,
+      "maxHp": 337,
+      "healthRegen": 0,
+      "updated": true
+    },
+    "Mana": {
+      "type": "Mana",
+      "mana": 88,
+      "maxMana": 88,
+      "manaRegen": 3.8000000000000003,
+      "updated": false
+    },
+    "Stats": {
+      "type": "Stats",
+      "unallocated": 0,
+      "intellect": 22,
+      "prowess": 12,
+      "agility": 25,
+      "maxHp": 337,
+      "maxMana": 88,
+      "armor": 13,
+      "defense": 10,
+      "block": 14,
+      "dodge": 0,
+      "range": 5,
+      "resistMagic": 0,
+      "baseRange": 0,
+      "damageBonus": 1,
+      "meleeBonus": 3,
+      "rangedBonus": 0,
+      "luck": 0,
+      "maxLuck": 0,
+      "movementSpeed": 145,
+      "isLocked": true,
+      "_internal": {
+        "base": {
+          "intellect": 11,
+          "prowess": 11,
+          "agility": 11,
+          "maxHp": 30,
+          "maxMana": 10,
+          "armor": 0,
+          "defense": 0,
+          "block": 0,
+          "dodge": 0,
+          "range": 0,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 0,
+          "meleeBonus": 0,
+          "rangedBonus": 0,
+          "luck": 0,
+          "maxLuck": 0,
+          "movementSpeed": 100
+        },
+        "gear": {
+          "intellect": 2,
+          "prowess": 1,
+          "agility": 14,
+          "maxHp": 116,
+          "maxMana": 0,
+          "armor": 13,
+          "defense": 10,
+          "block": 14,
+          "dodge": 0,
+          "range": 5,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 1,
+          "meleeBonus": 3,
+          "rangedBonus": 0,
+          "luck": 0,
+          "maxLuck": 0,
+          "movementSpeed": 45
+        },
+        "temp": {
+          "intellect": 0,
+          "prowess": 0,
+          "agility": 0,
+          "luck": 0,
+          "maxHp": 0,
+          "maxMana": 0,
+          "movementSpeed": 0,
+          "armor": 0,
+          "defense": 0,
+          "block": 0,
+          "dodge": 0,
+          "range": 0,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 0,
+          "meleeBonus": 0,
+          "rangedBonus": 0,
+          "maxLuck": 0
+        },
+        "incremented": {
+          "intellect": 9,
+          "prowess": 0,
+          "agility": 0
+        }
+      }
+    },
+    "Inventory": {
+      "type": "Inventory",
+      "equipped": {
+        "mainhand": {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 3,
+          "baseDamageMax": 8,
+          "icon": "dagger.svg",
+          "baseBlock": 4,
+          "stats": {
+            "agility": 1,
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbnoe0cm-fjmknz-wes889",
+          "description": "rare weapon",
+          "goldValue": 419,
+          "isSellable": true,
+          "equippedSlot": "mainhand"
+        },
+        "offhand": {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "name": "common weapon",
+          "uniqueId": "mbn2fru2-2r0pxp-3l5sdg",
+          "description": "common weapon",
+          "goldValue": 99,
+          "isSellable": true,
+          "equippedSlot": "offhand"
+        },
+        "armor": {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1,
+            "maxHp": 16
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbn70nvi-32pq4v-xwla2b",
+          "description": "rare armor",
+          "goldValue": 449,
+          "isSellable": true,
+          "equippedSlot": "armor"
+        },
+        "amulet": {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 8,
+          "icon": "amulet.svg",
+          "stats": {
+            "damageBonus": 1,
+            "meleeBonus": 3
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbn6vvgw-5caea8-2l09cj",
+          "description": "rare amulet",
+          "goldValue": 331,
+          "isSellable": true,
+          "equippedSlot": "amulet"
+        },
+        "leftring": {
+          "name": "Band of Zu",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 10,
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "collectItem": true,
+          "goldValue": 0,
+          "isSellable": false,
+          "stats": {
+            "intellect": 2,
+            "agility": 2
+          },
+          "description": "The Power of the Zarath flows through this mithril band.",
+          "uniqueId": "mbn6on3x-513a0k-oa4joy",
+          "journeyItemId": "bandOfZu",
+          "icon": "ring.svg",
+          "affixes": [],
+          "equippedSlot": "leftring"
+        },
+        "rightring": {
+          "name": "Golden Buniyar Band",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 78,
+          "tierIndex": 6,
+          "itemTier": "relic",
+          "goldValue": 659.333333,
+          "stats": {
+            "maxHp": 100,
+            "agility": 10,
+            "block": 10,
+            "defense": 10,
+            "armor": 10,
+            "movementSpeed": 45
+          },
+          "description": "All marvel at the Grace and Speed of the Grand Buniyar.",
+          "uniqueId": "mbn264d0-yzhfk5-d5l99d",
+          "icon": "golden-bunny.png",
+          "affixes": [
+            {
+              "name": "resilience",
+              "type": "combat",
+              "trigger": "hitByAttack",
+              "effect": "instantHeal",
+              "params": {
+                "minHealPercentage": 0.05,
+                "maxHealPercentage": 0.1,
+                "chanceToHeal": 0.05
+              },
+              "description": "Chance to recover a percentage of missing health on being hit."
+            }
+          ],
+          "purchasePrice": 1978,
+          "equippedSlot": "rightring"
+        }
+      },
+      "items": [
+        {
+          "tierIndex": 2,
+          "type": "amulet",
+          "name": "Sigil of Zukarath",
+          "journeyItemId": "sigilOfZukarath",
+          "itemTier": "rare",
+          "maxLuck": 7,
+          "icon": "amulet.svg",
+          "stats": {
+            "block": 1,
+            "prowess": 1
+          },
+          "critStats": [],
+          "uniqueId": "mbn2ngn1-9a35rl-hjsot2",
+          "description": "rare amulet",
+          "goldValue": 263,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "type": "armor",
+          "name": "Vestment of Zukarath",
+          "journeyItemId": "vestmentOfZukarath",
+          "itemTier": "rare",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1,
+            "maxHp": 10
+          },
+          "critStats": [],
+          "uniqueId": "mbn2bopp-prq2fd-tsixf8",
+          "description": "rare armor",
+          "goldValue": 256,
+          "isSellable": true
+        },
+        {
+          "itemId": "mbn4b13g-9ool44-d50vkt",
+          "journeyItemId": "stoneOfVeilPiercing",
+          "name": "Stone of Veil Piercing",
+          "type": "consumable",
+          "itemTier": "rare",
+          "goldValue": 0,
+          "useItem": true,
+          "useEffect": "teleportToTier",
+          "params": {
+            "tier": 7
+          },
+          "description": "A mystical stone that Will teleport you to the 7th tier of Zurath.",
+          "icon": "stone_of_veil_peirce.png",
+          "isSellable": false,
+          "uniqueId": "mbn4b13g-zfdhtt-qexpmt"
+        },
+        {
+          "itemId": "mbn6wqmb-9j1kgs-n2sfaa",
+          "journeyItemId": "stoneOfReturn",
+          "name": "Stone of Return",
+          "type": "consumable",
+          "itemTier": "common",
+          "goldValue": 0,
+          "useItem": true,
+          "useEffect": "teleportToTier",
+          "params": {
+            "tier": 0
+          },
+          "description": "A mystical stone that returns you to the surface of Zurath.",
+          "icon": "stone_of_return.png",
+          "isSellable": false,
+          "uniqueId": "mbn6wqmb-5mw952-m7c10u"
+        },
+        {
+          "itemId": "mbnoj46i-7ngtpo-mbmhlm",
+          "journeyItemId": "spectralWyrmKey",
+          "name": "Spectral Wyrm Key",
+          "type": "journey",
+          "itemTier": "magic",
+          "goldValue": 0,
+          "collectItem": true,
+          "isJourneyItem": true,
+          "description": "Posessing this Key allows passage to Ashangal.",
+          "icon": "spectral_wyrm_key.png",
+          "isSellable": false,
+          "uniqueId": "mbnoj46i-915l2j-n0u516"
+        },
+        {
+          "name": "Band of Karn",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 10,
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "collectItem": true,
+          "goldValue": 0,
+          "isSellable": false,
+          "stats": {
+            "prowess": 2,
+            "maxHp": 50
+          },
+          "description": "The Power of the Khetar flows through this steel band.",
+          "uniqueId": "mbn4bl0x-239i6i-0r1g8d",
+          "journeyItemId": "bandOfKarn",
+          "icon": "ring.svg",
+          "affixes": []
+        }
+      ]
+    },
+    "Resource": {
+      "type": "Resource",
+      "torches": 4,
+      "healPotions": 6,
+      "gold": 12844,
+      "potionDropFail": 0,
+      "torchDropFail": 0,
+      "portalBinding": 0,
+      "craftResources": {
+        "ashenShard": 4,
+        "ashenCrystal": 0,
+        "ashenGem": 0,
+        "sylduranShard": 0,
+        "sylduranCrystal": 0,
+        "sylduranGem": 0
+      }
+    },
+    "AttackSpeed": {
+      "type": "AttackSpeed",
+      "attackSpeed": 500,
+      "elapsedSinceLastAttack": 71318.9
+    },
+    "Affix": {
+      "type": "Affix",
+      "affixes": [
+        {
+          "name": "resilience",
+          "type": "combat",
+          "trigger": "hitByAttack",
+          "effect": "instantHeal",
+          "params": {
+            "minHealPercentage": 0.05,
+            "maxHealPercentage": 0.1,
+            "chanceToHeal": 0.05
+          },
+          "sourceId": "mbn264d0-yzhfk5-d5l99d"
+        }
+      ]
+    },
+    "PlayerState": {
+      "type": "PlayerState",
+      "name": "journey bunny",
+      "level": 12,
+      "xp": 3972,
+      "nextLevelXp": 5718,
+      "dead": false,
+      "lampLit": false,
+      "discoveredTileCount": 27754,
+      "isInCombat": false,
+      "isCasting": false
+    },
+    "JourneyState": {
+      "type": "JourneyState",
+      "completedPaths": [],
+      "pathTree": {}
+    },
+    "JourneyPath": {
+      "type": "JourneyPath",
+      "paths": [
+        {
+          "id": "master_whispers",
+          "parentId": "master_whispers",
+          "nextPathId": "",
+          "offered": true,
+          "accepted": true,
+          "completed": false,
+          "title": "Whispers of Zukarath",
+          "description": "Follow the guidance of the Zukran Masters to prove your worth.",
+          "offerText": "Begin your journey with the Zukran Masters.",
+          "acceptedText": "You have accepted the Journey of Whispers.",
+          "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
+          "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
+          "logCompletion": false,
+          "tasks": [],
+          "rewards": []
+        },
+        {
+          "id": "master_echoes",
+          "parentId": "master_echoes",
+          "nextPathId": "",
+          "offered": false,
+          "accepted": false,
+          "completed": false,
+          "title": "Echoes of Zurath",
+          "description": "Uncover the hidden Echoes within Zurath.",
+          "offerText": "Begin your journey to uncover the Echoes of Zurath.",
+          "acceptedText": "You have accepted the journey to uncover the Echoes.",
+          "activeText": "Continue your journey to uncover the Echoes.",
+          "completionText": "You have uncovered all Echoes within Zurath.",
+          "logCompletion": false,
+          "tasks": [],
+          "rewards": []
+        },
+        {
+          "id": "master_whispers",
+          "parentId": "master_whispers",
+          "nextPathId": "",
+          "offered": true,
+          "accepted": true,
+          "completed": false,
+          "title": "Whispers of Zukarath",
+          "description": "Follow the guidance of the Zukran Masters to prove your worth.",
+          "offerText": "Begin your journey with the Zukran Masters.",
+          "acceptedText": "You have accepted the Journey of Whispers.",
+          "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
+          "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
+          "logCompletion": false,
+          "tasks": [],
+          "rewards": []
+        },
+        {
+          "id": "whisper_parent_6",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_7",
+          "offerType": "npc",
+          "offeredBy": "sehnrhyx_syliri",
+          "offered": false,
+          "accepted": true,
+          "completed": false,
+          "title": "Enter Ashangal",
+          "description": "Discover the entrance to the endless depths of Ashangal.",
+          "offerText": "Discover the entrance to Ashangal. Will you accept this challenge?",
+          "acceptedText": "You have accepted the journey to enter Ashangal.",
+          "activeText": "Continue your journey to discover the entrance to Ashangal.",
+          "completionText": "It seems an Echo of Ashangal has led you to the entrance! The Shard of Echoes is attuned to Ashangal and will help you in further discoveries in the depths.",
+          "logCompletion": true,
+          "tasks": [
+            {
+              "id": "whisper_child_6_1",
+              "parentId": "whisper_parent_6",
+              "accepted": false,
+              "completed": true,
+              "title": "Prepare for Ashangal",
+              "description": "Speak to Sehnrhyx Syliri when you are ready to enter Ashangal.",
+              "offerText": "Speak to Sehnrhyx Syliri when you are ready to enter Ashangal.",
+              "acceptedText": "Speak to Sehnrhyx Syliri when you are ready to enter Ashangal.",
+              "activeText": "Speak to Sehnrhyx Syliri when you are ready to enter Ashangal.",
+              "completionText": "I used the last of the Ashen Shards to realign our portal to take you to Ashangal's doorstep!",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                }
+              ],
+              "completedAt": 1749358553746
+            },
+            {
+              "id": "whisper_child_6_2",
+              "parentId": "whisper_parent_6",
+              "accepted": false,
+              "completed": true,
+              "title": "Passage to the Depths",
+              "description": "Locate the secret entrance on Tier 10.",
+              "offerText": "Locate the secret entrance on Tier 10.",
+              "acceptedText": "Locate the secret entrance on Tier 10.",
+              "activeText": "Locate the secret entrance on Tier 10.",
+              "completionText": "You have discovered the path.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "attemptStairs",
+                "fromTier": 10,
+                "toTier": 11
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                }
+              ],
+              "completedAt": 1749388118882
+            },
+            {
+              "id": "whisper_child_6_3",
+              "parentId": "whisper_parent_6",
+              "accepted": false,
+              "completed": true,
+              "title": "Opening the Way",
+              "description": "Forge the key to gain entry to Ashangal.",
+              "offerText": "Forge the key to gain entry to Ashangal.",
+              "acceptedText": "Forge the key to gain entry to Ashangal.",
+              "activeText": "Forge the key to gain entry to Ashangal.",
+              "completionText": "You have dispelled the guardian's Illusion. Enter Ashangal!",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "collectItem",
+                "journeyItemId": "spectralWyrmKey",
+                "tier": 10
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                },
+                {
+                  "type": "stairUnlock",
+                  "stairFrom": 10,
+                  "stairTo": 11
+                }
+              ],
+              "completedAt": 1749388140541
+            },
+            {
+              "id": "whisper_child_6_4",
+              "parentId": "whisper_parent_6",
+              "accepted": false,
+              "completed": true,
+              "title": "Deeper Descent",
+              "description": "Use the secret passage to enter Ashangal.",
+              "offerText": "Descend to from Zurath into Ashangal.",
+              "acceptedText": "Descend to from Zurath into Ashangal.",
+              "activeText": "Descend to from Zurath into Ashangal.",
+              "completionText": "You have entered Ashangal.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "reachTier",
+                "tier": 11
+              },
+              "rewards": [
+                {
+                  "xp": 50,
+                  "gold": 50
+                }
+              ],
+              "completedAt": 1749388156102
+            },
+            {
+              "id": "whisper_child_6_5",
+              "parentId": "whisper_parent_6",
+              "accepted": false,
+              "completed": false,
+              "title": "Return to Syliri",
+              "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "offerText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "acceptedText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "activeText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "completionText": "You have returned to Sehnrhyx Syliri.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "useItem",
+                "journeyItemId": "stoneOfReturn"
+              },
+              "rewards": [
+                {
+                  "xp": 125,
+                  "gold": 125
+                }
+              ]
+            }
+          ],
+          "rewards": [
+            {
+              "xp": 500,
+              "gold": 500
+            },
+            {
+              "type": "unlock",
+              "mechanic": "setPortalDestination",
+              "fromPortal": 0,
+              "toPortal": 11
+            },
+            {
+              "type": "item",
+              "journeyItemId": "stoneOfReturn",
+              "quantity": 1
+            },
+            {
+              "type": "item",
+              "journeyItemId": "shardOfEchoes",
+              "quantity": 1,
+              "isJourneyItem": true
+            },
+            {
+              "type": "masterPath",
+              "mechanic": "pathOfEchoes"
+            }
+          ],
+          "totalTaskCount": 5,
+          "completedTaskCount": 4
+        }
+      ]
+    },
+    "PlayerAchievements": {
+      "type": "PlayerAchievements",
+      "stats": {
+        "monstersKilled": 0,
+        "bossesKilled": 0,
+        "itemsUsed": 0,
+        "potionsUsed": 0,
+        "resourcesCollected": {
+          "ashenShard": 0,
+          "sylduranShard": 0
+        },
+        "itemsCollected": 0,
+        "interactions": 0,
+        "tiersReached": 0,
+        "uniqueItemDrops": [
+          {
+            "journeyItemId": "bandOfKarn",
+            "name": "Band of Karn"
+          },
+          {
+            "journeyItemId": "wyrmTooth",
+            "name": "Wyrm Tooth"
+          },
+          {
+            "journeyItemId": "bandOfZu",
+            "name": "Band of Zu"
+          }
+        ],
+        "unlockedPortals": [
+          0
+        ]
+      },
+      "history": []
+    }
+  },
+  "gameState": {
+    "GameState": {
+      "type": "GameState",
+      "tier": 11,
+      "highestTier": 11,
+      "gameStarted": true,
+      "gameOver": false,
+      "isVictory": false,
+      "isRangedMode": false,
+      "transitionLock": false,
+      "needsRender": true,
+      "needsInitialRender": false
+    },
+    "OfferedJourneys": {
+      "type": "OfferedJourneys",
+      "journeys": []
+    }
+  },
+  "overlayState": {
+    "OverlayState": {
+      "type": "OverlayState",
+      "isOpen": true,
+      "activeTab": "menu",
+      "logMessages": [
+        "You have entered Ashangal.",
+        "You Reached Tier 11",
+        "Gained 55 XP (3972/5718)",
+        "You have dispelled the guardian's Illusion. Enter Ashangal!",
+        "Added Spectral Wyrm Key to inventory",
+        "You have discovered the path.",
+        "The Stairs are blocked by a magical barrier",
+        "You are no longer in combat.",
+        "Your shot hit a wall.",
+        "Gained 92 XP (3917/5718)",
+        "Hobgoblin defeated!",
+        "Exploration milestone reached! Gained 1200 XP for discovering 27000 tiles.",
+        "Gained 1200 XP (3825/5718)",
+        "You are no longer in combat.",
+        "The darkness is at bay... for now!",
+        "Your shot hit a wall.",
+        "Load saved game complete",
+        "Sold junk weapon for 66 gold",
+        "Sold junk weapon for 66 gold",
+        "Sold junk weapon for 63 gold",
+        "Sold junk weapon for 63 gold",
+        "Sold junk weapon for 58 gold",
+        "Sold junk weapon for 58 gold",
+        "Sold junk weapon for 58 gold",
+        "Sold junk weapon for 58 gold",
+        "Sold common weapon for 132 gold",
+        "Sold common weapon for 146 gold",
+        "Sold common weapon for 146 gold",
+        "Sold common weapon for 141 gold",
+        "Sold common weapon for 131 gold",
+        "Sold common weapon for 151 gold",
+        "Sold common armor for 145 gold",
+        "Sold common armor for 140 gold",
+        "Sold common armor for 135 gold",
+        "Sold common armor for 140 gold",
+        "Sold common armor for 126 gold",
+        "Sold common armor for 146 gold",
+        "Sold common armor for 116 gold",
+        "Sold common armor for 111 gold",
+        "Sold common armor for 111 gold",
+        "Sold common armor for 111 gold",
+        "Sold common armor for 141 gold",
+        "Sold common armor for 111 gold",
+        "Sold common armor for 156 gold",
+        "Sold common armor for 116 gold",
+        "Sold rare armor for 309 gold",
+        "Equipped rare amulet to amulet",
+        "Equipped rare armor to armor",
+        "Equipped rare weapon to mainhand",
+        "Opened shop for Shop Keeper",
+        "You are no longer in combat.",
+        "Gained 106 XP (2625/5718)",
+        "Ghoul defeated!",
+        "Gained 107 XP (2519/5718)",
+        "Orc Chieftan defeated!",
+        "Gained 94 XP (2412/5718)",
+        "Hobgoblin defeated!",
+        "Your shot hit a wall.",
+        "You are no longer in combat.",
+        "Exploration milestone reached! Gained 1200 XP for discovering 26000 tiles.",
+        "Gained 1200 XP (2318/5718)",
+        "Gained 84 XP (1118/5718)",
+        "Goblin defeated!",
+        "Gained 92 XP (1034/5718)",
+        "Hobgoblin defeated!",
+        "Gained 109 XP (942/5718)",
+        "Orc Chieftan defeated!",
+        "The darkness is at bay... for now!",
+        "Load saved game complete",
+        "You are no longer in combat.",
+        "Gained 107 XP (833/5718)",
+        "Orc Chieftan defeated!",
+        "Gained 104 XP (726/5718)",
+        "Ghoul defeated!",
+        "Gained 91 XP (622/5718)",
+        "Orc defeated!",
+        "Gained 107 XP (531/5718)",
+        "Ogre defeated!",
+        "Gained 121 XP (424/5718)",
+        "Beholder defeated!",
+        "+1 to Intellect! Now 22.",
+        "+1 to Intellect! Now 21.",
+        "+1 to Intellect! Now 20.",
+        "Exploration milestone reached! Gained 1100 XP for discovering 25000 tiles.",
+        "Level up! Now level 12, , Gained 1 stat point to allocate!",
+        "Gained 1100 XP (5219/4916)",
+        "You Reached Tier 10",
+        "Gained 50 XP (4119/4916)",
+        "You step through a mysterious portal surging with chaotic energy and are transported to Tier 10!",
+        "I used the last of the Ashen Shards to realign our portal to take you to Ashangal's doorstep!",
+        "Journey accepted: Enter Ashangal",
+        "Added Stone of Return to inventory",
+        "Gained 500 gold",
+        "Gained 500 XP (4069/4916)",
+        "New journey available: Enter Ashangal",
+        "You have spoken with Sehnrhyx Syliri.",
+        "The power of the stone surges with chaotic energy and instsantly transports you to Tier 0!",
+        "You have returned to Sehnrhyx Syliri.",
+        "Used Stone of Return",
+        "The Stone transports you to Tier 0!",
+        "You are no longer in combat.",
+        "Gained 62 XP (3569/4916)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Gained 62 XP (3507/4916)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Gained 60 XP (3445/4916)",
+        "Imp defeated!",
+        "Gained 61 XP (3385/4916)",
+        "Imp defeated!",
+        "Exploration milestone reached! Gained 1100 XP for discovering 24000 tiles.",
+        "Gained 1100 XP (3324/4916)",
+        "You are no longer in combat.",
+        "Gained 60 XP (2224/4916)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Gained 60 XP (2164/4916)",
+        "Imp defeated!",
+        "The darkness is at bay... for now!",
+        "Load saved game complete",
+        "Equipped Band of Zu to leftring",
+        "Exploration milestone reached! Gained 1100 XP for discovering 23000 tiles.",
+        "Gained 1100 XP (2104/4916)",
+        "You are no longer in combat.",
+        "Gained 63 XP (1004/4916)",
+        "Zombie defeated!",
+        "Gained 82 XP (941/4916)",
+        "Ghoul defeated!",
+        "You have acquired a Band of Zu.",
+        "Gained 93 XP (859/4916)",
+        "Beholder defeated!",
+        "Gained 62 XP (766/4916)",
+        "Zombie defeated!",
+        "Gained 75 XP (704/4916)",
+        "Banshee defeated!",
+        "Your shot hit a wall.",
+        "Exploration milestone reached! Gained 1000 XP for discovering 22000 tiles.",
+        "Level up! Now level 11, ",
+        "Gained 1000 XP (4840/4211)",
+        "The darkness is at bay... for now!",
+        "Load saved game complete",
+        "Equipped Band of Karn to leftring",
+        "Game saved to save_mbn0yfim-9kzgnm-s3o40d",
+        "Game saved to save_mbn0yfim-9kzgnm-s3o40d",
+        "You are no longer in combat.",
+        "You have acquired a Band of Karn.",
+        "Your shot hit a wall.",
+        "Your shot hit a wall.",
+        "Your shot hit a wall.",
+        "Gained 83 XP (3840/4211)",
+        "Orc Chieftan defeated!",
+        "You Reached Tier 8",
+        "Gained 40 XP (3757/4211)",
+        "You step through a mysterious portal surging with chaotic energy and are transported to Tier 8!",
+        "Journey accepted: Rings of the Magi",
+        "Added Stone of Veil Piercing to inventory",
+        "Added Stone of Return to inventory",
+        "Gained 200 gold",
+        "Gained 200 XP (3717/4211)",
+        "New journey available: Rings of the Magi",
+        "Thank you for bringing these to me. This confirms what I feared. The corruption of Ashangal has escaped containment.",
+        "The power of the stone surges with chaotic energy and instsantly transports you to Tier 0!",
+        "Used Stone of Return",
+        "The Stone transports you to Tier 0!",
+        "Exploration milestone reached! Gained 1000 XP for discovering 21000 tiles.",
+        "Gained 1000 XP (3517/4211)",
+        "You are no longer in combat.",
+        "Your shot hit a wall.",
+        "You have gathered 15 Ashen Shards.",
+        "Your shot hit a wall.",
+        "Gained 54 XP (2517/4211)",
+        "Zombie defeated!",
+        "Your shot hit a wall.",
+        "Gained 49 XP (2463/4211)",
+        "Skeleton defeated!",
+        "You are no longer in combat.",
+        "Gained 53 XP (2414/4211)",
+        "Zombie defeated!",
+        "Gained 71 XP (2361/4211)",
+        "Orc Chieftan defeated!",
+        "Exploration milestone reached! Gained 1000 XP for discovering 20000 tiles.",
+        "Gained 1000 XP (2290/4211)",
+        "You are no longer in combat.",
+        "Gained 73 XP (1290/4211)",
+        "Orc Chieftan defeated!",
+        "Exploration milestone reached! Gained 1000 XP for discovering 19000 tiles.",
+        "Gained 1000 XP (1217/4211)",
+        "You are no longer in combat.",
+        "Gained 64 XP (217/4211)",
+        "Banshee defeated!",
+        "Your shot hit a wall.",
+        "Your shot hit a wall.",
+        "Your shot hit a wall.",
+        "Your shot hit a wall.",
+        "Exploration milestone reached! Gained 900 XP for discovering 18000 tiles.",
+        "Level up! Now level 10, , Gained 1 stat point to allocate!",
+        "Gained 900 XP (3635/3482)",
+        "You are no longer in combat.",
+        "Gained 56 XP (2735/3482)"
+      ],
+      "activeMenuSection": "controls-button",
+      "activeShopNpcId": null
+    }
+  },
+  "id": "mbnojqrl-4ujcfe-0imofx"
+}

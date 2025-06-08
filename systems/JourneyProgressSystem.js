@@ -271,35 +271,38 @@ export class JourneyProgressSystem extends System {
                         !condition.quantity);
 
             case 'findItem':
-                console.log(`JourneyProgressSystem: Evaluated findItem for task ${task}`,condition, action);
+                console.log(`JourneyProgressSystem: Evaluated findItem for task ${task}`, condition, action);
                 if (!action.data || !action.data.journeyItemId) return false;
                 return (condition.type === 'findItem' && condition.journeyItemId === action.data.journeyItemId);
 
             case 'collectItem':
-                console.log(`JourneyProgressSystem: Evaluated collectItem for task ${task}`,condition, action);
+                console.log(`JourneyProgressSystem: Evaluated collectItem for task ${task}`, condition, action);
                 if (!action.data || !action.data.journeyItemId) return false;
-                return  condition.type === 'collectItem' && condition.journeyItemId === action.data.journeyItemId ;
-                
+                return condition.type === 'collectItem' && condition.journeyItemId === action.data.journeyItemId;
+
 
             case 'bossKill':
                 return condition.type === 'bossKill' && condition.tier === action.data.tier;
 
             case 'interactWithNPC':
-                // have to allow normal interactions to complete Final condition until issues ironed out in dialogue system
-                return (condition.type === 'interactWithNPC' || condition.type === 'interactWithNPCFinal') &&
+                
+                console.log(`JourneyProgressSystem: Evaluating interactWithNPC for task ${task.id}`, condition, action);
+                if (condition.type === 'interactWithNPCFinal') {
+                    const path = this.entityManager.getEntity('player').getComponent('JourneyPath').paths.find(p => p.id === task.parentId);
+                   const isMatchFinal = condition.type === 'interactWithNPCFinal' &&
+                        condition.npc === npcLogicalId &&
+                        action.data.taskId === task.id &&
+                        (path.completedTaskCount || 0) === (path.totalTaskCount || 0) - 1;
+                    console.log(`JourneyProgressSystem: Evaluated interactWithNPCFinal for task ${task.id}`, isMatchFinal);
+                    return isMatchFinal;
+                } else { 
+                    const isMatch = (condition.type === 'interactWithNPC' &&
                     condition.npc === npcLogicalId &&
-                    action.data.taskId === task.id;
-                break;
-            case 'interactWithNPCFinal':
-
-                const path = this.entityManager.getEntity('player').getComponent('JourneyPath').paths.find(p => p.id === task.parentId);
-                const isMatch = condition.type === 'interactWithNPCFinal' &&
-                    condition.npc === npcLogicalId &&
-                    action.data.taskId === task.id &&
-                    (path.completedTaskCount || 0) === (path.totalTaskCount || 0) - 1;
-
-                return isMatch;
-                break;
+                        action.data.taskId === task.id);
+                    console.log(`JourneyProgressSystem: Evaluated interactWithNPC for task ${task.id}`, isMatch);
+                    return isMatch;
+                }
+                
             case 'attemptStairs':
                 const isAttemptMatch = condition.type === 'attemptStairs' &&
                     condition.fromTier === action.data.fromTier &&
@@ -315,7 +318,10 @@ export class JourneyProgressSystem extends System {
                 }
                 return isAttemptMatch;
             case 'useItem':
-                return condition.type === 'useItem' && condition.itemId === action.data.itemId;
+                console.log(`JourneyProgressSystem: Evaluating useItem for task ${task.id}`, condition, action);
+                return condition.type === 'useItem' &&
+                    action.data.itemId &&
+                    (condition.itemId === action.data.itemId || condition.journeyItemId === action.data.itemId);
             case 'reachTier':
                 return condition.type === 'reachTier' && condition.tier === action.data.tier;
             case 'completeEchoes':

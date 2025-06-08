@@ -150,13 +150,14 @@ export class PlayerControllerSystem {
         const mainWeapon = playerInventory.equipped.mainhand;
 
         if (event.type === 'keyup' && event.key === ' ') {
+            //document.body.style.cursor = 'pointer'; // Change cursor to crosshair for ranged attack
             gameState.isRangedMode = false;
         } else if (event.type === 'keydown' && event.key === ' ' && !event.repeat) {
             if ((offWeapon?.attackType === 'ranged' && offWeapon?.baseRange > 0) ||
                 (mainWeapon?.attackType === 'ranged' && mainWeapon?.baseRange > 0)) {
                     //keeping this here as a reminder that this could be a place to hook into cast supression for projectiles
                // this.entityManager.removeComponentFromEntity('player', 'MovementIntent');
-
+               // document.body.style.cursor = 'crosshair'; // Change cursor to crosshair for ranged attack
                 gameState.isRangedMode = true;
             } else {
                 this.eventBus.emit('LogMessage', { message: 'You need a valid ranged weapon equipped to use ranged mode!' });

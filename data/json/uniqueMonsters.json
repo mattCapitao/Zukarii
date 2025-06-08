@@ -21,7 +21,7 @@
         "type": "rog",
         "dropChance": 0.1,
         "data": {
-          "itemTierIndexBonus": 2,
+          "itemTierIndexBonus": 3,
           "type": "weapon",
           "attackType": "melee",
           "name": "Orc Boss Chopper"

@@ -3,60 +3,36 @@
     "id": "master_whispers",
     "parentId": "master_whispers",
     "nextPathId": "",
-    "offered": true,
     "accepted": true,
     "completed": false,
+    "completionType": "campaign",
     "title": "Whispers of Zukarath",
     "description": "Follow the guidance of the Zukran Masters to prove your worth.",
-    "offerText": "Begin your journey with the Zukran Masters.",
-    "acceptedText": "You have accepted the Journey of Whispers.",
     "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
+    "completionCondition": null,
+    "rewards": [],
     "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
     "logCompletion": false,
-    "tasks": [],
-    "rewards": []
+    "tasks": []
   },
   {
     "id": "whisper_parent_1",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_2",
     "offerType": "auto",
-    "offeredBy": null,
-    "offered": true,
-    "accepted": true,
+    "offeredBy": "null",
+    "offered": false,
+    "accepted": false,
     "completed": false,
+    "logCompletion": true,
+    "startsAssigned": true,
     "title": "Enter Zurath",
     "description": "Begin your journey by entering Zurath and speaking to Sehnrhyx Syliri.",
     "offerText": "Whispers yet echo, and your fate has arrived. You must Enter Zurath to begin your Journey.",
     "acceptedText": "You have accepted the Journey of Whispers. Sehnrhyx Syliri will guide you to begin your Journey.",
     "activeText": "Speak to Sehnrhyx Syliri to start your trials.",
     "completionText": "Your training has gone well, you are deemed worthy! You may now enter Zurath to begin your journey on the Path of Whispers.",
-    "logCompletion": true,
-    "tasks": [
-      {
-        "id": "whisper_child_1_1",
-        "parentId": "whisper_parent_1",
-        "accepted": false,
-        "completed": false,
-        "title": "Setting Forth",
-        "description": "Speak to Sehnrhyx Syliri about your Journey.",
-        "offerText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "acceptedText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "activeText": "I'm glad to see you, I hope you have prepared well for your journey!",
-        "completionText": "Your training has gone well, you are deemed worthy for the trials.",
-        "logCompletion": true,
-        "completionCondition": {
-          "type": "interactWithNPCFinal",
-          "npc": "sehnrhyx_syliri"
-        },
-        "rewards": [
-          {
-            "xp": 25,
-            "gold": 25
-          }
-        ]
-      }
-    ],
+    "completionCondition": null,
     "rewards": [
       {
         "xp": 25,
@@ -66,6 +42,32 @@
         "type": "item",
         "journeyItemId": "stoneOfReturn",
         "quantity": 1
+      }
+      
+    ],
+    "tasks": [
+      {
+        "id": "whisper_child_1_1",
+        "parentId": "whisper_parent_1",
+        "completed": false,
+        "logCompletion": true,
+        "title": "Setting Forth",
+        "offerText": "Speak to Sehnrhyx Syliri about your Journey.",
+        "acceptedText": "Speak to Sehnrhyx Syliri about your Journey.",
+        "activeText": "Im glad to see you i hope you have prepared well for your journey!.",
+        "completionText": "Your training has gone well, you are deemed worthy for the trials.",
+        "description": "Speak to Sehnrhyx Syliri about your Journey.",
+        "completionCondition": {
+          "type": "interactWithNPC",
+          "npc": "sehnrhyx_syliri"
+        },
+        "rewards": [
+          {
+            "xp": 25,
+            "gold": 25
+          }
+         
+        ]
       }
     ]
   },
@@ -78,23 +80,32 @@
     "offered": false,
     "accepted": false,
     "completed": false,
+    "logCompletion": true,
     "title": "Vestments of the Order",
     "description": "Venture into Zurath and defeat the guardian to claim your Vestment of Zukarath.",
     "offerText": "Venture into Zurath and defeat the guardian to claim your Vestment of Zukarath. Will you take this challenge?",
     "acceptedText": "You have accepted the journey to claim the Vestment of Zukarath.",
     "activeText": "Continue your journey to defeat the guardian and claim the Vestment of Zukarath.",
     "completionText": "You have earned the Vestment of Zukarath by your valor!",
-    "logCompletion": true,
+    "completionCondition": null,
+    "rewards": [
+      {
+        "xp": 200,
+        "gold": 200
+      },
+      {
+        "type": "item",
+        "journeyItemId": "stoneOfReturn",
+        "quantity": 1
+      }
+    ],
     "tasks": [
       {
         "id": "whisper_child_2_1",
         "parentId": "whisper_parent_2",
-        "accepted": false,
         "completed": false,
         "title": "First Descent",
         "description": "Delve down to the third tier of Zurath.",
-        "offerText": "Descend to Tier 3 of Zurath.",
-        "acceptedText": "Descend to Tier 3 of Zurath.",
         "activeText": "Descend to Tier 3 of Zurath.",
         "completionText": "You have reached Tier 3.",
         "logCompletion": true,
@@ -112,12 +123,9 @@
       {
         "id": "whisper_child_2_2",
         "parentId": "whisper_parent_2",
-        "accepted": false,
         "completed": false,
         "title": "Battle Tested",
         "description": "Defeat the Guardian.",
-        "offerText": "Defeat the Guardian on Tier 3.",
-        "acceptedText": "Defeat the Guardian on Tier 3.",
         "activeText": "Defeat the Guardian on Tier 3.",
         "completionText": "Tier 3 Guardian Defeated.",
         "logCompletion": true,
@@ -135,12 +143,9 @@
       {
         "id": "whisper_child_2_3",
         "parentId": "whisper_parent_2",
-        "accepted": false,
         "completed": false,
         "title": "Vested Acolyte",
         "description": "Recover a Vestment of Zukarath.",
-        "offerText": "Find the Vestment of Zukarath on Tier 3.",
-        "acceptedText": "Find the Vestment of Zukarath on Tier 3.",
         "activeText": "Find the Vestment of Zukarath on Tier 3.",
         "completionText": "You have claimed your Vestment of Zukarath.",
         "logCompletion": true,
@@ -159,12 +164,9 @@
       {
         "id": "whisper_child_2_4",
         "parentId": "whisper_parent_2",
-        "accepted": false,
         "completed": false,
         "title": "Triumphant Return",
         "description": "Return to Sehnrhyx Syliri.",
-        "offerText": "Speak to Sehnrhyx Syliri to report your success.",
-        "acceptedText": "Speak to Sehnrhyx Syliri to report your success.",
         "activeText": "Speak to Sehnrhyx Syliri to report your success.",
         "completionText": "You have returned to Sehnrhyx Syliri.",
         "logCompletion": true,
@@ -179,154 +181,16 @@
           }
         ]
       }
-    ],
-    "rewards": [
-      {
-        "xp": 200,
-        "gold": 200
-      },
-      {
-        "type": "item",
-        "journeyItemId": "stoneOfReturn",
-        "quantity": 1
-      }
     ]
   },
   {
     "id": "whisper_parent_3",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_4",
-    "offerType": "npc",
-    "offeredBy": "sehnrhyx_syliri",
-    "offered": false,
-    "accepted": false,
     "completed": false,
     "title": "Sigil of the Order",
     "description": "Seek the Sigil of Zukarath to solidify your place among the Zukarrii.",
-    "offerText": "Seek the Sigil of Zukarath to prove your worth. Will you accept this challenge?",
-    "acceptedText": "You have accepted the journey to claim the Sigil of Zukarath.",
-    "activeText": "Continue your journey to claim the Sigil of Zukarath.",
-    "completionText": "You have earned the Sigil of Zukarath through your valor.",
-    "logCompletion": true,
-    "tasks": [
-      {
-        "id": "whisper_child_3_1",
-        "parentId": "whisper_parent_3",
-        "accepted": false,
-        "completed": false,
-        "title": "Seek Guidance",
-        "description": "Speak to Sehnrhyx Syliri about your Journey.",
-        "offerText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "acceptedText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "activeText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "completionText": "Sehnrhyx Syliri has guided you toward the Sigil.",
-        "logCompletion": true,
-        "completionCondition": {
-          "type": "interactWithNPC",
-          "npc": "sehnrhyx_syliri"
-        },
-        "rewards": [
-          {
-            "xp": 100,
-            "gold": 100
-          }
-        ]
-      },
-      {
-        "id": "whisper_child_3_2",
-        "parentId": "whisper_parent_3",
-        "accepted": false,
-        "completed": false,
-        "title": "Guardian’s Bane",
-        "description": "Defeat the guardian on Tier 6.",
-        "offerText": "Defeat the guardian on Tier 6.",
-        "acceptedText": "Defeat the guardian on Tier 6.",
-        "activeText": "Defeat the guardian on Tier 6.",
-        "completionText": "Tier 6 Guardian Defeated.",
-        "logCompletion": true,
-        "completionCondition": {
-          "type": "bossKill",
-          "tier": 6
-        },
-        "rewards": [
-          {
-            "xp": 100,
-            "gold": 100
-          }
-        ]
-      },
-      {
-        "id": "whisper_child_3_3",
-        "parentId": "whisper_parent_3",
-        "accepted": false,
-        "completed": false,
-        "title": "Claim the Sigil",
-        "description": "Recover a Sigil of Zukarath.",
-        "offerText": "Recover a Sigil of Zukarath.",
-        "acceptedText": "Recover a Sigil of Zukarath.",
-        "activeText": "Recover a Sigil of Zukarath.",
-        "completionText": "You have claimed the Sigil of Zukarath.",
-        "logCompletion": true,
-        "completionCondition": {
-          "type": "findItem",
-          "journeyItemId": "sigilOfZukarath",
-          "tier": 6
-        },
-        "rewards": [
-          {
-            "xp": 100,
-            "gold": 100
-          }
-        ]
-      },
-      {
-        "id": "whisper_child_3_4",
-        "parentId": "whisper_parent_3",
-        "accepted": false,
-        "completed": false,
-        "title": "Enter the Depths",
-        "description": "Descend to Tier 7 and report your findings.",
-        "offerText": "Descend to Tier 7 and report your findings.",
-        "acceptedText": "Descend to Tier 7 and report your findings.",
-        "activeText": "Descend to Tier 7 and report your findings.",
-        "completionText": "The way to Tier 7 is blocked by a magical barrier. You had better let Sehnrhyx Syliri know.",
-        "logCompletion": true,
-        "completionCondition": {
-          "type": "attemptStairs",
-          "fromTier": 6,
-          "toTier": 7
-        },
-        "rewards": [
-          {
-            "xp": 100,
-            "gold": 100
-          }
-        ]
-      },
-      {
-        "id": "whisper_child_3_5",
-        "parentId": "whisper_parent_3",
-        "accepted": false,
-        "completed": false,
-        "title": "Return to Syliri",
-        "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "offerText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "acceptedText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "activeText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "completionText": "You have returned to Sehnrhyx Syliri with the Sigil.",
-        "logCompletion": true,
-        "completionCondition": {
-          "type": "useItem",
-          "journeyItemId": "stoneOfReturn"
-        },
-        "rewards": [
-          {
-            "xp": 100,
-            "gold": 100
-          }
-        ]
-      }
-    ],
+    "completionCondition": null,
     "rewards": [
       {
         "xp": 400,
@@ -342,144 +206,124 @@
         "journeyItemId": "stoneOfVeilPiercing",
         "quantity": 1
       }
-    ]
-  },
-  {
-    "id": "whisper_parent_4",
-    "parentId": "master_whispers",
-    "nextPathId": "whisper_parent_5",
-    "offerType": "npc",
-    "offeredBy": "sehnrhyx_syliri",
-    "offered": false,
-    "accepted": false,
-    "completed": false,
-    "title": "Seeking Corruption",
-    "description": "Seek out the corruption within Zurath’s depths.",
-    "offerText": "Seek out the corruption within Zurath’s depths. Will you accept this challenge?",
-    "acceptedText": "You have accepted the journey to seek out the corruption.",
-    "activeText": "Continue your journey to seek out the corruption in Zurath’s depths.",
-    "completionText": "With shards you gathered I will activate and cleanse this old portal, to aid you in your investigation of this corruption.",
+    ],
+    "completionText": "You have earned the Sigil of Zukarath through your valor.",
     "logCompletion": true,
+    "offeredBy": "sehnrhyx_syliri",
     "tasks": [
       {
-        "id": "whisper_child_4_1",
-        "parentId": "whisper_parent_4",
-        "accepted": false,
+        "id": "whisper_child_3_1",
+        "parentId": "whisper_parent_3",
+        "nextPathId": "",
         "completed": false,
-        "title": "Prepare for the Depths",
-        "description": "You must use the Stone of Veil Piercing to bypass the magical barrier and reach Tier 7.",
-        "offerText": "Speak to Sehnrhyx Syliri to prepare for the depths.",
-        "acceptedText": "Speak to Sehnrhyx Syliri to prepare for the depths.",
-        "activeText": "Speak to Sehnrhyx Syliri to prepare for the depths.",
-        "completionText": "Use the Stone when you are ready.",
-        "logCompletion": true,
+        "title": "Seek Guidance",
+        "description": "Speak to Sehnrhyx Syliri about your Journey.",
         "completionCondition": {
           "type": "interactWithNPC",
           "npc": "sehnrhyx_syliri"
         },
         "rewards": [
           {
-            "xp": 50,
-            "gold": 55
+            "xp": 100,
+            "gold": 100
           }
-        ]
+        ],
+        "completionText": "Sehnrhyx Syliri has guided you toward the Sigil.",
+        "logCompletion": true
       },
       {
-        "id": "whisper_child_4_2",
-        "parentId": "whisper_parent_4",
-        "accepted": false,
+        "id": "whisper_child_3_2",
+        "parentId": "whisper_parent_3",
+        "nextPathId": "",
         "completed": false,
-        "title": "Transport to the Depths",
-        "description": "Are you now ready to face the next challenge?",
-        "offerText": "Reach Tier 7 to face the next challenge.",
-        "acceptedText": "Reach Tier 7 to face the next challenge.",
-        "activeText": "Reach Tier 7 to face the next challenge.",
-        "completionText": "You are ready to face the depths of Zurath.",
-        "logCompletion": true,
+        "title": "Guardian’s Bane",
+        "description": "Defeat the guardian on Tier 6.",
         "completionCondition": {
-          "type": "reachTier",
-          "tier": 7
+          "type": "bossKill",
+          "tier": 6
         },
         "rewards": [
           {
-            "xp": 50,
-            "gold": 50
+            "xp": 100,
+            "gold": 100
           }
-        ]
+        ],
+        "completionText": "Tier 6 Guardian Defeated.",
+        "logCompletion": true
       },
       {
-        "id": "whisper_child_4_3",
-        "parentId": "whisper_parent_4",
-        "accepted": false,
+        "id": "whisper_child_3_3",
+        "parentId": "whisper_parent_3",
+        "nextPathId": "",
         "completed": false,
-        "title": "Gather Shards",
-        "description": "Find 15 Ashen Shards.",
-        "offerText": "Find 15 Ashen Shards.",
-        "acceptedText": "Find 15 Ashen Shards.",
-        "activeText": "Find 15 Ashen Shards.",
-        "completionText": "You have gathered 15 Ashen Shards.",
-        "logCompletion": true,
+        "title": "Claim the Sigil",
+        "description": "Recover a Sigil of Zukarath.",
         "completionCondition": {
-          "type": "collectResource",
-          "resourceType": "ashenShard",
-          "quantity": 15
+          "type": "findItem",
+          "journeyItemId": "sigilOfZukarath",
+          "tier": 6
         },
         "rewards": [
           {
-            "xp": 50,
-            "gold": 50
+            "xp": 100,
+            "gold": 100
           }
-        ]
+        ],
+        "completionText": "You have claimed the Sigil of Zukarath.",
+        "logCompletion": true
       },
       {
-        "id": "whisper_child_4_4",
-        "parentId": "whisper_parent_4",
-        "accepted": false,
+        "id": "whisper_child_3_4",
+        "parentId": "whisper_parent_3",
+        "nextPathId": "",
+        "completed": false,
+        "title": "Enter the Depths",
+        "description": "Descescend to Tier 7 and report your findings.",
+        "completionCondition": {
+          "type": "attemptStairs",
+          "fromTier": 6,
+          "toTier": 7
+        },
+        "rewards": [
+          {
+            "xp": 100,
+            "gold": 100
+          }
+        ],
+        "completionText": "The way to Tier 7 is blocked by a magical barrier. You had better let Sehnrhyx Syliri know.",
+        "logCompletion": true
+      },
+      {
+        "id": "whisper_child_3_5",
+        "parentId": "whisper_parent_3",
+        "nextPathId": "",
         "completed": false,
         "title": "Return to Syliri",
         "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "offerText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "acceptedText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "activeText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "completionText": "You have returned to Sehnrhyx Syliri.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "useItem",
           "journeyItemId": "stoneOfReturn"
         },
         "rewards": [
           {
-            "xp": 50,
-            "gold": 50
+            "xp": 100,
+            "gold": 100
           }
-        ]
-      },
-      {
-        "id": "whisper_child_4_5",
-        "parentId": "whisper_parent_4",
-        "accepted": false,
-        "completed": false,
-        "title": "Turn In Shards",
-        "description": "Give 15 Ashen Shards to Sehnrhyx Syliri.",
-        "offerText": "Give 15 Ashen Shards to Sehnrhyx Syliri.",
-        "acceptedText": "Give 15 Ashen Shards to Sehnrhyx Syliri.",
-        "activeText": "Give 15 Ashen Shards to Sehnrhyx Syliri.",
-        "completionText": "Thank you for bringing these to me. This confirms what I feared. The corruption of Ashangal has escaped containment.",
-        "logCompletion": true,
-        "completionCondition": {
-          "type": "turnIn",
-          "npc": "sehnrhyx_syliri",
-          "resourceType": "ashenShard",
-          "quantity": 15
-        },
-        "rewards": [
-          {
-            "xp": 50,
-            "gold": 50
-          }
-        ]
+        ],
+        "completionText": "You have returned to Sehnrhyx Syliri with the Sigil.",
+        "logCompletion": true
       }
-    ],
+    ]
+  },
+  {
+    "id": "whisper_parent_4",
+    "parentId": "master_whispers",
+    "nextPathId": "whisper_parent_5",
+    "completed": false,
+    "offeredBy": "sehnrhyx_syliri",
+    "title": "Seeking Corruption",
+    "description": "Seek out the corruption within Zurath’s depths.",
+    "completionCondition": null,
     "rewards": [
       {
         "xp": 200,
@@ -499,118 +343,126 @@
         "type": "unlock",
         "mechanic": "tier0Portal"
       }
-    ]
-  },
-  {
-    "id": "whisper_parent_5",
-    "parentId": "master_whispers",
-    "nextPathId": "whisper_parent_6",
-    "offerType": "npc",
-    "offeredBy": "sehnrhyx_syliri",
-    "offered": false,
-    "accepted": false,
-    "completed": false,
-    "title": "Rings of the Magi",
-    "description": "Acquire the ancient rings to wield greater power.",
-    "offerText": "Acquire the ancient rings to wield greater power. Will you accept this challenge?",
-    "acceptedText": "You have accepted the journey to acquire the Rings of the Magi.",
-    "activeText": "Continue your journey to acquire the Rings of the Magi.",
-    "completionText": "You have claimed the Rings of the Magi.",
+    ],
+    "completionText": "With shards you gathered I will activate and cleanse this old portal, to aid you in your investigation of this corruption.",
     "logCompletion": true,
     "tasks": [
+
       {
-        "id": "whisper_child_5_1",
-        "parentId": "whisper_parent_5",
-        "accepted": false,
+        "id": "whisper_child_4_1",
+        "parentId": "whisper_parent_4",
+        "nextPathId": "",
         "completed": false,
-        "title": "Acquire Band of Zu",
-        "description": "Find a Band of Zu in Zurath’s depths.",
-        "offerText": "Find a Band of Zu in Zurath’s depths.",
-        "acceptedText": "Find a Band of Zu in Zurath’s depths.",
-        "activeText": "Find a Band of Zu in Zurath’s depths.",
-        "completionText": "You have acquired a Band of Zu.",
-        "logCompletion": true,
+        "title": "Prepare for the Depths",
+        "description": "You must use the Stone of Veil Piercing to bypass the magical barrier and reach Tier 7.",
         "completionCondition": {
-          "type": "collectItem",
-          "journeyItemId": "bandOfZu"
+          "type": "interactWithNPC",
+          "npc": "sehnrhyx_syliri"
         },
         "rewards": [
           {
-            "xp": 125,
-            "gold": 125
+            "xp": 50,
+            "gold": 55
           }
-        ]
+        ],
+        "completionText": "Use the Stone when you are ready .",
+        "logCompletion": true
       },
       {
-        "id": "whisper_child_5_2",
-        "parentId": "whisper_parent_5",
-        "accepted": false,
+        "id": "whisper_child_4_2",
+        "parentId": "whisper_parent_4",
+        "nextPathId": "",
         "completed": false,
-        "title": "Acquire Band of Karn",
-        "description": "Find a Band of Karn in Zurath’s depths.",
-        "offerText": "Find a Band of Karn in Zurath’s depths.",
-        "acceptedText": "Find a Band of Karn in Zurath’s depths.",
-        "activeText": "Find a Band of Karn in Zurath’s depths.",
-        "completionText": "You have acquired a Band of Karn.",
-        "logCompletion": true,
+        "title": "Transport to the Depths",
+        "description": "Are you now ready to face the next challenge?.",
         "completionCondition": {
-          "type": "collectItem",
-          "journeyItemId": "bandOfKarn"
+          "type": "reachTier",
+          "tier": 7
+        },
+
+        "rewards": [
+          {
+            "xp": 50,
+            "gold": 50
+          }
+        ],
+        "completionText": "You are ready to face the depths of Zurath.",
+        "logCompletion": true
+      },
+      {
+        "id": "whisper_child_4_3",
+        "parentId": "whisper_parent_4",
+        "nextPathId": "",
+        "completed": false,
+        "title": "Gather Shards",
+        "description": "Find 15 Ashen Shards.",
+        "completionCondition": {
+          "type": "collectResource",
+          "resourceType": "ashenShard",
+          "quantity": 15
         },
         "rewards": [
           {
-            "xp": 125,
-            "gold": 125
+            "xp": 50,
+            "gold": 50
           }
-        ]
+        ],
+        "completionText": "You have gathered 15 Ashen Shards.",
+        "logCompletion": true
       },
       {
-        "id": "whisper_child_5_3",
-        "parentId": "whisper_parent_5",
-        "accepted": false,
+        "id": "whisper_child_4_4",
+        "parentId": "whisper_parent_4",
+        "nextPathId": "",
         "completed": false,
         "title": "Return to Syliri",
         "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "offerText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "acceptedText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "activeText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "completionText": "You have returned to Sehnrhyx Syliri.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "useItem",
           "journeyItemId": "stoneOfReturn"
         },
         "rewards": [
           {
-            "xp": 125,
-            "gold": 125
+            "xp": 50,
+            "gold": 50
           }
-        ]
+        ],
+        "completionText": "You have returned to Sehnrhyx Syliri.",
+        "logCompletion": true
       },
       {
-        "id": "whisper_child_5_4",
-        "parentId": "whisper_parent_5",
-        "accepted": false,
+        "id": "whisper_child_4_5",
+        "parentId": "whisper_parent_4",
+        "nextPathId": "",
         "completed": false,
-        "title": "Speak to Syliri",
-        "description": "Speak to Sehnrhyx Syliri.",
-        "offerText": "Speak to Sehnrhyx Syliri.",
-        "acceptedText": "Speak to Sehnrhyx Syliri.",
-        "activeText": "Speak to Sehnrhyx Syliri.",
-        "completionText": "You have spoken with Sehnrhyx Syliri.",
-        "logCompletion": true,
+        "title": "Turn In Shards",
+        "description": "Give 15 Ashen Shards to Sehnrhyx Syliri.",
         "completionCondition": {
-          "type": "interactWithNPCFinal",
-          "npc": "sehnrhyx_syliri"
+          "type": "turnIn",
+          "npc": "sehnrhyx_syliri",
+          "resourceType": "ashenShard",
+          "quantity": 15
         },
         "rewards": [
           {
-            "xp": 125,
-            "gold": 125
+            "xp": 50,
+            "gold": 50
           }
-        ]
+        ],
+        "completionText": "Thank you for brining these to me. This confirms what I feared. The corruption of Ashangal has escaped containment.",
+        "logCompletion": true
       }
-    ],
+    ]
+  },
+  {
+    "id": "whisper_parent_5",
+    "parentId": "master_whispers",
+    "nextPathId": "whisper_parent_6",
+    "offeredBy": "sehnrhyx_syliri",
+    "completed": false,
+    "title": "Rings of the Magi",
+    "description": "Acquire the ancient rings to wield greater power.",
+    "completionCondition": null,
     "rewards": [
       {
         "xp": 500,
@@ -627,37 +479,77 @@
         "fromPortal": 0,
         "toPortal": 10
       }
-    ]
-  },
-  {
-    "id": "whisper_parent_6",
-    "parentId": "master_whispers",
-    "nextPathId": "whisper_parent_7",
-    "offerType": "npc",
-    "offeredBy": "sehnrhyx_syliri",
-    "offered": false,
-    "accepted": false,
-    "completed": false,
-    "title": "Enter Ashangal",
-    "description": "Discover the entrance to the endless depths of Ashangal.",
-    "offerText": "Discover the entrance to Ashangal. Will you accept this challenge?",
-    "acceptedText": "You have accepted the journey to enter Ashangal.",
-    "activeText": "Continue your journey to discover the entrance to Ashangal.",
-    "completionText": "It seems an Echo of Ashangal has led you to the entrance! The Shard of Echoes is attuned to Ashangal and will help you in further discoveries in the depths.",
+    ],
+    "completionText": "You have claimed the Rings of the Magi.",
     "logCompletion": true,
     "tasks": [
       {
-        "id": "whisper_child_6_1",
-        "parentId": "whisper_parent_6",
-        "accepted": false,
+        "id": "whisper_child_5_1",
+        "parentId": "whisper_parent_5",
+        "nextPathId": "",
         "completed": false,
-        "title": "Prepare for Ashangal",
-        "description": "Speak to Sehnrhyx Syliri when you are ready to enter Ashangal.",
-        "offerText": "Speak to Sehnrhyx Syliri when you are ready to enter Ashangal.",
-        "acceptedText": "Speak to Sehnrhyx Syliri when you are ready to enter Ashangal.",
-        "activeText": "Speak to Sehnrhyx Syliri when you are ready to enter Ashangal.",
-        "completionText": "I used the last of the Ashen Shards to realign our portal to take you to Ashangal's doorstep!",
-        "logCompletion": true,
+        "title": "Acquire Band of Zu",
+        "description": "Find a Band of Zu in Zurath’s depths.",
+        "completionCondition": {
+          "type": "collectItem",
+          "journeyItemId": "bandOfZu"
+        },
+        "rewards": [
+          {
+            "xp": 125,
+            "gold": 125
+          }
+        ],
+        "completionText": "You have acquired a Band of Zu.",
+        "logCompletion": true
+      },
+      {
+        "id": "whisper_child_5_2",
+        "parentId": "whisper_parent_5",
+        "nextPathId": "",
+        "completed": false,
+        "title": "Acquire Band of Karn",
+        "description": "Find a Band of Karn in Zurath’s depths.",
+        "completionCondition": {
+          "type": "collectItem",
+          "journeyItemId": "bandOfKarn"
+        },
+        "rewards": [
+          {
+            "xp": 125,
+            "gold": 125
+          }
+        ],
+        "completionText": "You have acquired a Band of Karn.",
+        "logCompletion": true
+      },
+      {
+        "id": "whisper_child_5_3",
+        "parentId": "whisper_parent_5",
+        "nextPathId": "",
+        "completed": false,
+        "title": "Return to Syliri",
+        "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+        "completionCondition": {
+          "type": "useItem",
+          "journeyItemId": "stoneOfReturn"
+        },
+        "rewards": [
+          {
+            "xp": 125,
+            "gold": 125
+          }
+        ],
+        "completionText": "You have returned to Sehnrhyx Syliri.",
+        "logCompletion": true
+      },
+      {
+        "id": "whisper_child_5_4",
+        "parentId": "whisper_parent_5",
+        "nextPathId": "",
+        "completed": false,
+        "title": "Speak to Syliri",
+        "description": "Speak to Sehnrhyx Syliri.",
         "completionCondition": {
           "type": "interactWithNPC",
           "npc": "sehnrhyx_syliri"
@@ -667,20 +559,73 @@
             "xp": 125,
             "gold": 125
           }
-        ]
+        ],
+        "completionText": "You have spoken with Sehnrhyx Syliri.",
+        "logCompletion": true
+      }
+    ]
+  },
+  {
+    "id": "whisper_parent_6",
+    "parentId": "master_whispers",
+    "nextPathId": "whisper_parent_7",
+    "offeredBy": "sehnrhyx_syliri",
+    "completed": false,
+    "title": "Enter Ashangal",
+    "description": "Discover the entrance to the endless depths of Ashangal.",
+    "completionCondition": null,
+    "rewards": [
+      {
+        "xp": 500,
+        "gold": 500
+      },
+      {
+        "type": "item",
+        "journeyItemId": "stoneOfReturn",
+        "quantity": 1
+      },
+      {
+        "type": "item",
+        "journeyItemId": "shardOfEchoes",
+        "quantity": 1,
+        "isJourneyItem": true
+      },
+      {
+        "type": "masterPath",
+        "mechanic": "pathOfEchoes",
+      }
+    ],
+    "completionText": "It seems an Echo of Ashangal has led you to the entrance! The Shard of echos is attuned to Ashangal and will help you in further discoveries in the depths.",
+    "logCompletion": true,
+    "tasks": [
+      {
+        "id": "whisper_child_6_1",
+        "parentId": "whisper_parent_6",
+        "nextPathId": "",
+        "completed": false,
+        "title": "Prepare for Ashangal",
+        "description": "Speak to Sehnrhyx Syliri when you are ready to enter Ashangal.",
+        "completionCondition": {
+          "type": "interactWithNPC",
+          "npc": "sehnrhyx_syliri"
+        },
+        "rewards": [
+          {
+            "xp": 125,
+            "gold": 125
+          }
+          
+        ],
+        "completionText": "I used the last of the Ashen Shards to realign our portal to take you to Ashangals doorstep!.",
+        "logCompletion": true
       },
       {
         "id": "whisper_child_6_2",
         "parentId": "whisper_parent_6",
-        "accepted": false,
+        "nextPathId": "",
         "completed": false,
-        "title": "Passage to the Depths",
+        "title": "Passage to the the depths",
         "description": "Locate the secret entrance on Tier 10.",
-        "offerText": "Locate the secret entrance on Tier 10.",
-        "acceptedText": "Locate the secret entrance on Tier 10.",
-        "activeText": "Locate the secret entrance on Tier 10.",
-        "completionText": "You have discovered the path.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "attemptStairs",
           "fromTier": 10,
@@ -691,45 +636,42 @@
             "xp": 125,
             "gold": 125
           }
-        ]
+        ],
+        "completionText": "You have discovered the path.",
+        "logCompletion": true
       },
       {
         "id": "whisper_child_6_3",
         "parentId": "whisper_parent_6",
-        "accepted": false,
         "completed": false,
         "title": "Opening the Way",
         "description": "Forge the key to gain entry to Ashangal.",
-        "offerText": "Forge the key to gain entry to Ashangal.",
-        "acceptedText": "Forge the key to gain entry to Ashangal.",
-        "activeText": "Forge the key to gain entry to Ashangal.",
-        "completionText": "You have dispelled the guardian's Illusion. Enter Ashangal!",
-        "logCompletion": true,
         "completionCondition": {
           "type": "collectItem",
-          "journeyItemId": "spectralWyrmKey"
+          "journeyItemId": "spectralWyrmTooth",
+          "tier": 10
         },
         "rewards": [
           {
             "xp": 125,
             "gold": 125
+
           },
           {
             "type": "stairUnlock",
             "stairFrom": 10,
             "stairTo": 11
           }
-        ]
+        ],
+        "completionText": "You have dispelled the guardians Illusion. Enter Ashangal!",
+        "logCompletion": true
       },
       {
         "id": "whisper_child_6_4",
         "parentId": "whisper_parent_6",
-        "accepted": false,
         "completed": false,
         "title": "Deeper Descent",
         "description": "Use the secret passage to enter Ashangal.",
-        "offerText": "Descend to from Zurath into Ashangal.",
-        "acceptedText": "Descend to from Zurath into Ashangal.",
         "activeText": "Descend to from Zurath into Ashangal.",
         "completionText": "You have entered Ashangal.",
         "logCompletion": true,
@@ -745,17 +687,12 @@
         ]
       },
       {
-        "id": "whisper_child_6_5",
+        "id": "whisper_child_6_4",
         "parentId": "whisper_parent_6",
-        "accepted": false,
+        "nextPathId": "",
         "completed": false,
         "title": "Return to Syliri",
         "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "offerText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "acceptedText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "activeText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "completionText": "You have returned to Sehnrhyx Syliri.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "useItem",
           "journeyItemId": "stoneOfReturn"
@@ -765,34 +702,9 @@
             "xp": 125,
             "gold": 125
           }
-        ]
-      }
-    ],
-    "rewards": [
-      {
-        "xp": 500,
-        "gold": 500
-      },
-      {
-        "type": "unlock",
-        "mechanic": "setPortalDestination",
-        "fromPortal": 0,
-        "toPortal": 11
-      },
-      {
-        "type": "item",
-        "journeyItemId": "stoneOfReturn",
-        "quantity": 1
-      },
-      {
-        "type": "item",
-        "journeyItemId": "shardOfEchoes",
-        "quantity": 1,
-        "isJourneyItem": true
-      },
-      {
-        "type": "masterPath",
-        "mechanic": "pathOfEchoes"
+        ],
+        "completionText": "You have returned to Sehnrhyx Syliri.",
+        "logCompletion": true
       }
     ]
   },
@@ -800,31 +712,31 @@
     "id": "whisper_parent_7",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_8",
-    "offerType": "npc",
     "offeredBy": "sehnrhyx_syliri",
-    "offered": false,
-    "accepted": false,
     "completed": false,
     "title": "Harnessing Corruption",
     "description": "Harness the corruption to unlock new powers.",
-    "offerText": "Harness the corruption to unlock new powers. Will you accept this challenge?",
-    "acceptedText": "You have accepted the journey to harness the corruption.",
-    "activeText": "Continue your journey to harness the corruption.",
+    "completionCondition": null,
+    "rewards": [
+      {
+        "xp": 750,
+        "gold": 500
+      },
+      {
+        "type": "unlock",
+        "mechanic": "portalBinding"
+      }
+    ],
     "completionText": "You have unlocked the power of Portal Binding.",
     "logCompletion": true,
     "tasks": [
       {
         "id": "whisper_child_7_1",
         "parentId": "whisper_parent_7",
-        "accepted": false,
+        "nextPathId": "",
         "completed": false,
         "title": "Enter Ashangal",
         "description": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
-        "offerText": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
-        "acceptedText": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
-        "activeText": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
-        "completionText": "You have entered Ashangal.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "interactWithNPC",
           "npc": "sehnrhyx_syliri"
@@ -833,21 +745,24 @@
           {
             "xp": 150,
             "gold": 100
+          },
+          {
+            "type": "unlock",
+            "mechanic": "setPortalDestination",
+            "fromPortal": 0,
+            "toPortal": 11
           }
-        ]
+        ],
+        "completionText": "You have entered Ashangal.",
+        "logCompletion": true
       },
       {
         "id": "whisper_child_7_2",
         "parentId": "whisper_parent_7",
-        "accepted": false,
+        "nextPathId": "",
         "completed": false,
         "title": "Collect Shards",
         "description": "Collect 50 Ashen Shards.",
-        "offerText": "Collect 50 Ashen Shards.",
-        "acceptedText": "Collect 50 Ashen Shards.",
-        "activeText": "Collect 50 Ashen Shards.",
-        "completionText": "You have collected 50 Ashen Shards.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "collectResource",
           "resourceType": "ashenShard",
@@ -858,20 +773,17 @@
             "xp": 150,
             "gold": 100
           }
-        ]
+        ],
+        "completionText": "You have collected 50 Ashen Shards.",
+        "logCompletion": true
       },
       {
         "id": "whisper_child_7_3",
         "parentId": "whisper_parent_7",
-        "accepted": false,
+        "nextPathId": "",
         "completed": false,
         "title": "Return to Syliri",
         "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "offerText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "acceptedText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "activeText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
-        "completionText": "You have returned to Sehnrhyx Syliri.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "useItem",
           "journeyItemId": "stoneOfReturn"
@@ -881,20 +793,17 @@
             "xp": 150,
             "gold": 100
           }
-        ]
+        ],
+        "completionText": "You have returned to Sehnrhyx Syliri.",
+        "logCompletion": true
       },
       {
         "id": "whisper_child_7_4",
         "parentId": "whisper_parent_7",
-        "accepted": false,
+        "nextPathId": "",
         "completed": false,
         "title": "Turn In Shards",
         "description": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
-        "offerText": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
-        "acceptedText": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
-        "activeText": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
-        "completionText": "The shards have been delivered.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "turnIn",
           "npc": "sehnrhyx_syliri",
@@ -906,17 +815,31 @@
             "xp": 150,
             "gold": 100
           }
-        ]
-      }
-    ],
-    "rewards": [
-      {
-        "xp": 750,
-        "gold": 500
+        ],
+        "completionText": "The shards have been delivered.",
+        "logCompletion": true
       },
       {
-        "type": "unlock",
-        "mechanic": "portalBinding"
+        "id": "whisper_child_7_5",
+        "parentId": "whisper_parent_7",
+        "nextPathId": "",
+        "completed": false,
+        "title": "Turn In Echoes Shard",
+        "description": "Give the Shard of Echoes to Sehnrhyx Syliri.",
+        "completionCondition": {
+          "type": "turnIn",
+          "npc": "sehnrhyx_syliri",
+          "itemId": "shardOfEchoes",
+          "quantity": 1
+        },
+        "rewards": [
+          {
+            "xp": 150,
+            "gold": 100
+          }
+        ],
+        "completionText": "The Shard of Echoes reveals the path of Echoes.",
+        "logCompletion": true
       }
     ]
   },
@@ -924,31 +847,29 @@
     "id": "whisper_parent_8",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_9",
-    "offerType": "npc",
     "offeredBy": "sehnrhyx_syliri",
-    "offered": false,
-    "accepted": false,
     "completed": false,
     "title": "Listening for Echoes",
     "description": "Seek out the Echoes hidden within Zurath.",
-    "offerText": "Seek out the Echoes hidden within Zurath. Will you accept this challenge?",
-    "acceptedText": "You have accepted the journey to seek out the Echoes.",
-    "activeText": "Continue your journey to seek out the Echoes.",
+    "completionCondition": null,
+    "rewards": [
+      {
+        "xp": 1000,
+        "gold": 750
+      }
+    ],
     "completionText": "You have uncovered the secrets of the Echoes.",
     "logCompletion": true,
+    "startsOffered": false,
+    "triggersMasterPath": "master_echoes",
     "tasks": [
       {
         "id": "whisper_child_8_1",
         "parentId": "whisper_parent_8",
-        "accepted": false,
+        "nextPathId": "",
         "completed": true,
         "title": "Complete Echoes",
         "description": "Complete five Echoes.",
-        "offerText": "Complete five Echoes.",
-        "acceptedText": "Complete five Echoes.",
-        "activeText": "Complete five Echoes.",
-        "completionText": "Five Echoes completed.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "completeEchoes",
           "count": 5
@@ -958,20 +879,17 @@
             "xp": 500,
             "gold": 375
           }
-        ]
+        ],
+        "completionText": "Five Echoes completed.",
+        "logCompletion": true
       },
       {
         "id": "whisper_child_8_2",
         "parentId": "whisper_parent_8",
-        "accepted": false,
+        "nextPathId": "",
         "completed": false,
         "title": "Return to Syliri",
         "description": "Return to Sehnrhyx Syliri to discuss the Echoes.",
-        "offerText": "Return to Sehnrhyx Syliri to discuss the Echoes.",
-        "acceptedText": "Return to Sehnrhyx Syliri to discuss the Echoes.",
-        "activeText": "Return to Sehnrhyx Syliri to discuss the Echoes.",
-        "completionText": "You have shared the Echoes with Sehnrhyx Syliri.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "interactWithNPCFinal",
           "npc": "sehnrhyx_syliri"
@@ -981,13 +899,9 @@
             "xp": 500,
             "gold": 375
           }
-        ]
-      }
-    ],
-    "rewards": [
-      {
-        "xp": 1000,
-        "gold": 750
+        ],
+        "completionText": "You have shared the Echoes with Sehnrhyx Syliri.",
+        "logCompletion": true
       }
     ]
   },
@@ -995,31 +909,37 @@
     "id": "whisper_parent_9",
     "parentId": "master_whispers",
     "nextPathId": "whisper_parent_10",
-    "offerType": "npc",
     "offeredBy": "sehnrhyx_syliri",
-    "offered": false,
-    "accepted": false,
     "completed": false,
     "title": "Clad in Magic",
     "description": "Equip a full set of magic gear to wield its power.",
-    "offerText": "Equip a full set of magic gear to wield its power. Will you accept this challenge?",
-    "acceptedText": "You have accepted the journey to equip a full set of magic gear.",
-    "activeText": "Continue your journey to equip a full set of magic gear.",
+    "completionCondition": null,
+    "rewards": [
+      {
+        "xp": 1000,
+        "gold": 1000
+      },
+      {
+        "type": "item",
+        "journeyitemId": "bladeOfKhetar",
+        "quantity": 1
+      },
+      {
+        "type": "item",
+        "journeyitemId": "staffOfZarath",
+        "quantity": 1
+      }
+    ],
     "completionText": "You are clad in magic, a true Zukarrii.",
     "logCompletion": true,
     "tasks": [
       {
         "id": "whisper_child_9_1",
         "parentId": "whisper_parent_9",
-        "accepted": false,
+        "nextPathId": "",
         "completed": true,
         "title": "Continue Echoes",
         "description": "Complete five more Echoes.",
-        "offerText": "Complete five more Echoes.",
-        "acceptedText": "Complete five more Echoes.",
-        "activeText": "Complete five more Echoes.",
-        "completionText": "Five more Echoes completed.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "completeEchoes",
           "count": 5
@@ -1029,20 +949,17 @@
             "xp": 250,
             "gold": 250
           }
-        ]
+        ],
+        "completionText": "Five more Echoes completed.",
+        "logCompletion": true
       },
       {
         "id": "whisper_child_9_2",
         "parentId": "whisper_parent_9",
-        "accepted": false,
+        "nextPathId": "",
         "completed": false,
         "title": "Equip Magic Gear",
         "description": "Equip a full set of magic gear (amulet, dagger, wand, armor, two rings).",
-        "offerText": "Equip a full set of magic gear.",
-        "acceptedText": "Equip a full set of magic gear.",
-        "activeText": "Equip a full set of magic gear.",
-        "completionText": "You have equipped a full set of magic gear.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "equipGear",
           "requirements": [
@@ -1079,20 +996,17 @@
             "xp": 250,
             "gold": 250
           }
-        ]
+        ],
+        "completionText": "You have equipped a full set of magic gear.",
+        "logCompletion": true
       },
       {
         "id": "whisper_child_9_3",
         "parentId": "whisper_parent_9",
-        "accepted": false,
+        "nextPathId": "",
         "completed": false,
         "title": "Return to Syliri",
         "description": "Return to Sehnrhyx Syliri.",
-        "offerText": "Return to Sehnrhyx Syliri.",
-        "acceptedText": "Return to Sehnrhyx Syliri.",
-        "activeText": "Return to Sehnrhyx Syliri.",
-        "completionText": "You have proven your magical prowess.",
-        "logCompletion": true,
         "completionCondition": {
           "type": "interactWithNPCFinal",
           "npc": "sehnrhyx_syliri"
@@ -1102,23 +1016,9 @@
             "xp": 500,
             "gold": 500
           }
-        ]
-      }
-    ],
-    "rewards": [
-      {
-        "xp": 1000,
-        "gold": 1000
-      },
-      {
-        "type": "item",
-        "journeyItemId": "bladeOfKhetar",
-        "quantity": 1
-      },
-      {
-        "type": "item",
-        "journeyItemId": "staffOfZarath",
-        "quantity": 1
+        ],
+        "completionText": "You have proven your magical prowess.",
+        "logCompletion": true
       }
     ]
   },
@@ -1126,17 +1026,13 @@
     "id": "master_echoes",
     "parentId": "master_echoes",
     "nextPathId": "",
-    "offered": false,
-    "accepted": false,
     "completed": false,
     "title": "Echoes of Zurath",
     "description": "Uncover the hidden Echoes within Zurath.",
-    "offerText": "Begin your journey to uncover the Echoes of Zurath.",
-    "acceptedText": "You have accepted the journey to uncover the Echoes.",
-    "activeText": "Continue your journey to uncover the Echoes.",
-    "completionText": "You have uncovered all Echoes within Zurath.",
+    "completionCondition": null,
+    "rewards": [],
+    "completionText": "",
     "logCompletion": false,
-    "tasks": [],
-    "rewards": []
+    "tasks": []
   }
 ]

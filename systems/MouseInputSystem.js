@@ -72,11 +72,34 @@ export class MouseInputSystem {
     }
 
     handleMouseMove(event) {
+        const cusrorPos = this.getWorldCoordinates(event);
+        this.setCursor(cusrorPos);
         if (!this.isMouseDown) return;
 
-        const { worldX, worldY } = this.getWorldCoordinates(event);
-        this.lastMouseX = worldX;
-        this.lastMouseY = worldY;
+        
+        this.lastMouseX = cusrorPos.worldX;
+        this.lastMouseY = cusrorPos.worldY;
+        
+    }
+
+    setCursor(cursorPos) {
+        const player = this.entityManager.getEntity('player');
+        if (!player) {
+            console.warn('MouseInputSystem: Player entity not found');
+            return;
+        }
+        const playerPos = player.getComponent('Position');
+        const dx = cursorPos.worldX - playerPos.x;
+        const dy = cursorPos.worldY - playerPos.y;
+        const rangeToCursor = Math.sqrt(dx * dx + dy * dy) / this.TILE_SIZE;
+        const playerRange = player.getComponent('Stats')?.range || 1; // Default range if not defined
+        const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
+        if (gameState.isRangedMode && rangeToCursor <= playerRange) {
+            document.body.style.cursor = 'crosshair'; // Change cursor to pointer when holding mouse down
+        }
+        else {
+            document.body.style.cursor = 'pointer'; // Reset cursor when not holding down
+        }
     }
 
     handleMouseUp(event) {
@@ -223,7 +246,7 @@ export class MouseInputSystem {
             const dy = npcPos.y - playerPos.y;
             const distance = Math.sqrt(dx * dx + dy * dy) / this.TILE_SIZE;
             const interactRange = 3;
-            // removed isClick || from this conditional to stop opening when range is too far.
+           
             if ( isClick && distance <= interactRange) {
                 if (!this.hasInteractedWithNPC) {
                     this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
@@ -244,6 +267,7 @@ export class MouseInputSystem {
                 console.log(`MouseInputSystem: Moving to NPC ${npc.id} at tile (${tileX}, ${tileY})`);
                 return;
             }
+            
         }
         const target = this.getMonsterAtPosition(worldX, worldY);
         let monster = null, rangeToTarget = 1;
@@ -257,6 +281,7 @@ export class MouseInputSystem {
 
         if (gameState.isRangedMode || (monster && hasRangedWeapon && rangeToTarget <= playerRange )) {
             if (hasRangedWeapon && attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed && mana.mana >= 2 && !playerState.isCasting) {
+               
                 const now = performance.now();
                 if (now - this.lastAttackTime >= attackSpeed.attackSpeed) {
                     const targetX = monster ? (monster.getComponent('Position').x) : worldX;
@@ -282,6 +307,7 @@ export class MouseInputSystem {
         }
 
         if (monster) {
+            document.body.style.cursor = 'crosshair'; // Change cursor to pointer when hovering over monster
             const monsterPos = monster.getComponent('Position');
             const tileX = Math.floor(monsterPos.x / this.TILE_SIZE);
             const tileY = Math.floor(monsterPos.y / this.TILE_SIZE);
@@ -290,7 +316,7 @@ export class MouseInputSystem {
             this.setMovementTarget(targetX, targetY);
             return;
         }
-
+        
         this.setMovementTarget(worldX, worldY);
     }
 

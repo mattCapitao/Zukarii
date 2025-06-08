@@ -31,24 +31,23 @@ export class HudUiSystem extends System {
     init() {
         // Initialize HUD DOM elements
         this.playerInfo = document.getElementById('player-info');
-        this.playerStatus = document.getElementById('player-status');
         this.hud = document.getElementById('hud-layer');
         this.resources = document.getElementById('resources');
 
-        if (!this.playerInfo || !this.playerStatus || !this.hud || !this.resources) {
+        if (!this.playerInfo ||  !this.hud || !this.resources) {
             throw new Error('HUD elements not found');
         }
 
-        this.hudDOM.hpBar = this.playerStatus.querySelector('#hpBar');
-        this.hudDOM.hpText = this.playerStatus.querySelector('#hpText');
-        this.hudDOM.manaBar = this.playerStatus.querySelector('#manaBar');
-        this.hudDOM.manaText = this.playerStatus.querySelector('#manaText');
-        this.hudDOM.xpBar = this.playerStatus.querySelector('#xpBar');
-        this.hudDOM.xpText = this.playerStatus.querySelector('#xpText');
-        this.hudDOM.healPotionCount = this.playerStatus.querySelector('#healPotionCount');
-        this.hudDOM.torchCount = this.playerStatus.querySelector('#torchCount');
-        this.hudDOM.goldCount = this.resources.querySelector('#goldCount');
-        this.hudDOM.ashenShardCount = this.resources.querySelector('#ashenShardCount');
+        this.hudDOM.hpBar = this.hud.querySelector('#hpBar');
+        this.hudDOM.hpText = this.hud.querySelector('#hpText');
+        this.hudDOM.manaBar = this.hud.querySelector('#manaBar');
+        this.hudDOM.manaText = this.hud.querySelector('#manaText');
+        this.hudDOM.xpBar = this.hud.querySelector('#xpBar');
+        this.hudDOM.xpText = this.hud.querySelector('#xpText');
+        this.hudDOM.healPotionCount = this.hud.querySelector('#healPotionCount');
+        this.hudDOM.torchCount = this.hud.querySelector('#torchCount');
+        this.hudDOM.goldCount = this.hud.querySelector('#goldCount');
+        this.hudDOM.ashenShardCount = this.hud.querySelector('#ashenShardCount');
 
         if (!this.hudDOM.hpBar || !this.hudDOM.hpText ||
             !this.hudDOM.manaBar || !this.hudDOM.manaText ||

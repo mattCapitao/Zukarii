@@ -1632,6 +1632,7 @@ export class LevelSystem extends System {
         //console.log(`LevelSystem.js: checkLevelAfterTransitions - Completed for tier ${tier}`);
 
         this.utilities.pushPlayerActions('reachTier', { tier });
+        console.warn(`LevelSystem.js: Pushing player action reachTier:  ${tier}.`);
     }
 
     calculateDistance(x1, y1, x2, y2) {

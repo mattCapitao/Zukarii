@@ -232,13 +232,9 @@ export class EffectsSystem extends System {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
         const tier = params.tier || 0;
-       // gameState.destinationTier = tier;
-        console.warn(`EffectsSystem: Teleporting ${entityId} to Tier ${tier}`);
         levelTransition.pendingTransition = 'teleportToTier';
         levelTransition.destinationTier = tier;
-        //this.entityManager.setActiveTier(tier);
-        this.eventBus.emit('LogMessage', { message: `The Stone transports you to Tier ${tier}!` });
-        this.eventBus.emit('ItemUsed', { entityId, itemId: context.itemId });
+        this.utilities.logMessage( {channel:"system", message: `You are teleported to tier ${tier}!` });
     }
 
     forgeSpectralWyrmKey(entityId, params, context) {

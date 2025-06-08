@@ -7,6 +7,7 @@ export class InventorySystem extends System {
         this.requiredComponents = ['Inventory'];
     }
 
+
     init() {
         this.eventBus.on('AddItem', (data) => {
             this.addItem(data);
@@ -305,14 +306,48 @@ export class InventorySystem extends System {
             return;
         }
 
-        inventory.items.splice(itemIndex, 1); // Remove consumable item
         this.eventBus.emit('ItemUsed', { entityId, item, effect: item.useEffect, params: item.params || {} });
-        this.utilities.pushPlayerActions('useItem', { itemId: item.id });
-        this.eventBus.emit('LogMessage', { message: `Used ${item.name}` });
+        let itemId = item.id || uniqueId;
+
+        if (item.journeyItemId != null) {
+            itemId = item.journeyItemId;
+        }
+
+        this.utilities.pushPlayerActions('useItem', { itemId });
         this.eventBus.emit('StatsUpdated', { entityId });
+        this.utilities.logMessage({ channel: "system", message: `Used ${item.name}` });
+
+        if (item.type === 'consumable') {
+            this.removeItem({ entityId, uniqueId });
+        }
     }
 
-    isSlotCompatible(item, slot) {
+    removeItem({ entityId, uniqueId }) {
+        const entity = this.entityManager.getEntity(entityId);
+        if (!entity) return;
+        const inventory = entity.getComponent('Inventory');
+        if (!inventory) return;
+        const item = inventory.items.find(item => item.uniqueId === uniqueId);
+        const itemIndex = inventory.items.findIndex(item => item.uniqueId === uniqueId);
+        if (itemIndex === -1) {
+            console.error('InventorySystem: Item with uniqueId not found:', uniqueId);
+            return;
+        }
+        if (!item.quantity) {
+            item.quantity = 1; // Default quantity if not specified
+        }
+ 
+        item.quantity--; 
+   
+        if (item.quantity <= 0) {
+            inventory.items.splice(itemIndex, 1); // Remove consumable item
+        } else {
+            this.utilities.logMessage({ channel: "system", message: `${item.quantity} ${item.name}, left in inventory ` });
+        }
+        
+    }
+
+    isSlotCompatible(item, slot) { 
         const slotMap = {
             amulet: ["amulet"],
             armor: ["armor"],

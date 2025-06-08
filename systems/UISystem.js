@@ -1275,7 +1275,7 @@ export class UISystem extends System {
             console.error("Tooltip cache not initialized");
             this.tooltipCache = new Map();
         }
-
+        
         let tooltip = this.tooltipCache.get(itemData.uniqueId);
         if (!tooltip) {
             tooltip = document.createElement('div');
