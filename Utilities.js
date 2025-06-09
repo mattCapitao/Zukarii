@@ -239,4 +239,173 @@ export class Utilities {
             y: tileY * this.TILE_SIZE
         };
     }
+
+    isWalkable(entityId, tileX, tileY) {
+        if (!Number.isFinite(tileX) || !Number.isFinite(tileY)) {
+            console.error(`Utilities.isWalkable: Invalid tile coordinates (tileX=${tileX}, tileY=${tileY}), entityId=${entityId}`);
+            return false;
+        }
+
+        const pixel = this.getPixelFromTile(tileX, tileY);
+        const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
+            const ePos = e.getComponent('Position');
+            return ePos.x === pixel.x && ePos.y === pixel.y;
+        });
+
+        const isBlocked = entitiesAtTarget.some(e =>
+            e.hasComponent('Wall') ||
+            e.hasComponent('Stair') ||
+            e.hasComponent('Portal') ||
+            e.hasComponent('Fountain') ||
+            (entityId !== e.id && e.hasComponent('MonsterData')) ||
+            (entityId !== e.id && e.hasComponent('NPCData'))
+        );
+        const hasFloor = entitiesAtTarget.some(e => e.hasComponent('Floor'));
+
+        if (isBlocked) {
+            console.log(`Utilities.isWalkable: Tile (${tileX}, ${tileY}) pixel (${pixel.x}, ${pixel.y}) blocked=${isBlocked}, entityId=${entityId || 'undefined'}, entities:`,
+                entitiesAtTarget.map(e => ({
+                    id: e.id,
+                    components: Array.from(e.components.keys()),
+                    pos: e.getComponent('Position')
+                })));
+        }
+        /*
+        if (!hasFloor) {
+            console.log(`Utilities.isWalkable: Tile (${tileX}, ${tileY}) pixel (${pixel.x}, ${pixel.y}) hasFloor=${hasFloor}, entityId=${entityId}, entities:`,
+                entitiesAtTarget.map(e => ({
+                    id: e.id,
+                    components: Array.from(e.components.keys()),
+                    pos: e.getComponent('Position')
+                })));
+        }
+        */
+        return !isBlocked; // && hasFloor;
+    }
+
+    findPathAStar(start, goal, entityId, tileSize = 1, maxIterations = 500, isWalkable = null) {
+        console.log(`findPathAStar: Starting from (${start.x}, ${start.y}) to (${goal.x}, ${goal.y}), entityId=${entityId}`);
+
+        const walkable = isWalkable || ((tileX, tileY) => this.isWalkable(entityId, tileX, tileY));
+
+        function nodeKey(x, y) {
+            return `${x},${y}`;
+        }
+
+        function heuristic(a, b) {
+            return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); // Manhattan distance
+        }
+
+        const directions = [
+            { x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 },
+            { x: -1, y: -1 }, { x: 1, y: -1 }, { x: -1, y: 1 }, { x: 1, y: 1 }
+        ];
+
+        const openSet = [{ x: start.x, y: start.y }];
+        const cameFrom = new Map();
+        const gScore = new Map();
+        const fScore = new Map();
+
+        gScore.set(nodeKey(start.x, start.y), 0);
+        fScore.set(nodeKey(start.x, start.y), heuristic(start, goal));
+
+        // Validate start and goal positions
+        if (!walkable(start.x, start.y)) {
+            const pixel = this.getPixelFromTile(start.x, start.y);
+            const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
+                const ePos = e.getComponent('Position');
+                return ePos.x === pixel.x && ePos.y === pixel.y;
+            });
+            console.warn(`findPathAStar: Start tile (${start.x}, ${start.y}) pixel (${pixel.x}, ${pixel.y}) is not walkable, entityId=${entityId}, entities:`,
+                entitiesAtTarget.map(e => ({
+                    id: e.id,
+                    components: Array.from(e.components.keys()),
+                    pos: e.getComponent('Position')
+                })));
+            return [];
+        }
+        if (!walkable(goal.x, goal.y)) {
+            const pixel = this.getPixelFromTile(goal.x, goal.y);
+            const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
+                const ePos = e.getComponent('Position');
+                return ePos.x === pixel.x && ePos.y === pixel.y;
+            });
+            console.warn(`findPathAStar: Goal tile (${goal.x}, ${goal.y}) pixel (${pixel.x}, ${pixel.y}) is not walkable, entityId=${entityId}, entities:`,
+                entitiesAtTarget.map(e => ({
+                    id: e.id,
+                    components: Array.from(e.components.keys()),
+                    pos: e.getComponent('Position')
+                })));
+            return [];
+        }
+
+        let iterations = 0;
+
+        while (openSet.length > 0 && iterations < maxIterations) {
+            let currentIdx = 0;
+            let current = openSet[0];
+            for (let i = 1; i < openSet.length; i++) {
+                const node = openSet[i];
+                if ((fScore.get(nodeKey(node.x, node.y)) || Infinity) < (fScore.get(nodeKey(current.x, current.y)) || Infinity)) {
+                    current = node;
+                    currentIdx = i;
+                }
+            }
+
+            if (current.x === goal.x && current.y === goal.y) {
+                const path = [];
+                let currKey = nodeKey(current.x, current.y);
+                while (cameFrom.has(currKey)) {
+                    path.unshift({ x: current.x, y: current.y });
+                    current = cameFrom.get(currKey);
+                    currKey = nodeKey(current.x, current.y);
+                }
+                path.unshift({ x: start.x, y: start.y });
+                console.log(`findPathAStar: Path found with length ${path.length}:`, path);
+                return path;
+            }
+
+            openSet.splice(currentIdx, 1);
+
+            for (const dir of directions) {
+                const neighbor = { x: current.x + dir.x, y: current.y + dir.y };
+                const neighborKey = nodeKey(neighbor.x, neighbor.y);
+                const neighborPixel = this.getPixelFromTile(neighbor.x, neighbor.y);
+                const isWalkableResult = walkable(neighbor.x, neighbor.y);
+
+                console.log(`findPathAStar: Neighbor tile (${neighbor.x}, ${neighbor.y}) pixel (${neighborPixel.x}, ${neighborPixel.y}) walkable=${isWalkableResult}`);
+                if (!isWalkableResult) {
+                    const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
+                        const ePos = e.getComponent('Position');
+                        return ePos.x === neighborPixel.x && ePos.y === neighborPixel.y;
+                    });
+                    console.log(`findPathAStar: Neighbor blocked, entities:`, entitiesAtTarget.map(e => ({
+                        id: e.id,
+                        components: Array.from(e.components.keys()),
+                        pos: e.getComponent('Position')
+                    })));
+                    continue;
+                }
+
+                const cost = (Math.abs(dir.x) + Math.abs(dir.y) === 2 ? 1.414 : 1);
+                const tentativeG = (gScore.get(nodeKey(current.x, current.y)) || 0) + cost;
+
+                console.log(`findPathAStar: Neighbor (${neighbor.x}, ${neighbor.y}) tentativeG=${tentativeG}, gScore=${gScore.get(neighborKey) || 'undefined'}`);
+
+                if (!gScore.has(neighborKey) || tentativeG < gScore.get(neighborKey)) {
+                    cameFrom.set(neighborKey, current);
+                    gScore.set(neighborKey, tentativeG);
+                    fScore.set(neighborKey, tentativeG + heuristic(neighbor, goal));
+                    if (!openSet.some(n => n.x === neighbor.x && n.y === neighbor.y)) {
+                        openSet.push(neighbor);
+                        console.log(`findPathAStar: Added neighbor (${neighbor.x}, ${neighbor.y}) to openSet`);
+                    }
+                }
+            }
+            iterations++;
+        }
+
+        console.warn(`findPathAStar: No path found after ${iterations} iterations, openSet size: ${openSet.length}`);
+        return [];
+    }
 }
