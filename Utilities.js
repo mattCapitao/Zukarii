@@ -4,6 +4,7 @@ export class Utilities {
     constructor() {
         this.entityManager = null; 
         this.eventBus = null;
+        this.TILE_SIZE = 32;
     } 
 
     pushPlayerActions(actionType, actionData) {
@@ -221,5 +222,21 @@ export class Utilities {
         return messages;
     }
 
+    getTileFromPixel(x, y) {
+        // Convert unscaled pixel coordinates to tile coordinates using Math.floor
+        // e.g., x = 385.31156569650386 → tileX = 12 (maps to [384, 416))
+        return {
+            tileX: Math.floor(x / this.TILE_SIZE),
+            tileY: Math.floor(y / this.TILE_SIZE)
+        };
+    }
 
+    getPixelFromTile(tileX, tileY) {
+        // Convert tile coordinates to unscaled pixel coordinates (top-left of tile)
+        // e.g., tileX = 12 → x = 384
+        return {
+            x: tileX * this.TILE_SIZE,
+            y: tileY * this.TILE_SIZE
+        };
+    }
 }

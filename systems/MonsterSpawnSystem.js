@@ -446,7 +446,8 @@ export class MonsterSpawnSystem extends System {
             e.hasComponent('Wall') ||
             e.hasComponent('Stair') ||
             e.hasComponent('Portal') ||
-            e.hasComponent('Fountain')
+            e.hasComponent('Fountain') ||
+            e.hasComponent('MonsterData')
         );
         const hasFloor = entitiesAtTarget.some(e => e.hasComponent('Floor'));
         return !isBlocked && hasFloor;

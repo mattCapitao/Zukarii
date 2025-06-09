@@ -11,10 +11,10 @@ export class MonsterControllerSystem extends System {
     }
 
     init() {
-        this.TILE_SIZE = 32;
+        this.TILE_SIZE = this.utilities.TILE_SIZE
         this.AGGRO_RANGE = 4 * this.TILE_SIZE; // 4 tiles in pixels (32 pixels per tile)
         this.MELEE_RANGE = 1.5 * this.TILE_SIZE; // Pixel distance to trigger melee attack
-        this.MONSTER_WANDER_CHANCE = 5;
+        this.MONSTER_WANDER_CHANCE = .5;
     }
     update(deltaTime) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
@@ -92,26 +92,44 @@ export class MonsterControllerSystem extends System {
                 );
                 ////console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to player at (${playerPos.x}, ${playerPos.y}), distance to player: ${distance.toFixed(2)} pixels`);
             } else {
-                // If not aggro, random chance to wander
+                if (
+                    !monster.hasComponent('MovementIntent') &&
+                    !monsterData.isAggro &&
+                    !monsterData.isBoss &&
+                    Math.random() < this.MONSTER_WANDER_CHANCE / 100
+                ) {
+                    const { tileX, tileY } = this.utilities.getTileFromPixel(pos.x, pos.y);
+                    const startPixel = this.utilities.getPixelFromTile(tileX, tileY);
 
-                if (!monster.hasComponent('MovementIntent')
-                    && (Math.floor(Math.random() * 100) < this.MONSTER_WANDER_CHANCE)
-                    && monsterData.isBoss !== true)
-                { // Bosses don't wander
-                 
-                    const wander = {};
-                    wander.x = pos.x + (Math.floor(Math.random() * 3) - 1) * this.TILE_SIZE;
-                    wander.y = pos.y + (Math.floor(Math.random() * 3) - 1) * this.TILE_SIZE;
+                    // Validate current position using rounded pixel coordinates
+                    if (!this.isWalkable(monster, startPixel.x, startPixel.y)) {
+                        console.warn(`MonsterControllerSystem: ${monsterData.name} at pixel (${pos.x}, ${pos.y}) tile (${tileX}, ${tileY}) is not walkable at rounded (${startPixel.x}, ${startPixel.y})`);
+                        return;
+                    }
 
-                    if (this.isWalkable(wander.x, wander.y)) {
+                    // Generate random offset (-1, 0, or 1 tile)
+                    const offsetX = Math.floor(Math.random() * 3) - 1;
+                    const offsetY = Math.floor(Math.random() * 3) - 1;
+
+                    // Skip if no movement
+                    if (offsetX === 0 && offsetY === 0) {
+                        return;
+                    }
+
+                    const wanderTileX = tileX + offsetX;
+                    const wanderTileY = tileY + offsetY;
+                    const wanderPixel = this.utilities.getPixelFromTile(wanderTileX, wanderTileY);
+
+                    if (this.isWalkable(monster, wanderPixel.x, wanderPixel.y)) {
                         this.entityManager.addComponentToEntity(
                             monster.id,
-                            new MovementIntentComponent(wander.x, wander.y)
+                            new MovementIntentComponent(wanderPixel.x, wanderPixel.y)
                         );
-                    } //console.log(`MonsterControllerSystem: ${monsterData.name} intends to wander to (${wander.x}, ${wander.y})`);
-
+                        console.log(`MonsterControllerSystem: ${monsterData.name} wandering to pixel (${wanderPixel.x}, ${wanderPixel.y}) tile (${wanderTileX}, ${wanderTileY})`);
+                    } else {
+                        console.log(`MonsterControllerSystem: ${monsterData.name} wander target pixel (${wanderPixel.x}, ${wanderPixel.y}) tile (${wanderTileX}, ${wanderTileY}) is not walkable`);
+                    }
                 }
-               
             }
         });
     }
@@ -175,18 +193,31 @@ export class MonsterControllerSystem extends System {
     }
 
     // systems/MonsterControllerSystem.js - New isWalkable method
-    isWalkable(x, y) {
+    isWalkable(walker, x, y) {
+        // Round pixel coordinates to the nearest tile boundary to handle floating-point drift
+        const { tileX, tileY } = this.utilities.getTileFromPixel(x, y);
+        const roundedPixel = this.utilities.getPixelFromTile(tileX, tileY);
+
         const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
             const ePos = e.getComponent('Position');
-            return ePos.x === x && ePos.y === y;
+            return ePos.x === roundedPixel.x && ePos.y === roundedPixel.y;
         });
+
         const isBlocked = entitiesAtTarget.some(e =>
             e.hasComponent('Wall') ||
             e.hasComponent('Stair') ||
             e.hasComponent('Portal') ||
-            e.hasComponent('Fountain')
+            e.hasComponent('Fountain') ||
+            (walker.id !== e.id && e.hasComponent('MonsterData')) ||
+            (walker.id !== e.id && e.hasComponent('NPCData'))
         );
         const hasFloor = entitiesAtTarget.some(e => e.hasComponent('Floor'));
+
+        if (!hasFloor || isBlocked) {
+            console.log(`MonsterControllerSystem.isWalkable: Pixel (${x}, ${y}) rounded to (${roundedPixel.x}, ${roundedPixel.y}) blocked=${isBlocked}, hasFloor=${hasFloor}, entities:`,
+                entitiesAtTarget.map(e => ({ id: e.id, components: Array.from(e.components.keys()) })));
+        }
+
         return !isBlocked && hasFloor;
     }
 }
