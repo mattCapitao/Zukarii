@@ -351,6 +351,9 @@ export class InventorySystem extends System {
         const slotMap = {
             amulet: ["amulet"],
             armor: ["armor"],
+            head: ["head"],
+            gloves: ["gloves"],
+            boots: ["boots"],
             ring: ["leftring", "rightring"],
             weapon: ["mainhand", "offhand"]
         };

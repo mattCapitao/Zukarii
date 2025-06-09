@@ -1036,24 +1036,24 @@ hr {
     background-image: url("img/icons/item_slots/armor.svg");
 }
 
-#tabs #equipped-items p.equip-slot.head {
-    background-image: url('img/icons/item-slots/head.svg');
+#tabs #equipped-items p.equip-slot.head.empty {
+    background-image: url("img/icons/item_slots/head.svg");
 }
 
-#tabs #equipped-items p.equip-slot.gloves {
-    background-image: url('img/icons/item-slots/gloves.svg');
+#tabs #equipped-items p.equip-slot.gloves.empty {
+    background-image: url("img/icons/item_slots/gloves.svg");
 }
 
-#tabs #equipped-items p.equip-slot.belt {
-    background-image: url('img/icons/item-slots/belt.svg');
+#tabs #equipped-items p.equip-slot.belt.empty {
+    background-image: url("img/icons/item_slots/belt.svg");
 }
 
-#tabs #equipped-items p.equip-slot.legs {
-    background-image: url('img/icons/item-slots/legs.svg');
+#tabs #equipped-items p.equip-slot.legs.empty {
+    background-image: url("img/icons/item_slots/legs.svg");
 }
 
-#tabs #equipped-items p.equip-slot.boots {
-    background-image: url('img/icons/item-slots/boots.svg');
+#tabs #equipped-items p.equip-slot.boots.empty {
+    background-image: url("img/icons/item_slots/boots.svg");
 }
 
 #menu-content {

@@ -1095,11 +1095,15 @@ export class MenuUiSystem extends System {
         const slotMap = {
             amulet: ["amulet"],
             armor: ["armor"],
+            head: ["head"],
+            gloves: ["gloves"],
+            boots: ["boots"],
             ring: ["leftring", "rightring"],
             weapon: ["mainhand", "offhand"]
         };
         const validSlots = slotMap[item.type];
         return validSlots?.includes(slot) || false;
+        console.log(`MenuUiSystem: isSlotCompatible called with item type ${item} and slot ${slot}`);
     }
 
     gameOver(dataObj) {
@@ -1177,6 +1181,21 @@ export class MenuUiSystem extends System {
                 armor.className = 'item-tooltip-armor';
                 armor.textContent = `Armor: ${itemData.armor || 0}`;
                 content.appendChild(armor);
+            } else if (itemData.type === "head") {
+                const armor = document.createElement('div');
+                armor.className = 'item-tooltip-armor';
+                armor.textContent = `Armor: ${itemData.armor || 0}`;
+                content.appendChild(armor);
+            } else if (itemData.type === "gloves") {
+                const armor = document.createElement('div');
+                armor.className = 'item-tooltip-armor';
+                armor.textContent = `Armor: ${itemData.armor || 0}`;
+                content.appendChild(armor);
+            } else if (itemData.type === "boots") {
+                const movementSpeed = document.createElement('div');
+                movementSpeed.className = 'item-tooltip-movementSpeed';
+                movementSpeed.textContent = `Move Speed: ${itemData.baseMovementSpeed || 0}%`;
+                content.appendChild(movementSpeed);
             }
 
             if ('stats' in itemData && itemData.stats) {

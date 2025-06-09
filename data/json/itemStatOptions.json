@@ -13,6 +13,18 @@
     "base": [ "armor" ],
     "bonus": [ "maxHp", "prowess", "agility", "block", "defense" ]
   },
+  "head": {
+    "base": [ "armor" ],
+    "bonus": [ "maxHp", "prowess", "intellect", "agility", "defense" ]
+  },
+  "gloves": {
+    "base": [ "armor" ],
+    "bonus": [ "maxHp", "prowess", "agility", "block", "damageBonus" ]
+  },
+  "boots": {
+    "base": [ "baseMovementSpeed" ],
+    "bonus": [ "movementSpeed", "agility", "dodge", "defense" ]
+  },
   "amulet": {
     "base": [ "maxLuck" ],
     "bonus": [

@@ -8,7 +8,7 @@ export class StatsComponent {
     constructor({
         unallocated = 0, intellect = 0, prowess = 0, agility = 0, maxHp = 0, maxMana = 0,
         armor = 0, defense = 0, block = 0, dodge = 0, range = 0, resistMagic = 0, baseRange = 0,
-        damageBonus = 0, meleeBonus = 0, rangedBonus = 0, luck = 0, maxLuck = 0 , movementSpeed = 0,
+        damageBonus = 0, meleeBonus = 0, rangedBonus = 0, luck = 0, maxLuck = 0 , movementSpeed = 0,baseMovementSpeed =0
     } = {}) {
         this.type = 'Stats';
         this.unallocated = unallocated;
@@ -30,21 +30,22 @@ export class StatsComponent {
         this.luck = luck;
         this.maxLuck = maxLuck;
         this.movementSpeed = movementSpeed;
+        this.baseMovementSpeed = baseMovementSpeed;
         this.isLocked = false;
 
         this._internal = {
             base: {
                 intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0,
                 armor: 0, defense: 0, block: 0, dodge: 0, range: 0, resistMagic: 0, baseRange: 0,
-                damageBonus: 0, meleeBonus: 0, rangedBonus: 0, luck: 0, maxLuck: 0
+                damageBonus: 0, meleeBonus: 0, rangedBonus: 0, luck: 0, maxLuck: 0, movementSpeed: 0,
             },
             gear: {
-                intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0,
+                intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0, baseMovementSpeed: 0,
                 armor: 0, defense: 0, block: 0, dodge: 0, range: 0, resistMagic: 0, baseRange: 0,
                 damageBonus: 0, meleeBonus: 0, rangedBonus: 0, luck: 0, maxLuck: 0, movementSpeed: 0,
             },
             temp: {
-                intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0,
+                intellect: 0, prowess: 0, agility: 0, maxHp: 0, maxMana: 0, baseMovementSpeed: 0,
                 armor: 0, defense: 0, block: 0, dodge: 0, range: 0, resistMagic: 0, baseRange: 0,
                 damageBonus: 0, meleeBonus: 0, rangedBonus: 0, luck: 0, maxLuck: 0, movementSpeed: 0,
             },

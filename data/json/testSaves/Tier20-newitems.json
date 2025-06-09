@@ -1,0 +1,1480 @@
+﻿{
+  "timestamp": "6/8/2025, 5:33:00 PM",
+  "characterName": "journey bunny",
+  "tier": 20,
+  "isDead": false,
+  "player": {
+    "Position": {
+      "type": "Position",
+      "x": 442.2332704942837,
+      "y": 1497.1388467985385
+    },
+    "Health": {
+      "type": "Health",
+      "hp": 501,
+      "maxHp": 501,
+      "healthRegen": 0,
+      "updated": true
+    },
+    "Mana": {
+      "type": "Mana",
+      "mana": 167,
+      "maxMana": 167,
+      "manaRegen": 4,
+      "updated": false
+    },
+    "Stats": {
+      "type": "Stats",
+      "unallocated": 3,
+      "intellect": 22,
+      "prowess": 12,
+      "agility": 25,
+      "maxHp": 501,
+      "maxMana": 167,
+      "armor": 13,
+      "defense": 10,
+      "block": 14,
+      "dodge": 0,
+      "range": 7,
+      "resistMagic": 0,
+      "baseRange": 0,
+      "damageBonus": 2,
+      "meleeBonus": 3,
+      "rangedBonus": 1,
+      "luck": 0,
+      "maxLuck": 0,
+      "movementSpeed": 145,
+      "baseMovementSpeed": 0,
+      "isLocked": false,
+      "_internal": {
+        "base": {
+          "intellect": 11,
+          "prowess": 11,
+          "agility": 11,
+          "maxHp": 30,
+          "maxMana": 10,
+          "armor": 0,
+          "defense": 0,
+          "block": 0,
+          "dodge": 0,
+          "range": 0,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 0,
+          "meleeBonus": 0,
+          "rangedBonus": 0,
+          "luck": 0,
+          "maxLuck": 0,
+          "movementSpeed": 100,
+          "baseMovementSpeed": 0
+        },
+        "gear": {
+          "intellect": 2,
+          "prowess": 1,
+          "agility": 14,
+          "maxHp": 116,
+          "maxMana": 0,
+          "armor": 13,
+          "defense": 10,
+          "block": 14,
+          "dodge": 0,
+          "range": 7,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 2,
+          "meleeBonus": 3,
+          "rangedBonus": 1,
+          "luck": 0,
+          "maxLuck": 0,
+          "movementSpeed": "45.",
+          "baseMovementSpeed": 0
+        },
+        "temp": {
+          "intellect": 0,
+          "prowess": 0,
+          "agility": 0,
+          "luck": 0,
+          "maxHp": 0,
+          "maxMana": 0,
+          "movementSpeed": 0,
+          "armor": 0,
+          "defense": 0,
+          "block": 0,
+          "dodge": 0,
+          "range": 0,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 0,
+          "meleeBonus": 0,
+          "rangedBonus": 0,
+          "maxLuck": 0
+        },
+        "incremented": {
+          "intellect": 9,
+          "prowess": 0,
+          "agility": 0
+        }
+      }
+    },
+    "Inventory": {
+      "type": "Inventory",
+      "equipped": {
+        "mainhand": {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 3,
+          "baseDamageMax": 8,
+          "icon": "dagger.svg",
+          "baseBlock": 4,
+          "stats": {
+            "agility": 1,
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbnoe0cm-fjmknz-wes889",
+          "description": "rare weapon",
+          "goldValue": 419,
+          "isSellable": true,
+          "equippedSlot": "mainhand"
+        },
+        "offhand": {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 1,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 3,
+          "baseDamageMax": 8,
+          "icon": "orb-wand.svg",
+          "baseRange": 7,
+          "stats": {
+            "rangedBonus": 1,
+            "damageBonus": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbnpvhn4-w5uzaw-wcsn36",
+          "description": "rare weapon",
+          "goldValue": 506,
+          "isSellable": true,
+          "equippedSlot": "offhand"
+        },
+        "armor": {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1,
+            "maxHp": 16
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbn70nvi-32pq4v-xwla2b",
+          "description": "rare armor",
+          "goldValue": 449,
+          "isSellable": true,
+          "equippedSlot": "armor"
+        },
+        "amulet": {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 8,
+          "icon": "amulet.svg",
+          "stats": {
+            "damageBonus": 1,
+            "meleeBonus": 3
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbn6vvgw-5caea8-2l09cj",
+          "description": "rare amulet",
+          "goldValue": 331,
+          "isSellable": true,
+          "equippedSlot": "amulet"
+        },
+        "leftring": {
+          "name": "Band of Zu",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 10,
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "collectItem": true,
+          "goldValue": 0,
+          "isSellable": false,
+          "stats": {
+            "intellect": 2,
+            "agility": 2
+          },
+          "description": "The Power of the Zarath flows through this mithril band.",
+          "uniqueId": "mbn6on3x-513a0k-oa4joy",
+          "journeyItemId": "bandOfZu",
+          "icon": "ring.svg",
+          "affixes": [],
+          "equippedSlot": "leftring"
+        },
+        "rightring": {
+          "name": "Golden Buniyar Band",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 78,
+          "tierIndex": 6,
+          "itemTier": "relic",
+          "goldValue": 659.333333,
+          "stats": {
+            "maxHp": 100,
+            "agility": 10,
+            "block": 10,
+            "defense": 10,
+            "armor": 10,
+            "movementSpeed": 45
+          },
+          "description": "All marvel at the Grace and Speed of the Grand Buniyar.",
+          "uniqueId": "mbn264d0-yzhfk5-d5l99d",
+          "icon": "golden-bunny.png",
+          "affixes": [
+            {
+              "name": "resilience",
+              "type": "combat",
+              "trigger": "hitByAttack",
+              "effect": "instantHeal",
+              "params": {
+                "minHealPercentage": 0.05,
+                "maxHealPercentage": 0.1,
+                "chanceToHeal": 0.05
+              },
+              "description": "Chance to recover a percentage of missing health on being hit."
+            }
+          ],
+          "purchasePrice": 1978,
+          "equippedSlot": "rightring"
+        }
+      },
+      "items": [
+        {
+          "tierIndex": 2,
+          "type": "amulet",
+          "name": "Sigil of Zukarath",
+          "journeyItemId": "sigilOfZukarath",
+          "itemTier": "rare",
+          "maxLuck": 7,
+          "icon": "amulet.svg",
+          "stats": {
+            "block": 1,
+            "prowess": 1
+          },
+          "critStats": [],
+          "uniqueId": "mbn2ngn1-9a35rl-hjsot2",
+          "description": "rare amulet",
+          "goldValue": 263,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 2,
+          "type": "amulet",
+          "name": "Holy Trinket",
+          "itemTier": "rare",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "defense": 1,
+            "intellect": 1
+          },
+          "critStats": [],
+          "uniqueId": "mbo68fmk-o0jysx-28o281",
+          "description": "rare amulet",
+          "goldValue": 364,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 9,
+          "icon": "amulet.svg",
+          "stats": {
+            "defense": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbo69455-2dpdrx-lay990",
+          "description": "rare amulet",
+          "goldValue": 454,
+          "isSellable": true,
+          "purchasePrice": 1362
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 8,
+          "icon": "amulet.svg",
+          "stats": {
+            "defense": 1,
+            "maxHp": 17
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbo6b53b-jzg2gu-utsp00",
+          "description": "rare amulet",
+          "goldValue": 604,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "type": "armor",
+          "name": "Vestment of Zukarath",
+          "journeyItemId": "vestmentOfZukarath",
+          "itemTier": "rare",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1,
+            "maxHp": 10
+          },
+          "critStats": [],
+          "uniqueId": "mbn2bopp-prq2fd-tsixf8",
+          "description": "rare armor",
+          "goldValue": 256,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "maxHp": 12,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbo67cok-hxsy5z-zb2q5k",
+          "description": "rare armor",
+          "goldValue": 514,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "defense": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbo694xn-7hrgkp-3rly4r",
+          "description": "rare armor",
+          "goldValue": 404,
+          "isSellable": true,
+          "purchasePrice": 1212
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "defense": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbo695g8-puwsxb-i0uv1s",
+          "description": "rare armor",
+          "goldValue": 404,
+          "isSellable": true,
+          "purchasePrice": 1212
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbnzbmd8-ow07uj-i470wi",
+          "description": "common armor",
+          "goldValue": 178,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbnzcg0w-qg6ei8-h395f6",
+          "description": "common armor",
+          "goldValue": 173,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbnzbcnd-tjxp63-0d0iwp",
+          "description": "common armor",
+          "goldValue": 178,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbnzcpmc-qnhufi-gzqum0",
+          "description": "common armor",
+          "goldValue": 178,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbo67o3c-536tz0-5vdswc",
+          "description": "common armor",
+          "goldValue": 182,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbo6eegb-g8nt20-mw6ey1",
+          "description": "common armor",
+          "goldValue": 187,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "armor",
+          "armor": 1,
+          "icon": "armor.svg",
+          "name": "junk armor",
+          "uniqueId": "mbo69o2k-27jvua-vra6d6",
+          "description": "junk armor",
+          "goldValue": 89,
+          "isSellable": true
+        },
+        {
+          "itemId": "mbn4b13g-9ool44-d50vkt",
+          "journeyItemId": "stoneOfVeilPiercing",
+          "name": "Stone of Veil Piercing",
+          "type": "consumable",
+          "itemTier": "rare",
+          "goldValue": 0,
+          "useItem": true,
+          "useEffect": "teleportToTier",
+          "params": {
+            "tier": 7
+          },
+          "description": "A mystical stone that Will teleport you to the 7th tier of Zurath.",
+          "icon": "stone_of_veil_peirce.png",
+          "isSellable": false,
+          "uniqueId": "mbn4b13g-zfdhtt-qexpmt"
+        },
+        {
+          "itemId": "mbnpk6kr-i3csh8-fc0brm",
+          "journeyItemId": "stoneOfReturn",
+          "name": "Stone of Return",
+          "type": "consumable",
+          "itemTier": "common",
+          "goldValue": 0,
+          "useItem": true,
+          "useEffect": "teleportToTier",
+          "params": {
+            "tier": 0
+          },
+          "description": "A mystical stone that returns you to the surface of Zurath.",
+          "icon": "stone_of_return.png",
+          "isSellable": false,
+          "uniqueId": "mbnpk6kr-uabi0h-2gwpw7"
+        },
+        {
+          "itemId": "mbnoj46i-7ngtpo-mbmhlm",
+          "journeyItemId": "spectralWyrmKey",
+          "name": "Spectral Wyrm Key",
+          "type": "journey",
+          "itemTier": "magic",
+          "goldValue": 0,
+          "collectItem": true,
+          "isJourneyItem": true,
+          "description": "Posessing this Key allows passage to Ashangal.",
+          "icon": "spectral_wyrm_key.png",
+          "isSellable": false,
+          "uniqueId": "mbnoj46i-915l2j-n0u516"
+        },
+        {
+          "itemId": "mbnpk6kr-0epd1p-fl0tre",
+          "journeyItemId": "shardOfEchoes",
+          "name": "Shard of Echoes",
+          "type": "journey",
+          "itemTier": "magic",
+          "goldValue": 0,
+          "isJourneyItem": true,
+          "description": "A fragment pulsing with ancient whispers, guiding you to the Echoes.",
+          "icon": "shard_of_echoes.png",
+          "isSellable": false,
+          "uniqueId": "mbnpk6kr-wra3w3-2t0cys"
+        },
+        {
+          "name": "Golden Buniyar Band",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 78,
+          "tierIndex": 6,
+          "itemTier": "relic",
+          "goldValue": 659.333333,
+          "stats": {
+            "maxHp": 100,
+            "agility": 10,
+            "block": 10,
+            "defense": 10,
+            "armor": 10,
+            "movementSpeed": 45
+          },
+          "description": "All marvel at the Grace and Speed of the Grand Buniyar.",
+          "uniqueId": "mbo696zd-ih15jd-jqqusw",
+          "icon": "golden-bunny.png",
+          "affixes": [
+            {
+              "name": "resilience",
+              "type": "combat",
+              "trigger": "hitByAttack",
+              "effect": "instantHeal",
+              "params": {
+                "minHealPercentage": 0.05,
+                "maxHealPercentage": 0.1,
+                "chanceToHeal": 0.05
+              },
+              "description": "Chance to recover a percentage of missing health on being hit."
+            }
+          ],
+          "purchasePrice": 1978
+        },
+        {
+          "name": "Band of Karn",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 10,
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "collectItem": true,
+          "goldValue": 0,
+          "isSellable": false,
+          "stats": {
+            "prowess": 2,
+            "maxHp": 50
+          },
+          "description": "The Power of the Khetar flows through this steel band.",
+          "uniqueId": "mbn4bl0x-239i6i-0r1g8d",
+          "journeyItemId": "bandOfKarn",
+          "icon": "ring.svg",
+          "affixes": []
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": -2,
+          "icon": "ring.svg",
+          "stats": {
+            "intellect": 1,
+            "maxHp": 14
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbo693o9-0z1nq8-2p9tfz",
+          "description": "rare ring",
+          "goldValue": 474,
+          "isSellable": true,
+          "purchasePrice": 1422
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": -2,
+          "icon": "ring.svg",
+          "stats": {
+            "maxMana": 6,
+            "damageBonus": 3
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbo6bnph-nwji9i-taldvt",
+          "description": "rare ring",
+          "goldValue": 414,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTierIndexBonus": 2,
+          "type": "ring",
+          "name": "Eyestalk Ring",
+          "itemTier": "common",
+          "maxLuck": 7,
+          "icon": "ring.svg",
+          "stats": {
+            "defense": 1
+          },
+          "critStats": [],
+          "uniqueId": "mbnzcg0w-tcoonh-nitww0",
+          "description": "common ring",
+          "goldValue": 203,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 4,
+          "baseDamageMax": 7,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "block": 1,
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbnpv6j1-1e87zi-8wdhqg",
+          "description": "rare weapon",
+          "goldValue": 466,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 4,
+          "baseDamageMax": 9,
+          "icon": "dagger.svg",
+          "baseBlock": 4,
+          "stats": {
+            "block": 1,
+            "damageBonus": 3
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbo694if-kys17a-hdbxb3",
+          "description": "rare weapon",
+          "goldValue": 554,
+          "isSellable": true,
+          "purchasePrice": 1662
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 2,
+          "icon": "dagger.svg",
+          "baseBlock": 2,
+          "stats": {
+            "meleeBonus": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbnzb12p-8shp56-nvp4co",
+          "description": "common weapon",
+          "goldValue": 183,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 3,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "meleeBonus": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbnzb9mv-6opw17-dthbmb",
+          "description": "common weapon",
+          "goldValue": 198,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 3,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "damageBonus": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbo679bs-jyrj3z-hyezoc",
+          "description": "common weapon",
+          "goldValue": 208,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 5,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "block": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbo68fmk-ykcqyl-fpieho",
+          "description": "common weapon",
+          "goldValue": 222,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 6,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "meleeBonus": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbo68f98-bj2rvm-uej416",
+          "description": "common weapon",
+          "goldValue": 227,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 3,
+          "icon": "dagger.svg",
+          "baseBlock": 2,
+          "name": "common weapon",
+          "uniqueId": "mbo6ds8s-y9e9bc-ogj4a9",
+          "description": "common weapon",
+          "goldValue": 207,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 4,
+          "baseDamageMax": 9,
+          "icon": "orb-wand.svg",
+          "baseRange": 7,
+          "stats": {
+            "agility": 1,
+            "rangedBonus": 2
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbo67coj-th10b3-mitmd6",
+          "description": "rare weapon",
+          "goldValue": 574,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "stats": {
+            "rangedBonus": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbnzb2o7-sdz2p7-y6i2nw",
+          "description": "common weapon",
+          "goldValue": 223,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 7,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "name": "common weapon",
+          "uniqueId": "mbo67soy-0enr8t-b1wc6i",
+          "description": "common weapon",
+          "goldValue": 247,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "name": "common weapon",
+          "uniqueId": "mbo696h7-ap6s93-0od2qb",
+          "description": "common weapon",
+          "goldValue": 237,
+          "isSellable": true,
+          "purchasePrice": 711
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "stats": {
+            "damageBonus": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbo6awnp-wqhm4c-78edjm",
+          "description": "common weapon",
+          "goldValue": 242,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "name": "common weapon",
+          "uniqueId": "mbo6dmd2-ijc393-jopdj1",
+          "description": "common weapon",
+          "goldValue": 237,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "name": "common weapon",
+          "uniqueId": "mbo67cok-cj9toa-gsvoq3",
+          "description": "common weapon",
+          "goldValue": 237,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 0,
+          "itemTier": "junk",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 3,
+          "icon": "orb-wand.svg",
+          "baseRange": 3,
+          "name": "junk weapon",
+          "uniqueId": "mbnzck3e-n4zic4-7sym1g",
+          "description": "junk weapon",
+          "goldValue": 99,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "name": "common weapon",
+          "uniqueId": "mbo6iukg-ssk6td-w9irkb",
+          "description": "common weapon",
+          "goldValue": 232,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "stats": {
+            "range": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbo6in1m-akn4ry-zzi2yz",
+          "description": "common weapon",
+          "goldValue": 237,
+          "isSellable": true
+        }
+      ]
+    },
+    "Resource": {
+      "type": "Resource",
+      "torches": 5,
+      "healPotions": 9,
+      "gold": 5486,
+      "potionDropFail": 0,
+      "torchDropFail": 0,
+      "portalBinding": 0,
+      "craftResources": {
+        "ashenShard": 99,
+        "ashenCrystal": 0,
+        "ashenGem": 0,
+        "sylduranShard": 0,
+        "sylduranCrystal": 0,
+        "sylduranGem": 0
+      }
+    },
+    "AttackSpeed": {
+      "type": "AttackSpeed",
+      "attackSpeed": 500,
+      "elapsedSinceLastAttack": 19547.4
+    },
+    "Affix": {
+      "type": "Affix",
+      "affixes": [
+        {
+          "name": "resilience",
+          "type": "combat",
+          "trigger": "hitByAttack",
+          "effect": "instantHeal",
+          "params": {
+            "minHealPercentage": 0.05,
+            "maxHealPercentage": 0.1,
+            "chanceToHeal": 0.05
+          },
+          "sourceId": "mbn264d0-yzhfk5-d5l99d"
+        }
+      ]
+    },
+    "PlayerState": {
+      "type": "PlayerState",
+      "name": "journey bunny",
+      "level": 18,
+      "xp": 7306,
+      "nextLevelXp": 13115,
+      "dead": false,
+      "lampLit": false,
+      "discoveredTileCount": 52046,
+      "isInCombat": false,
+      "isCasting": false
+    },
+    "JourneyState": {
+      "type": "JourneyState",
+      "completedPaths": [],
+      "pathTree": {}
+    },
+    "JourneyPath": {
+      "type": "JourneyPath",
+      "paths": [
+        {
+          "id": "master_whispers",
+          "parentId": "master_whispers",
+          "nextPathId": "",
+          "offered": true,
+          "accepted": true,
+          "completed": false,
+          "title": "Whispers of Zukarath",
+          "description": "Follow the guidance of the Zukran Masters to prove your worth.",
+          "offerText": "Begin your journey with the Zukran Masters.",
+          "acceptedText": "You have accepted the Journey of Whispers.",
+          "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
+          "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
+          "logCompletion": false,
+          "tasks": [],
+          "rewards": []
+        },
+        {
+          "id": "master_echoes",
+          "parentId": "master_echoes",
+          "nextPathId": "",
+          "offered": false,
+          "accepted": false,
+          "completed": false,
+          "title": "Echoes of Zurath",
+          "description": "Uncover the hidden Echoes within Zurath.",
+          "offerText": "Begin your journey to uncover the Echoes of Zurath.",
+          "acceptedText": "You have accepted the journey to uncover the Echoes.",
+          "activeText": "Continue your journey to uncover the Echoes.",
+          "completionText": "You have uncovered all Echoes within Zurath.",
+          "logCompletion": false,
+          "tasks": [],
+          "rewards": []
+        },
+        {
+          "id": "master_whispers",
+          "parentId": "master_whispers",
+          "nextPathId": "",
+          "offered": true,
+          "accepted": true,
+          "completed": false,
+          "title": "Whispers of Zukarath",
+          "description": "Follow the guidance of the Zukran Masters to prove your worth.",
+          "offerText": "Begin your journey with the Zukran Masters.",
+          "acceptedText": "You have accepted the Journey of Whispers.",
+          "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
+          "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
+          "logCompletion": false,
+          "tasks": [],
+          "rewards": []
+        },
+        {
+          "id": "whisper_parent_7",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_8",
+          "offerType": "npc",
+          "offeredBy": "sehnrhyx_syliri",
+          "offered": false,
+          "accepted": true,
+          "completed": false,
+          "title": "Harnessing Corruption",
+          "description": "Harness the corruption to unlock new powers.",
+          "offerText": "Harness the corruption to unlock new powers. Will you accept this challenge?",
+          "acceptedText": "You have accepted the journey to harness the corruption.",
+          "activeText": "Continue your journey to harness the corruption.",
+          "completionText": "You have unlocked the power of Portal Binding.",
+          "logCompletion": true,
+          "tasks": [
+            {
+              "id": "whisper_child_7_1",
+              "parentId": "whisper_parent_7",
+              "accepted": false,
+              "completed": true,
+              "title": "Enter Ashangal",
+              "description": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
+              "offerText": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
+              "acceptedText": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
+              "activeText": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
+              "completionText": "You have entered Ashangal.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ],
+              "completedAt": 1749389876968
+            },
+            {
+              "id": "whisper_child_7_2",
+              "parentId": "whisper_parent_7",
+              "accepted": false,
+              "completed": true,
+              "title": "Collect Shards",
+              "description": "Collect 50 Ashen Shards.",
+              "offerText": "Collect 50 Ashen Shards.",
+              "acceptedText": "Collect 50 Ashen Shards.",
+              "activeText": "Collect 50 Ashen Shards.",
+              "completionText": "You have collected 50 Ashen Shards.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "collectResource",
+                "resourceType": "ashenShard",
+                "quantity": 50
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ],
+              "completedAt": 1749406250145
+            },
+            {
+              "id": "whisper_child_7_3",
+              "parentId": "whisper_parent_7",
+              "accepted": false,
+              "completed": false,
+              "title": "Return to Syliri",
+              "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "offerText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "acceptedText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "activeText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "completionText": "You have returned to Sehnrhyx Syliri.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "useItem",
+                "journeyItemId": "stoneOfReturn"
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ]
+            },
+            {
+              "id": "whisper_child_7_4",
+              "parentId": "whisper_parent_7",
+              "accepted": false,
+              "completed": false,
+              "title": "Turn In Shards",
+              "description": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
+              "offerText": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
+              "acceptedText": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
+              "activeText": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
+              "completionText": "The shards have been delivered.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "turnIn",
+                "npc": "sehnrhyx_syliri",
+                "resourceType": "ashenShard",
+                "quantity": 50
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ]
+            }
+          ],
+          "rewards": [
+            {
+              "xp": 750,
+              "gold": 500
+            },
+            {
+              "type": "unlock",
+              "mechanic": "portalBinding"
+            }
+          ],
+          "totalTaskCount": 4,
+          "completedTaskCount": 2
+        }
+      ]
+    },
+    "PlayerAchievements": {
+      "type": "PlayerAchievements",
+      "stats": {
+        "monstersKilled": 0,
+        "bossesKilled": 0,
+        "itemsUsed": 0,
+        "potionsUsed": 0,
+        "resourcesCollected": {
+          "ashenShard": 0,
+          "sylduranShard": 0
+        },
+        "itemsCollected": 0,
+        "interactions": 0,
+        "tiersReached": 0,
+        "uniqueItemDrops": [
+          {
+            "journeyItemId": "bandOfKarn",
+            "name": "Band of Karn"
+          },
+          {
+            "journeyItemId": "wyrmTooth",
+            "name": "Wyrm Tooth"
+          },
+          {
+            "journeyItemId": "bandOfZu",
+            "name": "Band of Zu"
+          }
+        ],
+        "unlockedPortals": [
+          0
+        ]
+      },
+      "history": []
+    }
+  },
+  "gameState": {
+    "GameState": {
+      "type": "GameState",
+      "tier": 20,
+      "highestTier": 20,
+      "gameStarted": true,
+      "gameOver": false,
+      "isVictory": false,
+      "isRangedMode": false,
+      "transitionLock": false,
+      "needsRender": true,
+      "needsInitialRender": false
+    },
+    "OfferedJourneys": {
+      "type": "OfferedJourneys",
+      "journeys": []
+    }
+  },
+  "overlayState": {
+    "OverlayState": {
+      "type": "OverlayState",
+      "isOpen": true,
+      "activeTab": "menu",
+      "logMessages": [
+        "You Reached Tier 20",
+        "Gained 100 XP (7306/13115)",
+        "You step through a mysterious portal surging with chaotic energy and are transported to Tier 20!",
+        "Exploration milestone reached! Gained 1800 XP for discovering 52000 tiles.",
+        "Gained 1800 XP (7206/13115)",
+        "You are no longer in combat.",
+        "Gained 137 XP (5406/13115)",
+        "Kobold defeated!",
+        "Load saved game complete",
+        "You are no longer in combat.",
+        "Your shot hit a wall.",
+        "Gained 179 XP (5269/13115)",
+        "Orc Chieftan defeated!",
+        "You are no longer in combat.",
+        "Gained 133 XP (5090/13115)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Gained 200 XP (4957/13115)",
+        "Beholder defeated!",
+        "Gained 133 XP (4757/13115)",
+        "Imp defeated!",
+        "Gained 133 XP (4624/13115)",
+        "Imp defeated!",
+        "Exploration milestone reached! Gained 1800 XP for discovering 51000 tiles.",
+        "Gained 1800 XP (4491/13115)",
+        "Your shot hit a wall.",
+        "The darkness is at bay... for now!",
+        "You are no longer in combat.",
+        "Gained 133 XP (2691/13115)",
+        "Imp defeated!",
+        "Exploration milestone reached! Gained 1800 XP for discovering 50000 tiles.",
+        "Gained 1800 XP (2558/13115)",
+        "You are no longer in combat.",
+        "Gained 178 XP (758/13115)",
+        "Orc Chieftan defeated!",
+        "Gained 201 XP (580/13115)",
+        "Beholder defeated!",
+        "Gained 134 XP (379/13115)",
+        "Imp defeated!",
+        "Your shot hit a wall.",
+        "Gained 199 XP (245/13115)",
+        "Beholder defeated!",
+        "Level up! Now level 18, , Gained 1 stat point to allocate!",
+        "Gained 133 XP (11572/11526)",
+        "Imp defeated!",
+        "Exploration milestone reached! Gained 1700 XP for discovering 49000 tiles.",
+        "Gained 1700 XP (11439/11526)",
+        "You are no longer in combat.",
+        "Gained 135 XP (9739/11526)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Gained 135 XP (9604/11526)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Gained 134 XP (9469/11526)",
+        "Imp defeated!",
+        "Exploration milestone reached! Gained 1700 XP for discovering 48000 tiles.",
+        "Gained 1700 XP (9335/11526)",
+        "Gained 134 XP (7635/11526)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Gained 134 XP (7501/11526)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Gained 134 XP (7367/11526)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Gained 134 XP (7233/11526)",
+        "Imp defeated!",
+        "Gained 133 XP (7099/11526)",
+        "Imp defeated!",
+        "Exploration milestone reached! Gained 1700 XP for discovering 47000 tiles.",
+        "Gained 1700 XP (6966/11526)",
+        "You are no longer in combat.",
+        "Gained 134 XP (5266/11526)",
+        "Imp defeated!",
+        "Gained 133 XP (5132/11526)",
+        "Imp defeated!",
+        "Bought Golden Buniyar Band for 1978 gold",
+        "Bought common weapon for 711 gold",
+        "Bought rare armor for 1212 gold",
+        "Bought rare armor for 1212 gold",
+        "Bought rare weapon for 1662 gold",
+        "Bought rare amulet for 1362 gold",
+        "Bought rare ring for 1422 gold",
+        "Opened shop for Shop Keeper",
+        "You are no longer in combat.",
+        "Gained 134 XP (4999/11526)",
+        "Imp defeated!",
+        "Gained 173 XP (4865/11526)",
+        "Ghoul defeated!",
+        "Gained 133 XP (4692/11526)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Exploration milestone reached! Gained 1700 XP for discovering 46000 tiles.",
+        "Gained 1700 XP (4559/11526)",
+        "Gained 133 XP (2859/11526)",
+        "Imp defeated!",
+        "Your shot hit a wall.",
+        "You are no longer in combat.",
+        "Your shot hit a wall.",
+        "Gained 135 XP (2726/11526)",
+        "Imp defeated!",
+        "Gained 133 XP (2591/11526)",
+        "Imp defeated!",
+        "You are no longer in combat.",
+        "Gained 171 XP (2458/11526)",
+        "Ghoul defeated!",
+        "Your shot hit a wall.",
+        "Gained 134 XP (2287/11526)",
+        "Imp defeated!",
+        "Gained 134 XP (2153/11526)",
+        "Imp defeated!",
+        "Your shot hit a wall.",
+        "Gained 187 XP (2019/11526)",
+        "Minotaur defeated!",
+        "Gained 134 XP (1832/11526)",
+        "Imp defeated!",
+        "Your shot hit a wall.",
+        "Gained 133 XP (1698/11526)",
+        "Imp defeated!",
+        "Your shot hit a wall.",
+        "Gained 133 XP (1565/11526)",
+        "Imp defeated!",
+        "Your shot hit a wall.",
+        "Gained 135 XP (1432/11526)",
+        "Imp defeated!",
+        "Exploration milestone reached! Gained 1600 XP for discovering 45000 tiles.",
+        "Level up! Now level 17, ",
+        "Gained 1600 XP (11389/10092)",
+        "You are no longer in combat.",
+        "You Reached Tier 15",
+        "Gained 75 XP (9789/10092)",
+        "Gained 729 XP (9714/10092)",
+        "T`Kore-Tickrob defeated!",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 847 gold from you!",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 942 gold from you!",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 1046 gold from you!",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 1162 gold from you!",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 1291 gold from you!",
+        "Resilience heals you for 0 HP! (441/441)",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 1435 gold from you!",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 1594 gold from you!",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 1771 gold from you!",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 1968 gold from you!",
+        "T`Kore-Tickrob's Greedy Claw attack has stolen 2187 gold from you!",
+        "Gained 123 XP (8985/10092)",
+        "Zombie defeated!",
+        "You are no longer in combat.",
+        "The darkness is at bay... for now!",
+        "Your shot hit a wall.",
+        "Gained 123 XP (8862/10092)",
+        "Zombie defeated!",
+        "Gained 116 XP (8739/10092)",
+        "Skeleton defeated!",
+        "Gained 123 XP (8623/10092)",
+        "Zombie defeated!",
+        "Load saved game complete",
+        "Exploration milestone reached! Gained 1600 XP for discovering 44000 tiles.",
+        "Gained 1600 XP (8500/10092)",
+        "The darkness is at bay... for now!",
+        "You are no longer in combat.",
+        "Your shot hit a wall.",
+        "Gained 162 XP (6900/10092)",
+        "Orc Chieftan defeated!",
+        "Gained 165 XP (6738/10092)",
+        "Orc Chieftan defeated!",
+        "Gained 155 XP (6573/10092)",
+        "Troll defeated!",
+        "Your shot hit a wall.",
+        "Gained 163 XP (6418/10092)",
+        "Orc Chieftan defeated!",
+        "Your shot hit a wall.",
+        "Gained 183 XP (6255/10092)",
+        "Beholder defeated!",
+        "You are no longer in combat.",
+        "Gained 131 XP (6072/10092)",
+        "Wraith defeated!",
+        "You are no longer in combat.",
+        "Exploration milestone reached! Gained 1600 XP for discovering 43000 tiles.",
+        "Gained 1600 XP (5941/10092)",
+        "Gained 115 XP (4341/10092)",
+        "Skeleton defeated!",
+        "You are no longer in combat.",
+        "Gained 115 XP (4226/10092)",
+        "Skeleton defeated!",
+        "You are no longer in combat.",
+        "Gained 131 XP (4111/10092)",
+        "Wraith defeated!",
+        "Gained 148 XP (3980/10092)",
+        "Banshee defeated!",
+        "Resilience heals you for 0 HP! (441/441)",
+        "Gained 183 XP (3832/10092)",
+        "Beholder defeated!",
+        "Resilience heals you for 0 HP! (441/441)",
+        "Exploration milestone reached! Gained 1600 XP for discovering 42000 tiles.",
+        "Gained 1600 XP (3649/10092)",
+        "You are no longer in combat.",
+        "Gained 117 XP (2049/10092)",
+        "Wraith defeated!"
+      ],
+      "activeMenuSection": "controls-button",
+      "activeShopNpcId": null
+    }
+  },
+  "id": "mbo6fzha-m942jc-sbw5k2"
+}

@@ -125,7 +125,7 @@ export class ItemROGSystem extends System {
 
             const item = { ...partialItem };
             const itemTiers = ['junk', 'common', 'rare', 'magic', 'mastercraft', 'legendary', 'relic', 'artifact'];
-            const itemTypes = ['weapon', 'armor', 'amulet', 'ring'];
+            const itemTypes = ['weapon', 'armor', 'head', 'gloves', 'boots', 'amulet', 'ring'];
 
             // Tier handling
             if (item.tierIndex === undefined) {
@@ -189,6 +189,24 @@ export class ItemROGSystem extends System {
                     if (item.tierIndex === 0) item.armor = 1;
                 }
                 item.icon = 'armor.svg';
+            }  else if (item.type === 'head') {
+                if (item.head === undefined || item.armor === 0) {
+                    item.armor = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
+                    if (item.tierIndex === 0) item.armor = 1;
+                }
+                 item.icon = 'head.svg';
+            } else if (item.type === 'gloves') {
+                if (item.gloves === undefined || item.gloves === 0) {
+                    item.gloves = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
+                    if (item.tierIndex === 0) item.gloves = 1;
+                }
+                item.icon = 'gloves.svg';
+            } else if (item.type === 'boots') {
+                if (item.boots === undefined || item.boots === 0) {
+                    item.boots = Math.floor(Math.random() * 2) + this.statRoll("baseMovementSpeed", item);
+                    if (item.tierIndex === 0) item.boots = 1;
+                }
+                item.icon = 'boots.svg';
             } else if (item.type === 'amulet' || item.type === 'ring') {
                 if (item.maxLuck === undefined || item.maxLuck === 0) {
                     item.maxLuck = this.rollMaxLuck(item, dungeonTier);
@@ -401,6 +419,7 @@ export class ItemROGSystem extends System {
                 case 'baseDamageMax': value = Math.floor(Math.random() * item.tierIndex) + 1; break;
                 case 'baseBlock': value = Math.floor(item.tierIndex) + 1; break;
                 case 'baseRange': value = Math.floor(item.tierIndex) + 4; break;
+                case 'baseMovementSpeed': value = Math.floor(item.tierIndex) + 4; break; 
                 case 'armor': value = Math.floor(item.tierIndex) + 1; break;
                 case 'maxHp':
                     if (isCrit) {
@@ -425,6 +444,7 @@ export class ItemROGSystem extends System {
                 case 'range':
                 case 'block':
                 case 'defense':
+                case'movementSpeed':
                     if (isCrit) {
                         value = item.tierIndex * .5;
                     } else {
