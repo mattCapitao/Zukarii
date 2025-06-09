@@ -194,9 +194,12 @@ export class PlayerSystem extends System {
 
         Object.values(inventory.equipped).forEach(item => {
             if (!item) return;
-            if (item.type === 'armor') stats._internal.gear.armor += item.armor || 0;
+            if (['armor', 'head', 'gloves'].includes(item.type)) {
+                stats._internal.gear.armor += item.armor || 0;
+            };
             if (item.type === 'weapon' && item.attackType === 'melee') stats._internal.gear.block += item.baseBlock || 0;
             if (item.type === 'weapon' && item.attackType === 'ranged') stats._internal.gear.range = Math.max(stats._internal.gear.range || 0, item.baseRange || 0);
+            if (item.type === 'boots') stats._internal.gear.movementSpeed += item.baseMovementSpeed || 0 ;
             if (item.stats) {
                 Object.entries(item.stats).forEach(([stat, value]) => {
                     stats._internal.gear[stat] = (stats._internal.gear[stat] || 0) + (value || 0);

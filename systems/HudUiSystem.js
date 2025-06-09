@@ -203,6 +203,7 @@ export class HudUiSystem extends System {
         const hudLogElement = document.getElementById('hud-log-content');
         const limit = 50;
         const hudLogMessages = this.utilities.getLogMessages({ channel: this.activeHudLogTab, limit });
-        hudLogElement.innerHTML = hudLogMessages.map(line => `<p class="channel-${line.channel}">${line.message}</p>`).join('');
+       
+        hudLogElement.innerHTML = hudLogMessages.map(line => `<p class="channel-${line.channel} ${line.classNames}">${line.message}</p>`).join('');
     }
 }

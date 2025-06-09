@@ -339,7 +339,11 @@ export class LevelSystem extends System {
         }
 
         this.connectRooms(roomEntityIds, map, floors, walls, floorPositions, tier);
-        //console.log(`LevelSystem.js: generateLevel - Completed for tier ${tier}`);
+        console.log(`LevelSystem.generateLevel: Map state for tier ${tier}:`);
+        for (let y = 0; y < map.length; y++) {
+            console.log(`Row ${y}: ${map[y].join('')}`);
+        }
+        console.log(`LevelSystem.generateLevel: Floors: ${floors.length}, Walls: ${walls.length}, Rooms: ${roomEntityIds.length}`);
         return {
             map,
             roomEntityIds,

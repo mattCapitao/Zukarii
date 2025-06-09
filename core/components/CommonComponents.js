@@ -141,6 +141,7 @@ export class MovementSpeedComponent {
         this.movementSpeed = movementSpeed; // px per second
         this.elapsedSinceLastMove = 0; // Time since last move in ms
         this.combatSpeedMultiplier = 1; // Modifier for combat speed, default is 1 (no change)
+        this.wanderSpeedMultiplier = 1; // Modifier for wandering speed, default is 1 (no change)
     }
 }
 

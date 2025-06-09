@@ -190,21 +190,21 @@ export class ItemROGSystem extends System {
                 }
                 item.icon = 'armor.svg';
             }  else if (item.type === 'head') {
-                if (item.head === undefined || item.armor === 0) {
+                if (item.armor === undefined || item.armor === 0) {
                     item.armor = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
                     if (item.tierIndex === 0) item.armor = 1;
                 }
                  item.icon = 'head.svg';
             } else if (item.type === 'gloves') {
-                if (item.gloves === undefined || item.gloves === 0) {
-                    item.gloves = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
-                    if (item.tierIndex === 0) item.gloves = 1;
+                if (item.armor === undefined || item.armor === 0) {
+                    item.armor = Math.floor(Math.random() * 2) + this.statRoll("armor", item);
+                    if (item.tierIndex === 0) item.armor = 1;
                 }
                 item.icon = 'gloves.svg';
             } else if (item.type === 'boots') {
-                if (item.boots === undefined || item.boots === 0) {
-                    item.boots = Math.floor(Math.random() * 2) + this.statRoll("baseMovementSpeed", item);
-                    if (item.tierIndex === 0) item.boots = 1;
+                if (item.baseMovementSpeed === undefined || item.baseMovementSpeed === 0) {
+                    item.baseMovementSpeed = Math.floor(Math.random() * 2) + this.statRoll("baseMovementSpeed", item);
+                    if (item.tierIndex === 0) item.baseMovementSpeed = 1;
                 }
                 item.icon = 'boots.svg';
             } else if (item.type === 'amulet' || item.type === 'ring') {

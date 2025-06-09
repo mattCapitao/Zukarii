@@ -501,6 +501,9 @@ hr {
 .channel-combat {
     color: #e00000;
 }
+    .channel-combat.player {
+        color: #00e000;
+    }
 
 #bottom-hud-panel {
     position: absolute;
@@ -1403,8 +1406,9 @@ li.new-save-game {
     font-size: 0.875rem; /* ~14px */
     color: #0f0;
     z-index: 3000;
-    max-width: 15rem; /* ~200px */
-    max-height:45rem; 
+    min-width: 12rem; /* ~200px */
+    max-width: 15rem; /* ~240px */
+    max-height: 45rem;
     background: rgba(20, 30, 20, 1);
     border: 0.125rem solid #060; /* ~1px */
     border-radius: .625rem;

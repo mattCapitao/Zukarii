@@ -71,15 +71,11 @@ export class DamageCalculationSystem extends System {
         const totalDamage = Math.round(isCritical ? preCritDamage * 1.5 : preCritDamage);
 
         this.healthUpdates.push({ entityId: target.id, amount: -totalDamage , attackerId:'player'});
-
-        // NEW: Log—includes monster HP (matches current CombatSystem), revisit later
-        const targetHealth = target.getComponent('Health');
-        //this.eventBus.emit('LogMessage', {
-           // message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${totalDamage} damage to ${target.getComponent('MonsterData').name} with your ${weapon?.name || 'Fists'} (${targetHealth.hp - totalDamage}/${targetHealth.maxHp})`
-       // });
+       
         this.utilities.logMessage({
-            channel: 'combat',
-            message: `${isCritical ? ' (Critical Hit!) - ' : ''}You dealt ${totalDamage} damage to ${target.getComponent('MonsterData').name} with your ${weapon?.name || 'Fists'} (${targetHealth.hp - totalDamage}/${targetHealth.maxHp})`
+            channel: 'combat', 
+            classNames: 'player',
+            message: `${isCritical ? '(CRIT): ' : ''}You dealt ${totalDamage} damage to ${target.getComponent('MonsterData').name} with your ${weapon?.name || 'Fists'}`
         });
 
         return { damage: totalDamage };
@@ -90,7 +86,7 @@ export class DamageCalculationSystem extends System {
         const targetStats = target.getComponent('Stats');
         const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
         const tierDamageMultiplier = 0.20;
-        const armorReductionFactor = 0.08;
+        const armorReductionFactor = 0.02 + (.001 * tier/10);
         const defenseReductionFactor = 0.025;
 
         const baseDamageMin = monsterData.minBaseDamage || 2;
@@ -99,26 +95,21 @@ export class DamageCalculationSystem extends System {
         const scaledDamage = Math.round(baseDamage * (1 + tier * tierDamageMultiplier));
 
         const critThreshold = 95;
-        const critMultiplier = 1.2;
+        const critMultiplier = 1.2; 
         const critRoll = Math.random() * 100;
         const isCritical = critRoll >= critThreshold;
         const preReductionDamage = isCritical ? Math.round(scaledDamage * critMultiplier) : scaledDamage;
 
         const armor = targetStats.armor || 0;
-        const armorReduction = armor > 0 ? Math.max(1, Math.floor(preReductionDamage * (armorReductionFactor * armor))) : 0;
+        const armorReduction = armor > 0 ? Math.max(1, Math.floor(preReductionDamage * armorReductionFactor * armor)) : 0;
         const defenseReduction = Math.round(preReductionDamage * (defenseReductionFactor * (targetStats.defense || 0)));
         const totalDamage = Math.round(Math.max(0, preReductionDamage - armorReduction - defenseReduction));
 
-        // NEW: Queue damage—state goes to HealthUpdates
         this.healthUpdates.push({ entityId: target.id, amount: -totalDamage, attackerId: attacker });
 
-        // NEW: Log—no player HP, per your call
-        //this.eventBus.emit('LogMessage', {
-        //    message: `${isCritical ? ' (Critical Hit!) - ' : ''}${monsterData.name} hits for ${preReductionDamage}, armor protects you from: ${armorReduction}, defense skill mitigates: ${defenseReduction} resulting in ${totalDamage} damage dealt to you`
-       // });
         this.utilities.logMessage({
             channel: 'combat',
-            message: `${isCritical ? ' (Critical Hit!) - ' : ''}${monsterData.name} hits for ${preReductionDamage}, armor protects you from: ${armorReduction}, defense skill mitigates: ${defenseReduction} resulting in ${totalDamage} damage dealt to you`
+            message: `${isCritical ? '(CRIT): ' : ''}${monsterData.name} hits for ${preReductionDamage}, armor protects you from: ${armorReduction}, defense skill mitigates: ${defenseReduction} resulting in ${totalDamage} damage dealt to you`
         });
         return { damage: totalDamage };
     }

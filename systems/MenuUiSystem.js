@@ -110,11 +110,12 @@ export class MenuUiSystem extends System {
                     const tabMap = {
                         'inventory-tab-all': 'all',
                         'inventory-tab-armor': 'armor',
-                        'inventory-tab-weapon-melee': 'weapon-melee',
-                        'inventory-tab-weapon-ranged': 'weapon-ranged',
-                        'inventory-tab-amulet': 'amulet',
-                        'inventory-tab-ring': 'ring'
+                        'inventory-tab-weapon': 'weapon',
+                        'inventory-tab-jewelry': 'jewelry',
+                        'inventory-tab-journey': 'journey',
+                        'inventory-tab-consumables': 'consumables'
                     };
+
                     const newTab = tabMap[target.id];
                     if (newTab && newTab !== this.activeInventoryTab) {
                         this.activeInventoryTab = newTab;
@@ -628,19 +629,23 @@ export class MenuUiSystem extends System {
                 filteredItems = items;
                 break;
             case 'armor':
-                filteredItems = items.filter(item => item.type === 'armor');
+                filteredItems = items.filter(item =>
+                    ['armor', 'head', 'gloves', 'boots'].includes(item.type)
+                );
                 break;
-            case 'weapon-melee':
-                filteredItems = items.filter(item => item.type === 'weapon' && item.attackType === 'melee');
+            case 'weapon':
+                filteredItems = items.filter(item => item.type === 'weapon');
                 break;
-            case 'weapon-ranged':
-                filteredItems = items.filter(item => item.type === 'weapon' && item.attackType === 'ranged');
+            case 'jewelry':
+                filteredItems = items.filter(item =>
+                    ['amulet', 'ring'].includes(item.type)
+                );
                 break;
-            case 'amulet':
-                filteredItems = items.filter(item => item.type === 'amulet');
+            case 'journey':
+                filteredItems = items.filter(item => item.journeyItemId !== undefined);
                 break;
-            case 'ring':
-                filteredItems = items.filter(item => item.type === 'ring');
+            case 'consumables':
+                filteredItems = items.filter(item => item.type === 'consumable');
                 break;
             default:
                 console.warn(`MenuUiSystem: Unknown inventory tab "${tab}", defaulting to all items`);
@@ -649,6 +654,7 @@ export class MenuUiSystem extends System {
         }
         return filteredItems;
     }
+
 
     renderInventory(containerId, items, tab) {
         const inventoryDiv = document.getElementById(containerId);
@@ -935,24 +941,25 @@ export class MenuUiSystem extends System {
 
         const statList = [
             { stat: 'intellect', incrementable: true },
-            { stat: 'resistMagic', incrementable: false },
             { stat: 'prowess', incrementable: true },
-            { stat: 'block', incrementable: false },
             { stat: 'agility', incrementable: true },
-            { stat: 'dodge', incrementable: false },
-            { stat: 'defense', incrementable: false },
+            { stat: 'range', incrementable: false }, 
             { stat: 'damageBonus', incrementable: false },
             { stat: 'meleeBonus', incrementable: false },
             { stat: 'rangedBonus', incrementable: false },
-            { stat: 'moveementSpeed', incrementable: false },
+            { stat: 'armor', incrementable: false }, 
+            { stat: 'block', incrementable: false },
+            { stat: 'dodge', incrementable: false },
+            { stat: 'defense', incrementable: false },
+            { stat: 'resistMagic', incrementable: false },
+            { stat: 'movementSpeed', incrementable: false },
         ];
 
         let statHtml = `
+        <div><span style="font-weight:bold;">Unspent Points:</span></div>
         <div>Stat Points: <span>${stats.unallocated}</span></div>
         <div>Skill Points: <span>0</span></div>
-        <div><span class="increment hidden"> </span><span class="stat-value">${stats.armor || 0}</span> : Armor</div>
-        <div><span class="increment hidden"> </span><span class="stat-value">${stats.range || 0}</span> : Range</div>
-        <div><hr></div><div><hr></div>`;
+        <div><hr></div>`;
 
         statList.forEach(statEntry => {
             const statName = statEntry.stat;
@@ -1103,7 +1110,6 @@ export class MenuUiSystem extends System {
         };
         const validSlots = slotMap[item.type];
         return validSlots?.includes(slot) || false;
-        console.log(`MenuUiSystem: isSlotCompatible called with item type ${item} and slot ${slot}`);
     }
 
     gameOver(dataObj) {

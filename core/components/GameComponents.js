@@ -172,12 +172,12 @@ export class LightSourceDefinitions {
             },
             torch: {
                 visibilityEnabled: true,
-                visibilityRadius: 6,
+                visibilityRadius: 7,
                 visibilityOpacitySteps: [0.75, 0.15, 0],
                 visibilityTintColor: 'rgba(255,220,120,0.2)', // Subtle yellow tint
                 glowEnabled: true,
                 glowType: 'environmental', // Environmental glow for torch
-                glowColor: 'rgba(255,220,120,0.35)', // Used for environmental gradient
+                glowColor: 'rgba(255,220,120,0.30)', // Used for environmental gradient
                 glowIntensity: 1.0,
                 glowSize: 0, // Not used for environmental glow
                 proximityFactor: 1.0,
@@ -186,7 +186,7 @@ export class LightSourceDefinitions {
             },
             lamp: {
                 visibilityEnabled: true,
-                visibilityRadius: 7,
+                visibilityRadius: 8,
                 visibilityOpacitySteps: [0.75, 0.15, 0],
                 visibilityTintColor: 'rgba(255,255,255,0.2)', // Subtle white tint
                 glowEnabled: false, // No glow/outline for lamp
