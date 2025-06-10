@@ -165,6 +165,7 @@ export class Utilities {
         // Default entityId to "player" if not provided
         const entityId = logData.entityId || 'player';
         const channel = logData.channel || 'system';
+        const classNames = logData.classNames || [];
         const message = logData.message;
         const timestamp = Date.now(); // Generate timestamp at write time
 
@@ -173,7 +174,7 @@ export class Utilities {
         const logComponent = logEntity.getComponent('Log');
 
         // Add the log entry
-        logComponent.messages.unshift({channel, message, timestamp });
+        logComponent.messages.unshift({channel, classNames, message, timestamp });
 
         // Optional: Limit log size to prevent memory issues
         if (logComponent.messages.length > 200) {

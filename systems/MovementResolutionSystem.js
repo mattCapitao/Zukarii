@@ -86,7 +86,7 @@ export class MovementResolutionSystem extends System {
         }
     }
 
-    pathChecking(entity, pos, moveX, moveY, framesAhead = 5, hitboxEntities) {
+    pathChecking(entity, pos, moveX, moveY, framesAhead = 10, hitboxEntities) {
         if (entity.id === 'player' || entity.hasComponent('Projectile')) return { moveX, moveY };
         let testX = pos.x;
         let testY = pos.y;

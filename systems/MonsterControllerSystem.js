@@ -92,6 +92,7 @@ export class MonsterControllerSystem extends System {
                 );
                 ////console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to player at (${playerPos.x}, ${playerPos.y}), distance to player: ${distance.toFixed(2)} pixels`);
             } else {
+                /*
                 if (
                     !monster.hasComponent('MovementIntent') &&
                     !monsterData.isAggro &&
@@ -184,6 +185,7 @@ export class MonsterControllerSystem extends System {
                         }
                     }
                 }
+                */
             }
         });
     }
