@@ -123,17 +123,21 @@ export class EntityGenerationSystem extends System {
         console.log(`LevelSystem.js: generateFountains - Starting for tier ${tier}`);
         const fountainsPerLevel = () => {
             let r = Math.random();
-            return r < 0.10 ? 0 : r < 0.95 ? 1 : 2;
+            return r <.3 ? 0 : r < 0.95 ? 1 : 2;
         }
+        const fountainCount = fountainsPerLevel();
+        console.log(`LevelSystem.js: generateFountains - Fountain count for tier ${tier}: ${fountainCount}`);
         const fountains = [];
-
-        for (let i = 0; i < fountainsPerLevel; i++) {
-            const roomId = roomEntityIds[Math.floor(Math.random() * roomEntityIds.length)];
+        const validRoomIds = roomEntityIds.filter(roomId => {
             const room = this.entityManager.getEntity(roomId).getComponent('Room');
-            if (!isCustomLEvel && Array.isArray(room.hasEntities) && room.hasEntities.some(e => e.type === 'Fountain' || e.type === 'Stair')) {
-                i--;
-                continue;
-            }
+            return isCustomLevel || !(Array.isArray(room.hasEntities) && room.hasEntities.some(e => e.type === 'Fountain' || e.type === 'Stair'));
+        });
+
+        if (validRoomIds.length === 0) { console.log(`EntityGeneration: generateFountains() - No valid rooms for fouintain placement`); return; }
+        for (let i = 0; i < fountainCount; i++) {
+            
+            const roomId = validRoomIds.splice(Math.floor(Math.random() * validRoomIds.length), 1)[0];
+            const room = this.entityManager.getEntity(roomId).getComponent('Room');
             let x, y;
             let attempts = 0;
             do {
@@ -172,9 +176,7 @@ export class EntityGenerationSystem extends System {
                 }
             }
         }
-        
-       
-
+      
         console.log(`LevelSystem.js: generateFountains - Completed for tier ${tier}`);
         return fountains;
     }

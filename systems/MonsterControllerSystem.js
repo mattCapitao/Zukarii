@@ -14,7 +14,7 @@ export class MonsterControllerSystem extends System {
         this.TILE_SIZE = this.utilities.TILE_SIZE
         this.AGGRO_RANGE = 4 * this.TILE_SIZE; // 4 tiles in pixels (32 pixels per tile)
         this.MELEE_RANGE = 1.5 * this.TILE_SIZE; // Pixel distance to trigger melee attack
-        this.MONSTER_WANDER_CHANCE = .05;
+        this.MONSTER_WANDER_CHANCE = .001;
     }
     update(deltaTime) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
@@ -92,51 +92,37 @@ export class MonsterControllerSystem extends System {
                 );
                 ////console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to player at (${playerPos.x}, ${playerPos.y}), distance to player: ${distance.toFixed(2)} pixels`);
             } else {
-                /*
-                if (
-                    !monster.hasComponent('MovementIntent') &&
-                    !monsterData.isAggro &&
-                    !monsterData.isBoss &&
-                    monsterData.isElite
-                    
-                ) {
-                    const { tileX, tileY } = this.utilities.getTileFromPixel(pos.x, pos.y);
-                    const startPixel = this.utilities.getPixelFromTile(tileX, tileY);
+                // wandering disabled till i find an efficiant way to handle it 
+          
+                if (!monster.hasComponent('MovementIntent') && !monsterData.isAggro && !monsterData.isBoss && monsterData.isElite) {
 
-                    // Validate current position
-                    if (!this.utilities.isWalkable(monster.id, startPixel.x, startPixel.y)) {
-                        const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
-                            const ePos = e.getComponent('Position');
-                            return ePos.x === startPixel.x && ePos.y === startPixel.y;
-                        });
-                        console.warn(`MonsterControllerSystem: ${monsterData.name} at pixel (${pos.x}, ${pos.y}) tile (${tileX}, ${tileY}) is not walkable at rounded (${startPixel.x}, ${startPixel.y}), entities:`,
-                            entitiesAtTarget.map(e => ({
-                                id: e.id,
-                                components: Array.from(e.components.keys()),
-                                pos: e.getComponent('Position')
-                            })));
-                        return;
-                    }
+                    const { tileX, tileY } = this.utilities.getTileFromPixel(pos.x, pos.y);
+
+                    let setNextWanderTile = false;
 
                     // Check if monster is currently wandering
-                    if (monsterData.isWandering && monsterData.path && monsterData.path.length > 1) {
-                        const nextTile = monsterData.path[1];
-                        const nextPixel = this.utilities.getPixelFromTile(nextTile.x, nextTile.y);
-                        this.entityManager.addComponentToEntity(
-                            monster.id,
-                            new MovementIntentComponent(nextPixel.x, nextPixel.y)
-                        );
-                        monsterData.path.shift();
-                        if (monsterData.path.length <= 1) {
-                            monsterData.isWandering = false;
-                            monsterData.path = [];
-                            console.log(`MonsterControllerSystem: ${monsterData.name} finished wandering`);
+                    if (monsterData.isWandering && monsterData.wanderTile) {
+                        const nextTile = monsterData.wanderTile;
+                        if (tileX === nextTile.x && tileY === nextTile.y) {
+                            this.entityManager.removeComponentFromEntity(monster.id, 'MovementIntent');
+                            monsterData.wanderCycles--;
+
+                            if (monsterData.wanderCycles && monsterData.wanderCycles > 0) {
+                                setNextWanderTile = true;
+                            } else {
+                                console.log(`MonsterControllerSystem: ${monsterData.name} finished wandering`);
+                                monsterData.isWandering = false;
+                                monsterData.wanderTile = null;
+                                return;
+                            }
                         }
-                        return;
+                        if (!setNextWanderTile) {
+                            return; // Skip further processing if already wandering
+                        }
                     }
 
-                    // Attempt to start a new wander path
-                    if (Math.random() < this.MONSTER_WANDER_CHANCE) {
+                    if (Math.random() < this.MONSTER_WANDER_CHANCE || setNextWanderTile) {
+
                         let wanderTile = null;
                         let attempts = 0;
                         const maxAttempts = 10;
@@ -150,8 +136,8 @@ export class MonsterControllerSystem extends System {
 
                             if (
                                 (targetTileX !== tileX || targetTileY !== tileY) &&
-                                targetTileX >= 0 && targetTileX < 120 && targetTileY >= 0 && targetTileY < 67 && // Map bounds
-                                this.utilities.isWalkable(null, targetTileX, targetTileY) // Exclude all MonsterData
+                                targetTileX >= 0 && targetTileX < 120 && targetTileY >= 0 && targetTileY < 67// Map bounds
+                                && this.utilities.isWalkable(monster, targetTileX, targetTileY) // Exclude all MonsterData
                             ) {
                                 wanderTile = { x: targetTileX, y: targetTileY };
                             }
@@ -159,34 +145,25 @@ export class MonsterControllerSystem extends System {
                         }
 
                         if (wanderTile) {
-                            console.log(`MonsterControllerSystem: ${monsterData.name} found wander target tile (${wanderTile.x}, ${wanderTile.y})  after ${attempts} attempts`);
-                            const path = this.utilities.findPathAStar(
-                                { x: tileX, y: tileY },
-                                wanderTile,
-                                monster.id,
-                                1
-                            );
-
-                            if (path.length > 1) {
-                                monsterData.isWandering = true;
-                                monsterData.path = path;
-                                console.log(`MonsterControllerSystem: ${monsterData.name} starts wandering to tile (${wanderTile.x}, ${wanderTile.y}), path length: ${path.length}`);
-                                const nextTile = path[1];
-                                const nextPixel = this.utilities.getPixelFromTile(nextTile.x, nextTile.y);
-                                this.entityManager.addComponentToEntity(
-                                    monster.id,
-                                    new MovementIntentComponent(nextPixel.x, nextPixel.y)
-                                );
-                            } else {
-                                console.warn(`MonsterControllerSystem: ${monsterData.name} failed to find path to tile (${wanderTile.x}, ${wanderTile.y})`);
+                            if (!setNextWanderTile) {
+                                monsterData.wanderCycles = Math.floor(Math.random() * 3) + 2; // Random cycles between 2 and 4
                             }
+                            console.log(`MonsterControllerSystem: ${monsterData.name} found wander target tile (${wanderTile.x}, ${wanderTile.y})  after ${attempts} attempts`);
+                            monsterData.wanderTile = wanderTile;
+                            monsterData.isWandering = true;
+                            const nextPixel = this.utilities.getPixelFromTile(wanderTile.x, wanderTile.y);
+                            this.entityManager.addComponentToEntity(monster.id, new MovementIntentComponent(nextPixel.x, nextPixel.y));
                         } else {
-                            console.log(`MonsterControllerSystem: ${monsterData.name} failed to find wander target after ${attempts} attempts`);
+                            monsterData.isWandering = false;
+                            monsterData.wanderTile = null;
+                            this.entityManager.removeComponentFromEntity(monster.id, 'MovementIntent');
+                            console.warn(`MonsterControllerSystem: ${monsterData.name} failed to find path to tile (${wanderTile.x}, ${wanderTile.y})`);
                         }
                     }
+
                 }
-                */
             }
+           
         });
     }
 
@@ -248,5 +225,4 @@ export class MonsterControllerSystem extends System {
 
     }
 
-   
 }

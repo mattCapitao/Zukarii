@@ -258,6 +258,7 @@ export class Utilities {
             e.hasComponent('Stair') ||
             e.hasComponent('Portal') ||
             e.hasComponent('Fountain') ||
+            e.hasComponent('LootData') ||
             (entityId !== e.id && e.hasComponent('MonsterData')) ||
             (entityId !== e.id && e.hasComponent('NPCData'))
         );

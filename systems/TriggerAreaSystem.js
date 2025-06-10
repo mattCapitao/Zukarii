@@ -6,6 +6,8 @@ export class TriggerAreaSystem extends System {
         super(entityManager, eventBus);
         this.lastOverlaps = new Set();
         this._debuggedIds = new Set();
+        this.lastEnterTimestamps = new Map();
+        this.ENTER_COOLDOWN_MS = 1250; // 1 second, adjust as needed
         // No audio-specific or track-specific state
     }
 
@@ -59,11 +61,16 @@ export class TriggerAreaSystem extends System {
         // Handle entered triggers
         for (const id of currentOverlaps) {
             if (!this.lastOverlaps.has(id)) {
-                const triggerEntity = this.entityManager.getEntity(id);
-                if (triggerEntity) {
-                    const triggerArea = triggerEntity.getComponent('TriggerArea');
-                    if (triggerArea && triggerArea.action && triggerArea.data) {
-                        this.eventBus.emit(triggerArea.action, triggerArea.data);
+                const now = Date.now();
+                const lastEnter = this.lastEnterTimestamps.get(id) || 0;
+                if (now - lastEnter >= this.ENTER_COOLDOWN_MS) {
+                    const triggerEntity = this.entityManager.getEntity(id);
+                    if (triggerEntity) {
+                        const triggerArea = triggerEntity.getComponent('TriggerArea');
+                        if (triggerArea && triggerArea.action && triggerArea.data) {
+                            this.eventBus.emit(triggerArea.action, triggerArea.data);
+                            this.lastEnterTimestamps.set(id, now);
+                        }
                     }
                 }
             }
