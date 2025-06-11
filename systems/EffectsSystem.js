@@ -95,7 +95,6 @@ export class EffectsSystem extends System {
             return;
         }
 
-        console.log(`EffectsSystem: Attempting instantHeal on ${entity.id}`);
         const CHANCE_TO_HEAL = params?.chanceToHeal || 0.05;
         const MIN_HEAL_PERCENTAGE = params?.minHealPercentage || 0.05;
         const MAX_HEAL_PERCENTAGE = params?.maxHealPercentage || 0.10;
@@ -114,13 +113,9 @@ export class EffectsSystem extends System {
         const missingHp = health.maxHp - health.hp;
         const healPercentage = Math.random() * (MAX_HEAL_PERCENTAGE - MIN_HEAL_PERCENTAGE) + MIN_HEAL_PERCENTAGE;
         const healAmount = Math.round(missingHp * healPercentage);
-
-        //health.hp = Math.min(health.hp + healAmount, health.maxHp);
         this.healthUpdates.push({ entityId, amount: healAmount });
     
-        this.eventBus.emit('LogMessage', {
-            message: `Resilience heals you for ${healAmount} HP! (${health.hp}/${health.maxHp})`
-        });
+        this.utilities.LogMessage( {channel: 'combat', classNames: 'player', message: `Resilience heals you for ${healAmount} HP! (${health.hp}/${health.maxHp})`});
         console.log(`EffectsSystem: Healed ${entity.id} for ${healAmount} HP. Now: ${health.hp}/${health.maxHp}`);
     }
 
@@ -165,11 +160,7 @@ export class EffectsSystem extends System {
         const healPercentage = Math.random() * (MAX_DAMAGE_HEALED_PERCENTAGE - MIN_DAMAGE_HEALED_PERCENTAGE) + MIN_DAMAGE_HEALED_PERCENTAGE;
         const healAmount = Math.round(damageDealt * healPercentage);
 
-
-
-        this.eventBus.emit('LogMessage', {
-            message: `Life Steal heals you for ${healAmount} HP from damage dealt! (${health.hp}/${health.maxHp})`
-        });
+        this.utilities.LogMessage({ channel: 'combat', classNames: 'player', message: `Life Steal heals you for ${healAmount} HP from damage dealt! (${health.hp}/${health.maxHp})`});
         console.log(`EffectsSystem: ${entity.id} stole ${healAmount} HP from ${targetId}. Now: ${health.hp}/${health.maxHp}`);
     }
 
