@@ -58,50 +58,32 @@ export class EffectsSystem extends System {
         // No per-frame logic needed yet—event-driven for now
     }
 
-    // NEW: Moved from AffixSystem - stealGold effect
     stealGold(entityId, params, context) {
-        console.log('EffectsSystem.stealGold: this.entityManager:', this.entityManager);
         const attacker = this.entityManager.getEntity(entityId);
         const targetId = context.targetId;
         const target = this.entityManager.getEntity(targetId);
-        if (!attacker || !target) {
-            console.warn(`EffectsSystem: Attacker ${entityId} or target ${targetId} not found for stealGold`);
+        const resource = target?.getComponent('Resource');
+
+        if (!attacker || !target || !resource) {
+            console.warn(`EffectsSystem:stealGod failed - Attacker ${entityId} target ${targetId} or arget ${target.id} Resource component not found `);
             return;
         }
-
-        console.log(`EffectsSystem: Attempting stealGold on ${target.id} by ${attacker.id}`);
-        const STEAL_PERCENTAGE = params?.stealPercentage || 0.1;
-        const MIN_STEAL = params?.minSteal || 1;
-
-        const resource = target.getComponent('Resource');
-        if (!resource) {
-            console.warn(`EffectsSystem: Target ${target.id} has no Resource component for stealGold`);
-            return;
-        }
-
-        const monsterData = attacker.getComponent('MonsterData');
-        const attackerName = monsterData ? monsterData.name : 'Unknown';
-
         const goldBefore = resource.gold;
-        const stolenGold = Math.floor(goldBefore * STEAL_PERCENTAGE) + MIN_STEAL;
-        resource.gold = Math.max(0, goldBefore - stolenGold);
-
         if (goldBefore > 0) {
-            this.eventBus.emit('LogMessage', {
-                message: `${attackerName}'s Greedy Claw attack has stolen ${stolenGold} gold from you!`
-            });
-            if (resource.gold === 0) {
-                this.eventBus.emit('LogMessage', {
-                    message: `ALL YOUR GOLD ARE BELONG TO ${attackerName}`
-                });
-            }
-        } else {
-            this.eventBus.emit('LogMessage', {
-                message: `${attackerName} tried to steal gold, but you have none left!`
-            });
-        }
+            const STEAL_PERCENTAGE = params?.stealPercentage || 0.1;
+            const MIN_STEAL = params?.minSteal || 1;
+            const monsterData = attacker.getComponent('MonsterData');
+            const attackerName = monsterData ? monsterData.name : 'Unknown';
+            const stolenGold = Math.floor(goldBefore * STEAL_PERCENTAGE) + MIN_STEAL;
 
-        console.log(`EffectsSystem: ${attackerName} stole ${stolenGold} gold from ${target.id}. Gold now: ${resource.gold}`);
+            resource.gold = Math.max(0, goldBefore - stolenGold);
+
+            this.utilities.LogMessage({channel: 'loot',  message: `${attackerName}'s Greedy Claw attack has stolen ${stolenGold} gold from you!`});
+
+            if (resource.gold === 0) {
+                this.utilities.LogMessage({ channel: 'loot', message: `ALL YOUR GOLD ARE BELONG TO ${attackerName}` });
+            }
+        } 
     }
 
     // NEW: Moved from AffixSystem - instantHeal effect
