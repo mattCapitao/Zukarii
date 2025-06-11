@@ -115,7 +115,7 @@ export class EffectsSystem extends System {
         const healAmount = Math.round(missingHp * healPercentage);
         this.healthUpdates.push({ entityId, amount: healAmount });
     
-        this.utilities.LogMessage( {channel: 'combat', classNames: 'player', message: `Resilience heals you for ${healAmount} HP! (${health.hp}/${health.maxHp})`});
+        this.utilities.logMessage( {channel: 'combat', classNames: 'player', message: `Resilience heals you for ${healAmount} HP! (${health.hp}/${health.maxHp})`});
         console.log(`EffectsSystem: Healed ${entity.id} for ${healAmount} HP. Now: ${health.hp}/${health.maxHp}`);
     }
 
@@ -190,9 +190,7 @@ export class EffectsSystem extends System {
         this.healthUpdates.push({ entityId, amount: DAMAGE });
         this.healthUpdates.push({ TARGET_ID, amount: -reflectAmount });
 
-        this.eventBus.emit('LogMessage', {
-            message: `Reflect Damage hits your attacker for ${reflectAmount} HP! `
-        });
+        this.utilities.logMessage({channel: "system", message: `Reflect Damage hits your attacker for ${reflectAmount} HP! `});
         console.log(`EffectsSystem: Reflect Damage hits your attacker for ${entity.id} for ${reflectAmount} HP. `);
     }
 
@@ -214,7 +212,7 @@ export class EffectsSystem extends System {
         const player = this.entityManager.getEntity('player');
         const hasForgedKey = player.getComponent('Inventory')?.items?.some(item => item.itemId === 'spectralWyrmKey');
         if (hasForgedKey) {
-            this.eventBus.emit('LogMessage', { message: `You have already forged the Spectral Wyrm Key!` });
+            this.utilities.logMessage({ channel: "journey", message: `You have already forged the Spectral Wyrm Key!` });
             return;
         }
 

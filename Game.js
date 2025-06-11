@@ -18,7 +18,6 @@ import { LootManagerSystem } from './systems/LootManagerSystem.js';
 import { InventorySystem } from './systems/InventorySystem.js';
 import { HudUiSystem } from './systems/HudUiSystem.js'; 
 import { MenuUiSystem } from './systems/MenuUiSystem.js'; 
-import { UISystem } from './systems/UISystem.js';
 import { LevelTransitionSystem } from './systems/LevelTransitionSystem.js';
 import { AudioSystem } from './systems/AudioSystem.js';
 import { DataSystem } from './systems/DataSystem.js';
@@ -436,7 +435,7 @@ export class Game {
                 'spatialBuckets',
                 'animation',
                 'mapRender',
-                'entityRemoval',
+                'entityRemoval'
             ], deltaTime);
 
             const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');

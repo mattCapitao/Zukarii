@@ -53,7 +53,7 @@ export class CollisionSystem extends System {
                             collisionType: "current",
                             normalX: 0,
                             normalY: 0,
-                            distance: 0,
+                            distance: 0
                         });
                     }
                 }
@@ -130,7 +130,7 @@ export class CollisionSystem extends System {
                             collisionType: collision.entryTime === 0 ? "current" : "dynamic",
                             normalX: -collision.normalX, // Invert normal for target
                             normalY: -collision.normalY,
-                            distance: collision.entryTime * range,
+                            distance: collision.entryTime * range
                         });
                     }
 

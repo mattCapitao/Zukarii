@@ -114,7 +114,7 @@ export class PlayerSystem extends System {
             { tierIndex: randomStartItemTierIndex },
             { tierIndex: 0, type: 'armor' },
             { tierIndex: 0, type: 'weapon', attackType: 'ranged' },
-            { tierIndex: 0, type: 'weapon', attackType: 'melee' },
+            { tierIndex: 0, type: 'weapon', attackType: 'melee' }
         ];
 
         return Promise.all(partialItems.map(partialItem => {

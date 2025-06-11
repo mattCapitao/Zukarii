@@ -61,7 +61,7 @@ export class EntityGenerationSystem extends System {
         if (direction === 'down') { levelData.stairsDown = { x, y }; } else { levelData.stairsUp = { x, y } }
         console.log(`LevelSystem.js: Placed stairs ${direction} at (${x}, ${y}) on tier ${tier}`, stairEntity);
 
-        if (direction === 'down' && tier == 10) {
+        if (direction === 'down' && tier === 10) {
             visuals.avatar = `img/avatars/ashangal_guardian.png`;
             visuals.w = 64;
             visuals.h = 54;
@@ -239,7 +239,7 @@ export class EntityGenerationSystem extends System {
                         uniqueItem: 0.8
                     },
                     maxItems: 1,
-                    items: [],
+                    items: []
                 }));
 
                 console.log(`LevelSystem: Generated loot source at pixel (${pixelX}, ${pixelY}) for tile (${tileX}, ${tileY}) on tier ${tier}`);
