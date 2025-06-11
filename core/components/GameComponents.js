@@ -198,6 +198,7 @@ export class LightSourceDefinitions {
                 pulse: null,
                 duration: 500
             },
+
             lootGlow: {
                 visibilityEnabled: true,
                 visibilityRadius: 1.5, // Small visibility radius
@@ -223,6 +224,32 @@ export class LightSourceDefinitions {
                 glowSize: 10, // Small outline
                 proximityFactor: 1.5, // Slightly brighter when player is near
                 pulse: null
+            },
+            portalGreen: { // Example for NPC on tier 0
+                visibilityEnabled: true,
+                visibilityRadius: 4, // medium visibility radius
+                visibilityOpacitySteps: [0.75, 0.15, 0],
+                visibilityTintColor: 'rgba(0,255,0,0.4)', // Subtle green tint
+                glowEnabled: true,
+                glowType: 'environmental',
+                glowColor: 'rgba(0,255,0,1)', // Green glow
+                glowIntensity: 1, // Faint glow
+                glowSize: 0, // Small outline
+                proximityFactor: 3, // Slightly brighter when player is near
+                pulse: { amplitude: 0.3, frequency: 0.3 } // Strong pulsing
+            },
+            portalBlue: { 
+                visibilityEnabled: true,
+                visibilityRadius: 9, // Large visibility radius
+                visibilityOpacitySteps: [0.75, 0.15, 0],
+                visibilityTintColor: 'rgba(0,0,255,1)', // Strong Blue Tint
+                glowEnabled: true,
+                glowType: 'outline',
+                glowColor: 'rgba(0,0,255,1)', // Green glow
+                glowIntensity: 1, // Faint glow
+                glowSize: 15, // Small outline
+                proximityFactor: 3, // Slightly brighter when player is near
+                pulse: { amplitude: 0.3, frequency: 0.3 } // Strong pulsing
             },
             elite: { // Example for elite monster
                 visibilityEnabled: true, // No visibility effect
@@ -261,7 +288,7 @@ export class LightSourceDefinitions {
                 glowSize: 3, // Medium-sized outline
                 proximityFactor: 10, // Brighter when player is near
                 pulse: { amplitude: 0.25, frequency: 0.15 } // Subtle pulsing
-            },
+            }
         };
     }
 }

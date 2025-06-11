@@ -578,8 +578,15 @@ export class MapRenderSystem extends System {
 
             const light = entity.getComponent('LightSource');
             const pos = entity.getComponent('Position');
+            
+
+            let portalYOffset = 0;
+            if (entity.hasComponent('Portal')) {
+                portalYOffset = 64;
+            }
+
             const npcScreenX = safeNum((pos.x - startX) * this.SCALE_FACTOR + this.TILE_SIZE * this.SCALE_FACTOR / 2);
-            const npcScreenY = safeNum((pos.y - startY) * this.SCALE_FACTOR + this.TILE_SIZE * this.SCALE_FACTOR / 2);
+            const npcScreenY = safeNum(((pos.y + portalYOffset) - startY) * this.SCALE_FACTOR + this.TILE_SIZE * this.SCALE_FACTOR / 2);
 
             // Handle visibility effect (if enabled)
             if (light.visibilityEnabled && light.visibilityRadius > 0) {

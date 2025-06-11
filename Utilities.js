@@ -22,7 +22,6 @@ export class Utilities {
         console.warn(`Utilities: Pushed ${actionType} to PlayerActionQueue`, action);
     }
 
-
     camelToTitleCase(str) {
         return str
             .replace(/([A-Z])/g, ' $1')
@@ -45,14 +44,6 @@ export class Utilities {
             .replace(/'/g, '&#39;');
     }
 
-    getRandomName(names) {
-        if (!Array.isArray(names) || names.length === 0) {
-            return undefined;
-        }
-        const randomIndex = Math.floor(Math.random() * names.length);
-        return names[randomIndex];
-    }
-
     escapeJsonString(str) {
         return str.replace(/\\/g, '\\\\')
             .replace(/"/g, '\\"')
@@ -64,14 +55,10 @@ export class Utilities {
     dRoll(dieSize, rollCount = 1, plus=0) {
 
         let total = plus; let roll = 0;
-        let rollText = `Rolling ${rollCount} D${dieSize} + ${plus} : `;
-
         for (let i = 0; i < rollCount; i++) {
             roll= Math.floor(Math.random() * dieSize) + 1;
             total += roll;
-            rollText += `R${i}:${roll} : `;
         }
-        rollText += `Total: ${total}`;
         return total;
     }
 
@@ -242,17 +229,12 @@ export class Utilities {
     }
 
     isWalkable(entityId, tileX, tileY) {
-        if (!Number.isFinite(tileX) || !Number.isFinite(tileY)) {
-            console.error(`Utilities.isWalkable: Invalid tile coordinates (tileX=${tileX}, tileY=${tileY}), entityId=${entityId}`);
-            return false;
-        }
-
+        if (!Number.isFinite(tileX) || !Number.isFinite(tileY)) return false;
         const pixel = this.getPixelFromTile(tileX, tileY);
         const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
             const ePos = e.getComponent('Position');
             return ePos.x === pixel.x && ePos.y === pixel.y;
         });
-
         const isBlocked = entitiesAtTarget.some(e =>
             e.hasComponent('Wall') ||
             e.hasComponent('Stair') ||
@@ -262,27 +244,12 @@ export class Utilities {
             (entityId !== e.id && e.hasComponent('MonsterData')) ||
             (entityId !== e.id && e.hasComponent('NPCData'))
         );
-        const hasFloor = entitiesAtTarget.some(e => e.hasComponent('Floor'));
-
-        if (isBlocked) {
-            console.log(`Utilities.isWalkable: Tile (${tileX}, ${tileY}) pixel (${pixel.x}, ${pixel.y}) blocked=${isBlocked}, entityId=${entityId || 'undefined'}, entities:`,
-                entitiesAtTarget.map(e => ({
-                    id: e.id,
-                    components: Array.from(e.components.keys()),
-                    pos: e.getComponent('Position')
-                })));
-        }
-        /*
-        if (!hasFloor) {
-            console.log(`Utilities.isWalkable: Tile (${tileX}, ${tileY}) pixel (${pixel.x}, ${pixel.y}) hasFloor=${hasFloor}, entityId=${entityId}, entities:`,
-                entitiesAtTarget.map(e => ({
-                    id: e.id,
-                    components: Array.from(e.components.keys()),
-                    pos: e.getComponent('Position')
-                })));
-        }
-        */
-        return !isBlocked; // && hasFloor;
+        // Map check
+        const levelEntity = this.entityManager.getEntitiesWith(['Tier'])
+            .find(e => e.getComponent('Tier').value === this.entityManager.getActiveTier());
+        const mapComp = levelEntity?.getComponent('Map');
+        const isFloor = mapComp && mapComp.map[tileY] && mapComp.map[tileY][tileX] === ' ';
+        return !isBlocked && isFloor;
     }
 
     findPathAStar(start, goal, entityId, tileSize = 1, maxIterations = 500, isWalkable = null) {

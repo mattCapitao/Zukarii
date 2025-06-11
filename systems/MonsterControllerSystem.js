@@ -81,18 +81,12 @@ export class MonsterControllerSystem extends System {
                 }
 
                 // Set facing direction
-                if (dx <= 0) { monster.getComponent('Visuals').faceLeft = true; }
-                if (dx > 0) { monster.getComponent('Visuals').faceLeft = false; }
+                 monster.getComponent('Visuals').faceLeft = dx < 0 ? true : dx > 0 ? false : monster.getComponent('Visuals').faceLeft;
 
-                // Set MovementIntent for collision detection and resolution
-                // Destination is always the player's current position
-                this.entityManager.addComponentToEntity(
-                    monster.id,
-                    new MovementIntentComponent(playerPos.x, playerPos.y)
-                );
-                ////console.log(`MonsterControllerSystem: ${monsterData.name} intends to move to player at (${playerPos.x}, ${playerPos.y}), distance to player: ${distance.toFixed(2)} pixels`);
+                // Set MovementIntent destimnation as the player's current position
+                this.entityManager.addComponentToEntity(monster.id, new MovementIntentComponent(playerPos.x, playerPos.y));
+
             } else {
-                // wandering disabled till i find an efficiant way to handle it 
           
                 if (!monster.hasComponent('MovementIntent') && !monsterData.isAggro && !monsterData.isBoss && monsterData.isElite) {
 

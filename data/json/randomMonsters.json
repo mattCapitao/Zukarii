@@ -7,6 +7,7 @@
     "family": "undead",
     "minDungeonTier": 1,
     "avatar": "img/avatars/monsters/skeleton.png",
+    "movementSpeed": 58,
     "baseHp": 20,
     "maxHp": 20,
     "hp": 20,

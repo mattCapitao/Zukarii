@@ -7,7 +7,7 @@ export class TriggerAreaSystem extends System {
         this.lastOverlaps = new Set();
         this._debuggedIds = new Set();
         this.lastEnterTimestamps = new Map();
-        this.ENTER_COOLDOWN_MS = 1250; // 1 second, adjust as needed
+        this.ENTER_COOLDOWN_MS = 1500; 
         // No audio-specific or track-specific state
     }
 

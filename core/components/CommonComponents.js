@@ -291,4 +291,16 @@ export class LightSourceComponent {
         this.expires = expires;
         this.remainingDuration = remainingDuration;
     }
+} 
+
+export class AStarComponent {
+    constructor() {
+        this.type = 'AStar';
+        this.openSet = []; // List of nodes to be evaluated
+        this.closedSet = []; // List of nodes already evaluated
+        this.path = []; // Final path from start to goal
+        this.startNode = null; // Starting node for pathfinding
+        this.goalNode = null; // Goal node for pathfinding
+        this.grid = null; // Grid representation of the map for pathfinding
+    }
 }

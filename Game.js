@@ -218,38 +218,6 @@ export class Game {
         this.entityManager.addComponentToEntity('gameState', new JourneyUpdateQueueComponent());
         this.entityManager.addComponentToEntity('gameState', new AchievementUpdateQueueComponent());
         
-        /*
-        this.initializeSystems().then(() => {
-            // Load journey paths into gameState
-            this.state.eventBus.emit('GetJourneyPaths', {
-                callback: (journeyPaths) => {
-                    const journeyPathsComp = this.entityManager.getEntity('gameState').getComponent('JourneyPaths');
-                    journeyPathsComp.paths = journeyPaths;
-                    console.log('Game.js: Journey paths loaded into gameState:', journeyPaths);
-
-                    // Initialize offered journeys (excluding those that start assigned)
-                    const offeredJourneysComp = this.entityManager.getEntity('gameState').getComponent('OfferedJourneys');
-                    offeredJourneysComp.journeys = journeyPaths
-                        .filter(path => path.startsOffered && !path.startsAssigned)
-                        .map(path => ({ journeyId: path.id, offeredBy: path.offeredBy }));
-                    console.log('Game.js: Offered journeys initialized:', offeredJourneysComp.journeys);
-
-                    // Initialize player with master paths and assigned journeys only if not loading from a save
-                    const journeyPathComp = this.entityManager.getEntity('player').getComponent('JourneyPath');
-                    if (!this.isLoadingFromSave) {
-                        const masterPaths = journeyPaths.filter(path => path.id === path.parentId);
-                        const assignedJourneys = journeyPaths.filter(path => path.startsAssigned);
-                        journeyPathComp.paths = [...masterPaths, ...assignedJourneys];
-                        console.log('Game.js: Player journey paths initialized:', journeyPathComp.paths);
-                    } else {
-                        console.log('Game.js: Skipping default journey initialization due to loading from save');
-                    }
-
-                    this.state.eventBus.emit('InitializePlayer');
-                }
-            });
-        });
-        */
         this.initializeSystems().then(() => {
             // Load journey paths into gameState
             this.state.eventBus.emit('GetJourneyPaths', {
@@ -309,7 +277,7 @@ export class Game {
         this.systems.itemROG = new ItemROGSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.lootManager = new LootManagerSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.player = new PlayerSystem(this.entityManager, this.state.eventBus, this.utilities);
-        this.systems.monsterSpawn = new MonsterSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data);
+        this.systems.monsterSpawn = new MonsterSpawnSystem(this.entityManager, this.state.eventBus, this.utilities, this.systems.data);
         this.systems.npcSpawn = new NPCSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data, this.utilities);
         this.systems.entityGeneration = new EntityGenerationSystem(this.entityManager, this.state.eventBus, this.state);
         this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state, this.systems.entityGeneration, this.utilities);

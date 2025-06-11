@@ -87,21 +87,30 @@ export class EntityGenerationSystem extends System {
 
         let visualsImg = 'img/anim/Portal-Animation.png';
         let cleansed = false; // Portals are not cleansed by default
-
+        let lightsourceDefinition = 'portalBlue'; // Default light source definition
         const unlockedPortals = player.getComponent('PlayerAchievements').stats.unlockedPortals || [];
         if (unlockedPortals.includes(tier)) {
             active = true;
             cleansed = true;
             visualsImg = 'img/anim/Portal-Animation-Cleansed.png';
+            lightsourceDefinition = 'portalGreen';
         } else if (tier < 11 && gameState.highestTier < 11) {
             active = false;
             cleansed = false;
             visualsImg = 'img/avatars/inactive-portal.png';
+            lightsourceDefinition = null;
         } else if (tier < 11 && gameState.highestTier >= 11) {
             active = true;
             cleansed = true;
             visualsImg = 'img/anim/Portal-Animation-Cleansed.png';
+            lightsourceDefinition = 'portalGreen';
         }
+
+        if (lightsourceDefinition) {
+            this.eventBus.emit('LightSourceActivated', ({ type: lightsourceDefinition, entityId: portalEntity.id }));
+            console.log(`LevelSystem.js: generatePortal - emitted light source activation request for portal at tier ${tier} with definition ${lightsourceDefinition}`);
+        }
+        
         console.log(`LevelSystem.js: generatePortal - Portal visuals set to ${visualsImg} for tier ${tier}, cleansed: ${cleansed}`, gameState);
 
         portalComp.active = active;
@@ -113,8 +122,12 @@ export class EntityGenerationSystem extends System {
         this.eventBus.emit('PortalAdded');
 
         console.log(`LevelSystem - PORTAL - Portal Entity Created on tier: ${tier} at x:${x}, y:${y}`, portalEntity);
+
+        
         return portalEntity;
+
     }
+
 
     generateFountains(tier, levelData, entityList) {
         const map = levelData.map;
@@ -168,9 +181,9 @@ export class EntityGenerationSystem extends System {
                         x, y,
                         512, 512,
                         'PlayTrackControl',
-                        { track: 'fountain_loop', play: true, volume: 0.2, fadeIn: 1},
+                        { track: 'fountain_loop', play: true, volume: 0.2, fadeIn: 0.75},
                         'PlayTrackControl',
-                        { track: 'fountain_loop', play: false, fadeOut: 1 },
+                        { track: 'fountain_loop', play: false, fadeOut: 0.75 },
                         'Presence'
                     );
                 }

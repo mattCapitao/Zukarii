@@ -21,16 +21,16 @@ export class MovementResolutionSystem extends System {
 
         for (let i = 0; i < entities.length; i++) {
             const entity = entities[i];
-            const intent = entity.getComponent('MovementIntent');
-            const pos = entity.getComponent('Position');
-            let lastPos = null;
-
-            if (entity.id === 'player' && gameState.isRangedMode) {
+            const isPlayer = entity.id === 'player';
+            if (isPlayer && gameState.isRangedMode) {
                 // In ranged mode, player movement is handled by PlayerControllerSystem
                 continue;
             }
-
+            const hasProjectile = entity.hasComponent('Projectile');
             
+            const intent = entity.getComponent('MovementIntent');
+            const pos = entity.getComponent('Position');
+            let lastPos = null;
             if (entity.hasComponent('LastPosition')) {
                 lastPos = entity.getComponent('LastPosition');
             }
@@ -45,7 +45,7 @@ export class MovementResolutionSystem extends System {
             if (entity.hasComponent('InCombat') && entity.hasComponent('MovementSpeed')) {
                 actualSpeed *= moveSpeedComp.combatSpeedMultiplier;
             }
-            if (actualSpeed > this.MAX_ACTUAL_SPEED && !entity.hasComponent('Projectile')) actualSpeed = this.MAX_ACTUAL_SPEED;
+            if (actualSpeed > this.MAX_ACTUAL_SPEED && !hasProjectile) actualSpeed = this.MAX_ACTUAL_SPEED;
 
             const dx = intent.targetX - pos.x;
             const dy = intent.targetY - pos.y;
@@ -64,7 +64,7 @@ export class MovementResolutionSystem extends System {
             // Only run overlap checks if CollisionSystem predicted a collision
             const hasPredictedCollision = entity.hasComponent('Collision') && entity.getComponent('Collision').collisions.length > 0;
 
-            if (hasPredictedCollision) {
+            if (hasPredictedCollision && !hasProjectile) {
 
                 // Path checking for monsters/NPCs
                 if (entity.hasComponent('MonsterData')) {
@@ -98,8 +98,7 @@ export class MovementResolutionSystem extends System {
         }
     }
 
-    pathChecking(entity, pos, moveX, moveY, framesAhead = 10, hitboxEntities) {
-        if (entity.id === 'player' || entity.hasComponent('Projectile')) return { moveX, moveY };
+    pathChecking(entity, pos, moveX, moveY, framesAhead = 5, hitboxEntities) {
         let testX = pos.x;
         let testY = pos.y;
         let testMoveX = moveX;
@@ -121,7 +120,7 @@ export class MovementResolutionSystem extends System {
     }
 
     wouldOverlap(entity, newX, newY, hitboxEntities) {
-        if (entity.hasComponent('Projectile')) return false;
+        
         const hitbox = entity.getComponent('Hitbox');
         if (!hitbox) return false;
         for (let i = 0; i < hitboxEntities.length; i++) {

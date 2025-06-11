@@ -3,10 +3,10 @@ import { System } from '../core/Systems.js';
 import { PositionComponent, LastPositionComponent, HealthComponent, AttackSpeedComponent, MovementSpeedComponent, AffixComponent, VisualsComponent, HitboxComponent } from '../core/Components.js';
 
 export class MonsterSpawnSystem extends System {
-    constructor(entityManager, eventBus, dataSystem) {
-        super(entityManager, eventBus);
+    constructor(entityManager, eventBus, utilities, dataSystem) {
+        super(entityManager, eventBus, utilities);
         this.dataSystem = dataSystem;
-        this.MIN_SPAWN_DISTANCE = 4; // Minimum distance from player
+        this.MIN_SPAWN_DISTANCE = 6; // Minimum distance from player
         this.TILE_SIZE = 32; // Assuming each tile is 32x32 pixels
 
         // Aggro range for monsters (set to your actual aggro range)
@@ -257,7 +257,7 @@ export class MonsterSpawnSystem extends System {
 
             attempts++;
         } while (
-            !this.isWalkable(tileX, tileY) ||
+            !this.utilities.isWalkable(entity.id, tileX, tileY) ||
             isOccupied ||
             (tileX === playerTileX && tileY === playerTileY) ||
             distance < MIN_SPAWN_DISTANCE ||
@@ -275,10 +275,10 @@ export class MonsterSpawnSystem extends System {
         const attackSpeed = template.attackSpeed || 1000; // Default attack speed if not specified
         this.entityManager.addComponentToEntity(entity.id, new AttackSpeedComponent(attackSpeed));
 
-        const movemntSpeed = template.movementSpeed || 70; // Default movement speed if not specified
-        this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(movemntSpeed));
-
-
+        const movementSpeed = template.movementSpeed || 65; // Default movement speed if not specified
+        this.entityManager.addComponentToEntity(entity.id, new MovementSpeedComponent(movementSpeed));
+        const movementSpeedComp = entity.getComponent('MovementSpeed');
+        movementSpeedComp.combatSpeedMultiplier = .9;
 
         if (tier >= 8 && tier <= 10 && template.isElite) {
             const dropChance = 0.4; // 60% base chance
@@ -434,23 +434,5 @@ export class MonsterSpawnSystem extends System {
         return Math.round(baseHp * (1 + BASE_GROWTH_RATE * tierAdjustment + variance));
     }
 
-    // systems/MonsterSpawnSystem.js - New isWalkable method
-    isWalkable(tileX, tileY) {
-        const pixelX = tileX * this.TILE_SIZE;
-        const pixelY = tileY * this.TILE_SIZE;
-        const entitiesAtTarget = this.entityManager.getEntitiesWith(['Position']).filter(e => {
-            const ePos = e.getComponent('Position');
-            return ePos.x === pixelX && ePos.y === pixelY;
-        });
-        const isBlocked = entitiesAtTarget.some(e =>
-            e.hasComponent('Wall') ||
-            e.hasComponent('Stair') ||
-            e.hasComponent('Portal') ||
-            e.hasComponent('Fountain') ||
-            e.hasComponent('MonsterData')
-        );
-        const hasFloor = entitiesAtTarget.some(e => e.hasComponent('Floor'));
-        return !isBlocked && hasFloor;
-    }
 }
 

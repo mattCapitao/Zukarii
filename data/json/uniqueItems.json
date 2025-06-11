@@ -20,7 +20,7 @@
     "description": "Crafted in acnient times by the finest Zukarath artificers and inspired by the works of the legendary Zu Mage Mbphu, this staff is singualr in purpose. To seek out and destroy dark magic used by inferior arcane artificers.",
     "uniqueId": null,
     "journeyItemId": "mbphuStaff",
-    "icon": "mbphu-staff.svg",
+    "icon": "mbphu-staff.png",
     "affixes": [
       {
         "name": "lifeSteal",
