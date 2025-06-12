@@ -32,6 +32,7 @@ export class MouseInputSystem {
 
     async init() {
         console.log('MouseInputSystem initialized');
+        this.player = this.entityManager.getEntity('player');
     }
 
     handleResize() {
@@ -83,8 +84,8 @@ export class MouseInputSystem {
     }
 
     setCursor(cursorPos) {
-        const player = this.entityManager.getEntity('player');
-        if (!player) {
+        const player = this.player;
+        if (!this.player) {
             console.warn('MouseInputSystem: Player entity not found');
             return;
         }
@@ -129,7 +130,7 @@ export class MouseInputSystem {
         const duration = this.mouseDownTime ? now - this.mouseDownTime : 0;
         const isQuickClick = duration < this.CLICK_THRESHOLD;
 
-        const player = this.entityManager.getEntity('player');
+        const player = this.player;
         if (!player) {
             console.warn('MouseInputSystem: Player entity not found');
             return;
@@ -172,7 +173,7 @@ export class MouseInputSystem {
 
         if (!this.isMouseDown || this.lastMouseX === null || this.lastMouseY === null) return;
 
-        const player = this.entityManager.getEntity('player');
+        const player = this.player;
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (!player || !gameState?.gameStarted || gameState.gameOver || gameState.transitionLock) {
             console.log(`MouseInputSystem: Update skipped due to transitionLock or invalid state`);
@@ -186,7 +187,7 @@ export class MouseInputSystem {
     }
 
     clearMovement() {
-        const player = this.entityManager.getEntity('player');
+        const player = this.player;
         if (player) {
             this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
             this.isMouseDown = false;
@@ -229,7 +230,7 @@ export class MouseInputSystem {
     }
 
     processInput(worldX, worldY, isClick = false) {
-        const player = this.entityManager.getEntity('player');
+        const player = this.player;
         const playerState = player.getComponent('PlayerState');
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         const attackSpeed = player.getComponent('AttackSpeed');
@@ -344,7 +345,7 @@ export class MouseInputSystem {
 
         const targetX = tileX * this.TILE_SIZE;
         const targetY = tileY * this.TILE_SIZE;
-        const player = this.entityManager.getEntity('player');
+        const player = this.player;
         const moveDx = targetX - player.getComponent('Position').x;
         const moveDy = targetY - player.getComponent('Position').y;
         this.entityManager.addComponentToEntity('player', new MouseTargetComponent(targetX, targetY));
@@ -394,7 +395,7 @@ export class MouseInputSystem {
         const rect = this.canvas.getBoundingClientRect();
         const pixelX = (event.clientX - rect.left) / this.SCALE_FACTOR;
         const pixelY = (event.clientY - rect.top) / this.SCALE_FACTOR;
-        const player = this.entityManager.getEntity('player');
+        const player = this.player;
         const playerPos = player.getComponent('Position');
         const viewportWidth = this.canvas.width / this.SCALE_FACTOR;
         const viewportHeight = this.canvas.height / this.SCALE_FACTOR;

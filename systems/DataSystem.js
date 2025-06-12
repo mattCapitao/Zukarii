@@ -108,18 +108,6 @@ export class DataSystem extends System {
                 return [];
             });
 
-        // Custom surface level
-        this.customSurfaceLevel = {
-            map: this.generateSurfaceMap(),
-            rooms: [{ left: 1, top: 1, w: 8, h: 8, x: 5, y: 5, type: 'SurfaceRoom', connections: [] }],
-            stairsUp: { x: 2, y: 2 },
-            stairsDown: { x: 5, y: 5 },
-            playerSpawn: { x: 1, y: 1 },
-            monsters: [],
-            treasures: [],
-            fountains: [],
-            spawn: []
-        };
 
         // Load item stat options from JSON file asynchronously
         console.log('DataSystem: Starting fetch for itemStatOptions.json');
@@ -185,6 +173,11 @@ export class DataSystem extends System {
         this.eventBus.on('GetJourneyPaths', ({ callback }) => this.provideJourneyPaths({ callback }));
         this.eventBus.on('GetJourneyItems', ({ callback }) => this.provideJourneyItems({ callback }));
 
+
+        // Add event for custom level JSON
+        this.eventBus.on('GetCustomLevelJSON', ({ tier, callback }) => this.provideCustomLevelJSON({ tier, callback }));
+
+
         // Preload data
         this.loadData();
     }
@@ -221,6 +214,10 @@ export class DataSystem extends System {
 
             this.journeyItems = await fetch('data/json/journeyItems.json').then(r => r.json()).catch(() => []);
             console.log('DataSystem: Successfully loaded journeyItems.json:', this.journeyItems);
+
+            console.log('DataSystem: Starting fetch for tier_0.json');
+            this.customLevelJSON = await fetch('data/json/tier/0.json').then(r => r.json()).catch(() => null);
+            console.log('DataSystem: Successfully loaded tier_0.json:', this.customLevelJSON);
 
         } catch (error) {
             console.error('DataSystem: Failed to load data:', error);
@@ -283,28 +280,18 @@ export class DataSystem extends System {
         return Promise.resolve();
     }
 
-    generateSurfaceMap() {
-        const state = this.entityManager.getEntity('state');
-        let map = [];
-        for (let y = 0; y < 67; y++) {
-            map[y] = [];
-            for (let x = 0; x < 122; x++) {
-                if (y < 10 && x < 10) {
-                    map[y][x] = (y === 0 || y === 9 || x === 0 || x === 9) ? '#' : ' ';
-                } else {
-                    map[y][x] = '#';
-                }
-            }
-        }
-        map[2][2] = '⇑';
-        map[5][5] = '⇓';
-        return map;
-    }
 
-    provideCustomLevel({ tier, callback }) {
-        if (tier === 0) {
-            callback(JSON.parse(JSON.stringify(this.customSurfaceLevel)));
-        } else {
+    async provideCustomLevelJSON({ tier, callback }) {
+        try {
+            const customLevelJSON = await this.customLevelJSONPromise;
+            console.log('DataSystem: Providing custom level JSON for tier:', tier, customLevelJSON);
+            if (tier === 0 && customLevelJSON) {
+                callback(JSON.parse(JSON.stringify(customLevelJSON)));
+            } else {
+                callback(null);
+            }
+        } catch (error) {
+            console.error('DataSystem: Error providing custom level JSON:', error);
             callback(null);
         }
     }

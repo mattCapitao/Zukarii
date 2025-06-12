@@ -171,7 +171,7 @@ export class LevelSystem extends System {
 
             let levelData;
             if (customLevel != null || tier === 0) {
-                
+
                 if (customLevel == null && tier === 0) {
                     //console.log(`LevelSystem.js: Generating Tier 0 with generateSurfaceLevel`);
                     customLevel = this.generateCustomLevel(levelEntity);
@@ -204,12 +204,12 @@ export class LevelSystem extends System {
                 this.adjustPlayerPosition(levelEntity, transitionDirection === 'down' ? levelData.stairsUp : (levelData.stairsDown || levelData.stairsUp));
             } else {
 
-                const journeyBossLevels = [3,6]
+                const journeyBossLevels = [3, 6]
                 let hasBossRoom = false;
 
                 switch (true) {
                     case (tier - this.lastBossTier >= this.BOSS_ROOM_EVERY_X_LEVELS):
-                    case (Math.random() < 0.05) :
+                    case (Math.random() < 0.05):
                     case journeyBossLevels.includes(tier):
                         hasBossRoom = true;
                         break;
@@ -409,7 +409,7 @@ export class LevelSystem extends System {
 
                     // Score: penalize overlap and closeness, prefer central placement
                     //let centerScore = Math.abs(room.x + room.width / 2 - this.state.WIDTH / 2) + Math.abs(room.y + room.height / 2 - this.state.HEIGHT / 2);
-                   // let score = (overlap ? 1000 : 0) + (tooClose ? 500 : 0) + centerScore;
+                    // let score = (overlap ? 1000 : 0) + (tooClose ? 500 : 0) + centerScore;
 
                     // Score: penalize overlap and closeness, prefer decentralized placement
                     let distFromCenter = Math.abs(room.x + room.width / 2 - this.state.WIDTH / 2) + Math.abs(room.y + room.height / 2 - this.state.HEIGHT / 2);
@@ -954,7 +954,7 @@ export class LevelSystem extends System {
                     stairDownX = bossRoom.left + 1;
                     stairDownY = bossRoom.top + 1;
                     break;
-                } 
+                }
             } while (map[stairDownY][stairDownX] !== ' ');
 
             const stairDownEntity = this.generateStairEntity(levelData, entityList, tier, bossRoomId, 'down', stairDownX, stairDownY, true);
@@ -1037,7 +1037,7 @@ export class LevelSystem extends System {
         const stairs = [];
         const npcs = [];
         const shopCounters = [];
-       
+
         const tier = 0;
         const stairPos = { upX: 14, upY: 8, downX: 3, downY: 8 }
 
@@ -1073,7 +1073,7 @@ export class LevelSystem extends System {
         // Create a single room entity for the surface level
         const roomEntityId = 'room_0_surface';
         const roomEntity = this.entityManager.createEntity(roomEntityId);
-        
+
         this.entityManager.addComponentToEntity(roomEntityId, new RoomComponent({
             left: 1,
             top: 1,
@@ -1092,9 +1092,9 @@ export class LevelSystem extends System {
             floors: floors,
             stairs: stairs,
             npcs: npcs,
-            shopCounters : shopCounters,
+            shopCounters: shopCounters,
             stairsDown: { x: stairPos.downX, y: stairPos.downY },
-            stairsUp:  { x: stairPos.upX, y: stairPos.upY },
+            stairsUp: { x: stairPos.upX, y: stairPos.upY },
             roomEntityIds: roomEntityIds,
         };
 
@@ -1109,12 +1109,12 @@ export class LevelSystem extends System {
         entityList.npcs = npcs;
         entityList.shopCounters = shopCounters;
         //console.log(`LevelSystem.js: Updated EntityListComponent for ${levelEntity.id} in generateSurfaceLevel`);
-       
-       
+
+
         const stairUpEntity = this.generateStairEntity(levelData, entityList, tier, roomEntityId, 'up', stairPos.upX, stairPos.upY, true);
         const stairDownEntity = this.generateStairEntity(levelData, entityList, tier, roomEntityId, 'down', stairPos.downX, stairPos.downY, true);
-        
-        
+
+
         this.eventBus.emit('SpawnNPCs', {
             tier: 0,
             npcs: [
@@ -1318,7 +1318,7 @@ export class LevelSystem extends System {
     }
 
 
- 
+
     ensureRoomConnectionsPassTwo(levelEntity) {
         const mapComp = levelEntity.getComponent('Map');
         const entityList = levelEntity.getComponent('EntityList');
@@ -1407,8 +1407,8 @@ export class LevelSystem extends System {
                     }
                 } while (mapComp.map[y][x] !== ' ');
                 if (attempts <= 50) {
-                    const portalEntity = this.generatePortal(entityList, tier,  mapComp, x, y);
-                    
+                    const portalEntity = this.generatePortal(entityList, tier, mapComp, x, y);
+
                 }
             }
         }
@@ -1419,7 +1419,7 @@ export class LevelSystem extends System {
         if (Math.random() < merchantChance) {
             randomMerchant = true;
         }
-        if (tier > 0 && (tier % 10 === 0 || randomMerchant )) {
+        if (tier > 0 && (tier % 10 === 0 || randomMerchant)) {
             const hasShopkeeper = entityList.npcs.some(npcId => {
                 const npc = this.entityManager.getEntity(npcId);
                 const npcData = npc.getComponent('NPCData');

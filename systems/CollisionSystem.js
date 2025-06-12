@@ -27,8 +27,6 @@ export class CollisionSystem extends System {
             const deltaX = intent.targetX - moverPos.x;
             const deltaY = intent.targetY - moverPos.y;
 
-
-          
                 // Static overlap check for all entities except self and projectile source
                 const sourceEntityId = mover.getComponent('Projectile')?.sourceEntityId;
                 for (const target of entities) {
@@ -79,6 +77,12 @@ export class CollisionSystem extends System {
                 deltaY
             ));
 
+            let hasCollision = false;
+            if (!mover.hasComponent('Collision')) {
+                mover.addComponent(new CollisionComponent());
+            }
+
+            const moverCollisionComp = mover.getComponent('Collision');
 
             for (const target of nearbyEntities) {
                 if (mover === target) continue;
@@ -104,11 +108,9 @@ export class CollisionSystem extends System {
                 );
 
                 if (collision) {
-                    if (!mover.hasComponent('Collision')) {
-                        mover.addComponent(new CollisionComponent());
-                    }
-
-                    mover.getComponent('Collision').collisions.push({
+                    hasCollision = true; // At least one collision detected
+                    
+                    moverCollisionComp.collisions.push({
                         moverId: mover.id,
                         targetId: target.id,
                         collisionType: collision.entryTime === 0 ? "current" : "dynamic",
@@ -133,9 +135,14 @@ export class CollisionSystem extends System {
                             distance: collision.entryTime * range
                         });
                     }
-
+                     
                 }
             }
+
+            if (hasCollision) {
+                // If there are collisions, prevent movement by resetting intent
+                moverCollisionComp.nearbyEntities = nearbyEntities; // Store nearby entities for potential use
+            } 
         }
     }
 

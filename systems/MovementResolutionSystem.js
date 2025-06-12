@@ -18,7 +18,7 @@ export class MovementResolutionSystem extends System {
         }
         const entities = this.entityManager.getEntitiesWith(this.requiredComponents);
         // Cache all entities with hitboxes once per frame
-        const hitboxEntities = this.entityManager.getEntitiesWith(['Position', 'Hitbox']);
+        //nst hitboxEntities = this.entityManager.getEntitiesWith(['Position', 'Hitbox']);
 
         for (let i = 0; i < entities.length; i++) {
             const entity = entities[i];
@@ -63,13 +63,18 @@ export class MovementResolutionSystem extends System {
             }
 
             // Only run overlap checks if CollisionSystem predicted a collision
-            const hasPredictedCollision = entity.hasComponent('Collision') && entity.getComponent('Collision').collisions.length > 0;
+            const collisionComp = entity.getComponent('Collision');
+            const filteredCollisions = collisionComp?.collisions.filter(c => c.distance < maxStep * 3);
+
+            const hasPredictedCollision = filteredCollisions && filteredCollisions.length > 0;
 
             if (hasPredictedCollision && !hasProjectile) {
 
+               const hitboxEntities = collisionComp.nearbyEntities || [];
+
                 // Path checking for monsters/NPCs
                 if (entity.hasComponent('MonsterData')) {
-                    const pathResult = this.pathChecking(entity, pos, moveX, moveY, 5, hitboxEntities);
+                    const pathResult = this.pathChecking(entity, pos, moveX, moveY, 2, hitboxEntities);
                     moveX = pathResult.moveX;
                     moveY = pathResult.moveY;
                 } else {
@@ -101,7 +106,7 @@ export class MovementResolutionSystem extends System {
         }
     }
 
-    pathChecking(entity, pos, moveX, moveY, framesAhead = 5, hitboxEntities) {
+    pathChecking(entity, pos, moveX, moveY, framesAhead = 2, hitboxEntities) {
         let testX = pos.x;
         let testY = pos.y;
         let testMoveX = moveX;
@@ -109,12 +114,14 @@ export class MovementResolutionSystem extends System {
         for (let i = 0; i < framesAhead; i++) {
             testX += testMoveX;
             testY += testMoveY;
+
+
             if (this.wouldOverlap(entity, testX, testY, hitboxEntities)) {
                 if (!this.wouldOverlap(entity, testX, pos.y, hitboxEntities)) {
-                    return { moveX: testMoveX * 1.25, moveY: 0 };
+                    return { moveX: testMoveX * 1.5, moveY: 0 };
                 }
                 if (!this.wouldOverlap(entity, pos.x, testY, hitboxEntities)) {
-                    return { moveX: 0, moveY: testMoveY * 1.25};
+                    return { moveX: 0, moveY: testMoveY * 1.5};
                 }
                 return { moveX: 0, moveY: 0 };
             }

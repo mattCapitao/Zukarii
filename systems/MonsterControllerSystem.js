@@ -87,7 +87,7 @@ export class MonsterControllerSystem extends System {
                 this.entityManager.addComponentToEntity(monster.id, new MovementIntentComponent(playerPos.x, playerPos.y));
 
             } else {
-          
+            /*    
                 if (!monster.hasComponent('MovementIntent') && !monsterData.isAggro && !monsterData.isBoss && monsterData.isElite) {
 
                     const { tileX, tileY } = this.utilities.getTileFromPixel(pos.x, pos.y);
@@ -151,11 +151,12 @@ export class MonsterControllerSystem extends System {
                             monsterData.isWandering = false;
                             monsterData.wanderTile = null;
                             this.entityManager.removeComponentFromEntity(monster.id, 'MovementIntent');
-                            console.warn(`MonsterControllerSystem: ${monsterData.name} failed to find path to tile (${wanderTile.x}, ${wanderTile.y})`);
+                            console.warn(`MonsterControllerSystem: ${monsterData.name} has to wanderTile set)`);
                         }
                     }
 
                 }
+            */
             }
            
         });

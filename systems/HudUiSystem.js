@@ -26,6 +26,8 @@ export class HudUiSystem extends System {
         this.lastHealth = null;
         this.lastMana = null;
         this.activeHudLogTab = 'all'; // Default HUD log tab
+        this.lastHudLogUpdate = 0; // Track the last update time
+        this.hudLogThrottleDelay = 83.35; // Throttle delay in milliseconds
     }
 
     init() {
@@ -200,6 +202,10 @@ export class HudUiSystem extends System {
     }
 
     updateHudLog() {
+        const now = Date.now();
+        if (now - this.lastHudLogUpdate < this.hudLogThrottleDelay) {
+            return; // Skip update if within throttle delay
+        }
         const hudLogElement = document.getElementById('hud-log-content');
         const limit = 50;
         const hudLogMessages = this.utilities.getLogMessages({ channel: this.activeHudLogTab, limit });

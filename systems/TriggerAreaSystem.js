@@ -7,7 +7,9 @@ export class TriggerAreaSystem extends System {
         this.lastOverlaps = new Set();
         this._debuggedIds = new Set();
         this.lastEnterTimestamps = new Map();
-        this.ENTER_COOLDOWN_MS = 1500; 
+        this.lastExitTimestamps = new Map();
+        this.ENTER_COOLDOWN_MS = 850; 
+        this.EXIT_COOLDOWN_MS = 850; // Optional, not used in this system
         // No audio-specific or track-specific state
     }
 
@@ -44,7 +46,7 @@ export class TriggerAreaSystem extends System {
                 currentOverlaps.add(triggerEntity.id);
             }
         }
-
+        const now = Date.now();
         // Handle exited triggers
         for (const id of this.lastOverlaps) {
             if (!currentOverlaps.has(id)) {
@@ -53,6 +55,7 @@ export class TriggerAreaSystem extends System {
                     const triggerArea = triggerEntity.getComponent('TriggerArea');
                     if (triggerArea && triggerArea.stopAction && triggerArea.stopData) {
                         this.eventBus.emit(triggerArea.stopAction, triggerArea.stopData);
+                        this.lastExitTimestamps.set(id, now);
                     }
                 }
             }
@@ -61,9 +64,11 @@ export class TriggerAreaSystem extends System {
         // Handle entered triggers
         for (const id of currentOverlaps) {
             if (!this.lastOverlaps.has(id)) {
-                const now = Date.now();
+                
                 const lastEnter = this.lastEnterTimestamps.get(id) || 0;
-                if (now - lastEnter >= this.ENTER_COOLDOWN_MS) {
+                const lastExit = this.lastExitTimestamps.get(id) || 0;
+
+                if (now - lastEnter >= this.ENTER_COOLDOWN_MS && now - lastExit >= this.EXIT_COOLDOWN_MS) {
                     const triggerEntity = this.entityManager.getEntity(id);
                     if (triggerEntity) {
                         const triggerArea = triggerEntity.getComponent('TriggerArea');

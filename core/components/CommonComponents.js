@@ -58,7 +58,8 @@ export class WanderIntentComponent {
 export class CollisionComponent {
     constructor() {
         this.type = 'Collision';
-        this.collisions = []; // Array to store collision details
+        this.collisions = []; // Array to store collision details 
+        this.nearbyEntities = []; // Entities within a certain range for collision checks
     }
 }
 
