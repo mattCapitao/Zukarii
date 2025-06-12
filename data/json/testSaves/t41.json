@@ -1,0 +1,5206 @@
+﻿{
+  "timestamp": "6/10/2025, 2:39:57 PM",
+  "characterName": "journey bunny",
+  "tier": 41,
+  "isDead": false,
+  "player": {
+    "Position": {
+      "type": "Position",
+      "x": 2076.532550874289,
+      "y": 1777.961633143974
+    },
+    "Health": {
+      "type": "Health",
+      "hp": 1000,
+      "maxHp": 1000,
+      "healthRegen": 0,
+      "updated": true
+    },
+    "Mana": {
+      "type": "Mana",
+      "mana": 363,
+      "maxMana": 363,
+      "manaRegen": 4,
+      "updated": false
+    },
+    "Stats": {
+      "type": "Stats",
+      "unallocated": 8,
+      "intellect": 29,
+      "prowess": 15,
+      "agility": 42,
+      "maxHp": 1000,
+      "maxMana": 363,
+      "armor": 33,
+      "defense": 24,
+      "block": 27,
+      "dodge": 0,
+      "range": 9,
+      "resistMagic": 0,
+      "baseRange": 0,
+      "damageBonus": 9,
+      "meleeBonus": 4,
+      "rangedBonus": 8,
+      "luck": 0,
+      "maxLuck": 0,
+      "movementSpeed": 200,
+      "baseMovementSpeed": 0,
+      "isLocked": false,
+      "_internal": {
+        "base": {
+          "intellect": 11,
+          "prowess": 11,
+          "agility": 11,
+          "maxHp": 30,
+          "maxMana": 10,
+          "armor": 0,
+          "defense": 0,
+          "block": 0,
+          "dodge": 0,
+          "range": 0,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 0,
+          "meleeBonus": 0,
+          "rangedBonus": 0,
+          "luck": 0,
+          "maxLuck": 0,
+          "movementSpeed": 100,
+          "baseMovementSpeed": 0
+        },
+        "gear": {
+          "intellect": 9,
+          "prowess": 4,
+          "agility": 31,
+          "maxHp": 239,
+          "maxMana": 5,
+          "armor": 33,
+          "defense": 24,
+          "block": 27,
+          "dodge": 0,
+          "range": 9,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 9,
+          "meleeBonus": 4,
+          "rangedBonus": 8,
+          "luck": 0,
+          "maxLuck": 0,
+          "movementSpeed": 100
+        },
+        "temp": {
+          "intellect": 0,
+          "prowess": 0,
+          "agility": 0,
+          "luck": 0,
+          "maxHp": 0,
+          "maxMana": 0,
+          "movementSpeed": 0,
+          "armor": 0,
+          "defense": 0,
+          "block": 0,
+          "dodge": 0,
+          "range": 0,
+          "resistMagic": 0,
+          "baseRange": 0,
+          "damageBonus": 0,
+          "meleeBonus": 0,
+          "rangedBonus": 0,
+          "maxLuck": 0
+        },
+        "incremented": {
+          "intellect": 9,
+          "prowess": 0,
+          "agility": 0
+        }
+      }
+    },
+    "Inventory": {
+      "type": "Inventory",
+      "equipped": {
+        "mainhand": {
+          "tierIndex": 3,
+          "itemTierIndexBonus": 3,
+          "type": "weapon",
+          "attackType": "melee",
+          "name": "Orc Boss Chopper",
+          "itemTier": "magic",
+          "baseDamageMin": 4,
+          "baseDamageMax": 9,
+          "icon": "dagger.svg",
+          "baseBlock": 4,
+          "stats": {
+            "damageBonus": 4,
+            "meleeBonus": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "uniqueId": "mbpxe8qs-v2clct-9jjfwv",
+          "description": "magic weapon",
+          "goldValue": 1946,
+          "isSellable": true,
+          "equippedSlot": "mainhand"
+        },
+        "offhand": {
+          "name": "Mbphu Greater iLvl Annihilation Staff",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseRange": 9,
+          "slots": [
+            "mainhand",
+            "offhand"
+          ],
+          "baseDamageMin": 10,
+          "baseDamageMax": 15,
+          "tierIndex": 6,
+          "itemTier": "relic",
+          "goldValue": 500000,
+          "stats": {
+            "intellect": 5,
+            "maxMana": 5,
+            "agility": 5,
+            "damageBonus": 5,
+            "rangedBonus": 5
+          },
+          "description": "Crafted in acnient times by the finest Zukarath artificers and inspired by the works of the legendary Zu Mage Mbphu, this staff is singualr in purpose. To seek out and destroy dark magic used by inferior arcane artificers.",
+          "uniqueId": "mbpr9r5u-k9gb8s-y7utvz",
+          "journeyItemId": "mbphuStaff",
+          "icon": "mbphu-staff.png",
+          "affixes": [
+            {
+              "name": "lifeSteal",
+              "type": "combat",
+              "trigger": "attackHitTarget",
+              "effect": "lifeSteal",
+              "params": {
+                "minDmageHealedPercentage": 0.25,
+                "maxDamageHealedPercentage": 0.5,
+                "chanceToStealLife": 0.15
+              },
+              "description": "Chance to heal for a portion of damage dealt when hitting an enemy."
+            }
+          ],
+          "equippedSlot": "offhand"
+        },
+        "armor": {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "prowess": 2,
+            "maxHp": 20,
+            "agility": 2
+          },
+          "critStats": [],
+          "name": "magic armor",
+          "uniqueId": "mbpxab8r-eup07q-j7u626",
+          "description": "magic armor",
+          "goldValue": 2008,
+          "isSellable": true,
+          "equippedSlot": "armor"
+        },
+        "amulet": {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "amulet",
+          "maxLuck": -3,
+          "icon": "amulet.svg",
+          "stats": {
+            "intellect": 2,
+            "meleeBonus": 3,
+            "rangedBonus": 3
+          },
+          "critStats": [],
+          "name": "magic amulet",
+          "uniqueId": "mbpxa8re-eoe5lc-mev7w8",
+          "description": "magic amulet",
+          "goldValue": 1548,
+          "isSellable": true,
+          "equippedSlot": "amulet"
+        },
+        "leftring": {
+          "name": "Golden Buniyar Band",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 78,
+          "tierIndex": 6,
+          "itemTier": "relic",
+          "goldValue": 659.333333,
+          "stats": {
+            "maxHp": 100,
+            "agility": 10,
+            "block": 10,
+            "defense": 10,
+            "armor": 10,
+            "movementSpeed": 45
+          },
+          "description": "All marvel at the Grace and Speed of the Grand Buniyar.",
+          "uniqueId": "mbo696zd-ih15jd-jqqusw",
+          "icon": "golden-bunny.png",
+          "affixes": [
+            {
+              "name": "resilience",
+              "type": "combat",
+              "trigger": "hitByAttack",
+              "effect": "instantHeal",
+              "params": {
+                "minHealPercentage": 0.05,
+                "maxHealPercentage": 0.1,
+                "chanceToHeal": 0.05
+              },
+              "description": "Chance to recover a percentage of missing health on being hit."
+            }
+          ],
+          "purchasePrice": 1978,
+          "equippedSlot": "leftring"
+        },
+        "rightring": {
+          "name": "Golden Buniyar Band",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 78,
+          "tierIndex": 6,
+          "itemTier": "relic",
+          "goldValue": 659.333333,
+          "stats": {
+            "maxHp": 100,
+            "agility": 10,
+            "block": 10,
+            "defense": 10,
+            "armor": 10,
+            "movementSpeed": 45
+          },
+          "description": "All marvel at the Grace and Speed of the Grand Buniyar.",
+          "uniqueId": "mbn264d0-yzhfk5-d5l99d",
+          "icon": "golden-bunny.png",
+          "affixes": [
+            {
+              "name": "resilience",
+              "type": "combat",
+              "trigger": "hitByAttack",
+              "effect": "instantHeal",
+              "params": {
+                "minHealPercentage": 0.05,
+                "maxHealPercentage": 0.1,
+                "chanceToHeal": 0.05
+              },
+              "description": "Chance to recover a percentage of missing health on being hit."
+            }
+          ],
+          "purchasePrice": 1978,
+          "equippedSlot": "rightring"
+        },
+        "gloves": {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "gloves",
+          "armor": 4,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 2,
+            "agility": 2,
+            "block": 2
+          },
+          "critStats": [],
+          "name": "magic gloves",
+          "uniqueId": "mbokuk6b-s2h9z6-8h294l",
+          "description": "magic gloves",
+          "goldValue": 1078,
+          "isSellable": true,
+          "purchasePrice": 3234,
+          "equippedSlot": "gloves"
+        },
+        "head": {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "head",
+          "armor": 5,
+          "icon": "head.svg",
+          "stats": {
+            "maxHp": 19,
+            "defense": 2,
+            "intellect": 2
+          },
+          "critStats": [],
+          "name": "magic head",
+          "uniqueId": "mbpxdmas-hkwbkm-gc7aw8",
+          "description": "magic head",
+          "goldValue": 2008,
+          "isSellable": true,
+          "equippedSlot": "head"
+        },
+        "boots": {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "boots",
+          "baseMovementSpeed": 8,
+          "icon": "boots.svg",
+          "stats": {
+            "movementSpeed": 2,
+            "agility": 2,
+            "defense": 2
+          },
+          "critStats": [],
+          "name": "magic boots",
+          "uniqueId": "mbpxbcc2-dt9lcg-me9ryt",
+          "description": "magic boots",
+          "goldValue": 1568,
+          "isSellable": true,
+          "equippedSlot": "boots"
+        }
+      },
+      "items": [
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "agility": 2,
+            "defense": 1,
+            "resistMagic": 3
+          },
+          "critStats": [],
+          "name": "magic amulet",
+          "uniqueId": "mbpvx0x6-jq4vby-bzqkr7",
+          "description": "magic amulet",
+          "goldValue": 1150,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "resistMagic": 1,
+            "maxMana": 5
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbpvljav-r8m25s-ya0vt8",
+          "description": "rare amulet",
+          "goldValue": 537,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "prowess": 1,
+            "maxMana": 7
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbpvmr80-80nshq-9hnyl9",
+          "description": "rare amulet",
+          "goldValue": 595,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "damageBonus": 1,
+            "resistMagic": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbpwf6rk-86g6po-mfufcp",
+          "description": "rare amulet",
+          "goldValue": 554,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "resistMagic": 1,
+            "rangedBonus": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbpwtisc-hpx3g9-qjmyzo",
+          "description": "rare amulet",
+          "goldValue": 554,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 8,
+          "icon": "amulet.svg",
+          "stats": {
+            "damageBonus": 1,
+            "meleeBonus": 3
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbn6vvgw-5caea8-2l09cj",
+          "description": "rare amulet",
+          "goldValue": 331,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 1,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "maxMana": 5,
+            "intellect": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbpx7th1-fcie1j-pah92e",
+          "description": "rare amulet",
+          "goldValue": 594,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": -1,
+          "icon": "amulet.svg",
+          "stats": {
+            "intellect": 1,
+            "damageBonus": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbpxba9g-thfxxw-muryjb",
+          "description": "rare amulet",
+          "goldValue": 734,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "meleeBonus": 3,
+            "rangedBonus": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbpxc9dm-xky2rl-fdu0hi",
+          "description": "rare amulet",
+          "goldValue": 764,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "damageBonus": 2,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbpxcenz-nzhlbe-scbis5",
+          "description": "rare amulet",
+          "goldValue": 754,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "damageBonus": 2,
+            "intellect": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbpxed8x-qyrrm0-2uh0aw",
+          "description": "rare amulet",
+          "goldValue": 773,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "armor",
+          "armor": 5,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 2,
+            "defense": 1,
+            "prowess": 2
+          },
+          "critStats": [],
+          "name": "magic armor",
+          "uniqueId": "mbpwtl43-seasw2-xsumdc",
+          "description": "magic armor",
+          "goldValue": 1268,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "defense": 1,
+            "agility": 2,
+            "prowess": 2
+          },
+          "critStats": [],
+          "name": "magic armor",
+          "uniqueId": "mbpxbasd-kuoomd-t7c8xz",
+          "description": "magic armor",
+          "goldValue": 1628,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "armor",
+          "armor": 5,
+          "icon": "armor.svg",
+          "stats": {
+            "maxHp": 30,
+            "defense": 2,
+            "block": 2
+          },
+          "critStats": [],
+          "name": "magic armor",
+          "uniqueId": "mbpxeeea-g4uxen-e16mpv",
+          "description": "magic armor",
+          "goldValue": 2266,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "armor",
+          "armor": 5,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 2,
+            "maxHp": 16,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "magic armor",
+          "uniqueId": "mboktk8y-ntjoab-zjjrmt",
+          "description": "magic armor",
+          "goldValue": 1358,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "maxHp": 19,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbomqlfj-zwhm8q-oc7j3z",
+          "description": "rare armor",
+          "goldValue": 679,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "maxHp": 14,
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbpvwu12-hosn0s-uyt21t",
+          "description": "rare armor",
+          "goldValue": 695,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "prowess": 1,
+            "maxHp": 20
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbpwuwhg-6o94jp-4spnnj",
+          "description": "rare armor",
+          "goldValue": 774,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "prowess": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbpwv1h4-b7xso0-1yylfj",
+          "description": "rare armor",
+          "goldValue": 594,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1,
+            "maxHp": 15
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbpx5f7c-igw53r-r1r9bw",
+          "description": "rare armor",
+          "goldValue": 743,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1,
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbpwsnt3-jicn1g-86eob1",
+          "description": "rare armor",
+          "goldValue": 594,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "prowess": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbpx9gm2-w9p0ij-re7nz5",
+          "description": "rare armor",
+          "goldValue": 784,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mboynl51-82enbk-dllfvu",
+          "description": "common armor",
+          "goldValue": 240,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "maxHp": 8
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbomqlfj-b7p09o-lu4gd3",
+          "description": "common armor",
+          "goldValue": 270,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mboypgp7-upze22-4vso0g",
+          "description": "common armor",
+          "goldValue": 230,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mboyq1zg-t4f8fi-8i8l4c",
+          "description": "common armor",
+          "goldValue": 235,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mboyq639-xh9jla-xn6078",
+          "description": "common armor",
+          "goldValue": 235,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "maxHp": 7
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbp05d6p-y3k5m0-wzkdpn",
+          "description": "common armor",
+          "goldValue": 270,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTierIndexBonus": 2,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbpr9r5v-rj3zl0-rvjckr",
+          "description": "common armor",
+          "goldValue": 259,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbpr9r5v-s6genq-axg7e0",
+          "description": "common armor",
+          "goldValue": 249,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbpr7z0v-h5zb5j-m4syyu",
+          "description": "common armor",
+          "goldValue": 259,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbpvlnbe-7h659y-r6s1qy",
+          "description": "common armor",
+          "goldValue": 254,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbpvm9yi-s29dbn-gfyprc",
+          "description": "common armor",
+          "goldValue": 254,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbpwez81-3g3zgz-288nh3",
+          "description": "common armor",
+          "goldValue": 282,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbpwszh5-msvnvj-b3p6iz",
+          "description": "common armor",
+          "goldValue": 282,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbpwuskq-hm0g94-v73euc",
+          "description": "common armor",
+          "goldValue": 282,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbpwv8yx-qjfkc3-5toxyj",
+          "description": "common armor",
+          "goldValue": 287,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "maxHp": 10
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbpx5xys-ys7iea-qqih9b",
+          "description": "common armor",
+          "goldValue": 327,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbpxavpk-57w4tq-eaf046",
+          "description": "common armor",
+          "goldValue": 372,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbpxb113-q3nsaa-jpda7y",
+          "description": "common armor",
+          "goldValue": 377,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbpxe1ck-oxun1q-6fbfnf",
+          "description": "common armor",
+          "goldValue": 382,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbpxem9n-0kst0s-xiebbu",
+          "description": "common armor",
+          "goldValue": 387,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "boots",
+          "baseMovementSpeed": 9,
+          "icon": "boots.svg",
+          "stats": {
+            "defense": 2,
+            "agility": 2,
+            "dodge": 0,
+            "movementSpeed": 2
+          },
+          "critStats": [],
+          "name": "mastercraft boots",
+          "uniqueId": "mbpxb9hi-kgkqhc-yuuwwd",
+          "description": "mastercraft boots",
+          "goldValue": 5880,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "boots",
+          "baseMovementSpeed": 8,
+          "icon": "boots.svg",
+          "stats": {
+            "agility": 2,
+            "movementSpeed": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "magic boots",
+          "uniqueId": "mbpxecuq-rhe31q-042qa7",
+          "description": "magic boots",
+          "goldValue": 1566,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "dodge": 0,
+            "defense": 1,
+            "agility": 2
+          },
+          "critStats": [],
+          "name": "magic boots",
+          "uniqueId": "mbpxeowj-hdr323-wkmago",
+          "description": "magic boots",
+          "goldValue": 1546,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "dodge": 0,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mboyn94a-9vq71u-nlo2n6",
+          "description": "rare boots",
+          "goldValue": 449,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "defense": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpvl728-oz1zqj-gsyi0e",
+          "description": "rare boots",
+          "goldValue": 497,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "agility": 1,
+            "movementSpeed": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpvwnbo-a0u20b-5jykhf",
+          "description": "rare boots",
+          "goldValue": 535,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "defense": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpvx1di-yvzbrm-hgy65o",
+          "description": "rare boots",
+          "goldValue": 535,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "movementSpeed": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpwfj31-i24q71-8idujy",
+          "description": "rare boots",
+          "goldValue": 554,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "dodge": 0,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpwta3g-a82n4s-m622h3",
+          "description": "rare boots",
+          "goldValue": 544,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "dodge": 0,
+            "movementSpeed": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpwvbrb-megn0o-q6hjcq",
+          "description": "rare boots",
+          "goldValue": 544,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "dodge": 0,
+            "movementSpeed": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpx7mkn-tnbvk7-4vgao4",
+          "description": "rare boots",
+          "goldValue": 544,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 1,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "defense": 1,
+            "movementSpeed": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpxazde-vrzu7n-jd5yly",
+          "description": "rare boots",
+          "goldValue": 744,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "dodge": 0,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpxaxcn-k4e5w0-47iqub",
+          "description": "rare boots",
+          "goldValue": 734,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "dodge": 0,
+            "movementSpeed": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpxcd82-lpmwh0-vs1dxw",
+          "description": "rare boots",
+          "goldValue": 734,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 1,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "defense": 1,
+            "dodge": 0
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbpxecuq-msragh-zr1dmr",
+          "description": "rare boots",
+          "goldValue": 753,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "agility": 1,
+            "movementSpeed": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbomrgxo-thesf5-l7idis",
+          "description": "rare boots",
+          "goldValue": 459,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "name": "common boots",
+          "uniqueId": "mboyn2sb-sysw86-9w9z23",
+          "description": "common boots",
+          "goldValue": 220,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "name": "common boots",
+          "uniqueId": "mbp04teq-gi9dy3-1at8t7",
+          "description": "common boots",
+          "goldValue": 220,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "name": "common boots",
+          "uniqueId": "mbpvixk2-ipe2hc-ddakf1",
+          "description": "common boots",
+          "goldValue": 239,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "boots",
+          "baseMovementSpeed": 5,
+          "icon": "boots.svg",
+          "name": "common boots",
+          "uniqueId": "mbpwt300-c0xtd0-ivxyy3",
+          "description": "common boots",
+          "goldValue": 267,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "boots",
+          "baseMovementSpeed": 5,
+          "icon": "boots.svg",
+          "stats": {
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "common boots",
+          "uniqueId": "mbpx6gew-txh1aq-biktjz",
+          "description": "common boots",
+          "goldValue": 272,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "boots",
+          "baseMovementSpeed": 5,
+          "icon": "boots.svg",
+          "name": "common boots",
+          "uniqueId": "mbpx9gm2-i7xwmx-0hxh29",
+          "description": "common boots",
+          "goldValue": 362,
+          "isSellable": true
+        },
+        {
+          "itemId": "mbn4b13g-9ool44-d50vkt",
+          "journeyItemId": "stoneOfVeilPiercing",
+          "name": "Stone of Veil Piercing",
+          "type": "consumable",
+          "itemTier": "rare",
+          "goldValue": 0,
+          "useItem": true,
+          "useEffect": "teleportToTier",
+          "params": {
+            "tier": 7
+          },
+          "description": "A mystical stone that Will teleport you to the 7th tier of Zurath.",
+          "icon": "stone_of_veil_peirce.png",
+          "isSellable": false,
+          "uniqueId": "mbn4b13g-zfdhtt-qexpmt"
+        },
+        {
+          "itemId": "mbnpk6kr-i3csh8-fc0brm",
+          "journeyItemId": "stoneOfReturn",
+          "name": "Stone of Return",
+          "type": "consumable",
+          "itemTier": "common",
+          "goldValue": 0,
+          "useItem": true,
+          "useEffect": "teleportToTier",
+          "params": {
+            "tier": 0
+          },
+          "description": "A mystical stone that returns you to the surface of Zurath.",
+          "icon": "stone_of_return.png",
+          "isSellable": false,
+          "uniqueId": "mbnpk6kr-uabi0h-2gwpw7"
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "gloves",
+          "armor": 5,
+          "icon": "gloves.svg",
+          "stats": {
+            "maxHp": 23,
+            "damageBonus": 3,
+            "prowess": 2
+          },
+          "critStats": [],
+          "name": "magic gloves",
+          "uniqueId": "mbpx5i2s-r9g89j-qdhed4",
+          "description": "magic gloves",
+          "goldValue": 1766,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "gloves",
+          "armor": 4,
+          "icon": "gloves.svg",
+          "stats": {
+            "damageBonus": 2,
+            "prowess": 2,
+            "maxHp": 23
+          },
+          "critStats": [],
+          "name": "magic gloves",
+          "uniqueId": "mbpxbuqn-31apon-b5olxd",
+          "description": "magic gloves",
+          "goldValue": 2068,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare gloves",
+          "uniqueId": "mbpr8p3o-lr63qj-c5ag4s",
+          "description": "rare gloves",
+          "goldValue": 527,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 1,
+          "itemTier": "rare",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "stats": {
+            "damageBonus": 1,
+            "maxHp": 16
+          },
+          "critStats": [],
+          "name": "rare gloves",
+          "uniqueId": "mbpxdmar-k9sbko-02q6e2",
+          "description": "rare gloves",
+          "goldValue": 924,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 2,
+          "icon": "gloves.svg",
+          "name": "common gloves",
+          "uniqueId": "mboypj0j-xyonpk-qury9o",
+          "description": "common gloves",
+          "goldValue": 230,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "common gloves",
+          "uniqueId": "mbpr9kr8-rshm6l-a0iiiz",
+          "description": "common gloves",
+          "goldValue": 259,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "name": "common gloves",
+          "uniqueId": "mbpvixk3-5cqu7m-kkhkgg",
+          "description": "common gloves",
+          "goldValue": 254,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "common gloves",
+          "uniqueId": "mbpvmaqs-lt4hrf-anm7q0",
+          "description": "common gloves",
+          "goldValue": 259,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "stats": {
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "common gloves",
+          "uniqueId": "mbpvmk0u-d70b4x-yq260q",
+          "description": "common gloves",
+          "goldValue": 278,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 2,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "common gloves",
+          "uniqueId": "mbpwuz4j-pamj8i-1dyf4u",
+          "description": "common gloves",
+          "goldValue": 282,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTierIndexBonus": 2,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "name": "common gloves",
+          "uniqueId": "mbpwwyy7-kbsbl0-o518n2",
+          "description": "common gloves",
+          "goldValue": 282,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "common gloves",
+          "uniqueId": "mbpwwyy7-9h26jx-7nk3ua",
+          "description": "common gloves",
+          "goldValue": 287,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 2,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "common gloves",
+          "uniqueId": "mbpx6395-ajunad-1typne",
+          "description": "common gloves",
+          "goldValue": 282,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 2,
+          "icon": "gloves.svg",
+          "name": "common gloves",
+          "uniqueId": "mbpxfd6i-f3eb3d-3ihrvo",
+          "description": "common gloves",
+          "goldValue": 382,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "prowess": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mboypen3-v6pe47-1yvypv",
+          "description": "rare head",
+          "goldValue": 489,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "intellect": 1,
+            "maxHp": 18
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbp04k7c-g20onf-1nax0n",
+          "description": "rare head",
+          "goldValue": 669,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "maxHp": 16,
+            "intellect": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbpxaj2o-ylw1cv-cnncdz",
+          "description": "rare head",
+          "goldValue": 934,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "agility": 1,
+            "maxHp": 16
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbpxfr48-ffe3md-1xc9jz",
+          "description": "rare head",
+          "goldValue": 953,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "prowess": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbomtagt-6kr5v0-x1oi76",
+          "description": "rare head",
+          "goldValue": 489,
+          "isSellable": true,
+          "purchasePrice": 1467
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 2,
+          "icon": "head.svg",
+          "name": "common head",
+          "uniqueId": "mboyne8o-257hge-forg23",
+          "description": "common head",
+          "goldValue": 230,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "name": "common head",
+          "uniqueId": "mbpvlom7-thlhc2-976xc1",
+          "description": "common head",
+          "goldValue": 254,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "name": "common head",
+          "uniqueId": "mbpvw4vt-92xt4l-qvgb5r",
+          "description": "common head",
+          "goldValue": 273,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 2,
+          "icon": "head.svg",
+          "stats": {
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "common head",
+          "uniqueId": "mbpwewv9-jknz1w-zooeuo",
+          "description": "common head",
+          "goldValue": 282,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "intellect": 1
+          },
+          "critStats": [],
+          "name": "common head",
+          "uniqueId": "mbpwtci0-yy6anm-kpnh5p",
+          "description": "common head",
+          "goldValue": 287,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTierIndexBonus": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 2,
+          "icon": "head.svg",
+          "name": "common head",
+          "uniqueId": "mbpx5ovb-g723gx-nwhg1o",
+          "description": "common head",
+          "goldValue": 287,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 2,
+          "icon": "head.svg",
+          "stats": {
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "common head",
+          "uniqueId": "mbpx600b-e0ejen-69lwtw",
+          "description": "common head",
+          "goldValue": 282,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "name": "common head",
+          "uniqueId": "mbpxcyu1-6zh735-mm6oyi",
+          "description": "common head",
+          "goldValue": 377,
+          "isSellable": true
+        },
+        {
+          "itemId": "mbnoj46i-7ngtpo-mbmhlm",
+          "journeyItemId": "spectralWyrmKey",
+          "name": "Spectral Wyrm Key",
+          "type": "journey",
+          "itemTier": "magic",
+          "goldValue": 0,
+          "collectItem": true,
+          "isJourneyItem": true,
+          "description": "Posessing this Key allows passage to Ashangal.",
+          "icon": "spectral_wyrm_key.png",
+          "isSellable": false,
+          "uniqueId": "mbnoj46i-915l2j-n0u516"
+        },
+        {
+          "itemId": "mbnpk6kr-0epd1p-fl0tre",
+          "journeyItemId": "shardOfEchoes",
+          "name": "Shard of Echoes",
+          "type": "journey",
+          "itemTier": "magic",
+          "goldValue": 0,
+          "isJourneyItem": true,
+          "description": "A fragment pulsing with ancient whispers, guiding you to the Echoes.",
+          "icon": "shard_of_echoes.png",
+          "isSellable": false,
+          "uniqueId": "mbnpk6kr-wra3w3-2t0cys"
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "ring",
+          "maxLuck": -2,
+          "icon": "ring.svg",
+          "stats": {
+            "range": 2,
+            "damageBonus": 1,
+            "defense": 2,
+            "meleeBonus": 5
+          },
+          "critStats": [],
+          "name": "mastercraft ring",
+          "uniqueId": "mbpxcmft-83rryi-4bcf7h",
+          "description": "mastercraft ring",
+          "goldValue": 6030,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "meleeBonus": 1,
+            "defense": 2,
+            "rangedBonus": 3
+          },
+          "critStats": [],
+          "name": "magic ring",
+          "uniqueId": "mbpr8zw5-zbdebl-wsg5tw",
+          "description": "magic ring",
+          "goldValue": 1074,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "prowess": 2,
+            "rangedBonus": 3,
+            "agility": 2
+          },
+          "critStats": [],
+          "name": "magic ring",
+          "uniqueId": "mbpr911f-aaozcx-ye1tvn",
+          "description": "magic ring",
+          "goldValue": 1094,
+          "isSellable": true
+        },
+        {
+          "name": "Band of Karn",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 10,
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "collectItem": true,
+          "goldValue": 0,
+          "isSellable": false,
+          "stats": {
+            "prowess": 2,
+            "maxHp": 50
+          },
+          "description": "The Power of the Khetar flows through this steel band.",
+          "uniqueId": "mbn4bl0x-239i6i-0r1g8d",
+          "journeyItemId": "bandOfKarn",
+          "icon": "ring.svg",
+          "affixes": []
+        },
+        {
+          "name": "Band of Zu",
+          "type": "ring",
+          "slot": "ring",
+          "luck": 10,
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "collectItem": true,
+          "goldValue": 0,
+          "isSellable": false,
+          "stats": {
+            "intellect": 2,
+            "agility": 2
+          },
+          "description": "The Power of the Zarath flows through this mithril band.",
+          "uniqueId": "mbn6on3x-513a0k-oa4joy",
+          "journeyItemId": "bandOfZu",
+          "icon": "ring.svg",
+          "affixes": []
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "maxMana": 7,
+            "intellect": 1
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbpwt6fy-2sdj97-4ey9k5",
+          "description": "rare ring",
+          "goldValue": 614,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": -1,
+          "icon": "ring.svg",
+          "stats": {
+            "damageBonus": 3,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbpx6fmv-27nlnc-awscnv",
+          "description": "rare ring",
+          "goldValue": 564,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 2,
+          "type": "ring",
+          "name": "Eyestalk Ring",
+          "itemTier": "rare",
+          "maxLuck": -3,
+          "icon": "ring.svg",
+          "stats": {
+            "meleeBonus": 1,
+            "maxMana": 7
+          },
+          "critStats": [],
+          "uniqueId": "mbpx7th1-euxt25-t89yfm",
+          "description": "rare ring",
+          "goldValue": 584,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": -4,
+          "icon": "ring.svg",
+          "stats": {
+            "rangedBonus": 2,
+            "maxHp": 11
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbpxa0g7-sjptt4-nx846b",
+          "description": "rare ring",
+          "goldValue": 814,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "prowess": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbpxakqv-kd33es-kxkcim",
+          "description": "rare ring",
+          "goldValue": 744,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 2,
+          "type": "ring",
+          "name": "Eyestalk Ring",
+          "itemTier": "rare",
+          "maxLuck": -4,
+          "icon": "ring.svg",
+          "stats": {
+            "prowess": 1,
+            "meleeBonus": 1
+          },
+          "critStats": [],
+          "uniqueId": "mbpxaxcn-tty51p-ogydkj",
+          "description": "rare ring",
+          "goldValue": 724,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTierIndexBonus": 3,
+          "type": "weapon",
+          "attackType": "melee",
+          "name": "Orc Boss Chopper",
+          "itemTier": "magic",
+          "baseDamageMin": 5,
+          "baseDamageMax": 10,
+          "icon": "dagger.svg",
+          "baseBlock": 5,
+          "stats": {
+            "agility": 2,
+            "meleeBonus": 4,
+            "damageBonus": 1
+          },
+          "critStats": [],
+          "uniqueId": "mbpxakqv-a10lqc-sejbii",
+          "description": "magic weapon",
+          "goldValue": 1988,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 5,
+          "baseDamageMax": 8,
+          "icon": "dagger.svg",
+          "baseBlock": 5,
+          "stats": {
+            "block": 1,
+            "meleeBonus": 4,
+            "damageBonus": 1
+          },
+          "critStats": [],
+          "name": "magic weapon",
+          "uniqueId": "mbpxbmg6-mta4x5-u96erj",
+          "description": "magic weapon",
+          "goldValue": 1928,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 5,
+          "baseDamageMax": 9,
+          "icon": "dagger.svg",
+          "baseBlock": 5,
+          "stats": {
+            "damageBonus": 2,
+            "block": 1,
+            "agility": 2
+          },
+          "critStats": [],
+          "name": "magic weapon",
+          "uniqueId": "mbpwfhn3-nl4zio-38vr05",
+          "description": "magic weapon",
+          "goldValue": 1548,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 4,
+          "baseDamageMax": 5,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "meleeBonus": 1,
+            "damageBonus": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbpvjpx3-ulnqej-87orcd",
+          "description": "rare weapon",
+          "goldValue": 617,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 3,
+          "baseDamageMax": 5,
+          "icon": "dagger.svg",
+          "baseBlock": 4,
+          "stats": {
+            "prowess": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbpvw4vu-u7p6sb-kjtnqn",
+          "description": "rare weapon",
+          "goldValue": 655,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 4,
+          "baseDamageMax": 8,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "damageBonus": 3,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbom1y6b-z2xdp3-occ9zt",
+          "description": "rare weapon",
+          "goldValue": 629,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 6,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbpr8trc-hgagem-sxtp00",
+          "description": "common weapon",
+          "goldValue": 294,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 5,
+          "icon": "dagger.svg",
+          "baseBlock": 2,
+          "stats": {
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbpvj8sl-8i7d48-a41r5s",
+          "description": "common weapon",
+          "goldValue": 289,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 4,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "name": "common weapon",
+          "uniqueId": "mbpx8pfi-u2xu5p-31owyh",
+          "description": "common weapon",
+          "goldValue": 312,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 5,
+          "type": "weapon",
+          "attackType": "ranged",
+          "name": "Wyrm Staff",
+          "affixes": [
+            {
+              "name": "lifeSteal",
+              "type": "combat",
+              "trigger": "attackHitTarget",
+              "effect": "lifeSteal",
+              "params": {
+                "minDmageHealedPercentage": 0.15,
+                "maxDamageHealedPercentage": 0.35,
+                "chanceToStealLife": 0.1
+              },
+              "description": "Chance to heal for a portion of damage dealt when hitting an enemy."
+            }
+          ],
+          "itemTier": "legendary",
+          "baseDamageMin": 7,
+          "baseDamageMax": 10,
+          "icon": "orb-wand.svg",
+          "baseRange": 9,
+          "stats": {
+            "agility": 3,
+            "intellect": 3,
+            "range": 2,
+            "rangedBonus": 6
+          },
+          "critStats": [],
+          "uniqueId": "mbpwfwca-y86hmg-f875j0",
+          "description": "legendary weapon",
+          "goldValue": 9340,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 4,
+          "baseDamageMax": 10,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "stats": {
+            "intellect": 1,
+            "range": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mboyh6sq-o6zza4-gkomm4",
+          "description": "rare weapon",
+          "goldValue": 659,
+          "isSellable": true,
+          "purchasePrice": 1977
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 3,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 7,
+          "stats": {
+            "range": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbpxa7ll-9rpqmp-7dvfnd",
+          "description": "rare weapon",
+          "goldValue": 904,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 3,
+          "baseDamageMax": 8,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "stats": {
+            "rangedBonus": 2,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbpxaft2-6yy44x-wkavtm",
+          "description": "rare weapon",
+          "goldValue": 924,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "stats": {
+            "range": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbpvixk3-ntwvzl-suiiqx",
+          "description": "common weapon",
+          "goldValue": 299,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 4,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "name": "common weapon",
+          "uniqueId": "mbpvjf13-kn7ns5-n5fouq",
+          "description": "common weapon",
+          "goldValue": 294,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 4,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "stats": {
+            "range": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbpvlb9q-2gc0q5-i6pxn6",
+          "description": "common weapon",
+          "goldValue": 304,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 4,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "stats": {
+            "rangedBonus": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbpvlgp8-weqhge-jsq62a",
+          "description": "common weapon",
+          "goldValue": 299,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "stats": {
+            "rangedBonus": 2
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbpwfwca-xz88to-bdukrt",
+          "description": "common weapon",
+          "goldValue": 342,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 4,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "stats": {
+            "intellect": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbpx8lgb-y69zp2-b953wx",
+          "description": "common weapon",
+          "goldValue": 327,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 7,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "stats": {
+            "rangedBonus": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbpx8ufq-4cd0co-1e9gbu",
+          "description": "common weapon",
+          "goldValue": 342,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "name": "common weapon",
+          "uniqueId": "mbpxb7j0-l0lf9c-33w3k8",
+          "description": "common weapon",
+          "goldValue": 427,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "movementSpeed": 1,
+            "dodge": 0
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbqfuo54-al67pe-t83tbe",
+          "description": "rare boots",
+          "goldValue": 753,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "intellect": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbqfuyxc-bwct6g-fcnptz",
+          "description": "rare amulet",
+          "goldValue": 763,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "head",
+          "armor": 6,
+          "icon": "head.svg",
+          "stats": {
+            "defense": 1,
+            "maxHp": 39,
+            "agility": 2,
+            "prowess": 2
+          },
+          "critStats": [],
+          "name": "mastercraft head",
+          "uniqueId": "mbqfv6it-xkl7bo-jwm7az",
+          "description": "mastercraft head",
+          "goldValue": 9323,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "name": "common gloves",
+          "uniqueId": "mbqfv9se-vmd7wu-mf6t6x",
+          "description": "common gloves",
+          "goldValue": 387,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "agility": 1,
+            "resistMagic": 2
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbqfvd7o-lmtoqo-c0ryqk",
+          "description": "rare ring",
+          "goldValue": 773,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 3,
+          "type": "weapon",
+          "attackType": "melee",
+          "name": "Orc Boss Chopper",
+          "itemTier": "rare",
+          "baseDamageMin": 4,
+          "baseDamageMax": 7,
+          "icon": "dagger.svg",
+          "baseBlock": 4,
+          "stats": {
+            "block": 1,
+            "damageBonus": 2
+          },
+          "critStats": [],
+          "uniqueId": "mbqfvof8-slzs99-ux4gys",
+          "description": "rare weapon",
+          "goldValue": 923,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "prowess": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqfvp3c-lpsdgx-xdkwl9",
+          "description": "rare armor",
+          "goldValue": 793,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqfvrjt-hn41h1-tggyn5",
+          "description": "rare armor",
+          "goldValue": 793,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 3,
+          "baseDamageMax": 5,
+          "icon": "dagger.svg",
+          "baseBlock": 4,
+          "stats": {
+            "agility": 1,
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbqfw5ir-mcyz1e-91swa4",
+          "description": "rare weapon",
+          "goldValue": 902,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "prowess": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqfw49o-pbr40k-hodarl",
+          "description": "rare head",
+          "goldValue": 822,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "agility": 1,
+            "movementSpeed": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbqfw7eg-bj6amx-xxqdxm",
+          "description": "rare boots",
+          "goldValue": 782,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "common gloves",
+          "uniqueId": "mbqfwa55-lpcuwp-auvdaa",
+          "description": "common gloves",
+          "goldValue": 401,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "name": "common weapon",
+          "uniqueId": "mbqfwhb6-xsfuyq-fma74e",
+          "description": "common weapon",
+          "goldValue": 441,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 7,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "name": "common weapon",
+          "uniqueId": "mbqfwg28-1flmni-1909bu",
+          "description": "common weapon",
+          "goldValue": 441,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "agility": 1,
+            "maxHp": 19
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqfwie7-e3kr1f-la4230",
+          "description": "rare head",
+          "goldValue": 1002,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "gloves",
+          "armor": 4,
+          "icon": "gloves.svg",
+          "stats": {
+            "damageBonus": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare gloves",
+          "uniqueId": "mbqfwe93-9r5ih5-bgzlsp",
+          "description": "rare gloves",
+          "goldValue": 822,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "maxHp": 12,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqfwnyq-uewtjx-7pf4td",
+          "description": "rare head",
+          "goldValue": 922,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 4,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 7,
+          "stats": {
+            "intellect": 2,
+            "agility": 2,
+            "range": 2
+          },
+          "critStats": [],
+          "name": "magic weapon",
+          "uniqueId": "mbqfwzj6-fmyr7o-ipdi04",
+          "description": "magic weapon",
+          "goldValue": 1984,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbqfx32c-ekuqv8-zdo7c1",
+          "description": "common armor",
+          "goldValue": 396,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "maxHp": 24,
+            "prowess": 2,
+            "intellect": 2
+          },
+          "critStats": [],
+          "name": "magic head",
+          "uniqueId": "mbqfxrpz-4muyqw-jevah1",
+          "description": "magic head",
+          "goldValue": 2164,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "gloves",
+          "armor": 4,
+          "icon": "gloves.svg",
+          "stats": {
+            "damageBonus": 2,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare gloves",
+          "uniqueId": "mbqfxtd9-xgx7a3-ol77x3",
+          "description": "rare gloves",
+          "goldValue": 832,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 4,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 8,
+          "stats": {
+            "range": 1,
+            "agility": 2,
+            "rangedBonus": 1
+          },
+          "critStats": [],
+          "name": "magic weapon",
+          "uniqueId": "mbqfyrfv-gbuh2b-bt5wpa",
+          "description": "magic weapon",
+          "goldValue": 1964,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 2,
+          "baseDamageMax": 5,
+          "icon": "dagger.svg",
+          "baseBlock": 2,
+          "stats": {
+            "block": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbqfyua2-x0z04c-vb2l5i",
+          "description": "common weapon",
+          "goldValue": 431,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "maxHp": 11,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbqfyv58-vmv078-y897n6",
+          "description": "rare ring",
+          "goldValue": 882,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "prowess": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqfyyjr-zuon9s-rhgs2t",
+          "description": "rare head",
+          "goldValue": 812,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "gloves",
+          "armor": 4,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 2,
+            "block": 2,
+            "maxHp": 15
+          },
+          "critStats": [],
+          "name": "magic gloves",
+          "uniqueId": "mbqfz05d-sa3am8-pk979a",
+          "description": "magic gloves",
+          "goldValue": 1984,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 1,
+            "damageBonus": 1
+          },
+          "critStats": [],
+          "name": "rare gloves",
+          "uniqueId": "mbqfz10l-nk14nq-e03znz",
+          "description": "rare gloves",
+          "goldValue": 812,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "defense": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbqfz90g-ixes0c-5zjhi5",
+          "description": "rare boots",
+          "goldValue": 782,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "dodge": 0,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbqfz9sh-mpo8pt-xfsrz4",
+          "description": "rare boots",
+          "goldValue": 772,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "defense": 2,
+            "rangedBonus": 3,
+            "damageBonus": 1,
+            "range": 2
+          },
+          "critStats": [],
+          "name": "mastercraft ring",
+          "uniqueId": "mbqfzbuq-m93tdz-e2m805",
+          "description": "mastercraft ring",
+          "goldValue": 6315,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "gloves",
+          "armor": 5,
+          "icon": "gloves.svg",
+          "stats": {
+            "agility": 2,
+            "prowess": 2,
+            "damageBonus": 2
+          },
+          "critStats": [],
+          "name": "magic gloves",
+          "uniqueId": "mbqfw1c2-8t3etr-an7bg1",
+          "description": "magic gloves",
+          "goldValue": 1744,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "common boots",
+          "uniqueId": "mbqfw1c2-fwxcol-gn88zw",
+          "description": "common boots",
+          "goldValue": 386,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "gloves",
+          "armor": 4,
+          "icon": "gloves.svg",
+          "stats": {
+            "maxHp": 10,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare gloves",
+          "uniqueId": "mbqfzyp8-7q5q7f-4qxn6f",
+          "description": "rare gloves",
+          "goldValue": 912,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 4,
+          "baseDamageMax": 7,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "meleeBonus": 3,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbqg030q-3bn30s-3ru7zz",
+          "description": "rare weapon",
+          "goldValue": 942,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "maxHp": 11,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqg00zx-5hfdw3-54ucna",
+          "description": "rare head",
+          "goldValue": 922,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "amulet",
+          "maxLuck": -3,
+          "icon": "amulet.svg",
+          "stats": {
+            "resistMagic": 1,
+            "block": 2,
+            "meleeBonus": 3,
+            "prowess": 2
+          },
+          "critStats": [],
+          "name": "mastercraft amulet",
+          "uniqueId": "mbqg06ls-3q6e91-a7388b",
+          "description": "mastercraft amulet",
+          "goldValue": 6090,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "head",
+          "armor": 5,
+          "icon": "head.svg",
+          "stats": {
+            "prowess": 2,
+            "maxHp": 37,
+            "agility": 2,
+            "intellect": 2
+          },
+          "critStats": [],
+          "name": "mastercraft head",
+          "uniqueId": "mbqg0cpx-yt5ap9-2d0607",
+          "description": "mastercraft head",
+          "goldValue": 9315,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTierIndexBonus": 2,
+          "type": "ring",
+          "name": "Eyestalk Ring",
+          "itemTier": "common",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "defense": 1
+          },
+          "critStats": [],
+          "uniqueId": "mbqg0f1v-9t6pr4-rvdf0j",
+          "description": "common ring",
+          "goldValue": 386,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 2,
+          "icon": "gloves.svg",
+          "stats": {
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "common gloves",
+          "uniqueId": "mbqg0f1v-ua6s2t-30lpok",
+          "description": "common gloves",
+          "goldValue": 396,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "intellect": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbqg0j6s-g6ktuj-n53cfj",
+          "description": "rare amulet",
+          "goldValue": 782,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "defense": 1,
+            "maxHp": 18
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqg0hm3-y99pb2-j7enzv",
+          "description": "rare head",
+          "goldValue": 992,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "rangedBonus": 4,
+            "block": 1,
+            "meleeBonus": 2
+          },
+          "critStats": [],
+          "name": "magic amulet",
+          "uniqueId": "mbqg0ntz-9uolkg-o96e1i",
+          "description": "magic amulet",
+          "goldValue": 1664,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 1,
+          "baseDamageMax": 5,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "name": "common weapon",
+          "uniqueId": "mbqg0ptd-okpao4-v1uf5d",
+          "description": "common weapon",
+          "goldValue": 426,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "maxHp": 6
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbqg0swm-a2o852-ztgf0x",
+          "description": "common armor",
+          "goldValue": 421,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "head",
+          "armor": 5,
+          "icon": "head.svg",
+          "stats": {
+            "defense": 2,
+            "agility": 2,
+            "intellect": 2,
+            "maxHp": 35
+          },
+          "critStats": [],
+          "name": "mastercraft head",
+          "uniqueId": "mbqg0tof-l17bhz-8ejg45",
+          "description": "mastercraft head",
+          "goldValue": 9165,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "prowess": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqgos1z-cykthc-a0l71v",
+          "description": "rare head",
+          "goldValue": 812,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1,
+            "maxHp": 17
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqgow7m-w67yw7-11ltmo",
+          "description": "rare armor",
+          "goldValue": 972,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "prowess": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqgq1wv-9npxhl-iglhcu",
+          "description": "rare head",
+          "goldValue": 812,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 3,
+          "type": "weapon",
+          "attackType": "melee",
+          "name": "Orc Boss Chopper",
+          "itemTier": "rare",
+          "baseDamageMin": 4,
+          "baseDamageMax": 8,
+          "icon": "dagger.svg",
+          "baseBlock": 4,
+          "stats": {
+            "agility": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "uniqueId": "mbqgq6l1-gvpfn9-9h4jdg",
+          "description": "rare weapon",
+          "goldValue": 942,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 3,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "stats": {
+            "agility": 1,
+            "rangedBonus": 2
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbqgqrx9-sciah1-sfoi2d",
+          "description": "rare weapon",
+          "goldValue": 942,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTierIndexBonus": 1,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqgrknw-l1rz2j-7v3leh",
+          "description": "rare armor",
+          "goldValue": 822,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "boots",
+          "baseMovementSpeed": 8,
+          "icon": "boots.svg",
+          "stats": {
+            "movementSpeed": 1,
+            "defense": 1,
+            "dodge": 0
+          },
+          "critStats": [],
+          "name": "magic boots",
+          "uniqueId": "mbqgrknw-x7zifz-lp71aa",
+          "description": "magic boots",
+          "goldValue": 1564,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "gloves",
+          "armor": 5,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 2,
+            "block": 2,
+            "maxHp": 27
+          },
+          "critStats": [],
+          "name": "magic gloves",
+          "uniqueId": "mbqgrlkc-pjeikn-c3hx0n",
+          "description": "magic gloves",
+          "goldValue": 2244,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "damageBonus": 3,
+            "range": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbqgs6xl-vma1oi-yp7vow",
+          "description": "rare amulet",
+          "goldValue": 821,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTierIndexBonus": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 2,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "stats": {
+            "range": 1
+          },
+          "critStats": [],
+          "name": "common weapon",
+          "uniqueId": "mbqgs922-l8wtzj-x8lspw",
+          "description": "common weapon",
+          "goldValue": 456,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbqgs922-gcpjou-8trliz",
+          "description": "common armor",
+          "goldValue": 406,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "boots",
+          "baseMovementSpeed": 5,
+          "icon": "boots.svg",
+          "name": "common boots",
+          "uniqueId": "mbqgsa4l-40sylr-dv2rwp",
+          "description": "common boots",
+          "goldValue": 391,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": -1,
+          "icon": "amulet.svg",
+          "stats": {
+            "damageBonus": 3,
+            "range": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbqgsdqq-co187n-koxrwg",
+          "description": "rare amulet",
+          "goldValue": 811,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 2,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbqgsgjm-kh3zpt-1qum3s",
+          "description": "common armor",
+          "goldValue": 401,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "gloves",
+          "armor": 5,
+          "icon": "gloves.svg",
+          "stats": {
+            "block": 1,
+            "damageBonus": 4,
+            "prowess": 2,
+            "maxHp": 24
+          },
+          "critStats": [],
+          "name": "mastercraft gloves",
+          "uniqueId": "mbqgslqx-f38cp2-9mgn94",
+          "description": "mastercraft gloves",
+          "goldValue": 8558,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "prowess": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqgs2eh-4tkwso-xkqioq",
+          "description": "rare armor",
+          "goldValue": 831,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "gloves",
+          "armor": 4,
+          "icon": "gloves.svg",
+          "stats": {
+            "agility": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare gloves",
+          "uniqueId": "mbqgt1fw-udbs6i-mal9t7",
+          "description": "rare gloves",
+          "goldValue": 841,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "intellect": 2,
+            "maxHp": 22,
+            "agility": 2
+          },
+          "critStats": [],
+          "name": "magic head",
+          "uniqueId": "mbqgt6hv-lw6wkn-kngjve",
+          "description": "magic head",
+          "goldValue": 2162,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "name": "common head",
+          "uniqueId": "mbqgti2a-w0w4qz-4i0qap",
+          "description": "common head",
+          "goldValue": 406,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "stats": {
+            "block": 1,
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "rare gloves",
+          "uniqueId": "mbqgtgwk-5d63vb-cq3488",
+          "description": "rare gloves",
+          "goldValue": 831,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "gloves",
+          "armor": 5,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 2,
+            "agility": 2,
+            "maxHp": 23,
+            "damageBonus": 2
+          },
+          "critStats": [],
+          "name": "mastercraft gloves",
+          "uniqueId": "mbqgtn9u-nzpxve-rs1fox",
+          "description": "mastercraft gloves",
+          "goldValue": 8408,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "meleeBonus": 3,
+            "resistMagic": 4,
+            "intellect": 2
+          },
+          "critStats": [],
+          "name": "magic amulet",
+          "uniqueId": "mbqgtp5b-ax8obc-yd3j0c",
+          "description": "magic amulet",
+          "goldValue": 1742,
+          "isSellable": true
+        },
+        {
+          "name": "Mbphu Greater iLvl Annihilation Staff",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseRange": 9,
+          "slots": [
+            "mainhand",
+            "offhand"
+          ],
+          "baseDamageMin": 10,
+          "baseDamageMax": 15,
+          "tierIndex": 6,
+          "itemTier": "relic",
+          "goldValue": 500000,
+          "stats": {
+            "intellect": 5,
+            "maxMana": 5,
+            "agility": 5,
+            "damageBonus": 5,
+            "rangedBonus": 5
+          },
+          "description": "Crafted in acnient times by the finest Zukarath artificers and inspired by the works of the legendary Zu Mage Mbphu, this staff is singualr in purpose. To seek out and destroy dark magic used by inferior arcane artificers.",
+          "uniqueId": "mbqgugrb-8vq6bv-w35fa0",
+          "journeyItemId": "mbphuStaff",
+          "icon": "mbphu-staff.png",
+          "affixes": [
+            {
+              "name": "lifeSteal",
+              "type": "combat",
+              "trigger": "attackHitTarget",
+              "effect": "lifeSteal",
+              "params": {
+                "minDmageHealedPercentage": 0.25,
+                "maxDamageHealedPercentage": 0.5,
+                "chanceToStealLife": 0.15
+              },
+              "description": "Chance to heal for a portion of damage dealt when hitting an enemy."
+            }
+          ]
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 4,
+          "baseDamageMax": 8,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "stats": {
+            "damageBonus": 2,
+            "rangedBonus": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbqgugrb-x1tj0i-yyydad",
+          "description": "rare weapon",
+          "goldValue": 991,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "boots",
+          "baseMovementSpeed": 5,
+          "icon": "boots.svg",
+          "name": "common boots",
+          "uniqueId": "mbqgunl2-h5i76q-cy9eo6",
+          "description": "common boots",
+          "goldValue": 391,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "gloves",
+          "armor": 4,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 2,
+            "block": 2,
+            "maxHp": 23
+          },
+          "critStats": [],
+          "name": "magic gloves",
+          "uniqueId": "mbqgvnyi-keuh7w-onaf4c",
+          "description": "magic gloves",
+          "goldValue": 2182,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqgvsu9-obnzv1-2ifej2",
+          "description": "rare armor",
+          "goldValue": 831,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqgvu2j-coe1i0-7dpgg8",
+          "description": "rare armor",
+          "goldValue": 831,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "defense": 1,
+            "dodge": 0
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbqgvwet-hmk8vn-z1eqbs",
+          "description": "rare boots",
+          "goldValue": 791,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "maxMana": 11,
+            "rangedBonus": 4,
+            "block": 2
+          },
+          "critStats": [],
+          "name": "magic ring",
+          "uniqueId": "mbqgvy2l-ffrqhb-5qub9q",
+          "description": "magic ring",
+          "goldValue": 1902,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 3,
+          "baseDamageMax": 7,
+          "icon": "dagger.svg",
+          "baseBlock": 4,
+          "stats": {
+            "agility": 1,
+            "meleeBonus": 2
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbqgs2eh-f0wmxt-fbxpox",
+          "description": "rare weapon",
+          "goldValue": 951,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 4,
+          "baseDamageMax": 6,
+          "icon": "orb-wand.svg",
+          "baseRange": 6,
+          "stats": {
+            "agility": 1,
+            "rangedBonus": 3
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbqgw6ls-3c1sd4-gt0iph",
+          "description": "rare weapon",
+          "goldValue": 981,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "amulet",
+          "maxLuck": -3,
+          "icon": "amulet.svg",
+          "stats": {
+            "damageBonus": 1,
+            "maxHp": 26,
+            "meleeBonus": 2
+          },
+          "critStats": [],
+          "name": "magic amulet",
+          "uniqueId": "mbqgw5db-k4hlp4-ow69i1",
+          "description": "magic amulet",
+          "goldValue": 2082,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "agility": 2,
+            "maxHp": 23,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "magic armor",
+          "uniqueId": "mbqgw9cz-2ptp9l-0utdvj",
+          "description": "magic armor",
+          "goldValue": 2162,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "prowess": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqjtzt2-g03hy3-tbt5vk",
+          "description": "rare armor",
+          "goldValue": 831,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "defense": 1,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqju6gw-dgfngy-x7fdna",
+          "description": "rare head",
+          "goldValue": 841,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "block": 1,
+            "rangedBonus": 2
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbqju9fh-5tnkd2-yih3p3",
+          "description": "rare amulet",
+          "goldValue": 811,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "boots",
+          "baseMovementSpeed": 5,
+          "icon": "boots.svg",
+          "name": "common boots",
+          "uniqueId": "mbqju4wd-fbr0o2-v8oag2",
+          "description": "common boots",
+          "goldValue": 391,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "maxHp": 6
+          },
+          "critStats": [],
+          "name": "common head",
+          "uniqueId": "mbqjtxo0-0ixgjb-054rk3",
+          "description": "common head",
+          "goldValue": 436,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 2,
+          "icon": "head.svg",
+          "name": "common head",
+          "uniqueId": "mbqjubse-o0pqn2-pgiu0a",
+          "description": "common head",
+          "goldValue": 401,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "intellect": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqjuem7-35qjzk-gkab7k",
+          "description": "rare head",
+          "goldValue": 841,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "gloves",
+          "armor": 4,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare gloves",
+          "uniqueId": "mbqjufbj-23ap38-sz4r9s",
+          "description": "rare gloves",
+          "goldValue": 841,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": -3,
+          "icon": "amulet.svg",
+          "stats": {
+            "agility": 1,
+            "meleeBonus": 3
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbqjtszr-o5x1ad-1u340c",
+          "description": "rare amulet",
+          "goldValue": 791,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTierIndexBonus": 3,
+          "type": "weapon",
+          "attackType": "melee",
+          "name": "Orc Boss Chopper",
+          "itemTier": "common",
+          "baseDamageMin": 2,
+          "baseDamageMax": 6,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "uniqueId": "mbqjvji0-haye0c-ukfc6p",
+          "description": "common weapon",
+          "goldValue": 446,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "dodge": 0,
+            "movementSpeed": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbqjvq0k-0b1099-afrqg6",
+          "description": "rare boots",
+          "goldValue": 791,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "meleeBonus": 2,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbqjvt3s-wa9rga-hn8wrv",
+          "description": "rare amulet",
+          "goldValue": 811,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "meleeBonus": 2,
+            "damageBonus": 2
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbqjvxkm-cqdc1d-rxcc5b",
+          "description": "rare ring",
+          "goldValue": 821,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "prowess": 2,
+            "block": 2,
+            "range": 1,
+            "maxHp": 26
+          },
+          "critStats": [],
+          "name": "mastercraft amulet",
+          "uniqueId": "mbqjvysi-1245rq-3iom1j",
+          "description": "mastercraft amulet",
+          "goldValue": 8183,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "defense": 1,
+            "intellect": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqjvzkf-hohcdf-6lh246",
+          "description": "rare head",
+          "goldValue": 841,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "gloves",
+          "armor": 5,
+          "icon": "gloves.svg",
+          "stats": {
+            "maxHp": 26,
+            "agility": 2,
+            "prowess": 2
+          },
+          "critStats": [],
+          "name": "magic gloves",
+          "uniqueId": "mbqjw2fb-c8m79s-ryj975",
+          "description": "magic gloves",
+          "goldValue": 2262,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTierIndexBonus": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "name": "common armor",
+          "uniqueId": "mbqpurvg-men3e6-stco22",
+          "description": "common armor",
+          "goldValue": 406,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "agility": 2,
+            "maxMana": 12,
+            "prowess": 2
+          },
+          "critStats": [],
+          "name": "magic ring",
+          "uniqueId": "mbqpurvg-00rj9g-b3nbl3",
+          "description": "magic ring",
+          "goldValue": 1882,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "common head",
+          "uniqueId": "mbqpu9ti-ye45pv-o7msh8",
+          "description": "common head",
+          "goldValue": 411,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "common armor",
+          "uniqueId": "mbqpuuvv-4lqhe6-dthpud",
+          "description": "common armor",
+          "goldValue": 411,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "meleeBonus": 1,
+            "maxMana": 4
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbqpuw29-ydt0bu-13qkva",
+          "description": "rare ring",
+          "goldValue": 831,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "dodge": 0,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbqpuyi3-g2tzj5-jkjghw",
+          "description": "rare boots",
+          "goldValue": 791,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "movementSpeed": 2,
+            "agility": 2,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "magic boots",
+          "uniqueId": "mbqpuzai-zdscej-l2mhj9",
+          "description": "magic boots",
+          "goldValue": 1662,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "agility": 1,
+            "movementSpeed": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbqpvber-hujpho-xvbd8m",
+          "description": "rare boots",
+          "goldValue": 801,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "maxMana": 11,
+            "meleeBonus": 3,
+            "rangedBonus": 3,
+            "agility": 2
+          },
+          "critStats": [],
+          "name": "mastercraft amulet",
+          "uniqueId": "mbqpvc2y-hl9fgm-xpj3ub",
+          "description": "mastercraft amulet",
+          "goldValue": 7283,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "gloves",
+          "armor": 2,
+          "icon": "gloves.svg",
+          "name": "common gloves",
+          "uniqueId": "mbqpvi4u-iunc9g-os9tdx",
+          "description": "common gloves",
+          "goldValue": 401,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "resistMagic": 1,
+            "intellect": 1
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbqpvk2y-pexn38-v2zjir",
+          "description": "rare amulet",
+          "goldValue": 801,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "ring",
+          "maxLuck": 0,
+          "icon": "ring.svg",
+          "stats": {
+            "resistMagic": 3,
+            "rangedBonus": 3
+          },
+          "critStats": [],
+          "name": "rare ring",
+          "uniqueId": "mbqpvm1s-gjq7nb-adpu27",
+          "description": "rare ring",
+          "goldValue": 841,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "boots",
+          "baseMovementSpeed": 7,
+          "icon": "boots.svg",
+          "stats": {
+            "agility": 2,
+            "movementSpeed": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "magic boots",
+          "uniqueId": "mbqpvr2s-ck17op-fzq0n6",
+          "description": "magic boots",
+          "goldValue": 1642,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "maxHp": 18,
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqpw2y4-1nnmlg-imadpp",
+          "description": "rare armor",
+          "goldValue": 1011,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 4,
+          "baseDamageMax": 9,
+          "icon": "orb-wand.svg",
+          "baseRange": 7,
+          "stats": {
+            "agility": 1,
+            "range": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbqpw5qs-tjg6gy-9izzxl",
+          "description": "rare weapon",
+          "goldValue": 1001,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 3,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1,
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqpw9tf-9j7mt7-cr7bay",
+          "description": "rare armor",
+          "goldValue": 831,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "armor",
+          "armor": 4,
+          "icon": "armor.svg",
+          "stats": {
+            "block": 1,
+            "prowess": 1
+          },
+          "critStats": [],
+          "name": "rare armor",
+          "uniqueId": "mbqpwag6-terc1b-vu7vj0",
+          "description": "rare armor",
+          "goldValue": 841,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "maxHp": 13,
+            "agility": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqpwdaz-jgj9nc-jngl84",
+          "description": "rare head",
+          "goldValue": 951,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "boots",
+          "baseMovementSpeed": 6,
+          "icon": "boots.svg",
+          "stats": {
+            "agility": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare boots",
+          "uniqueId": "mbqpwe4s-fmkngh-4unm6e",
+          "description": "rare boots",
+          "goldValue": 801,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 3,
+          "baseDamageMax": 5,
+          "icon": "dagger.svg",
+          "baseBlock": 3,
+          "stats": {
+            "prowess": 1,
+            "block": 1
+          },
+          "critStats": [],
+          "name": "rare weapon",
+          "uniqueId": "mbqpwii9-xx0z3v-x1ndbu",
+          "description": "rare weapon",
+          "goldValue": 911,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 1,
+          "baseDamageMax": 5,
+          "icon": "orb-wand.svg",
+          "baseRange": 5,
+          "name": "common weapon",
+          "uniqueId": "mbqpwjan-niurid-jrutgf",
+          "description": "common weapon",
+          "goldValue": 446,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 4,
+          "itemTier": "mastercraft",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "meleeBonus": 5,
+            "maxHp": 29,
+            "intellect": 2,
+            "resistMagic": 4
+          },
+          "critStats": [],
+          "name": "mastercraft amulet",
+          "uniqueId": "mbqpwkss-784pnr-midq73",
+          "description": "mastercraft amulet",
+          "goldValue": 8858,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 1,
+          "itemTier": "common",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "intellect": 1
+          },
+          "critStats": [],
+          "name": "common head",
+          "uniqueId": "mbqpwnmk-87k22i-968yju",
+          "description": "common head",
+          "goldValue": 411,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "ring",
+          "maxLuck": -4,
+          "icon": "ring.svg",
+          "stats": {
+            "defense": 1,
+            "maxHp": 25,
+            "rangedBonus": 4
+          },
+          "critStats": [],
+          "name": "magic ring",
+          "uniqueId": "mbqpwvds-ir93e4-o5a2s3",
+          "description": "magic ring",
+          "goldValue": 2082,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "gloves",
+          "armor": 3,
+          "icon": "gloves.svg",
+          "stats": {
+            "prowess": 1,
+            "maxHp": 11
+          },
+          "critStats": [],
+          "name": "rare gloves",
+          "uniqueId": "mbqpwy0n-iwnto8-1uppnl",
+          "description": "rare gloves",
+          "goldValue": 988,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "prowess": 1,
+            "rangedBonus": 3
+          },
+          "critStats": [],
+          "name": "rare amulet",
+          "uniqueId": "mbqqv467-dcmcsz-wfsbgu",
+          "description": "rare amulet",
+          "goldValue": 878,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "weapon",
+          "attackType": "ranged",
+          "baseDamageMin": 4,
+          "baseDamageMax": 11,
+          "icon": "orb-wand.svg",
+          "baseRange": 7,
+          "stats": {
+            "range": 1,
+            "agility": 2,
+            "damageBonus": 1
+          },
+          "critStats": [],
+          "name": "magic weapon",
+          "uniqueId": "mbqqve4z-1nw6zk-ytguan",
+          "description": "magic weapon",
+          "goldValue": 2196,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "intellect": 1,
+            "defense": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqqvh62-1l4n1n-tguuf9",
+          "description": "rare head",
+          "goldValue": 888,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "amulet",
+          "maxLuck": 0,
+          "icon": "amulet.svg",
+          "stats": {
+            "maxHp": 25,
+            "defense": 2,
+            "damageBonus": 2
+          },
+          "critStats": [],
+          "name": "magic amulet",
+          "uniqueId": "mbqqvo09-3gfkyg-rhncgr",
+          "description": "magic amulet",
+          "goldValue": 2256,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "head",
+          "armor": 4,
+          "icon": "head.svg",
+          "stats": {
+            "prowess": 2,
+            "agility": 2,
+            "intellect": 2
+          },
+          "critStats": [],
+          "name": "magic head",
+          "uniqueId": "mbqqvpty-57unsw-x4recn",
+          "description": "magic head",
+          "goldValue": 1876,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 2,
+          "itemTier": "rare",
+          "type": "head",
+          "armor": 3,
+          "icon": "head.svg",
+          "stats": {
+            "maxHp": 11,
+            "intellect": 1
+          },
+          "critStats": [],
+          "name": "rare head",
+          "uniqueId": "mbqqvvof-s9h3sp-y3juei",
+          "description": "rare head",
+          "goldValue": 988,
+          "isSellable": true
+        },
+        {
+          "tierIndex": 3,
+          "itemTier": "magic",
+          "type": "weapon",
+          "attackType": "melee",
+          "baseDamageMin": 5,
+          "baseDamageMax": 10,
+          "icon": "dagger.svg",
+          "baseBlock": 4,
+          "stats": {
+            "meleeBonus": 1,
+            "damageBonus": 2,
+            "agility": 2
+          },
+          "critStats": [],
+          "name": "magic weapon",
+          "uniqueId": "mbqqvxbu-0cq75h-brssb3",
+          "description": "magic weapon",
+          "goldValue": 2156,
+          "isSellable": true
+        }
+      ]
+    },
+    "Resource": {
+      "type": "Resource",
+      "torches": 8,
+      "healPotions": 14,
+      "gold": 117579,
+      "potionDropFail": 0,
+      "torchDropFail": 0,
+      "portalBinding": 0,
+      "craftResources": {
+        "ashenShard": 169,
+        "ashenCrystal": 287,
+        "ashenGem": 9,
+        "sylduranShard": 0,
+        "sylduranCrystal": 0,
+        "sylduranGem": 0
+      }
+    },
+    "AttackSpeed": {
+      "type": "AttackSpeed",
+      "attackSpeed": 500,
+      "elapsedSinceLastAttack": 7301549.900000001
+    },
+    "Affix": {
+      "type": "Affix",
+      "affixes": [
+        {
+          "name": "resilience",
+          "type": "combat",
+          "trigger": "hitByAttack",
+          "effect": "instantHeal",
+          "params": {
+            "minHealPercentage": 0.05,
+            "maxHealPercentage": 0.1,
+            "chanceToHeal": 0.05
+          },
+          "sourceId": "mbn264d0-yzhfk5-d5l99d"
+        },
+        {
+          "name": "lifeSteal",
+          "type": "combat",
+          "trigger": "attackHitTarget",
+          "effect": "lifeSteal",
+          "params": {
+            "minDmageHealedPercentage": 0.25,
+            "maxDamageHealedPercentage": 0.5,
+            "chanceToStealLife": 0.15
+          },
+          "sourceId": "mbpr9r5u-k9gb8s-y7utvz"
+        },
+        {
+          "name": "resilience",
+          "type": "combat",
+          "trigger": "hitByAttack",
+          "effect": "instantHeal",
+          "params": {
+            "minHealPercentage": 0.05,
+            "maxHealPercentage": 0.1,
+            "chanceToHeal": 0.05
+          },
+          "sourceId": "mbo696zd-ih15jd-jqqusw"
+        }
+      ]
+    },
+    "PlayerState": {
+      "type": "PlayerState",
+      "name": "journey bunny",
+      "level": 28,
+      "xp": 34126,
+      "nextLevelXp": 98158,
+      "dead": false,
+      "lampLit": false,
+      "discoveredTileCount": 117812,
+      "isInCombat": false,
+      "isCasting": false
+    },
+    "JourneyState": {
+      "type": "JourneyState",
+      "completedPaths": [],
+      "pathTree": {}
+    },
+    "JourneyPath": {
+      "type": "JourneyPath",
+      "paths": [
+        {
+          "id": "master_whispers",
+          "parentId": "master_whispers",
+          "nextPathId": "",
+          "offered": true,
+          "accepted": true,
+          "completed": false,
+          "title": "Whispers of Zukarath",
+          "description": "Follow the guidance of the Zukran Masters to prove your worth.",
+          "offerText": "Begin your journey with the Zukran Masters.",
+          "acceptedText": "You have accepted the Journey of Whispers.",
+          "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
+          "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
+          "logCompletion": false,
+          "tasks": [],
+          "rewards": []
+        },
+        {
+          "id": "master_echoes",
+          "parentId": "master_echoes",
+          "nextPathId": "",
+          "offered": false,
+          "accepted": false,
+          "completed": false,
+          "title": "Echoes of Zurath",
+          "description": "Uncover the hidden Echoes within Zurath.",
+          "offerText": "Begin your journey to uncover the Echoes of Zurath.",
+          "acceptedText": "You have accepted the journey to uncover the Echoes.",
+          "activeText": "Continue your journey to uncover the Echoes.",
+          "completionText": "You have uncovered all Echoes within Zurath.",
+          "logCompletion": false,
+          "tasks": [],
+          "rewards": []
+        },
+        {
+          "id": "master_whispers",
+          "parentId": "master_whispers",
+          "nextPathId": "",
+          "offered": true,
+          "accepted": true,
+          "completed": false,
+          "title": "Whispers of Zukarath",
+          "description": "Follow the guidance of the Zukran Masters to prove your worth.",
+          "offerText": "Begin your journey with the Zukran Masters.",
+          "acceptedText": "You have accepted the Journey of Whispers.",
+          "activeText": "Continue your trials with the Zukran Masters to prove your worth.",
+          "completionText": "You have completed the Journey of Whispers, you are now a full member of the Zukaran Order of Magi!",
+          "logCompletion": false,
+          "tasks": [],
+          "rewards": []
+        },
+        {
+          "id": "whisper_parent_7",
+          "parentId": "master_whispers",
+          "nextPathId": "whisper_parent_8",
+          "offerType": "npc",
+          "offeredBy": "sehnrhyx_syliri",
+          "offered": false,
+          "accepted": true,
+          "completed": false,
+          "title": "Harnessing Corruption",
+          "description": "Harness the corruption to unlock new powers.",
+          "offerText": "Harness the corruption to unlock new powers. Will you accept this challenge?",
+          "acceptedText": "You have accepted the journey to harness the corruption.",
+          "activeText": "Continue your journey to harness the corruption.",
+          "completionText": "You have unlocked the power of Portal Binding.",
+          "logCompletion": true,
+          "tasks": [
+            {
+              "id": "whisper_child_7_1",
+              "parentId": "whisper_parent_7",
+              "accepted": false,
+              "completed": true,
+              "title": "Enter Ashangal",
+              "description": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
+              "offerText": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
+              "acceptedText": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
+              "activeText": "Speak to Sehnrhyx Syliri to teleport to Tier 11.",
+              "completionText": "You have entered Ashangal.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "interactWithNPC",
+                "npc": "sehnrhyx_syliri"
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ],
+              "completedAt": 1749389876968
+            },
+            {
+              "id": "whisper_child_7_2",
+              "parentId": "whisper_parent_7",
+              "accepted": false,
+              "completed": true,
+              "title": "Collect Shards",
+              "description": "Collect 50 Ashen Shards.",
+              "offerText": "Collect 50 Ashen Shards.",
+              "acceptedText": "Collect 50 Ashen Shards.",
+              "activeText": "Collect 50 Ashen Shards.",
+              "completionText": "You have collected 50 Ashen Shards.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "collectResource",
+                "resourceType": "ashenShard",
+                "quantity": 50
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ],
+              "completedAt": 1749406250145
+            },
+            {
+              "id": "whisper_child_7_3",
+              "parentId": "whisper_parent_7",
+              "accepted": false,
+              "completed": false,
+              "title": "Return to Syliri",
+              "description": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "offerText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "acceptedText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "activeText": "Use your Stone of Return to return to Sehnrhyx Syliri.",
+              "completionText": "You have returned to Sehnrhyx Syliri.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "useItem",
+                "journeyItemId": "stoneOfReturn"
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ]
+            },
+            {
+              "id": "whisper_child_7_4",
+              "parentId": "whisper_parent_7",
+              "accepted": false,
+              "completed": false,
+              "title": "Turn In Shards",
+              "description": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
+              "offerText": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
+              "acceptedText": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
+              "activeText": "Give 50 Ashen Shards to Sehnrhyx Syliri.",
+              "completionText": "The shards have been delivered.",
+              "logCompletion": true,
+              "completionCondition": {
+                "type": "turnIn",
+                "npc": "sehnrhyx_syliri",
+                "resourceType": "ashenShard",
+                "quantity": 50
+              },
+              "rewards": [
+                {
+                  "xp": 150,
+                  "gold": 100
+                }
+              ]
+            }
+          ],
+          "rewards": [
+            {
+              "xp": 750,
+              "gold": 500
+            },
+            {
+              "type": "unlock",
+              "mechanic": "portalBinding"
+            }
+          ],
+          "totalTaskCount": 4,
+          "completedTaskCount": 2
+        }
+      ]
+    },
+    "PlayerAchievements": {
+      "type": "PlayerAchievements",
+      "stats": {
+        "monstersKilled": 0,
+        "bossesKilled": 0,
+        "itemsUsed": 0,
+        "potionsUsed": 0,
+        "resourcesCollected": {
+          "ashenShard": 0,
+          "sylduranShard": 0
+        },
+        "itemsCollected": 0,
+        "interactions": 0,
+        "tiersReached": 0,
+        "uniqueItemDrops": [
+          {
+            "journeyItemId": "bandOfKarn",
+            "name": "Band of Karn"
+          },
+          {
+            "journeyItemId": "wyrmTooth",
+            "name": "Wyrm Tooth"
+          },
+          {
+            "journeyItemId": "bandOfZu",
+            "name": "Band of Zu"
+          }
+        ],
+        "unlockedPortals": [
+          0
+        ]
+      },
+      "history": []
+    }
+  },
+  "gameState": {
+    "GameState": {
+      "type": "GameState",
+      "tier": 41,
+      "highestTier": 41,
+      "gameStarted": true,
+      "gameOver": false,
+      "isVictory": false,
+      "isRangedMode": false,
+      "transitionLock": false,
+      "needsRender": true,
+      "needsInitialRender": false
+    },
+    "OfferedJourneys": {
+      "type": "OfferedJourneys",
+      "journeys": []
+    }
+  },
+  "overlayState": {
+    "OverlayState": {
+      "type": "OverlayState",
+      "isOpen": true,
+      "activeTab": "menu",
+      "logMessages": [
+        "You are no longer in combat.",
+        "Your shot hit a wall.",
+        "Gained 617 XP (34126/98158)",
+        "Giant Rat defeated!",
+        "Resilience heals you for 0 HP! (1000/1000)",
+        "Gained 725 XP (33509/98158)",
+        "Orc defeated!",
+        "Life Steal heals you for 13 HP from damage dealt! (1000/1000)",
+        "Gained 834 XP (32784/98158)",
+        "Orc Chieftan defeated!",
+        "Your shot hit a wall.",
+        "Gained 934 XP (31950/98158)",
+        "Beholder defeated!",
+        "Gained 834 XP (31016/98158)",
+        "Orc Chieftan defeated!",
+        "Life Steal heals you for 9 HP from damage dealt! (1000/1000)",
+        "Life Steal heals you for 17 HP from damage dealt! (1000/1000)",
+        "Gained 725 XP (30182/98158)",
+        "Orc defeated!",
+        "Life Steal heals you for 9 HP from damage dealt! (1000/1000)",
+        "You are no longer in combat.",
+        "Exploration milestone reached! Gained 2800 XP for discovering 117000 tiles.",
+        "Gained 2800 XP (29457/98158)",
+        "Gained 748 XP (26657/98158)",
+        "Hobgoblin defeated!",
+        "Life Steal heals you for 20 HP from damage dealt! (1000/1000)",
+        "Gained 744 XP (25909/98158)",
+        "Hobgoblin defeated!",
+        "Life Steal heals you for 27 HP from damage dealt! (1000/1000)",
+        "You are no longer in combat.",
+        "Your shot hit a wall.",
+        "Gained 746 XP (25165/98158)",
+        "Hobgoblin defeated!",
+        "Gained 665 XP (24419/98158)",
+        "Kobold defeated!",
+        "Life Steal heals you for 8 HP from damage dealt! (1000/1000)",
+        "The darkness is at bay... for now!",
+        "Your shot hit a wall.",
+        "Gained 787 XP (23754/98158)",
+        "Ghoul defeated!",
+        "Your shot hit a wall.",
+        "Exploration milestone reached! Gained 2800 XP for discovering 116000 tiles.",
+        "Gained 2800 XP (22967/98158)",
+        "You are no longer in combat.",
+        "You Reached Tier 41",
+        "Gained 205 XP (20167/98158)",
+        "You step through a mysterious portal surging with chaotic energy and are transported to Tier 41!",
+        "Gained 644 XP (19962/98158)",
+        "Orc defeated!",
+        "You are no longer in combat.",
+        "Gained 750 XP (19318/98158)",
+        "Ogre defeated!",
+        "Resilience heals you for 0 HP! (1000/1000)",
+        "Life Steal heals you for 29 HP from damage dealt! (1000/1000)",
+        "Gained 640 XP (18568/98158)",
+        "Orc defeated!",
+        "Life Steal heals you for 11 HP from damage dealt! (1000/1000)",
+        "Gained 660 XP (17928/98158)",
+        "Hobgoblin defeated!",
+        "Life Steal heals you for 24 HP from damage dealt! (1000/1000)",
+        "Gained 746 XP (17268/98158)",
+        "Ogre defeated!",
+        "Gained 807 XP (16522/98158)",
+        "Wyrmling defeated!",
+        "Life Steal heals you for 45 HP from damage dealt! (1000/1000)",
+        "Gained 658 XP (15715/98158)",
+        "Hobgoblin defeated!",
+        "Life Steal heals you for 32 HP from damage dealt! (1000/1000)",
+        "Life Steal heals you for 8 HP from damage dealt! (1000/1000)",
+        "Gained 709 XP (15057/98158)",
+        "Troll defeated!",
+        "Gained 709 XP (14348/98158)",
+        "Troll defeated!",
+        "Life Steal heals you for 20 HP from damage dealt! (1000/1000)",
+        "Gained 747 XP (13639/98158)",
+        "Ogre defeated!",
+        "Gained 742 XP (12892/98158)",
+        "Orc Chieftan defeated!",
+        "Life Steal heals you for 21 HP from damage dealt! (1000/1000)",
+        "Gained 826 XP (12150/98158)",
+        "Beholder defeated!",
+        "Gained 585 XP (11324/98158)",
+        "Kobold defeated!",
+        "Resilience heals you for 0 HP! (1000/1000)",
+        "Resilience heals you for 0 HP! (1000/1000)",
+        "Gained 714 XP (10739/98158)",
+        "Troll defeated!",
+        "Life Steal heals you for 14 HP from damage dealt! (1000/1000)",
+        "Your shot hit a wall.",
+        "Your shot hit a wall.",
+        "Exploration milestone reached! Gained 2800 XP for discovering 115000 tiles.",
+        "Gained 2800 XP (10025/98158)",
+        "Gained 747 XP (7225/98158)",
+        "Ogre defeated!",
+        "Life Steal heals you for 56 HP from damage dealt! (1000/1000)",
+        "Life Steal heals you for 9 HP from damage dealt! (1000/1000)",
+        "Resilience heals you for 0 HP! (1000/1000)",
+        "You are no longer in combat.",
+        "Gained 585 XP (6478/98158)",
+        "Kobold defeated!",
+        "Gained 746 XP (5893/98158)",
+        "Ogre defeated!",
+        "Life Steal heals you for 10 HP from damage dealt! (1000/1000)",
+        "Life Steal heals you for 28 HP from damage dealt! (1000/1000)",
+        "Life Steal heals you for 42 HP from damage dealt! (1000/1000)",
+        "Gained 640 XP (5147/98158)",
+        "Orc defeated!",
+        "Life Steal heals you for 22 HP from damage dealt! (1000/1000)",
+        "Resilience heals you for 0 HP! (1000/1000)",
+        "Gained 660 XP (4507/98158)",
+        "Hobgoblin defeated!",
+        "Life Steal heals you for 19 HP from damage dealt! (1000/1000)",
+        "Gained 584 XP (3847/98158)",
+        "Kobold defeated!",
+        "Resilience heals you for 0 HP! (1000/1000)",
+        "Life Steal heals you for 7 HP from damage dealt! (1000/1000)",
+        "Gained 642 XP (3263/98158)",
+        "Orc defeated!",
+        "Gained 585 XP (2621/98158)",
+        "Kobold defeated!",
+        "Life Steal heals you for 43 HP from damage dealt! (1000/1000)",
+        "Gained 584 XP (2036/98158)",
+        "Kobold defeated!",
+        "Gained 587 XP (1452/98158)",
+        "Kobold defeated!",
+        "Resilience heals you for 0 HP! (1000/1000)",
+        "Exploration milestone reached! Gained 2700 XP for discovering 114000 tiles.",
+        "Level up! Now level 28, , Gained 1 stat point to allocate!",
+        "Gained 2700 XP (78491/77626)",
+        "You are no longer in combat.",
+        "The darkness is at bay... for now!",
+        "Gained 642 XP (75791/77626)",
+        "Orc defeated!",
+        "Gained 739 XP (75149/77626)",
+        "Orc Chieftan defeated!",
+        "Gained 604 XP (74410/77626)",
+        "Goblin defeated!",
+        "Gained 746 XP (73806/77626)",
+        "Ogre defeated!",
+        "Life Steal heals you for 14 HP from damage dealt! (957/957)",
+        "Gained 824 XP (73060/77626)",
+        "Beholder defeated!",
+        "Life Steal heals you for 9 HP from damage dealt! (957/957)",
+        "Load saved game complete",
+        "You are no longer in combat.",
+        "Your shot hit a wall.",
+        "Gained 570 XP (72236/77626)",
+        "Imp defeated!",
+        "Life Steal heals you for 19 HP from damage dealt! (957/957)",
+        "Exploration milestone reached! Gained 2700 XP for discovering 113000 tiles.",
+        "Gained 2700 XP (71666/77626)",
+        "You are no longer in combat.",
+        "Gained 571 XP (68966/77626)",
+        "Imp defeated!",
+        "Your shot hit a wall.",
+        "Gained 570 XP (68395/77626)",
+        "Imp defeated!",
+        "Gained 570 XP (67825/77626)",
+        "Imp defeated!",
+        "Life Steal heals you for 26 HP from damage dealt! (957/957)",
+        "Gained 738 XP (67255/77626)",
+        "Orc Chieftan defeated!",
+        "You are no longer in combat.",
+        "Your shot hit a wall.",
+        "Gained 546 XP (66517/77626)",
+        "Giant Rat defeated!",
+        "Life Steal heals you for 30 HP from damage dealt! (957/957)",
+        "Gained 570 XP (65971/77626)",
+        "Imp defeated!",
+        "Your shot hit a wall.",
+        "Exploration milestone reached! Gained 2700 XP for discovering 112000 tiles.",
+        "Gained 2700 XP (65401/77626)",
+        "Gained 570 XP (62701/77626)",
+        "Imp defeated!",
+        "Life Steal heals you for 15 HP from damage dealt! (957/957)",
+        "You are no longer in combat.",
+        "Gained 571 XP (62131/77626)",
+        "Imp defeated!",
+        "Gained 738 XP (61560/77626)",
+        "Orc Chieftan defeated!",
+        "Life Steal heals you for 57 HP from damage dealt! (957/957)",
+        "Gained 570 XP (60822/77626)",
+        "Imp defeated!",
+        "Life Steal heals you for 43 HP from damage dealt! (957/957)",
+        "Gained 573 XP (60252/77626)",
+        "Imp defeated!",
+        "Exploration milestone reached! Gained 2700 XP for discovering 111000 tiles.",
+        "Gained 2700 XP (59679/77626)",
+        "You are no longer in combat.",
+        "Your shot hit a wall.",
+        "Gained 571 XP (56979/77626)",
+        "Imp defeated!",
+        "Life Steal heals you for 54 HP from damage dealt! (957/957)",
+        "Gained 570 XP (56408/77626)",
+        "Imp defeated!",
+        "Resilience heals you for 0 HP! (957/957)",
+        "Resilience heals you for 0 HP! (957/957)",
+        "Gained 573 XP (55838/77626)",
+        "Imp defeated!",
+        "Gained 571 XP (55265/77626)"
+      ],
+      "activeMenuSection": "controls-button",
+      "activeShopNpcId": null
+    }
+  },
+  "id": "mbo6fzha-m942jc-sbw5k2"
+}

@@ -1,4 +1,5 @@
-﻿import { System } from '../core/Systems.js';
+﻿
+            import { System } from '../core/Systems.js';
 export class MovementResolutionSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
@@ -71,18 +72,20 @@ export class MovementResolutionSystem extends System {
                     const pathResult = this.pathChecking(entity, pos, moveX, moveY, 5, hitboxEntities);
                     moveX = pathResult.moveX;
                     moveY = pathResult.moveY;
+                } else {
+                    // General overlap checks
+                    const newX = pos.x + moveX;
+                    if (this.wouldOverlap(entity, newX, pos.y, hitboxEntities)) {
+                        moveX = 0;
+                        intent.targetX = pos.x;
+                    }
+                    const newY = pos.y + moveY;
+                    if (this.wouldOverlap(entity, pos.x, newY, hitboxEntities)) {
+                        moveY = 0;
+                        intent.targetY = pos.y;
+                    }
                 }
-                // General overlap checks
-                const newX = pos.x + moveX;
-                if (this.wouldOverlap(entity, newX, pos.y, hitboxEntities)) {
-                    moveX = 0;
-                    intent.targetX = pos.x;
-                }
-                const newY = pos.y + moveY;
-                if (this.wouldOverlap(entity, pos.x, newY, hitboxEntities)) {
-                    moveY = 0;
-                    intent.targetY = pos.y;
-                }
+                
             }
 
             if (lastPos) {
@@ -152,4 +155,3 @@ export class MovementResolutionSystem extends System {
         return false;
     }
 }
-

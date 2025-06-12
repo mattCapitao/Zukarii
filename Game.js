@@ -57,8 +57,8 @@ import { HotBarSystem } from './systems/HotBarSystem.js';
 import {
     PositionComponent, VisualsComponent, HealthComponent, ManaComponent, StatsComponent, InventoryComponent, ResourceComponent,
     PlayerStateComponent, LightingState, LightSourceDefinitions, OverlayStateComponent, InputStateComponent, LogComponent, LightSourceComponent,
-    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, DeadComponent, NeedsRenderComponent, AudioQueueComponent,
-    LevelTransitionComponent, HitboxComponent, LastPositionComponent, UIComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
+    AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, NeedsRenderComponent, AudioQueueComponent,
+    LevelTransitionComponent, HitboxComponent, LastPositionComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
     AnimationComponent, AnimationStateComponent, JourneyStateComponent, JourneyPathComponent, DialogueComponent, JourneyPathsComponent,
     OfferedJourneysComponent, PlayerActionQueueComponent, PlayerAchievementsComponent, JourneyUpdateQueueComponent, JourneyRewardComponent, AchievementUpdateQueueComponent
 } from './core/Components.js';
@@ -67,7 +67,7 @@ export class Game {
     constructor() {
 
         this.state = new State();
-        window.state = this.state; // Expose state globally for debugging
+        //window.state = this.state; // Expose state globally for debugging
         this.entityManager = this.state.entityManager;
         this.utilities = this.state.utilities;
         this.utilities.entityManager = this.entityManager;
@@ -86,7 +86,7 @@ export class Game {
             this.entityManager.removeEntity('player');
         }
         player = this.entityManager.createEntity('player', true);
-        window.player = player; // Expose player globally for debugging
+        //window.player = player; // Expose player globally for debugging
         this.entityManager.addComponentToEntity('player', new LightSourceComponent({
             definitionKey: 'unlit',
             visibilityEnabled: true,
@@ -132,14 +132,13 @@ export class Game {
         this.entityManager.addComponentToEntity('player', new AnimationStateComponent());
         this.entityManager.addComponentToEntity('player', new AnimationComponent());
         const animation = player.getComponent('Animation');
+
         animation.spriteSheets = {
-            'idle': new Image(),
-            'walk': new Image(),
-            'attack': new Image()
+            idle: { src: 'img/anim/Player/Idle.png'},
+            walk: { src: 'img/anim/Player/Walk.png' },  
+            attack: { src: 'img/anim/Player/Attack_Fire_2.png' }
         };
-        animation.spriteSheets['idle'].src = 'img/anim/Player/Idle.png';
-        animation.spriteSheets['walk'].src = 'img/anim/Player/Walk.png';
-        animation.spriteSheets['attack'].src = 'img/anim/Player/Attack_Fire_2.png';
+
         animation.animations = {
             'idle': {
                 frames: [
@@ -373,6 +372,46 @@ export class Game {
             perfLabel = { host: window.location.host, env: 'Dev: dev 01: 127.0.0.1:3000' };
         }
 
+        const updateSystems = [
+            'playerInput',
+            'mouseInput',
+            'hotBar',
+            'playerController',
+            'playerTimer',
+            'lighting',
+            'player',
+            'exploration',
+            'projectile',
+            'monsterController',
+            'monsterTimer',
+            'collisions',
+            'triggerArea',
+            'movementResolution',
+            'playerCollision',
+            'monsterCollision',
+            'projectileCollisions',
+            'combat',
+            'damageCalculation',
+            'health',
+            'mana',
+            'path',
+            'journeyReward',
+            'interaction',
+            'actionTracking',
+            'journeyProgress',
+            'npcController',
+            
+            'audio',
+            'levelTransition',
+            'spatialBuckets',
+            'animation',
+            'mapRender',
+            'hudUi',
+            'menuUi',
+            'dialogueUI',
+            'entityRemoval'
+        ];
+
         const gameLoop = (currentTime) => {
             this.gameLoopId = requestAnimationFrame(gameLoop);
             const deltaTime = (currentTime - lastTime) / 1000;
@@ -399,44 +438,7 @@ export class Game {
                 }
             }
 
-            this.updateSystems([
-                'playerInput',
-                'mouseInput',
-                'hotBar',
-                'playerController',
-                'playerTimer',
-                'lighting',
-                'player',
-                'exploration',
-                'projectile',
-                'monsterController',
-                'monsterTimer',
-                'collisions',
-                'triggerArea',
-                'movementResolution',
-                'playerCollision',
-                'monsterCollision',
-                'projectileCollisions',
-                'combat',
-                'damageCalculation',
-                'health',
-                'mana',
-                'path',
-                'journeyReward',
-                'interaction',
-                'actionTracking',
-                'journeyProgress',
-                'npcController',
-                'hudUi',
-                'menuUi',
-                'dialogueUI',
-                'audio',
-                'levelTransition',
-                'spatialBuckets',
-                'animation',
-                'mapRender',
-                'entityRemoval'
-            ], deltaTime);
+            this.updateSystems(updateSystems, deltaTime);
 
             const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
             if (!gameState?.gameOver) {

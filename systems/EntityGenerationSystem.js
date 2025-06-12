@@ -79,6 +79,7 @@ export class EntityGenerationSystem extends System {
         this.entityManager.addComponentToEntity(portalEntity.id, new PortalComponent());
         const portalComp = portalEntity.getComponent('Portal');
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        const player = this.entityManager.getEntity('player');
 
         this.entityManager.addComponentToEntity(portalEntity.id, new VisualsComponent(48, 72));
         this.entityManager.addComponentToEntity(portalEntity.id, new HitboxComponent(24, 24, 23, 43));

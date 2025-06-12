@@ -78,10 +78,10 @@ export class EffectsSystem extends System {
 
             resource.gold = Math.max(0, goldBefore - stolenGold);
 
-            this.utilities.LogMessage({channel: 'loot',  message: `${attackerName}'s Greedy Claw attack has stolen ${stolenGold} gold from you!`});
+            this.utilities.logMessage({channel: 'loot',  message: `${attackerName}'s Greedy Claw attack has stolen ${stolenGold} gold from you!`});
 
             if (resource.gold === 0) {
-                this.utilities.LogMessage({ channel: 'loot', message: `ALL YOUR GOLD ARE BELONG TO ${attackerName}` });
+                this.utilities.logMessage({ channel: 'loot', message: `ALL YOUR GOLD ARE BELONG TO ${attackerName}` });
             }
         } 
     }
@@ -160,7 +160,7 @@ export class EffectsSystem extends System {
         const healPercentage = Math.random() * (MAX_DAMAGE_HEALED_PERCENTAGE - MIN_DAMAGE_HEALED_PERCENTAGE) + MIN_DAMAGE_HEALED_PERCENTAGE;
         const healAmount = Math.round(damageDealt * healPercentage);
 
-        this.utilities.LogMessage({ channel: 'combat', classNames: 'player', message: `Life Steal heals you for ${healAmount} HP from damage dealt! (${health.hp}/${health.maxHp})`});
+        this.utilities.logMessage({ channel: 'combat', classNames: 'player', message: `Life Steal heals you for ${healAmount} HP from damage dealt! (${health.hp}/${health.maxHp})`});
         console.log(`EffectsSystem: ${entity.id} stole ${healAmount} HP from ${targetId}. Now: ${health.hp}/${health.maxHp}`);
     }
 
