@@ -3,6 +3,8 @@
 // Manages loading and parsing custom level JSON files
 
 import { System } from '../core/Systems.js';
+import { customLevels } from '../data/cfg/customLevels.js';
+
 import {
     MapComponent,
     EntityListComponent,
@@ -22,6 +24,7 @@ export class CustomLevelSystem extends System {
         this.state = state;
         this.entityGenerationSystem = entityGenerationSystem;
         this.TILE_SIZE = state.TILE_SIZE || 32;
+        this.customLevels = customLevels; 
     }
 
     init() {
@@ -87,11 +90,11 @@ export class CustomLevelSystem extends System {
         this.entityManager.addComponentToEntity(roomEntityId, new RoomComponent({
             left: 21,
             top: 21,
-            width: 19,
-            height: 9,
+            width: 12,
+            height: 7,
             type: 'SurfaceRoom',
-            centerX: 21 + Math.floor(19 / 2),
-            centerY: 21 + Math.floor(9 / 2),
+            centerX: 21 + Math.floor(12 / 2),
+            centerY: 21 + Math.floor(7 / 2),
             connections: []
         }));
         const roomEntityIds = [roomEntity.id];

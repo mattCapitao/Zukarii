@@ -1,5 +1,6 @@
 ﻿import { System } from '../core/Systems.js';
 import { CustomLevelSystem } from './CustomLevelSystem.js';
+import { customLevels } from '../data/cfg/customLevels.js';
 import {
     MapComponent,
     EntityListComponent,
@@ -52,8 +53,8 @@ export class LevelSystem extends System {
         this.MIN_STAIR_DISTANCE = 24;
         this.TILE_SIZE = this.state.TILE_SIZE || 32;
         this.isAddingLevel = false; // Guard against re-entrant calls
-
         this.customLevelSystem = new CustomLevelSystem(entityManager, eventBus, state, genSys);
+        this.customLevels = customLevels; 
     }
 
     init() {
@@ -99,7 +100,7 @@ export class LevelSystem extends System {
                 this.entityManager.setActiveTier(gameState.tier);
                 //console.log(`LevelSystem.js: init - Preserved loaded tier ${gameState.tier}, active tier set to: ${this.entityManager.getActiveTier()}`);
             } else {
-                //console.log(`LevelSystem.js: init - Active tier already set to ${this.entityManager.getActiveTier()}, skipping setActiveTier`);
+                console.log(`LevelSystem.js: init - Active tier already set to ${this.entityManager.getActiveTier()}, skipping setActiveTier`);
             }
             // Explicitly call checkLevelAfterTransitions for the loaded tier
             const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === gameState.tier);
@@ -110,54 +111,10 @@ export class LevelSystem extends System {
         //console.log('LevelSystem.js: init - Completed');
     }
 
-    removeWallAtPosition(x, y, walls, levelEntity) {
-        if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= this.state.WIDTH || y >= this.state.HEIGHT) {
-            console.error(`LevelSystem.js: Invalid tile coordinates (${x}, ${y}) on tier ${levelEntity.getComponent('Tier').value}`);
-            return;
-        }
-
-        const tier = levelEntity.getComponent('Tier').value;
-        const pixelX = x * this.TILE_SIZE;
-        const pixelY = y * this.TILE_SIZE;
-        const wallEntities = this.entityManager.getEntitiesWith(['Position', 'Wall']).filter(e => {
-            const pos = e.getComponent('Position');
-            return pos.x === pixelX && pos.y === pixelY && e.id.startsWith(`wall_${tier}_`);
-        });
-
-        if (wallEntities.length === 0) {
-            //console.log(`LevelSystem.js: No wall entities found at pixel (${pixelX}, ${pixelY}) for tile (${x}, ${y}) on tier ${tier}`);
-        }
-
-        wallEntities.forEach(wall => {
-            const wallId = wall.id;
-            this.entityManager.removeEntity(wallId);
-            const wallIndex = walls.indexOf(wallId);
-            if (wallIndex !== -1) {
-                walls.splice(wallIndex, 1);
-            }
-        });
-
-        const mapComp = levelEntity.getComponent('Map');
-        if (mapComp && mapComp.map[y] && mapComp.map[y][x]) {
-            mapComp.map[y][x] = ' ';
-            const floorId = `floor_${tier}_floor_${y}_${x}`;
-            if (!this.entityManager.getEntity(floorId)) {
-                const floorEntity = this.entityManager.createEntity(floorId);
-                this.entityManager.addComponentToEntity(floorEntity.id, new PositionComponent(pixelX, pixelY));
-                this.entityManager.addComponentToEntity(floorEntity.id, new FloorComponent());
-                const entityList = levelEntity.getComponent('EntityList');
-                if (entityList && entityList.floors) {
-                    entityList.floors.push(floorEntity.id);
-                } else {
-                    console.error(`LevelSystem.js: EntityListComponent missing or invalid for tier ${tier} when adding floor ${floorId}`);
-                }
-            }
-        } else {
-            console.error(`LevelSystem.js: Failed to update map at (${x}, ${y}) on tier ${tier} - mapComp or map position invalid`);
-        }
-    }
+    
 
     addLevel({ tier, customLevel = null, transitionDirection = null }) {
+
         if (this.isAddingLevel) {
             console.warn(`LevelSystem.js: addLevel - Re-entrant call detected for tier ${tier}, aborting to prevent loop`);
             return;
@@ -175,8 +132,8 @@ export class LevelSystem extends System {
             this.entityManager.addComponentToEntity(levelEntity.id, { type: 'Tier', value: tier });
 
             let levelData;
-            if (tier === 0) {
-                console.log(`LevelSystem.js: Loading custom level for tier 0 via CustomLevelSystem`);
+            if (this.customLevels.has(tier)) {
+                console.log(`LevelSystem.js: Loading custom level for tier ${tier}`);
                 this.customLevelSystem.loadCustomLevel(tier, levelEntity).then(levelData => {
                     levelData.isCustomLevel = true;
                     console.log(`LevelSystem.js: addLevel - Adjusting player position for tier ${tier}, transitionDirection: ${transitionDirection}`);
@@ -930,6 +887,53 @@ export class LevelSystem extends System {
         }
     }
 
+    removeWallAtPosition(x, y, walls, levelEntity) {
+        if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= this.state.WIDTH || y >= this.state.HEIGHT) {
+            console.error(`LevelSystem.js: Invalid tile coordinates (${x}, ${y}) on tier ${levelEntity.getComponent('Tier').value}`);
+            return;
+        }
+
+        const tier = levelEntity.getComponent('Tier').value;
+        const pixelX = x * this.TILE_SIZE;
+        const pixelY = y * this.TILE_SIZE;
+        const wallEntities = this.entityManager.getEntitiesWith(['Position', 'Wall']).filter(e => {
+            const pos = e.getComponent('Position');
+            return pos.x === pixelX && pos.y === pixelY && e.id.startsWith(`wall_${tier}_`);
+        });
+
+        if (wallEntities.length === 0) {
+            //console.log(`LevelSystem.js: No wall entities found at pixel (${pixelX}, ${pixelY}) for tile (${x}, ${y}) on tier ${tier}`);
+        }
+
+        wallEntities.forEach(wall => {
+            const wallId = wall.id;
+            this.entityManager.removeEntity(wallId);
+            const wallIndex = walls.indexOf(wallId);
+            if (wallIndex !== -1) {
+                walls.splice(wallIndex, 1);
+            }
+        });
+
+        const mapComp = levelEntity.getComponent('Map');
+        if (mapComp && mapComp.map[y] && mapComp.map[y][x]) {
+            mapComp.map[y][x] = ' ';
+            const floorId = `floor_${tier}_floor_${y}_${x}`;
+            if (!this.entityManager.getEntity(floorId)) {
+                const floorEntity = this.entityManager.createEntity(floorId);
+                this.entityManager.addComponentToEntity(floorEntity.id, new PositionComponent(pixelX, pixelY));
+                this.entityManager.addComponentToEntity(floorEntity.id, new FloorComponent());
+                const entityList = levelEntity.getComponent('EntityList');
+                if (entityList && entityList.floors) {
+                    entityList.floors.push(floorEntity.id);
+                } else {
+                    console.error(`LevelSystem.js: EntityListComponent missing or invalid for tier ${tier} when adding floor ${floorId}`);
+                }
+            }
+        } else {
+            console.error(`LevelSystem.js: Failed to update map at (${x}, ${y}) on tier ${tier} - mapComp or map position invalid`);
+        }
+    }
+
     findNearestRoom(roomId, existingRoomIds, excludeRoomIds = []) {
         const room = this.entityManager.getEntity(roomId).getComponent('Room');
         let nearestRoomId = null;
@@ -1206,7 +1210,7 @@ export class LevelSystem extends System {
         // Log the map state around the stair
         if (stair) {
             const minY = Math.max(0, stair.y - 1);
-            const maxY = Math.min(map.length - 1, stair.y + 1);
+            const maxY = Math.min(map.length - 1, stair.y + 1); 
             const minX = Math.max(0, stair.x - 1);
             const maxX = Math.min(map[0].length - 1, stair.x + 1);
             //console.log(`LevelSystem.js: Map state around stair (${stair.x}, ${stair.y}):`);
@@ -1513,7 +1517,9 @@ export class LevelSystem extends System {
         //console.log(`LevelSystem.js: checkLevelAfterTransitions - Completed for tier ${tier}`);
 
         this.utilities.pushPlayerActions('reachTier', { tier });
-        console.warn(`LevelSystem.js: Pushing player action reachTier:  ${tier}.`);
+        console.warn(`LevelSystem.js: Pushing player action reachTier:  ${tier}.`); 
+
+        console.warn(`LevelSystem.js: checkLevelAfterTransitions - Completed for tier ${tier} with levelData`, mapComp, entityList );
     }
 
     calculateDistance(x1, y1, x2, y2) {

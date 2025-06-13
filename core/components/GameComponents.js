@@ -159,7 +159,7 @@ export class LightSourceDefinitions {
         this.definitions = {
             unlit: {
                 visibilityEnabled: true,
-                visibilityRadius: 2,
+                visibilityRadius: 3,
                 visibilityOpacitySteps: [0.75, 0.15, 0],
                 visibilityTintColor: 'rgba(255,255,255,0)',
                 glowEnabled: false,
@@ -173,8 +173,8 @@ export class LightSourceDefinitions {
             torch: {
                 visibilityEnabled: true,
                 visibilityRadius: 7,
-                visibilityOpacitySteps: [0.75, 0.15, 0],
-                visibilityTintColor: 'rgba(255,220,120,0.2)', // Subtle yellow tint
+                visibilityOpacitySteps: [0.85, 0.35, 0],
+                visibilityTintColor: 'rgba(229,174,107,0.8)', // Subtle yellow tint
                 glowEnabled: true,
                 glowType: 'environmental', // Environmental glow for torch
                 glowColor: 'rgba(255,220,120,0.30)', // Used for environmental gradient
@@ -214,9 +214,9 @@ export class LightSourceDefinitions {
             },
             magic: { // Example for NPC on tier 0
                 visibilityEnabled: true,
-                visibilityRadius: 15, // Large visibility radius
-                visibilityOpacitySteps: [0.75, 0.15, 0],
-                visibilityTintColor: 'rgba(0,255,0,0.4)', // Subtle green tint
+                visibilityRadius: 18, // Large visibility radius
+                visibilityOpacitySteps: [0.95, 0.25, 0],
+                visibilityTintColor: 'rgba(0,255,0,0.8)', // Subtle green tint
                 glowEnabled: true,
                 glowType: 'outline',
                 glowColor: 'rgba(0,128,0,1)', // Green glow

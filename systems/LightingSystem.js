@@ -11,7 +11,7 @@ export class LightingSystem extends System {
 
     init() {
         this.RENDER_RADIUS_MODIFIER = 3;
-        this.DEFAULT_VISIBLE_RADIUS = 2;
+        this.DEFAULT_VISIBLE_RADIUS = 3;
         this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
         this.eventBus.on('LightSourceActivated', (data) => this.activateLightSource(data));
         this.eventBus.on('LightExpired', () => this.checkExpiration());
