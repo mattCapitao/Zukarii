@@ -12,6 +12,12 @@ import {
     FloorComponent,
     ExplorationComponent,
     SpatialBucketsComponent,
+    HitboxComponent,
+    RoomComponent,
+
+
+
+
 } from '../core/Components.js';
 
 export class CustomLevelSystem extends System {
@@ -27,6 +33,8 @@ export class CustomLevelSystem extends System {
     }
 
     async loadCustomLevel(tier, levelEntity) {
+
+      
         console.log(`CustomLevelSystem: Loading custom level for tier ${tier}`);
         return new Promise((resolve, reject) => {
             this.eventBus.emit('GetCustomLevelJSON', {
@@ -112,14 +120,14 @@ export class CustomLevelSystem extends System {
         }
 
         // Hardcode special entities
-        const stairPos = { upX: 14, upY: 8, downX: 3, downY: 8 };
-        const portalPos = { x: 16, y: 2 };
-        const shopCounterPos = { x: 7, y: 8 };
+        const stairPos = { upX: 34, upY: 28, downX: 23, downY: 28 };
+        const portalPos = { x: 36, y: 22 };
+        const shopCounterPos = { x: 27, y: 28 };
         const roomEntityId = `room_${tier}_surface`;
         const roomEntity = this.entityManager.createEntity(roomEntityId);
         this.entityManager.addComponentToEntity(roomEntityId, new RoomComponent({
-            left: 1,
-            top: 1,
+            left: 21,
+            top: 21,
             width: 19,
             height: 9,
             type: 'SurfaceRoom',
@@ -170,8 +178,8 @@ export class CustomLevelSystem extends System {
         this.eventBus.emit('SpawnNPCs', {
             tier: 0,
             npcs: [
-                { id: 'sehnrhyx_syliri', x: 8, y: 3 },
-                { id: 'shop_keeper', x: 8, y: 8 }
+                { id: 'sehnrhyx_syliri', x: 28, y: 23 },
+                { id: 'shop_keeper', x: 28, y: 28 }
             ]
         });
 

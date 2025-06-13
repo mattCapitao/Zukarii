@@ -102,7 +102,7 @@ export class Game {
             pulse: null
         }));
         this.entityManager.addComponentToEntity('player', new LogComponent());
-        this.entityManager.addComponentToEntity('player', new PositionComponent(64, 112));
+        this.entityManager.addComponentToEntity('player', new PositionComponent(704, 704));
         this.entityManager.addComponentToEntity('player', new LastPositionComponent(0, 0));
         this.entityManager.addComponentToEntity('player', new VisualsComponent(32, 32));
         const visuals = this.entityManager.getEntity('player').getComponent('Visuals');
@@ -278,13 +278,13 @@ export class Game {
         this.systems.monsterSpawn = new MonsterSpawnSystem(this.entityManager, this.state.eventBus, this.utilities, this.systems.data);
         this.systems.npcSpawn = new NPCSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data, this.utilities);
         this.systems.entityGeneration = new EntityGenerationSystem(this.entityManager, this.state.eventBus, this.state);
-        this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state, this.systems.entityGeneration, this.utilities);
         this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.path = new PathSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.interaction = new InteractionSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.hudUi = new HudUiSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.menuUi = new MenuUiSystem(this.entityManager, this.state.eventBus, this.utilities);
-        //this.systems.ui = new UISystem(this.entityManager, this.state.eventBus, this.utilities);
+        this.systems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state, this.systems.entityGeneration, this.utilities);
+        
         this.systems.levelTransition = new LevelTransitionSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.audio = new AudioSystem(this.entityManager, this.state.eventBus);
         this.systems.exploration = new ExplorationSystem(this.entityManager, this.state.eventBus, this.utilities);
@@ -308,6 +308,8 @@ export class Game {
 
     iniitalizeActiveGameSystems() {
         let activeGameSystems = {}
+        // activeGameSystems.level = new LevelSystem(this.entityManager, this.state.eventBus, this.state, this.systems.entityGeneration, this.utilities);
+
         activeGameSystems.playerTimer = new PlayerTimerSystem(this.entityManager, this.state.eventBus);
         activeGameSystems.monsterController = new MonsterControllerSystem(this.entityManager, this.state.eventBus, this.utilities);
         activeGameSystems.monsterTimer = new MonsterTimerSystem(this.entityManager, this.state.eventBus);
@@ -400,7 +402,6 @@ export class Game {
             'actionTracking',
             'journeyProgress',
             'npcController',
-            
             'audio',
             'levelTransition',
             'spatialBuckets',
@@ -456,7 +457,7 @@ export class Game {
             this.entityManager.addComponentToEntity('gameState', new GameStateComponent({
                 gameStarted: true,
                 gameOver: false,
-                tier: 1,
+                tier: 0,
             }));
             gameState = this.entityManager.getEntity('gameState');
         } else {

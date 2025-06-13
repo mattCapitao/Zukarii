@@ -14,6 +14,7 @@ export class LevelTransitionSystem extends System {
         this.eventBus.on('LevelAdded', (data) => this.handleLevelAdded(data));
         this.eventBus.on('TransitionLoad', ({ tier, data }) => this.transitionViaLoad(tier, data));
         this.lightingState = this.entityManager.getEntity('lightingState').getComponent('LightingState');
+        this.player = this.entityManager.getEntity('player');
     }
 
     update(deltaTime) {
@@ -146,8 +147,8 @@ export class LevelTransitionSystem extends System {
     }
 
     clearPlayerPosition() {
-        const player = this.entityManager.getEntity('player');
-        const playerPos = player.getComponent('Position');
+
+        const playerPos = this.player.getComponent('Position');
         const oldPlayerPos = { x: playerPos.x, y: playerPos.y };
 
         this.eventBus.emit('ClearOldPlayerPosition', oldPlayerPos);
@@ -373,7 +374,7 @@ export class LevelTransitionSystem extends System {
             pos = this.findAdjacentTile(upStair.x, upStair.y);
         } else {
             // Fallback case (shouldn't typically happen, but preserved for safety)
-            const stairsDown = entityList.stairsDown || { x: 5, y: 5 };
+            const stairsDown = entityList.stairsDown || { x: 22, y: 22 };
             console.log(`LevelTransitionSystem: Fallback positioning near stairsDown at (${stairsDown.x}, ${stairsDown.y})`);
             pos = this.findAdjacentTile(stairsDown.x, stairsDown.y);
         }
@@ -466,7 +467,7 @@ export class LevelTransitionSystem extends System {
 
             const portalComp = portalEntity.getComponent('Portal');
             const visuals = portalEntity.getComponent('Visuals');
-            const unlockedPortals = player.getComponent('PlayerAchievements').stats.unlockedPortals || [];
+            const unlockedPortals = this.player.getComponent('PlayerAchievements').stats.unlockedPortals || [];
 
             let visualsImg = 'img/anim/Portal-Animation.png';
             let cleansed = false;
