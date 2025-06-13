@@ -89,7 +89,7 @@ export class MapRenderSystem extends System {
             wall: 'img/map/wall.png',
             player: 'img/avatars/player.png',
             stairsup: 'img/avatars/stairsup.png',
-            stairsdown: 'img/avatars/stairsdown.png',
+            stairsdown: 'img/avatars/starisdown.png',
             portal: 'img/anim/Portal-Animation.png',
             inactivePortal: 'img/avatars/inactive-portal.png',
             cleansedPortal: 'img/anim/Portal-Animation-Cleansed.png',

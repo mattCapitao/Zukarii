@@ -13,11 +13,7 @@ import {
     ExplorationComponent,
     SpatialBucketsComponent,
     HitboxComponent,
-    RoomComponent,
-
-
-
-
+    RoomComponent
 } from '../core/Components.js';
 
 export class CustomLevelSystem extends System {
@@ -74,12 +70,12 @@ export class CustomLevelSystem extends System {
         const shopCounters = [];
         const portals = [];
 
-        const tileLayer = jsonData.layers.find(layer => layer.type === 'tilelayer');
-        if (!tileLayer) {
-            throw new Error('No tile layer found in JSON');
+        const mapTileLayer = jsonData.layers.find(layer => layer.name === 'Map');
+        if (!mapTileLayer) {
+            throw new Error('No map tile layer found in JSON');
         }
 
-        const data = tileLayer.data;
+        const data = mapTileLayer.data;
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const tileId = data[y * width + x];
@@ -120,8 +116,8 @@ export class CustomLevelSystem extends System {
         }
 
         // Hardcode special entities
-        const stairPos = { upX: 34, upY: 28, downX: 23, downY: 28 };
-        const portalPos = { x: 36, y: 22 };
+        const stairPos = { upX: 23, upY: 19, downX: 23, downY: 29 };
+        const portalPos = { x: 28, y: 18 };
         const shopCounterPos = { x: 27, y: 28 };
         const roomEntityId = `room_${tier}_surface`;
         const roomEntity = this.entityManager.createEntity(roomEntityId);
