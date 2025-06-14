@@ -29,7 +29,10 @@ export class ActionSystem extends System {
 
         const fUseTime = Date.now(); 
 
-        if (!fountainData) { console.log('ActionSystem: - useFountain: No fountain data found.'); return; }
+        if (!fountainData) { 
+            console.log('ActionSystem: - useFountain: No fountain data found.'); 
+            return; 
+        }
 
         const canUseFountain = fUseTime - fountainData.useCdExpiresAt || 0; // Default to 0 if not set
         if (canUseFountain < 1) { return; }
@@ -117,7 +120,7 @@ export class ActionSystem extends System {
         if (!player) return;
 
         const resource = player.getComponent('Resource');
-        console.log('ActionSystem: - LightTorch: resource:', resource);
+        //console.log('ActionSystem: - LightTorch: resource:', resource);
         if (resource.torches <= 0) {
             this.eventBus.emit('LogMessage', { message: 'You have no torches left.' });
             return;
@@ -134,6 +137,6 @@ export class ActionSystem extends System {
             message = 'You light your last torch!';
         }
         this.eventBus.emit('LogMessage', { message });
-        console.log('ActionSystem: - LightTorch: resource:', resource);
+        //console.log('ActionSystem: - LightTorch: resource:', resource);
     }
 }

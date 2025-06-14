@@ -8,10 +8,10 @@ export class NPCControllerSystem extends System {
     }
 
     init() {
-        console.log('NPCControllerSystem: Initialized');
+        //console.log('NPCControllerSystem: Initialized');
         // Listen for the GenerateShopInventories event
         this.eventBus.on('GenerateShopInventories', ({ tier }) => {
-            console.log(`NPCControllerSystem: Received GenerateShopInventories event for tier ${tier}`);
+            //console.log(`NPCControllerSystem: Received GenerateShopInventories event for tier ${tier}`);
             this.generateShopInventories(tier);
         });
         const initTier = this.entityManager.getActiveTier();
@@ -24,7 +24,7 @@ export class NPCControllerSystem extends System {
     }
 
     async generateShopInventories(tier) {
-        console.log(`NPCControllerSystem: Starting generateShopInventories for tier ${tier}`);
+        //console.log(`NPCControllerSystem: Starting generateShopInventories for tier ${tier}`);
         try {
             // Check if game state is ready
             const gameStateEntity = this.entityManager.getEntity('gameState');
@@ -35,30 +35,30 @@ export class NPCControllerSystem extends System {
 
             // Set active tier to the provided tier
             this.entityManager.setActiveTier(tier);
-            console.log('NPCControllerSystem: Active tier set to:', tier, 'tiers:', Array.from(this.entityManager.entitiesByTier.keys()));
+            //console.log('NPCControllerSystem: Active tier set to:', tier, 'tiers:', Array.from(this.entityManager.entitiesByTier.keys()));
 
             // Query for ShopComponent in the specified tier
             const shopEntities = this.entityManager.getEntitiesWith(['ShopComponent'], tier);
-            console.log('NPCControllerSystem: Found entities with ShopComponent in tier', tier, ':', shopEntities.length, 'IDs:', shopEntities.map(n => n.id));
+            //console.log('NPCControllerSystem: Found entities with ShopComponent in tier', tier, ':', shopEntities.length, 'IDs:', shopEntities.map(n => n.id));
 
             // Filter for NPCs with both ShopComponent and NPCData
             const npcs = shopEntities.filter(entity => entity.hasComponent('NPCData'));
-            console.log('NPCControllerSystem: Filtered NPCs with ShopComponent and NPCData in tier', tier, ':', npcs.length, 'IDs:', npcs.map(n => n.id));
+            //console.log('NPCControllerSystem: Filtered NPCs with ShopComponent and NPCData in tier', tier, ':', npcs.length, 'IDs:', npcs.map(n => n.id));
 
             // Debug: Check shop keeper explicitly
             const shopKeeper = this.entityManager.getEntitiesWith(['NPCData'], tier).find(n => n.id.includes('shop_keeper'));
             if (shopKeeper) {
-                console.log('NPCControllerSystem: Shop Keeper ID:', shopKeeper.id);
-                console.log('NPCControllerSystem: Shop Keeper components:', Array.from(shopKeeper.components.keys()));
-                console.log('NPCControllerSystem: Has ShopComponent:', shopKeeper.hasComponent('ShopComponent'));
+                //console.log('NPCControllerSystem: Shop Keeper ID:', shopKeeper.id);
+                //console.log('NPCControllerSystem: Shop Keeper components:', Array.from(shopKeeper.components.keys()));
+                //console.log('NPCControllerSystem: Has ShopComponent:', shopKeeper.hasComponent('ShopComponent'));
             } else {
-                console.log('NPCControllerSystem: No shop keeper found in NPCData entities');
+                //console.log('NPCControllerSystem: No shop keeper found in NPCData entities');
             }
 
             if (npcs.length === 0) {
-                console.log('NPCControllerSystem: No NPCs found with ShopComponent and NPCData in tier', tier);
+                //console.log('NPCControllerSystem: No NPCs found with ShopComponent and NPCData in tier', tier);
                 const npcDataEntities = this.entityManager.getEntitiesWith(['NPCData'], tier);
-                console.log('NPCControllerSystem: Entities with NPCData in tier', tier, ':', npcDataEntities.map(n => n.id));
+                //console.log('NPCControllerSystem: Entities with NPCData in tier', tier, ':', npcDataEntities.map(n => n.id));
                 return;
             }
 
@@ -69,7 +69,7 @@ export class NPCControllerSystem extends System {
                     this.eventBus.emit('GetUniqueItems', {
                         callback: (items) => {
                             uniqueItems = items;
-                            console.log('NPCControllerSystem: Loaded unique items:', uniqueItems.length);
+                            //console.log('NPCControllerSystem: Loaded unique items:', uniqueItems.length);
                             resolve();
                         }
                     });
@@ -84,7 +84,7 @@ export class NPCControllerSystem extends System {
             if (!goldenBuniyarBand) {
                 console.warn('NPCControllerSystem: "Golden Buniyar Band" not found in unique items');
             } else {
-                console.log('NPCControllerSystem: Found "Golden Buniyar Band":', goldenBuniyarBand);
+                //console.log('NPCControllerSystem: Found "Golden Buniyar Band":', goldenBuniyarBand);
             }
 
             // Check player name for "bunny"
@@ -93,7 +93,7 @@ export class NPCControllerSystem extends System {
             if (player && player.hasComponent('PlayerState')) {
                 const playerName = player.getComponent('PlayerState').name || '';
                 hasBunnyInName = playerName.toLowerCase().includes('bunny');
-                console.log(`NPCControllerSystem: Player name: "${playerName}", has "bunny": ${hasBunnyInName}`);
+                //console.log(`NPCControllerSystem: Player name: "${playerName}", has "bunny": ${hasBunnyInName}`);
             } else {
                 console.warn('NPCControllerSystem: Player or PlayerState not found, cannot check name');
                 // Proceed without the unique item, but don't fail
@@ -102,7 +102,7 @@ export class NPCControllerSystem extends System {
             for (const npc of npcs) {
                 const shopComponent = npc.getComponent('ShopComponent');
                 if (shopComponent.items && shopComponent.items.length > 0) {
-                    console.log(`NPCControllerSystem: Skipping NPC ${npc.id}, already has items`);
+                    //console.log(`NPCControllerSystem: Skipping NPC ${npc.id}, already has items`);
                     continue;
                 }
 
@@ -125,35 +125,35 @@ export class NPCControllerSystem extends System {
                     }
 
 
-                console.log('NPCControllerSystem: partialItems for NPC:', npc.id, partialItems);
+                //console.log('NPCControllerSystem: partialItems for NPC:', npc.id, partialItems);
                 const shopItemPromises = partialItems.map((partialItem, index) => {
                     return new Promise((resolve) => {
-                        console.log(`NPCControllerSystem: Emitting GenerateROGItem for item ${index} for NPC ${npc.id}:`, partialItem);
+                        //console.log(`NPCControllerSystem: Emitting GenerateROGItem for item ${index} for NPC ${npc.id}:`, partialItem);
                         this.eventBus.emit('GenerateROGItem', {
                             partialItem,
                             dungeonTier: tier, // Use the provided tier
                             callback: (item) => {
-                                console.log(`NPCControllerSystem: Callback received for item ${index} for NPC ${npc.id}:`, item);
+                                //console.log(`NPCControllerSystem: Callback received for item ${index} for NPC ${npc.id}:`, item);
                                 resolve(item);
                             }
                         });
                     });
                 });
 
-                console.log('NPCControllerSystem: Waiting for Promise.all for NPC:', npc.id);
+                //console.log('NPCControllerSystem: Waiting for Promise.all for NPC:', npc.id);
                 let shopItems = await Promise.all(shopItemPromises);
-                console.log('NPCControllerSystem: Promise.all resolved, shopItems for NPC:', npc.id, shopItems);
+                //console.log('NPCControllerSystem: Promise.all resolved, shopItems for NPC:', npc.id, shopItems);
 
                 const filteredItems = shopItems.filter(item => item !== null && item !== undefined);
-                console.log('NPCControllerSystem: Filtered shop items for NPC:', npc.id, filteredItems);
+                //console.log('NPCControllerSystem: Filtered shop items for NPC:', npc.id, filteredItems);
 
                 // Add "Golden Buniyar Band" if found and player name contains "bunny"
                 if (goldenBuniyarBand && hasBunnyInName) {
                     const uniqueItemCopy = { ...goldenBuniyarBand, uniqueId: this.utilities.generateUniqueId() };
                     filteredItems.push(uniqueItemCopy);
-                    console.log('NPCControllerSystem: Added "Golden Buniyar Band" to shop items for NPC:', npc.id);
+                    //console.log('NPCControllerSystem: Added "Golden Buniyar Band" to shop items for NPC:', npc.id);
                 } else if (goldenBuniyarBand && !hasBunnyInName) {
-                    console.log('NPCControllerSystem: Skipped adding "Golden Buniyar Band" to shop items for NPC:', npc.id, 'Reason: Player name does not contain "bunny"');
+                    //console.log('NPCControllerSystem: Skipped adding "Golden Buniyar Band" to shop items for NPC:', npc.id, 'Reason: Player name does not contain "bunny"');
                 }
 
                 shopComponent.items = filteredItems.map(item => ({
@@ -161,7 +161,7 @@ export class NPCControllerSystem extends System {
                     uniqueId: item.uniqueId || this.utilities.generateUniqueId(),
                     purchasePrice: Math.round((item.goldValue || 0) * shopComponent.sellMultiplier)
                 }));
-                console.log(`NPCControllerSystem: Generated ${shopComponent.items.length} shop items for NPC ${npc.id}`);
+                //console.log(`NPCControllerSystem: Generated ${shopComponent.items.length} shop items for NPC ${npc.id}`);
             }
         } catch (err) {
             console.error('NPCControllerSystem: Error in generateShopInventories:', err);

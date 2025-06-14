@@ -222,7 +222,7 @@ const isOverlapping = overlapNow || overlapProjLast || overlapTargLast || overla
 
 if (!isOverlapping) continue;
 
-console.log(`ProjectileCollisionSystem: ${projectile.id} collided with ${target.id}`);
+//console.log(`ProjectileCollisionSystem: ${projectile.id} collided with ${target.id}`);
 
 if (target.hasComponent('Wall')) {
 if (!projectile.hasComponent('RemoveEntity')) {
@@ -230,12 +230,12 @@ projectile.addComponent(new RemoveEntityComponent());
 }
 this.sfxQueue.push({ sfx: 'firehit0', volume: .1 });
 this.eventBus.emit('LogMessage', { message: 'Your shot hit a wall.' });
-console.log(`ProjectileCollisionSystem: ${projectile.id} hit wall ${target.id}`);
+//console.log(`ProjectileCollisionSystem: ${projectile.id} hit wall ${target.id}`);
 break;
 }
 
 if ((target.hasComponent('MonsterData') && !target.hasComponent('Dead'))) {
-console.log(`ProjectileCollisionSystem: ${projectile.id} hit target ${target.id}`);
+//console.log(`ProjectileCollisionSystem: ${projectile.id} hit target ${target.id}`);
 const weapon = projData.weapon;
 if (!weapon && source?.hasComponent('PlayerState')) {
 throw new Error(`Projectile ${projectile.id} from player has no weapon assigned!`);

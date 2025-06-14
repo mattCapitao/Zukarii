@@ -37,12 +37,12 @@ export class MonsterCollisionSystem extends System {
                     console.warn(`MonsterCollisionSystem: Target entity ${collisionData.targetId} not found for monster ${monster.id}`);
                     continue; // Skip if target entity is not found
                 }
-                //console.log(`MonsterCollisionSystem: Monster collided with ${target.id}`);
+                ////console.log(`MonsterCollisionSystem: Monster collided with ${target.id}`);
 
                 if (target.hasComponent('MonsterData') && target.getComponent('Health').hp > 0 && !target.hasComponent('Dead')) {
                     const targetMonsterData = target.getComponent('MonsterData');
                     if (monsterData.isAggro) targetMonsterData.isAggro = true;
-                    //console.log(`MonsterCollisionSystem: Monster ${monster.id} collided with monster ${target.id}`,monster, target);
+                    ////console.log(`MonsterCollisionSystem: Monster ${monster.id} collided with monster ${target.id}`,monster, target);
                 }
                 /*
                 if (target.hasComponent('Fountain')) {
@@ -50,10 +50,10 @@ export class MonsterCollisionSystem extends System {
                 if (target.hasComponent('LootData')) {
                 }
                 if (target.hasComponent('Stair') && !monster.hasComponent('StairLock')) {
-                    console.log(`MonsterCollisionSystem: Monster ${monster.id} collided with stair ${target.id}`);
+                    //console.log(`MonsterCollisionSystem: Monster ${monster.id} collided with stair ${target.id}`);
                 }
                 if (target.hasComponent('Portal')) {
-                    console.log(`MonsterCollisionSystem: Monster ${monster.id} collided with portal ${target.id}`);
+                    //console.log(`MonsterCollisionSystem: Monster ${monster.id} collided with portal ${target.id}`);
                 }
                 */
             }

@@ -42,7 +42,7 @@ export class LightingSystem extends System {
                     player.removeComponent('LightSource');
                     player.addComponent(new LightSourceComponent({ definitionKey: 'unlit' }));
                 }
-                console.log(`LightingSystem: Torch expired, visibleRadius reset to ${this.lightingState.visibleRadius}`);
+                //console.log(`LightingSystem: Torch expired, visibleRadius reset to ${this.lightingState.visibleRadius}`);
                 this.utilities.logMessage({ channel: 'system', message: 'The torch has burned out!' });
                 this.trackControlQueue.push({ track: 'torchBurning', play: false, volume: 0 });
             }
@@ -65,21 +65,21 @@ export class LightingSystem extends System {
     }
 
     activateLightSource({ type, entityId = 'player' }) {
-        console.log('LightingSystem: Activating light source:', type);
+        //console.log('LightingSystem: Activating light source:', type);
         if (!this.definitions[type]) {
-            console.warn(`LightingSystem: Unknown light source type: ${type}`);
+            ////console.log(`LightingSystem: Unknown light source type: ${type}`);
             return;
         }
 
         const entity = this.entityManager.getEntity(entityId);
         if (!entity) {
-            console.warn(`LightingSystem: Entity ${entityId} not found`);
+            ////console.log(`LightingSystem: Entity ${entityId} not found`);
             return;
         }
 
         if (entity.hasComponent('LightSource')) {
             entity.removeComponent('LightSource');
-            console.warn(`LightingSystem: Removing Existing LightSourceComponent from Entity ${entityId} `);
+            ////console.log(`LightingSystem: Removing Existing LightSourceComponent from Entity ${entityId} `);
 
         }
 
@@ -111,14 +111,14 @@ export class LightingSystem extends System {
                 remainingDuration: def.duration || 0
             }));
 
-            console.log(`LightingSystem: Activated ${type} for player - visibleRadius: ${this.lightingState.visibleRadius}, expires on turn: ${this.lightingState.expiresOnTurn}`);
+            //console.log(`LightingSystem: Activated ${type} for player - visibleRadius: ${this.lightingState.visibleRadius}, expires on turn: ${this.lightingState.expiresOnTurn}`);
             this.trackControlQueue.push({ track: 'torchBurning', play: true, volume: 0.05 });
         } else {
 
             const lightingStateEntity = this.entityManager.getEntity('lightingState');
             const definitions = lightingStateEntity.getComponent('LightSourceDefinitions').definitions;
             if (!definitions[type]) {
-                console.warn(`LightingSystem: Unknown light source type: ${type}`);
+                ////console.log(`LightingSystem: Unknown light source type: ${type}`);
                 return;
             }
 
@@ -142,7 +142,7 @@ export class LightingSystem extends System {
 
  
             entity.addComponent(lightSourceComp);
-            console.warn(`LightingSystem: Activated ${type} for entity ${entityId}`, entity, lightSourceComp);
+            ////console.log(`LightingSystem: Activated ${type} for entity ${entityId}`, entity, lightSourceComp);
         }
     }
 

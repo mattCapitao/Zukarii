@@ -11,13 +11,13 @@ export class NPCSpawnSystem extends System {
 
     init() {
         this.eventBus.on('SpawnNPCs', (data) => this.handleSpawnNPCs(data));
-        console.log('NPCSpawnSystem: Initialized');
+        //console.log('NPCSpawnSystem: Initialized');
     }
 
     update(deltaTime) { /* No per-frame updates needed */ }
 
     async handleSpawnNPCs({ tier, npcs }) {
-        console.log(`NPCSpawnSystem: Received SpawnNPCs event for tier ${tier}, npcs:`, npcs);
+        //console.log(`NPCSpawnSystem: Received SpawnNPCs event for tier ${tier}, npcs:`, npcs);
         this.entityManager.setActiveTier(tier);
 
        
@@ -31,7 +31,7 @@ export class NPCSpawnSystem extends System {
 
         try {
             const npcTemplates = await fetchData();
-            console.log('NPCSpawnSystem: NPC templates:', npcTemplates);
+            //console.log('NPCSpawnSystem: NPC templates:', npcTemplates);
 
             const levelEntity = this.entityManager.getEntity(`level_${tier}`);
             if (!levelEntity) {
@@ -66,14 +66,14 @@ export class NPCSpawnSystem extends System {
                 const visuals = entity.getComponent('Visuals');
                 visuals.avatar = template.avatar;
                 if (template.faceLeft) {
-                    console.log("NPCSpawnSystem: template.faceLeft = ", template.faceLeft);
+                    //console.log("NPCSpawnSystem: template.faceLeft = ", template.faceLeft);
                     visuals.faceLeft = template.faceLeft;
                 }
                 this.entityManager.addComponentToEntity(entity.id, new HitboxComponent(template.hitboxWidth, template.hitboxHeight));
                 this.entityManager.addComponentToEntity(entity.id, new NPCDataComponent(template.id, template.name, template.greeting));
                 if (template.hasJourneyPaths) {
                     this.entityManager.addComponentToEntity(entity.id, new JourneyDialogueComponent());
-                    console.log(`NPCSpawnSystem: Added JourneyDialogueComponent to NPC ${entity.id}`);
+                    //console.log(`NPCSpawnSystem: Added JourneyDialogueComponent to NPC ${entity.id}`);
                 }
 
 
@@ -105,7 +105,7 @@ export class NPCSpawnSystem extends System {
                             action: 'openShop',
                             params: { npcId: entity.id }
                         };
-                        console.log(`NPCSpawnSystem: Added ShopComponent and ShopDialogueComponent to NPC ${entity.id}`);
+                        //console.log(`NPCSpawnSystem: Added ShopComponent and ShopDialogueComponent to NPC ${entity.id}`);
                         hasNpcShop = true;
                     }
                 }
@@ -114,9 +114,9 @@ export class NPCSpawnSystem extends System {
                 if (hasNpcShop) {
                     this.eventBus.emit('GenerateShopInventories', { tier });
                 }
-                console.log(`NPCSpawnSystem: Spawned NPC ${entity.id} (${template.name}) at pixel (${pixelX}, ${pixelY}) for tile (${tileX}, ${tileY}) on tier ${tier}`);
+                //console.log(`NPCSpawnSystem: Spawned NPC ${entity.id} (${template.name}) at pixel (${pixelX}, ${pixelY}) for tile (${tileX}, ${tileY}) on tier ${tier}`);
             }
-            console.log(`NPCSpawnSystem: EntityListComponent.npcs after spawning:`, entityList.npcs);
+            //console.log(`NPCSpawnSystem: EntityListComponent.npcs after spawning:`, entityList.npcs);
 
         } catch (err) {
             console.error('NPCSpawnSystem: Failed to fetch NPC data:', err);
@@ -138,7 +138,7 @@ export class NPCSpawnSystem extends System {
             e.hasComponent('NPCData')
         );
         const hasFloor = entitiesAtTarget.some(e => e.hasComponent('Floor'));
-        console.log(`NPCSpawnSystem: Tile (${tileX}, ${tileY}) walkable check: isBlocked=${isBlocked}, hasFloor=${hasFloor}`);
+        //console.log(`NPCSpawnSystem: Tile (${tileX}, ${tileY}) walkable check: isBlocked=${isBlocked}, hasFloor=${hasFloor}`);
         return !isBlocked && hasFloor;
     }
 }

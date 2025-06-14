@@ -164,7 +164,7 @@ export class PlayerSystem extends System {
         const stats = player.getComponent('Stats');
 
         // Log the modification for debugging
-        console.log(`PlayerSystem.js: modifyBaseStat - Modifying stat ${stat} by ${value}`);
+        //console.log(`PlayerSystem.js: modifyBaseStat - Modifying stat ${stat} by ${value}`);
 
         // Update the specified stat in _internal.base
         if (stat in stats._internal.base) {

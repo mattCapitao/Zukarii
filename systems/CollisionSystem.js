@@ -182,7 +182,7 @@ export class CollisionSystem extends System {
 
     // Swept AABB collision detection
     sweptAABB(mover, target, deltaX, deltaY) {
-        //console.log(`Swept AABB called with : mover(${mover.x}, ${mover.y}), target(${target.x}, ${target.y}), deltaX: ${deltaX}, deltaY: ${deltaY}`);
+        ////console.log(`Swept AABB called with : mover(${mover.x}, ${mover.y}), target(${target.x}, ${target.y}), deltaX: ${deltaX}, deltaY: ${deltaY}`);
         const moverLeft = mover.x;
         const moverRight = mover.x + mover.width;
         const moverTop = mover.y;

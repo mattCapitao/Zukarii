@@ -138,7 +138,7 @@ export class LootManagerSystem extends System {
         this.eventBus.on('DropLoot', (data) => this.handleLootDrop(data));
         this.eventBus.emit('GetUniqueItems', {
             callback: (uniqueItems) => {
-                console.log('LootManagerSystem: Received unique items from DataSystem:', uniqueItems);
+                //console.log('LootManagerSystem: Received unique items from DataSystem:', uniqueItems);
                 this.uniqueItems = uniqueItems;
             }
         });
@@ -146,7 +146,7 @@ export class LootManagerSystem extends System {
         // Fetch journey items
         this.eventBus.emit('GetJourneyItems', {
             callback: (journeyItems) => {
-                console.log('LootManagerSystem: Received journey items from DataSystem:', journeyItems);
+                //console.log('LootManagerSystem: Received journey items from DataSystem:', journeyItems);
                 this.journeyItems = journeyItems;
             }
         });
@@ -158,8 +158,8 @@ export class LootManagerSystem extends System {
             console.error(`LootManagerSystem: No LootSourceData found on lootSource entity with ID: ${lootSource.id}`);
             return;
         }
-        console.log(`LootManagerSystem: handleLootDrop() called with lootSource:`, sourceData);
-        console.log(`LootManagerSystem: Handling loot drop for ${sourceData.name}, items:`, sourceData.items);
+        //console.log(`LootManagerSystem: handleLootDrop() called with lootSource:`, sourceData);
+        //console.log(`LootManagerSystem: Handling loot drop for ${sourceData.name}, items:`, sourceData.items);
 
         if (Math.random() >= this.BASE_DROP_CHANCE) {
            // this.eventBus.emit('LogMessage', { message: `The ${sourceData.name} dropped nothing.` });
@@ -186,10 +186,10 @@ export class LootManagerSystem extends System {
         const torches = this.calculateTorchDrop(playerResource, lightingState, modifiers.torches || 1);
         const healPotions = this.calculatePotionDrop(playerResource, playerHealth, modifiers.healPotions || 1);
         const stones = this.calculateStoneDrop(sourceData, modifiers.stones || 1);
-        console.log("Ashen: Stones", stones);
+        //console.log("Ashen: Stones", stones);
 
         const items = await this.buildItemsDropped(sourceData, player, modifiers);
-        console.log(`LootManagerSystem: handleLootDrop() generated items:`, items);
+        //console.log(`LootManagerSystem: handleLootDrop() generated items:`, items);
 
         const uniqueId = this.utilities.generateUniqueId();
         const lootEntity = this.entityManager.createEntity(`loot_${sourceData.tier}_${uniqueId}`);
@@ -202,7 +202,7 @@ export class LootManagerSystem extends System {
             items,
             stones,
         });
-        console.log("Ashen: LootData Created", lootData);
+        //console.log("Ashen: LootData Created", lootData);
         this.entityManager.addComponentToEntity(lootEntity.id, position);
         this.entityManager.addComponentToEntity(lootEntity.id, lootData);
 
@@ -249,7 +249,7 @@ export class LootManagerSystem extends System {
                     console.warn(`LootManagerSystem: No DeadComponent found on source entity ${sourceEntityId}`);
                 }
             } else if (sourceEntity && sourceEntity.hasComponent('Room')) {
-                console.log(`LootManagerSystem: Source entity ${sourceEntityId} is a Room.`);
+                //console.log(`LootManagerSystem: Source entity ${sourceEntityId} is a Room.`);
             } else {
                 console.warn(`LootManagerSystem: Source entity ${sourceEntityId} not found for processed flag`);
             }
@@ -279,15 +279,15 @@ export class LootManagerSystem extends System {
                             callback: (item) => { if (item) items.push(item);}
                         });
                     } else if (stub.type === "randomUnique") {
-                        console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) randomUnique stub.data: ", stub.data);
+                        //console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) randomUnique stub.data: ", stub.data);
                         const uniqueItem = await this.getUniqueItem({ type: "randomUnique", data: stub.data });
-                        console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) randomUnique uniqueItem: ", uniqueItem);
+                        //console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) randomUnique uniqueItem: ", uniqueItem);
                         if (uniqueItem) items.push(uniqueItem);
                     } else if (stub.type === "customUnique") {
-                        console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) customUnique stub.data: ", stub.data);
+                        //console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) customUnique stub.data: ", stub.data);
                         // Specific unique item
                         const uniqueItem = await this.getUniqueItem({ type: "customUnique", data: stub.data });
-                        console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) customUnique uniqueItem: ", uniqueItem);
+                        //console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) customUnique uniqueItem: ", uniqueItem);
                         if (uniqueItem) items.push(uniqueItem);
                     }
                 }
@@ -315,7 +315,7 @@ export class LootManagerSystem extends System {
                 }
             }
       }
-      //console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) returning Item Array: ", sourceData, player, modifiers, items);
+      ////console.log("LootManagerSystem: buildItemsDropped(sourceData, player, modifiers) returning Item Array: ", sourceData, player, modifiers, items);
       return items;
     }
 
@@ -355,7 +355,7 @@ export class LootManagerSystem extends System {
         stones.type = stoneType;
         const stoneText = this.utilities.camelToTitleCase(stoneType);
         stones.text = stoneText;
-        console.log("Ashen: Calculated Stones", stones);
+        //console.log("Ashen: Calculated Stones", stones);
         return stones;
         
         //EXAMPLE stones = {count:1, type:'ashenShard', text:"Ashen Shard"}
@@ -394,7 +394,7 @@ export class LootManagerSystem extends System {
     }
 
     getItemTier(dungeonTier, player) {
-        console.log("getItemTier() called");
+        //console.log("getItemTier() called");
         let tableIndex = 0;
         switch (true) {
             case dungeonTier < 5:
@@ -414,7 +414,7 @@ export class LootManagerSystem extends System {
         tableIndex = Math.min(Math.max(tableIndex, 0), this.tierTables.length - 1);
 
         const roll = Math.random();
-        console.log(`LootManagerSystem: tableIndex=${tableIndex}, dungeonTier=${dungeonTier}, luckAdjustment=${this.getLuckyTier(player)}, roll=${roll}`);
+        //console.log(`LootManagerSystem: tableIndex=${tableIndex}, dungeonTier=${dungeonTier}, luckAdjustment=${this.getLuckyTier(player)}, roll=${roll}`);
         return this.tierTables[tableIndex](roll);
     }
 
@@ -426,7 +426,7 @@ export class LootManagerSystem extends System {
     }
 
     async getUniqueItem({ type = "randomUnique", data = {} }) {
-        console.log(`LootManagerSystem: getUniqueItem() called with type: ${type}, data:`, data);
+        //console.log(`LootManagerSystem: getUniqueItem() called with type: ${type}, data:`, data);
         let uniqueItems = await this.uniqueItemsPromise;
 
         if (!uniqueItems) {
@@ -434,7 +434,7 @@ export class LootManagerSystem extends System {
             uniqueItems = await new Promise(resolve => {
                 this.eventBus.emit('GetUniqueItems', {
                     callback: (items) => {
-                        console.log('LootManagerSystem: Fetched unique items synchronously:', items);
+                        //console.log('LootManagerSystem: Fetched unique items synchronously:', items);
                         resolve(items);
                     }
                 });
@@ -457,13 +457,13 @@ export class LootManagerSystem extends System {
             console.warn('LootManagerSystem: No journey items available');
         }
 
-        console.log('LootManagerSystem: Available unique items:', uniqueItems);
+        //console.log('LootManagerSystem: Available unique items:', uniqueItems);
         let uniqueItem;
         if (type === "customUnique") {
             // Check journey items first // Move this to seperate block later... no need to check journey items if type is randomUnique or even customUnique
             uniqueItem = journeyItems.find(i => i.journeyItemId === data.journeyItemId && (!data.type || i.type === data.type));
             if (uniqueItem) {
-                console.log(`LootManagerSystem: Fetched journey item '${data.journeyItemId}':`, uniqueItem);
+                //console.log(`LootManagerSystem: Fetched journey item '${data.journeyItemId}':`, uniqueItem);
                 return { ...uniqueItem, uniqueId: this.utilities.generateUniqueId() };
             }
             // Fallback to unique items
@@ -473,7 +473,7 @@ export class LootManagerSystem extends System {
                 console.warn(`LootManagerSystem: Unique item '${data.name}' not found in uniqueItems`);
                 return null;
             }
-            console.log(`LootManagerSystem: Fetched custom unique item '${data.name}':`, uniqueItem);
+            //console.log(`LootManagerSystem: Fetched custom unique item '${data.name}':`, uniqueItem);
         } else {
             // Random unique (from items[] or random generation loop)
             let tierIndex = data.tierIndex; // Extract tierIndex from data
@@ -484,7 +484,7 @@ export class LootManagerSystem extends System {
                 console.warn(`LootManagerSystem: No unique item found for tier '${tier}'`);
                 return null;
             }
-            console.log(`LootManagerSystem: Selected random unique item for tier '${tier}':`, uniqueItem);
+            //console.log(`LootManagerSystem: Selected random unique item for tier '${tier}':`, uniqueItem);
         }
         return { ...uniqueItem, uniqueId: this.utilities.generateUniqueId() };
     }

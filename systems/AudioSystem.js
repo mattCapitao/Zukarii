@@ -17,7 +17,7 @@ export class AudioSystem extends System {
         this.sfxQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.SFX || [];
         this.trackControlQueue = this.entityManager.getEntity('gameState')?.getComponent('AudioQueue')?.TrackControl || [];
         this.eventBus.on('PlaySfxImmediate', ({ sfx, volume }) => {
-            console.log(`AudioSystem: Immediate playback requested for sfx: ${sfx} at volume: ${volume}`);
+            //console.log(`AudioSystem: Immediate playback requested for sfx: ${sfx} at volume: ${volume}`);
             this.playSfx({ sfx, volume });
         });
     
@@ -33,32 +33,32 @@ export class AudioSystem extends System {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (!gameState?.transitionLock && this.sfxQueue.length > 0) {
             this.sfxQueue.forEach(({ sfx, volume }) => {
-                console.log(`AudioSystem: Processing AudioQueue - Playing sfx: ${sfx} at Volume: ${volume}`);
+                //console.log(`AudioSystem: Processing AudioQueue - Playing sfx: ${sfx} at Volume: ${volume}`);
                 this.playSfx({ sfx, volume });
             });
             this.sfxQueue.length = 0;
-            console.log('AudioSystem: Processed and cleared AudioQueue SFX');
+            //console.log('AudioSystem: Processed and cleared AudioQueue SFX');
         }
         if (this.trackControlQueue.length > 0) {
             this.trackControlQueue.forEach((data) => {
                 const playCommand = data.play ? 'play' : 'stop';
-                console.log(`AudioSystem: Processing AudioQueue - Track Control ${playCommand} track: ${data.track} at Volume: ${data.volume}, fadeIn: ${data.fadeIn}, fadeOut: ${data.fadeOut}`);
+                //console.log(`AudioSystem: Processing AudioQueue - Track Control ${playCommand} track: ${data.track} at Volume: ${data.volume}, fadeIn: ${data.fadeIn}, fadeOut: ${data.fadeOut}`);
                 this.playTrackControl(data);
             });
             this.trackControlQueue.length = 0;
-            console.log('AudioSystem: Processed and cleared AudioQueue TrackControl');
+            //console.log('AudioSystem: Processed and cleared AudioQueue TrackControl');
         }
     }
 
     playSfx({ sfx, volume }) {
-        console.log(`AudioSystem: Playing sfx: ${sfx} at Volume: ${volume}`);
+        //console.log(`AudioSystem: Playing sfx: ${sfx} at Volume: ${volume}`);
         if (!this.soundBuffers[sfx]) {
             console.warn(`AudioSystem: Sound buffer ${sfx} not found`);
             return;
         }
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume().then(() => {
-                console.log(`AudioSystem: AudioContext resumed for ${sfx}`);
+                //console.log(`AudioSystem: AudioContext resumed for ${sfx}`);
                 this.scheduleSfx(sfx, volume);
             }).catch(error => {
                 console.error(`AudioSystem: Failed to resume AudioContext for ${sfx}:`, error);
@@ -77,7 +77,7 @@ export class AudioSystem extends System {
         source.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
         source.start(0);
-        console.log(`AudioSystem: Playback scheduled for ${sfx}`);
+        //console.log(`AudioSystem: Playback scheduled for ${sfx}`);
     }
 
     // Add fadeIn and fadeOut parameters (default to 0.5s for smoothness)
@@ -112,7 +112,7 @@ export class AudioSystem extends System {
                     this.trackState.set(track, 'stopped');
                     this.trackSources.delete(track);
                     this.fadeTimeouts.delete(track);
-                    console.log(`AudioSystem: Track ${track} ended and removed from trackState.`);
+                    //console.log(`AudioSystem: Track ${track} ended and removed from trackState.`);
                 };
                 const startTrack = () => {
                     const now = this.audioContext.currentTime;
@@ -121,7 +121,7 @@ export class AudioSystem extends System {
                     gainNode.gain.linearRampToValueAtTime(volume, now + fadeIn);
                     this.trackSources.set(track, source);
                     this.trackState.set(track, 'playing');
-                    console.log(`AudioSystem: Playing ${track} with fadeIn to Volume: ${volume}`);
+                    //console.log(`AudioSystem: Playing ${track} with fadeIn to Volume: ${volume}`);
                 };
                 if (this.audioContext.state === 'suspended') {
                     this.audioContext.resume().then(startTrack).catch(error => {
@@ -149,7 +149,7 @@ export class AudioSystem extends System {
                         this.trackSources.delete(track);
                         this.trackState.set(track, 'stopped');
                         this.fadeTimeouts.delete(track);
-                        console.log(`AudioSystem: Stopped ${track} with fadeOut`);
+                        //console.log(`AudioSystem: Stopped ${track} with fadeOut`);
                     }, fadeOut * 1000 + 100);
                     this.fadeTimeouts.set(track, timeoutId);
                     this.trackState.set(track, 'stopping');
@@ -158,7 +158,7 @@ export class AudioSystem extends System {
                     this.trackSources.delete(track);
                     this.trackState.set(track, 'stopped');
                     this.fadeTimeouts.delete(track);
-                    console.log(`AudioSystem: Stopped ${track}`);
+                    //console.log(`AudioSystem: Stopped ${track}`);
                 }
             } else {
                 // If not playing, ensure state is stopped
@@ -183,7 +183,7 @@ export class AudioSystem extends System {
                 const existingSource = this.trackSources.get(track);
                 existingSource.stop();
                 this.trackSources.delete(track);
-                console.log(`AudioSystem: Stopped existing ${track}`);
+                //console.log(`AudioSystem: Stopped existing ${track}`);
             }
             // Play new track if buffer exists
             if (this.soundBuffers[track]) {
@@ -199,15 +199,15 @@ export class AudioSystem extends System {
                     this.audioContext.resume().then(() => {
                         source.start(0);
                         this.trackSources.set(track, source);
-                        console.log(`AudioSystem: Playing ${track} at Volume: ${volume}`);
+                        //console.log(`AudioSystem: Playing ${track} at Volume: ${volume}`);
                     }).catch(error => {
                         console.error(`AudioSystem: Failed to resume AudioContext for ${track}:`, error);
                     });
                 } else {
-                    console.log('About to play:', track, 'Buffer:', this.soundBuffers[track]);
+                    //console.log('About to play:', track, 'Buffer:', this.soundBuffers[track]);
                     source.start(0);
                     this.trackSources.set(track, source);
-                    console.log(`AudioSystem: Playing ${track} at Volume: ${volume}`);
+                    //console.log(`AudioSystem: Playing ${track} at Volume: ${volume}`);
                 }
             } else {
                 console.warn(`AudioSystem: Sound buffer ${track} not found`);
@@ -218,7 +218,7 @@ export class AudioSystem extends System {
                 const source = this.trackSources.get(track);
                 source.stop();
                 this.trackSources.delete(track);
-                console.log(`AudioSystem: Stopped ${track}`);
+                //console.log(`AudioSystem: Stopped ${track}`);
             }
         }
     }
@@ -292,12 +292,12 @@ export class AudioSystem extends System {
                 }
                 const arrayBuffer = await response.arrayBuffer();
                 this.soundBuffers[key] = await this.audioContext.decodeAudioData(arrayBuffer);
-                //console.log(`AudioSystem: Preloaded ${key}`);
+                ////console.log(`AudioSystem: Preloaded ${key}`);
             } catch (error) {
                 console.error(`AudioSystem: Failed to preload ${key} from ${path}:`, error);
             }
         }
-        console.log('AudioSystem: sounds preloaded');
+        //console.log('AudioSystem: sounds preloaded');
             this.eventBus.emit('AudioLoaded');
         
     }

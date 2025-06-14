@@ -13,11 +13,7 @@ export class DialogueUISystem extends System {
         this.closeTimeout = null;
         this.lastRenderedText = null;
         this.lastRenderedOptions = null;
-        console.log('DialogueUISystem: DOM elements', {
-            dialogueWindow: this.dialogueWindow,
-            dialogueButtons: this.dialogueButtons,
-            dialogueText: this.dialogueText
-        });
+        //console.log('DialogueUISystem: DOM elements', {dialogueWindow: this.dialogueWindow,dialogueButtons: this.dialogueButtons,dialogueText: this.dialogueText});
         if (!this.dialogueButtons) {
             console.error('DialogueUISystem: Failed to find dialogue-buttons element');
         }
@@ -39,10 +35,10 @@ export class DialogueUISystem extends System {
             return;
         }
         this.dialogueButtons.addEventListener('click', (event) => {
-            console.log('DialogueUISystem: Click event on dialogue-buttons', event.target);
+            //console.log('DialogueUISystem: Click event on dialogue-buttons', event.target);
             const button = event.target.closest('button');
             if (!button) {
-                console.log('DialogueUISystem: No button found for click');
+                //console.log('DialogueUISystem: No button found for click');
                 return;
             }
 
@@ -53,7 +49,7 @@ export class DialogueUISystem extends System {
             let intent = player.getComponent('InteractionIntent') || new InteractionIntentComponent();
             intent.intents.push({ action, params });
             player.addComponent(intent);
-            console.log(`DialogueUISystem: Added ${action} intent`, params);
+            //console.log(`DialogueUISystem: Added ${action} intent`, params);
 
             if (action !== 'closeDialogue' && action !== 'openShop') {
                 this.refreshDialogueTimeout();
@@ -66,7 +62,7 @@ export class DialogueUISystem extends System {
                 dialogue.dialogueStage = 'greeting';
                 this.lastRenderedText = null;
                 this.lastRenderedOptions = null;
-                console.log('DialogueUISystem: Closed dialogue via button click');
+                //console.log('DialogueUISystem: Closed dialogue via button click');
             }
         });
 
@@ -80,7 +76,7 @@ export class DialogueUISystem extends System {
                 dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
                 dialogue.isOpen = true;
                 dialogue.dialogueStage = 'greeting';
-                console.log(`DialogueUISystem: Updated dialogue for trigger message`, { message });
+                //console.log(`DialogueUISystem: Updated dialogue for trigger message`, { message });
                 this.refreshDialogueTimeout();
             }
             // If message is a string (legacy/NPC)
@@ -90,7 +86,7 @@ export class DialogueUISystem extends System {
                     dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
                     dialogue.isOpen = true;
                     dialogue.dialogueStage = 'taskCompletion';
-                    console.log(`DialogueUISystem: Updated dialogue for completion message`, { message });
+                    //console.log(`DialogueUISystem: Updated dialogue for completion message`, { message });
                     this.refreshDialogueTimeout();
                 } else {
                     /*
@@ -98,7 +94,7 @@ export class DialogueUISystem extends System {
                     dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
                     dialogue.isOpen = true;
                     dialogue.dialogueStage = 'greeting';
-                    console.log(`DialogueUISystem: Updated dialogue for string message`, { message });
+                    //console.log(`DialogueUISystem: Updated dialogue for string message`, { message });
                     this.refreshDialogueTimeout();
                     */
                 }
@@ -120,7 +116,7 @@ export class DialogueUISystem extends System {
             this.closeTimeout = null;
             this.lastRenderedText = null;
             this.lastRenderedOptions = null;
-            console.log('DialogueUISystem: Closed dialogue after 30000ms timeout');
+            //console.log('DialogueUISystem: Closed dialogue after 30000ms timeout');
         }, 30000);
     }
 
@@ -201,7 +197,7 @@ export class DialogueUISystem extends System {
 
             this.lastRenderedText = dialogue.text;
             this.lastRenderedOptions = optionsString;
-            console.log('DialogueUISystem: Rendered dialogue, text:', dialogue.text, 'options:', dialogue.options, 'window display:', this.dialogueWindow.style.display);
+            //console.log('DialogueUISystem: Rendered dialogue, text:', dialogue.text, 'options:', dialogue.options, 'window display:', this.dialogueWindow.style.display);
         } else if (!dialogue.isOpen) {
             this.dialogueWindow.style.display = 'none';
             this.dialogueButtons.style.display = 'none';
@@ -221,6 +217,6 @@ export class DialogueUISystem extends System {
             clearTimeout(this.closeTimeout);
             this.closeTimeout = null;
         }
-        console.log('DialogueUISystem: Destroyed');
+        //console.log('DialogueUISystem: Destroyed');
     }
 }

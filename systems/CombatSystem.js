@@ -17,12 +17,12 @@ export class CombatSystem extends System {
     init() {
         this.eventBus.on('MeleeAttack', (data) => this.handleMeleeAttack(data));
         this.eventBus.on('RangedAttack', (data) => {
-            console.log('CombatSystem: RangedAttack event received with data:', data);
+            //console.log('CombatSystem: RangedAttack event received with data:', data);
             this.handleRangedAttack(data);
         });
         this.eventBus.on('MonsterAttack', (data) => this.handleMonsterMeleeAttack(data));
         this.eventBus.on('RangedAttackHit', (data) => {
-            console.log('CombatSystem: RangedAttackHit event received with data:', data);
+            //console.log('CombatSystem: RangedAttackHit event received with data:', data);
             this.combatFlagging(data);
          });
            
@@ -174,7 +174,7 @@ export class CombatSystem extends System {
 
         const manaCost = 2;
         if (this.entityManager.getEntity('player').getComponent('Mana').mana < manaCost) {
-            console.log(`you do not have enough mana to cast FlamingBolt`);
+            //console.log(`you do not have enough mana to cast FlamingBolt`);
             return;
         }
 
@@ -242,12 +242,12 @@ export class CombatSystem extends System {
             case attacker:
                 //this.eventBus.emit('LogMessage', { message: `You enter combat with ${target.getComponent('MonsterData').name}!` });
                 this.utilities.logMessage({ channel: 'combat', message: `You enter combat with ${target.getComponent('MonsterData').name}!` });
-                console.log(`${ target.getComponent('MonsterData').name } enters combat after being hit by player`)
+                //console.log(`${ target.getComponent('MonsterData').name } enters combat after being hit by player`)
                 break;
             case target:
                 //this.eventBus.emit('LogMessage', { message: `${attacker.getComponent('MonsterData').name} enters combat with you!` });
                 this.utilities.logMessage({ channel: 'combat', message: `${attacker.getComponent('MonsterData').name} enters combat with you!` });
-                console.log(`${attacker.getComponent('MonsterData').name } Initiates combat by attacking player}`)
+                //console.log(`${attacker.getComponent('MonsterData').name } Initiates combat by attacking player}`)
                 break;
             default:
                 break;

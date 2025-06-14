@@ -20,7 +20,7 @@ export class JourneyRewardSystem extends System {
     }
 
     async requestJourneyItmes() {
-        console.log('JourneyRewardSystem: Rjourneying journeyItems');
+        console.log('JourneyRewardSystem: Requesting journeyItems');
         try {
             return new Promise((resolve) => {
                 this.eventBus.emit('GetJourneyItems', {

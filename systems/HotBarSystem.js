@@ -21,9 +21,9 @@ export class HotBarSystem extends System {
             const slot = document.querySelector(`.hotbar-slot[data-hotbar-id="${hotBarKey}"]`);
             if (slot) {
                 const data = slot.getAttribute('data-hotbar-data');
-                console.log(`Hotbar Key ${hotBarKey}:`, data);
+                //console.log(`Hotbar Key ${hotBarKey}:`, data);
             } else {
-                console.log(`No hotbar slot found for key: ${hotBarKey}`);
+                //console.log(`No hotbar slot found for key: ${hotBarKey}`);
             }
             entity.removeComponent('HotBarIntent');
         }

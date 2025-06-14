@@ -31,7 +31,7 @@ export class EntityGenerationSystem extends System {
 
 
     generateStairEntity(levelData, entityList, tier, roomId, direction, x, y, returnEntity = false) {
-        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState')
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const map = levelData.map;
         const lockedLevels = [6, 10];
         const roomEntity = this.entityManager.getEntity(roomId);

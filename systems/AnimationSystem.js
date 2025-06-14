@@ -25,7 +25,7 @@ export class AnimationSystem extends System {
         animation.currentAnimation = 'attack';
         animation.currentFrame = 0;
         animation.frameTimer = 0;
-        console.log('AnimationSystem: Switched player to attack');
+        //console.log('AnimationSystem: Switched player to attack');
     }
 
     update(deltaTime) {
@@ -55,7 +55,7 @@ export class AnimationSystem extends System {
                     animation.currentAnimation = 'idle';
                     animation.currentFrame = 0;
                     animation.frameTimer = 0;
-                    console.log(`AnimationSystem: Switched ${entity.id} to idle after attack`);
+                    //console.log(`AnimationSystem: Switched ${entity.id} to idle after attack`);
                 }
             } else {
                 // Normal idle/walk state transitions
@@ -66,7 +66,7 @@ export class AnimationSystem extends System {
                     animation.currentAnimation = 'walk';
                     animation.currentFrame = 0;
                     animation.frameTimer = 0;
-                    console.log(`AnimationSystem: Switched ${entity.id} to walk`);
+                    //console.log(`AnimationSystem: Switched ${entity.id} to walk`);
                 } else if (!hasMovement && !animState.isIdle) {
                     animState.isIdle = true;
                     animState.isWalking = false;
@@ -74,7 +74,7 @@ export class AnimationSystem extends System {
                     animation.currentAnimation = 'idle';
                     animation.currentFrame = 0;
                     animation.frameTimer = 0;
-                    console.log(`AnimationSystem: Switched ${entity.id} to idle`);
+                    //console.log(`AnimationSystem: Switched ${entity.id} to idle`);
                 }
             }
 
@@ -93,7 +93,7 @@ export class AnimationSystem extends System {
                     const currentSpeed = movementSpeedComp.movementSpeed;
                     const speedRatio = currentSpeed / this.baselineSpeed;
                     effectiveFrameTime = animData.frameTime / speedRatio;
-                   // console.log(`AnimationSystem: Walk speed: ${currentSpeed.toFixed(2)}, speedRatio: ${speedRatio.toFixed(2)}, effectiveFrameTime: ${effectiveFrameTime.toFixed(2)}ms`);
+                   // //console.log(`AnimationSystem: Walk speed: ${currentSpeed.toFixed(2)}, speedRatio: ${speedRatio.toFixed(2)}, effectiveFrameTime: ${effectiveFrameTime.toFixed(2)}ms`);
                 }
             }
 

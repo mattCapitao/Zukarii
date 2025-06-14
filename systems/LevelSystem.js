@@ -79,9 +79,13 @@ export class LevelSystem extends System {
 
             //console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier 0 in init`);
 
-            this.addLevel({ tier: 0, customLevel: this.generateCustomLevel(levelEntity) });
-            // Explicitly call checkLevelAfterTransitions for tier 0 to ensure shop inventories are generated
-            this.checkLevelAfterTransitions({ tier: 0, levelEntity });
+            this.customLevelSystem.loadCustomLevel(0, levelEntity).then((customLevel) => {
+                this.addLevel({ tier: 0, customLevel });
+                this.checkLevelAfterTransitions({ tier: 0, levelEntity });
+            }).catch((error) => {
+                console.error('Failed to load custom level for Tier 0:', error);
+            });
+
         }
 
         if (isNewGame) {
@@ -1366,7 +1370,6 @@ export class LevelSystem extends System {
 
 
     ensureRoomConnectionsPassTwo(levelEntity) {
-        if (this.isCustomLevel(tier)) { return; }
         const mapComp = levelEntity.getComponent('Map');
         const entityList = levelEntity.getComponent('EntityList');
         const tier = levelEntity.getComponent('Tier').value;
@@ -1522,7 +1525,12 @@ export class LevelSystem extends System {
 
         // Generate shop inventories only after NPC spawning is confirmed
         //console.log(`LevelSystem.js: Emitting GenerateShopInventories for tier ${tier} after NPC spawning`);
-        this.eventBus.emit('GenerateShopInventories', { tier });
+        let shopTier = tier;
+        if (tier === 0) {
+            const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+            shopTier = gameState.highestTier || 0; 
+        }
+        this.eventBus.emit('GenerateShopInventories', { shopTier });
         //console.log(`LevelSystem.js: checkLevelAfterTransitions - Completed for tier ${tier}`);
 
         this.utilities.pushPlayerActions('reachTier', { tier });

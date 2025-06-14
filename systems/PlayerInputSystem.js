@@ -30,7 +30,7 @@ export class PlayerInputSystem {
 
         window.addEventListener('keydown', this.keydownHandler, { capture: true });
         window.addEventListener('keyup', this.keyupHandler, { capture: true });
-        //console.log('PlayerInputSystem: Key listeners attached to window');
+        ////console.log('PlayerInputSystem: Key listeners attached to window');
     }
 
     async init() {
@@ -39,7 +39,7 @@ export class PlayerInputSystem {
         if (!player.hasComponent('InputState')) {
             this.entityManager.addComponentToEntity('player', new InputStateComponent());
         }
-        //console.log('PlayerInputSystem initialized');
+        ////console.log('PlayerInputSystem initialized');
     }
 
     handleKeyDown(event) {
@@ -58,9 +58,9 @@ export class PlayerInputSystem {
            
         }
          
-        //console.log('PlayerInputSystem: handleKeyDown - raw key:', event.key);ssssssss
+        ////console.log('PlayerInputSystem: handleKeyDown - raw key:', event.key);ssssssss
         const mappedKey = this.keyMap[event.key];
-        //console.log('PlayerInputSystem: handleKeyDown - mappedKey:', mappedKey);
+        ////console.log('PlayerInputSystem: handleKeyDown - mappedKey:', mappedKey);
 
         if ((document.activeElement.id === 'save-name-input' ) && mappedKey != 'escape') {
             return; // Ignore keypresses when the save-name-input field is focused
@@ -69,11 +69,11 @@ export class PlayerInputSystem {
         } 
 
         if (event.repeat) {
-            //console.log('PlayerInputSystem: Ignoring repeated key press:', event.key);
+            ////console.log('PlayerInputSystem: Ignoring repeated key press:', event.key);
             return;
         }
 
-        //console.log('PlayerInputSystem: handleKeyDown - raw key pressed:', event.key);
+        ////console.log('PlayerInputSystem: handleKeyDown - raw key pressed:', event.key);
         if (mappedKey) {
             event.preventDefault();  // Prevent default action for mapped keys
             this.keysPressed[mappedKey] = true;
@@ -89,9 +89,9 @@ export class PlayerInputSystem {
     }
 
     handleKeyUp(event) {
-       // console.log('PlayerInputSystem: handleKeyUp - raw key:', event.key);
+       // //console.log('PlayerInputSystem: handleKeyUp - raw key:', event.key);
         const mappedKey = this.keyMap[event.key];
-       // console.log('KeyUp Event Fired:', event.key, 'Mapped:', mappedKey);
+       // //console.log('KeyUp Event Fired:', event.key, 'Mapped:', mappedKey);
         
         if (mappedKey) {
             if (document.activeElement.id === 'save-name-input' && mappedKey != 'escape') {
@@ -100,7 +100,7 @@ export class PlayerInputSystem {
 
             delete this.keysPressed[mappedKey];
             this.updateInputState();
-           // console.log('Key Up:', mappedKey, 'keysPressed:', JSON.stringify(this.keysPressed));
+           // //console.log('Key Up:', mappedKey, 'keysPressed:', JSON.stringify(this.keysPressed));
             if (mappedKey === ' ') {
                 this.handleNonMovementKeys(event, mappedKey, false);
             }
@@ -112,7 +112,7 @@ export class PlayerInputSystem {
         if (player) {
             const inputState = player.getComponent('InputState');
             inputState.keys = { ...this.keysPressed };
-           // console.log('PlayerInputSystem: InputState updated with keys:', JSON.stringify(inputState.keys));
+           // //console.log('PlayerInputSystem: InputState updated with keys:', JSON.stringify(inputState.keys));
         }
     }
 
@@ -145,12 +145,12 @@ export class PlayerInputSystem {
                 case ' ':
                     event.preventDefault();
                     this.eventBus.emit('ToggleRangedMode', { event });
-                    //console.log('PlayerInputSystem: Emitting ToggleRangedMode - event:', event.type, 'key:', event.key);
+                    ////console.log('PlayerInputSystem: Emitting ToggleRangedMode - event:', event.type, 'key:', event.key);
                     break;
                 case 'm':
                     event.preventDefault();
                     this.eventBus.emit('ToggleMinimap');
-                   // console.log('PlayerInputSystem: Emitting ToggleMinimap');
+                   // //console.log('PlayerInputSystem: Emitting ToggleMinimap');
                     break;
                 case '1':
                 case '2':
@@ -159,12 +159,12 @@ export class PlayerInputSystem {
                 case '5':
                 case '6':
                     event.preventDefault();
-                    //console.log('PlayerInputSystem: handleKeyDown - mappedKey:', mappedKey);
+                    ////console.log('PlayerInputSystem: handleKeyDown - mappedKey:', mappedKey);
                     const player = this.entityManager.getEntity('player');
                     if (!player.hasComponent('HotbarIntent')) {
                         const hotBarComp = new HotBarIntentComponent(mappedKey)
                         this.entityManager.addComponentToEntity('player', hotBarComp );
-                       // console.log('PlayerInputSystem: Added HotBarIntentComponent to player with hotBarKey:',hotBarComp, mappedKey);
+                       // //console.log('PlayerInputSystem: Added HotBarIntentComponent to player with hotBarKey:',hotBarComp, mappedKey);
                     }
                     break;
         }
@@ -175,6 +175,6 @@ export class PlayerInputSystem {
     destroy() {
         window.removeEventListener('keydown', this.keydownHandler, { capture: true });
         window.removeEventListener('keyup', this.keyupHandler, { capture: true });
-        //console.log('PlayerInputSystem destroyed, listeners removed');
+        ////console.log('PlayerInputSystem destroyed, listeners removed');
     }
 }

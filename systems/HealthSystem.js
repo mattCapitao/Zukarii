@@ -19,7 +19,7 @@ export class HealthSystem extends System {
                 this.modifyHealth(entityId, amount, attackerId);
             });
             this.healthUpdates.length = 0; // Clear queue
-            console.log('HealthSystem: Processed and cleared HealthUpdates');
+            //console.log('HealthSystem: Processed and cleared HealthUpdates');
         }
     }
 
@@ -83,11 +83,11 @@ export class HealthSystem extends System {
                 hpBar.animationStartTime = Date.now(); // Start animation
                 hpBar.updated = true;
             }
-            console.log(`HealthSystem: Updated HpBar for ${entityId} - fillPercent: ${fillPercent}, fillColor: ${fillColor}`);
+            //console.log(`HealthSystem: Updated HpBar for ${entityId} - fillPercent: ${fillPercent}, fillColor: ${fillColor}`);
         } else {
             // Remove HpBarComponent if health is full or zero
             entity.removeComponent('HpBar');
-            console.log(`HealthSystem: Removed HpBar for ${entityId} - hp: ${hp}, maxHp: ${maxHp}`);
+            //console.log(`HealthSystem: Removed HpBar for ${entityId} - hp: ${hp}, maxHp: ${maxHp}`);
         }
     }
 }

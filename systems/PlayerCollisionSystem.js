@@ -121,7 +121,7 @@ export class PlayerCollisionSystem extends System {
                             const toTier = stairComp.direction === 'down' ? fromTier + 1 : fromTier - 1;
                             try {
                                 this.utilities.pushPlayerActions('attemptStairs', { fromTier, toTier, success: false });
-                                console.log(`PlayerCollisionSystem: Pushed attemptStairs action`, { fromTier, toTier, success: false });
+                                //console.log(`PlayerCollisionSystem: Pushed attemptStairs action`, { fromTier, toTier, success: false });
                             } catch (error) {
                                 console.error('PlayerCollisionSystem: Failed to push attemptStairs action', { error: error.message });
                             }

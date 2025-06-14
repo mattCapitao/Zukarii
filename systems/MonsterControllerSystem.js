@@ -75,7 +75,7 @@ export class MonsterControllerSystem extends System {
                     if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
                         this.eventBus.emit('MonsterAttack', { entityId: monster.id });
                         attackSpeed.elapsedSinceLastAttack = 0;
-                        ////console.log(`MonsterControllerSystem: ${monsterData.name} attacked player at distance ${distance.toFixed(2)} pixels`);
+                        //////console.log(`MonsterControllerSystem: ${monsterData.name} attacked player at distance ${distance.toFixed(2)} pixels`);
                     }
                     return; // Stop moving if in melee range
                 }
@@ -104,7 +104,7 @@ export class MonsterControllerSystem extends System {
                             if (monsterData.wanderCycles && monsterData.wanderCycles > 0) {
                                 setNextWanderTile = true;
                             } else {
-                                console.log(`MonsterControllerSystem: ${monsterData.name} finished wandering`);
+                                //console.log(`MonsterControllerSystem: ${monsterData.name} finished wandering`);
                                 monsterData.isWandering = false;
                                 monsterData.wanderTile = null;
                                 return;
@@ -142,7 +142,7 @@ export class MonsterControllerSystem extends System {
                             if (!setNextWanderTile) {
                                 monsterData.wanderCycles = Math.floor(Math.random() * 3) + 2; // Random cycles between 2 and 4
                             }
-                            console.log(`MonsterControllerSystem: ${monsterData.name} found wander target tile (${wanderTile.x}, ${wanderTile.y})  after ${attempts} attempts`);
+                            //console.log(`MonsterControllerSystem: ${monsterData.name} found wander target tile (${wanderTile.x}, ${wanderTile.y})  after ${attempts} attempts`);
                             monsterData.wanderTile = wanderTile;
                             monsterData.isWandering = true;
                             const nextPixel = this.utilities.getPixelFromTile(wanderTile.x, wanderTile.y);
@@ -179,10 +179,10 @@ export class MonsterControllerSystem extends System {
 
         if (monsterData.isBoss) {
             this.utilities.pushPlayerActions('bossKill', { monsterId: monsterData.id, tier });
-            //console.log(`MonsterControllerSystem: Boss defeated: ${monsterData.name}, awarding special actions and loot.`);
+            ////console.log(`MonsterControllerSystem: Boss defeated: ${monsterData.name}, awarding special actions and loot.`);
         } else {
             this.utilities.pushPlayerActions('monsterKill', { monsterId: monsterData.id, tier });
-            //console.log(`MonsterControllerSystem: Monster defeated: ${monsterData.name}, awarding actions and loot.`);
+            ////console.log(`MonsterControllerSystem: Monster defeated: ${monsterData.name}, awarding actions and loot.`);
         }
 
         const lootSource = this.entityManager.createEntity(`loot_source_${monsterData.tier}_${Date.now()}`);

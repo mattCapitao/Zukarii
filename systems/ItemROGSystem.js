@@ -7,28 +7,28 @@ export class ItemROGSystem extends System {
     }
 
     async init() {
-        //console.log('ItemROGSystem: Initializing');
+        ////console.log('ItemROGSystem: Initializing');
         // Register listener synchronously
         this.eventBus.on('GenerateROGItem', ({ partialItem, dungeonTier, callback }) => {
-            //console.log('ItemROGSystem: Received GenerateROGItem:', { partialItem, dungeonTier });
+            ////console.log('ItemROGSystem: Received GenerateROGItem:', { partialItem, dungeonTier });
             const item = this.generateRogItem({ partialItem, dungeonTier });
-            //console.log('ItemROGSystem: Generated item for callback:', item);
+            ////console.log('ItemROGSystem: Generated item for callback:', item);
             callback(item);
         });
-        //console.log('ItemROGSystem: GenerateROGItem listener registered');
+        ////console.log('ItemROGSystem: GenerateROGItem listener registered');
         // Load itemStatOptions asynchronously
         await this.requestItemStatOptions();
-        //console.log('ItemROGSystem: itemStatOptions after init:', this.itemStatOptions);
+        ////console.log('ItemROGSystem: itemStatOptions after init:', this.itemStatOptions);
     }
 
     async requestItemStatOptions() {
-        //console.log('ItemROGSystem: Requesting itemStatOptions');
+        ////console.log('ItemROGSystem: Requesting itemStatOptions');
         try {
             return new Promise((resolve) => {
                 this.eventBus.emit('GetItemStatOptions', {
                     callback: (itemStatOptions) => {
                         this.itemStatOptions = itemStatOptions;
-                        //console.log('ItemROGSystem: Received Item stat options:', this.itemStatOptions);
+                        ////console.log('ItemROGSystem: Received Item stat options:', this.itemStatOptions);
                         resolve();
                     }
                 });
@@ -40,7 +40,7 @@ export class ItemROGSystem extends System {
     }
 
     calculateGoldValue(item, dungeonTier) {
-        //console.log('ItemROGSystem: Calculating goldValue for item:', item);
+        ////console.log('ItemROGSystem: Calculating goldValue for item:', item);
         try {
             // Base gold value from LootManagerSystem: 0.95 * (30 + tier * 10)
             const baseGoldValue = 0.95 * (30 + dungeonTier * 10);
@@ -107,7 +107,7 @@ export class ItemROGSystem extends System {
 
             // Calculate final gold value
             const goldValue = Math.round((baseGoldValue + statMultiplier) * itemTierMultiplier);
-            //console.log(`ItemROGSystem: Calculated goldValue: base=${baseGoldValue}, tierMultiplier=${itemTierMultiplier}, sumOfWeightedStats=${sumOfWeightedStats}, statMultiplier=${statMultiplier}, total=${goldValue}`);
+            ////console.log(`ItemROGSystem: Calculated goldValue: base=${baseGoldValue}, tierMultiplier=${itemTierMultiplier}, sumOfWeightedStats=${sumOfWeightedStats}, statMultiplier=${statMultiplier}, total=${goldValue}`);
             return goldValue;
         } catch (err) {
             console.error('ItemROGSystem: Error in calculateGoldValue:', err);
@@ -116,7 +116,7 @@ export class ItemROGSystem extends System {
     }
 
     generateRogItem({ partialItem = { tierIndex: 0 }, dungeonTier }) {
-        //console.log('ItemROGSystem: Generating item with partialItem:', partialItem, 'dungeonTier:', dungeonTier);
+        ////console.log('ItemROGSystem: Generating item with partialItem:', partialItem, 'dungeonTier:', dungeonTier);
         try {
             if (!this.itemStatOptions) {
                 console.warn('ItemROGSystem: itemStatOptions not loaded, using fallback behavior');
@@ -233,7 +233,7 @@ export class ItemROGSystem extends System {
                 const affix = this.getRandomAffix();
                 if (affix) {
                     item.affixes = [affix];
-                    //console.log('ItemROGSystem: Affix added:', affix);
+                    ////console.log('ItemROGSystem: Affix added:', affix);
                 } else {
                     console.warn('ItemROGSystem: getRandomAffix returned an empty string');
                 }
@@ -254,7 +254,7 @@ export class ItemROGSystem extends System {
                 ...item // Overwrite with generated properties
             };
 
-            //console.log(`ItemROGSystem: Successfully generated item:`, finalItem);
+            ////console.log(`ItemROGSystem: Successfully generated item:`, finalItem);
             return finalItem;
         } catch (err) {
             console.error('ItemROGSystem: Error in generateRogItem:', err);
@@ -263,7 +263,7 @@ export class ItemROGSystem extends System {
     }
 
     getBonusStats(statArray, item, dungeonTier) {
-        //console.log('ItemROGSystem: getBonusStats called with statArray:', statArray, 'item:', item, 'dungeonTier:', dungeonTier);
+        ////console.log('ItemROGSystem: getBonusStats called with statArray:', statArray, 'item:', item, 'dungeonTier:', dungeonTier);
         try {
             if (!this.itemStatOptions || !statArray) {
                 console.warn('ItemROGSystem: itemStatOptions or statArray not available, returning empty stats');
@@ -283,19 +283,19 @@ export class ItemROGSystem extends System {
 
             if (itemTier === 4 || itemTier === 7) { // Chance for bonus stats on Mastercraft and Artifact
                 const statCritChance = dungeonTier * .001;
-                //console.log('ItemROGSystem: Mastercraft stat count roll crit chance:', statCritChance);
+                ////console.log('ItemROGSystem: Mastercraft stat count roll crit chance:', statCritChance);
                 if (Math.random() <= statCritChance) {
                     critCount++;
-                    //console.log('ItemROGSystem: Mastercraft stat count roll CRIT - count increased to:', critCount);
+                    ////console.log('ItemROGSystem: Mastercraft stat count roll CRIT - count increased to:', critCount);
                     if (Math.random() <= statCritChance) {
                         critCount++;
-                        //console.log('ItemROGSystem: Mastercraft stat count roll DOUBLE CRIT - count increased to:', critCount);
+                        ////console.log('ItemROGSystem: Mastercraft stat count roll DOUBLE CRIT - count increased to:', critCount);
                         if (Math.random() <= statCritChance) {
                             critCount++;
-                            //console.log('ItemROGSystem: Mastercraft stat count roll TRIPLE CRIT - count increased to:', critCount);
+                            ////console.log('ItemROGSystem: Mastercraft stat count roll TRIPLE CRIT - count increased to:', critCount);
                             if (Math.random() <= statCritChance) {
                                 critCount++;
-                                //console.log('ItemROGSystem: Mastercraft stat count roll QUAD CRIT - count increased to:', critCount);
+                                ////console.log('ItemROGSystem: Mastercraft stat count roll QUAD CRIT - count increased to:', critCount);
                             }
                         }
                     }
@@ -303,7 +303,7 @@ export class ItemROGSystem extends System {
             }
 
             const critStats = [];
-            //console.log(`ItemROGSystem: Crit count: ${critCount}, available stats:`, availableStats);
+            ////console.log(`ItemROGSystem: Crit count: ${critCount}, available stats:`, availableStats);
             for (let i = 0, c = 0; i < count && availableStats.length > 0; i++, c++) {
                 const index = Math.floor(Math.random() * availableStats.length);
                 const stat = availableStats.splice(index, 1)[0];
@@ -313,7 +313,7 @@ export class ItemROGSystem extends System {
 
                 if (isCrit) {
                     critStats.push(stat);
-                    //console.log('ItemROGSystem: Mastercraft stat roll CRIT - statValue increased to:', statValue);
+                    ////console.log('ItemROGSystem: Mastercraft stat roll CRIT - statValue increased to:', statValue);
                 }
 
                 if (selectedStats.hasOwnProperty(stat)) {
@@ -323,7 +323,7 @@ export class ItemROGSystem extends System {
                 }
             }
 
-            //console.log(`ItemROGSystem: Returning selected stats:`, selectedStats, 'critStats:', critStats);
+            ////console.log(`ItemROGSystem: Returning selected stats:`, selectedStats, 'critStats:', critStats);
             return { slected: selectedStats, crit: critStats };
         } catch (err) {
             console.error('ItemROGSystem: Error in getBonusStats:', err);
@@ -332,7 +332,7 @@ export class ItemROGSystem extends System {
     }
 
     getRandomAffix() {
-        //console.log('ItemROGSystem: Selecting random affix');
+        ////console.log('ItemROGSystem: Selecting random affix');
         try {
             const itemAffixOptions = [
                 {
@@ -373,7 +373,7 @@ export class ItemROGSystem extends System {
                 }
             ];
             const index = Math.floor(Math.random() * itemAffixOptions.length);
-            //console.log('ItemROGSystem: Selected affix:', itemAffixOptions[index]);
+            ////console.log('ItemROGSystem: Selected affix:', itemAffixOptions[index]);
             return itemAffixOptions[index];
         } catch (err) {
             console.error('ItemROGSystem: Error in getRandomAffix:', err);
@@ -382,7 +382,7 @@ export class ItemROGSystem extends System {
     }
 
     rollMaxLuck(item, dungeonTier) {
-        //console.log('ItemROGSystem: Rolling maxLuck for item:', item, 'dungeonTier:', dungeonTier);
+        ////console.log('ItemROGSystem: Rolling maxLuck for item:', item, 'dungeonTier:', dungeonTier);
         try {
             const baseRoll = Math.floor(Math.random() * 12) - 4;
             const tierFactor = item.tierIndex + Math.floor(dungeonTier / 5);
@@ -396,7 +396,7 @@ export class ItemROGSystem extends System {
             const centerThresholdLow = Math.floor((negativeCap + positiveCap) / 2 - gapSize / 2);
             const centerThresholdHigh = centerThresholdLow + gapSize - 1;
             const result = (finalRoll >= centerThresholdLow && finalRoll <= centerThresholdHigh) ? 0 : finalRoll;
-            //console.log('ItemROGSystem: maxLuck result:', result);
+            ////console.log('ItemROGSystem: maxLuck result:', result);
             return result;
         } catch (err) {
             console.error('ItemROGSystem: Error in rollMaxLuck:', err);
@@ -405,10 +405,10 @@ export class ItemROGSystem extends System {
     }
 
     statRoll(stat, item, isCrit = false) {
-        //console.log(`ItemROGSystem: Rolling stat ${stat} crit:${isCrit} for item:`, item);
+        ////console.log(`ItemROGSystem: Rolling stat ${stat} crit:${isCrit} for item:`, item);
         try {
             if (item[stat] !== undefined && item[stat] !== 0) {
-                //console.log(`ItemROGSystem: Stat ${stat} already set to ${item[stat]}, skipping roll`);
+                ////console.log(`ItemROGSystem: Stat ${stat} already set to ${item[stat]}, skipping roll`);
                 return 0;
             }
 
@@ -462,13 +462,13 @@ export class ItemROGSystem extends System {
                     }
                     break;
                 default:
-                    //console.log(`ItemROGSystem: Stat ${stat} not found while attempting to generate a value for item:`, item);
+                    ////console.log(`ItemROGSystem: Stat ${stat} not found while attempting to generate a value for item:`, item);
                     return 0;
             }
-            //console.log(`ItemROGSystem: Rolled value for ${stat}:`, value);
+            ////console.log(`ItemROGSystem: Rolled value for ${stat}:`, value);
             if (isCrit) {
                 value = Math.round(value * 1.5);
-                //console.log(`ItemROGSystem: ${stat} rolled CRIT - value increased to:`, value);
+                ////console.log(`ItemROGSystem: ${stat} rolled CRIT - value increased to:`, value);
             }
             return value;
         } catch (err) {
@@ -478,7 +478,7 @@ export class ItemROGSystem extends System {
     }
 
     randomizeStatRoll(max, item) {
-        //console.log('ItemROGSystem: Randomizing stat roll with max:', max, 'item:', item);
+        ////console.log('ItemROGSystem: Randomizing stat roll with max:', max, 'item:', item);
         try {
             const baseroll = Math.floor(Math.random() * max) + 1;
             let roll = baseroll;
@@ -491,7 +491,7 @@ export class ItemROGSystem extends System {
                 roll++;
             }
             if (item.tierIndex >= 5 && roll < max && Math.random() < .005) { roll++; }
-            //console.log('ItemROGSystem: Randomized stat roll result:', roll);
+            ////console.log('ItemROGSystem: Randomized stat roll result:', roll);
             return roll;
         } catch (err) {
             console.error('ItemROGSystem: Error in randomizeStatRoll:', err);
@@ -500,7 +500,7 @@ export class ItemROGSystem extends System {
     }
 
     generateFallbackItem(partialItem, dungeonTier) {
-        //console.log('ItemROGSystem: Generating fallback item with partialItem:', partialItem, 'dungeonTier:', dungeonTier);
+        ////console.log('ItemROGSystem: Generating fallback item with partialItem:', partialItem, 'dungeonTier:', dungeonTier);
         try {
             const item = { ...partialItem };
             item.tierIndex = item.tierIndex || 0;
@@ -511,7 +511,7 @@ export class ItemROGSystem extends System {
             item.description = `${item.itemTier} ${item.type}`;
             item.goldValue = this.calculateGoldValue(item, dungeonTier);
             item.isSellable = true;
-            //console.log('ItemROGSystem: Generated fallback item:', item);
+            ////console.log('ItemROGSystem: Generated fallback item:', item);
             return item;
         } catch (err) {
             console.error('ItemROGSystem: Error in generateFallbackItem:', err);

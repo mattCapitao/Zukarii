@@ -10,7 +10,7 @@ export class EntityRemovalSystem extends System {
         const entitiesToRemove = this.entityManager.getEntitiesWith(this.requiredComponents);
 
         for (const entity of entitiesToRemove) {
-            console.log(`EntityRemovalSystem: Removing entity ${entity.id}`);
+            //console.log(`EntityRemovalSystem: Removing entity ${entity.id}`);
             this.entityManager.removeEntity(entity.id);
         }
     }

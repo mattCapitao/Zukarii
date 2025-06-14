@@ -11,12 +11,12 @@ export class EffectsSystem extends System {
 
     init() {
 
-        console.log('EffectsSystem.init: this.entityManager:', this.entityManager);
+        //console.log('EffectsSystem.init: this.entityManager:', this.entityManager);
 
         this.eventBus.on('applyEffect', ({ entityId, effect, params, context }) => {
 
-            console.log('EffectsSystem.applyEffect: this:', this, 'entityManager:', this.entityManager);
-            console.log(`EffectsSystem: Received applyEffect for ${entityId} with effect: ${effect}`);
+            //console.log('EffectsSystem.applyEffect: this:', this, 'entityManager:', this.entityManager);
+            //console.log(`EffectsSystem: Received applyEffect for ${entityId} with effect: ${effect}`);
 
 
             const handlers = {
@@ -31,7 +31,7 @@ export class EffectsSystem extends System {
                 console.warn(`EffectsSystem: No handler for effect ${effect} on ${entityId}`);
             }
         });
-        console.log('EffectsSystem: Initialized and listening for applyEffect events');
+        //console.log('EffectsSystem: Initialized and listening for applyEffect events');
 
         this.eventBus.on('ItemUsed', ({ entityId, item, effect, params }) => {
             this.applyEffect({ entityId, effect, params, context: { itemId: item.itemId } });
@@ -39,8 +39,8 @@ export class EffectsSystem extends System {
     }
 
     applyEffect({ entityId, effect, params, context }) {    
-        console.log('EffectsSystem.applyEffect: this.entityManager:', this.entityManager);
-        console.log(`EffectsSystem: Applying effect ${effect} to ${entityId} with params:`, params);
+        //console.log('EffectsSystem.applyEffect: this.entityManager:', this.entityManager);
+        //console.log(`EffectsSystem: Applying effect ${effect} to ${entityId} with params:`, params);
         const handlers = {
             teleportToTier: this.teleportToTier.bind(this),
             reflectDamage: this.reflectDamage.bind(this),
@@ -88,7 +88,7 @@ export class EffectsSystem extends System {
 
     // NEW: Moved from AffixSystem - instantHeal effect
     instantHeal(entityId, params, context) {
-        console.log('EffectsSystem.instantHeal: this.entityManager:', this.entityManager);
+        //console.log('EffectsSystem.instantHeal: this.entityManager:', this.entityManager);
         const entity = this.entityManager.getEntity(entityId);
         if (!entity) {
             console.warn(`EffectsSystem: Entity ${entityId} not found for instantHeal`);
@@ -100,7 +100,7 @@ export class EffectsSystem extends System {
         const MAX_HEAL_PERCENTAGE = params?.maxHealPercentage || 0.10;
 
         if (Math.random() >= CHANCE_TO_HEAL) {
-            console.log(`EffectsSystem: Heal chance failed for ${entity.id}`);
+            //console.log(`EffectsSystem: Heal chance failed for ${entity.id}`);
             return;
         }
 
@@ -116,25 +116,25 @@ export class EffectsSystem extends System {
         this.healthUpdates.push({ entityId, amount: healAmount });
     
         this.utilities.logMessage( {channel: 'combat', classNames: 'player', message: `Resilience heals you for ${healAmount} HP! (${health.hp}/${health.maxHp})`});
-        console.log(`EffectsSystem: Healed ${entity.id} for ${healAmount} HP. Now: ${health.hp}/${health.maxHp}`);
+        //console.log(`EffectsSystem: Healed ${entity.id} for ${healAmount} HP. Now: ${health.hp}/${health.maxHp}`);
     }
 
     // NEW: Moved from AffixSystem - lifeSteal effect
     lifeSteal(entityId, params, context) {
-        console.log('EffectsSystem.lifeSteal: this.entityManager:', this.entityManager);
+        //console.log('EffectsSystem.lifeSteal: this.entityManager:', this.entityManager);
         const entity = this.entityManager.getEntity(entityId);
         if (!entity) {
             console.warn(`EffectsSystem: Entity ${entityId} not found for lifeSteal`);
             return;
         }
 
-        console.log(`EffectsSystem: Attempting lifeSteal on ${entity.id}`);
+        //console.log(`EffectsSystem: Attempting lifeSteal on ${entity.id}`);
         const CHANCE_TO_STEAL_LIFE = params?.chanceToStealLife || 0.05;
         const MIN_DAMAGE_HEALED_PERCENTAGE = params?.minDamageHealedPercentage || 0.10;
         const MAX_DAMAGE_HEALED_PERCENTAGE = params?.maxDamageHealedPercentage || 0.25;
 
         if (Math.random() >= CHANCE_TO_STEAL_LIFE) {
-            console.log(`EffectsSystem: Life steal chance failed for ${entity.id}`);
+            //console.log(`EffectsSystem: Life steal chance failed for ${entity.id}`);
             return;
         }
 
@@ -161,19 +161,19 @@ export class EffectsSystem extends System {
         const healAmount = Math.round(damageDealt * healPercentage);
 
         this.utilities.logMessage({ channel: 'combat', classNames: 'player', message: `Life Steal heals you for ${healAmount} HP from damage dealt! (${health.hp}/${health.maxHp})`});
-        console.log(`EffectsSystem: ${entity.id} stole ${healAmount} HP from ${targetId}. Now: ${health.hp}/${health.maxHp}`);
+        //console.log(`EffectsSystem: ${entity.id} stole ${healAmount} HP from ${targetId}. Now: ${health.hp}/${health.maxHp}`);
     }
 
 
     reflectDamage(entityId, params, context) {
-        console.log('EffectsSystem.reflectDamage: this.entityManager:', this.entityManager);
+        //console.log('EffectsSystem.reflectDamage: this.entityManager:', this.entityManager);
         const entity = this.entityManager.getEntity(entityId);
         if (!entity) {
             console.warn(`EffectsSystem: Entity ${entityId} not found for reflectDamage`);
             return;
         }
 
-        console.log(`EffectsSystem: Attempting reflectDamage on ${entity.id}`);
+        //console.log(`EffectsSystem: Attempting reflectDamage on ${entity.id}`);
         const CHANCE_TO_REFLECT = params?.chanceToReflect || 0.10;
         const MIN_REFLECT_PERCENTAGE = params?.minReflectPercentage || 0.50;
         const MAX_REFLECT_PERCENTAGE = params?.maxReflectPercentage || 1;
@@ -181,7 +181,7 @@ export class EffectsSystem extends System {
         const TARGET_ID = context.attackerId || null;
 
         if (Math.random() >= CHANCE_TO_REFLECT) {
-            console.log(`EffectsSystem: Reflect chance failed for ${entity.id}`);
+            //console.log(`EffectsSystem: Reflect chance failed for ${entity.id}`);
             return;
         }
         const reflectAmount = Math.round(DAMAGE * (Math.random() * (MAX_REFLECT_PERCENTAGE - MIN_REFLECT_PERCENTAGE) + MIN_REFLECT_PERCENTAGE));
@@ -191,7 +191,7 @@ export class EffectsSystem extends System {
         this.healthUpdates.push({ TARGET_ID, amount: -reflectAmount });
 
         this.utilities.logMessage({channel: "system", message: `Reflect Damage hits your attacker for ${reflectAmount} HP! `});
-        console.log(`EffectsSystem: Reflect Damage hits your attacker for ${entity.id} for ${reflectAmount} HP. `);
+        //console.log(`EffectsSystem: Reflect Damage hits your attacker for ${entity.id} for ${reflectAmount} HP. `);
     }
 
     teleportToTier(entityId, params, context) {
@@ -216,22 +216,24 @@ export class EffectsSystem extends System {
             return;
         }
 
-        console.log(`EffectsSystem: Attempting to forge Spectral Wyrm Key from ${entityId}`);
+        //console.log(`EffectsSystem: Attempting to forge Spectral Wyrm Key from ${entityId}`);
         
         const playerResource = player.getComponent('Resource');
-        console.log(`EffectsSystem: Player resource component:`, playerResource);
+        //console.log(`EffectsSystem: Player resource component:`, playerResource);
         const requiredResources = params.craftResources 
-        console.log(`EffectsSystem: Required resources for forging Spectral Wyrm Key: ${requiredResources}`);
-        console.log(`EffectsSystem: Player resource component:`, playerResource.craftResources);
+        //console.log(`EffectsSystem: Required resources for forging Spectral Wyrm Key: ${requiredResources}`);
+        //console.log(`EffectsSystem: Player resource component:`, playerResource.craftResources);
         const craftResourceAmount = playerResource.craftResources[requiredResources] || 0;
         const amount = params.amount;
-        console.log(`EffectsSystem: Player has ${craftResourceAmount} of ${amount} required ${requiredResources}`);
+        //console.log(`EffectsSystem: Player has ${craftResourceAmount} of ${amount} required ${requiredResources}`);
 
         let hasResources = false;
         if (craftResourceAmount < amount) {
             this.utilities.logMessage({ channel: 'system', message: `You need at least ${amount} ${requiredResources} to forge the Spectral Wyrm Key!` });
             return;
-        } else { hasResources = true; console.log(`EffectsSystem: Player has ${craftResourceAmount} of ${amount} required ${requiredResources}`)}
+        } else { hasResources = true; 
+            //console.log(`EffectsSystem: Player has ${craftResourceAmount} of ${amount} required ${requiredResources}`)
+        }
 
         const proximityEntity = params.proximity; 
         const tier = params.tier; 
@@ -242,17 +244,17 @@ export class EffectsSystem extends System {
             this.utilities.logMessage({ channel: 'system', message: `You must be near the stairs down in Tier ${tier} to forge the Spectral Wyrm Key!` });
             return;
         } else {
-             console.log(`EffectsSystem: Player is in on tier ${tier}`)  
+             //console.log(`EffectsSystem: Player is in on tier ${tier}`)  
         }
         
         const stairsDownEntity = this.utilities.findStairOnTier(tier, 'down');
-        console.log(`EffectsSystem: stairsDownEntity:`, stairsDownEntity);
+        //console.log(`EffectsSystem: stairsDownEntity:`, stairsDownEntity);
         const stairsDownPosition = stairsDownEntity.getComponent('Position');
         const playerPosition = player.getComponent('Position');
         const distance = Math.sqrt(Math.pow(stairsDownPosition.x - playerPosition.x, 2) + Math.pow(stairsDownPosition.y - playerPosition.y, 2));
         const proximityDistance = 320; // Define the proximity distance threshold 5 tiles * 32px * 2 scaling per tile
         inProximity = distance <= proximityDistance; // Check if player is within proximity distance
-        console.log(`EffectsSystem: Player is ${distance} units away from stairs down in Tier ${tier}. Proximity check: ${distance} <= ${proximityDistance}`);
+        //console.log(`EffectsSystem: Player is ${distance} units away from stairs down in Tier ${tier}. Proximity check: ${distance} <= ${proximityDistance}`);
 
         if (hasResources && inProximity) {
             // need to unlock stairs

@@ -31,7 +31,7 @@ export class MouseInputSystem {
     }
 
     async init() {
-        console.log('MouseInputSystem initialized');
+        //console.log('MouseInputSystem initialized');
         this.player = this.entityManager.getEntity('player');
     }
 
@@ -58,7 +58,7 @@ export class MouseInputSystem {
 
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (!gameState?.gameStarted || gameState.gameOver || gameState.transitionLock) {
-            console.log(`MouseInputSystem: Input blocked`);
+            //console.log(`MouseInputSystem: Input blocked`);
             return;
         }
 
@@ -114,7 +114,7 @@ export class MouseInputSystem {
             this.hasInteractedWithNPC = false;
             this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
             this.eventBus.emit('StopMovement', { entityId: 'player' });
-            console.log('MouseInputSystem: Reset mouse state due to dialogue being open');
+            //console.log('MouseInputSystem: Reset mouse state due to dialogue being open');
             return;
         }
 
@@ -122,7 +122,7 @@ export class MouseInputSystem {
 
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (gameState.transitionLock) {
-            console.log(`MouseInputSystem: Mouse up ignored during transition`);
+            //console.log(`MouseInputSystem: Mouse up ignored during transition`);
             return;
         }
 
@@ -139,11 +139,11 @@ export class MouseInputSystem {
         if (this.lastMouseX !== null && this.lastMouseY !== null) {
             if (isQuickClick) {
                 this.processInput(this.lastMouseX, this.lastMouseY, true);
-                console.log(`MouseInputSystem: Quick click detected (${duration.toFixed(2)}ms)`);
+                //console.log(`MouseInputSystem: Quick click detected (${duration.toFixed(2)}ms)`);
             } else {
                 this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
                 this.eventBus.emit('StopMovement', { entityId: 'player' });
-                console.log(`MouseInputSystem: Hold release detected (${duration.toFixed(2)}ms), stopped movement`);
+                //console.log(`MouseInputSystem: Hold release detected (${duration.toFixed(2)}ms), stopped movement`);
             }
         }
 
@@ -166,7 +166,7 @@ export class MouseInputSystem {
                 this.hasInteractedWithNPC = false;
                 this.entityManager.removeComponentFromEntity('player', 'MouseTarget');
                 this.eventBus.emit('StopMovement', { entityId: 'player' });
-                console.log('MouseInputSystem: Reset mouse state in update due to dialogue being open');
+                //console.log('MouseInputSystem: Reset mouse state in update due to dialogue being open');
             }
             return;
         }
@@ -176,7 +176,7 @@ export class MouseInputSystem {
         const player = this.player;
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
         if (!player || !gameState?.gameStarted || gameState.gameOver || gameState.transitionLock) {
-            console.log(`MouseInputSystem: Update skipped due to transitionLock or invalid state`);
+            //console.log(`MouseInputSystem: Update skipped due to transitionLock or invalid state`);
             return;
         }
 
@@ -196,7 +196,7 @@ export class MouseInputSystem {
             this.mouseDownTime = null;
             this.hasInteractedWithNPC = false;
             this.eventBus.emit('StopMovement', { entityId: 'player' });
-            console.log('MouseInputSystem: Cleared movement components and mouse state due to level transition');
+            //console.log('MouseInputSystem: Cleared movement components and mouse state due to level transition');
         }
     }
 
@@ -222,7 +222,7 @@ export class MouseInputSystem {
                 const centerY = pos.y + visuals.h / 2;
                 const dx = worldX - centerX;
                 const dy = worldY - centerY;
-                console.log(`MouseInputSystem: Hit NPC ${npc.id}, distance from center: ${Math.sqrt(dx * dx + dy * dy).toFixed(2)} pixels`);
+                //console.log(`MouseInputSystem: Hit NPC ${npc.id}, distance from center: ${Math.sqrt(dx * dx + dy * dy).toFixed(2)} pixels`);
                 return npc;
             }
         }
@@ -255,7 +255,7 @@ export class MouseInputSystem {
                     const intent = player.getComponent('InteractionIntent') || new InteractionIntentComponent();
                     intent.intents.push({ action: 'interactWithNPC', params: { npcId: npc.id } });
                     player.addComponent(intent);
-                    console.log(`MouseInputSystem: Interacting with NPC ${npc.id} at (${npcPos.x}, ${npcPos.y})`);
+                    //console.log(`MouseInputSystem: Interacting with NPC ${npc.id} at (${npcPos.x}, ${npcPos.y})`);
                     this.hasInteractedWithNPC = true;
                 }
                 return;
@@ -265,7 +265,7 @@ export class MouseInputSystem {
                 const targetX = tileX * this.TILE_SIZE;
                 const targetY = tileY * this.TILE_SIZE;
                 this.setMovementTarget(targetX, targetY);
-                console.log(`MouseInputSystem: Moving to NPC ${npc.id} at tile (${tileX}, ${tileY})`);
+                //console.log(`MouseInputSystem: Moving to NPC ${npc.id} at tile (${tileX}, ${tileY})`);
                 return;
             }
             
@@ -295,13 +295,13 @@ export class MouseInputSystem {
                         dy /= magnitude;
                     }
                     visuals.faceLeft = dx < 0;
-                    console.log(`MouseInputSystem: Ranged attack - direction: dx=${dx.toFixed(2)}, dy=${dy.toFixed(2)}, faceLeft: ${visuals.faceLeft}`);
+                    //console.log(`MouseInputSystem: Ranged attack - direction: dx=${dx.toFixed(2)}, dy=${dy.toFixed(2)}, faceLeft: ${visuals.faceLeft}`);
 
                     const direction = { dx, dy, source: monster ? 'mouse_monster' : 'mouse_ranged' };
                     this.eventBus.emit('RangedAttack', direction);
                     attackSpeed.elapsedSinceLastAttack = 0;
                     this.lastAttackTime = now;
-                    console.log(`MouseInputSystem: Ranged attack triggered, source: ${direction.source}, target: (${targetX.toFixed(2)}, ${targetY.toFixed(2)})`);
+                    //console.log(`MouseInputSystem: Ranged attack triggered, source: ${direction.source}, target: (${targetX.toFixed(2)}, ${targetY.toFixed(2)})`);
                 }
             }
             return;
@@ -327,7 +327,7 @@ export class MouseInputSystem {
         const tileY = Math.floor(worldY / this.TILE_SIZE);
 
         if (tileX < 0 || tileX >= this.state.WIDTH || tileY < 0 || tileY >= this.state.HEIGHT) {
-            console.log(`MouseInputSystem: Target tile (${tileX}, ${tileY}) out of bounds`);
+            //console.log(`MouseInputSystem: Target tile (${tileX}, ${tileY}) out of bounds`);
             return;
         }
 
@@ -339,7 +339,7 @@ export class MouseInputSystem {
 
         const map = levelEntity.getComponent('Map').map;
         if (!map[tileY] || map[tileY][tileX] === 1) {
-            console.log(`MouseInputSystem: Tile (${tileX}, ${tileY}) is a wall`);
+            //console.log(`MouseInputSystem: Tile (${tileX}, ${tileY}) is a wall`);
             return;
         }
 
@@ -349,7 +349,7 @@ export class MouseInputSystem {
         const moveDx = targetX - player.getComponent('Position').x;
         const moveDy = targetY - player.getComponent('Position').y;
         this.entityManager.addComponentToEntity('player', new MouseTargetComponent(targetX, targetY));
-        //console.log(`MouseInputSystem: Setting movement target to (${targetX.toFixed(2)}, ${targetY.toFixed(2)}) for tile (${tileX}, ${tileY}), direction: (${moveDx.toFixed(2)}, ${moveDy.toFixed(2)})`);
+        ////console.log(`MouseInputSystem: Setting movement target to (${targetX.toFixed(2)}, ${targetY.toFixed(2)}) for tile (${tileX}, ${tileY}), direction: (${moveDx.toFixed(2)}, ${moveDy.toFixed(2)})`);
     }
 
     getMonsterAtPosition(worldX, worldY) {
@@ -376,14 +376,14 @@ export class MouseInputSystem {
                 const centerY = pos.y + visuals.h / 2;
                 const dx = worldX - centerX;
                 const dy = worldY - centerY;
-                console.log(`MouseInputSystem: Hit monster ${monster.id}, distance from center: ${Math.sqrt(dx * dx + dy * dy).toFixed(2)} pixels`);
+                //console.log(`MouseInputSystem: Hit monster ${monster.id}, distance from center: ${Math.sqrt(dx * dx + dy * dy).toFixed(2)} pixels`);
 
 
                 const playerPos = this.entityManager.getEntity('player').getComponent('Position');
                 const rx = pos.x + visuals.w / 2 - playerPos.x;
                 const ry = pos.y + visuals.h / 2 - playerPos.y;
                 const distance = Math.sqrt(rx * rx + ry * ry);
-                console.log(`MouseInputSystem: Hit monster ${monster.id}, distance from player: ${distance.toFixed(2)} pixels`);
+                //console.log(`MouseInputSystem: Hit monster ${monster.id}, distance from player: ${distance.toFixed(2)} pixels`);
                 const range = Math.floor(distance / this.TILE_SIZE);
                 return { monster, range };
             }
@@ -417,6 +417,6 @@ export class MouseInputSystem {
             window.removeEventListener('resize', () => this.handleResize());
         }
         this.eventBus.off('LevelAdded', this.clearMovement);
-        console.log('MouseInputSystem destroyed');
+        //console.log('MouseInputSystem destroyed');
     }
 }

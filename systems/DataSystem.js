@@ -4,17 +4,15 @@
 import { System } from '../core/Systems.js';
 import { customLevels } from '../data/cfg/customLevels.js';
 
-
 export class DataSystem extends System {
     constructor(entityManager, eventBus) {
         super(entityManager, eventBus);
         this.requiredComponents = [];
         this.customLevels = customLevels; // Load custom levels from external file
 
-        console.log('DataSystem: Custom levels loaded:', this.customLevels);
+        console.log('DataSystem: Custom levels to load :', this.customLevels);
 
-
-        console.log('DataSystem: Preloading custom levels');
+//console.log('DataSystem: Preloading custom levels');
         this.customLevels.forEach((level, tier) => {
             console.log(`DataSystem: Preloading custom level for tier ${tier}:`, level);
             fetch(level.jsonPath)
@@ -34,7 +32,7 @@ export class DataSystem extends System {
         });
 
         // Preload custom levels
-        console.log('DataSystem: Preloading custom levels');
+      //  console.log('DataSystem: Preloading custom levels');
         this.customLevelsPromise = Promise.all(
             Array.from(this.customLevels.entries()).map(([tier, level]) =>
                 fetch(level.jsonPath)
@@ -55,7 +53,7 @@ export class DataSystem extends System {
         );
 
         // Load random monsters from JSON file asynchronously
-        console.log('DataSystem: Starting fetch for randomMonsters.json');
+       // console.log('DataSystem: Starting fetch for randomMonsters.json');
         this.randomMonstersPromise = fetch('data/json/randomMonsters.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received (randomMonsters):', response);
@@ -74,9 +72,8 @@ export class DataSystem extends System {
                 return [];
             });
 
-
         // Load unique monsters from JSON file asynchronously
-        console.log('DataSystem: Starting fetch for uniqueMonsters.json');
+      //  console.log('DataSystem: Starting fetch for uniqueMonsters.json');
         this.uniqueMonstersPromise = fetch('data/json/uniqueMonsters.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received (uniqueMonsters):', response);
@@ -96,7 +93,7 @@ export class DataSystem extends System {
             });
 
         // Load boss monsters from JSON file asynchronously
-        console.log('DataSystem: Starting fetch for bossMonsters.json');
+       // console.log('DataSystem: Starting fetch for bossMonsters.json');
         this.bossMonstersPromise = fetch('data/json/bossMonsters.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received (bossMonsters):', response);
@@ -116,7 +113,7 @@ export class DataSystem extends System {
             });
 
         // Load unique items from JSON file asynchronously
-        console.log('DataSystem: Starting fetch for uniqueItems.json');
+      //  console.log('DataSystem: Starting fetch for uniqueItems.json');
         this.uniqueItemsPromise = fetch('data/json/uniqueItems.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received:', response);
@@ -136,7 +133,7 @@ export class DataSystem extends System {
             });
 
         // Load NPCs from JSON file asynchronously
-        console.log('DataSystem: Starting fetch for npcs.json');
+      //  console.log('DataSystem: Starting fetch for npcs.json');
         this.npcsPromise = fetch('data/json/npcs.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received (npcs):', response);
@@ -155,7 +152,6 @@ export class DataSystem extends System {
                 return [];
             });
 
-
         // Custom surface level
         this.customSurfaceLevel = {
             map: this.generateSurfaceMap(), 
@@ -168,28 +164,8 @@ export class DataSystem extends System {
             fountains: [],
             spawn: []
         };
-/* // Made redundant with new customLevels structure
-        // Load custom level JSON for Tier 0
-        console.log('DataSystem: Starting fetch for tier_0.json');
-        this.customLevelJSONPromise = fetch('data/json/tier/0.json')
-            .then(response => {
-                console.log('DataSystem: Fetch response received (tier_0):', response);
-                if (!response.ok) {
-                    throw new Error(`Failed to load tier_0.json: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('DataSystem: Successfully loaded tier_0.json:', data);
-                return data;
-            })
-            .catch(error => {
-                console.error('DataSystem: Failed to load tier_0.json:', error);
-                return null;
-            });
-*/
-        // Load item stat options from JSON file asynchronously
-        console.log('DataSystem: Starting fetch for itemStatOptions.json');
+
+      //  console.log('DataSystem: Starting fetch for itemStatOptions.json');
         this.itemStatOptionsPromise = fetch('data/json/itemStatOptions.json')
             .then(response => {
                 console.log('DataSystem: Fetch response received (itemStatOptions):', response);
@@ -208,7 +184,7 @@ export class DataSystem extends System {
                 return {};
             });
 
-        console.log('DataSystem: Starting fetch for journeyPaths.json');
+       // console.log('DataSystem: Starting fetch for journeyPaths.json');
         this.journeyPathsPromise = fetch('data/json/journeyPaths.json')
             .then(response => {
                 if (!response.ok) throw new Error(`Failed to load journeyPaths.json: ${response.status}`);
@@ -219,7 +195,7 @@ export class DataSystem extends System {
                 return [];
             });
 
-        console.log('DataSystem: Starting fetch for journeyItems.json');
+       // console.log('DataSystem: Starting fetch for journeyItems.json');
         this.journeyItemsPromise = fetch('data/json/journeyItems.json')
             .then(response => {
                 if (!response.ok) throw new Error(`Failed to load journeyItems.json: ${response.status}`);
@@ -229,12 +205,7 @@ export class DataSystem extends System {
                 console.error('DataSystem: Failed to load journeyItems.json:', error);
                 return [];
             });
-
-        
     }
-
-
-
 
     init() {
         this.eventBus.on('GetCustomLevel', (data) => this.provideCustomLevel(data));
@@ -253,39 +224,36 @@ export class DataSystem extends System {
         this.eventBus.on('GetJourneyPaths', ({ callback }) => this.provideJourneyPaths({ callback }));
         this.eventBus.on('GetJourneyItems', ({ callback }) => this.provideJourneyItems({ callback }));
 
-
         // Add event for custom level JSON
         this.eventBus.on('GetCustomLevelJSON', ({ tier, callback }) => this.provideCustomLevelJSON({ tier, callback }));
-
 
         // Preload data
         this.loadData();
     }
 
-
     async loadData() {
         try {
-            console.log('DataSystem: Starting fetch for randomMonsters.json');
+           // console.log('DataSystem: Starting fetch for randomMonsters.json');
             this.randomMonsters = await fetch('data/json/randomMonsters.json').then(r => r.json());
             console.log('DataSystem: Successfully loaded randomMonsters.json:', this.randomMonsters);
 
-            console.log('DataSystem: Starting fetch for uniqueMonsters.json');
+          //  console.log('DataSystem: Starting fetch for uniqueMonsters.json');
             this.uniqueMonsters = await fetch('data/json/uniqueMonsters.json').then(r => r.json());
             console.log('DataSystem: Successfully loaded uniqueMonsters.json:', this.uniqueMonsters);
 
-            console.log('DataSystem: Starting fetch for bossMonsters.json');
+          //  console.log('DataSystem: Starting fetch for bossMonsters.json');
             this.bossMonsters = await fetch('data/json/bossMonsters.json').then(r => r.json());
             console.log('DataSystem: Successfully loaded bossMonsters.json:', this.bossMonsters);
 
-            console.log('DataSystem: Starting fetch for uniqueItems.json');
+          //  console.log('DataSystem: Starting fetch for uniqueItems.json');
             this.uniqueItems = await fetch('data/json/uniqueItems.json').then(r => r.json());
             console.log('DataSystem: Successfully loaded uniqueItems.json:', this.uniqueItems);
 
-            console.log('DataSystem: Starting fetch for itemStatOptions.json');
+         //   console.log('DataSystem: Starting fetch for itemStatOptions.json');
             this.itemStatOptions = await fetch('data/json/itemStatOptions.json').then(r => r.json());
             console.log('DataSystem: Successfully loaded itemStatOptions.json:', this.itemStatOptions);
 
-            console.log('DataSystem: Starting fetch for npcs.json');
+        //    console.log('DataSystem: Starting fetch for npcs.json');
             this.NPCs = await fetch('data/json/npcs.json').then(r => r.json());
             console.log('DataSystem: Successfully loaded npcs.json:', this.NPCs);
 
@@ -294,12 +262,6 @@ export class DataSystem extends System {
 
             this.journeyItems = await fetch('data/json/journeyItems.json').then(r => r.json()).catch(() => []);
             console.log('DataSystem: Successfully loaded journeyItems.json:', this.journeyItems);
-
-            /* // redundant with new customLevels structure
-            console.log('DataSystem: Starting fetch for data/json/tier/0.json');
-            this.customLevelJSON = await fetch('data/json/tier/0.json').then(r => r.json()).catch(() => null);
-            console.log('DataSystem: Successfully loaded data/json/tier/0.json:', this.customLevelJSON);
-            */
 
         } catch (error) {
             console.error('DataSystem: Failed to load data:', error);
@@ -396,24 +358,6 @@ export class DataSystem extends System {
         }
     }
 
-
-    /*
-    async provideCustomLevelJSON({ tier, callback }) {
-        try {
-            const customLevelJSON = await this.customLevelJSONPromise;
-            console.log('DataSystem: Providing custom level JSON for tier:', tier, customLevelJSON);
-            if (tier === 0 && customLevelJSON) {
-                callback(JSON.parse(JSON.stringify(customLevelJSON)));
-            } else {
-                callback(null);
-            }
-        } catch (error) {
-            console.error('DataSystem: Error providing custom level JSON:', error);
-            callback(null);
-        }
-    }
-    */
-
     provideCustomLevel({ tier, callback }) {
         if (tier === 0) {
             callback(JSON.parse(JSON.stringify(this.customSurfaceLevel)));
@@ -509,5 +453,4 @@ export class DataSystem extends System {
             callback([]);
         }
     }
-
 }

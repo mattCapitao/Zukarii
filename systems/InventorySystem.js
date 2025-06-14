@@ -113,7 +113,7 @@ export class InventorySystem extends System {
                 affixComponent.affixes.push(affixData);
             });
             this.entityManager.addComponentToEntity(entityId, affixComponent);
-            console.log(`InventorySystem: Applied affixes from ${item.name} to ${entityId}:`, affixComponent.affixes);
+            //console.log(`InventorySystem: Applied affixes from ${item.name} to ${entityId}:`, affixComponent.affixes);
         }
 
         this.eventBus.emit('GearChanged', { entityId, action: 'equip', item, slot });
@@ -139,7 +139,7 @@ export class InventorySystem extends System {
         if (affixComponent && item.affixes) {
             affixComponent.affixes = affixComponent.affixes.filter(affix => affix.sourceId !== item.uniqueId);
             this.entityManager.addComponentToEntity(entityId, affixComponent);
-            console.log(`InventorySystem: Removed affixes from ${item.name} for ${entityId}:`, affixComponent.affixes);
+            //console.log(`InventorySystem: Removed affixes from ${item.name} for ${entityId}:`, affixComponent.affixes);
         }
 
         if (toInventory) {
@@ -227,7 +227,7 @@ export class InventorySystem extends System {
 
         const itemToSell = inventory.items[itemIndex];
         if (!itemToSell.isSellable) {
-            console.log(`InventorySystem: Item ${itemToSell.name} (uniqueId: ${uniqueId}) is not sellable`);
+            //console.log(`InventorySystem: Item ${itemToSell.name} (uniqueId: ${uniqueId}) is not sellable`);
             return;
         }
 
@@ -240,7 +240,7 @@ export class InventorySystem extends System {
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
 
-        console.log(`InventorySystem: Sold item ${itemToSell.name} (uniqueId: ${uniqueId}) for ${goldValue} gold`);
+        //console.log(`InventorySystem: Sold item ${itemToSell.name} (uniqueId: ${uniqueId}) for ${goldValue} gold`);
     }
 
     buyItem({ entityId, npcId, uniqueId }) {
@@ -285,7 +285,7 @@ export class InventorySystem extends System {
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
 
-        console.log(`InventorySystem: Bought item ${item.name} (uniqueId: ${uniqueId}) for ${item.purchasePrice} gold`);
+        //console.log(`InventorySystem: Bought item ${item.name} (uniqueId: ${uniqueId}) for ${item.purchasePrice} gold`);
     }
 
     useItem({ entityId, uniqueId }) {

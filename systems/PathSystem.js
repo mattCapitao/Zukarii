@@ -19,7 +19,7 @@ export class PathSystem extends System {
                 this.processPathTransfer(transfer);
             });
             this.pathTransfers.length = 0; // Clear queue after processing
-            console.log('PathSystem: Processed and cleared pathTransfers');
+            //console.log('PathSystem: Processed and cleared pathTransfers');
             this.eventBus.emit('JourneyStateUpdated'); // Notify UISystem of potential changes
         }
     }
@@ -77,7 +77,7 @@ export class PathSystem extends System {
         if (targetPath) {
             // Path successfully added to target; remove from source
             this.utilities.removePath(sourceJourneyPath, journeyPathCompId);
-            console.log(`PathSystem: Transferred path ${journeyPathCompId} from ${sourceEntityId} to ${targetEntityId}`);
+            //console.log(`PathSystem: Transferred path ${journeyPathCompId} from ${sourceEntityId} to ${targetEntityId}`);
         } else {
             // Path not found on target; log error and do not remove from source
             console.error(`PathSystem: Failed to transfer path ${journeyPathCompId} to target entity ${targetEntityId} - path not found after adding`);

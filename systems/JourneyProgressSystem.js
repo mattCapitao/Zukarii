@@ -248,7 +248,7 @@ export class JourneyProgressSystem extends System {
             return false;
         }
         let npcLogicalId;
-        console.log(`JourneyProgressSystem: Matching task ${task.id} with action ${action.type}`, { condition, actionData: action.data });
+       // console.log(`JourneyProgressSystem: Matching task ${task.id} with action ${action.type}`, { condition, actionData: action.data });
         if (action.data.npcId) {
             const npcEntity = this.entityManager.getEntity(action.data.npcId);
             npcLogicalId = npcEntity ? npcEntity.getComponent('NPCData')?.id : action.data.npcId;

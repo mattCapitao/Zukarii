@@ -90,17 +90,17 @@ export class MonsterSpawnSystem extends System {
                 ...(randomMonsters || []),
                 ...(uniqueMonsters || [])
             ];
-            console.log('MonsterSpawnSystem: Random monsters:', randomMonsters);
-            console.log('MonsterSpawnSystem: Unique monsters:', uniqueMonsters);
-            console.log('MonsterSpawnSystem: Boss monsters:', bossMonsters);
-            console.log('MonsterSpawnSystem: Monster spawn pool:', spawnPool);
-            console.log(`MonsterSpawnSystem: Spawning ${monsterCount} monsters for tier ${tier}`);
+            ////console.log('MonsterSpawnSystem: Random monsters:', randomMonsters);
+            ////console.log('MonsterSpawnSystem: Unique monsters:', uniqueMonsters);
+            ////console.log('MonsterSpawnSystem: Boss monsters:', bossMonsters);
+            ////console.log('MonsterSpawnSystem: Monster spawn pool:', spawnPool);
+            ////console.log(`MonsterSpawnSystem: Spawning ${monsterCount} monsters for tier ${tier}`);
 
             this.entityManager.setActiveTier(tier); // NEW: Ensure tier sync
-            console.log(`MonsterSpawnSystem: Active tier set to ${tier}, rooms: ${rooms}`);
+            ////console.log(`MonsterSpawnSystem: Active tier set to ${tier}, rooms: ${rooms}`);
 
             if (hasBossRoom) {
-                console.log('MonsterSpawnSystem: Starting Boss Monster RoomSelection');
+                ////console.log('MonsterSpawnSystem: Starting Boss Monster RoomSelection');
                 const bossRoomId = rooms.find(roomId => {
                     const roomEntity = this.entityManager.getEntity(roomId);
                     if (!roomEntity) {
@@ -114,15 +114,15 @@ export class MonsterSpawnSystem extends System {
                     }
                     return roomComp.roomType === 'BossChamberSpecial';
                 });
-                console.log(`MonsterSpawnSystem: Boss room ID: ${bossRoomId}`);
+                ////console.log(`MonsterSpawnSystem: Boss room ID: ${bossRoomId}`);
                 if (bossRoomId && bossMonsters) {
                     const bossTemplate = bossMonsters[Math.floor(Math.random() * bossMonsters.length)];
                     const boss = this.createMonsterEntity(bossTemplate, tier, [bossRoomId], playerX, playerY);
-                    console.log(`MonsterSpawnSystem: Selected Boss ${bossTemplate.name} to spawn at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`, boss);
+                    ////console.log(`MonsterSpawnSystem: Selected Boss ${bossTemplate.name} to spawn at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`, boss);
 
                     if (boss) {
                         boss.getComponent('MonsterData').isBoss = true;
-                        console.log(`MonsterSpawnSystem: Boss ${boss.getComponent('MonsterData').name} spawned at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`);
+                        ////console.log(`MonsterSpawnSystem: Boss ${boss.getComponent('MonsterData').name} spawned at (${boss.getComponent('Position').x}, ${boss.getComponent('Position').y})`);
                         const entityList = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier).getComponent('EntityList');
                         entityList.monsters.push(boss.id);
                     } else {
@@ -141,7 +141,7 @@ export class MonsterSpawnSystem extends System {
             let eliteMonsterCount = 0;
 
             const primaryFamily = this.primaryFamilies[Math.floor(Math.random() * this.primaryFamilies.length)];
-            console.log(`MonsterSpawnSystem: Primary family selected: ${primaryFamily}`);
+            ////console.log(`MonsterSpawnSystem: Primary family selected: ${primaryFamily}`);
             const tierMonsters = (randomMonsters || []).filter(m => m.minDungeonTier <= tier);
 
             const tierPrimaryFamilyMonsters = tierMonsters.filter(m => m.family === primaryFamily);
@@ -416,11 +416,11 @@ export class MonsterSpawnSystem extends System {
 
         if (affixDefinitions.length > 0) {
             this.entityManager.addComponentToEntity(entity.id, new AffixComponent(affixDefinitions));
-            console.log(`MonsterSpawnSystem: Added affixes to ${template.name}:`, affixDefinitions);
+            ////console.log(`MonsterSpawnSystem: Added affixes to ${template.name}:`, affixDefinitions);
         }
 
-        console.log(`MonsterSpawnSystem: Entity ${entity.id} classes: ${template.classes}, components:`, Array.from(entity.components.keys()));
-        console.log(`MonsterSpawnSystem.js: Spawned monster ${entity.id} at pixel (${pixelX}, ${pixelY}) for tile (${tileX}, ${tileY}) on tier ${tier}`, entity);
+        ////console.log(`MonsterSpawnSystem: Entity ${entity.id} classes: ${template.classes}, components:`, Array.from(entity.components.keys()));
+        ////console.log(`MonsterSpawnSystem.js: Spawned monster ${entity.id} at pixel (${pixelX}, ${pixelY}) for tile (${tileX}, ${tileY}) on tier ${tier}`, entity);
         return entity;
     }
 
