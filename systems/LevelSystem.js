@@ -111,7 +111,9 @@ export class LevelSystem extends System {
         //console.log('LevelSystem.js: init - Completed');
     }
 
-    
+    isCustomLevel(tier) {
+        return this.customLevels && this.customLevels.has(tier);
+    }
 
     addLevel({ tier, customLevel = null, transitionDirection = null }) {
 
@@ -277,6 +279,7 @@ export class LevelSystem extends System {
     }
 
     generateLevel(hasBossRoom, tier, levelEntityId) {
+        if (this.isCustomLevel(tier)) { return; }
         //console.log(`LevelSystem.js: generateLevel - Starting for tier ${tier}, hasBossRoom: ${hasBossRoom}`);
         const levelEntity = this.entityManager.getEntity(levelEntityId);
         const map = Array.from({ length: this.state.HEIGHT }, () => Array(this.state.WIDTH).fill('#'));
@@ -339,6 +342,7 @@ export class LevelSystem extends System {
 
 
     placeRooms(numRooms, hasBossRoom, levelEntityId, tier) {
+        if (this.isCustomLevel(tier)) { return; }
         //console.log(`LevelSystem.js: placeRooms - Improved - Starting for tier ${tier}, numRooms: ${numRooms}, hasBossRoom: ${hasBossRoom}`);
         const roomOrigins = new Set();
         const roomEntityIds = [];
@@ -495,6 +499,7 @@ export class LevelSystem extends System {
     }
 
     connectRooms(roomEntityIds, map, floors, walls, floorPositions, tier) {
+        if (this.isCustomLevel(tier)) { return; }
         //console.log(`LevelSystem.js: connectRooms (MST) - Starting for tier ${tier}, roomEntityIds: ${roomEntityIds.length}`);
         if (roomEntityIds.length === 0) return;
         const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
@@ -1279,6 +1284,7 @@ export class LevelSystem extends System {
         const mapComp = levelEntity.getComponent('Map');
         const entityList = levelEntity.getComponent('EntityList');
         const tier = levelEntity.getComponent('Tier').value;
+        if (this.isCustomLevel(tier)) { return; }
         const rooms = Array.isArray(entityList.rooms) ? entityList.rooms : [];
         if (rooms.length === 0) return;
 
@@ -1360,10 +1366,11 @@ export class LevelSystem extends System {
 
 
     ensureRoomConnectionsPassTwo(levelEntity) {
+        if (this.isCustomLevel(tier)) { return; }
         const mapComp = levelEntity.getComponent('Map');
         const entityList = levelEntity.getComponent('EntityList');
         const tier = levelEntity.getComponent('Tier').value;
-
+        if (this.isCustomLevel(tier)) { return; }
         const rooms = Array.isArray(entityList.rooms) ? entityList.rooms : [];
         //console.log(`LevelSystem: Ensuring room connections for tier ${tier}, rooms: ${JSON.stringify(rooms)}`);
 
@@ -1406,7 +1413,9 @@ export class LevelSystem extends System {
             console.warn(`LevelSystem.js: No level entity found for tier ${tier}`);
             return;
         }
-        this.ensureRoomConnections(entity);
+        if (!this.isCustomLevel(tier)) {
+            this.ensureRoomConnections(entity);
+        }
         //console.log(`LevelSystem.js: Checking level ${entity.id}, components: ${Array.from(entity.components.keys())}`);
 
         const mapComp = entity.getComponent('Map');
