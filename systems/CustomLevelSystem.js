@@ -61,240 +61,16 @@ export class CustomLevelSystem extends System {
             });
         });
     }
-
-
-    /*
-    parseLevelJSON(jsonData, tier, levelEntity) {
-        console.log(`CustomLevelSystem: Parsing JSON for tier ${tier}`);
-        const width = jsonData.width;
-        const height = jsonData.height;
-
-        if (width !== this.state.WIDTH || height !== this.state.HEIGHT) {
-            throw new Error(`Map dimensions (${width}x${height}) do not match expected (${this.state.WIDTH}x${this.state.HEIGHT})`);
-        }
-
-        const map = Array(height).fill().map(() => Array(width).fill('#'));
-        const walls = [];
-        const floors = [];
-        const stairs = [];
-        const npcs = [];
-        const shopCounters = [];
-        const portals = [];
-        const fountains = [];
-        const treasures = [];
-        let stairsUp = null;
-        let stairsDown = null;
-
-        // Create the entityList object before generating entities
-        const entityList = {
-            walls,
-            floors,
-            stairs,
-            portals,
-            fountains,
-            loot: treasures, // Use 'loot' as expected by generateLootEntity
-            npcs,
-            shopCounters,
-            rooms: []
-        };
-
-        // Create room entity first
-        const roomEntityId = `room_${tier}_surface`;
-        if (this.entityManager.getEntity(roomEntityId)) {
-            this.entityManager.removeEntity(roomEntityId);
-        }
-        const roomEntity = this.entityManager.createEntity(roomEntityId);
-        this.entityManager.addComponentToEntity(roomEntityId, new RoomComponent({
-            left: 21,
-            top: 21,
-            width: 12,
-            height: 7,
-            type: 'SurfaceRoom',
-            centerX: 21 + Math.floor(12 / 2),
-            centerY: 21 + Math.floor(7 / 2),
-            connections: []
-        }));
-        entityList.rooms.push(roomEntity.id);
-
-        // Define tile-to-entity mapping for StaticEntities layer
-        const tileEntityMap = {
-            3: { type: 'Stair', direction: 'up' }, // StairsUp
-            4: { type: 'Stair', direction: 'down' }, // StairsDown
-            5: { type: 'Portal' }, // Portal
-            6: { type: 'Fountain' }, // Fountain
-            7: { type: 'TreasureChest' }, // TreasureChest
-            8: { type: 'ShopCounter' }, // ShopCounter
-            9: { type: 'NPC', id: 'sehnrhyx_syliri' }, // SehnrhyxSyliri
-            10: { type: 'NPC', id: 'shop_keeper' } // ShopKeeper
-        };
-
-        // Parse StaticEntities tile layer
-        const entitiesLayer = jsonData.layers.find(layer => layer.name === 'StaticEntities' && layer.type === 'tilelayer');
-        if (!entitiesLayer) {
-            console.warn(`CustomLevelSystem: No StaticEntities tile layer found in tier ${tier} JSON, using fallback entities`);
-            stairsUp = { x: 23, y: 19 };
-            stairsDown = { x: 23, y: 29 };
-            this.entityGenerationSystem.generateStairEntity(
-                { map, walls, floors, stairs, npcs, shopCounters, portals, roomEntityIds: [roomEntityId] },
-                entityList,
-                tier,
-                roomEntityId,
-                'up',
-                23,
-                19,
-                true
-            );
-            this.entityGenerationSystem.generateStairEntity(
-                { map, walls, floors, stairs, npcs, shopCounters, portals, roomEntityIds: [roomEntityId] },
-                entityList,
-                tier,
-                roomEntityId,
-                'down',
-                23,
-                29,
-                true
-            );
-            portals.push(this.entityGenerationSystem.generatePortal(entityList, tier, { map }, 28, 18));
-            shopCounters.push(this.entityGenerationSystem.generateShopCounter(entityList, tier, { map }, 27, 28));
-            npcs.push({ id: 'sehnrhyx_syliri', x: 28, y: 23 }, { id: 'shop_keeper', x: 28, y: 28 });
-        } else {
-            const entitiesData = entitiesLayer.data;
-
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    const tileId = entitiesData[y * width + x];
-                    if (tileId === 0) continue; // Empty tile
-
-                    const entityInfo = tileEntityMap[tileId];
-                    if (!entityInfo) {
-                        console.warn(`CustomLevelSystem: Unknown tile ID ${tileId} at (${x}, ${y}) in StaticEntities layer`);
-                        continue;
-                    }
-
-                    const pixelX = x * this.TILE_SIZE;
-                    const pixelY = y * this.TILE_SIZE;
-
-                    // Debug log
-                    console.log(`Processing entity ${entityInfo.type} at tile (${x}, ${y})`);
-
-                    switch (entityInfo.type) {
-                        case 'Stair':
-                            const direction = entityInfo.direction || 'up';
-                            const stairId = this.entityGenerationSystem.generateStairEntity(
-                                { map, walls, floors, stairs, npcs, shopCounters, portals, roomEntityIds: [roomEntityId] },
-                                entityList,
-                                tier,
-                                roomEntityId,
-                                direction,
-                                x,
-                                y,
-                                true
-                            );
-                            stairs.push(stairId);
-                            if (direction === 'up') {
-                                stairsUp = { x, y };
-                            } else if (direction === 'down') {
-                                stairsDown = { x, y };
-                            }
-                            break;
-                        case 'Portal':
-                            const portalId = this.entityGenerationSystem.generatePortal(
-                                entityList,
-                                tier,
-                                { map },
-                                x,
-                                y
-                            );
-                            portals.push(portalId);
-                            break;
-                        case 'Fountain':
-                            const fountainId = this.entityGenerationSystem.generateFountainEntity(
-                                entityList,
-                                tier,
-                                { map },
-                                x,
-                                y
-                            );
-                            fountains.push(fountainId);
-                            break;
-
-                        case 'TreasureChest':
-                            const lootEntityId = this.entityGenerationSystem.generateLootEntity(
-                                entityList,
-                                tier,
-                                { map },
-                                x,
-                                y
-                            );
-                            treasures.push(lootEntityId);
-                            break;
-
-                        case 'ShopCounter':
-                            const shopCounterId = this.entityGenerationSystem.generateShopCounter(
-                                entityList,
-                                tier,
-                                { map },
-                                x,
-                                y
-                            );
-                            shopCounters.push(shopCounterId);
-                            break;
-
-                        case 'NPC':
-                            const npcId = entityInfo.id;
-                            if (npcId) {
-                                npcs.push({ id: npcId, x, y });
-                            } else {
-                                console.warn(`NPC at (${x}, ${y}) missing 'id'`);
-                            }
-                            break;
-
-                        default:
-                            console.warn(`Unknown entity type '${entityInfo.type}' at (${x}, ${y})`);
-                            break;
-                    }
-                }
-            }
-        }
-
-        // Create level data
-        const levelData = {
-            map,
-            walls,
-            floors,
-            stairs,
-            npcs,
-            shopCounters,
-            portals,
-            treasures,
-            stairsDown,
-            stairsUp,
-            roomEntityIds: entityList.rooms,
-            isCustomLevel: true
-        };
-
-        // Add components to level entity
-        const mapComp = new MapComponent(levelData);
-        this.entityManager.addComponentToEntity(levelEntity.id, mapComp);
-
-        this.entityManager.addComponentToEntity(levelEntity.id, new EntityListComponent(entityList));
-        this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent());
-        this.entityManager.addComponentToEntity(levelEntity.id, new SpatialBucketsComponent());
-
-        // Spawn NPCs if defined in StaticEntities
-        if (npcs.length > 0) {
-            this.eventBus.emit('SpawnNPCs', {
-                tier: 0,
-                npcs
-            });
-        }
-
-        return levelData;
+    spawnRandomMonsters() {
+        const hasElites = tier > 1;
+        this.eventBus.emit('SpawnMonsters', {
+            tier,
+            rooms: levelData.roomEntityIds,
+            hasBossRoom,
+            spawnPool: { randomMonsters: true, uniqueMonsters: hasElites }
+        });
     }
 
-
-
-  */
     parseLevelJSON(jsonData, tier, levelEntity) {
         console.log(`CustomLevelSystem: Parsing JSON for tier ${tier}`);
         const width = jsonData.width;
@@ -605,7 +381,15 @@ export class CustomLevelSystem extends System {
         return levelData;
     }
     
-    
+    spawnRandomMonsters() {
+        const hasElites = tier > 1;
+        this.eventBus.emit('SpawnMonsters', {
+            tier,
+            rooms: levelData.roomEntityIds,
+            hasBossRoom,
+            spawnPool: { randomMonsters: true, uniqueMonsters: hasElites }
+        });
+    }
 }
 
 

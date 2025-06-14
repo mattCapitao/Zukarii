@@ -266,7 +266,7 @@ export class LevelSystem extends System {
         } else {
             this.checkLevelAfterTransitions({ tier, levelEntity });
             const mapComponent = levelEntity.getComponent('Map');
-            if (mapComponent && ((tier === 0 && mapComponent.stairsDown) || (tier !== 0 && mapComponent.stairsUp && mapComponent.stairsDown))) {
+            if (mapComponent && mapComponent.stairsUp && mapComponent.stairsDown) {
                 this.eventBus.emit('LevelAdded', { tier, entityId: levelEntity.id });
             } else {
                 console.error(`LevelSystem: Invalid MapComponent for existing tier ${tier}`);
@@ -1271,7 +1271,7 @@ export class LevelSystem extends System {
 
         pos.x = this.TILE_SIZE;
         pos.y = this.TILE_SIZE;
-        console.warn(`LevelSystem: No adjacent walkable tile found near (${stair.x}, ${stair.y}), using fallback position (${pos.x}, ${pos.y})`);
+        console.warn(`LevelSystem: adjustPlayerPosition() -  No adjacent walkable tile found near (${stair.x}, ${stair.y}), using fallback position (${pos.x}, ${pos.y})`);
         exploration.discoveredFloors.add(`${Math.floor(pos.x / this.TILE_SIZE)},${Math.floor(pos.y / this.TILE_SIZE)}`);
     }
 

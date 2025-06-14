@@ -174,7 +174,7 @@ export class LightSourceDefinitions {
                 visibilityEnabled: true,
                 visibilityRadius: 7,
                 visibilityOpacitySteps: [0.85, 0.35, 0],
-                visibilityTintColor: 'rgba(229,174,107,0.8)', // Subtle yellow tint
+                visibilityTintColor: 'rgba(229,174,107,0.8 )', // Subtle yellow tint
                 glowEnabled: true,
                 glowType: 'environmental', // Environmental glow for torch
                 glowColor: 'rgba(255,220,120,0.30)', // Used for environmental gradient
