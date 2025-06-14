@@ -22,8 +22,8 @@ import {
 
 export class EntityGenerationSystem extends System {
 
-    constructor(entityManager, eventBus, state) {
-        super(entityManager, eventBus);
+    constructor(entityManager, eventBus, state, utilities) {
+        super(entityManager, eventBus, utilities);
         this.state = state;
         this.TILE_SIZE = this.state.TILE_SIZE || 32;
         
@@ -195,6 +195,36 @@ export class EntityGenerationSystem extends System {
         return fountains;
     }
 
+    generateFountainEntity(entityList, tier, mapComp, x, y, active = true) {
+        const fountainEntity = this.entityManager.createEntity(`fountain_${tier}_fountain_${entityList.fountains.length}`);
+        this.entityManager.addComponentToEntity(fountainEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
+        this.entityManager.addComponentToEntity(fountainEntity.id, new FountainComponent(false, false, active));
+        this.entityManager.addComponentToEntity(fountainEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
+        this.entityManager.addComponentToEntity(fountainEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE, this.TILE_SIZE / 2, this.TILE_SIZE));
+
+        const visuals = fountainEntity.getComponent('Visuals');
+        visuals.avatar = 'img/anim/fountain/128x64_fountain_stone_shadow_anim.png';
+
+        entityList.fountains.push(fountainEntity.id);
+        mapComp.map[y][x] = '≅';
+
+        if (active) {
+            this.generateTriggerArea(
+                entityList,
+                x, y,
+                512, 512,
+                'PlayTrackControl',
+                { track: 'fountain_loop', play: true, volume: 0.2, fadeIn: 0.75 },
+                'PlayTrackControl',
+                { track: 'fountain_loop', play: false, fadeOut: 0.75 },
+                'Presence'
+            );
+        }
+
+        console.log(`EntityGenerationSystem: Created fountain at (${x}, ${y}) on tier ${tier}`, fountainEntity);
+        return fountainEntity;
+    }
+
     generateLootEntities(tier, map, roomEntityIds) {
         console.log(`LevelSystem.js: generateLootEntities - Starting for tier ${tier}`);
         const lootPerLevel = 5;
@@ -254,6 +284,61 @@ export class EntityGenerationSystem extends System {
         return lootEntityIds;
     }
 
+    generateLootEntity(entityList, tier, mapComp, x, y, lootData = {}) {
+
+        const collectEntityId = (data) => {
+            if (data.tier === tier) {
+                entityList.treasures.push(data.entityId);
+                console.log(`LevelSystem: logged entity ID ${data.entityId} for tier ${tier}`);
+            }
+        };
+        this.eventBus.on('LootEntityCreated', collectEntityId);
+       
+        const pixelX = x * this.TILE_SIZE;
+        const pixelY = y * this.TILE_SIZE;
+
+        const uniqueId = this.utilities.generateUniqueId();
+        const lootSource = this.entityManager.createEntity(`loot_source_${tier}_${uniqueId}`);
+        // Create a unique ID for the loot entity
+        const roomId = lootData.roomId || `customMapPlacement${lootSource.id}`; // Optional room association
+
+        // Default loot source data
+        const defaultLootSourceData = {
+            sourceType: "container",
+            name: "Treasure Chest",
+            tier: tier,
+            position: { x: pixelX, y: pixelY },
+            sourceDetails: { id: roomId },
+            chanceModifiers: {
+                torches: 1,
+                healPotions: 1,
+                gold: 1.5,
+                item: 0.25,
+                uniqueItem: 0.8
+            },
+            maxItems: 1,
+            items: []
+        };
+
+        // Merge default data with lootData (if provided)
+        const mergedLootSourceData = {
+            ...defaultLootSourceData,
+            ...lootData,
+            chanceModifiers: {
+                ...defaultLootSourceData.chanceModifiers,
+                ...(lootData.chanceModifiers || {})
+            }
+        };
+
+       this.entityManager.addComponentToEntity(lootSource.id, new LootSourceData(mergedLootSourceData));
+
+        // Emit an event for loot creation
+        this.eventBus.emit('DropLoot', { lootSource });
+
+        console.log(`EntityGenerationSystem: Created loot entity at (${x}, ${y}) on tier ${tier}`, lootSource);
+        this.eventBus.off('LootEntityCreated', collectEntityId);
+        return entityList.treasures;
+    }
 
 
 

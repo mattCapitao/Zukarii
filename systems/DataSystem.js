@@ -10,7 +10,10 @@ export class DataSystem extends System {
         super(entityManager, eventBus);
         this.requiredComponents = [];
         this.customLevels = customLevels; // Load custom levels from external file
+
         console.log('DataSystem: Custom levels loaded:', this.customLevels);
+
+
         console.log('DataSystem: Preloading custom levels');
         this.customLevels.forEach((level, tier) => {
             console.log(`DataSystem: Preloading custom level for tier ${tier}:`, level);
@@ -50,6 +53,27 @@ export class DataSystem extends System {
                     })
             )
         );
+
+        // Load random monsters from JSON file asynchronously
+        console.log('DataSystem: Starting fetch for randomMonsters.json');
+        this.randomMonstersPromise = fetch('data/json/randomMonsters.json')
+            .then(response => {
+                console.log('DataSystem: Fetch response received (randomMonsters):', response);
+                if (!response.ok) {
+                    throw new Error(`Failed to load randomMonsters.json: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('DataSystem: Successfully loaded randomMonsters.json:', data);
+                return data;
+            })
+            .catch(error => {
+                console.error('DataSystem: Failed to load randomMonsters.json:', error);
+                console.log('DataSystem: Returning empty array as fallback for randomMonsters');
+                return [];
+            });
+
 
         // Load unique monsters from JSON file asynchronously
         console.log('DataSystem: Starting fetch for uniqueMonsters.json');

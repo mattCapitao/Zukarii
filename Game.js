@@ -277,7 +277,7 @@ export class Game {
         this.systems.player = new PlayerSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.monsterSpawn = new MonsterSpawnSystem(this.entityManager, this.state.eventBus, this.utilities, this.systems.data);
         this.systems.npcSpawn = new NPCSpawnSystem(this.entityManager, this.state.eventBus, this.systems.data, this.utilities);
-        this.systems.entityGeneration = new EntityGenerationSystem(this.entityManager, this.state.eventBus, this.state);
+        this.systems.entityGeneration = new EntityGenerationSystem(this.entityManager, this.state.eventBus, this.state, this.utilities);
         this.systems.inventory = new InventorySystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.path = new PathSystem(this.entityManager, this.state.eventBus, this.utilities);
         this.systems.interaction = new InteractionSystem(this.entityManager, this.state.eventBus, this.utilities);
