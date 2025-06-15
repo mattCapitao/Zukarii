@@ -8,7 +8,7 @@ export class LevelTransitionSystem extends System {
         this.requiredComponents = ['Map', 'Tier', 'Exploration'];
         this.pendingTransition = null;
     }
-
+     
     init() {
         this.levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
         this.eventBus.on('LevelAdded', (data) => this.handleLevelAdded(data));
@@ -328,15 +328,18 @@ export class LevelTransitionSystem extends System {
     } 
 
     handleLevelAdded({ tier, entityId }) {
-   
+        this.entityManager.setActiveTier(tier);
         this.eventBus.emit('PlayTrackControl', { track: 'fountain_loop', play: false, fadeOut: 1.0 });
         console.log(`LevelAdded event for tier ${tier}, entityId: ${entityId}`);
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const renderControl = this.entityManager.getEntity('renderState').getComponent('RenderControl');
         const player = this.entityManager.getEntity('player');
         const levelEntity = this.entityManager.getEntity(entityId);
-
-
+        console.log('ActiveTier: ', this.entityManager.getActiveTier());
+        const allLevelEntities = this.entityManager.getEntitiesWith(['Map', 'Tier']);
+        console.log('LevelTransitionSystem: All level entities:', allLevelEntities);
+        //console.log('LevelTransitionSystem: Level entity:', levelEntity.id, levelEntity);
+        
         if (!levelEntity) {
             console.error(`Level entity for tier ${tier} not found after LevelAdded event`);
             return;

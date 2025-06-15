@@ -34,7 +34,7 @@ export class NPCControllerSystem extends System {
             }
 
             // Set active tier to the provided tier
-            this.entityManager.setActiveTier(tier);
+            //this.entityManager.setActiveTier(tier);
             //console.log('NPCControllerSystem: Active tier set to:', tier, 'tiers:', Array.from(this.entityManager.entitiesByTier.keys()));
 
             // Query for ShopComponent in the specified tier

@@ -126,21 +126,32 @@ export class LevelSystem extends System {
             return;
         }
         this.isAddingLevel = true;
+        if (!transitionDirection) {
+            transitionDirection = tier > this.entityManager.getActiveTier() ? 'down' : 'up';
+        }
         console.log(`LevelSystem.js: addLevel - Starting for tier ${tier}, transitionDirection: ${transitionDirection}`);
 
+        console.log(`LevelSystem: Active tier before setting: ${this.entityManager.getActiveTier()}`);
         this.entityManager.setActiveTier(tier);
-        console.log(`LevelSystem.js: addLevel - Set active tier to ${tier}, active tier: ${this.entityManager.getActiveTier()}`);
+        console.log(`LevelSystem: Active tier after setting: ${this.entityManager.getActiveTier()}`);
+       
         let levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === tier);
 
         if (!levelEntity) {
-            levelEntity = this.entityManager.createEntity(`level_${tier}`);
-            console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier ${tier}`);
+            const newLevelEntity = this.entityManager.createEntity(`level_${tier}`);
+            levelEntity = this.entityManager.getEntity(newLevelEntity.id);
+    
+            console.log(`LevelSystem.js: Created level entity with ID: ${levelEntity.id} for tier ${tier}`,levelEntity);
             this.entityManager.addComponentToEntity(levelEntity.id, { type: 'Tier', value: tier });
 
+            console.log(`LevelSystem: Components attached to level entity ${levelEntity.id}:`, Array.from(levelEntity.components.keys()));
+
             let levelData;
+
             if (this.customLevels.has(tier)) {
-                console.log(`LevelSystem.js: Loading custom level for tier ${tier}`);
+                console.log(`LevelSystem.js: Loading custom level for tier ${tier} , Entity: `, levelEntity);
                 this.customLevelSystem.loadCustomLevel(tier, levelEntity).then(levelData => {
+                    console.log(`LevelSystem.js:inside of loadCustomLevel.then() for tier ${tier} Entity`, levelEntity);
                     levelData.isCustomLevel = true;
                     console.log(`LevelSystem.js: addLevel - Adjusting player position for tier ${tier}, transitionDirection: ${transitionDirection}`);
                     this.adjustPlayerPosition(levelEntity, transitionDirection === 'down' ? levelData.stairsUp : (levelData.stairsDown || levelData.stairsUp));
@@ -149,15 +160,15 @@ export class LevelSystem extends System {
                     gameState.needsInitialRender = true;
                     gameState.needsRender = true;
 
-                    const ercPasses = 3;
-                    for (let i = 0; i < ercPasses; i++) {
-                        this.ensureRoomConnections(levelEntity);
-                    }
                     this.checkLevelAfterTransitions({ tier, levelEntity });
 
                     const mapComponent = levelEntity.getComponent('Map');
                     if (mapComponent && mapComponent.stairsDown) {
-                        this.eventBus.emit('LevelAdded', { tier, entityId: levelEntity.id });
+                        console.log(`LevelSystem.js: addLevel - Emitting LevelAdded for tier ${tier}, entityId: ${levelEntity.id}`, levelEntity);
+                        const entityCheck = this.entityManager.getEntity(levelEntity.id);
+                        console.log(`LevelSystem.js: adding Level - Entity check for ${levelEntity.id}:`, entityCheck);
+                        const entityId = levelEntity.id;
+                        this.eventBus.emit('LevelAdded', { tier, entityId });
                     } else {
                         console.error(`LevelSystem.js: Invalid MapComponent for tier ${tier}`);
                     }
@@ -194,7 +205,7 @@ export class LevelSystem extends System {
                 console.log(`LevelSystem.js: addLevel - Adjusting player position for tier ${tier}, transitionDirection: ${transitionDirection}`);
                 this.adjustPlayerPosition(levelEntity, transitionDirection === 'down' ? levelData.stairsUp : (levelData.stairsDown || levelData.stairsUp));
             } else {
-                // ... (procedural level generation remains unchanged)
+
                 const journeyBossLevels = [3, 6];
                 let hasBossRoom = false;
 
@@ -211,17 +222,8 @@ export class LevelSystem extends System {
 
                 this.sfxQueue.push({ sfx: 'bossLevel0', volume: 0.5 });
 
-                const entityList = new EntityListComponent({
-                    walls: [],
-                    floors: [],
-                    stairs: [],
-                    portals: [],
-                    monsters: [],
-                    treasures: [],
-                    fountains: [],
-                    rooms: [],
-                    npcs: []
-                });
+                const entityList = new EntityListComponent();
+
                 this.entityManager.addComponentToEntity(levelEntity.id, entityList);
                 this.entityManager.addComponentToEntity(levelEntity.id, new ExplorationComponent());
                 this.entityManager.addComponentToEntity(levelEntity.id, new SpatialBucketsComponent());
@@ -1528,9 +1530,10 @@ export class LevelSystem extends System {
         let shopTier = tier;
         if (tier === 0) {
             const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
-            shopTier = gameState.highestTier || 0; 
+            console.warn(`LevelSystem: Higherst tier set to ${gameState.highestTier}`, gameState);
+            shopTier = gameState.highestTier || tier; 
         }
-        this.eventBus.emit('GenerateShopInventories', { shopTier });
+        this.eventBus.emit('GenerateShopInventories', { tier: shopTier });
         //console.log(`LevelSystem.js: checkLevelAfterTransitions - Completed for tier ${tier}`);
 
         this.utilities.pushPlayerActions('reachTier', { tier });

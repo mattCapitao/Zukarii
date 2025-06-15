@@ -24,7 +24,7 @@ export class SpatialBucketsComponent {
 }
 
 export class EntityListComponent {
-    constructor({ walls = [], floors = [], stairs = [], portals = [], monsters = [], treasures = [], fountains = [], shopCounters=[], triggerAreas=[], rooms = [] } = {}) {
+    constructor({ walls = [], floors = [], stairs = [], portals = [], monsters = [], treasures = [], fountains = [], shopCounters = [], triggerAreas = [], rooms = [] } = {}) {
         this.type = 'EntityList';
         this.walls = walls;
         this.floors = floors;
@@ -35,7 +35,7 @@ export class EntityListComponent {
         this.fountains = fountains;
         this.shopCounters = shopCounters
         this.triggerAreas = triggerAreas
-        this.rooms = Array.isArray(rooms) ? rooms : []; // Ensure rooms is always an array
+        this.rooms = rooms;
     }
 }
 

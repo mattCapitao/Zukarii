@@ -15,6 +15,10 @@ export class EntityManager {
 
     // Set the active tier for entity operations
     setActiveTier(tier) {
+        if (tier === undefined || tier === null) {
+            console.error(`EntityManager: Attempted to set active tier to an invalid value: ${tier}`);
+            console.trace();
+        }
         this.activeTier = tier;
         if (!this.entitiesByTier.has(tier)) {
             this.entitiesByTier.set(tier, new Map());
@@ -68,7 +72,7 @@ export class EntityManager {
         const tierMap = this.entitiesByTier.get(this.activeTier);
         if (tierMap && tierMap.has(id)) {
             tierMap.delete(id);
-           // console.log(`EntityManager: Removed entity ${id} from tier ${this.activeTier}`);
+            console.log(`EntityManager: Removed entity ${id} from tier ${this.activeTier}`);
         } else {
             console.warn(`EntityManager: Entity ${id} not found in global or tier ${this.activeTier}`);
         }
