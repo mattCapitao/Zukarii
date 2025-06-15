@@ -172,7 +172,7 @@ export class LightSourceDefinitions {
             },
             torch: {
                 visibilityEnabled: true,
-                visibilityRadius: 7,
+                visibilityRadius: 6,
                 visibilityOpacitySteps: [0.85, 0.35, 0],
                 visibilityTintColor: 'rgba(229,174,107,0.8 )', // Subtle yellow tint
                 glowEnabled: true,
@@ -186,7 +186,7 @@ export class LightSourceDefinitions {
             },
             lamp: {
                 visibilityEnabled: true,
-                visibilityRadius: 8,
+                visibilityRadius: 7,
                 visibilityOpacitySteps: [0.75, 0.15, 0],
                 visibilityTintColor: 'rgba(255,255,255,0.2)', // Subtle white tint
                 glowEnabled: false, // No glow/outline for lamp

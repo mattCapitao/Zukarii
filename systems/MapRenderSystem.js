@@ -528,10 +528,17 @@ export class MapRenderSystem extends System {
         const lightingCtx = this.lightingCanvas.getContext('2d');
         lightingCtx.clearRect(0, 0, this.lightingCanvas.width, this.lightingCanvas.height);
 
-        // 2. Fill lighting canvas with opaque black
+        //2. Fill lighting canvas with darkness
+        // Calculate darkness opacity based on visibility radius
+        const visibilityRadius = (lightingState && typeof lightingState.visibleRadius === 'number')
+            ? lightingState.visibleRadius
+            : 3; // Default value if not defined
+        const darknessOpacity = Math.min(1, Math.max(0, 0.87 + (visibilityRadius * 0.01))); // Clamp between 0 and 1
+
+        // Fill lighting canvas with dynamic opacity
         lightingCtx.globalAlpha = 1;
         lightingCtx.globalCompositeOperation = 'source-over';
-        lightingCtx.fillStyle = 'rgba(0,0,0,.95)';
+        lightingCtx.fillStyle = `rgba(0,0,0,${darknessOpacity})`;
         lightingCtx.fillRect(0, 0, this.lightingCanvas.width, this.lightingCanvas.height);
 
         // 3. Prepare gradient for clearing

@@ -1647,7 +1647,7 @@ tooltip-description {
     transform: translate(-50%, -50%);
     width: 300px;
     height: 150px;
-    background: rgba(20, 30, 20, 0.7);
+    background: rgba(25, 30, 20, 0.99);
     border: 2px solid #0f0;
     border-radius: 10px;
     color: #0f0;
