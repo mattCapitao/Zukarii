@@ -27,6 +27,9 @@ export class InventorySystem extends System {
         this.eventBus.on('BuyItem', (data) => {
             this.buyItem(data);
         });
+        this.eventBus.on('RemoveItem', (data) => {
+            this.removeItem(data);
+        });
         this.eventBus.on('UseItem', ({ entityId, uniqueId }) => this.useItem({ entityId, uniqueId }));
         this.sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || []
         
@@ -305,8 +308,10 @@ export class InventorySystem extends System {
             console.warn('InventorySystem: Item is not usable:', item);
             return;
         }
-
+        console.log('InventorySystem: Using item:', item, 'with uniqueId: ', uniqueId);
         this.eventBus.emit('ItemUsed', { entityId, item, effect: item.useEffect, params: item.params || {} });
+
+        /*moving to effect system until ItemUseSystem is implemented
         let itemId = item.id || uniqueId;
 
         if (item.journeyItemId != null) {
@@ -320,9 +325,11 @@ export class InventorySystem extends System {
         if (item.type === 'consumable') {
             this.removeItem({ entityId, uniqueId });
         }
+        */
     }
 
     removeItem({ entityId, uniqueId }) {
+        console.log('InventorySystem: removeItem called with entityId:', entityId, 'and uniqueId:', uniqueId);
         const entity = this.entityManager.getEntity(entityId);
         if (!entity) return;
         const inventory = entity.getComponent('Inventory');

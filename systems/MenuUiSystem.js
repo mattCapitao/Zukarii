@@ -956,7 +956,7 @@ export class MenuUiSystem extends System {
         ];
 
         let statHtml = `
-        <div><span style="font-weight:bold;">Unspent Points:</span></div>
+        <div><p style="font-weight:bold;">Unspent Points:</p></div>
         <div>Stat Points: <span>${stats.unallocated}</span></div>
         <div>Skill Points: <span>0</span></div>
         <div><hr></div>`;
@@ -1123,7 +1123,7 @@ export class MenuUiSystem extends System {
         this.eventBus.emit('GameOverRendered');
     }
 
-    showItemTooltip(itemData, event) {
+    showItemTooltip(itemData, event)     {
         if (!itemData || !itemData.uniqueId) {
             return;
         }
@@ -1133,160 +1133,185 @@ export class MenuUiSystem extends System {
             this.tooltipCache = new Map();
         }
 
-        let tooltip = this.tooltipCache.get(itemData.uniqueId);
-        if (!tooltip) {
-            tooltip = document.createElement('div');
-            tooltip.id = `item-tooltip-${itemData.uniqueId}`;
-            tooltip.className = `item-tooltip-class ${itemData.itemTier}`;
-            tooltip.style.position = 'absolute';
-            tooltip.style.whiteSpace = 'pre-wrap';
-
-            const content = document.createElement('div');
-
-            const name = document.createElement('div');
-            name.className = 'item-tooltip-name';
-            name.textContent = this.utilities.encodeHTMLEntities(itemData.name);
-            content.appendChild(name);
-
-            const iconContainerParagraph = document.createElement('p');
-            iconContainerParagraph.className = `item-tooltip-icon-wrap ${itemData.itemTier}`;
-            content.appendChild(iconContainerParagraph);
-
-            const icon = document.createElement('img');
-            icon.className = `item-tooltip-icon ${itemData.itemTier}`;
-            icon.src = `img/icons/items/${itemData.icon}`;
-            icon.alt = itemData.name;
-            iconContainerParagraph.appendChild(icon);
-
-            const typeTier = document.createElement('div');
-            typeTier.className = 'item-tooltip-type-tier';
-            typeTier.textContent = `${itemData.itemTier} ${itemData.type}`;
-            content.appendChild(typeTier);
-
-            if (itemData.type === "weapon") {
-                const damage = document.createElement('div');
-                damage.className = 'item-tooltip-damage';
-                damage.textContent = `Damage: ${itemData.baseDamageMin}-${itemData.baseDamageMax}`;
-                content.appendChild(damage);
-                switch (itemData.attackType) {
-                    case "melee":
-                        const baseBlock = document.createElement('div');
-                        baseBlock.className = 'item-tooltip-base-block';
-                        baseBlock.textContent = `Block: ${itemData.baseBlock || 0}`;
-                        content.appendChild(baseBlock);
-                        break;
-                    case "ranged":
-                        const baseRange = document.createElement('div');
-                        baseRange.className = 'item-tooltip-base-range';
-                        baseRange.textContent = `Range: ${itemData.baseRange || 0}`;
-                        content.appendChild(baseRange);
-                        break;
-                }
-            } else if (itemData.type === "armor") {
-                const armor = document.createElement('div');
-                armor.className = 'item-tooltip-armor';
-                armor.textContent = `Armor: ${itemData.armor || 0}`;
-                content.appendChild(armor);
-            } else if (itemData.type === "head") {
-                const armor = document.createElement('div');
-                armor.className = 'item-tooltip-armor';
-                armor.textContent = `Armor: ${itemData.armor || 0}`;
-                content.appendChild(armor);
-            } else if (itemData.type === "gloves") {
-                const armor = document.createElement('div');
-                armor.className = 'item-tooltip-armor';
-                armor.textContent = `Armor: ${itemData.armor || 0}`;
-                content.appendChild(armor);
-            } else if (itemData.type === "boots") {
-                const movementSpeed = document.createElement('div');
-                movementSpeed.className = 'item-tooltip-movementSpeed';
-                movementSpeed.textContent = `Move Speed: ${itemData.baseMovementSpeed || 0}%`;
-                content.appendChild(movementSpeed);
-            }
-
-            if ('stats' in itemData && itemData.stats) {
-                const divider = document.createElement('hr');
-                divider.className = 'tooltip-divider';
-                content.appendChild(divider);
-
-                const propCount = Object.keys(itemData.stats).length;
-                if (propCount > 0) {
-                    const statsContainer = document.createElement('div');
-                    statsContainer.className = 'tooltip-stats';
-                    Object.entries(itemData.stats).forEach(([stat, value]) => {
-                        let critChar = '';
-                        const statLine = document.createElement('div');
-                        statLine.className = 'tooltip-stat';
-                        const critStats = itemData.critStats || [];
-                        if (critStats.includes(stat)) {
-                            statLine.className += ' crit-stat';
-                            critChar = '!';
-                        }
-                        statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.utilities.encodeHTMLEntities(stat)} ${this.utilities.encodeHTMLEntities(critChar)}`;
-                        statsContainer.appendChild(statLine);
-                    });
-                    content.appendChild(statsContainer);
-                }
-            }
-
-            if (itemData.affixes && itemData.affixes.length > 0) {
-                const affixDivider = document.createElement('hr');
-                affixDivider.className = 'tooltip-divider';
-                content.appendChild(affixDivider);
-                itemData.affixes.forEach(affix => {
-                    const affixElement = document.createElement('div');
-                    affixElement.className = 'tooltip-affix';
-                    const affixName = affix.name ? affix.name.charAt(0).toUpperCase() + affix.name.slice(1) : 'Unnamed';
-                    affixElement.textContent = `${affixName}: ${affix.description || 'No description'}`;
-                    content.appendChild(affixElement);
-                });
-            }
-
-            const descriptionDivider = document.createElement('hr');
-            descriptionDivider.className = 'tooltip-divider';
-            content.appendChild(descriptionDivider);
-
-            const description = document.createElement('div');
-            description.className = 'tooltip-description';
-            description.textContent = `${itemData.description}`;
-            content.appendChild(description);
-
-            const sellInfoDivider = document.createElement('hr');
-            sellInfoDivider.className = 'tooltip-divider';
-            content.appendChild(sellInfoDivider);
-
-            const sellInfo = document.createElement('div');
-            sellInfo.className = 'tooltip-sellInfo';
-            sellInfo.textContent = 'Item Cannot Be Sold';
-
-            if (itemData.isSellable) {
-                sellInfo.textContent = `Sellable | Value: ${itemData.goldValue}`;
-            }
-            content.appendChild(sellInfo);
-
-            tooltip.appendChild(content);
-            document.body.appendChild(tooltip);
-            this.tooltipCache.set(itemData.uniqueId, tooltip);
+        // Clear any existing timeout to prevent multiple triggers
+        if (this.tooltipTimeout) {
+            clearTimeout(this.tooltipTimeout);
         }
 
-        tooltip.style.display = 'block';
-        setTimeout(() => {
-            const x = event.pageX - tooltip.offsetWidth - 15;
-            const y = event.pageY - tooltip.offsetHeight + (tooltip.offsetHeight / 2);
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-            const tooltipWidth = tooltip.offsetWidth;
-            const tooltipHeight = tooltip.offsetHeight;
+        // Set a delay before showing the tooltip
+        this.tooltipTimeout = setTimeout(() => {
+            let tooltip = this.tooltipCache.get(itemData.uniqueId);
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.id = `item-tooltip-${itemData.uniqueId}`;
+                tooltip.className = `item-tooltip-class ${itemData.itemTier}`;
+                tooltip.style.position = 'absolute';
+                tooltip.style.whiteSpace = 'pre-wrap';
 
-            tooltip.style.left = `${Math.max(10, Math.min(x, viewportWidth - tooltipWidth - 10))}px`;
-            tooltip.style.top = `${Math.max(10, Math.min(y, viewportHeight - tooltipHeight - 10))}px`;
-        }, 0);
+                const content = document.createElement('div');
+
+                const name = document.createElement('div');
+                name.className = 'item-tooltip-name';
+                name.textContent = this.utilities.encodeHTMLEntities(itemData.name);
+                content.appendChild(name);
+
+                const iconContainerParagraph = document.createElement('p');
+                iconContainerParagraph.className = `item-tooltip-icon-wrap ${itemData.itemTier}`;
+                content.appendChild(iconContainerParagraph);
+
+                const icon = document.createElement('img');
+                icon.className = `item-tooltip-icon ${itemData.itemTier}`;
+                icon.src = `img/icons/items/${itemData.icon}`;
+                icon.alt = itemData.name;
+                iconContainerParagraph.appendChild(icon);
+
+                const typeTier = document.createElement('div');
+                typeTier.className = 'item-tooltip-type-tier';
+                typeTier.textContent = `${itemData.itemTier} ${itemData.type}`;
+                content.appendChild(typeTier);
+
+                if (itemData.type === "weapon") {
+                    const damage = document.createElement('div');
+                    damage.className = 'item-tooltip-damage';
+                    damage.textContent = `Damage: ${itemData.baseDamageMin}-${itemData.baseDamageMax}`;
+                    content.appendChild(damage);
+                    switch (itemData.attackType) {
+                        case "melee":
+                            const baseBlock = document.createElement('div');
+                            baseBlock.className = 'item-tooltip-base-block';
+                            baseBlock.textContent = `Block: ${itemData.baseBlock || 0}`;
+                            content.appendChild(baseBlock);
+                            break;
+                        case "ranged":
+                            const baseRange = document.createElement('div');
+                            baseRange.className = 'item-tooltip-base-range';
+                            baseRange.textContent = `Range: ${itemData.baseRange || 0}`;
+                            content.appendChild(baseRange);
+                            break;
+                    }
+                } else if (itemData.type === "armor") {
+                    const armor = document.createElement('div');
+                    armor.className = 'item-tooltip-armor';
+                    armor.textContent = `Armor: ${itemData.armor || 0}`;
+                    content.appendChild(armor);
+                } else if (itemData.type === "head") {
+                    const armor = document.createElement('div');
+                    armor.className = 'item-tooltip-armor';
+                    armor.textContent = `Armor: ${itemData.armor || 0}`;
+                    content.appendChild(armor);
+                } else if (itemData.type === "gloves") {
+                    const armor = document.createElement('div');
+                    armor.className = 'item-tooltip-armor';
+                    armor.textContent = `Armor: ${itemData.armor || 0}`;
+                    content.appendChild(armor);
+                } else if (itemData.type === "boots") {
+                    const movementSpeed = document.createElement('div');
+                    movementSpeed.className = 'item-tooltip-movementSpeed';
+                    movementSpeed.textContent = `Move Speed: ${itemData.baseMovementSpeed || 0}%`;
+                    content.appendChild(movementSpeed);
+                }
+
+                if ('stats' in itemData && itemData.stats) {
+                    const divider = document.createElement('hr');
+                    divider.className = 'tooltip-divider';
+                    content.appendChild(divider);
+
+                    const propCount = Object.keys(itemData.stats).length;
+                    if (propCount > 0) {
+                        const statsContainer = document.createElement('div');
+                        statsContainer.className = 'tooltip-stats';
+                        Object.entries(itemData.stats).forEach(([stat, value]) => {
+                            let critChar = '';
+                            const statLine = document.createElement('div');
+                            statLine.className = 'tooltip-stat';
+                            const critStats = itemData.critStats || [];
+                            if (critStats.includes(stat)) {
+                                statLine.className += ' crit-stat';
+                                critChar = '!';
+                            }
+                            statLine.textContent = `${value > 0 ? '+' : ''}${value} : ${this.utilities.encodeHTMLEntities(stat)} ${this.utilities.encodeHTMLEntities(critChar)}`;
+                            statsContainer.appendChild(statLine);
+                        });
+                        content.appendChild(statsContainer);
+                    }
+                }
+
+                if (itemData.affixes && itemData.affixes.length > 0) {
+                    const affixDivider = document.createElement('hr');
+                    affixDivider.className = 'tooltip-divider';
+                    content.appendChild(affixDivider);
+                    itemData.affixes.forEach(affix => {
+                        const affixElement = document.createElement('div');
+                        affixElement.className = 'tooltip-affix';
+                        const affixName = affix.name ? affix.name.charAt(0).toUpperCase() + affix.name.slice(1) : 'Unnamed';
+                        affixElement.textContent = `${affixName}: ${affix.description || 'No description'}`;
+                        content.appendChild(affixElement);
+                    });
+                }
+
+                const descriptionDivider = document.createElement('hr');
+                descriptionDivider.className = 'tooltip-divider';
+                content.appendChild(descriptionDivider);
+
+                const description = document.createElement('div');
+                description.className = 'tooltip-description';
+                description.textContent = `${itemData.description}`;
+                content.appendChild(description);
+
+                const sellInfoDivider = document.createElement('hr');
+                sellInfoDivider.className = 'tooltip-divider';
+                content.appendChild(sellInfoDivider);
+
+                const sellInfo = document.createElement('div');
+                sellInfo.className = 'tooltip-sellInfo';
+                sellInfo.textContent = 'Item Cannot Be Sold';
+
+                if (itemData.isSellable) {
+                    sellInfo.textContent = `Sellable | Value: ${itemData.goldValue}`;
+                }
+                content.appendChild(sellInfo);
+
+                tooltip.appendChild(content);
+                document.body.appendChild(tooltip);
+                this.tooltipCache.set(itemData.uniqueId, tooltip);
+            }
+
+            tooltip.style.display = 'block';
+
+            // Position the tooltip relative to the triggering item
+            const target = event.target.closest('.item-icon');
+            if (target) {
+                const rect = target.getBoundingClientRect();
+                const tooltipWidth = tooltip.offsetWidth;
+                const tooltipHeight = tooltip.offsetHeight;
+
+                // Calculate position relative to the item
+                // const x = rect.left + window.scrollX + rect.width + 10; // Position to the right of the item
+                const x = rect.left + window.scrollX - tooltipWidth - 10; // Position to the left of the item
+                const y = rect.top + window.scrollY + (rect.height / 2) - (tooltipHeight / 2); // Center vertically
+
+                // Ensure the tooltip stays within the viewport
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                //tooltip.style.left = `${Math.min(x, viewportWidth - tooltipWidth - 10)}px`; // Position to the right of the item
+                tooltip.style.left = `${Math.max(10, Math.min(x, viewportWidth - tooltipWidth - 10))}px`;// Position to the left of the item
+                tooltip.style.top = `${Math.max(10, Math.min(y, viewportHeight - tooltipHeight - 10))}px`;
+            }
+        }, 300);
     }
 
     hideItemTooltip(itemData) {
         if (!itemData || !itemData.uniqueId) {
             return;
         }
+
+        // Clear the timeout to prevent the tooltip from showing if the mouse leaves quickly
+        if (this.tooltipTimeout) {
+            clearTimeout(this.tooltipTimeout);
+            this.tooltipTimeout = null;
+        }
+
         if (!this.tooltipCache) {
             console.error("Tooltip cache not initialized");
             this.tooltipCache = new Map();

@@ -14,7 +14,7 @@ export class ExplorationSystem extends System {
         this.TILE_SIZE = 32;
         this.revealFullMinimap = false; // Set to true to reveal the full minimap
         this.lastMinimapRender = 0;
-        this.minimapRenderInterval = 333; // ms (3 times per second)
+        this.minimapRenderInterval = 166.7; // ms (6 times per second)
 
     }
 

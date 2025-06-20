@@ -29,7 +29,7 @@
     "description": "Begin your journey by entering Zurath and speaking to Sehnrhyx Syliri.",
     "offerText": "Whispers yet echo, and your fate has arrived. You must Enter Zurath to begin your Journey.",
     "acceptedText": "You have accepted the Journey of Whispers. Sehnrhyx Syliri will guide you to begin your Journey.",
-    "activeText": "Speak to Sehnrhyx Syliri to start your trials.",
+    "activeText": "P: Speak to Sehnrhyx Syliri to start your trials.",
     "completionText": "Your training has gone well, you are deemed worthy! You may now enter Zurath to begin your journey on the Path of Whispers.",
     "logCompletion": true,
     "tasks": [
@@ -40,10 +40,10 @@
         "completed": false,
         "title": "Setting Forth",
         "description": "Speak to Sehnrhyx Syliri about your Journey.",
-        "offerText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "acceptedText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "activeText": "I'm glad to see you, I hope you have prepared well for your journey!",
-        "completionText": "Your training has gone well, you are deemed worthy for the trials.",
+        "offerText": "Offer: Speak to Sehnrhyx Syliri about your Journey.",
+        "acceptedText": "Accepted: Speak to Sehnrhyx Syliri about your Journey.",
+        "activeText": "C: I'm glad to see you, I hope you have prepared well for your journey!",
+        "completionText": "Your have spoken with Sehnrhyx Syliri, he has deemed you worthy for the Path of Whispers.",
         "logCompletion": true,
         "completionCondition": {
           "type": "interactWithNPCFinal",
@@ -92,11 +92,11 @@
         "accepted": false,
         "completed": false,
         "title": "First Descent",
-        "description": "Delve down to the third tier of Zurath.",
-        "offerText": "Descend to Tier 3 of Zurath.",
-        "acceptedText": "Descend to Tier 3 of Zurath.",
-        "activeText": "Descend to Tier 3 of Zurath.",
-        "completionText": "You have reached Tier 3.",
+        "description": "Desc: Delve down to the third tier of Zurath.",
+        "offerText": "Offer: Descend to Tier 3 of Zurath.",
+        "acceptedText": "Accepted: Descend to Tier 3 of Zurath.",
+        "activeText": "Active: Descend to Tier 3 of Zurath.",
+        "completionText": "Completion: You have reached Tier 3.",
         "logCompletion": true,
         "completionCondition": {
           "type": "reachTier",
@@ -214,21 +214,21 @@
         "parentId": "whisper_parent_3",
         "accepted": false,
         "completed": false,
-        "title": "Seek Guidance",
-        "description": "Speak to Sehnrhyx Syliri about your Journey.",
-        "offerText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "acceptedText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "activeText": "Speak to Sehnrhyx Syliri about your Journey.",
-        "completionText": "Sehnrhyx Syliri has guided you toward the Sigil.",
+        "title": "Delving Deeper",
+        "description": "Delve down to the sixth tier of Zurath.",
+        "offerText": "Descend to Tier 6 of Zurath.",
+        "acceptedText": "Descend to Tier 6 of Zurath.",
+        "activeText": "Descend to Tier 6 of Zurath.",
+        "completionText": "You have reached Tier 6.",
         "logCompletion": true,
         "completionCondition": {
-          "type": "interactWithNPC",
-          "npc": "sehnrhyx_syliri"
+          "type": "reachTier",
+          "tier": 6
         },
         "rewards": [
           {
-            "xp": 100,
-            "gold": 100
+            "xp": 50,
+            "gold": 50
           }
         ]
       },

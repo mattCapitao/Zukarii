@@ -310,7 +310,7 @@ hr {
 #hud-top-right {
     position: absolute;
     top: .5rem;
-    right: .5rem;
+    right: .2rem;
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -321,15 +321,16 @@ hr {
 #minimap-canvas {
     width: 248px;
     height: 138px;
-    padding: 2px 0 0 2px;
+    padding: 0;
     margin: 0;
     border-bottom: 1px solid #0f0;
+    border-radius: 0.625rem 0.625rem 0 0 ;
     z-index: 597;
     pointer-events: none;
     background: rgba(134, 134, 134, 1);
 }
 #minimap-wrapper {
-    width: 254px;
+    width: 252px;
     height: 162px;
     padding: 0px;
     margin: 0;
@@ -470,6 +471,14 @@ hr {
         border-bottom: none; /* Remove bottom border */
     }
 
+
+hud-log-content-wrapper {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba(25, 30, 20, .99);
+}
 #hud-log-content {
     height: calc(100% - 30px); /* Subtract tab height */
     overflow-y: auto;
@@ -478,7 +487,7 @@ hr {
     padding: 10px;
     border: 2px solid #0f0; /* Border on text window */
     border-radius: 0 0 8px 8px; /* Bottom-left and bottom-right radius */
-    background: rgba(26, 32, 26, 1);
+    background: rgba(20, 25, 20, 1);
     text-align: left;
     padding: .3125rem;
     gap: .1625rem;
@@ -486,10 +495,11 @@ hr {
 }
 
     #hud-log-content p {
-        font-size: 10px;
+        font-size: 12px;
         margin-bottom: 4px;
         text-shadow: 0 0 1px #000;
-        line-height: 1.2;
+        line-height: 1.25;
+        font-weight:300;
     }
 
 .channel-system {
@@ -499,7 +509,7 @@ hr {
     color: #fbd013;
 }
 .channel-combat {
-    color: #e00000;
+    color: #ee1111;
 }
     .channel-combat.player {
         color: #00e000;
@@ -627,10 +637,10 @@ hr {
 
 #tabs {
     position: absolute;
-    top: 50%;
+    top: 42%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: 70vw;
+    transform: translate(-50%, -50.25%);
+    width: 68.5vw;
     min-height: auto; /* Allow height to adjust based on content */
     max-height: 95vh;
     background: rgba(20, 30, 20, 0.7);
@@ -640,7 +650,7 @@ hr {
     display: none; /* Hidden by default */
     font-family: 'Verdana', Roboto, sans-serif;
     font-size: 0.875rem; /* ~14px */
-    padding: .875rem; 
+    padding: .625rem;
     pointer-events: auto; /* Clickable children */
     z-index: 2000; /* Increased to appear above #splash */
 }
@@ -799,7 +809,7 @@ hr {
 
 #tab-wrapper {
     height: 100%;
-    min-height: 40rem;
+    min-height: 32rem;
     max-height: 95vh; /* Prevents overflow */
     width: 100%; /* Ensure it takes the full width of #tabs */
     padding: 0;
@@ -811,7 +821,7 @@ hr {
 }
 
 #log-content {
-    height: 30rem; /* ~400px */
+    height: 28rem; /* ~400px */
     width: 100%;
     overflow-y: hidden;
 }
@@ -820,7 +830,7 @@ hr {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 27rem; /* Keep max height but let content dictate rows */
+    height: 25.75rem; /* Keep max height but let content dictate rows */
     padding: 0.625rem; /* Outer padding */
     border: 0.125rem solid #0f0;
     border-radius: .625rem;
@@ -838,7 +848,7 @@ hr {
     }
 
 #character-content {
-    height: 30rem; /* ~400px */
+    height: 28rem; /* ~400px */
     width: 100%;
     display: flex; /* overwritten in line with none when hide is triggered*/
     flex-direction: row;
@@ -849,7 +859,7 @@ hr {
     flex: 44; /* Takes 4/5 of the width */   
     display: flex;
     flex-direction: row;
-    height: 30rem; /* ~400px */
+    height: 28rem; /* ~400px */
     margin-top: 0.625rem; /* ~10px */
     gap: 0.875rem; /* ~10px */
 }
@@ -890,6 +900,7 @@ hr {
 #character-stat-wrapper {
     display: flex;
     flex-direction: column;
+    height: 24.8rem; 
     width: 100%;
     gap: .125rem; /* Optional: controls spacing between items */
     font-size: 0.75rem; /* ~12px */
@@ -905,7 +916,7 @@ hr {
 
     #character-stat-wrapper > div {
         padding: .125rem 0 .125rem 0; /* ~2px */
-        box-sizing: border-box; /* Ensures padding/border don't increase width */
+        
         margin: 0;
         text-align: left;
         width: 100%; /* Full width of the parent */
@@ -933,6 +944,7 @@ hr {
 
 #equipped-items {
     width: 100%;
+    height:24.8rem;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
@@ -1060,7 +1072,7 @@ hr {
 }
 
 #menu-content {
-    height: 30rem; /* ~400px, matches #character-content */
+    height: 28rem; /* ~400px, matches #character-content */
     width: 100%;
     display: flex; /* Ensure flexbox is applied */
     flex-direction: row; /* Explicitly set to row to ensure side-by-side layout */
@@ -1072,7 +1084,7 @@ hr {
 #game-menu {
     display: flex;
     flex-direction: column;
-    height: 30rem; /* ~400px */
+    height: 28rem; /* ~400px */
     width: 20%;
     margin-top: 0.625rem; /* ~10px */
 }
@@ -1114,7 +1126,7 @@ hr {
 #menu-panel {
     display: flex;
     flex-direction: column;
-    height: 30rem; /* ~400px, matches #inventory */
+    height: 28rem; /* ~400px, matches #inventory */
     width: 78%; /* Matches #inventory’s width */
     margin-top: 0.625rem; /* ~10px, matches #inventory */
 }
@@ -1195,7 +1207,7 @@ li.new-save-game {
 }
 
 #journey-content {
-    height: 30rem; /* ~400px */
+    height: 28rem; /* ~400px */
     width: 100%;
     display: flex; /* overwritten in line with none when hide is triggered*/
     justify-content: space-between;
@@ -1204,7 +1216,7 @@ li.new-save-game {
 #journey {
     display: flex;
     flex-direction: column;
-    height: 31.75rem; /* ~400px */
+    height: 28rem; /* ~400px */
     width: 98%;
     margin-top: 0.625rem; /* ~10px */
 }
@@ -1220,7 +1232,7 @@ li.new-save-game {
     padding: 0;
     margin: 0;
     width: 100%;
-    height: 30rem; /* Keep max height but let content dictate rows */
+    height: 25rem; /* Keep max height but let content dictate rows */
     border-radius: .625rem;
     background: rgba(20, 30, 20, 0.7);
 }
@@ -1264,7 +1276,7 @@ li.new-save-game {
     flex-direction: column;
     gap: 0.625rem; /* ~5px */
     width: 100%;
-    height: 27.25rem; /* Keep max height but let content dictate rows */
+    height: 24rem; /* Keep max height but let content dictate rows */
     padding: 0.625rem; /* Outer padding */
     border: 0.125rem solid #0f0;
     -moz-border-radius: 0px;
@@ -1295,7 +1307,7 @@ li.new-save-game {
     flex:56;
     display: flex;
     flex-direction: column;
-    height: 31.75rem; /* ~400px */
+    height: 28rem; /* ~400px */
     margin-top: 0.625rem; /* ~10px */
 }
 
@@ -1303,8 +1315,7 @@ li.new-save-game {
     padding: 0;
     margin: 0;
     width: 100%;
-    height: 30rem; /* Keep max height but let content dictate rows */
-
+    height: 25rem; /* Keep max height but let content dictate rows */
     border-radius: .625rem;
     background: rgba(20, 30, 20, 0.7);
 }
@@ -1354,7 +1365,7 @@ li.new-save-game {
     -webkit-align-content: flex-start;
     align-content: flex-start;
     gap: 0.625rem;
-    height: 27.25rem; /* Keep max height but let content dictate rows */
+    height: 23rem; /* Keep max height but let content dictate rows */
     padding: 0.625rem; /* Outer padding */
     border: 0.125rem solid #0f0;
     -moz-border-radius: 0px;
@@ -1645,15 +1656,15 @@ tooltip-description {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 300px;
-    height: 150px;
+    width: 320px;
+    height: 188px;
     background: rgba(25, 30, 20, 0.99);
     border: 2px solid #0f0;
     border-radius: 10px;
     color: #0f0;
     font-family: 'Verdana', Roboto, sans-serif;
     font-size: 14px;
-    padding: 16px;
+    padding: 0;
     pointer-events: auto;
     z-index: 2100;
     display: flex;
@@ -1661,18 +1672,33 @@ tooltip-description {
     justify-content: space-between;
 }
 
+.sharp-text {
+    text-shadow: -1px -1px 0 black, /* Top-left */
+    1px -1px 0 black, /* Top-right */
+    -1px 1px 0 black, /* Bottom-left */
+    1px 1px 0 black; /* Bottom-right */
+}
+
 #dialogue-text {
-    text-align: center;
-    flex-grow: 1;
+    height: 100%;
     display: flex;
+    font-weight: 100;
     align-items: center;
+    text-align: left;
     justify-content: center;
+    background: rgba(20, 25, 20, 1);
+    border-radius: .625rem .625rem 0 0;
+    border-bottom: 1px solid #00ff0066;
+    padding: .475rem;
 }
 
 #dialogue-buttons {
     display: flex;
-    justify-content: center;
-    gap: 0.625rem;
+    flex-direction: row;
+    gap: .625rem; /* Space between buttons */
+    align-items: center;
+    justify-content: center; /* Center buttons horizontally */
+    padding: .375rem;
 }
 
 #dialogue-close {
@@ -1683,7 +1709,7 @@ tooltip-description {
     cursor: pointer;
     font-size: 16px;
     border-radius: 5px;
-    align-self: center;
+    
 }
 
     #dialogue-close:hover {
@@ -1710,7 +1736,7 @@ tooltip-description {
 /* Shop Tab Styles */
 /* Shop Tab Styles */
 #shop-content {
-    height: 30rem;
+    height: 28rem;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -1777,7 +1803,7 @@ tooltip-description {
     align-content: flex-start;
     gap: 0.625rem;
     width: 100%;
-    height: 27.25rem;
+    height: 25rem;
     padding: 0.625rem;
     border: 0.125rem solid #0f0;
     border-radius: 0px 0px .625rem .625rem;

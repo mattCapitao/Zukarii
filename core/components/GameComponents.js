@@ -57,7 +57,7 @@ export class RenderStateComponent {
 export class GameStateComponent {
     constructor({
         tier = 0,
-        highestTier = 1,
+        highestTier = 0,
         gameStarted = false,
         gameOver = false,
         isVictory = false,
@@ -331,6 +331,7 @@ export class ShopComponent {
         this.shopType = shopType;
         this.items = items;
         this.sellMultiplier = sellMultiplier;
+        this.lastRestockTime = null;
     }
 }
 export class JourneyPathsComponent {

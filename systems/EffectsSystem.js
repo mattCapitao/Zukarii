@@ -34,7 +34,7 @@ export class EffectsSystem extends System {
         //console.log('EffectsSystem: Initialized and listening for applyEffect events');
 
         this.eventBus.on('ItemUsed', ({ entityId, item, effect, params }) => {
-            this.applyEffect({ entityId, effect, params, context: { itemId: item.itemId } });
+           this.applyEffect({ entityId, effect, params, context: { item, itemId: item.itemId } });
         });
     }
 
@@ -196,6 +196,7 @@ export class EffectsSystem extends System {
 
     teleportToTier(entityId, params, context) {
         const entity = this.entityManager.getEntity(entityId);
+        console.log(`EffectsSystem: Attempting teleportToTier on ${entityId} with params:`, params, context);
         if (!entity) {
             console.warn(`EffectsSystem: Entity ${entityId} not found for teleportToTier`, params.tier);
             return;
@@ -205,7 +206,20 @@ export class EffectsSystem extends System {
         const tier = params.tier || 0;
         levelTransition.pendingTransition = 'teleportToTier';
         levelTransition.destinationTier = tier;
-        this.utilities.logMessage( {channel:"system", message: `You are teleported to tier ${tier}!` });
+        this.utilities.logMessage({ channel: "system", message: `You are teleported to tier ${tier}!` });
+
+        const uniqueId = context.item.uniqueId;
+        const itemId = context.item.journeyItemId != null ? context.item.journeyItemId :  uniqueId; // Use journeyItemId if available, otherwise use context.item.id
+
+        this.utilities.pushPlayerActions('useItem', { itemId });
+        this.eventBus.emit('StatsUpdated', { entityId });
+        this.utilities.logMessage({ channel: "system", message: `Used ${context.item.name}` });
+
+        console.log(`EffectsSystem: Teleporting ${entity.id} to tier ${tier} with uniqueId ${uniqueId}`);
+        if (context.item.type === 'consumable') {
+            console.log(`EffectsSystem: Emitting request to Removing item ${uniqueId} from player inventory after teleporting to tier ${tier}`);
+            this.eventBus.emit('RemoveItem', { entityId: 'player', uniqueId });
+        }
     }
 
     forgeSpectralWyrmKey(entityId, params, context) {
@@ -227,13 +241,7 @@ export class EffectsSystem extends System {
         const amount = params.amount;
         //console.log(`EffectsSystem: Player has ${craftResourceAmount} of ${amount} required ${requiredResources}`);
 
-        let hasResources = false;
-        if (craftResourceAmount < amount) {
-            this.utilities.logMessage({ channel: 'system', message: `You need at least ${amount} ${requiredResources} to forge the Spectral Wyrm Key!` });
-            return;
-        } else { hasResources = true; 
-            //console.log(`EffectsSystem: Player has ${craftResourceAmount} of ${amount} required ${requiredResources}`)
-        }
+        
 
         const proximityEntity = params.proximity; 
         const tier = params.tier; 
@@ -241,10 +249,10 @@ export class EffectsSystem extends System {
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState')
         let inProximity = false; // Initialize proximity check
         if (gameState.tier !== tier) {
-            this.utilities.logMessage({ channel: 'system', message: `You must be near the stairs down in Tier ${tier} to forge the Spectral Wyrm Key!` });
+            this.utilities.logMessage({ channel: 'system', message: `You must be near The Guardian among the ashen to make your offering!` });
             return;
         } else {
-             //console.log(`EffectsSystem: Player is in on tier ${tier}`)  
+             
         }
         
         const stairsDownEntity = this.utilities.findStairOnTier(tier, 'down');
@@ -255,6 +263,20 @@ export class EffectsSystem extends System {
         const proximityDistance = 320; // Define the proximity distance threshold 5 tiles * 32px * 2 scaling per tile
         inProximity = distance <= proximityDistance; // Check if player is within proximity distance
         //console.log(`EffectsSystem: Player is ${distance} units away from stairs down in Tier ${tier}. Proximity check: ${distance} <= ${proximityDistance}`);
+
+        if (!inProximity) {
+            this.utilities.logMessage({ channel: 'system', message: `You must be near The Guardian among the ashen to make your offering!` });
+            return;
+        } 
+
+        let hasResources = false;
+        if (craftResourceAmount < amount) {
+            this.utilities.logMessage({ channel: 'system', message: `You must offer this tooth and at least ${amount} ${requiredResources} to The Guardian !` });
+            return;
+        } else {
+            hasResources = true;
+            //console.log(`EffectsSystem: Player has ${craftResourceAmount} of ${amount} required ${requiredResources}`)
+        }
 
         if (hasResources && inProximity) {
             // need to unlock stairs
@@ -281,10 +303,23 @@ export class EffectsSystem extends System {
                 isSellable: false
             
             };
-            
+
+
            // Need to add item to inventory
             this.eventBus.emit('HandleItemReward', { reward: spectralWyrmKey, entityId: player.id }); 
-            this.utilities.logMessage( { channel: "journey", message: `You have forged the Spectral Wyrm Key!` });
+            this.utilities.logMessage({ channel: "journey", message: `You have forged the Spectral Wyrm Key!` });
+
+            const uniqueId = context.item.uniqueId;
+            const itemId = context.item.journeyItemId != null ? context.item.journeyItemId : uniqueId; // Use journeyItemId if available, otherwise use context.item.id
+
+            this.utilities.pushPlayerActions('useItem', { itemId });
+            this.eventBus.emit('StatsUpdated', { entityId });
+            this.utilities.logMessage({ channel: "system", message: `Used ${context.item.name}` });
+
+            if (context.item.type === 'consumable') {
+                console.log(`EffectsSystem: Emitting request to Removing item ${uniqueId} from player inventory after forging Spectral Wyrm Key`);
+                this.eventBus.emit('RemoveItem', { entityId: player.id, uniqueId });
+            }
         }  
     }
 }

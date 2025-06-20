@@ -62,6 +62,12 @@ export class FloorComponent {
     }
 }
 
+export class ShopCounterComponent {
+    constructor() {
+        this.type = 'ShopCounter';
+    }
+}
+
 export class StairComponent {
     constructor(direction, active = true) { // 'up' or 'down'
         this.type = 'Stair';

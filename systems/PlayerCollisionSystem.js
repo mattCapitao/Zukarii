@@ -92,7 +92,7 @@ export class PlayerCollisionSystem extends System {
                 continue;
             }
             if (target.hasComponent('LootData')) {
-                if (this.isAdjacentToPlayer(player, target, 96)) {
+                if (isAdjacent) {
                     const pos = target.getComponent('Position');
                     this.eventBus.emit('PickupTreasure', { x: pos.x, y: pos.y });
                     collision.collisions.splice(i, 1);
@@ -223,9 +223,6 @@ export class PlayerCollisionSystem extends System {
         }
         return false;
     }
-
-
-
 
 
 

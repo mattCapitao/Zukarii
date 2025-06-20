@@ -151,8 +151,8 @@ export class DialogueUISystem extends System {
             });
           
             this.dialogueWindow.style.display = 'flex';
-            this.dialogueButtons.style.display = 'block';
-            this.dialogueText.style.display = 'block';
+            this.dialogueButtons.style.display = 'flex';
+            this.dialogueText.style.display = 'flex';
 
             if (dialogue.npcId) {
                 const npc = this.entityManager.getEntity(dialogue.npcId);

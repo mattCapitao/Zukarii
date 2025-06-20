@@ -5,13 +5,14 @@ export class NPCControllerSystem extends System {
     constructor(entityManager, eventBus, utilities) {
         super(entityManager, eventBus);
         this.utilities = utilities;
+        this.INVENTORY_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
     }
 
     init() {
         //console.log('NPCControllerSystem: Initialized');
         // Listen for the GenerateShopInventories event
         this.eventBus.on('GenerateShopInventories', ({ tier }) => {
-            //console.log(`NPCControllerSystem: Received GenerateShopInventories event for tier ${tier}`);
+            console.log(`NPCControllerSystem: Received GenerateShopInventories event for tier ${tier}`);
             this.generateShopInventories(tier);
         });
         const initTier = this.entityManager.getActiveTier();
@@ -24,7 +25,7 @@ export class NPCControllerSystem extends System {
     }
 
     async generateShopInventories(tier) {
-        //console.log(`NPCControllerSystem: Starting generateShopInventories for tier ${tier}`);
+        console.log(`NPCControllerSystem: Starting generateShopInventories for tier ${tier}`);
         try {
             // Check if game state is ready
             const gameStateEntity = this.entityManager.getEntity('gameState');
@@ -33,10 +34,7 @@ export class NPCControllerSystem extends System {
                 return;
             }
 
-            // Set active tier to the provided tier
-            //this.entityManager.setActiveTier(tier);
-            //console.log('NPCControllerSystem: Active tier set to:', tier, 'tiers:', Array.from(this.entityManager.entitiesByTier.keys()));
-
+            
             // Query for ShopComponent in the specified tier
             const shopEntities = this.entityManager.getEntitiesWith(['ShopComponent'], tier);
             //console.log('NPCControllerSystem: Found entities with ShopComponent in tier', tier, ':', shopEntities.length, 'IDs:', shopEntities.map(n => n.id));
@@ -101,11 +99,20 @@ export class NPCControllerSystem extends System {
 
             for (const npc of npcs) {
                 const shopComponent = npc.getComponent('ShopComponent');
-                if (shopComponent.items && shopComponent.items.length > 0) {
-                    //console.log(`NPCControllerSystem: Skipping NPC ${npc.id}, already has items`);
+                const now = Date.now();
+
+                // Check if inventory is expired
+                if (shopComponent.lastRestockTime && now - shopComponent.lastRestockTime < this.INVENTORY_COOLDOWN_MS) {
+                    console.log(`NPCControllerSystem: Skipping inventory generation for NPC ${npc.id}, cooldown active`);
                     continue;
                 }
 
+                console.log(`NPCControllerSystem: Resetting Inventory for NPC ${npc.id} at tier ${tier}`);
+                shopComponent.items = [];
+                shopComponent.lastRestockTime = now; // Update timestamp
+
+
+                console.log(`NPCControllerSystem: Generating shop items for NPC ${npc.id} at tier ${tier}`);
                 let merchantBaseItemTier = Math.round(tier / 10);
                 if (merchantBaseItemTier < 1) merchantBaseItemTier = 0;
                 if (merchantBaseItemTier > 6) merchantBaseItemTier = 6;
@@ -116,8 +123,10 @@ export class NPCControllerSystem extends System {
                 for (let i = 0; i < merchantItemCount; i++) {
                     let itemTier = merchantBaseItemTier;
                     const roll = Math.random();
-                   if(roll > .98) itemTier++;
-                   if(roll < .25) itemTier--;
+                    if (roll > .998) itemTier += 2;
+                        else if (roll > .85) itemTier++ ;
+                    if (roll < .01) itemTier -= 2;
+                        else if(roll < .35) itemTier--;
 
                     if (itemTier < 1) itemTier = 0;
                     if (itemTier > 6) itemTier = 6;

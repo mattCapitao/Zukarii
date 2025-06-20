@@ -55,12 +55,14 @@ export class NPCSpawnSystem extends System {
                 const pixelX = tileX * this.TILE_SIZE;
                 const pixelY = tileY * this.TILE_SIZE;
 
-                if (!this.isWalkable(tileX, tileY)) {
-                    console.warn(`NPCSpawnSystem: Tile (${tileX}, ${tileY}) is not walkable for NPC ${npcData.id}`);
+                const entity = this.entityManager.createEntity(`npc_${tier}_${npcData.id}_${Math.random().toString(36).substring(2, 11)}`);
+
+                if (!this.utilities.isWalkable(entity.id,tileX, tileY)) {
+                    console.error(`NPCSpawnSystem: Tile (${tileX}, ${tileY}) is not walkable for NPC ${npcData.id}`);
                     continue;
                 }
 
-                const entity = this.entityManager.createEntity(`npc_${tier}_${npcData.id}_${Math.random().toString(36).substring(2, 11)}`);
+                
                 this.entityManager.addComponentToEntity(entity.id, new PositionComponent(pixelX, pixelY));
                 this.entityManager.addComponentToEntity(entity.id, new VisualsComponent(template.width, template.height));
                 const visuals = entity.getComponent('Visuals');
@@ -80,7 +82,6 @@ export class NPCSpawnSystem extends System {
                 if (template.lightSource) {
                    // this.entityManager.addComponentToEntity(entity.id, new LightSourceComponent({ definitionKey: 'magic', entityId: entity.id } ));
                     this.eventBus.emit('LightSourceActivated', ({ type: 'magic', entityId: entity.id }));
-
                 }
 
                 if (template.shopType) {
@@ -123,6 +124,7 @@ export class NPCSpawnSystem extends System {
         }
     }
 
+    /* // USING: this.utilities.isWalkable(entity.id, tileX, tileY) in NPCControllerSystem.js
     isWalkable(tileX, tileY) {
         const pixelX = tileX * this.TILE_SIZE;
         const pixelY = tileY * this.TILE_SIZE;
@@ -141,4 +143,5 @@ export class NPCSpawnSystem extends System {
         //console.log(`NPCSpawnSystem: Tile (${tileX}, ${tileY}) walkable check: isBlocked=${isBlocked}, hasFloor=${hasFloor}`);
         return !isBlocked && hasFloor;
     }
+    */
 }

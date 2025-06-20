@@ -18,6 +18,7 @@ import {
     NPCDataComponent,
     ShopComponent,
     TriggerAreaComponent,
+    ShopCounterComponent
 } from '../core/Components.js';
 
 export class EntityGenerationSystem extends System {
@@ -39,8 +40,8 @@ export class EntityGenerationSystem extends System {
         
         let active = true;
         if (direction === 'down' && lockedLevels.includes(tier) && gameState.highestTier <= tier) {
-            console.warn(`LevelSystem.js: generateStairEntity - Stairs down at tier ${tier} are locked until highest tier is reached.`);
-            console.warn(`LevelSystem.js: generateStairEntity - Highest tier is currently ${gameState.highestTier}.`);
+            console.warn(`EntityGenerationSystem: generateStairEntity - Stairs down at tier ${tier} are locked until highest tier is reached.`);
+            console.warn(`EntityGenerationSystem: generateStairEntity - Highest tier is currently ${gameState.highestTier}.`);
             active = false;
         }
         const stairId = `stair_${tier}_stair_${direction}_${x}_${y}`
@@ -59,7 +60,7 @@ export class EntityGenerationSystem extends System {
         const stairChar = direction === 'down' ? '⇓' : '⇑';
         map[y][x] = stairChar;
         if (direction === 'down') { levelData.stairsDown = { x, y }; } else { levelData.stairsUp = { x, y } }
-        console.log(`LevelSystem.js: Placed stairs ${direction} at (${x}, ${y}) on tier ${tier}`, stairEntity);
+        console.log(`EntityGenerationSystem: Placed stairs ${direction} at (${x}, ${y}) on tier ${tier}`, stairEntity);
 
         if (direction === 'down' && tier === 10) {
             visuals.avatar = `img/avatars/ashangal_guardian.png`;
@@ -109,10 +110,10 @@ export class EntityGenerationSystem extends System {
 
         if (lightsourceDefinition) {
             this.eventBus.emit('LightSourceActivated', ({ type: lightsourceDefinition, entityId: portalEntity.id }));
-            console.log(`LevelSystem.js: generatePortal - emitted light source activation request for portal at tier ${tier} with definition ${lightsourceDefinition}`);
+            console.log(`EntityGenerationSystem: generatePortal - emitted light source activation request for portal at tier ${tier} with definition ${lightsourceDefinition}`);
         }
         
-        console.log(`LevelSystem.js: generatePortal - Portal visuals set to ${visualsImg} for tier ${tier}, cleansed: ${cleansed}`, gameState);
+        console.log(`EntityGenerationSystem: generatePortal - Portal visuals set to ${visualsImg} for tier ${tier}, cleansed: ${cleansed}`, gameState);
 
         portalComp.active = active;
         portalComp.cleansed = cleansed; 
@@ -124,24 +125,22 @@ export class EntityGenerationSystem extends System {
 
         console.log(`LevelSystem - PORTAL - Portal Entity Created on tier: ${tier} at x:${x}, y:${y}`, portalEntity);
 
-        
         return portalEntity;
 
     }
 
 
-    generateFountains(tier, levelData, entityList) {
-        const map = levelData.map;
+    generateFountains(tier, levelData, entityList, mapComp) {
+        const map = mapComp.map;
         const roomEntityIds = levelData.roomEntityIds;
         const isCustomLevel = levelData.isCustomLevel || false;
-        console.log(`LevelSystem.js: generateFountains - Starting for tier ${tier}`);
+        console.log(`EntityGenerationSystem: generateFountains - Starting for tier ${tier}`);
         const fountainsPerLevel = () => {
             let r = Math.random();
-            return r <.3 ? 0 : r < 0.95 ? 1 : 2;
+            return r <.03 ? 0 : r < 0.95 ? 1 : 2;
         }
         const fountainCount = fountainsPerLevel();
-        console.log(`LevelSystem.js: generateFountains - Fountain count for tier ${tier}: ${fountainCount}`);
-        const fountains = [];
+        console.log(`EntityGenerationSystem: generateFountains - Fountain count for tier ${tier}: ${fountainCount}`);
         const validRoomIds = roomEntityIds.filter(roomId => {
             const room = this.entityManager.getEntity(roomId).getComponent('Room');
             return isCustomLevel || !(Array.isArray(room.hasEntities) && room.hasEntities.some(e => e.type === 'Fountain' || e.type === 'Stair'));
@@ -164,38 +163,15 @@ export class EntityGenerationSystem extends System {
                 }
             } while (map[y][x] !== ' ');
             if (attempts <= 50) {
-                const fountainEntity = this.entityManager.createEntity(`fountain_${tier}_fountain_${i}`);
-                this.entityManager.addComponentToEntity(fountainEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
-                this.entityManager.addComponentToEntity(fountainEntity.id, new FountainComponent(false, false, true));
-                this.entityManager.addComponentToEntity(fountainEntity.id, new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE));
-                this.entityManager.addComponentToEntity(fountainEntity.id, new HitboxComponent(this.TILE_SIZE, this.TILE_SIZE, this.TILE_SIZE/2, this.TILE_SIZE,));
-                const visuals = fountainEntity.getComponent('Visuals');
-                visuals.avatar = 'img/avatars/fountain.png';
-                visuals.avatar = 'img/anim/fountain/128x64_fountain_stone_shadow_anim.png';
-                fountains.push(fountainEntity.id);
-                room.hasEntities.push({ id: fountainEntity.id, type: 'Fountain' });
-                map[y][x] = '≅';
-                const fountainComp = fountainEntity.getComponent('Fountain');
-                if (fountainComp.active) {
-                    this.generateTriggerArea(
-                        entityList,
-                        x, y,
-                        512, 512,
-                        'PlayTrackControl',
-                        { track: 'fountain_loop', play: true, volume: 0.2, fadeIn: 0.75},
-                        'PlayTrackControl',
-                        { track: 'fountain_loop', play: false, fadeOut: 0.75 },
-                        'Presence'
-                    );
-                }
+                const fountainEntity = this.generateFountainEntity(entityList, tier, mapComp, x, y, true, room);
             }
         }
       
-        console.log(`LevelSystem.js: generateFountains - Completed for tier ${tier}`);
-        return fountains;
+        console.log(`EntityGenerationSystem: generateFountains - Completed for tier ${tier}`);
+        //return fountains;
     }
 
-    generateFountainEntity(entityList, tier, mapComp, x, y, active = true) {
+    generateFountainEntity(entityList, tier, mapComp, x, y, active = true, room = null) {
         const fountainEntity = this.entityManager.createEntity(`fountain_${tier}_fountain_${entityList.fountains.length}`);
         this.entityManager.addComponentToEntity(fountainEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
         this.entityManager.addComponentToEntity(fountainEntity.id, new FountainComponent(false, false, active));
@@ -208,11 +184,24 @@ export class EntityGenerationSystem extends System {
         entityList.fountains.push(fountainEntity.id);
         mapComp.map[y][x] = '≅';
 
+        // Update room.hasEntities if a room is provided
+        if (room) {
+            if (!Array.isArray(room.hasEntities)) {
+                room.hasEntities = [];
+            }
+            room.hasEntities.push({ id: fountainEntity.id, type: 'Fountain' });
+        }
+
+        let triggerAreaSize = 512; // Default size for trigger area
+
+        if (tier === 2) {
+            triggerAreaSize = 128; // Smaller trigger area for tier 2 becasue of close proximity of fountains.
+        }
         if (active) {
             this.generateTriggerArea(
                 entityList,
                 x, y,
-                512, 512,
+                triggerAreaSize, triggerAreaSize,
                 'PlayTrackControl',
                 { track: 'fountain_loop', play: true, volume: 0.2, fadeIn: 0.75 },
                 'PlayTrackControl',
@@ -225,82 +214,47 @@ export class EntityGenerationSystem extends System {
         return fountainEntity;
     }
 
-    generateLootEntities(tier, map, roomEntityIds) {
-        console.log(`LevelSystem.js: generateLootEntities - Starting for tier ${tier}`);
+    generateLootEntities(tier, mapComp, entityList) {
+        console.log(`EntityGenerationSystem: generateLootEntities - Starting for tier ${tier}`);
         const lootPerLevel = 5;
-        const lootEntityIds = [];
-        const collectEntityId = (data) => {
-            if (data.tier === tier) {
-                lootEntityIds.push(data.entityId);
-                console.log(`LevelSystem: logged entity ID ${data.entityId} for tier ${tier}`);
-            }
-        };
-        this.eventBus.on('LootEntityCreated', collectEntityId);
-
+        const roomEntityIds = entityList.rooms;
         for (let i = 0; i < lootPerLevel; i++) {
             const roomId = roomEntityIds[Math.floor(Math.random() * roomEntityIds.length)];
             const room = this.entityManager.getEntity(roomId).getComponent('Room');
-            let tileX, tileY;
+            let x, y;
             let attempts = 0;
+
             do {
-                tileX = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
-                tileY = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
+                x = room.left + 1 + Math.floor(Math.random() * (room.width - 2));
+                y = room.top + 1 + Math.floor(Math.random() * (room.height - 2));
                 attempts++;
                 if (attempts > 50) {
                     console.error(`Failed to place loot entity in room after 50 attempts`);
                     break;
                 }
-            } while (map[tileY][tileX] !== ' ');
+            } while (mapComp.map[y][x] !== ' ');
 
             if (attempts <= 50) {
-                const pixelX = tileX * this.TILE_SIZE;
-                const pixelY = tileY * this.TILE_SIZE;
-                const lootSource = this.entityManager.createEntity(`loot_source_${tier}_${Date.now()}_${i}`);
-                this.entityManager.addComponentToEntity(lootSource.id, new LootSourceData({
-                    sourceType: "container",
-                    name: "Treasure Chest",
-                    tier: tier,
-                    position: { x: pixelX, y: pixelY },
-                    sourceDetails: { id: roomId },
-                    chanceModifiers: {
-                        torches: 1,
-                        healPotions: 1,
-                        gold: 1.5,
-                        item: 0.25,
-                        uniqueItem: 0.8
-                    },
-                    maxItems: 1,
-                    items: []
-                }));
-
-                console.log(`LevelSystem: Generated loot source at pixel (${pixelX}, ${pixelY}) for tile (${tileX}, ${tileY}) on tier ${tier}`);
-                this.eventBus.emit('DropLoot', { lootSource });
+                this.generateLootEntity(entityList, tier, mapComp, x, y, roomId);
             }
         }
-
-        this.eventBus.off('LootEntityCreated', collectEntityId);
-        console.log(`Generated ${lootPerLevel} loot entity IDs for tier ${tier}`, lootEntityIds);
-        console.log(`LevelSystem.js: generateLootEntities - Completed for tier ${tier}`);
-        return lootEntityIds;
+        console.log(`EntityGenerationSystem: generateLootEntities - Completed for tier ${tier}`);
     }
 
-    generateLootEntity(entityList, tier, mapComp, x, y, lootData = {}) {
+    generateLootEntity(entityList, tier, mapComp, x, y, roomId, lootData = {}) {
+        const room = this.entityManager.getEntity(roomId).getComponent('Room');
+        if (!room) {
+            console.error(`generateLootEntity: Room with ID ${roomId} not found.`);
+            return;
+        }
 
-        const collectEntityId = (data) => {
-            if (data.tier === tier) {
-                entityList.treasures.push(data.entityId);
-                console.log(`LevelSystem: logged entity ID ${data.entityId} for tier ${tier}`);
-            }
-        };
-        this.eventBus.on('LootEntityCreated', collectEntityId);
-       
+        if (!Array.isArray(room.hasEntities)) {room.hasEntities = [];}
+
         const pixelX = x * this.TILE_SIZE;
         const pixelY = y * this.TILE_SIZE;
 
         const uniqueId = this.utilities.generateUniqueId();
         const lootSource = this.entityManager.createEntity(`loot_source_${tier}_${uniqueId}`);
-        // Create a unique ID for the loot entity
-        const roomId = lootData.roomId || `customMapPlacement${lootSource.id}`; // Optional room association
 
         // Default loot source data
         const defaultLootSourceData = {
@@ -330,23 +284,34 @@ export class EntityGenerationSystem extends System {
             }
         };
 
-       this.entityManager.addComponentToEntity(lootSource.id, new LootSourceData(mergedLootSourceData));
+        this.entityManager.addComponentToEntity(lootSource.id, new LootSourceData(mergedLootSourceData));
 
-        // Emit an event for loot creation
+        // Set up the callback to listen for the DropLoot event
+        const collectEntityId = (data) => {
+            if (data.tier === tier) {
+                entityList.treasures.push(data.entityId);
+                room.hasEntities.push({ id: data.entityId, type: 'Treasure' });
+                console.log(`LevelSystem: logged entity ID ${data.entityId} for tier ${tier}`);
+
+                // Clean up the event listener after handling
+                this.eventBus.off('LootEntityCreated', collectEntityId);
+            }
+        };
+        this.eventBus.on('LootEntityCreated', collectEntityId);
+
+        // Emit the DropLoot event to create the loot object
         this.eventBus.emit('DropLoot', { lootSource });
 
-        console.log(`EntityGenerationSystem: Created loot entity at (${x}, ${y}) on tier ${tier}`, lootSource);
-        this.eventBus.off('LootEntityCreated', collectEntityId);
-        return entityList.treasures;
+        console.log(`EntityGenerationSystem: Created loot source at (${x}, ${y}) on tier ${tier}`, lootSource);
+        return lootSource;
     }
-
-
 
     generateShopCounter(entityList, tier, mapComp, x, y) {
         const shopCounterEntity = this.entityManager.createEntity(`shopCounter_${tier}_shopCounter_${entityList.shopCounters.length}`);
         this.entityManager.addComponentToEntity(shopCounterEntity.id, new PositionComponent(x * this.TILE_SIZE, y * this.TILE_SIZE));
         this.entityManager.addComponentToEntity(shopCounterEntity.id, new VisualsComponent(58, 112));
         this.entityManager.addComponentToEntity(shopCounterEntity.id, new HitboxComponent(112, 58));
+        this.entityManager.addComponentToEntity(shopCounterEntity.id, new ShopCounterComponent(tier, x, y));
         const visuals = shopCounterEntity.getComponent('Visuals');
         visuals.avatar = 'img/avatars/shop-counter.png';
         entityList.shopCounters.push(shopCounterEntity.id);

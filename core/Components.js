@@ -14,6 +14,7 @@ import {
     PortalComponent,
     FountainComponent,
     TriggerAreaComponent,
+    ShopCounterComponent,
 } from './components/MapComponents.js';
 
 import {
@@ -97,6 +98,7 @@ export {
     PortalComponent,
     FountainComponent,
     TriggerAreaComponent,
+    ShopCounterComponent,
 
     // Player-related components
     StatsComponent,

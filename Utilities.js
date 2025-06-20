@@ -228,6 +228,54 @@ export class Utilities {
         };
     }
 
+
+    isWalkable(entityId, tileX, tileY) {
+        if (!Number.isFinite(tileX) || !Number.isFinite(tileY)) return false;
+
+        // Map check: Trust the map to determine if the tile has a floor
+        const levelEntity = this.entityManager.getEntitiesWith(['Tier'])
+            .find(e => e.getComponent('Tier').value === this.entityManager.getActiveTier());
+        const mapComp = levelEntity?.getComponent('Map');
+        const isFloor = mapComp && mapComp.map[tileY] && mapComp.map[tileY][tileX] === ' ';
+        if (!isFloor) {
+            console.log(`isWalkable: Tile (${tileX}, ${tileY}) is not a floor, returning false`, );
+            return false;
+        }
+        // Check entities with Position and Hitbox components
+        const pixel = this.getPixelFromTile(tileX, tileY);
+        const blockingEntities = this.entityManager.getEntitiesWith(['Position', 'Hitbox']).filter(e => {
+            // Skip overlap checks for walls since the isFloor check already handles them
+            if (e.hasComponent('Wall')) return false;
+            
+            if (e.hasComponent('ShopCounter')) return false; // Skip shop counters
+           
+
+            const ePos = e.getComponent('Position');
+            const eHitbox = e.getComponent('Hitbox');
+
+            const entityLeft = ePos.x + eHitbox.offsetX;
+            const entityRight = entityLeft + eHitbox.width;
+            const entityTop = ePos.y + eHitbox.offsetY;
+            const entityBottom = entityTop + eHitbox.height;
+
+            const tileLeft = pixel.x;
+            const tileRight = tileLeft + this.TILE_SIZE;
+            const tileTop = pixel.y;
+            const tileBottom = tileTop + this.TILE_SIZE;
+
+            // Check if the entity's hitbox overlaps the tile
+            return (
+                entityRight > tileLeft && entityLeft < tileRight && // Horizontal overlap
+                entityBottom > tileTop && entityTop < tileBottom    // Vertical overlap
+            );
+        });
+
+        // If any entity blocks the tile, it's non-walkable
+        return blockingEntities.length === 0;
+    }
+ 
+
+    /*
     isWalkable(entityId, tileX, tileY) {
         if (!Number.isFinite(tileX) || !Number.isFinite(tileY)) return false;
         const pixel = this.getPixelFromTile(tileX, tileY);
@@ -251,6 +299,7 @@ export class Utilities {
         const isFloor = mapComp && mapComp.map[tileY] && mapComp.map[tileY][tileX] === ' ';
         return !isBlocked && isFloor;
     }
+    */
 
     findPathAStar(start, goal, entityId, tileSize = 1, maxIterations = 500, isWalkable = null) {
         console.log(`findPathAStar: Starting from (${start.x}, ${start.y}) to (${goal.x}, ${goal.y}), entityId=${entityId}`);

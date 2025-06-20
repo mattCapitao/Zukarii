@@ -280,7 +280,7 @@ export class MonsterSpawnSystem extends System {
         const movementSpeedComp = entity.getComponent('MovementSpeed');
         movementSpeedComp.combatSpeedMultiplier = .9;
 
-        if (tier >= 8 && tier <= 10 && template.isElite) {
+        if (tier >= 7 && tier <= 10 && template.isElite) {
             const dropChance = 0.4; // 60% base chance
             const dropModifier = (tier - 8) * 0.3; // +20% per tier above 8
             const dropRoll = Math.random();
@@ -324,12 +324,12 @@ export class MonsterSpawnSystem extends System {
                 }
             });
         }
-        if (tier > 7 && tier < 11 && template.isElite) {
+        if (tier >= 8 && tier < 11 && template.isElite) {
 
-            const drop = 0.40; // Base drop chance for the item
+            const drop = 0.20; // Base drop chance for the item
             let dropModifier = 0; // Default drop modifier
             if (tier > 8) {
-                 dropModifier = (tier - 8) * 0.3; // Increase drop chance by 20% per tier above 8
+                 dropModifier = (tier - 8) * 0.4; // Increase drop chance by 40% per tier above 8
             }
             const dropRoll = Math.random();
 
