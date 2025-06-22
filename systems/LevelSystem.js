@@ -127,7 +127,7 @@ export class LevelSystem extends System {
         }
         this.isAddingLevel = true;
         if (!transitionDirection) {
-            transitionDirection = tier > this.entityManager.getActiveTier() ? 'down' : tier > this.entityManager.getActiveTier() ?  'up' : null;
+            transitionDirection = tier > this.entityManager.getActiveTier() ? 'down' : tier < this.entityManager.getActiveTier() ?  'up' : null;
         }
         console.log(`LevelSystem.js: addLevel - Starting for tier ${tier}, transitionDirection: ${transitionDirection}`);
 
@@ -1440,6 +1440,7 @@ export class LevelSystem extends System {
                 }
             }
         }
+        
 
         // Add a shopkeeper NPC every 10 tiers if none exists
         let randomMerchant = false;

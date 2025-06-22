@@ -38,12 +38,24 @@ export class InteractionSystem extends System {
                     this.handleAcknowledgeCompletion(params);
                 } else if (action === 'completeTask') {
                     this.handleCompleteTask(params);
+                } else if (action === 'selectPortalTier') {
+                    this.handleSelectPortalTier(params);
                 }
                 console.log(`InteractionSystem: Processed intent: ${action}`, params);
             });
             intent.intents = [];
             console.log('InteractionSystem: Cleared InteractionIntent intents');
         }
+    }
+
+    handleSelectPortalTier({ tier }) {
+        const levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+
+        // Set destinationTier to null for randomization or the selected tier
+        levelTransition.destinationTier = tier === '?' ? null : tier;
+
+        levelTransition.pendingTransition = 'portal';
+        console.log(`InteractionSystem: Set pendingTransition to 'portal' with destinationTier: ${levelTransition.destinationTier}`);
     }
 
     handleInteractWithNPC({ npcId }) {
@@ -73,6 +85,7 @@ export class InteractionSystem extends System {
                 path.tasks?.forEach(task => {
                     if (!task.completed && (task.completionCondition.type === 'interactWithNPC' || task.completionCondition.type === 'interactWithNPCFinal') && task.completionCondition.npc === npcData.id) {
                         taskId = task.id;
+                        /*
                         if (task.id === 'whisper_child_2_4') {
                             console.log(`InteractionSystem: Found whisper_child_2_4 for NPC ${npcData.id}`, {
                                 taskId: task.id,
@@ -80,6 +93,7 @@ export class InteractionSystem extends System {
                                 condition: task.completionCondition
                             });
                         }
+                        */
                     }
                 });
             });
@@ -87,9 +101,11 @@ export class InteractionSystem extends System {
 
         this.utilities.pushPlayerActions('interactWithNPC', { npcId, taskId });
         console.log(`InteractionSystem: Pushed interactWithNPC to PlayerActionQueue`, { npcId, taskId });
+        /*
         if (taskId === 'whisper_child_2_4') {
             console.log(`InteractionSystem: Queued action for whisper_child_2_4`, { npcId, taskId });
         }
+        */
 
         this.refreshDialogue(npcId);
     }
@@ -128,12 +144,14 @@ export class InteractionSystem extends System {
 
         journeyPath.paths.push({ ...journeyData, accepted: true });
         offeredJourneysComp.journeys = offeredJourneysComp.journeys.filter(q => q.journeyId !== journeyId);
-        this.eventBus.emit('LogMessage', { message: `Journey accepted: ${journeyData.title}` });
+        this.utilities.logMessage({ channel: "journey", message: `Journey accepted: ${journeyData.title}` });
         this.eventBus.emit('JourneyStateUpdated');
         console.log(`InteractionSystem: Journey ${journeyId} accepted by player`);
+        /*
         if (journeyId === 'whisper_parent_3') {
             console.log(`InteractionSystem: Accepted whisper_parent_3`);
         }
+        */
 
         const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
         if (dialogue) {
@@ -157,7 +175,7 @@ export class InteractionSystem extends System {
             console.log(`InteractionSystem: Added ShopInteractionComponent to player for NPC ${npcId}`);
         }
         this.eventBus.emit('ToggleOverlay', { tab: 'shop', fromShop: true, npcId });
-        this.eventBus.emit('LogMessage', { message: `Opened shop for ${npc.getComponent('NPCData').name}` });
+        this.utilities.logMessage({ channel: "system", message: `Opened shop for ${npc.getComponent('NPCData').name}` });
         console.log(`InteractionSystem: Emitted ToggleOverlay for shop with NPC ${npcId}`);
     }
 
@@ -192,9 +210,11 @@ export class InteractionSystem extends System {
         if (task) {
             this.utilities.pushPlayerActions('interactWithNPC', { npcId: task.completionCondition.npc, taskId });
             console.log(`InteractionSystem: Pushed interactWithNPC for task ${taskId}`);
+            /*
             if (taskId === 'whisper_child_2_4') {
                 console.log(`InteractionSystem: Queued completeTask action for whisper_child_2_4`, { npcId: task.completionCondition.npc, taskId });
             }
+            */
         }
 
         dialogue.text = '';
@@ -271,12 +291,14 @@ export class InteractionSystem extends System {
                             totalTaskCount: path.totalTaskCount,
                             completedTaskCount: path.completedTaskCount
                         });
+                        /*
                         if (task.id === 'whisper_child_2_4') {
                             console.log(`InteractionSystem: Blocked whisper_child_2_4 due to incomplete tasks`, {
                                 totalTaskCount: path.totalTaskCount,
                                 completedTaskCount: path.completedTaskCount
                             });
                         }
+                        */
                         finalTaskHandled = true;
                     } else {
                         console.log(`InteractionSystem: Task ${task.id} ready for completion`, {
@@ -356,9 +378,10 @@ export class InteractionSystem extends System {
             dialogue.dialogueStage = 'completion';
             this.shownCompletions.add(completedJourney.id);
             console.log(`InteractionSystem: Showing completion message for journey ${completedJourney.id}`);
+            /*
             if (completedJourney.id === 'whisper_parent_2') {
                 console.log(`InteractionSystem: Completion dialogue for whisper_parent_2`, { text: dialogue.text });
-            }
+            }*/
             return true;
         }
 
@@ -381,9 +404,11 @@ export class InteractionSystem extends System {
             dialogue.npcId = npcId;
             dialogue.dialogueStage = 'journeyOffer';
             console.log(`InteractionSystem: Offering journey ${journey.journeyId}`);
+            /*
             if (journey.journeyId === 'whisper_parent_3') {
                 console.log(`InteractionSystem: Offering whisper_parent_3`, { text: dialogue.text });
             }
+            */
             return true;
         }
 
@@ -442,7 +467,7 @@ export class InteractionSystem extends System {
             if (reward.gold) return `${reward.gold} gold`;
             if (reward.type === 'item') return `${reward.quantity || 1} ${reward.itemId}`;
             if (reward.type === 'unlock') return `${reward.mechanic}`;
-            return '';
+            return '';fLog
         }).filter(str => str);
         return rewardStrings.join(', ');
     }

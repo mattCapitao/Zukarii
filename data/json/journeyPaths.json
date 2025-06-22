@@ -917,6 +917,12 @@
       {
         "type": "unlock",
         "mechanic": "portalBinding"
+      },
+      {
+        "type": "unlock",
+        "mechanic": "setPortalDestination",
+        "fromPortal": 0,
+        "toPortal": 11
       }
     ]
   },

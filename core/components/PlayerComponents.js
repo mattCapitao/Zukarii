@@ -208,3 +208,11 @@ export class JourneyRewardComponent {
         this.rewards = []; // Array of rewards
     }
 }
+
+export class PortalBindingComponent {
+    constructor({ bindings = [], cleansed = [] } = {}) {
+        this.type = 'PortalBinding';
+        this.bindings = bindings; // Array of portal bindings
+        this.cleansed = cleansed;
+    }
+}

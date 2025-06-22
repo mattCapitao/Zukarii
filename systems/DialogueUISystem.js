@@ -68,12 +68,26 @@ export class DialogueUISystem extends System {
 
         this.eventBus.on('DialogueMessage', ({ message }) => {
             const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
+            console.log('DialogueUISystem: Received DialogueMessage', { message, dialogue });
             if (!dialogue) return;
 
             // If message is an object (from a trigger area)
             if (typeof message === 'object' && message !== null && message.message) {
                 dialogue.text = message.message;
                 dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
+                console.log('DialogueUISystem: processing options', message.options);
+                if (message.options && Array.isArray(message.options)) {
+                    message.options.forEach(option => {
+                        if (option.label && option.action) {
+                            dialogue.options.push({
+                                label: option.label,
+                                action: option.action,
+                                params: option.params || {}
+                            });
+                        }
+                    });
+                }
+                console.log('DialogueUISystem: Updated dialogue with trigger message', { message, dialogue });
                 dialogue.isOpen = true;
                 dialogue.dialogueStage = 'greeting';
                 //console.log(`DialogueUISystem: Updated dialogue for trigger message`, { message });

@@ -1,4 +1,4 @@
-﻿import { JourneyRewardComponent,  } from '../core/Components.js';
+﻿import { JourneyRewardComponent, PortalBindingComponent } from '../core/Components.js';
 import { System } from '../core/Systems.js';
 
 
@@ -116,8 +116,11 @@ export class JourneyRewardSystem extends System {
                 visuals.avatar = 'img/anim/Portal-Animation-Cleansed.png';
             }
             if (reward.type === 'unlock' && reward.mechanic === 'portalBinding') {
-                // this.eventBus.emit('AddComponent', { entityId: 'player', component: new PortalBindingsComponent([0]) });
-                // this.eventBus.emit('LogMessage', { message: `Unlocked Portal Binding` });
+                this.entityManager.addComponentToEntity('player', new PortalBindingComponent({
+                    bindings: [0],
+                    cleansed: [0,1,2,3,4,5,6,7,8,9,10],
+                }));
+                this.utilities.logMessage({channel:'journey', message: `Unlocked Portal Binding` });
                 console.log(`JourneyRewardSystem: Added PortalBindingsComponent`);
             } else if (reward.type) {
                 console.warn(`JourneyRewardSystem: Unknown reward type ${reward.type}`);

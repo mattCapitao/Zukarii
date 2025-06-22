@@ -91,7 +91,9 @@ export class EntityGenerationSystem extends System {
         let cleansed = false; // Portals are not cleansed by default
         let lightsourceDefinition = 'portalBlue'; // Default light source definition
         const unlockedPortals = player.getComponent('PlayerAchievements').stats.unlockedPortals || [];
-        if (unlockedPortals.includes(tier)) {
+        const cleansedPortals = player.getComponent('PortalBindingds')?.cleansed || [];
+        console.warn(`EntityGenerationSystem: generatePortal - Starting for tier ${tier}`, unlockedPortals, cleansedPortals);
+        if (cleansedPortals.includes(tier) || unlockedPortals.includes(tier)) {
             active = true;
             cleansed = true;
             visualsImg = 'img/anim/Portal-Animation-Cleansed.png';

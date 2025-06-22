@@ -30,6 +30,7 @@ import {
     PlayerAchievementsComponent,
     JourneyRewardComponent,
     HotBarIntentComponent,
+    PortalBindingComponent,
 } from './components/PlayerComponents.js';
 
 import {
@@ -113,6 +114,7 @@ export {
     PlayerAchievementsComponent,
     JourneyRewardComponent,
     HotBarIntentComponent,
+    PortalBindingComponent,
 
     // Game-related components
     UIComponent,

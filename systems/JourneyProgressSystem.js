@@ -42,7 +42,7 @@ export class JourneyProgressSystem extends System {
                         if (this.checkEquipGear(task, inventory)) {
                             task.completed = true;
                             task.completedAt = Date.now();
-                            this.eventBus.emit('LogMessage', { message: task.completionText });
+                            this.utilities.logMessage({ channel: "journey", message: task.completionText });
                             this.eventBus.emit('DialogueMessage', { message: task.completionText });
                             
                             this.eventBus.emit('JourneyStateUpdated');
@@ -71,7 +71,7 @@ export class JourneyProgressSystem extends System {
                         }
                         task.completed = true;
                         task.completedAt = Date.now();
-                        this.eventBus.emit('LogMessage', { message: task.completionText });
+                        this.utilities.logMessage({ channel: "journey", message: task.completionText });
                         this.eventBus.emit('DialogueMessage', { message: task.completionText });
                         this.eventBus.emit('JourneyStateUpdated');
                         console.log(`JourneyProgressSystem: Completed task ${task.id} for action ${action.type}`);
@@ -213,7 +213,7 @@ export class JourneyProgressSystem extends System {
             const allTasksCompleted = journey.tasks?.length > 0 && journey.tasks.every(task => task.completed);
             if (allTasksCompleted) {
                 journey.pendingCompletion = true;
-                this.eventBus.emit('JourneyStateUpdated');
+                this.eventBus.emit('Log');
                 console.log(`JourneyProgressSystem: Journey ${journey.id} set to pendingCompletion`);
                 if (journey.id === 'whisper_parent_2' || journey.id === 'whisper_parent_3') {
                     console.log(`JourneyProgressSystem: ${journey.id} pending completion`, { tasks: journey.tasks.map(t => ({ id: t.id, completed: t.completed })) });
@@ -430,7 +430,7 @@ export class JourneyProgressSystem extends System {
             if (nextJourney && !offeredJourneysComp.journeys.some(q => q.journeyId === nextJourney.id)) {
                 const offeredBy = nextJourney.offeredBy || journey.offeredBy || 'default_npc';
                 offeredJourneysComp.journeys.push({ journeyId: nextJourney.id, offeredBy });
-                this.eventBus.emit('LogMessage', { message: `New journey available: ${nextJourney.title}` });
+                this.utilities.logMessage({ channel: "journey", message: `New journey available: ${nextJourney.title}` });
                 console.log(`JourneyProgressSystem: Offered next journey ${nextJourney.id} by ${offeredBy}`);
                 if (nextJourney.id === 'whisper_parent_3' || nextJourney.id === 'whisper_parent_4') {
                     console.log(`JourneyProgressSystem: Offered ${nextJourney.id} after completing ${journey.id}`);
@@ -447,7 +447,7 @@ export class JourneyProgressSystem extends System {
             const masterPath = journeyPathsComp.paths.find(path => path.id === journey.triggersMasterPath);
             if (masterPath && !journeyPath.paths.some(p => p.id === masterPath.id)) {
                 this.utilities.addPath(journeyPath, masterPath);
-                this.eventBus.emit('LogMessage', { message: `New path unlocked: ${masterPath.title}` });
+                this.utilities.logMessage({ channel: "journey", message: `New path unlocked: ${masterPath.title}` });
                 console.log(`JourneyProgressSystem: Triggered master path ${masterPath.id}`);
             }
         }

@@ -1,10 +1,10 @@
 ﻿// systems/LevelTransitionSystem.js - Updated
-import { HpBarComponent, LightingState } from '../core/Components.js';
+import { PortalBindingComponent } from '../core/Components.js';
 import { System } from '../core/Systems.js';
 
 export class LevelTransitionSystem extends System {
     constructor(entityManager, eventBus, utilities) {
-        super(entityManager, eventBus);
+        super(entityManager, eventBus, utilities);
         this.requiredComponents = ['Map', 'Tier', 'Exploration'];
         this.pendingTransition = null;
     }
@@ -28,8 +28,12 @@ export class LevelTransitionSystem extends System {
 
             switch (this.pendingTransition) {
                 case 'portal':
-                    const destinationTier = this.levelTransition.destinationTier || null;
-
+                    let destinationTier;
+                    if (this.levelTransition.destinationTier === null || this.levelTransition.destinationTier === undefined) {
+                        destinationTier = null;
+                    } else {
+                        destinationTier = this.levelTransition.destinationTier || 0;
+                    }
                     this.transitionViaPortal(deltaTime, destinationTier);
                     break;
                 case 'teleportToTier':
@@ -219,7 +223,7 @@ export class LevelTransitionSystem extends System {
         const currentTier = gameState.tier;
         
         console.warn('LevelTransitionSystem: Starting transitionViaPortal for currentTier:', currentTier, 'destinationTier:', destinationTier);
-        if (destinationTier == null) {
+        if ((destinationTier === null || destinationTier === undefined) && destinationTier !==0) {
             destinationTier = this.randomizeTier(currentTier);
         }
         let teleportMessage = `You step through a mysterious portal surging with chaotic energy and are transported to Tier`;
@@ -227,15 +231,17 @@ export class LevelTransitionSystem extends System {
         if (this.pendingTransition== 'teleportToTier') {
             teleportMessage = `The power of the stone surges with chaotic energy and instsantly transports you to Tier`;
         }
-        this.eventBus.emit('LogMessage', { message: `${teleportMessage} ${destinationTier}!` });
+        this.utilities.logMessage({ channel: "system", message: `${teleportMessage} ${destinationTier}!` });
         gameState.tier = destinationTier;
 
+        const transitionDirection = destinationTier > currentTier ? 'down' : destinationTier < currentTier ? 'up' : null;
+        
         renderControl.locked = true;
         console.log('LevelTransitionSystem: Render locked for TransitionViaPortal');
 
         //this.eventBus.emit('RenderNeeded');
         gameState.needsRender = true;
-        this.eventBus.emit('AddLevel', { tier: destinationTier });
+        this.eventBus.emit('AddLevel', { tier: destinationTier, transitionDirection });
         console.warn('LevelTransitionSystem: Emitted AddLevel for destinationTier:', destinationTier);
         const sfxQueue = this.entityManager.getEntity('gameState').getComponent('AudioQueue').SFX || [];
 
@@ -291,6 +297,14 @@ export class LevelTransitionSystem extends System {
                 }
             }
         });
+
+        // Restore PortalBindingComponent if it exists in saved data
+        if (data.player.PortalBinding) {
+            console.log('LevelTransitionSystem: Restoring PortalBindingComponent:', data.player.PortalBinding);
+            this.entityManager.addComponentToEntity('player', new PortalBindingComponent(data.player.PortalBinding));
+        } else {
+            console.warn('LevelTransitionSystem: No PortalBindingComponent found in saved data');
+        }
 
         // Update overlay
         const overlayState = this.entityManager.getEntity('overlayState').getComponent('OverlayState');
@@ -455,31 +469,44 @@ export class LevelTransitionSystem extends System {
         const healthUpdates = this.entityManager.getEntity('gameState').getComponent('DataProcessQueues').HealthUpdates;
         healthUpdates.push({ entityId: 'player', amount: 0 }); 
 
-        if (tier < 11) {
+        //if (tier < 11) {
             this.updatePortalsForTier(tier);
-        }
+        //}
     }
 
     updatePortalsForTier(tier) {
+        console.warn(`LevelTransitionSystem: updatePortalsForTier called for tier ${tier}`);
         const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
         const portals = this.entityManager.getEntitiesWith(['Portal', 'Visuals', 'Position']);
+        const player = this.entityManager.getEntity('player');
+        console.warn(`LevelTransitionSystem: Found player `, player);
+        let cleansedPortals = [];
+        if (player.hasComponent('PortalBinding')) {
+            const portalBinding = player.getComponent('PortalBinding');
+            console.warn(`LevelTransitionSystem: PortalBinding for player:`, portalBinding);
+            cleansedPortals = portalBinding.cleansed || [];
+        }
+        const unlockedPortals = this.player.getComponent('PlayerAchievements').stats.unlockedPortals || [];
+
         for (const portalEntity of portals) {
             // Only update portals on the current tier
-            const entityTier = parseInt(portalEntity.id.split('_')[1], 10) || 0;
-            if (entityTier !== tier) continue;
-
+            //const entityTier = parseInt(portalEntity.id.split('_')[1], 10) || 0;
+            //if (entityTier !== tier) continue;
+            console.warn(`LevelTransitionSystem: Updating portal for tier ${tier} on entity ${portalEntity.id}`);
             const portalComp = portalEntity.getComponent('Portal');
             const visuals = portalEntity.getComponent('Visuals');
-            const unlockedPortals = this.player.getComponent('PlayerAchievements').stats.unlockedPortals || [];
-
+            
             let visualsImg = 'img/anim/Portal-Animation.png';
             let cleansed = false;
             let active = portalComp.active; // default to current state
+            let lightsourceDefinition = null;
+            console.warn(`LevelTransitionSystem: Portal visuals before update:`, visuals.avatar);
 
-            if (unlockedPortals.includes(tier)) {
+            if (cleansedPortals.includes(tier) || unlockedPortals.includes(tier)) {
                 active = true;
                 cleansed = true;
                 visualsImg = 'img/anim/Portal-Animation-Cleansed.png';
+                lightsourceDefinition = 'portalGreen';
             } else if (tier < 11 && gameState.highestTier < 11) {
                 active = false;
                 cleansed = false;
@@ -488,11 +515,42 @@ export class LevelTransitionSystem extends System {
                 active = true;
                 cleansed = true;
                 visualsImg = 'img/anim/Portal-Animation-Cleansed.png';
+                lightsourceDefinition = 'portalGreen';
             }
             portalComp.active = active;
             portalComp.cleansed = cleansed;
             visuals.avatar = visualsImg;
+            console.warn(`LevelTransitionSystem: Portal visuals after update:`, visuals.avatar);
+            if (lightsourceDefinition) {
+                this.eventBus.emit('LightSourceActivated', ({ type: lightsourceDefinition, entityId: portalEntity.id }));
+                console.warn(`LevelTransityionSystem: UpdatePortalsForTier - emitted light source activation request for portal at tier ${tier} with definition ${lightsourceDefinition}`);
+            }
         }
+
+        /*
+        if (entityList.portals.length > 0) {
+            const portal = this.entityManager.getEntity(entityList.portals[0]);
+            const portalComp = portal.getComponent('Portal');
+            const visuals = portal.getComponent('Visuals') || new VisualsComponent(this.TILE_SIZE, this.TILE_SIZE);
+            let lightsourceDefinition = null;
+
+            const player = this.entityManager.getEntity('player');
+            const unlockedPortals = player.getComponent('PlayerAchievements').stats.unlockedPortals || [];
+            const cleansedPortals = player.getComponent('PortalBindingds')?.cleansed || [];
+            console.warn(`checkLevelAfterTransition: updatePortal - Starting for tier ${tier}`, unlockedPortals, cleansedPortals);
+            if (portalComp && cleansedPortals.includes(tier) || unlockedPortals.includes(tier)) {
+                portalComp.active = true;
+                portalComp.cleansed = true;
+                visuals.avatar = 'img/anim/Portal-Animation-Cleansed.png';
+                lightsourceDefinition = 'portalGreen';
+            } 
+            if (lightsourceDefinition) {
+            this.eventBus.emit('LightSourceActivated', ({ type: lightsourceDefinition, entityId: portalEntity.id }));
+            console.log(`LevelSystem: generatePortal - emitted light source activation request for portal at tier ${ tier } with definition ${ lightsourceDefinition }`);
+            }
+
+        }
+        */
     }
 
 }  

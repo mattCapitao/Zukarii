@@ -509,12 +509,14 @@ hud-log-content-wrapper {
     color: #fbd013;
 }
 .channel-combat {
-    color: #ee1111;
+    color: #ff0022;
 }
     .channel-combat.player {
         color: #00e000;
     }
-
+.channel-journey {
+    color:#6969f3;
+}
 #bottom-hud-panel {
     position: absolute;
     bottom: 0;

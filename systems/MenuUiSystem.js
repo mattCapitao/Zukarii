@@ -60,7 +60,7 @@ export class MenuUiSystem extends System {
         this.eventBus.on('GearChanged', (data) => this.updateCharacterUI(data));
         this.eventBus.on('GameSaved', ({ key, success, message }) => {
             //console.log('MenuUiSystem: GameSaved event received:', { key, success, message });
-            this.eventBus.emit('LogMessage', { message });
+            this.utilities.logMessage({ channel: "system", message });
             if (success) {
                 this.updateMenu();
             }
@@ -68,15 +68,15 @@ export class MenuUiSystem extends System {
         this.eventBus.on('GameLoaded', ({ saveId, success, message }) => {
             //console.log('MenuUiSystem: GameLoaded event received:', { saveId, success, message });
             if (success) {
-                this.eventBus.emit('LogMessage', { message: 'Load saved game complete' });
+                this.utilities.logMessage({ channel: "system", message: 'Load saved game complete' });
                 this.toggleOverlay({ tab: 'log' });
             } else {
-                this.eventBus.emit('LogMessage', { message });
+                this.utilities.logMessage({ channel: "system", message });
             }
         });
         this.eventBus.on('SaveCompleted', ({ key, success, message }) => {
             //console.log('MenuUiSystem: SaveCompleted event received:', { key, success, message });
-            this.eventBus.emit('LogMessage', { message });
+            this.utilities.logMessage({ channel: "system", message });
             if (success) {
                 this.updateMenu();
             }
@@ -466,7 +466,7 @@ export class MenuUiSystem extends System {
                     return;
                 }
                 if (!itemData.isSellable) {
-                    this.eventBus.emit('LogMessage', { message: 'Item Cannot Be Sold' });
+                    this.utilities.logMessage({ channel: "system", message: 'Item Cannot Be Sold' });
                     return;
                 }
                 this.hideItemTooltip(itemData);

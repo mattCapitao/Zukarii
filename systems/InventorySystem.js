@@ -49,7 +49,7 @@ export class InventorySystem extends System {
         item.uniqueId = item.uniqueId || this.utilities.generateUniqueId();
         if (!inventory.items.some(i => i.uniqueId === item.uniqueId)) {
             inventory.items.push({ ...item });
-            this.eventBus.emit('LogMessage', { message: `Added ${item.name} to inventory` });
+            this.utilities.logMessage({ channel: "system", message: `Added ${item.name} to inventory` });
         }
 
         if (item.journeyItemId) {
@@ -74,18 +74,18 @@ export class InventorySystem extends System {
         }
 
         if (item.levelRequirement && entity.getComponent('PlayerState')?.level < item.levelRequirement) {
-            this.eventBus.emit('LogMessage', { message: `You need to be level ${item.levelRequirement} to equip ${item.name}!` });
+            this.utilities.logMessage({ channel: "system", message: `You need to be level ${item.levelRequirement} to equip ${item.name}!` });
             return;
         }
 
         const index = inventory.items.findIndex(i => i.uniqueId === item.uniqueId);
         if (index === -1) {
-            this.eventBus.emit('LogMessage', { message: `Error: ${item.name} not in inventory` });
+            this.utilities.logMessage({ channel: "system", message: `Error: ${item.name} not in inventory` });
             return;
         }
 
         if (!this.isSlotCompatible(item, slot)) {
-            this.eventBus.emit('LogMessage', { message: `Cannot equip ${item.name} to ${slot}!` });
+            this.utilities.logMessage({ channel: "system", message: `Cannot equip ${item.name} to ${slot}!` });
             return;
         }
 
@@ -96,10 +96,10 @@ export class InventorySystem extends System {
 
         inventory.items.splice(index, 1);
         inventory.equipped[slot] = { ...item, equippedSlot: slot };
-        this.eventBus.emit('LogMessage', { message: `Equipped ${item.name} to ${slot}` });
+        this.utilities.logMessage({ channel: "system", message: `Equipped ${item.name} to ${slot}` });
 
         if (item.stats?.movementSpeed) {
-            this.eventBus.emit('LogMessage', { message: `${item.name} grants +${item.stats.movementSpeed} movement speed!` });
+            this.utilities.logMessage({ channel: "system", message: `${item.name} grants +${item.stats.movementSpeed} movement speed!` });
         }
 
         if (item.affixes && Array.isArray(item.affixes)) {
@@ -147,7 +147,7 @@ export class InventorySystem extends System {
 
         if (toInventory) {
             inventory.items.push({ ...item, equippedSlot: undefined });
-            if (!silent) this.eventBus.emit('LogMessage', { message: `Unequipped ${item.name} to inventory` });
+            if (!silent) this.utilities.logMessage({ channel: "system", message: `Unequipped ${item.name} to inventory` });
         }
         this.eventBus.emit('GearChanged', { entityId, action: 'unequip', slot });
     }
@@ -238,7 +238,7 @@ export class InventorySystem extends System {
         resource.gold = (resource.gold || 0) + goldValue;
         inventory.items.splice(itemIndex, 1);
 
-        this.eventBus.emit('LogMessage', { message: `Sold ${itemToSell.name} for ${goldValue} gold` });
+        this.utilities.logMessage({ channel: "loot", message: `Sold ${itemToSell.name} for ${goldValue} gold` });
         this.sfxQueue.push({ sfx: 'loot0', volume: .33 });
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
@@ -275,7 +275,7 @@ export class InventorySystem extends System {
 
         const item = shopComponent.items[itemIndex];
         if (resource.gold < item.purchasePrice) {
-            this.eventBus.emit('LogMessage', { message: 'Not enough gold to buy this item!' });
+            this.utilities.logMessage({ channel: "system", message: 'Not enough gold to buy this item!' });
             return;
         }
 
@@ -283,7 +283,7 @@ export class InventorySystem extends System {
         inventory.items.push({ ...item, uniqueId: this.utilities.generateUniqueId() });
         shopComponent.items.splice(itemIndex, 1);
 
-        this.eventBus.emit('LogMessage', { message: `Bought ${item.name} for ${item.purchasePrice} gold` });
+        this.utilities.logMessage({ channel: "loot", message: `Bought ${item.name} for ${item.purchasePrice} gold` });
         this.eventBus.emit('PlaySfxImmediate', { sfx: 'coin', volume: 0.25 });
         this.eventBus.emit('StatsUpdated', { entityId: 'player' });
         this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
@@ -310,22 +310,6 @@ export class InventorySystem extends System {
         }
         console.log('InventorySystem: Using item:', item, 'with uniqueId: ', uniqueId);
         this.eventBus.emit('ItemUsed', { entityId, item, effect: item.useEffect, params: item.params || {} });
-
-        /*moving to effect system until ItemUseSystem is implemented
-        let itemId = item.id || uniqueId;
-
-        if (item.journeyItemId != null) {
-            itemId = item.journeyItemId;
-        }
-
-        this.utilities.pushPlayerActions('useItem', { itemId });
-        this.eventBus.emit('StatsUpdated', { entityId });
-        this.utilities.logMessage({ channel: "system", message: `Used ${item.name}` });
-
-        if (item.type === 'consumable') {
-            this.removeItem({ entityId, uniqueId });
-        }
-        */
     }
 
     removeItem({ entityId, uniqueId }) {
