@@ -305,3 +305,13 @@ export class AStarComponent {
         this.grid = null; // Grid representation of the map for pathfinding
     }
 }
+
+export class PortalInteractionComponent {
+    constructor() {
+        this.type = 'PortalInteraction';
+        this.portalId = null; // ID of the portal entity
+        this.tier = null; // Current tier
+        this.action = null; // The player's intended action (e.g., 'cleansePortal', 'enterUncleansedPortal', 'cancelPortalInteraction', 'teleport')
+        this.params = {}; // Additional parameters related to the action
+    }
+}

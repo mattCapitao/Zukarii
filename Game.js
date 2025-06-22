@@ -52,6 +52,7 @@ import { NPCControllerSystem } from './systems/NPCControllerSystem.js';
 import { EntityGenerationSystem } from './systems/EntityGenerationSystem.js';
 import { TriggerAreaSystem } from './systems/TriggerAreaSystem.js'; 
 import { HotBarSystem } from './systems/HotBarSystem.js';
+import { PortalSystem } from './systems/PortalSystem.js';
 
 
 import {
@@ -60,7 +61,8 @@ import {
     AttackSpeedComponent, MovementSpeedComponent, AffixComponent, DataProcessQueues, NeedsRenderComponent, AudioQueueComponent,
     LevelTransitionComponent, HitboxComponent, LastPositionComponent, RenderStateComponent, GameStateComponent, RenderControlComponent,
     AnimationComponent, AnimationStateComponent, JourneyStateComponent, JourneyPathComponent, DialogueComponent, JourneyPathsComponent,
-    OfferedJourneysComponent, PlayerActionQueueComponent, PlayerAchievementsComponent, JourneyUpdateQueueComponent, JourneyRewardComponent, AchievementUpdateQueueComponent
+    OfferedJourneysComponent, PlayerActionQueueComponent, PlayerAchievementsComponent, JourneyUpdateQueueComponent, JourneyRewardComponent,
+    AchievementUpdateQueueComponent, PortalInteractionComponent, PortalBindingComponent, NPCDataComponent, ShopInteractionComponent
 } from './core/Components.js';
 
 export class Game {
@@ -322,6 +324,7 @@ export class Game {
         activeGameSystems.entityRemoval = new EntityRemovalSystem(this.entityManager);
         activeGameSystems.npcController = new NPCControllerSystem(this.entityManager, this.state.eventBus, this.utilities);
         activeGameSystems.hotBar = new HotBarSystem(this.entityManager, this.state.eventBus, this.utilities);
+        activeGameSystems.portal = new PortalSystem(this.entityManager, this.state.eventBus, this.utilities);
 
         Object.values(activeGameSystems).forEach(system => system.init());
         this.systems = { ...this.systems, ...activeGameSystems };
@@ -390,6 +393,7 @@ export class Game {
             'triggerArea',
             'movementResolution',
             'playerCollision',
+            'portal',
             'monsterCollision',
             'projectileCollisions',
             'combat',

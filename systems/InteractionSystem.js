@@ -40,12 +40,28 @@ export class InteractionSystem extends System {
                     this.handleCompleteTask(params);
                 } else if (action === 'selectPortalTier') {
                     this.handleSelectPortalTier(params);
+                } else if (action === 'updatePortalInteraction') {
+                    this.updatePortalInteraction(params);
                 }
                 console.log(`InteractionSystem: Processed intent: ${action}`, params);
             });
             intent.intents = [];
             console.log('InteractionSystem: Cleared InteractionIntent intents');
         }
+    }
+
+    updatePortalInteraction({ action, portalId, tier }) {
+        const player = this.entityManager.getEntity('player');
+        const portalInteractionComp = player.getComponent('PortalInteraction');
+
+        if (!portalInteractionComp) {
+            console.error('InteractionSystem: PortalInteractionComponent not found on player.');
+            return;
+        }
+
+        portalInteractionComp.action = action;
+        portalInteractionComp.params = { portalId, tier };
+        console.log(`InteractionSystem: Updated PortalInteractionComponent`, portalInteractionComp);
     }
 
     handleSelectPortalTier({ tier }) {

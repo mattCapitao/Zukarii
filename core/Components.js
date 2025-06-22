@@ -83,6 +83,7 @@ import {
     ShopDialogueComponent,
     LogComponent,
     LightSourceComponent,
+    PortalInteractionComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -165,6 +166,7 @@ export {
     ShopDialogueComponent,
     LogComponent,
     LightSourceComponent,
+    PortalInteractionComponent,
 };
 
 // Utility functions

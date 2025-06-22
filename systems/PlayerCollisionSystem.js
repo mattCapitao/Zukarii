@@ -1,5 +1,5 @@
 ﻿import { System } from '../core/Systems.js';
-import { StairLockComponent, InteractionIntentComponent } from '../core/Components.js';
+import { StairLockComponent, PortalInteractionComponent  } from '../core/Components.js';
 
 export class PlayerCollisionSystem extends System {
     constructor(entityManager, eventBus, utilities) {
@@ -150,6 +150,43 @@ export class PlayerCollisionSystem extends System {
                     
                 }
             }
+
+            if (target.hasComponent('Portal')) {
+                const portalComp = target.getComponent('Portal');
+                if (!portalComp.active) continue;
+
+                if (player.hasComponent('PortalBinding')) {
+                    if (player.hasComponent('PortalInteraction')) continue;
+                    console.warn(`PlayerCollisionSystem: Player has PortalBinding, checking portal interaction for ${target.id}`);
+                    if (isOverlapping) {
+                        let interactionComp = new PortalInteractionComponent();
+                        interactionComp.portalId = target.id;
+                        interactionComp.tier = this.entityManager.getActiveTier();
+                        player.addComponent(interactionComp);
+
+                        collision.collisions.splice(i, 1);
+                        continue;
+                    }
+                } else if (isOverlapping) {
+                        this.sfxQueue.push({ sfx: 'portal0', volume: 0.5 });
+                        levelTransition = this.entityManager.getEntity('gameState').getComponent('LevelTransition');
+                        if (portalComp.destinationTier !== undefined && portalComp.destinationTier !== null) {
+                            levelTransition.destinationTier = portalComp.destinationTier;
+                        }
+
+                        this.entityManager.getEntity('gameState').getComponent('GameState').transitionLock = true;
+
+                        if (levelTransition && levelTransition.pendingTransition === null) {
+                            levelTransition.lastMovementDirection = movementDirection;
+                            levelTransition.pendingTransition = 'portal';
+                            this.endTurn('transitionPortal');
+                            collision.collisions.splice(i, 1);
+                            break;
+                        }
+                }
+            }
+
+            /*
             if (target.hasComponent('Portal')) {
                 const portalComp = target.getComponent('Portal');
                 if (!portalComp.active) continue;
@@ -248,6 +285,7 @@ export class PlayerCollisionSystem extends System {
                 }
                 
             }
+          */
         }
     }
 
