@@ -307,14 +307,7 @@ export class InteractionSystem extends System {
                             totalTaskCount: path.totalTaskCount,
                             completedTaskCount: path.completedTaskCount
                         });
-                        /*
-                        if (task.id === 'whisper_child_2_4') {
-                            console.log(`InteractionSystem: Blocked whisper_child_2_4 due to incomplete tasks`, {
-                                totalTaskCount: path.totalTaskCount,
-                                completedTaskCount: path.completedTaskCount
-                            });
-                        }
-                        */
+
                         finalTaskHandled = true;
                     } else {
                         console.log(`InteractionSystem: Task ${task.id} ready for completion`, {
@@ -483,7 +476,7 @@ export class InteractionSystem extends System {
             if (reward.gold) return `${reward.gold} gold`;
             if (reward.type === 'item') return `${reward.quantity || 1} ${reward.itemId}`;
             if (reward.type === 'unlock') return `${reward.mechanic}`;
-            return '';fLog
+            return '';
         }).filter(str => str);
         return rewardStrings.join(', ');
     }

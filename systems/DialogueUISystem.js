@@ -63,6 +63,11 @@ export class DialogueUISystem extends System {
                 this.lastRenderedText = null;
                 this.lastRenderedOptions = null;
                 //console.log('DialogueUISystem: Closed dialogue via button click');
+                // Remove PortalInteraction component if it exists
+                const player = this.entityManager.getEntity('player');
+                if (player.hasComponent('PortalInteraction')) {
+                    player.removeComponent('PortalInteraction');
+                }
             }
         });
 
@@ -71,9 +76,17 @@ export class DialogueUISystem extends System {
             console.log('DialogueUISystem: Received DialogueMessage', { message, dialogue });
             if (!dialogue) return;
 
-            // If message is an object (from a trigger area)
+            // If message is an object 
             if (typeof message === 'object' && message !== null && message.message) {
                 dialogue.text = message.message;
+
+                dialogue.options = Array.isArray(message.options) ? [...message.options] : [];
+
+                // Check if "Close" option exists, add it if not
+                if (!dialogue.options.some(option => option.action === 'closeDialogue')) {
+                    dialogue.options.push({ label: 'Close', action: 'closeDialogue', params: {} });
+                }
+                /*
                 dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
                 console.log('DialogueUISystem: processing options', message.options);
                 if (message.options && Array.isArray(message.options)) {
@@ -87,6 +100,7 @@ export class DialogueUISystem extends System {
                         }
                     });
                 }
+                */
                 console.log('DialogueUISystem: Updated dialogue with trigger message', { message, dialogue });
                 dialogue.isOpen = true;
                 dialogue.dialogueStage = 'greeting';

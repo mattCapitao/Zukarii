@@ -59,11 +59,6 @@ export class PortalSystem extends System {
                 action: 'updatePortalInteraction',
                 params: { action: 'teleport', portalId: portal.id, tier:'?' }
             },
-            {
-                label: 'Cancel',
-                action: 'updatePortalInteraction',
-                params: { action: 'cancelPortalInteraction', portalId: portal.id, tier }
-            }
         ];
 
         interactionComp.options = options; // Store options in the component
@@ -97,8 +92,8 @@ export class PortalSystem extends System {
 
                     interactionComp.action = null; // Reset action to allow handling cleansed portal on the next frame
                     this.utilities.logMessage({ channel: 'system', message: `You have cleansed the portal on tier ${tier}.` });
-                    console.warn(`PortalSystem: Player ${player.id} cleansed portal on tier ${tier}.`, portalBindComp);
-                    interactionComp.action = null;
+                    this.handleCleansedPortal(player, portalComp, portalBindComp, interactionComp.tier);
+                   
                 } else {
                     this.eventBus.emit('DialogueMessage', {
                         message: {
@@ -110,21 +105,12 @@ export class PortalSystem extends System {
                 }
                 break;
 
-            case 'cancelPortalInteraction':
-                this.eventBus.emit('DialogueMessage', {
-                    message: {
-                        message: 'You canceled the portal interaction.',
-                        options: []
-                    }
-                });
-                player.removeComponent('PortalInteraction'); // Remove the component to end the interaction
-                break;
-
             case 'teleport':
-                
+                const destinationTier = interactionComp.params.tier === '?' ? null : interactionComp.tier;
                 player.removeComponent('PortalInteraction'); // Remove the component after teleporting
                 //this.handleTeleport(player, portalComp, portalBindComp, tier);
-                this.handleTeleport(tier);
+                console.log(`PortalSystem: Player ${player.id} requested teleportation to tier ${destinationTier}.`);
+                this.handleTeleport(destinationTier);
                 break;
 
             default:
@@ -150,12 +136,6 @@ export class PortalSystem extends System {
             params: { tier: '?' }
         });
 
-        options.unshift({
-            label: 'Cancel',
-            action: 'updatePortalInteraction',
-            params: { action: 'cancelPortalInteraction',  tier }
-        });
-
         let intent = player.getComponent('InteractionIntent') || new InteractionIntentComponent();
         intent.intents.push({ action: 'openPortalDialogue', params: {} });
         player.addComponent(intent);
@@ -167,6 +147,7 @@ export class PortalSystem extends System {
                 options
             }
         });
+
     }
 
     handleTeleport(tier) {

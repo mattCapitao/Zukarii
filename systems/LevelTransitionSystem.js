@@ -1,5 +1,5 @@
 ﻿// systems/LevelTransitionSystem.js - Updated
-import { PortalBindingComponent } from '../core/Components.js';
+import { PortalBindingComponent, PortalInteractionComponent } from '../core/Components.js';
 import { System } from '../core/Systems.js';
 
 export class LevelTransitionSystem extends System {
@@ -25,6 +25,20 @@ export class LevelTransitionSystem extends System {
             this.pendingTransition = this.levelTransition.pendingTransition;
             console.log('LevelTransitionSystem: Processing pending transition:', this.pendingTransition);
             this.levelTransition.pendingTransition = null;
+
+            // Close the dialogue to prevent repeated teleportation
+            const dialogue = this.entityManager.getEntity('dialogueState').getComponent('Dialogue');
+            if (dialogue) {
+                dialogue.isOpen = false;
+                dialogue.text = '';
+                dialogue.options = [];
+                dialogue.npcId = '';
+                dialogue.dialogueStage = 'greeting';
+            }
+            // remove PortalInteraction component if it exists
+            if (this.player.hasComponent('PortalInteraction')) {
+                this.player.removeComponent('PortalInteraction');
+            }
 
             switch (this.pendingTransition) {
                 case 'portal':
