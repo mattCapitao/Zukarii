@@ -1697,10 +1697,16 @@ tooltip-description {
 #dialogue-buttons {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: .625rem; /* Space between buttons */
     align-items: center;
     justify-content: center; /* Center buttons horizontally */
-    padding: .375rem;
+    padding: .4rem;
+    max-height: 2.75rem;
+    overflow-y: auto; /* Allow scrolling if buttons overflow */
+    scrollbar-color: #0f0 #111;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
 }
 
 #dialogue-close {

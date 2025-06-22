@@ -123,7 +123,9 @@ export class PortalSystem extends System {
             portalBindComp.bindings.push(tier);
         }
 
-        const bindings = portalBindComp.bindings;
+        const bindings = Array.isArray(portalBindComp.bindings) ? [...portalBindComp.bindings] : [];
+        bindings.sort((a, b) => a - b);
+
         const options = bindings.map(tier => ({
             label: tier ,
             action: 'selectPortalTier',

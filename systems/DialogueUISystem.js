@@ -84,23 +84,9 @@ export class DialogueUISystem extends System {
 
                 // Check if "Close" option exists, add it if not
                 if (!dialogue.options.some(option => option.action === 'closeDialogue')) {
-                    dialogue.options.push({ label: 'Close', action: 'closeDialogue', params: {} });
+                    dialogue.options.unshift({ label: 'Close', action: 'closeDialogue', params: {} });     
                 }
-                /*
-                dialogue.options = [{ label: 'Close', action: 'closeDialogue', params: {} }];
-                console.log('DialogueUISystem: processing options', message.options);
-                if (message.options && Array.isArray(message.options)) {
-                    message.options.forEach(option => {
-                        if (option.label && option.action) {
-                            dialogue.options.push({
-                                label: option.label,
-                                action: option.action,
-                                params: option.params || {}
-                            });
-                        }
-                    });
-                }
-                */
+
                 console.log('DialogueUISystem: Updated dialogue with trigger message', { message, dialogue });
                 dialogue.isOpen = true;
                 dialogue.dialogueStage = 'greeting';
