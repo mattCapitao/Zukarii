@@ -1684,14 +1684,19 @@ tooltip-description {
 #dialogue-text {
     height: 100%;
     display: flex;
+    flex-direction: column;
+    gap: .625rem; /* Space between buttons */
     font-weight: 100;
-    align-items: center;
+   
     text-align: left;
-    justify-content: center;
+   
     background: rgba(20, 25, 20, 1);
     border-radius: .625rem .625rem 0 0;
-    border-bottom: 1px solid #00ff0066;
-    padding: .475rem;
+    padding: .625rem;
+    overflow-y: auto; /* Allow scrolling if buttons overflow */
+    scrollbar-color: #0f0 #111;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
 }
 
 #dialogue-buttons {
@@ -1699,10 +1704,12 @@ tooltip-description {
     flex-direction: row;
     flex-wrap: wrap;
     gap: .625rem; /* Space between buttons */
+    border-top: 1px solid #00ff0066;
     align-items: center;
     justify-content: center; /* Center buttons horizontally */
     padding: .4rem;
-    max-height: 2.75rem;
+    min-height: 2.75rem;
+    max-height: 3.0rem;
     overflow-y: auto; /* Allow scrolling if buttons overflow */
     scrollbar-color: #0f0 #111;
     scrollbar-width: thin;

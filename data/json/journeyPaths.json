@@ -30,7 +30,7 @@
     "offerText": "Whispers yet echo, and your fate has arrived. You must Enter Zurath to begin your Journey.",
     "acceptedText": "You have accepted the Journey of Whispers. Sehnrhyx Syliri will guide you to begin your Journey.",
     "activeText": "P: Speak to Sehnrhyx Syliri to start your trials.",
-    "completionText": "Your training has gone well, you are deemed worthy! You may now enter Zurath to begin your journey on the Path of Whispers.",
+    "completionText": "<p>I am told that Your training has gone well, you are deemed worthy! </p><p>Whispers yet echo, and your fate has arrived. If you wish to ascend to the order, You must Enter Zurath to begin your Journey.</p><p> You may now enter Zurath to begin your journey on the Path of Whispers.</p>",
     "logCompletion": true,
     "tasks": [
       {

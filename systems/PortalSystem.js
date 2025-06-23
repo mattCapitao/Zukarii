@@ -50,7 +50,7 @@ export class PortalSystem extends System {
     presentDialogueOptions(player, portal, portalBindComp, tier, interactionComp) {
         const options = [
             {
-                label: 'Cleanse Portal (10 Ashen Shards)',
+                label: 'Cleanse',
                 action: 'updatePortalInteraction',
                 params: { action: 'cleansePortal', portalId:portal.id, tier }
             },

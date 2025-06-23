@@ -387,10 +387,7 @@ export class InteractionSystem extends System {
             dialogue.dialogueStage = 'completion';
             this.shownCompletions.add(completedJourney.id);
             console.log(`InteractionSystem: Showing completion message for journey ${completedJourney.id}`);
-            /*
-            if (completedJourney.id === 'whisper_parent_2') {
-                console.log(`InteractionSystem: Completion dialogue for whisper_parent_2`, { text: dialogue.text });
-            }*/
+
             return true;
         }
 

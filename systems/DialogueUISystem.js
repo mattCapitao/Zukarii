@@ -152,7 +152,7 @@ export class DialogueUISystem extends System {
         );
 
         if (dialogue.isOpen && needsRender) {
-            this.dialogueText.innerHTML = this.utilities.encodeHTMLEntities(dialogue.text);
+            this.dialogueText.innerHTML = dialogue.text; //this.utilities.encodeHTMLEntities(dialogue.text);
             this.dialogueButtons.innerHTML = '';
 
             dialogue.options.forEach((option, index) => {

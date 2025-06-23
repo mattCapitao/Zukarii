@@ -132,7 +132,7 @@ export class JourneyProgressSystem extends System {
                             return '';
                         }).filter(str => str) || [];
                         const rewardMessage = rewardStrings.length > 0 ? rewardStrings.join(', ') : 'None';
-                        const dialogueText = `${journeyData.completionText} Rewards: ${rewardMessage}`;
+                        const dialogueText = `${journeyData.completionText} <p>Rewards: ${rewardMessage}</p>`;
                         dialogueComp.dialogues[path.id] = {
                             text: dialogueText,
                             action: 'acknowledgeCompletion',
