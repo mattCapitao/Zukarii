@@ -20,6 +20,7 @@ export class SpatialBucketsComponent {
     constructor() {
         this.type = 'SpatialBuckets';
         this.buckets = new Map(); // Map of bucketKey (`${x},${y}`) to array of entity IDs
+        this.monsterBuckets = new Map(); // Map of bucketKey (`${x},${y}`) to array of monster entity IDs
     }
 }
 

@@ -82,7 +82,7 @@ export class ProjectileCollisionSystem extends System {
                     break;
                 }
 
-                if ((target.hasComponent('MonsterData') && !target.hasComponent('Dead'))) {
+                if (target.hasComponent('MonsterData') && !source.hasComponent('MonsterData') && !target.hasComponent('Dead')) {
                     const weapon = projData.weapon;
                     if (!weapon && source?.hasComponent('PlayerState')) {
                         throw new Error(`Projectile ${projectile.id} from player has no weapon assigned!`);
@@ -101,6 +101,34 @@ export class ProjectileCollisionSystem extends System {
                     if (source?.hasComponent('PlayerState')) {
                         this.sfxQueue.push({ sfx: 'firehit0', volume: .1 });
                     }
+
+                    if (!projData.isPiercing && !projectile.hasComponent('RemoveEntity')) {
+                        projectile.rangeLeft = 0;
+                        projectile.addComponent(new RemoveEntityComponent());
+                        break;
+                    } else {
+                        projectile.rangeLeft -= 1;
+                    }
+                }
+
+                if (target.hasComponent('PlayerState') && source.hasComponent('MonsterData')) {
+                    const weapon = projData.weapon;
+                    if (!weapon) {
+                        console.error(`Projectile ${projectile.id} from monster has no weapon assigned!`);
+                        continue;
+                    }
+                    this.eventBus.emit('CalculateDamage', {
+                        attacker: source,
+                        target: target,
+                        weapon: weapon
+                    });
+
+                    this.eventBus.emit('PlayerWasHit', {
+                        attacker: source,
+                        target: target,
+                    });
+
+                    this.sfxQueue.push({ sfx: 'firehit0', volume: .1 });
 
                     if (!projData.isPiercing && !projectile.hasComponent('RemoveEntity')) {
                         projectile.rangeLeft = 0;

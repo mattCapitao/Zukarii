@@ -115,8 +115,31 @@
         "dropChance": 0.75,
         "data": {}
       }
-    ]
-  },
+    ],
+    "rangedAttack": {
+      "name": "Firebolt",
+      "manaCost": 0,
+      "range": 5,
+      "piercing": false,
+      "sfx": "firecast0",
+      "castTime": 100,
+      "projectileSpeed": 320,
+      "projectileAvatar": "img/avatars/projectile.png",
+      "weapon": {
+        "name": "Firebolt",
+        "baseDamageMin": 2,
+        "baseDamageMax": 5,
+        "attackType": "ranged",
+        "range": 5,
+        "specialEffects": {
+          "piercing": true,
+          "elemental": "fire"
+        },
+        "critMultiplier": 1.5,
+        "projectileAvatar": "img/avatars/projectile.png"
+      }
+    }
+   },
   {
     "x": 0,
     "y": 0,
@@ -173,6 +196,29 @@
         "dropChance": 0.75,
         "data": {}
       }
-    ]
+    ],
+    "rangedAttack": {
+      "name": "Firebolt",
+      "manaCost": 0,
+      "range": 5,
+      "piercing": false,
+      "sfx": "firecast0",
+      "castTime": 100,
+      "projectileSpeed": 320,
+      "projectileAvatar": "img/avatars/projectile.png",
+      "weapon": {
+        "name": "Firebolt",
+        "baseDamageMin": 2,
+        "baseDamageMax": 5,
+        "attackType": "ranged",
+        "range": 5,
+        "specialEffects": {
+          "piercing": true,
+          "elemental": "fire"
+        },
+        "critMultiplier": 1.5,
+        "projectileAvatar": "img/avatars/projectile.png"
+      }
+    }
   }
 ]

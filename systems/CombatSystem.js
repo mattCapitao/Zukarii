@@ -20,11 +20,13 @@ export class CombatSystem extends System {
             //console.log('CombatSystem: RangedAttack event received with data:', data);
             this.handleRangedAttack(data);
         });
+        this.eventBus.on('MonsterRangedAttack', (data) => this.initiateRangedAttack(data));
         this.eventBus.on('MonsterAttack', (data) => this.handleMonsterMeleeAttack(data));
         this.eventBus.on('RangedAttackHit', (data) => {
             //console.log('CombatSystem: RangedAttackHit event received with data:', data);
             this.combatFlagging(data);
-         });
+        });
+        
            
     }
 
@@ -219,6 +221,68 @@ export class CombatSystem extends System {
             this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(playerPos.x, playerPos.y));
             this.eventBus.emit('LightSourceActivated', ({ type: 'firebolt', entityId: projectile.id }));
             playerState.isCasting = false;
+        }, CAST_TIME);
+    }
+
+    initiateRangedAttack({ entityId, direction }) {
+        console.log('CombatSystem: initiateRangedAttack called with source:', entityId, 'and direction:', direction);
+        const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
+        if (gameState?.gameOver) return;
+
+        const source = this.entityManager.getEntity(entityId);
+        if (!source) return;
+        if (source.hasComponent('Dead')) return;
+        const rangedAttack = source.getComponent('RangedAttack');
+        if (!rangedAttack) return;
+
+        
+        
+        if (source.hasComponent('PlayerState')) {
+            const sourceState = source.getComponent('State');
+            if (sourceState?.isCasting) return;
+            sourceState.isCasting = true;
+            if (rangedAttack.manaCost && rangedAttack.manaCost > 0) {
+                const mana = source.getComponent('Mana');
+                if (!mana || mana.mana < rangedAttack.manaCost) {
+                    this.utilities.logMessage({ channel: 'combat', message: `${source.id} does not have enough mana to cast ${rangedAttack.name}` });
+                    return;
+                }
+                this.manaUpdates.push({ entityId, amount: -rangedAttack.manaCost });
+            }
+        }
+
+        const combat = source.getComponent('InCombat');
+        if (!combat) {
+            source.addComponent(new InCombatComponent(3000));
+            this.utilities.logMessage({ channel: 'combat', message: `${source.id} enters combat by casting ${rangedAttack.name}!` });
+        } else {
+            combat.elapsed = 0; // Reset to extend 3s
+        }
+
+        const sourcePos = source.getComponent('Position');
+        const range = rangedAttack.range || 3;
+        const isPiercing = rangedAttack.piercing || false;
+
+        this.sfxQueue.push({ sfx: rangedAttack.sfx || 'firecast0', volume: .1 });
+        const CAST_TIME = rangedAttack.castTime || 100;
+        
+        //this.eventBus.emit('AnimateRangedAttack', { entityId });
+
+        setTimeout(() => {
+            const projectile = this.entityManager.createEntity(`projectile_${this.utilities.generateUniqueId()}`);
+            this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(sourcePos.x, sourcePos.y));
+            this.entityManager.addComponentToEntity(projectile.id, new LastPositionComponent(0, 0));
+            this.entityManager.addComponentToEntity(projectile.id, new ProjectileComponent(direction, range, entityId, rangedAttack.weapon, isPiercing));
+            this.entityManager.addComponentToEntity(projectile.id, new MovementSpeedComponent(rangedAttack.projectileSpeed || 320));
+            this.entityManager.addComponentToEntity(projectile.id, new HitboxComponent(32, 32));
+            this.entityManager.addComponentToEntity(projectile.id, new VisualsComponent(24, 24));
+            const visuals = this.entityManager.getEntity(projectile.id).getComponent('Visuals');
+            visuals.avatar = rangedAttack.projectileAvatar || 'img/avatars/projectile.png';
+            console.warn(`CombatSystem: initiateRangedAttack - projectile visuals component set to ${visuals}`);
+            visuals.offsetX = 8; visuals.offsetY = 8;
+            this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(sourcePos.x, sourcePos.y));
+            this.eventBus.emit('LightSourceActivated', { type: rangedAttack.lightSourceType || 'default', entityId: projectile.id });
+            sourceState.isCasting = false;
         }, CAST_TIME);
     }
 

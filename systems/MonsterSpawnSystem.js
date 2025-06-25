@@ -1,6 +1,6 @@
 ﻿// systems/MonsterSpawnSystem.js
 import { System } from '../core/Systems.js';
-import { PositionComponent, LastPositionComponent, HealthComponent, AttackSpeedComponent, MovementSpeedComponent, AffixComponent, VisualsComponent, HitboxComponent } from '../core/Components.js';
+import { PositionComponent, LastPositionComponent, HealthComponent, AttackSpeedComponent, MovementSpeedComponent, AffixComponent, VisualsComponent, HitboxComponent, RangedAttackComponent } from '../core/Components.js';
 
 export class MonsterSpawnSystem extends System {
     constructor(entityManager, eventBus, utilities, dataSystem) {
@@ -151,7 +151,7 @@ export class MonsterSpawnSystem extends System {
 
             if (tierMonsters.length === 0 && tierUniqueMonsters.length === 0) {
                 console.warn(`MonsterSpawnSystem: No monsters available for tier ${tier}`);
-                return;
+                return false;
             }
 
             for (let i = 0; i < monsterCount; i++) {
@@ -175,7 +175,7 @@ export class MonsterSpawnSystem extends System {
 
                 if (!playerX || !playerY) {
                     console.error(`MonsterSpawnSystem.js: Player position {x:${playerX},  y:${playerY} could not be resolved for calling createMonsterEntity`);
-                    return null;
+                    return false;
                 }
 
                 const monster = this.createMonsterEntity(template, tier, normalRoomIds, playerX, playerY);
@@ -417,6 +417,10 @@ export class MonsterSpawnSystem extends System {
         if (affixDefinitions.length > 0) {
             this.entityManager.addComponentToEntity(entity.id, new AffixComponent(affixDefinitions));
             ////console.log(`MonsterSpawnSystem: Added affixes to ${template.name}:`, affixDefinitions);
+        }
+
+        if (template.rangedAttack) {
+            this.entityManager.addComponentToEntity(entity.id, new RangedAttackComponent(template.rangedAttack));
         }
 
         ////console.log(`MonsterSpawnSystem: Entity ${entity.id} classes: ${template.classes}, components:`, Array.from(entity.components.keys()));

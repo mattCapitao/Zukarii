@@ -84,6 +84,7 @@ import {
     LogComponent,
     LightSourceComponent,
     PortalInteractionComponent,
+    RangedAttackComponent,
 } from './components/CommonComponents.js';
 
 // Re-export all components for centralized access
@@ -167,6 +168,7 @@ export {
     LogComponent,
     LightSourceComponent,
     PortalInteractionComponent,
+    RangedAttackComponent,
 };
 
 // Utility functions

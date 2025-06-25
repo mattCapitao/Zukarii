@@ -143,6 +143,15 @@ export class Utilities {
         return null;
     }
 
+    getDistance(pos1, pos2) {
+        if (!pos1 || !pos2 || typeof pos1.x !== 'number' || typeof pos1.y !== 'number' || typeof pos2.x !== 'number' || typeof pos2.y !== 'number') {
+            console.warn('Utilities: Invalid positions provided to getDistance', pos1, pos2);
+            return Infinity; // Return a large value to indicate invalid distance
+        }
+        const dx = pos2.x - pos1.x;
+        const dy = pos2.y - pos1.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
 
     logMessage(logData) {
         if (!logData || typeof logData !== 'object' || !logData.message) {

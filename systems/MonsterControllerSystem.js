@@ -7,14 +7,21 @@ export class MonsterControllerSystem extends System {
         super(entityManager, eventBus);
         this.requiredComponents = ['Position', 'Health', 'MonsterData'];
         this.utilities = utilities;
-        this.utilities.entityManager = this.entityManager; // Ensure utilities have access to the entity manager
+        this.utilities.entityManager = this.entityManager; // Ensure utilities have access to the entity manager     
     }
-
     init() {
         this.TILE_SIZE = this.utilities.TILE_SIZE
+        this.BUCKET_SIZE = 16; // Matches existing bucket size (16 tiles)
+        this.invTileBucket = 1 / (this.TILE_SIZE * this.BUCKET_SIZE);
         this.AGGRO_RANGE = 4 * this.TILE_SIZE; // 4 tiles in pixels (32 pixels per tile)
         this.MELEE_RANGE = 1.5 * this.TILE_SIZE; // Pixel distance to trigger melee attack
         this.MONSTER_WANDER_CHANCE = .001;
+
+        const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
+        const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
+
+        this.bucketsComp = levelEntity.getComponent('SpatialBuckets');
+        
     }
     update(deltaTime) {
         const gameState = this.entityManager.getEntity('gameState')?.getComponent('GameState');
@@ -23,9 +30,7 @@ export class MonsterControllerSystem extends System {
         const player = this.entityManager.getEntity('player');
         if (!player || player.getComponent('PlayerState').dead || player.hasComponent('Dead')) return;
 
-        const tier = this.entityManager.getEntity('gameState').getComponent('GameState').tier;
-        const levelEntity = this.entityManager.getEntitiesWith(['Map', 'Tier']).find(e => e.getComponent('Tier').value === tier);
-        if (!levelEntity) return;
+        if (!this.bucketsComp || !this.bucketsComp.monsterBuckets) return;
 
         const monsters = this.entityManager.getEntitiesWith(this.requiredComponents);
 
@@ -60,6 +65,8 @@ export class MonsterControllerSystem extends System {
             const dx = playerPos.x - pos.x;
             const dy = playerPos.y - pos.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
+            const magnitude = distance === 0 ? 1 : distance; // Avoid division by zero
+            const direction = magnitude === 0 ? { dx: 0, dy: 0 } : { dx: dx / magnitude, dy: dy / magnitude }
 
             // Accumulate time for attacks (deltaTime in seconds, convert to ms)
             attackSpeed.elapsedSinceLastAttack += deltaTime * 1000;
@@ -70,7 +77,40 @@ export class MonsterControllerSystem extends System {
 
             if (distance > this.AGGRO_RANGE * 2 && !isInCombat) { monsterData.isAggro = false; }
 
+            monsterData.nearbyMonsters = [];
             if (monsterData.isAggro) {
+
+                const nearbyMonsters = this.getNearbyMonsters(monster, this.AGGRO_RANGE);
+                monsterData.nearbyMonsters = nearbyMonsters; // Store nearby monsters with distance in MonsterData
+
+                console.log(`MonsterControllerSystem: Updated nearbyMonsters for ${monsterData.name} with ${monsterData.nearbyMonsters.length} entries`);
+                nearbyMonsters.forEach(({ entityId, distance }) => {
+                    const nearbyMonster = this.entityManager.getEntity(entityId);
+                    const nearbyMonsterData = nearbyMonster.getComponent('MonsterData');
+                    nearbyMonsterData.isAggro = true;
+                    if (monsterData.isInCombat) {
+                        nearbyMonster.addComponent(new InCombatComponent(3000)); // Set inCombat if the monster is already in combat
+                    }
+                    console.log(`MonsterControllerSystem: Nearby monster ${nearbyMonsterData.name} is now aggro at distance ${distance} from Aggro monster ${monsterData.name}`);
+                });
+
+                if (monster.hasComponent('RangedAttack')) {
+                    const rangedAttack = monster.getComponent('RangedAttack');
+                    console.warn(`MonsterControllerSystem: ${monsterData.name} has ranged attack with range ${rangedAttack.range} distance to player`);
+                    if (distance <= rangedAttack.range * this.TILE_SIZE) {
+                        console.warn(`MonsterControllerSystem: ${monsterData.name} is in ranged attack range of player at distance ${distance.toFixed(2)} pixels`);
+                        console.warn(`MonsterControllerSystem: ${monsterData.name} attack cooldown data: `,attackSpeed.elapsedSinceLastAttack, attackSpeed.attackSpeed);
+                        if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
+                            console.warn(`MonsterControllerSystem: ${monsterData.name} is emitting ranged attack`);
+                            this.eventBus.emit('MonsterRangedAttack', { entityId: monster.id, direction });
+                            attackSpeed.elapsedSinceLastAttack = 0;
+                            //////console.log(`MonsterControllerSystem: ${monsterData.name} ranged attacked player at distance ${distance.toFixed(2)} pixels`);
+                        }
+                        return; // Stop moving if in ranged attack range
+                    }
+                }
+
+
                 if (distance <= this.MELEE_RANGE) {
                     if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
                         this.eventBus.emit('MonsterAttack', { entityId: monster.id });
@@ -78,7 +118,7 @@ export class MonsterControllerSystem extends System {
                         //////console.log(`MonsterControllerSystem: ${monsterData.name} attacked player at distance ${distance.toFixed(2)} pixels`);
                     }
                     return; // Stop moving if in melee range
-                }
+                }  
 
                 // Set facing direction
                  monster.getComponent('Visuals').faceLeft = dx < 0 ? true : dx > 0 ? false : monster.getComponent('Visuals').faceLeft;
@@ -160,6 +200,37 @@ export class MonsterControllerSystem extends System {
             }
            
         });
+    }
+
+    getNearbyMonsters(entity, range) {
+        if (!entity || !entity.hasComponent('Position') || !this.bucketsComp) return [];
+        const pos = entity.getComponent('Position');
+        const bucketX = Math.floor(pos.x * this.invTileBucket); // Required to locate the entity's bucket
+        const bucketY = Math.floor(pos.y * this.invTileBucket);
+
+        const nearbyBuckets = [];
+        const contagionRange = Math.ceil(range * this.invTileBucket); // Convert range to bucket units
+        console.log(`MonsterControllerSystem: Monster at bucket (${bucketX}, ${bucketY}), contagion range: ${contagionRange}`);
+
+        for (let dx = -contagionRange; dx <= contagionRange; dx++) {
+            for (let dy = -contagionRange; dy <= contagionRange; dy++) {
+                const bucketKey = `${bucketX + dx},${bucketY + dy}`;
+                if (this.bucketsComp.monsterBuckets.has(bucketKey)) {
+                    nearbyBuckets.push(...this.bucketsComp.monsterBuckets.get(bucketKey));
+                }
+            }
+        }
+
+        const nearbyMonsters = nearbyBuckets
+            .map(id => this.entityManager.getEntity(id))
+            .filter(entity => entity && entity.hasComponent('MonsterData'))
+            .map(nearbyMonster => {
+                const nearbyPos = nearbyMonster.getComponent('Position');
+                const distance = this.utilities.getDistance(pos, nearbyPos);
+                return { entityId: nearbyMonster.id, distance }; // Include distance in the result
+            });
+
+        return nearbyMonsters.filter(m => m.distance <= range);
     }
 
     handleMonsterDeath(entityId) {

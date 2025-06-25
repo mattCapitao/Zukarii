@@ -22,6 +22,7 @@ export class SpatialBucketsSystem extends System {
     update() {
         const activeTier = this.entityManager.getActiveTier();
         const levelEntity = this.entityManager.getEntitiesWith(['Tier']).find(e => e.getComponent('Tier').value === activeTier);
+        
         if (!levelEntity) {
             console.warn(`SpatialBucketSystem: No level entity found for active tier ${activeTier}`);
             return;
@@ -32,12 +33,13 @@ export class SpatialBucketsSystem extends System {
             console.warn(`SpatialBucketSystem: SpatialBucketsComponent missing for level ${levelEntity.id}`);
             return;
         }
-
+        
         // Black box optimization: clear arrays in place instead of clearing the map
         for (const arr of bucketsComp.buckets.values()) arr.length = 0;
-
+        for (const arr of bucketsComp.monsterBuckets.values()) arr.length = 0;
         // Find all entities with Position and Visuals components
         const entities = this.entityManager.getEntitiesWith(['Position', 'Visuals']);
+        const monsters = entities.filter(entity => entity.hasComponent('MonsterData'));
         const invTileBucket = this.invTileBucket;
 
         for (let i = 0; i < entities.length; i++) {
@@ -52,7 +54,26 @@ export class SpatialBucketsSystem extends System {
                 bucketsComp.buckets.set(bucketKey, arr);
             }
             arr.push(entity.id);
+
         }
+
+        for (let i = 0; i < monsters.length; i++) {
+            const monster = monsters[i];
+            const pos = monster.getComponent('Position');
+            const bucketX = Math.floor(pos.x * invTileBucket);
+            const bucketY = Math.floor(pos.y * invTileBucket);
+            const bucketKey = `${bucketX},${bucketY}`;
+
+            // Monster-specific bucket for aggro checks and AOE damage
+            let monsterArr = bucketsComp.monsterBuckets.get(bucketKey);
+            if (!monsterArr) {
+                monsterArr = [];
+                bucketsComp.monsterBuckets.set(bucketKey, monsterArr);
+            }
+            monsterArr.push(monster.id);
+            //console.log(`SpatialBucketsSystem: Added monster ${monster.id} to bucket ${bucketKey}`);
+        }
+       // console.log(`SpatialBucketsSystem: Updated spatial buckets for tier ${activeTier}. Total buckets: ${bucketsComp.buckets.size}, Monster Buckets: ${bucketsComp.monsterBuckets.size}`);
     }
 }
 

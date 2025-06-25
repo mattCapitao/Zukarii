@@ -364,11 +364,10 @@ export class Game {
 
     startGameLoop() {
         this.GameLoopRunning = true;
-        let lastTime = performance.now();
-
+        let lastTime = window.performance.now();
         let frameCount = 0;
         let fps = 0;
-        let lastFpsUpdate = performance.now();
+        let lastFpsUpdate = window.performance.now();
         const fpsCounter = document.getElementById('fps-counter');
         let perfLabel = {};
         if (window.location.host === 'game.zukarii.com') {
