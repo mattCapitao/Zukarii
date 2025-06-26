@@ -129,8 +129,8 @@ export class EffectsSystem extends System {
         }
 
         //console.log(`EffectsSystem: Attempting lifeSteal on ${entity.id}`);
-        const CHANCE_TO_STEAL_LIFE = params?.chanceToStealLife || 0.05;
-        const MIN_DAMAGE_HEALED_PERCENTAGE = params?.minDamageHealedPercentage || 0.10;
+        const CHANCE_TO_STEAL_LIFE = params?.chanceToStealLife || 0.10;
+        const MIN_DAMAGE_HEALED_PERCENTAGE = params?.minDamageHealedPercentage || 0.15;
         const MAX_DAMAGE_HEALED_PERCENTAGE = params?.maxDamageHealedPercentage || 0.25;
 
         if (Math.random() >= CHANCE_TO_STEAL_LIFE) {

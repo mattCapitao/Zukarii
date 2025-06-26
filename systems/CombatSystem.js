@@ -205,7 +205,7 @@ export class CombatSystem extends System {
         this.manaUpdates.push({ entityId: 'player', amount: -manaCost });
         const CAST_TIME = 100;
         playerState.isCasting = true;
-        this.eventBus.emit('AnimateRangedAttack');
+        this.eventBus.emit('AnimateRangedAttack', { entityId: 'plsyer' });
 
         setTimeout(() => {
             const projectile = this.entityManager.createEntity(`projectile_${this.utilities.generateUniqueId()}`);
@@ -265,9 +265,11 @@ export class CombatSystem extends System {
 
         this.sfxQueue.push({ sfx: rangedAttack.sfx || 'firecast0', volume: .1 });
         const CAST_TIME = rangedAttack.castTime || 100;
-        
-        //this.eventBus.emit('AnimateRangedAttack', { entityId });
 
+        if (source.hasComponent('Animation') && source.hasComponent('AnimationState')) {
+            this.eventBus.emit('AnimateRangedAttack', { entityId });
+        }
+        
         setTimeout(() => {
             const projectile = this.entityManager.createEntity(`projectile_${this.utilities.generateUniqueId()}`);
             this.entityManager.addComponentToEntity(projectile.id, new PositionComponent(sourcePos.x, sourcePos.y));

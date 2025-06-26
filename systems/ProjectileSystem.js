@@ -36,7 +36,14 @@ export class ProjectileSystem extends System {
                 // Normalize direction vector (dx, dy)
                 const magnitude = Math.sqrt(dx * dx + dy * dy);
                 if (magnitude === 0) {
-                    console.warn(`ProjectileSystem: Invalid direction for projectile ${projectile.id}, skipping movement`);
+                    projData.zeroMagFrameCount = (projData.zeroMagFrameCount || 0) + 1;
+                    console.warn(`ProjectileSystem: Invalid direction for projectile ${projectile.id}, skipping movement`, projData);
+                    if (projData.zeroMagFrameCount > 5) {
+                        // If zero magnitude for too many frames, remove the projectile
+                        if (!projectile.hasComponent('RemoveEntity')) {
+                            projectile.addComponent(new RemoveEntityComponent());
+                        }
+                    }
                     continue;
                 }
 

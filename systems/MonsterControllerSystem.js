@@ -83,7 +83,7 @@ export class MonsterControllerSystem extends System {
                 const nearbyMonsters = this.getNearbyMonsters(monster, this.AGGRO_RANGE);
                 monsterData.nearbyMonsters = nearbyMonsters; // Store nearby monsters with distance in MonsterData
 
-                console.log(`MonsterControllerSystem: Updated nearbyMonsters for ${monsterData.name} with ${monsterData.nearbyMonsters.length} entries`);
+               // console.log(`MonsterControllerSystem: Updated nearbyMonsters for ${monsterData.name} with ${monsterData.nearbyMonsters.length} entries`);
                 nearbyMonsters.forEach(({ entityId, distance }) => {
                     const nearbyMonster = this.entityManager.getEntity(entityId);
                     const nearbyMonsterData = nearbyMonster.getComponent('MonsterData');
@@ -210,7 +210,7 @@ export class MonsterControllerSystem extends System {
 
         const nearbyBuckets = [];
         const contagionRange = Math.ceil(range * this.invTileBucket); // Convert range to bucket units
-        console.log(`MonsterControllerSystem: Monster at bucket (${bucketX}, ${bucketY}), contagion range: ${contagionRange}`);
+       // console.log(`MonsterControllerSystem: Monster at bucket (${bucketX}, ${bucketY}), contagion range: ${contagionRange}`);
 
         for (let dx = -contagionRange; dx <= contagionRange; dx++) {
             for (let dy = -contagionRange; dy <= contagionRange; dy++) {

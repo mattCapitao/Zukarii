@@ -21,11 +21,11 @@ import {
 } from '../core/Components.js';
 
 const roomTypes = [
-    { type: 'SquareRoom', probability: 45, minW: 15, maxW: 21, minH: 8, maxH: 11 },
-    { type: 'VerticalRoom', probability: 30, minW: 8, maxW: 12, minH: 12, maxH: 18 },
-    { type: 'HorizontalRoom', probability: 5, minW: 18, maxW: 22, minH: 8, maxH: 12 },
-    { type: 'AlcoveSpecial', probability: 15, minW: 10, maxW: 10, minH: 5, maxH: 5 },
-    { type: 'BossChamberSpecial', probability: 5, minW: 25, maxW: 30, minH: 15, maxH: 18 }
+    { type: 'SquareRoom', probability: 45, minW: 8, maxW: 12, minH: 8, maxH: 12 },
+    { type: 'VerticalRoom', probability: 30, minW: 8, maxW: 11, minH: 11, maxH: 15 },
+    { type: 'HorizontalRoom', probability: 5, minW: 11, maxW: 15, minH: 8, maxH: 11 },
+    { type: 'AlcoveSpecial', probability: 15, minW: 5, maxW: 10, minH: 5, maxH: 10 },
+    { type: 'BossChamberSpecial', probability: 5, minW: 16, maxW: 20, minH: 16, maxH: 20 }
 ];
 export class LevelSystem extends System {
     constructor(entityManager, eventBus, state, genSys, utilities) {
@@ -42,14 +42,14 @@ export class LevelSystem extends System {
         this.ROOM_EDGE_BUFFER = 4;
         this.CORRIDOR_EDGE_BUFFER = 2;
         this.MIN_ROOM_SIZE = 5;
-        this.MAX_OVERLAP_PERCENT = 0.02;
+        this.MAX_OVERLAP_PERCENT = 0.01;
         this.INITIAL_MIN_DISTANCE = 35;
         this.MIN_DISTANCE_FLOOR = 3;
         this.MIN_BOSS_LEVEL = 3
         this.BOSS_ROOM_EVERY_X_LEVELS = 3;
         this.lastBossTier = 0;
         this.MAX_PLACEMENT_ATTEMPTS = 30; // Reduced to prevent performance issues
-        this.roomsPerLevel = 30; // Reduced to prevent performance issues
+        this.roomsPerLevel = 42; // Reduced to prevent performance issues
         this.MIN_STAIR_DISTANCE = 24;
         this.TILE_SIZE = this.state.TILE_SIZE || 32;
         this.isAddingLevel = false; // Guard against re-entrant calls

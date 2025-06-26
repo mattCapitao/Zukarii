@@ -370,7 +370,14 @@ export class JourneyProgressSystem extends System {
         return false;
     }
 
-    checkEquipGear(task, inventory) {
+    checkEquipGear(task, inventory) { 
+
+        console.log(`JourneyProgressSystem: Checking equipGear for task ${task.id}`,task, inventory.equipped);
+        for (const item of Object.values(inventory.equipped)) {
+            if (!item || item.itemTier !== 'magic') return false;
+        }
+        return true;
+        /*
         const requiredTypes = new Set(['amulet', 'armor', 'ring', 'ring', 'weapon', 'weapon']);
         const requiredWeapons = new Set(['melee', 'ranged']);
         const equippedTypes = new Set();
@@ -398,6 +405,7 @@ export class JourneyProgressSystem extends System {
             requiredTypes.every(type => type === 'weapon' || equippedTypes.has(type)) &&
             requiredWeapons.size === equippedWeapons.size &&
             requiredWeapons.every(attackType => equippedWeapons.has(attackType));
+            */
     }
 
     applyRewards(journey) {

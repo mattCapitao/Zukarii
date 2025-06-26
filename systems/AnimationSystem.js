@@ -7,15 +7,15 @@ export class AnimationSystem extends System {
         this.baselineSpeed = 100; // Combat speed (192 * 0.66)
 
         // Listen for RangedAttack event to trigger attack animation
-        this.eventBus.on('AnimateRangedAttack', () => this.animateRangedAttack());
+        this.eventBus.on('AnimateRangedAttack', (data) => this.animateRangedAttack(data));
     }
 
-    animateRangedAttack() {
-        const player = this.entityManager.getEntity('player');
-        if (!player) return;
+    animateRangedAttack({entityId }) {
+        const entity = this.entityManager.getEntity(entityId);
+        if (!entity) return;
 
-        const animState = player.getComponent('AnimationState');
-        const animation = player.getComponent('Animation');
+        const animState = entity.getComponent('AnimationState');
+        const animation = entity.getComponent('Animation');
         if (!animState || !animation) return;
 
         // Trigger attack animation

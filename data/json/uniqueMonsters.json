@@ -162,7 +162,7 @@
     "uniqueItemsDropped": [
       {
         "type": "rog",
-        "dropChance": 0.05,
+        "dropChance": 0.02,
         "data": {
           "tierIndex": 5,
           "type": "weapon",
@@ -175,7 +175,7 @@
               "trigger": "attackHitTarget",
               "effect": "lifeSteal",
               "params": {
-                "minDmageHealedPercentage": 0.15,
+                "minDmageHealedPercentage": 0.25,
                 "maxDamageHealedPercentage": 0.35,
                 "chanceToStealLife": 0.10
               },

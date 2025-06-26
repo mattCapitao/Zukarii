@@ -227,20 +227,20 @@ export class LightSourceDefinitions {
             },
             portalGreen: { // Example for NPC on tier 0
                 visibilityEnabled: true,
-                visibilityRadius: 4, // medium visibility radius
+                visibilityRadius: 11, // medium visibility radius
                 visibilityOpacitySteps: [0.75, 0.15, 0],
                 visibilityTintColor: 'rgba(0,255,0,0.4)', // Subtle green tint
                 glowEnabled: true,
                 glowType: 'environmental',
                 glowColor: 'rgba(0,255,0,1)', // Green glow
                 glowIntensity: 1, // Faint glow
-                glowSize: 0, // Small outline
+                glowSize: 15, // Small outline
                 proximityFactor: 3, // Slightly brighter when player is near
                 pulse: { amplitude: 0.3, frequency: 0.3 } // Strong pulsing
             },
             portalBlue: { 
                 visibilityEnabled: true,
-                visibilityRadius: 9, // Large visibility radius
+                visibilityRadius: 11, // Large visibility radius
                 visibilityOpacitySteps: [0.75, 0.15, 0],
                 visibilityTintColor: 'rgba(0,0,255,1)', // Strong Blue Tint
                 glowEnabled: true,
