@@ -85,6 +85,7 @@ export class MonsterControllerSystem extends System {
 
                // console.log(`MonsterControllerSystem: Updated nearbyMonsters for ${monsterData.name} with ${monsterData.nearbyMonsters.length} entries`);
                 nearbyMonsters.forEach(({ entityId, distance }) => {
+                    if (entityId === monster.id) return; // Skip self
                     const nearbyMonster = this.entityManager.getEntity(entityId);
                     const nearbyMonsterData = nearbyMonster.getComponent('MonsterData');
                     nearbyMonsterData.isAggro = true;
@@ -96,12 +97,12 @@ export class MonsterControllerSystem extends System {
 
                 if (monster.hasComponent('RangedAttack')) {
                     const rangedAttack = monster.getComponent('RangedAttack');
-                    console.warn(`MonsterControllerSystem: ${monsterData.name} has ranged attack with range ${rangedAttack.range} distance to player`);
+                   // console.warn(`MonsterControllerSystem: ${monsterData.name} has ranged attack with range ${rangedAttack.range} distance to player`);
                     if (distance <= rangedAttack.range * this.TILE_SIZE) {
-                        console.warn(`MonsterControllerSystem: ${monsterData.name} is in ranged attack range of player at distance ${distance.toFixed(2)} pixels`);
-                        console.warn(`MonsterControllerSystem: ${monsterData.name} attack cooldown data: `,attackSpeed.elapsedSinceLastAttack, attackSpeed.attackSpeed);
+                       // console.warn(`MonsterControllerSystem: ${monsterData.name} is in ranged attack range of player at distance ${distance.toFixed(2)} pixels`);
+                        //console.warn(`MonsterControllerSystem: ${monsterData.name} attack cooldown data: `,attackSpeed.elapsedSinceLastAttack, attackSpeed.attackSpeed);
                         if (attackSpeed.elapsedSinceLastAttack >= attackSpeed.attackSpeed) {
-                            console.warn(`MonsterControllerSystem: ${monsterData.name} is emitting ranged attack`);
+                           // console.warn(`MonsterControllerSystem: ${monsterData.name} is emitting ranged attack`);
                             this.eventBus.emit('MonsterRangedAttack', { entityId: monster.id, direction });
                             attackSpeed.elapsedSinceLastAttack = 0;
                             //////console.log(`MonsterControllerSystem: ${monsterData.name} ranged attacked player at distance ${distance.toFixed(2)} pixels`);

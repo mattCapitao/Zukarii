@@ -79,6 +79,16 @@ export class GameStateComponent {
     }
 }
 
+export class GameOptionsComponent {
+    constructor({
+        soundEnabled = true,
+        globalVolume = .7, // Global audio volume
+    } = {}) {
+        this.type = 'GameOptions';
+        soundEnabled = soundEnabled; // Boolean: Whether sound is enabled
+        this.globalVolume = globalVolume; // Global audio volume
+    }
+}
 export class ProjectileComponent {
     constructor(direction, rangeLeft, sourceEntityId, weapon = null, isPiercing = false) {
         this.type = 'Projectile';

@@ -341,3 +341,29 @@ export class RangedAttackComponent {
         };
     }
 }
+
+
+export class AttackComponent {
+    constructor({ name, manaCost, range, piercing, sfx, castTime, projectileSpeed, projectileAvatar, lightSourceType, weapon }) {
+        this.type = 'Attack';
+        this.name = name || 'Firebolt';
+        this.manaCost = manaCost || 0;
+        this.range = range || 3;
+        this.piercing = piercing || false;
+        this.sfx = sfx || 'firecast0';
+        this.castTime = castTime || 100;
+        this.projectileSpeed = projectileSpeed || 320;
+        this.projectileAvatar = projectileAvatar || 'img/avatars/projectile.png';
+        this.lightSourceType = lightSourceType || 'default';
+        this.weapon = weapon || {
+            name: 'Firebolt',
+            baseDamageMin: 2,
+            baseDamageMax: 5,
+            attackType: 'ranged',
+            range: 3,
+            specialEffects: { piercing: true, elemental: 'fire' },
+            critMultiplier: 1.5,
+            projectileAvatar: 'img/avatars/projectile.png'
+        };
+    }
+}

@@ -74,8 +74,8 @@ export class SplashSystem extends System {
         // Wait for audio to load
         this.eventBus.on('AudioLoaded', () => {
             console.log('SplashSystem: Audio loaded, playing sounds');
-            this.eventBus.emit('PlayTrackControl', { track: 'backgroundMusic', play: true, volume: 0.05 });
-            this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
+            this.eventBus.emit('PlayTrackControl', { track: 'backgroundMusic', play: true, volume: 0.025 });
+            this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.01 });
         });
 
         // Start animation loop
@@ -222,7 +222,7 @@ export class SplashSystem extends System {
         this.menuItems.forEach((item, index) => {
             item.addEventListener('click', () => {
                 this.selectedIndex = index;
-                //this.eventBus.emit('PlaySfxImmediate', { sfx: 'ding', volume: 0.06 });
+        
                 this.updateSelection();
                 this.handleSelection(index);
             });
@@ -248,7 +248,7 @@ export class SplashSystem extends System {
             this.entityManager.addComponentToEntity('player', new NewCharacterComponent({ name: playerName }));
             this.eventBus.emit('PlayerStateUpdated', { entityId: 'player' });
             setTimeout(() => { this.createNewGame(); this.eventBus.emit('ToggleOverlay', { tab: 'character' }); }, 2000);
-            this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.05 });
+            this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.01 });
             
             
         });
@@ -257,11 +257,11 @@ export class SplashSystem extends System {
             if (!this.isActive || document.activeElement.id === 'player-name-input') return;
             if (e.key === 'ArrowUp') {
                 this.selectedIndex = (this.selectedIndex - 1 + this.menuItems.length) % this.menuItems.length;
-               // this.eventBus.emit('PlaySfxImmediate', { sfx: 'ding', volume: 0.06 });
+              
                 this.updateSelection();
             } else if (e.key === 'ArrowDown') {
                 this.selectedIndex = (this.selectedIndex + 1) % this.menuItems.length;
-               // this.eventBus.emit('PlaySfxImmediate', { sfx: 'ding', volume: 0.06 });
+               
                 this.updateSelection();
             } else if (e.key === 'Enter') {
                 this.handleSelection(this.selectedIndex);
@@ -277,7 +277,7 @@ export class SplashSystem extends System {
     }
 
     handleSelection(index) {
-        //this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.075 });
+        
         if (index === 0) {
             this.eventBus.emit('ToggleOverlay', { tab: 'menu' });
             setTimeout(() => {
