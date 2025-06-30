@@ -310,7 +310,7 @@ export class PlayerSystem extends System {
 
             playerState.nextLevelXp = Math.round(playerState.nextLevelXp * this.getXpMultiplier(x));
 
-            this.sfxQueue.push({ sfx: 'ding', volume: .5 });
+            this.sfxQueue.push({ sfx: 'ding', volume: .05 });
             this.eventBus.emit('LogMessage', { message: `Level up! Now level ${playerState.level}, ${statAllocationMessage}` });
         }
         if (levelUp) {

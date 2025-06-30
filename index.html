@@ -221,6 +221,8 @@
                 <div class="player-status-child">Heal Potions: <span id="healPotionCount"></span></div><!-- set innerHTML on #healPotionCount -->
                 <div class="player-info-child resource">Gold: <span id="goldCount"></span></div>
                 <div class="player-info-child resource">Ashen Shards: <span id="ashenShardCount"></span></div>
+                <div class="player-info-child resource">Ashen Crystals: <span id="ashenCrystalCount"></span></div>
+                <div class="player-info-child resource">Ashen Gems: <span id="ashenGemCount"></span></div>
             </div>
 
 
@@ -283,7 +285,15 @@
                                     <li>⇑: Stairs Up (Tier 1 Exit Game)</li>
                                 </ul>
                             </div>
-                            <div id="options-data" style="display:none;"><h3>Options:</h3></div>
+                            <div id="options-data" style="display:none;"><h3>Options:</h3>
+                            <div id="sound">
+                                <h5>Audio Settings:</h5>
+                                <div>
+                                    <span id="sound-enabled-cell"><label>Sound Enabled</label> <input id="sound-enabled" type="checkbox" value="true" checked/></span> <br/>
+                                    <span id="global-volume-cell"><label>SFX Volume</label> <input id="global-volume" type="range" min="0" max="100" value="70"/> </span>
+                                </div>
+                            </div>
+                            </div>
                             <div id="save-games-data" style="display:none;"><h3>Saved Games:</h3></div>
                             <div id="load-games-data" style="display:none;"><h3>Load Games:</h3></div>
                             <div id="new-game-data" style="display:none;">

@@ -397,8 +397,9 @@ export class Game {
             'projectileCollisions',
             'combat',
             'damageCalculation',
-            'health',
             'mana',
+            'effects',
+            'health',
             'path',
             'journeyReward',
             'interaction',
@@ -476,7 +477,8 @@ export class Game {
         }
         document.getElementById('hud-layer').style.visibility = 'visible';
         gameState.needsRender = true;
-        this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume: .05 });
+        const musicVolume = this.entityManager.getEntity('gameState')?.getComponent('GameOptions')?.globalVolume  * .05;
+        this.trackControlQueue.push({ track: 'backgroundMusic', play: true, volume: musicVolume });
 
         const player = this.entityManager.getEntity('player');
 
@@ -485,10 +487,10 @@ export class Game {
             const saveId = null;
             this.state.eventBus.emit('RequestSaveGame', { saveId });
             player.removeComponent('NewCharacter');
-           
-            setTimeout(() => { this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'intro', volume: 0.25 }); }, 2000);
+            const introVolume = this.entityManager.getEntity('gameState')?.getComponent('GameOptions')?.globalVolume * 0.25;
+            setTimeout(() => { this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'intro', volume: introVolume }); }, 2000);
         }
-        this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
+        this.state.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.01 });
 
         if (!this.GameLoopRunning) {
             this.startGameLoop();

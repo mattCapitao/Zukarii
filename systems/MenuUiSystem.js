@@ -131,6 +131,54 @@ export class MenuUiSystem extends System {
     }
 
     setupEventListeners() {
+
+        // Sound-enabled checkbox and global volume slider
+        const soundEnabledCheckbox = document.getElementById('sound-enabled');
+        const globalVolumeSlider = document.getElementById('global-volume');
+
+        if (soundEnabledCheckbox && globalVolumeSlider) {
+            // Event listener for sound-enabled checkbox
+            soundEnabledCheckbox.addEventListener('change', () => {
+                const gameOptions = this.entityManager.getEntity('gameState').getComponent('GameOptions');
+                if (!gameOptions) {
+                    console.error('MenuUiSystem: GameOptionsComponent not found on gameState entity');
+                    return;
+                }
+
+                if (soundEnabledCheckbox.checked) {
+                    // Restore volume from slider value
+                    const sliderValue = parseInt(globalVolumeSlider.value, 10) / 100;
+                    gameOptions.soundEnabled = true;
+                    gameOptions.globalVolume = sliderValue;
+                    this.eventBus.emit('AudioEnabled', gameOptions.soundEnabled);
+                } else {
+                    // Mute sound
+                    gameOptions.soundEnabled = false;
+                    gameOptions.globalVolume = 0;
+                    //globalVolumeSlider.value = 0; // Update slider to reflect muted state
+                }
+                this.eventBus.emit('AudioEnabled', gameOptions.soundEnabled);
+            });
+
+            // Event listener for global volume slider
+            globalVolumeSlider.addEventListener('input', () => {
+                const gameOptions = this.entityManager.getEntity('gameState').getComponent('GameOptions');
+                if (!gameOptions) {
+                    console.error('MenuUiSystem: GameOptionsComponent not found on gameState entity');
+                    return;
+                }
+
+                const sliderValue = parseInt(globalVolumeSlider.value, 10) / 100;
+                gameOptions.globalVolume = sliderValue;
+
+                // If sound is disabled, re-enable it when the slider is adjusted
+                if (!soundEnabledCheckbox.checked) {
+                    //soundEnabledCheckbox.checked = true;
+                    //gameOptions.soundEnabled = true;
+                }
+            });
+        }
+
         const buttons = document.querySelectorAll('button');
         buttons.forEach(button => {
             button.addEventListener('contextmenu', (event) => {
@@ -147,7 +195,7 @@ export class MenuUiSystem extends System {
                     this.updateMenu();
 
                     if (button.id === 'exit-button') {
-                        this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.05 });
+                        this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.01 });
                         setTimeout(() => {
                             location.reload(true);
                         }, 2000);
@@ -182,7 +230,7 @@ export class MenuUiSystem extends System {
                 if (loadButton && !loadButton.disabled) {
                     //console.log('MenuUiSystem: Load button clicked, emitting RequestLoadGame');
                     const saveId = loadButton.dataset.saveId;
-                    this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.05 });
+                    this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal0', volume: 0.01 });
                     this.eventBus.emit('ToggleOverlay', { tab: 'menu' });
                     this.splashMenu = document.getElementById('splash-menu');
                     this.splashMenu.style.transition = 'opacity 0.5s ease-in-out';
@@ -191,7 +239,7 @@ export class MenuUiSystem extends System {
                         this.eventBus.emit('RequestLoadGame', { saveId }, (result) => {
                             if (result.success) {
                                 //console.log('MenuUiSystem: Load successful, waiting for TransitionLoad');
-                                this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.05 });
+                                this.eventBus.emit('PlaySfxImmediate', { sfx: 'portal1', volume: 0.01 });
                             }
                         });
                         this.eventBus.emit('ToggleOverlay', { tab: 'journey' });

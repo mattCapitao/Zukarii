@@ -7,6 +7,7 @@ import { EventBus } from './core/EventBus.js';
 import {
     UIComponent,
     GameStateComponent,
+    GameOptionsComponent
 } from './core/Components.js';
 
 export class State {
@@ -45,11 +46,19 @@ export class State {
     initializeCoreEntities() {
         // Game state entity (global)
         const gameState = this.entityManager.createEntity('gameState', true);
+
         this.entityManager.addComponentToEntity('gameState',
             new GameStateComponent({
                 gameStarted: false,
                 needsRender: true,          // Set to true to ensure initial render
                 needsInitialRender: true    // Set to true for initial render
+            })
+        );
+        this.entityManager.addComponentToEntity('gameState', 
+            new GameOptionsComponent({
+                type: 'GameOptions',
+                soundEnabled: true,
+                globalVolume: .75,
             })
         );
         console.log('State.js: Created gameState entity with GameState component:', this.entityManager.getEntity('gameState'));

@@ -18,7 +18,9 @@ export class HudUiSystem extends System {
             healPotionCount: null,
             torchCount: null,
             goldCount: null,
-            ashenShardCount: null
+            ashenShardCount: null,
+            ashenCrystalCount: null,
+            ashenGemCount: null
         };
         this.statusUpdates = {};
         this.needsUpdate = false;
@@ -50,6 +52,8 @@ export class HudUiSystem extends System {
         this.hudDOM.torchCount = this.hud.querySelector('#torchCount');
         this.hudDOM.goldCount = this.hud.querySelector('#goldCount');
         this.hudDOM.ashenShardCount = this.hud.querySelector('#ashenShardCount');
+        this.hudDOM.ashenCrystalCount = this.hud.querySelector('#ashenCrystalCount');
+        this.hudDOM.ashenGemCount = this.hud.querySelector('#ashenGemCount');
 
         if (!this.hudDOM.hpBar || !this.hudDOM.hpText ||
             !this.hudDOM.manaBar || !this.hudDOM.manaText ||
@@ -147,6 +151,12 @@ export class HudUiSystem extends System {
         if (this.statusUpdates.ashenShardCount !== undefined) {
             this.hudDOM.ashenShardCount.textContent = this.statusUpdates.ashenShardCount;
         }
+        if (this.statusUpdates.ashenCrystalCount !== undefined) {
+            this.hudDOM.ashenCrystalCount.textContent = this.statusUpdates.ashenCrystalCount;
+        }
+        if (this.statusUpdates.ashenGemCount !== undefined) {
+            this.hudDOM.ashenGemCount.textContent = this.statusUpdates.ashenGemCount;
+        }
         this.statusUpdates = {};
     }
 
@@ -168,6 +178,8 @@ export class HudUiSystem extends System {
         this.statusUpdates.healPotions = resource.healPotions;
         this.statusUpdates.torches = resource.torches;
         this.statusUpdates.ashenShardCount = resource.craftResources.ashenShard || 0;
+        this.statusUpdates.ashenCrystalCount = resource.craftResources.ashenCrystal || 0;
+        this.statusUpdates.ashenGemCount = resource.craftResources.ashenGem || 0;
         this.statusUpdates.goldCount = resource.gold !== undefined ? resource.gold : 0;
 
         ////console.log("Resource - after statusUpdates", resource);
@@ -178,7 +190,9 @@ export class HudUiSystem extends System {
             const dungeonTierSpan = document.getElementById('dungeonTier');
             const highestTierSpan = document.getElementById('highestTier');
             const playerGoldSpan = document.getElementById('#goldCount');
-            const playerShardSpan = document.getElementById('#ashenShardCount');
+            const playerAshenShardSpan = document.getElementById('#ashenShardCount');
+            const playerAshenCrystalSpan = document.getElementById('#ashenCrystalCount');
+            const playerAshenGemSpan = document.getElementById('#ashenGemCount');
 
             const gameState = this.entityManager.getEntity('gameState').getComponent('GameState');
 
@@ -187,7 +201,10 @@ export class HudUiSystem extends System {
             if (dungeonTierSpan) dungeonTierSpan.textContent = gameState.tier;
             if (highestTierSpan) highestTierSpan.textContent = gameState.highestTier;
             if (playerGoldSpan) playerGoldSpan.textContent = resource.gold !== undefined ? resource.gold : 'N/A';
-            if (playerShardSpan) playerShardSpan.textContent = resource.craftResources.ashenShard !== undefined ? resource.craftResources.ashenShard : 0;
+            if (playerAshenShardSpan) playerAshenShardSpan.textContent = resource.craftResources.ashenShard !== undefined ? resource.craftResources.ashenShard : 0;
+            if (playerAshenCrystalSpan) playerAshenCrystalSpan.textContent = resource.craftResources.ashenCrystal  !== undefined ? resource.craftResources.ashenCrystal  : 0;
+            if (playerAshenGemSpan) playerAshenGemSpan.textContent = resource.craftResources.ashenGem !== undefined ? resource.craftResources.ashenGem : 0;
+
         }
 
         if (!this.needsUpdate) {

@@ -10,9 +10,10 @@ export class AnimationSystem extends System {
         this.eventBus.on('AnimateRangedAttack', (data) => this.animateRangedAttack(data));
     }
 
-    animateRangedAttack({entityId }) {
+    animateRangedAttack({entityId}) {
         const entity = this.entityManager.getEntity(entityId);
-        if (!entity) return;
+        if (!entity)  return;
+
 
         const animState = entity.getComponent('AnimationState');
         const animation = entity.getComponent('Animation');

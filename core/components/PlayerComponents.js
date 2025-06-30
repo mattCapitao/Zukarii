@@ -106,7 +106,8 @@ export class PlayerStateComponent {
         dead = false,
         lampLit = false,
         discoveredTileCount = 0,
-        isInCombat = false
+        isInCombat = false,
+        
     } = {}) {
         this.type = 'PlayerState';
         this.name = name;

@@ -22,7 +22,8 @@ export class EffectsSystem extends System {
             const handlers = {
                 stealGold: this.stealGold.bind(this),
                 instantHeal: this.instantHeal.bind(this),
-                lifeSteal: this.lifeSteal.bind(this)
+                lifeSteal: this.lifeSteal.bind(this),
+                reflectDamage: this.reflectDamage.bind(this)
             };
             const handler = handlers[effect];
             if (handler) {
@@ -172,11 +173,15 @@ export class EffectsSystem extends System {
             console.warn(`EffectsSystem: Entity ${entityId} not found for reflectDamage`);
             return;
         }
+        if (!context || !context.attackerId || !context.damageDealt) {
+            console.warn(`EffectsSystem: Invalid context for reflectDamage on ${entityId}`, context);
+            return;
+        }
 
-        //console.log(`EffectsSystem: Attempting reflectDamage on ${entity.id}`);
+        console.log(`EffectsSystem: Attempting reflectDamage on ${entity.id}`);
         const CHANCE_TO_REFLECT = params?.chanceToReflect || 0.10;
-        const MIN_REFLECT_PERCENTAGE = params?.minReflectPercentage || 0.50;
-        const MAX_REFLECT_PERCENTAGE = params?.maxReflectPercentage || 1;
+        const MIN_REFLECT_PERCENTAGE = params?.minReflectPercentage || 0.25;
+        const MAX_REFLECT_PERCENTAGE = params?.maxReflectPercentage || .5;
         const DAMAGE = context.damageDealt || 0;
         const TARGET_ID = context.attackerId || null;
 
@@ -186,12 +191,12 @@ export class EffectsSystem extends System {
         }
         const reflectAmount = Math.round(DAMAGE * (Math.random() * (MAX_REFLECT_PERCENTAGE - MIN_REFLECT_PERCENTAGE) + MIN_REFLECT_PERCENTAGE));
 
-        //health.hp = Math.min(health.hp + healAmount, health.maxHp);
-        this.healthUpdates.push({ entityId, amount: DAMAGE });
-        this.healthUpdates.push({ TARGET_ID, amount: -reflectAmount });
+        this.healthUpdates.push({ entityId, amount: reflectAmount });
+        console.log(`EffectsSystem: ${entity.id} received ${DAMAGE} damage from ${TARGET_ID}. Reflecting ${reflectAmount} damage back to attacker.${TARGET_ID}`);
+        this.healthUpdates.push({ entityId: TARGET_ID, amount: -reflectAmount });
 
-        this.utilities.logMessage({channel: "system", message: `Reflect Damage hits your attacker for ${reflectAmount} HP! `});
-        //console.log(`EffectsSystem: Reflect Damage hits your attacker for ${entity.id} for ${reflectAmount} HP. `);
+        this.utilities.logMessage({ channel: 'combat', classNames: 'player', message: `Reflect Damage hits your attacker for ${reflectAmount} HP! `});
+        console.log(`EffectsSystem: Reflect Damage hits your attacker for ${entity.id} for ${reflectAmount} HP. `);
     }
 
     teleportToTier(entityId, params, context) {

@@ -98,7 +98,7 @@ export class CombatSystem extends System {
         }
 
         this.combatSfx('hit');
-        this.eventBus.emit('PlayerWasHit', { entityId: 'player', attackerId: entityId });
+        //eventBus.emit('PlayerWasHit', { entityId: 'player', attackerId: entityId });
         this.eventBus.emit('CalculateDamage', {
             attacker: monster,
             target: player
@@ -205,7 +205,7 @@ export class CombatSystem extends System {
         this.manaUpdates.push({ entityId: 'player', amount: -manaCost });
         const CAST_TIME = 100;
         playerState.isCasting = true;
-        this.eventBus.emit('AnimateRangedAttack', { entityId: 'plsyer' });
+        this.eventBus.emit('AnimateRangedAttack', { entityId: 'player' });
 
         setTimeout(() => {
             const projectile = this.entityManager.createEntity(`projectile_${this.utilities.generateUniqueId()}`);
@@ -236,9 +236,9 @@ export class CombatSystem extends System {
         if (!rangedAttack) return;
 
         
-        
+        let sourceState = null;
         if (source.hasComponent('PlayerState')) {
-            const sourceState = source.getComponent('State');
+            sourceState = source.getComponent('State');
             if (sourceState?.isCasting) return;
             sourceState.isCasting = true;
             if (rangedAttack.manaCost && rangedAttack.manaCost > 0) {
@@ -284,7 +284,7 @@ export class CombatSystem extends System {
             visuals.offsetX = 8; visuals.offsetY = 8;
             this.entityManager.addComponentToEntity(projectile.id, new NeedsRenderComponent(sourcePos.x, sourcePos.y));
             this.eventBus.emit('LightSourceActivated', { type: rangedAttack.lightSourceType || 'default', entityId: projectile.id });
-            sourceState.isCasting = false;
+            if(sourceState)sourceState.isCasting = false;
         }, CAST_TIME);
     }
 

@@ -9,7 +9,7 @@ export class AffixSystem extends System {
 
     init() {
         this.eventBus.on('PlayerWasHit', ({ entityId, attackerId, damageDealt }) => {
-            //console.log(`AffixSystem: Received PlayerWasHit for ${entityId} from ${attackerId}`);
+            console.warn(`AffixSystem: Received PlayerWasHit for ${entityId} from ${attackerId} damageDealt: ${damageDealt}`);
             this.handleAffixes(attackerId, 'attackHitTarget', { targetId: entityId });
             this.handleAffixes(entityId, 'hitByAttack', { attackerId, damageDealt });
         });
